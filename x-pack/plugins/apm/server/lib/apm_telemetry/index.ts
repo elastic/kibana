@@ -11,6 +11,7 @@ import {
   Logger,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
+import { unwrapEsResponse } from '../../../../observability/server';
 import { APMConfig } from '../..';
 import {
   TaskManagerSetupContract,
@@ -65,27 +66,22 @@ export async function createApmTelemetry({
   const collectAndStore = async () => {
     const config = await config$.pipe(take(1)).toPromise();
     const [{ elasticsearch }] = await core.getStartServices();
-    const esClient = elasticsearch.legacy.client;
+    const esClient = elasticsearch.client;
 
     const indices = await getApmIndices({
       config,
       savedObjectsClient,
     });
 
-    const search = esClient.callAsInternalUser.bind(
-      esClient,
-      'search'
-    ) as CollectTelemetryParams['search'];
+    const search: CollectTelemetryParams['search'] = (params) =>
+      unwrapEsResponse(esClient.asInternalUser.search<any>(params));
 
-    const indicesStats = esClient.callAsInternalUser.bind(
-      esClient,
-      'indices.stats'
-    ) as CollectTelemetryParams['indicesStats'];
+    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
+      unwrapEsResponse(esClient.asInternalUser.indices.stats(params));
 
-    const transportRequest = esClient.callAsInternalUser.bind(
-      esClient,
-      'transport.request'
-    ) as CollectTelemetryParams['transportRequest'];
+    const transportRequest: CollectTelemetryParams['transportRequest'] = (
+      params
+    ) => unwrapEsResponse(esClient.asInternalUser.transport.request(params));
 
     const dataTelemetry = await collectDataTelemetry({
       search,
@@ -159,7 +155,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

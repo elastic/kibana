@@ -256,6 +256,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeEdit.length).to.eql(1);
 
+      expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
@@ -283,7 +284,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     await testSubjects.setValue('nameInput', connectorName);
 
-    await comboBox.set('connectorIndexesComboBox', indexName);
+    await retry.try(async () => {
+      // At times we find the driver controlling the ComboBox in tests
+      // can select the wrong item, this ensures we always select the correct index
+      await comboBox.set('connectorIndexesComboBox', indexName);
+      expect(
+        await comboBox.isOptionSelected(
+          await testSubjects.find('connectorIndexesComboBox'),
+          indexName
+        )
+      ).to.be(true);
+    });
 
     await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
     await pageObjects.common.closeToast();

@@ -12,7 +12,7 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 
-import { ADD_SOURCE_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
 
@@ -74,12 +74,17 @@ export const PrivateSources: React.FC = () => {
     sidebarLinks.push({
       title: PRIVATE_LINK_TITLE,
       iconType: 'plusInCircle',
-      path: ADD_SOURCE_PATH,
+      path: getSourcesPath(ADD_SOURCE_PATH, false),
     });
   }
 
   const headerAction = (
-    <EuiButtonTo to={ADD_SOURCE_PATH} fill color="primary" data-test-subj="AddSourceButton">
+    <EuiButtonTo
+      to={getSourcesPath(ADD_SOURCE_PATH, false)}
+      fill
+      color="primary"
+      data-test-subj="AddSourceButton"
+    >
       {PRIVATE_LINK_TITLE}
     </EuiButtonTo>
   );
@@ -107,16 +112,7 @@ export const PrivateSources: React.FC = () => {
     <ContentSection className="zero-state__private-sources">
       <EuiPanel className="euiPanel--inset">
         <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt
-          iconType="lock"
-          title={<h2>You have no private sources</h2>}
-          body={
-            <p>
-              Select from the content sources below to create a private source, available only to
-              you
-            </p>
-          }
-        />
+        <EuiEmptyPrompt iconType="lock" title={<h2>You have no private sources</h2>} />
         <EuiSpacer size="xxl" />
       </EuiPanel>
     </ContentSection>

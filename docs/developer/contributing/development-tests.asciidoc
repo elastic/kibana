@@ -17,10 +17,6 @@ root)
 |Jest (integration) |`**/integration_tests/**/*.test.{js,mjs,ts,tsx}`
 |`yarn test:jest_integration [test path]`
 
-|Mocha
-|`**/__tests__/**/*.js`
-|`node scripts/mocha --grep=regexp [test path]`
-
 |Functional
 |`test/**/config.js` `x-pack/test/**/config.js`
 |`node scripts/functional_tests_server --config [directory]/config.js``node scripts/functional_test_runner_ --config [directory]/config.js --grep=regexp`
@@ -59,8 +55,6 @@ kibana/src/plugins/dashboard/server$ yarn test:jest --coverage
 
 yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/plugins/dashboard/jest.config.js server
 ----
-
-NOTE: There are still a handful of legacy tests that use the Mocha test runner. For those tests, use `node scripts/mocha --grep=regexp [test path]`. Tests using Mocha are located within `__tests__` directories.
 
 
 [discrete]

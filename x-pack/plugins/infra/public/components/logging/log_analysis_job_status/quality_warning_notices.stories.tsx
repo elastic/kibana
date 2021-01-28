@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { QualityWarning } from '../../../../common/log_analysis';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 

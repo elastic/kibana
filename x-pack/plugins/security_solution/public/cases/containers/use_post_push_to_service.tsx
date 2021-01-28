@@ -5,6 +5,8 @@
  */
 
 import { useReducer, useCallback } from 'react';
+import moment from 'moment';
+import dateMath from '@elastic/datemath';
 
 import {
   ServiceConnectorCaseResponse,
@@ -12,15 +14,18 @@ import {
   CaseConnector,
   CommentType,
 } from '../../../../case/common/api';
+import { SecurityPageName } from '../../app/types';
+import { useFormatUrl, FormatUrl, getRuleDetailsUrl } from '../../common/components/link_to';
 import {
   errorToToaster,
   useStateToaster,
   displaySuccessToast,
 } from '../../common/components/toasters';
+import { Alert } from '../components/case_view';
 
 import { getCase, pushToService, pushCase } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
+import { Case, Comment } from './types';
 import { CaseServices } from './use_get_case_user_actions';
 
 interface PushToServiceState {
@@ -72,6 +77,7 @@ interface PushToServiceRequest {
   caseId: string;
   connector: CaseConnector;
   caseServices: CaseServices;
+  alerts: Record<string, Alert>;
   updateCase: (newCase: Case) => void;
 }
 
@@ -80,6 +86,7 @@ export interface UsePostPushToService extends PushToServiceState {
     caseId,
     caseServices,
     connector,
+    alerts,
     updateCase,
   }: PushToServiceRequest) => void;
 }
@@ -92,9 +99,10 @@ export const usePostPushToService = (): UsePostPushToService => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const postPushToService = useCallback(
-    async ({ caseId, caseServices, connector, updateCase }: PushToServiceRequest) => {
+    async ({ caseId, caseServices, connector, alerts, updateCase }: PushToServiceRequest) => {
       let cancel = false;
       const abortCtrl = new AbortController();
       try {
@@ -103,7 +111,13 @@ export const usePostPushToService = (): UsePostPushToService => {
         const responseService = await pushToService(
           connector.id,
           connector.type,
-          formatServiceRequestData(casePushData, connector, caseServices),
+          formatServiceRequestData({
+            myCase: casePushData,
+            connector,
+            caseServices,
+            alerts,
+            formatUrl,
+          }),
           abortCtrl.signal
         );
         const responseCase = await pushCase(
@@ -148,11 +162,59 @@ export const usePostPushToService = (): UsePostPushToService => {
   return { ...state, postPushToService };
 };
 
-export const formatServiceRequestData = (
-  myCase: Case,
-  connector: CaseConnector,
-  caseServices: CaseServices
-): ServiceConnectorCaseParams => {
+export const determineToAndFrom = (alert: Alert) => {
+  const ellapsedTimeRule = moment.duration(
+    moment().diff(dateMath.parse(alert.rule?.from != null ? alert.rule.from : 'now-0s'))
+  );
+
+  const from = moment(alert['@timestamp'] ?? new Date())
+    .subtract(ellapsedTimeRule)
+    .toISOString();
+  const to = moment(alert['@timestamp'] ?? new Date()).toISOString();
+
+  return { to, from };
+};
+
+const getAlertFilterUrl = (alert: Alert): string => {
+  const { to, from } = determineToAndFrom(alert);
+  return `?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:${alert._id}),type:phrase),query:(match:(_id:(query:${alert._id},type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)),timeline:(linkTo:!(global),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)))`;
+};
+
+const getCommentContent = (
+  comment: Comment,
+  alerts: Record<string, Alert>,
+  formatUrl: FormatUrl
+): string => {
+  if (comment.type === CommentType.user) {
+    return comment.comment;
+  } else if (comment.type === CommentType.alert) {
+    const alert = alerts[comment.alertId];
+    const ruleDetailsLink = formatUrl(getRuleDetailsUrl(alert.rule.id), {
+      absolute: true,
+      skipSearch: true,
+    });
+
+    return `[${i18n.ALERT}](${ruleDetailsLink}${getAlertFilterUrl(alert)}) ${
+      i18n.ALERT_ADDED_TO_CASE
+    }.`;
+  }
+
+  return '';
+};
+
+export const formatServiceRequestData = ({
+  myCase,
+  connector,
+  caseServices,
+  alerts,
+  formatUrl,
+}: {
+  myCase: Case;
+  connector: CaseConnector;
+  caseServices: CaseServices;
+  alerts: Record<string, Alert>;
+  formatUrl: FormatUrl;
+}): ServiceConnectorCaseParams => {
   const {
     id: caseId,
     createdAt,
@@ -179,7 +241,7 @@ export const formatServiceRequestData = (
       )
       .map((c) => ({
         commentId: c.id,
-        comment: c.type === CommentType.user ? c.comment : '',
+        comment: getCommentContent(c, alerts, formatUrl),
         createdAt: c.createdAt,
         createdBy: {
           fullName: c.createdBy.fullName ?? null,

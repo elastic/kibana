@@ -11,8 +11,6 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../dashboard/tsconfig.json" },
-    //
-    // The following are dependencies that have not been typed yet.
-    // { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
   ]
 }

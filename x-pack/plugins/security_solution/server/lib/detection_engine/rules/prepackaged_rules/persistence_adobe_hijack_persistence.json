@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1044",
-          "name": "File System Permissions Weakness",
-          "reference": "https://attack.mitre.org/techniques/T1044/"
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.010",
+              "name": "Services File Permissions Weakness",
+              "reference": "https://attack.mitre.org/techniques/T1574/010/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { panAnimationDuration } from '../../../../plugins/security_solution/public/resolver/store/camera/scaling_constants';
 
 const expectedDifference = 0.09;
+
+const waitForPanAnimationToFinish = () =>
+  new Promise((resolve) => setTimeout(resolve, panAnimationDuration + 1));
 
 export default function ({
   getPageObjects,
@@ -22,6 +25,7 @@ export default function ({
   const find = getService('find');
   const browser = getService('browser');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/87425
   describe('Resolver test app', function () {
     this.tags('ciGroup7');
 
@@ -103,6 +107,8 @@ export default function ({
             beforeEach(async () => {
               // select the node
               await button.click();
+              // Wait for the pan to center the node
+              await waitForPanAnimationToFinish();
             });
             it('should render as expected', async () => {
               expect(
@@ -155,6 +161,9 @@ export default function ({
                     beforeEach(async () => {
                       // click the first pill
                       await (await firstPill()).click();
+
+                      // Wait for the pan to center the node
+                      await waitForPanAnimationToFinish();
                     });
                     it('should render as expected', async () => {
                       expect(

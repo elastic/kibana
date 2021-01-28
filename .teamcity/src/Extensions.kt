@@ -20,26 +20,29 @@ fun BuildType.kibanaAgent(size: Int) {
 }
 
 val testArtifactRules = """
-    target/kibana-*
-    target/test-metrics/*
-    target/kibana-security-solution/**/*.png
     target/junit/**/*
+    target/kibana-*
+    target/kibana-coverage/**/*
+    target/kibana-security-solution/**/*.png
+    target/test-metrics/*
     target/test-suites-ci-plan.json
-    test/**/screenshots/session/*.png
-    test/**/screenshots/failure/*.png
     test/**/screenshots/diff/*.png
+    test/**/screenshots/failure/*.png
+    test/**/screenshots/session/*.png
     test/functional/failure_debug/html/*.html
-    x-pack/test/**/screenshots/session/*.png
-    x-pack/test/**/screenshots/failure/*.png
     x-pack/test/**/screenshots/diff/*.png
-    x-pack/test/functional/failure_debug/html/*.html
+    x-pack/test/**/screenshots/failure/*.png
+    x-pack/test/**/screenshots/session/*.png
     x-pack/test/functional/apps/reporting/reports/session/*.pdf
+    x-pack/test/functional/failure_debug/html/*.html
   """.trimIndent()
 
 fun BuildType.addTestSettings() {
   artifactRules += "\n" + testArtifactRules
   steps {
-    failedTestReporter()
+    if(isReportingEnabled()) {
+       failedTestReporter()
+    }
   }
   features {
     junit()
@@ -48,7 +51,7 @@ fun BuildType.addTestSettings() {
 
 fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
   params {
-    param("elastic.slack.enabled", "true")
+    param("elastic.slack.enabled", isReportingEnabled().toString())
     param("elastic.slack.channels", to)
   }
 }

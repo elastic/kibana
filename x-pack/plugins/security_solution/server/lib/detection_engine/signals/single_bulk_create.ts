@@ -6,7 +6,11 @@
 
 import { countBy, isEmpty, get } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
@@ -19,7 +23,7 @@ import { isEventTypeSignal } from './build_event_type_signal';
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -222,7 +226,7 @@ export const singleBulkCreate = async ({
 export const bulkInsertSignals = async (
   signals: WrappedSignalHit[],
   logger: Logger,
-  services: AlertServices,
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   refresh: RefreshTypes
 ): Promise<BulkInsertSignalsResponse> => {
   // index documents after creating an ID based on the

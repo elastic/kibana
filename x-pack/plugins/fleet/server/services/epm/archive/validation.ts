@@ -13,6 +13,7 @@ import {
   RegistryInput,
   RegistryStream,
   RegistryVarsEntry,
+  PackageSpecManifest,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { unpackBufferEntries } from './index';
@@ -143,7 +144,7 @@ function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: stri
   const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
   return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
 }
-function parseAndVerifyDataStreams(
+export function parseAndVerifyDataStreams(
   paths: string[],
   pkgName: string,
   pkgVersion: string
@@ -211,7 +212,7 @@ function parseAndVerifyDataStreams(
 
   return dataStreams;
 }
-function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
+export function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryStream[] {
   const streams: RegistryStream[] = [];
   const manifestStreams = manifest.streams;
   if (manifestStreams && manifestStreams.length > 0) {
@@ -243,7 +244,7 @@ function parseAndVerifyStreams(manifest: any, dataStreamPath: string): RegistryS
   }
   return streams;
 }
-function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
+export function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVarsEntry[] {
   const vars: RegistryVarsEntry[] = [];
   if (manifestVars && manifestVars.length > 0) {
     manifestVars.forEach((manifestVar) => {
@@ -278,19 +279,23 @@ function parseAndVerifyVars(manifestVars: any[], location: string): RegistryVars
   }
   return vars;
 }
-function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] {
+export function parseAndVerifyPolicyTemplates(
+  manifest: PackageSpecManifest
+): RegistryPolicyTemplate[] {
   const policyTemplates: RegistryPolicyTemplate[] = [];
   const manifestPolicyTemplates = manifest.policy_templates;
-  if (manifestPolicyTemplates && manifestPolicyTemplates > 0) {
+  if (manifestPolicyTemplates && manifestPolicyTemplates.length > 0) {
     manifestPolicyTemplates.forEach((policyTemplate: any) => {
       const { name, title: policyTemplateTitle, description, inputs, multiple } = policyTemplate;
-      if (!(name && policyTemplateTitle && description && inputs)) {
+      if (!(name && policyTemplateTitle && description)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description', 'input' missing in policy template: ${policyTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${policyTemplate}`
         );
       }
-
-      const parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      let parsedInputs: RegistryInput[] | undefined = [];
+      if (inputs) {
+        parsedInputs = parseAndVerifyInputs(inputs, `config template ${name}`);
+      }
 
       // defaults to true if undefined, but may be explicitly set to false.
       let parsedMultiple = true;
@@ -307,7 +312,7 @@ function parseAndVerifyPolicyTemplates(manifest: any): RegistryPolicyTemplate[] 
   }
   return policyTemplates;
 }
-function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
+export function parseAndVerifyInputs(manifestInputs: any, location: string): RegistryInput[] {
   const inputs: RegistryInput[] = [];
   if (manifestInputs && manifestInputs.length > 0) {
     manifestInputs.forEach((input: any) => {

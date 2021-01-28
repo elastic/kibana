@@ -35,11 +35,6 @@
       },
       "technique": [
         {
-          "id": "T1043",
-          "name": "Commonly Used Port",
-          "reference": "https://attack.mitre.org/techniques/T1043/"
-        },
-        {
           "id": "T1090",
           "name": "Proxy",
           "reference": "https://attack.mitre.org/techniques/T1090/",

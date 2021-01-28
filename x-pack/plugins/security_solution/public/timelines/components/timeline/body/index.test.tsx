@@ -22,6 +22,7 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
+    columnType: 'number',
     sortDirection: Direction.desc,
   },
 ];

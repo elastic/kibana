@@ -9,6 +9,7 @@
   },
   "include": [
     "*.ts",
+    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -22,14 +23,12 @@
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
-    //
-    // The following are dependencies that have not been typed yet.
-    // { "path": "../data/tsconfig.json"},
-    // { "path": "../embeddable/tsconfig.json" },
-    // { "path": "../home/tsconfig.json" },
-    // { "path": "../navigation/tsconfig.json" },
-    // { "path": "../saved_objects_tagging_oss/tsconfig.json" }
-    // { "path": "../saved_objects/tsconfig.json" },
-    // { "path": "../ui_actions/tsconfig.json" },
+    { "path": "../data/tsconfig.json"},
+    { "path": "../embeddable/tsconfig.json" },
+    { "path": "../home/tsconfig.json" },
+    { "path": "../navigation/tsconfig.json" },
+    { "path": "../saved_objects_tagging_oss/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../ui_actions/tsconfig.json" },
   ]
 }
