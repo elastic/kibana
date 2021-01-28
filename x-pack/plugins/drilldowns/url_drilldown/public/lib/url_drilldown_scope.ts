@@ -31,6 +31,7 @@ import {
   RowClickContext,
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
+import type { UrlTemplateEditorVariable } from '../../../../../../src/plugins/kibana_react/public';
 
 /**
  * Part of context scope extracted from an embeddable
@@ -231,16 +232,52 @@ function getEventScopeFromRowClickTriggerContext(ctx: RowClickContext): RowClick
   return scope;
 }
 
-export function getEventVariableList(context: ActionFactoryContext): string[] {
+export function getEventVariableList(context: ActionFactoryContext): UrlTemplateEditorVariable[] {
   const [trigger] = context.triggers;
 
   switch (trigger) {
     case SELECT_RANGE_TRIGGER:
-      return ['event.key', 'event.from', 'event.to'];
+      return [
+        {
+          label: 'event.key',
+        },
+        {
+          label: 'event.from',
+        },
+        {
+          label: 'event.to',
+        },
+      ];
     case VALUE_CLICK_TRIGGER:
-      return ['event.key', 'event.value', 'event.negate', 'event.points'];
+      return [
+        {
+          label: 'event.key',
+        },
+        {
+          label: 'event.value',
+        },
+        {
+          label: 'event.negate',
+        },
+        {
+          label: 'event.points',
+        },
+      ];
     case ROW_CLICK_TRIGGER:
-      return ['event.rowIndex', 'event.values', 'event.keys', 'event.columnNames'];
+      return [
+        {
+          label: 'event.rowIndex',
+        },
+        {
+          label: 'event.values',
+        },
+        {
+          label: 'event.keys',
+        },
+        {
+          label: 'event.columnNames',
+        },
+      ];
   }
 
   return [];

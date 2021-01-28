@@ -20,9 +20,10 @@ import {
   txtUrlTemplateVariablesHelpLinkText,
   txtUrlTemplateVariablesFilterPlaceholderText,
 } from './i18n';
+import { UrlTemplateEditorVariable } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface Props {
-  variables: string[];
+  variables: UrlTemplateEditorVariable[];
   onSelect: (variable: string) => void;
   variablesHelpLink?: string;
 }
@@ -31,9 +32,9 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   const closePopover = () => setIsVariablesPopoverOpen(false);
 
-  const options: EuiSelectableOption[] = variables.map((variable: string) => ({
-    key: variable,
-    label: variable,
+  const options: EuiSelectableOption[] = variables.map(({ label }) => ({
+    key: label,
+    label,
   }));
 
   return (

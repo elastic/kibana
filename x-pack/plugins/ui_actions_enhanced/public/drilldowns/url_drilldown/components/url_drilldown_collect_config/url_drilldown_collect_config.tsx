@@ -27,11 +27,14 @@ import {
   txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
-import { UrlTemplateEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  UrlTemplateEditor,
+  UrlTemplateEditorVariable,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface UrlDrilldownCollectConfig {
   config: UrlDrilldownConfig;
-  variables: string[];
+  variables: UrlTemplateEditorVariable[];
   onConfig: (newConfig: UrlDrilldownConfig) => void;
   syntaxHelpDocsLink?: string;
   variablesHelpDocsLink?: string;
@@ -96,7 +99,11 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         }
         labelAppend={variablesDropdown}
       >
-        <UrlTemplateEditor initialValue={'http://google.com'} onChange={(value) => {}} />
+        <UrlTemplateEditor
+          initialValue={urlTemplate}
+          onChange={(value) => {}}
+          variables={variables}
+        />
       </EuiFormRow>
       <EuiFormRow
         fullWidth

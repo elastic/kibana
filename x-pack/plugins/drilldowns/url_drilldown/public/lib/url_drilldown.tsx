@@ -7,7 +7,6 @@
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { IExternalUrl } from 'src/core/public';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -19,6 +18,10 @@ import {
 import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
+import {
+  reactToUiComponent,
+  UrlTemplateEditorVariable,
+} from '../../../../../../src/plugins/kibana_react/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -174,13 +177,16 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     };
   };
 
-  public readonly getVariableList = (context: ActionFactoryContext): string[] => {
+  public readonly getVariableList = (
+    context: ActionFactoryContext
+  ): UrlTemplateEditorVariable[] => {
     const eventVariables = getEventVariableList(context);
-    const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
-      (key) => 'context.panel.' + key
-    );
-    const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
+    // const contextVariables = Object.keys(getFlattenedObject(getPanelVariables(context))).map(
+    //   (key) => 'context.panel.' + key
+    // );
+    // const globalVariables = Object.keys(getFlattenedObject(this.deps.getGlobalScope()));
 
-    return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
+    return [...eventVariables];
+    // return [...eventVariables.sort(), ...contextVariables.sort(), ...globalVariables.sort()];
   };
 }

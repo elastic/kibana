@@ -18,7 +18,7 @@ monaco.languages.register({
 monaco.languages.setMonarchTokensProvider(LANG, language);
 monaco.languages.setLanguageConfiguration(LANG, conf);
 
-export interface Variable {
+export interface UrlTemplateEditorVariable {
   label: string;
   description?: string;
   documentation?: string;
@@ -26,7 +26,7 @@ export interface Variable {
 export interface UrlTemplateEditorProps {
   initialValue: string;
   height?: CodeEditorProps['height'];
-  variables?: Variable[];
+  variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
 }
 
@@ -42,7 +42,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     }
 
     const { dispose } = monaco.languages.registerCompletionItemProvider(LANG, {
-      triggerCharacters: ['{'],
+      triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
         const word = model.getWordUntilPosition(position);
         const range = {
