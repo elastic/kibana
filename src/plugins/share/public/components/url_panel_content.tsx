@@ -526,7 +526,7 @@ export class UrlPanelContent extends Component<Props, State> {
     const tipContent = (
       <FormattedMessage
         id="share.urlPanel.publicUrlHelpText"
-        defaultMessage="Public URL allows anonymous access to the dashboard to any user without needing to log in."
+        defaultMessage="Use public URL to share with anyone. It enables one-step anonymous access by removing the login prompt."
       />
     );
 
