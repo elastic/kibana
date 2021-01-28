@@ -13,7 +13,7 @@ import { useFormData, UseField, ToggleField } from '../../../../../../shared_imp
 
 import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
 
-import { MinAgeInputField, SnapshotPoliciesField } from '../shared_fields';
+import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 
 const formFieldPaths = {
   enabled: '_meta.delete.enabled',
@@ -63,7 +63,7 @@ export const DeletePhase: FunctionComponent = () => {
         }
         fullWidth
       >
-        {enabled && <MinAgeInputField phase="delete" />}
+        {enabled && <MinAgeField phase="delete" />}
       </EuiDescribedFormGroup>
       {enabled ? (
         <EuiDescribedFormGroup
