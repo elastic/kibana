@@ -4,8 +4,8 @@
 <titleabbrev>What is Kibana?</titleabbrev>
 ++++
 
-{kib} enables you to
-shape your data and navigate the Elastic Stack.  With {kib}, you can:
+{kib} enables you to give
+shape to your data and navigate the Elastic Stack.  With {kib}, you can:
 
 * *Visualize and analyze your data.*
 Search for hidden insights, visualize what you've found in charts, gauges,
@@ -121,7 +121,7 @@ file, or add a sample data set.
 
 . *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
-You can also limit your results the most recent documents added to {es}.
+You can also limit your results to the most recent documents added to {es}.
 
 . *Visualize.* {kib} provides many options to create visualizations of your data, from
 aggregation-based data to time series data.
@@ -135,14 +135,10 @@ the “wow” factor needed to impress your CEO and captivate coworkers with a b
 . *Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
 a dashboard, share a link, export to PDF, and more.
 
-For hands-on experience with analyzing your data, check out
-the Elastic https://www.elastic.co/demos[demo gallery].
-
-
 [float]
 ==== Plot location data on a map
 If you’re looking to better understand the “where’’ in your data, your data
-analysis journey also includes <<maps, *Maps*>>. This app is the right
+analysis journey will also include <<maps, *Maps*>>. This app is the right
 choice when you’re looking for a spatial pattern, performing ad-hoc location-driven analysis,
 or analyzing metrics with a geographic perspective. With *Maps*, you can build
 world country maps, administrative region maps, and point-to-point origin-destination maps.
@@ -151,7 +147,8 @@ You can also visualize and track movement over space and through time.
 [float]
 ==== Model data behavior
 
-<<xpack-ml, *{ml-cap}*>> is for modeling the behavior of your data.
+To model the behavior of your data, you'll want to use
+<<xpack-ml, *{ml-cap}*>>.
 This app can help you extract insights from your data that you might otherwise miss.
 You can forecast unusual behavior in your time series data.
 You can also perform outlier detection, regression, and classification analysis
@@ -160,10 +157,10 @@ on your data and generate annotated results.
 [float]
 ==== Graph relationships
 
-<<xpack-graph, *Graph*>> enables you to uncover how items in your
-data are related. This information is useful in a variety of applications,
+Looking to uncover how items in your data are related?
+<<xpack-graph, *Graph*>> is your app. Graphing relationships is useful in a variety of use cases,
 from fraud detection to recommendation engines. For example, graph exploration
-can help you uncover website vulnerabilities that hackers are targeting
+can help you uncover website vulnerabilities that hackers are targeting,
 so you can harden your website. Or, you might provide graph-based
 personalized recommendations to your e-commerce customers.
 
@@ -278,7 +275,7 @@ image::images/features-control.png[Features Controls screen]
 
 [float]
 [[intro-kibana-Security]]
-=== {kib} security
+=== Secure {kib}
 
 {kib} offers a range of security features for you to control who has access to what.
 The security features are automatically turned on when
