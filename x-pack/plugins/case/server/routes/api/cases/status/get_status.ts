@@ -8,8 +8,8 @@ import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
 import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { constructQueries, findCaseStatusStats } from '../helpers';
 
 export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -20,25 +20,24 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const args = caseStatuses.map((status) => ({
-          client,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-            filter: `${CASE_SAVED_OBJECT}.attributes.status: ${status}`,
-          },
-        }));
 
-        const [openCases, inProgressCases, closesCases] = await Promise.all(
-          args.map((arg) => caseService.findCases(arg))
-        );
+        const [openCases, inProgressCases, closedCases] = await Promise.all([
+          ...caseStatuses.map((status) => {
+            const statusQuery = constructQueries({ status });
+            return findCaseStatusStats({
+              client,
+              caseOptions: statusQuery.case,
+              subCaseOptions: statusQuery.subCase,
+              caseService,
+            });
+          }),
+        ]);
 
         return response.ok({
           body: CasesStatusResponseRt.encode({
-            count_open_cases: openCases.total,
-            count_in_progress_cases: inProgressCases.total,
-            count_closed_cases: closesCases.total,
+            count_open_cases: openCases,
+            count_in_progress_cases: inProgressCases,
+            count_closed_cases: closedCases,
           }),
         });
       } catch (error) {

@@ -22,6 +22,7 @@ describe('GET status', () => {
     page: 1,
     perPage: 1,
     type: 'cases',
+    sortField: 'created_at',
   };
 
   beforeAll(async () => {
@@ -41,19 +42,23 @@ describe('GET status', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
+
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
       ...findArgs,
-      filter: 'cases.attributes.status: open',
+      filter:
+        '((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
       ...findArgs,
-      filter: 'cases.attributes.status: in-progress',
+      filter:
+        '((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
       ...findArgs,
-      filter: 'cases.attributes.status: closed',
+      filter:
+        '((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
     });
 
     expect(response.payload).toEqual({
