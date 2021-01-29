@@ -49,10 +49,7 @@ export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
-  public async setup(
-    core: CoreSetup<ClientPluginsStart, unknown>,
-    plugins: ClientPluginsSetup
-  ): Promise<void> {
+  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,

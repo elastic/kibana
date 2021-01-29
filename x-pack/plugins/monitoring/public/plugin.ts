@@ -10,7 +10,7 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
 } from 'kibana/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -36,7 +36,12 @@ interface MonitoringSetupPluginDependencies {
 
 export class MonitoringPlugin
   implements
-    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
+    AsyncPlugin<
+      boolean,
+      void,
+      MonitoringSetupPluginDependencies,
+      MonitoringStartPluginDependencies
+    > {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public async setup(

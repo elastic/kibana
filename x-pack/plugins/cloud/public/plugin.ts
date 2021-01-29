@@ -44,7 +44,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = false;
   }
 
-  public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
     const { id, resetPasswordUrl, deploymentUrl } = this.config;
     this.isCloudEnabled = getIsCloudEnabled(id);
 
