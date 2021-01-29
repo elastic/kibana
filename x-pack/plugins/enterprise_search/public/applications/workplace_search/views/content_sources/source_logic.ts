@@ -126,29 +126,22 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [

@@ -181,4 +181,5 @@ export const getAreaVisTypeDefinition = (
       },
     ],
   },
+  requiresSearch: true,
 });

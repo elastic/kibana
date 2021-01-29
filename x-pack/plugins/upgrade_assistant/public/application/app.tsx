@@ -16,10 +16,10 @@ export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
 }
 
-export const RootComponent = ({ i18n, ...contexValue }: AppDependencies) => {
+export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
   return (
     <i18n.Context>
-      <AppContextProvider value={contexValue}>
+      <AppContextProvider value={contextValue}>
         <div data-test-subj="upgradeAssistantRoot">
           <EuiPageHeader>
             <EuiPageHeaderSection>

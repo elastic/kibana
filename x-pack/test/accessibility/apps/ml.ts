@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  // flaky tests, see https://github.com/elastic/kibana/issues/88592
-  describe.skip('ml', () => {
+  describe('ml', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -239,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('data frame analytics create job select index pattern modal', async () => {
+          await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalytics.startAnalyticsCreation();
           await a11y.testAppSnapshot();
@@ -261,6 +261,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
           await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.testExecution.logTestStep('displays the include fields selection');
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
           await a11y.testAppSnapshot();
         });
 

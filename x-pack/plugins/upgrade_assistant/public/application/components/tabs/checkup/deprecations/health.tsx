@@ -10,8 +10,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { DeprecationInfo } from '../../../../../../common/types';
 import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {

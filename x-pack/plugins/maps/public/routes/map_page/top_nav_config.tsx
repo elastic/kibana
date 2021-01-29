@@ -10,11 +10,13 @@ import { Adapters } from 'src/plugins/inspector/public';
 import {
   getCoreChrome,
   getMapsCapabilities,
+  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreI18n,
   getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
+  getPresentationUtilContext,
 } from '../../kibana_services';
 import {
   checkForDuplicateTitle,
@@ -25,6 +27,7 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
+import { SavedObjectSaveModalDashboard } from '../../../../../../src/plugins/presentation_util/public';
 
 export function getTopNavConfig({
   savedMap,
@@ -139,54 +142,64 @@ export function getTopNavConfig({
           />
         ) : undefined;
 
-        const saveModal = (
-          <SavedObjectSaveModalOrigin
-            originatingApp={savedMap.getOriginatingApp()}
-            getAppNameFromId={savedMap.getAppNameFromId}
-            onSave={async (props: OnSaveProps & { returnToOrigin: boolean }) => {
-              try {
-                await checkForDuplicateTitle(
-                  {
-                    id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
-                    title: props.newTitle,
-                    copyOnSave: props.newCopyOnSave,
-                    lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
-                    getEsType: () => MAP_SAVED_OBJECT_TYPE,
-                    getDisplayName: getMapEmbeddableDisplayName,
-                  },
-                  props.isTitleDuplicateConfirmed,
-                  props.onTitleDuplicate,
-                  {
-                    savedObjectsClient: getSavedObjectsClient(),
-                    overlays: getCoreOverlays(),
-                  }
-                );
-              } catch (e) {
-                // ignore duplicate title failure, user notified in save modal
-                return {};
-              }
+        const saveModalProps = {
+          onSave: async (
+            props: OnSaveProps & { returnToOrigin?: boolean; dashboardId?: string | null }
+          ) => {
+            try {
+              await checkForDuplicateTitle(
+                {
+                  id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
+                  title: props.newTitle,
+                  copyOnSave: props.newCopyOnSave,
+                  lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
+                  getEsType: () => MAP_SAVED_OBJECT_TYPE,
+                  getDisplayName: getMapEmbeddableDisplayName,
+                },
+                props.isTitleDuplicateConfirmed,
+                props.onTitleDuplicate,
+                {
+                  savedObjectsClient: getSavedObjectsClient(),
+                  overlays: getCoreOverlays(),
+                }
+              );
+            } catch (e) {
+              // ignore duplicate title failure, user notified in save modal
+              return {};
+            }
 
-              await savedMap.save({
-                ...props,
-                newTags: selectedTags,
-                saveByReference: true,
-              });
-              // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
-              return { id: 'id' };
-            }}
-            onClose={() => {}}
-            documentInfo={{
-              description: mapDescription,
-              id: savedMap.getSavedObjectId(),
-              title: savedMap.getTitle(),
-            }}
-            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
-              defaultMessage: 'map',
-            })}
-            options={tagSelector}
-          />
-        );
-        showSaveModal(saveModal, getCoreI18n().Context);
+            await savedMap.save({
+              ...props,
+              newTags: selectedTags,
+              saveByReference: !props.dashboardId,
+            });
+            // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
+            return { id: 'id' };
+          },
+          onClose: () => {},
+          documentInfo: {
+            description: mapDescription,
+            id: savedMap.getSavedObjectId(),
+            title: savedMap.getTitle(),
+          },
+          objectType: i18n.translate('xpack.maps.topNav.saveModalType', {
+            defaultMessage: 'map',
+          }),
+        };
+        const PresentationUtilContext = getPresentationUtilContext();
+        const saveModal =
+          savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables() ? (
+            <SavedObjectSaveModalOrigin
+              {...saveModalProps}
+              originatingApp={savedMap.getOriginatingApp()}
+              getAppNameFromId={savedMap.getAppNameFromId}
+              options={tagSelector}
+            />
+          ) : (
+            <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
+          );
+
+        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },
     });
 

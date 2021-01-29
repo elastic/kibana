@@ -52,6 +52,7 @@ export class ReportingPlugin
         description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
           defaultMessage: `Custom image to use in the PDF's footer`,
         }),
+        sensitive: true,
         type: 'image',
         schema: schema.nullable(schema.byteSize({ max: '200kb' })),
         category: [PLUGIN_ID],

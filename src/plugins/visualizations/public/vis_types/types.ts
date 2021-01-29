@@ -7,10 +7,10 @@
  */
 
 import { IconType } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
 import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
-import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -34,7 +34,6 @@ export interface ISchemas {
 
 export interface Schema {
   aggFilter: string[];
-  editor: boolean | string;
   group: AggGroupName;
   max: number;
   min: number;
@@ -49,11 +48,35 @@ export interface Schema {
   tooltip?: ReactNode;
 }
 
+type DefaultEditorOptionsComponent<TVisParams> = React.ComponentType<
+  VisEditorOptionsProps<TVisParams>
+>;
+
+interface DefaultEditorConfig<TVisParams> {
+  // collections should moved directly into default editor in https://github.com/elastic/kibana/issues/84879
+  collections?: {
+    [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
+  };
+  enableAutoApply?: boolean;
+  defaultSize?: string;
+  optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
+  optionTabs?: Array<{
+    name: string;
+    title: string;
+    editor: DefaultEditorOptionsComponent<TVisParams>;
+  }>;
+  schemas?: Array<Partial<Schema>>;
+}
+
+interface CustomEditorConfig {
+  editor: string;
+}
+
 /**
- * A visualization type representing one specific type of "classical"
+ * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
-export interface VisType<TVisParams = unknown> {
+export interface VisTypeDefinition<TVisParams> {
   /**
    * Visualization unique name
    */
@@ -69,7 +92,7 @@ export interface VisType<TVisParams = unknown> {
   /**
    * If given, it will be diplayed on the wizard vis card as a note in italic.
    */
-  readonly note: string;
+  readonly note?: string;
   /**
    * If given, it will return the supported triggers for this vis.
    */
@@ -82,8 +105,6 @@ export interface VisType<TVisParams = unknown> {
   readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
 
   readonly isAccessible?: boolean;
-  readonly requestHandler?: string | unknown;
-  readonly responseHandler?: string | unknown;
   /**
    * It is the visualization icon, displayed on the wizard.
    */
@@ -94,21 +115,27 @@ export interface VisType<TVisParams = unknown> {
   readonly image?: string;
   /**
    * Describes the visualization stage
+   * @default 'production'
    */
-  readonly stage: 'experimental' | 'beta' | 'production';
+  readonly stage?: 'experimental' | 'beta' | 'production';
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
+   * @default 'aggbased'
    */
-  readonly group: VisGroups;
+  readonly group?: VisGroups;
   /**
    * If given, it will be displayed on the wizard instead of the title.
    * We use it because we want to differentiate the vis title from the
    * way it is presented on the wizard
    */
-  readonly titleInWizard: string;
-  readonly requiresSearch: boolean;
-  readonly useCustomNoDataScreen: boolean;
+  readonly titleInWizard?: string;
+  /**
+   * The flag is necessary for aggregation based visualizations.
+   * When "true", an additional step on the vis creation wizard will be provided
+   * with the selection of a search source - an index pattern or a saved search.
+   */
+  readonly requiresSearch?: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**
@@ -118,18 +145,27 @@ export interface VisType<TVisParams = unknown> {
    * of this type.
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
-
-  readonly toExpressionAst?: VisToExpressionAst<TVisParams>;
-  readonly visualization?: VisualizationControllerConstructor;
+  /**
+   * Should be provided to expand base visualization expression with
+   * custom exprsesion chain, including render expression.
+   * Explicit renderer should be registered in expressions plugin to render your visualization.
+   */
+  readonly toExpressionAst: VisToExpressionAst<TVisParams>;
 
   readonly setup?: (vis: Vis<TVisParams>) => Promise<Vis<TVisParams>>;
-  hidden: boolean;
+  hidden?: boolean;
 
-  readonly schemas: ISchemas;
+  readonly options?: Partial<VisTypeOptions>;
 
-  readonly options: VisTypeOptions;
-
-  // TODO: The following types still need to be refined properly.
-  readonly editorConfig: Record<string, any>;
+  /**
+   * Config for the default editor.
+   * Custom editor can be specified.
+   */
+  readonly editorConfig: DefaultEditorConfig<TVisParams> | CustomEditorConfig;
+  /**
+   * Have the "defaults" prop with default params for a visualization.
+   * TODO: ideally should have next type: { defaults: TVisParams } , but currently
+   * have incosistencies in legacy visLib visualizations
+   */
   readonly visConfig: Record<string, any>;
 }

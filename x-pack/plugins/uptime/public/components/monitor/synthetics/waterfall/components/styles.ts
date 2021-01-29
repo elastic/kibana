@@ -6,7 +6,7 @@
 
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
