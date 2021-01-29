@@ -5,7 +5,7 @@
  */
 import React, { useCallback } from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,

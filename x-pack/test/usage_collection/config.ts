@@ -24,7 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     // list paths to the files that contain your plugins tests
-    testFiles: [resolve(__dirname, './test_suites/application_usage')],
+    testFiles: [
+      resolve(__dirname, './test_suites/application_usage'),
+      resolve(__dirname, './test_suites/stack_management_usage'),
+    ],
 
     services,
     pageObjects,

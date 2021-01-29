@@ -95,7 +95,7 @@ export class KibanaMigrator {
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
       typeRegistry,
@@ -177,7 +177,7 @@ export class KibanaMigrator {
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
                 migrateRawDocs(
                   this.serializer,
-                  this.documentMigrator.migrate,
+                  this.documentMigrator.migrateAndConvert,
                   rawDocs,
                   new MigrationLogger(this.log)
                 ),
@@ -192,6 +192,7 @@ export class KibanaMigrator {
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
+          kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
           pollInterval: this.savedObjectsConfig.pollInterval,

@@ -241,6 +241,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isTopLevelAggregation() {
+      return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
+    },
     /**
      * Removes the dimension matching a specific test subject
      */
@@ -503,13 +506,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param index - index of th element in datatable
      */
     async getDatatableHeaderText(index = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] thead th:nth-child(${
-            index + 1
-          }) .euiTableCellContent__text`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableHeader(index);
+      return el.getVisibleText();
     },
 
     /**
@@ -519,13 +517,55 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param colIndex - index of column of the cell
      */
     async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
-            colIndex + 1
-          })`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return el.getVisibleText();
+    },
+
+    async getDatatableHeader(index = 0) {
+      return find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        })`
+      );
+    },
+
+    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+      return await find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRow"]:nth-child(${
+          rowIndex + 2 // this is a bit specific for EuiDataGrid: the first row is the Header
+        }) [data-test-subj="dataGridRowCell"]:nth-child(${colIndex + 1})`
+      );
+    },
+
+    async isDatatableHeaderSorted(index = 0) {
+      return find.existsByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        }) [data-test-subj^="dataGridHeaderCellSortingIcon"]`
+      );
+    },
+
+    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'asc' | 'desc') {
+      const el = await this.getDatatableHeader(colIndex);
+      await el.click();
+      let buttonEl;
+      if (direction !== 'none') {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+        );
+      } else {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+        );
+      }
+      return buttonEl.click();
+    },
+
+    async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      await el.focus();
+      const action = await el.findByTestSubject(actionTestSub);
+      return action.click();
     },
 
     /**

@@ -7,7 +7,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash';
+import { isNumber, reduce, times } from 'lodash';
 import moment from 'moment';
 
 import { InvalidLogScaleValues } from '../../errors';
@@ -62,7 +62,7 @@ export class AxisScale {
 
     return d3[extent](
       opts.reduce(function (opts, v) {
-        if (!_.isNumber(v)) v = +v;
+        if (!isNumber(v)) v = +v;
         if (!isNaN(v)) opts.push(v);
         return opts;
       }, [])
@@ -90,7 +90,7 @@ export class AxisScale {
     const y = moment(x);
     const method = n > 0 ? 'add' : 'subtract';
 
-    _.times(Math.abs(n), function () {
+    times(Math.abs(n), function () {
       y[method](interval);
     });
 
@@ -100,7 +100,7 @@ export class AxisScale {
   getAllPoints() {
     const config = this.axisConfig;
     const data = this.visConfig.data.chartData();
-    const chartPoints = _.reduce(
+    const chartPoints = reduce(
       data,
       (chartPoints, chart, chartIndex) => {
         const points = chart.series.reduce((points, seri, seriIndex) => {
@@ -254,6 +254,6 @@ export class AxisScale {
   }
 
   validateScale(scale) {
-    if (!scale || _.isNaN(scale)) throw new Error('scale is ' + scale);
+    if (!scale || Number.isNaN(scale)) throw new Error('scale is ' + scale);
   }
 }

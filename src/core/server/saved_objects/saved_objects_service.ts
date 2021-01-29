@@ -43,6 +43,7 @@ import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+import { registerCoreObjectTypes } from './object_types';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -305,6 +306,8 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
+    registerCoreObjectTypes(this.typeRegistry);
+
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
@@ -454,6 +457,7 @@ export class SavedObjectsService
       createExporter: (savedObjectsClient) =>
         new SavedObjectsExporter({
           savedObjectsClient,
+          typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
         }),
       createImporter: (savedObjectsClient) =>
