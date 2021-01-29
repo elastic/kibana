@@ -111,8 +111,7 @@ export class PluginsSystem {
           errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
         });
       } else {
-        // awaiting non-promise contract to get back in the event queue
-        contract = await contractOrPromise;
+        contract = contractOrPromise;
       }
 
       contracts.set(pluginName, contract);
@@ -161,8 +160,7 @@ export class PluginsSystem {
           errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
         });
       } else {
-        // awaiting non-promise contract to get back in the event queue
-        contract = await contractOrPromise;
+        contract = contractOrPromise;
       }
 
       contracts.set(pluginName, contract);
