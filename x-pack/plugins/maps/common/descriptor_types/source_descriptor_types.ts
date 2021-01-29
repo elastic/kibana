@@ -112,7 +112,7 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   term: string; // term field name
   whereQuery?: Query;
   size?: number;
-  type?: SOURCE_TYPES.ES_TERM_SOURCE;
+  type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
