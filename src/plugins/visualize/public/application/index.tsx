@@ -30,9 +30,11 @@ export const renderApp = (
   const app = (
     <Router history={services.history}>
       <KibanaContextProvider services={services}>
-        <services.i18n.Context>
-          <VisualizeApp onAppLeave={onAppLeave} />
-        </services.i18n.Context>
+        <services.presentationUtil.ContextProvider>
+          <services.i18n.Context>
+            <VisualizeApp onAppLeave={onAppLeave} />
+          </services.i18n.Context>
+        </services.presentationUtil.ContextProvider>
       </KibanaContextProvider>
     </Router>
   );

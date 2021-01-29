@@ -176,6 +176,11 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 // get the chart type based on its configuration
 export function getChartType(config) {
   let chartType = CHART_TYPE.SINGLE_METRIC;
+
+  if (config.functionDescription === 'lat_long' || config.mapData !== undefined) {
+    return CHART_TYPE.GEO_MAP;
+  }
+
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&

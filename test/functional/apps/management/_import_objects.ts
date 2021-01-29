@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  describe('import objects', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/89478
+  describe.skip('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
         await kibanaServer.uiSettings.replace({});
