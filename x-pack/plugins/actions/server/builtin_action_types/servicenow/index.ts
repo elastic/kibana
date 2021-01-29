@@ -69,7 +69,7 @@ export function getServiceNowITSMActionType(
       }),
       params: ExecutorParamsSchemaITSM,
     },
-    executor: curry(executor)({ logger, table: serviceNowITSMTable }),
+    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowITSMTable }),
   };
 }
 
@@ -104,6 +104,7 @@ const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices
 async function executor(
   {
     logger,
+    configurationUtilities,
     table,
   }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities; table: string },
   execOptions: ActionTypeExecutorOptions<

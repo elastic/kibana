@@ -175,7 +175,7 @@ export const createExternalService = (
         axios: axiosInstance,
         url: getChoicesURL(fields),
         logger,
-        proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return res.data.result;

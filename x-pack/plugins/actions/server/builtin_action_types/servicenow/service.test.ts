@@ -126,7 +126,8 @@ describe('ServiceNow service', () => {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
-        logger
+        logger,
+        configurationUtilities
       );
 
       requestMock.mockImplementation(() => ({
@@ -137,6 +138,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
       });
     });
@@ -206,7 +208,8 @@ describe('ServiceNow service', () => {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
-        logger
+        logger,
+        configurationUtilities
       );
 
       requestMock.mockImplementation(() => ({
@@ -220,6 +223,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident',
         method: 'post',
         data: { short_description: 'title', description: 'desc' },
@@ -301,7 +305,8 @@ describe('ServiceNow service', () => {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
-        logger
+        logger,
+        configurationUtilities
       );
 
       patchMock.mockImplementation(() => ({
@@ -316,6 +321,7 @@ describe('ServiceNow service', () => {
       expect(patchMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/sn_si_incident/1',
         data: { short_description: 'title', description: 'desc' },
       });
@@ -401,7 +407,8 @@ describe('ServiceNow service', () => {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
-        logger
+        logger,
+        configurationUtilities
       );
 
       requestMock.mockImplementation(() => ({
@@ -412,6 +419,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url:
           'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^ORname=sn_si_incident^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
@@ -448,6 +456,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url:
           'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
@@ -468,7 +477,8 @@ describe('ServiceNow service', () => {
           config: { apiUrl: 'https://dev102283.service-now.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
-        logger
+        logger,
+        configurationUtilities
       );
 
       requestMock.mockImplementation(() => ({
@@ -480,6 +490,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url:
           'https://dev102283.service-now.com/api/now/v2/table/sys_choice?sysparm_query=name=task^ORname=sn_si_incident^element=priority^ORelement=category&sysparm_fields=label,value,dependent_value,element',
       });
