@@ -25,6 +25,7 @@ import {
 } from '../../../../src/plugins/kibana_utils/public';
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import { APP_ID } from '../common/constants';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -79,7 +80,7 @@ export async function renderApp({
     const stateTransfer = getEmbeddableService()?.getStateTransfer();
 
     const { embeddableId, originatingApp, valueInput } =
-      stateTransfer?.getIncomingEditorState() || {};
+      stateTransfer?.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {

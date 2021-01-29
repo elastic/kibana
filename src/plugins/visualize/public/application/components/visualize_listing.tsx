@@ -64,7 +64,7 @@ export const VisualizeListing = () => {
 
   useMount(() => {
     // Reset editor state if the visualize listing page is loaded.
-    stateTransferService.clearEditorState();
+    stateTransferService.clearEditorState(VisualizeConstants.APP_ID);
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
