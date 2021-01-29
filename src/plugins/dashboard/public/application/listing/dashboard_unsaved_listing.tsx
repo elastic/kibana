@@ -16,7 +16,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { DashboardSavedObject } from '../..';
 import {
   createConfirmStrings,
@@ -29,15 +28,16 @@ import { DashboardAppServices, DashboardRedirect } from '../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({
-  dashboard,
+  id,
+  title,
   onOpenClick,
   onDiscardClick,
 }: {
-  dashboard?: DashboardSavedObject;
+  id: string;
+  title?: string;
   onOpenClick: () => void;
   onDiscardClick: () => void;
 }) => {
-  const title = dashboard?.title ?? getNewDashboardTitle();
   return (
     <div className="dshUnsavedListingItem">
       <EuiFlexGroup
@@ -47,12 +47,20 @@ const DashboardUnsavedItem = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon color="text" className="dshUnsavedListingItem__icon" type="dashboardApp" />
+          <EuiIcon
+            color="text"
+            className="dshUnsavedListingItem__icon"
+            type={title ? 'dashboardApp' : 'clock'}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h4 className="dshUnsavedListingItem__title">
-              {dashboard?.title ?? getNewDashboardTitle()}
+            <h4
+              className={`dshUnsavedListingItem__title ${
+                title ? '' : 'dshUnsavedListingItem__loading'
+              }`}
+            >
+              {title || dashboardUnsavedListingStrings.getLoadingTitle()}
             </h4>
           </EuiTitle>
         </EuiFlexItem>
@@ -68,9 +76,10 @@ const DashboardUnsavedItem = ({
             flush="left"
             size="s"
             color="primary"
+            disabled={!title}
             onClick={onOpenClick}
-            data-test-subj={`edit-unsaved-${title.split(' ').join('-')}`}
-            aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(title)}
+            data-test-subj={title ? `edit-unsaved-${title.split(' ').join('-')}` : undefined}
+            aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(title ?? id)}
           >
             {dashboardUnsavedListingStrings.getEditTitle()}
           </EuiButtonEmpty>
@@ -80,9 +89,10 @@ const DashboardUnsavedItem = ({
             flush="left"
             size="s"
             color="danger"
+            disabled={!title}
             onClick={onDiscardClick}
-            data-test-subj={`discard-unsaved-${title.split(' ').join('-')}`}
-            aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(title)}
+            data-test-subj={title ? `discard-unsaved-${title.split(' ').join('-')}` : undefined}
+            aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(title ?? id)}
           >
             {dashboardUnsavedListingStrings.getDiscardTitle()}
           </EuiButtonEmpty>
@@ -91,6 +101,10 @@ const DashboardUnsavedItem = ({
     </div>
   );
 };
+
+interface UnsavedItemMap {
+  [key: string]: DashboardSavedObject;
+}
 
 export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardRedirect }) => {
   const {
@@ -101,8 +115,11 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
     },
   } = useKibana<DashboardAppServices>();
 
-  const [items, setItems] = useState<JSX.Element[]>([]);
-  const [dashboardIds, setDashboardIds] = useState<string[]>([]);
+  const [items, setItems] = useState<UnsavedItemMap>({});
+  const [mounted, setMounted] = useState(true);
+  const [dashboardIds, setDashboardIds] = useState<string[]>(
+    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
+  );
 
   const onOpen = useCallback(
     (id?: string) => {
@@ -125,50 +142,52 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
     [overlays, dashboardPanelStorage]
   );
 
-  useMount(() => {
-    setDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+  useEffect(() => {
+    return () => setMounted(false);
   });
 
   useEffect(() => {
-    let hasNewDashboard = false;
     const dashPromises = dashboardIds
-      .filter((id) => {
-        if (id !== DASHBOARD_PANELS_UNSAVED_ID) {
-          return true;
-        }
-        hasNewDashboard = true;
-        return false;
-      })
+      .filter((id) => id !== DASHBOARD_PANELS_UNSAVED_ID)
       .map((dashboardId) => savedDashboards.get(dashboardId));
     Promise.all(dashPromises).then((dashboards: DashboardSavedObject[]) => {
-      const newItems = dashboards.map((dashboard) => (
-        <DashboardUnsavedItem
-          key={dashboard.id}
-          dashboard={dashboard}
-          onOpenClick={() => onOpen(dashboard.id)}
-          onDiscardClick={() => onDiscard(dashboard.id)}
-        />
-      ));
-      if (hasNewDashboard) {
-        newItems.unshift(
-          <DashboardUnsavedItem
-            key={DASHBOARD_PANELS_UNSAVED_ID}
-            onOpenClick={() => onOpen()}
-            onDiscardClick={() => onDiscard()}
-          />
-        );
+      const dashboardMap = {};
+      if (!mounted) {
+        return;
       }
-      setItems(newItems);
+      setItems(
+        dashboards.reduce((map, dashboard) => {
+          return {
+            ...map,
+            [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
+          };
+        }, dashboardMap)
+      );
     });
-  }, [dashboardIds, onOpen, onDiscard, savedDashboards]);
+  }, [dashboardIds, savedDashboards, mounted]);
 
-  return items.length === 0 ? null : (
+  return dashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
         heading="h3"
-        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(items.length > 1)}
+        title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(dashboardIds.length > 1)}
       >
-        {items}
+        {dashboardIds.map((dashboardId: string) => {
+          const title: string | undefined =
+            dashboardId === DASHBOARD_PANELS_UNSAVED_ID
+              ? getNewDashboardTitle()
+              : items[dashboardId]?.title;
+          const redirectId = dashboardId === DASHBOARD_PANELS_UNSAVED_ID ? undefined : dashboardId;
+          return (
+            <DashboardUnsavedItem
+              key={dashboardId}
+              id={dashboardId}
+              title={title}
+              onOpenClick={() => onOpen(redirectId)}
+              onDiscardClick={() => onDiscard(redirectId)}
+            />
+          );
+        })}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

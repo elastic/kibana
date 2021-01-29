@@ -46,6 +46,10 @@
   margin-bottom: 0 !important;
 }
 
+.dshUnsavedListingItem__loading {
+  color: $euiTextSubduedColor !important;
+}
+
 .dshUnsavedListingItem__actions {
   margin-left: $euiSizeL + $euiSizeXS;
 }

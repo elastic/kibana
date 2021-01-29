@@ -78,7 +78,6 @@ export class DashboardStateManager {
   >;
   private readonly stateContainerChangeSub: Subscription;
   private readonly dashboardPanelStorage?: DashboardPanelStorage;
-  private readonly STATE_STORAGE_KEY = '_a';
   public readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly allowByValueEmbeddables: boolean;

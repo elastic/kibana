@@ -358,6 +358,10 @@ export const dashboardUnsavedListingStrings = {
           : dashboardListingTable.getEntityName(),
       },
     }),
+  getLoadingTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.loading', {
+      defaultMessage: 'Loading',
+    }),
   getEditAriaLabel: (title: string) =>
     i18n.translate('dashboard.listing.unsaved.editAria', {
       defaultMessage: 'Continue editing {title}',
