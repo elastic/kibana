@@ -79,7 +79,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     this._initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
   ) {
