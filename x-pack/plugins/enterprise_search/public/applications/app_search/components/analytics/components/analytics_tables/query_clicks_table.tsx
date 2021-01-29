@@ -15,7 +15,7 @@ import { generateEnginePath } from '../../../engine';
 import { DOCUMENTS_TITLE } from '../../../documents';
 
 import { QueryClick } from '../../types';
-import { FIRST_COLUMN_PROPS, TAGS_COLUMN, COUNT_COLUMN_PROPS } from './constants';
+import { FIRST_COLUMN_PROPS, TAGS_COLUMN, COUNT_COLUMN_PROPS } from './shared_columns';
 
 interface Props {
   items: QueryClick[];

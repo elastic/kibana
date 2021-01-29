@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
 
 import { Query } from '../../types';
-import { TERM_COLUMN_PROPS, TAGS_COLUMN, COUNT_COLUMN_PROPS, ACTIONS_COLUMN } from './constants';
+import {
+  TERM_COLUMN_PROPS,
+  TAGS_COLUMN,
+  COUNT_COLUMN_PROPS,
+  ACTIONS_COLUMN,
+} from './shared_columns';
 
 interface Props {
   items: Query[];
