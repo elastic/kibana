@@ -6,6 +6,10 @@
  * Public License, v 1.
  */
 
-import { VegaBaseView } from './vega_base_view';
+import type { Map } from 'mapbox-gl';
 
-export class VegaMapView extends VegaBaseView {}
+export interface LayerParameters<TContext extends Record<string, any> = {}> {
+  id: string;
+  map: Map;
+  context: TContext;
+}
