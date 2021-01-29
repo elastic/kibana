@@ -44,7 +44,7 @@ export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
-  private config?: TaskManagerConfig;
+  private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
@@ -54,12 +54,11 @@ export class TaskManagerPlugin
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
   public setup(core: CoreSetup): TaskManagerSetupContract {
-    this.config = this.initContext.config.get<TaskManagerConfig>();
-
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
