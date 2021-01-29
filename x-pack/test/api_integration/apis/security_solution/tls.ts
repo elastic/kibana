@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Tls Test with Packetbeat', () => {
+  describe.only('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
       before(() => esArchiver.load('packetbeat/tls'));
       after(() => esArchiver.unload('packetbeat/tls'));

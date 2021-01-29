@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Network DNS', () => {
+  describe.only('Network DNS', () => {
     describe('With packetbeat', () => {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));

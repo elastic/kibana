@@ -21,7 +21,7 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('Users', () => {
+  describe.only('Users', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/default'));
       after(() => esArchiver.unload('auditbeat/default'));

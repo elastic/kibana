@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('securitySolutionGraphQLClient');
 
-  describe('Timeline', () => {
+  describe.only('Timeline', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 

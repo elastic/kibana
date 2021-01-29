@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Network Top N Flow', () => {
+  describe.only('Network Top N Flow', () => {
     describe('With filebeat', () => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
