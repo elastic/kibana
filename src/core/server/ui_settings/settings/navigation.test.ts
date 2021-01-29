@@ -28,18 +28,4 @@ describe('navigation settings', () => {
       );
     });
   });
-
-  describe('pageNavigation', () => {
-    const validate = getValidationFn(navigationSettings.pageNavigation);
-
-    it('should only accept valid values', () => {
-      expect(() => validate('modern')).not.toThrow();
-      expect(() => validate('legacy')).not.toThrow();
-      expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [modern]
-- [1]: expected value to equal [legacy]"
-`);
-    });
-  });
 });

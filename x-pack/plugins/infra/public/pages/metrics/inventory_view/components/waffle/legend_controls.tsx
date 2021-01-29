@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
 import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import { getColorPalette } from '../../lib/get_color_palette';

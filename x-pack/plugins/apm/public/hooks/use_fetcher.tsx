@@ -24,6 +24,21 @@ export interface FetcherResult<Data> {
   error?: IHttpFetchError;
 }
 
+function getDetailsFromErrorResponse(error: IHttpFetchError) {
+  const message = error.body?.message ?? error.response?.statusText;
+  return (
+    <>
+      {message} ({error.response?.status})
+      <h5>
+        {i18n.translate('xpack.apm.fetcher.error.url', {
+          defaultMessage: `URL`,
+        })}
+      </h5>
+      {error.response?.url}
+    </>
+  );
+}
+
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
 type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
@@ -82,25 +97,14 @@ export function useFetcher<TReturn>(
 
         if (!didCancel) {
           const errorDetails =
-            'response' in err ? (
-              <>
-                {err.response?.statusText} ({err.response?.status})
-                <h5>
-                  {i18n.translate('xpack.apm.fetcher.error.url', {
-                    defaultMessage: `URL`,
-                  })}
-                </h5>
-                {err.response?.url}
-              </>
-            ) : (
-              err.message
-            );
+            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addWarning({
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
+
               text: toMountPoint(
                 <div>
                   <h5>

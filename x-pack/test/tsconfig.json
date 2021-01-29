@@ -46,6 +46,7 @@
     { "path": "../plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "../plugins/event_log/tsconfig.json" },
     { "path": "../plugins/licensing/tsconfig.json" },
+    { "path": "../plugins/lens/tsconfig.json" },
     { "path": "../plugins/task_manager/tsconfig.json" },
     { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "../plugins/triggers_actions_ui/tsconfig.json" },
@@ -57,6 +58,9 @@
     { "path": "../plugins/beats_management/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
-    { "path": "../plugins/global_search_bar/tsconfig.json" }
+    { "path": "../plugins/global_search_bar/tsconfig.json" },
+    { "path": "../plugins/license_management/tsconfig.json" },
+    { "path": "../plugins/painless_lab/tsconfig.json" },
+    { "path": "../plugins/watcher/tsconfig.json" }
   ]
 }

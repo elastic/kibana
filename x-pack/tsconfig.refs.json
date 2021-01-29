@@ -5,6 +5,7 @@
     { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/dashboard_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
@@ -14,11 +15,13 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
+    { "path": "./plugins/maps/tsconfig.json" },
+    { "path": "./plugins/maps_file_upload/tsconfig.json" },
+    { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/spaces/tsconfig.json" },
@@ -28,6 +31,9 @@
     { "path": "./plugins/beats_management/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
     { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
-    { "path": "./plugins/global_search_bar/tsconfig.json" }
+    { "path": "./plugins/global_search_bar/tsconfig.json" },
+    { "path": "./plugins/license_management/tsconfig.json" },
+    { "path": "./plugins/painless_lab/tsconfig.json" },
+    { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }

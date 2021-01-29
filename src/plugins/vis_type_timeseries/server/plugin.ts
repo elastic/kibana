@@ -11,9 +11,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  RequestHandlerContext,
   Logger,
-  IRouter,
   FakeRequest,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
@@ -25,8 +23,14 @@ import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
-import { SearchStrategyRegistry } from './lib/search_strategies';
 import { uiSettings } from './ui_settings';
+import type { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRouter } from './types';
+
+import {
+  SearchStrategyRegistry,
+  DefaultSearchStrategy,
+  RollupSearchStrategy,
+} from './lib/search_strategies';
 
 export interface LegacySetup {
   server: Server;
@@ -42,11 +46,10 @@ interface VisTypeTimeseriesPluginStartDependencies {
 
 export interface VisTypeTimeseriesSetup {
   getVisData: (
-    requestContext: RequestHandlerContext,
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
     fakeRequest: FakeRequest,
     options: GetVisDataOptions
   ) => ReturnType<GetVisData>;
-  addSearchStrategy: SearchStrategyRegistry['addStrategy'];
 }
 
 export interface Framework {
@@ -55,7 +58,7 @@ export interface Framework {
   config$: Observable<VisTypeTimeseriesConfig>;
   globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
   logger: Logger;
-  router: IRouter;
+  router: VisTypeTimeseriesRouter;
   searchStrategyRegistry: SearchStrategyRegistry;
 }
 
@@ -73,9 +76,12 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<VisTypeTimeseriesRequestHandlerContext>();
 
     const searchStrategyRegistry = new SearchStrategyRegistry();
+
+    searchStrategyRegistry.addStrategy(new DefaultSearchStrategy());
+    searchStrategyRegistry.addStrategy(new RollupSearchStrategy());
 
     const framework: Framework = {
       core,
@@ -92,13 +98,12 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     return {
       getVisData: async (
-        requestContext: RequestHandlerContext,
+        requestContext: VisTypeTimeseriesRequestHandlerContext,
         fakeRequest: FakeRequest,
         options: GetVisDataOptions
       ) => {
         return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
       },
-      addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };
   }
 

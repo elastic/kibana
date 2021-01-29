@@ -5,7 +5,6 @@
  */
 import {
   ILegacyClusterClient,
-  IRouter,
   ILegacyScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
@@ -43,16 +42,17 @@ import {
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 describe('test endpoint route', () => {
-  let routerMock: jest.Mocked<IRouter>;
+  let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
   // tests assume that fleet is enabled, and thus agentService is available

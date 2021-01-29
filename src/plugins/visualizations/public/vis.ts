@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
-import { VisType } from './vis_types';
 import {
   IAggConfigs,
   IndexPattern,
@@ -30,6 +29,8 @@ import {
   AggConfigOptions,
   SearchSourceFields,
 } from '../../../plugins/data/public';
+import { BaseVisType } from './vis_types';
+import { VisParams } from '../common/types';
 
 export interface SerializedVisData {
   expression?: string;
@@ -56,10 +57,6 @@ export interface VisData {
   savedSearchId?: string;
 }
 
-export interface VisParams {
-  [key: string]: any;
-}
-
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
   const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
@@ -74,14 +71,11 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams = VisParams> {
-  public readonly type: VisType<TVisParams>;
+  public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
   public params: TVisParams;
-  // Session state is for storing information that is transitory, and will not be saved with the visualization.
-  // For instance, map bounds, which depends on the view port, browser window size, etc.
-  public sessionState: Record<string, any> = {};
   public data: VisData = {};
 
   public readonly uiState: PersistedState;
