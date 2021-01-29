@@ -81,6 +81,15 @@ for (let i = 0; i < 105; i++) {
 }
 window.scrollTo = jest.fn();
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
+  };
+});
+
 let component: ReactElement;
 const activatePhase = async (rendered: ReactWrapper, phase: string) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
@@ -148,7 +157,7 @@ const setPhaseIndexPriority = async (
   phase: string,
   priority: string | number
 ) => {
-  const priorityInput = findTestSubject(rendered, `${phase}-phaseIndexPriority`);
+  const priorityInput = findTestSubject(rendered, `${phase}-indexPriority`);
   await act(async () => {
     priorityInput.simulate('change', { target: { value: priority } });
   });
@@ -315,9 +324,6 @@ describe('edit policy', () => {
                     max_age: '30d',
                     max_size: '50gb',
                   },
-                  set_priority: {
-                    priority: 100,
-                  },
                 },
                 min_age: '0ms',
               },
@@ -442,6 +448,7 @@ describe('edit policy', () => {
       const rendered = mountWithIntl(component);
       await noRollover(rendered);
       await setPolicyName(rendered, 'mypolicy');
+
       await setPhaseIndexPriority(rendered, 'hot', '-1');
       waitForFormLibValidation(rendered);
       expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
@@ -503,7 +510,7 @@ describe('edit policy', () => {
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
-      const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
+      const shrinkInput = findTestSubject(rendered, 'warm-primaryShardCount');
       await act(async () => {
         shrinkInput.simulate('change', { target: { value: '0' } });
       });
@@ -520,7 +527,7 @@ describe('edit policy', () => {
         findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
-      const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
+      const shrinkInput = findTestSubject(rendered, 'warm-primaryShardCount');
       await act(async () => {
         shrinkInput.simulate('change', { target: { value: '-1' } });
       });
@@ -836,7 +843,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-      // Assert that only the custom and off options exist
+      // Assert that default, custom and 'none' options exist
       findTestSubject(rendered, 'dataTierSelect').simulate('click');
       expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeTruthy();
       expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
@@ -876,7 +883,7 @@ describe('edit policy', () => {
         await activatePhase(rendered, 'warm');
         expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        // Assert that only the custom and off options exist
+        // Assert that default, custom and 'none' options exist
         findTestSubject(rendered, 'dataTierSelect').simulate('click');
         expect(findTestSubject(rendered, 'defaultDataAllocationOption').exists()).toBeFalsy();
         expect(findTestSubject(rendered, 'customDataAllocationOption').exists()).toBeTruthy();
