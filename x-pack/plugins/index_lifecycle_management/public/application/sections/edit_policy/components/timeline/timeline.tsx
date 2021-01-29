@@ -60,7 +60,7 @@ const i18nTexts = {
     'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
     {
       defaultMessage:
-        'Data age is only considered after rollover has occurred which adds variation to time in hot phase. See hot phase settings.',
+        'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
     }
   ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
