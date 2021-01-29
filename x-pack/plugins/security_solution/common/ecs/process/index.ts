@@ -6,7 +6,9 @@
 
 export interface ProcessEcs {
   entity_id?: string[];
+  exit_code?: number[];
   hash?: ProcessHashData;
+  parent?: ProcessParentData;
   pid?: number[];
   name?: string[];
   ppid?: number[];
@@ -21,6 +23,10 @@ export interface ProcessHashData {
   md5?: string[];
   sha1?: string[];
   sha256?: string[];
+}
+
+export interface ProcessParentData {
+  name?: string[];
 }
 
 export interface Thread {
