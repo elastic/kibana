@@ -219,7 +219,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                 ['aria-label']: i18n.translate(
                   'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
                   {
-                    defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+                    defaultMessage: 'Preview {fieldName}: {fieldType}',
                     values: {
                       fieldName: field.displayName,
                       fieldType: field.type,

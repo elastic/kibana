@@ -288,14 +288,14 @@ const DragInner = memo(function DragDropInner({
             }}
             onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
               if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                if (activeDropTarget) {
+                  dropToActiveDropTarget();
+                }
                 if (isDragging) {
                   dragEnd();
                 } else {
                   dragStart(e);
                   setKeyboardMode(true);
-                }
-                if (activeDropTarget) {
-                  dropToActiveDropTarget();
                 }
               } else if (e.key === keys.ESCAPE) {
                 dragEnd();
@@ -552,8 +552,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
     <div
       data-test-subj="lnsDragDrop-reorderableDrag"
       className={
-        areItemsReordered
-          ? 'lnsDragDrop-reorderable lnsDragDrop-translatedDrag'
+        isDragging
+          ? 'lnsDragDrop-reorderable lnsDragDrop-translatableDrag'
           : 'lnsDragDrop-reorderable'
       }
       style={
@@ -697,8 +697,8 @@ const ReorderableDrop = memo(function ReorderableDrop(
             : undefined
         }
         ref={heightRef}
-        data-test-subj="lnsDragDrop-translatedDrop"
-        className="lnsDragDrop-translatedDrop lnsDragDrop-reorderable"
+        data-test-subj="lnsDragDrop-translatableDrop"
+        className="lnsDragDrop-translatableDrop lnsDragDrop-reorderable"
       >
         <DropInner {...props} />
       </div>

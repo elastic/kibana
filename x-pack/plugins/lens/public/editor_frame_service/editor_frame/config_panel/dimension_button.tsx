@@ -13,7 +13,7 @@ import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../type
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('xpack.lens.configure.editConfig', {
-    defaultMessage: 'Click to edit configuration for {label} or drag to move',
+    defaultMessage: 'Edit {label} configuration',
     values: { label },
   });
 

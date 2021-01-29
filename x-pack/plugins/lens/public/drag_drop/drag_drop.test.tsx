@@ -269,7 +269,6 @@ describe('DragDrop', () => {
       let dragging = dragContext?.dragging;
       let keyboardMode = !!dragContext?.keyboardMode;
       let activeDropTarget = dragContext?.activeDropTarget;
-
       const baseContext = {
         dragging,
         setDragging: (val?: DragDropIdentifier) => {
@@ -285,7 +284,6 @@ describe('DragDrop', () => {
         activeDropTarget,
         setA11yMessage: jest.fn(),
       };
-
       return mount(
         <ChildDragDropProvider {...baseContext} {...dragContext}>
           <ReorderProvider id="groupId">
@@ -381,12 +379,12 @@ describe('DragDrop', () => {
         component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
@@ -399,7 +397,7 @@ describe('DragDrop', () => {
         component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
 
@@ -468,12 +466,12 @@ describe('DragDrop', () => {
         transform: 'translateY(+8px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(0).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(-40px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
       expect(setA11yMessage).toBeCalledWith(
         'You have moved the item 1 from position 1 to position 2'
@@ -487,7 +485,7 @@ describe('DragDrop', () => {
         component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatedDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
 
@@ -512,6 +510,54 @@ describe('DragDrop', () => {
       expect(setA11yMessage).toBeCalledWith(
         'You have moved the item 1 from position 1 to position 2'
       );
+    });
+
+    test(`Keyboard Navigation: User cannot drop element to itself`, () => {
+      const setActiveDropTarget = jest.fn();
+      const setA11yMessage = jest.fn();
+      const component = mount(
+        <ChildDragDropProvider
+          {...defaultContext}
+          keyboardMode={true}
+          activeDropTarget={{
+            activeDropTarget: { id: '2' },
+          }}
+          dragging={{ id: '1' }}
+          setActiveDropTarget={setActiveDropTarget}
+          setA11yMessage={setA11yMessage}
+        >
+          <ReorderProvider id="groupId">
+            <DragDrop
+              label="1"
+              draggable
+              droppable={false}
+              dragType="reorder"
+              dropType="reorder"
+              reorderableGroup={[{ id: '1' }, { id: '2' }]}
+              value={{ id: '1' }}
+            >
+              <span>1</span>
+            </DragDrop>
+            <DragDrop
+              label="2"
+              draggable
+              droppable
+              dragType="reorder"
+              dropType="reorder"
+              reorderableGroup={[{ id: '1' }, { id: '2' }]}
+              value={{ id: '2' }}
+            >
+              <span>2</span>
+            </DragDrop>
+          </ReorderProvider>
+        </ChildDragDropProvider>
+      );
+      const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
+
+      keyboardHandler.simulate('keydown', { key: 'Space' });
+      keyboardHandler.simulate('keydown', { key: 'ArrowUp' });
+      expect(setActiveDropTarget).toBeCalledWith({ id: '1' });
+      expect(setA11yMessage).toBeCalledWith('You have moved back the item 1 to position 1');
     });
 
     test(`Keyboard Navigation: Doesn't call onDrop when movement is cancelled`, () => {

@@ -156,14 +156,9 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
             </p>
             <p id={`lnsDragDrop-keyboardInstructions`}>
               {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
-                defaultMessage: `Press space bar to start reordering the dimension group. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
+                defaultMessage: `Press enter or space to start reordering the dimension group. When dragging, use arrow keys to reorder. Press enter or space again to finish.`,
               })}
             </p>
-            {/* <p id={`lnsDragDrop-groupMovementInstructions`}>
-              {i18n.translate('xpack.lens.dragDrop.groupMovementInstructions', {
-                defaultMessage: `Use right arrow and left key to move dimension to the next group.`,
-              })}
-            </p> */}
           </div>
         </EuiScreenReaderOnly>
       </EuiPortal>
@@ -288,15 +283,26 @@ export function ReorderProvider({
 }
 
 export const reorderAnnouncements = {
-  moved: (itemLabel: string, position: number, prevPosition: number) =>
-    i18n.translate('xpack.lens.dragDrop.elementMoved', {
-      defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
-      values: {
-        itemLabel,
-        position,
-        prevPosition,
-      },
-    }),
+  moved: (itemLabel: string, position: number, prevPosition: number) => {
+    return prevPosition === position
+      ? i18n.translate('xpack.lens.dragDrop.elementMoved', {
+          defaultMessage: `You have moved back the item {itemLabel} to position {prevPosition}`,
+          values: {
+            itemLabel,
+            position,
+            prevPosition,
+          },
+        })
+      : i18n.translate('xpack.lens.dragDrop.elementMoved', {
+          defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
+          values: {
+            itemLabel,
+            position,
+            prevPosition,
+          },
+        });
+  },
+
   lifted: (itemLabel: string, position: number) =>
     i18n.translate('xpack.lens.dragDrop.elementLifted', {
       defaultMessage: `You have lifted an item {itemLabel} in position {position}`,
