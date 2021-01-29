@@ -95,7 +95,7 @@ async function createSetupSideEffects(
   if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
     await ensureInstalledPackage({
       savedObjectsClient: soClient,
-      pkgName: FleetServerPackage,
+      pkgName: FLEET_SERVER_PACKAGE,
       callCluster,
     });
     await ensureFleetServerIndicesCreated(esClient);
