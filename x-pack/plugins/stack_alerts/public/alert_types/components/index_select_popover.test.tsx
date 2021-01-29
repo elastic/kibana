@@ -117,4 +117,28 @@ describe('IndexSelectPopover', () => {
     const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
     expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
   });
+
+  test('renders index and timeField if defined', async () => {
+    const index = 'test-index';
+    const timeField = '@timestamp';
+    const indexSelectProps = {
+      ...props,
+      index: [index],
+      timeField,
+    };
+    const wrapper = mountWithIntl(<IndexSelectPopover {...indexSelectProps} />);
+    expect(wrapper.find('button[data-test-subj="selectIndexExpression"]').text()).toEqual(
+      `index ${index}`
+    );
+
+    wrapper.find('[data-test-subj="selectIndexExpression"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(
+      wrapper.find('EuiSelect[data-test-subj="thresholdAlertTimeFieldSelect"]').text()
+    ).toEqual(`Select a field${timeField}`);
+  });
 });
