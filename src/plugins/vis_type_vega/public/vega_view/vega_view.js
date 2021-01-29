@@ -16,8 +16,6 @@ export class VegaView extends VegaBaseView {
 
     const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
 
-    view.warn = this.onWarn.bind(this);
-    view.error = this.onError.bind(this);
     if (this._parser.useResize) this.updateVegaSize(view);
     view.initialize(this._$container.get(0), this._$controls.get(0));
 
