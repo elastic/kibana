@@ -103,7 +103,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   unmappedFieldsConfig?: {
     /**
-     * callback funtction to change the value of `showUnmappedFields` flag
+     * callback function to change the value of `showUnmappedFields` flag
      * @param value new value to set
      */
     onChangeUnmappedFields: (value: boolean) => void;

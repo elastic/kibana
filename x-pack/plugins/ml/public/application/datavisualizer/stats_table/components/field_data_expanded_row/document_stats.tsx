@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
+import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 
 const metaTableColumns = [
   {
@@ -59,7 +60,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
           defaultMessage="percentage"
         />
       ),
-      value: `${(count / sampleCount) * 100}%`,
+      value: `${roundToDecimalPlace((count / sampleCount) * 100)}%`,
     },
     {
       function: 'distinctValues',
