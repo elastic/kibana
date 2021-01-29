@@ -293,6 +293,7 @@ const searchSessionIndicatorViewStateToProps: {
 
 export interface SearchSessionIndicatorRef {
   openPopover: () => void;
+  closePopover: () => void;
 }
 
 export const SearchSessionIndicator = React.forwardRef<
@@ -320,8 +321,11 @@ export const SearchSessionIndicator = React.forwardRef<
       openPopover: () => {
         openPopover();
       },
+      closePopover: () => {
+        closePopover();
+      },
     }),
-    [openPopover]
+    [openPopover, closePopover]
   );
 
   if (!searchSessionIndicatorViewStateToProps[props.state]) return null;

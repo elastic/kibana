@@ -39,7 +39,7 @@ export const createConnectedSearchSessionIndicator = ({
     .pipe(map(isAutoRefreshEnabled), distinctUntilChanged());
 
   const debouncedSessionServiceState$ = sessionService.state$.pipe(
-    debounce((_state) => (_state === SearchSessionState.None ? EMPTY : timer(500))) // do not debounce to "NONE" transition
+    debounce((_state) => timer(_state === SearchSessionState.None ? 50 : 300)) // switch to None faster to quickly remove indicator when navigating away
   );
 
   return () => {
@@ -74,6 +74,7 @@ export const createConnectedSearchSessionIndicator = ({
     }
 
     if (!sessionService.isSessionStorageReady()) return null;
+    if (state === SearchSessionState.None) return null;
     return (
       <RedirectAppLinks application={application}>
         <SearchSessionIndicator
