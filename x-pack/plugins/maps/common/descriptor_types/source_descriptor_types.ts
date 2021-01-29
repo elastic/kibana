@@ -176,15 +176,10 @@ export type GeojsonFileSourceDescriptor = {
   type: string;
 };
 
-export type TableSourceValue = {
-  key: string;
-  value: string | number;
-};
-
 export type TableSourceDescriptor = {
   id: string;
   type: SOURCE_TYPES.TABLE_SOURCE;
-  __rows: TableSourceValue[][];
+  __rows: Array<{ [key: string]: string | number }>;
   __columns: InlineFieldDescriptor[];
   term: string;
 };

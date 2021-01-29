@@ -69,18 +69,18 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
 
     for (let i = 0; i < this._descriptor.__rows.length; i++) {
-      const bucketProperties: BucketProperties = {};
-      const row: TableSourceValue[] = this._descriptor.__rows[i];
+      const row: { [key: string]: string | number } = this._descriptor.__rows[i];
       let propKey: string | number | undefined;
-      for (let j = 0; j < row.length; j++) {
-        if (row[j].key === this._descriptor.term) {
-          propKey = row[j].value;
-        } else {
-          bucketProperties[row[j].key] = row[j].value;
+      for (const key in row) {
+        if (row.hasOwnProperty(key)) {
+          if (key === this._descriptor.term && row[key]) {
+            propKey = row[key];
+          }
         }
       }
-      if (propKey) {
-        propertiesMap.set(propKey.toString(), bucketProperties);
+      if (propKey && !propertiesMap.has(propKey.toString())) {
+        // If propKey is not a primary key in the table, this will favor the first match
+        propertiesMap.set(propKey.toString(), row);
       }
     }
 
