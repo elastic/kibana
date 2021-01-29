@@ -20,6 +20,19 @@ const defaultProps = {
   setSelectedTabIndex: jest.fn(),
 };
 
+jest.mock('../../../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+      };
+    },
+  };
+});
+
 /**
  * Mostly a dumb container with copy, test the three main states.
  */
