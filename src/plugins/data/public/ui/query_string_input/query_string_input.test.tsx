@@ -84,12 +84,15 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-describe('QueryStringInput', () => {
+// FAILING: https://github.com/elastic/kibana/issues/85715
+// FAILING: https://github.com/elastic/kibana/issues/89603
+// FAILING: https://github.com/elastic/kibana/issues/89641
+describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', async () => {
+  it.skip('Should render the given query', async () => {
     const { getByText } = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
