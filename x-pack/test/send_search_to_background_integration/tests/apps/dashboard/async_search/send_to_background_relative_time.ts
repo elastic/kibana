@@ -120,8 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('inspectorRequestChooser');
     await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
     const requestStats = await inspector.getTableData();
-    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-    expect(totalHits).to.equal('179');
+    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+    expect(totalHits).to.equal('0');
     await inspector.close();
   }
 }
