@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../../common/constants/field_types';
 import type { TypedLensByValueInput } from '../../../../../../../../lens/public';
-import type { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import type { FieldVisConfig } from '../../../../stats_table/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataType } from '../../../../../../../../lens/public/types';
@@ -14,13 +14,20 @@ import type { IndexPatternColumn } from '../../../../../../../../lens/public/ind
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { LayerConfig } from '../../../../../../../../lens/public/xy_visualization/types';
 import type { CombinedQuery } from '../../../common';
-
+import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
   layer: LayerConfig;
 }
 
-export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
+const TOP_VALUES_LABEL = i18n.translate('xpack.ml.dataVisualizer.lensChart.topValuesLabel', {
+  defaultMessage: 'Top values',
+});
+const COUNT = i18n.translate('xpack.ml.dataVisualizer.lensChart.countLabel', {
+  defaultMessage: 'Count',
+});
+
+export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IIndexPattern) {
   // if index has no timestamp field
   if (defaultIndexPattern.timeFieldName === undefined) {
     const columns: Record<string, IndexPatternColumn> = {
@@ -37,7 +44,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
         sourceField: item.fieldName!,
       },
       col2: {
-        label: 'Count',
+        label: COUNT,
         dataType: 'number',
         isBucketed: false,
         sourceField: 'Records',
@@ -58,7 +65,10 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
     col2: {
       dataType: 'number',
       isBucketed: false,
-      label: `Average of ${item.fieldName}`,
+      label: i18n.translate('xpack.ml.dataVisualizer.lensChart.averageOfLabel', {
+        defaultMessage: 'Average of {fieldName}',
+        values: { fieldName: item.fieldName },
+      }),
       operationType: 'avg',
       sourceField: item.fieldName!,
     },
@@ -82,12 +92,12 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: Ind
 
   return { columns, layer };
 }
-export function getDateSettings(item: FieldVisConfig, defaultIndexPattern: IndexPattern) {
+export function getDateSettings(item: FieldVisConfig) {
   const columns: Record<string, IndexPatternColumn> = {
     col2: {
       dataType: 'number',
       isBucketed: false,
-      label: 'Count of records',
+      label: COUNT,
       operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',
@@ -95,11 +105,11 @@ export function getDateSettings(item: FieldVisConfig, defaultIndexPattern: Index
     col1: {
       dataType: 'date',
       isBucketed: true,
-      label: defaultIndexPattern.timeFieldName!,
+      label: item.fieldName!,
       operationType: 'date_histogram',
       params: { interval: 'auto' },
       scale: 'interval',
-      sourceField: defaultIndexPattern.timeFieldName!,
+      sourceField: item.fieldName!,
     },
   };
   const layer: LayerConfig = {
@@ -115,7 +125,7 @@ export function getDateSettings(item: FieldVisConfig, defaultIndexPattern: Index
 export function getKeywordSettings(item: FieldVisConfig) {
   const columns: Record<string, IndexPatternColumn> = {
     col1: {
-      label: 'Top value of category',
+      label: TOP_VALUES_LABEL,
       dataType: 'string',
       isBucketed: true,
       operationType: 'terms',
@@ -127,7 +137,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
       sourceField: item.fieldName!,
     },
     col2: {
-      label: 'Count',
+      label: COUNT,
       dataType: 'number',
       isBucketed: false,
       sourceField: 'Records',
@@ -147,7 +157,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
 export function getBooleanSettings(item: FieldVisConfig) {
   const columns: Record<string, IndexPatternColumn> = {
     col1: {
-      label: 'Top value of category',
+      label: TOP_VALUES_LABEL,
       dataType: 'string',
       isBucketed: true,
       operationType: 'terms',
@@ -159,7 +169,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
       sourceField: item.fieldName!,
     },
     col2: {
-      label: 'Count',
+      label: COUNT,
       dataType: 'number',
       isBucketed: false,
       sourceField: 'Records',
@@ -203,12 +213,12 @@ export function getCompatibleLensDataType(type: FieldVisConfig['type']): DataTyp
 function getColumnsAndLayer(
   fieldType: FieldVisConfig['type'],
   item: FieldVisConfig,
-  defaultIndexPattern: IndexPattern
+  defaultIndexPattern: IIndexPattern
 ): ColumnsAndLayer | undefined {
   if (item.fieldName === undefined) return;
 
   if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
-    return getDateSettings(item, defaultIndexPattern);
+    return getDateSettings(item);
   }
   if (fieldType === ML_JOB_FIELD_TYPES.NUMBER) {
     return getNumberSettings(item, defaultIndexPattern);
@@ -224,11 +234,12 @@ function getColumnsAndLayer(
 // currently only supports the following types:
 // 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip'
 export function getLensAttributes(
-  defaultIndexPattern: IndexPattern,
+  defaultIndexPattern: IIndexPattern | undefined,
   combinedQuery: CombinedQuery,
   item: FieldVisConfig
 ): TypedLensByValueInput['attributes'] | undefined {
-  if (item.type === undefined && item.fieldName === undefined) return;
+  if (defaultIndexPattern === undefined || item.type === undefined || item.fieldName === undefined)
+    return;
 
   const presets = getColumnsAndLayer(item.type, item, defaultIndexPattern);
 
@@ -236,7 +247,10 @@ export function getLensAttributes(
 
   return {
     visualizationType: 'lnsXY',
-    title: `[Data Visualizer] Lens for ${item.fieldName}`,
+    title: i18n.translate('xpack.ml.dataVisualizer.lensChart.chartTitle', {
+      defaultMessage: 'Lens for {fieldName}',
+      values: { fieldName: item.fieldName },
+    }),
     references: [
       {
         id: defaultIndexPattern.id!,

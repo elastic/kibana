@@ -30,6 +30,7 @@ import { useMlKibana } from '../../../../contexts/kibana';
 import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
+import { useUrlState } from '../../../../util/url_state';
 
 interface Props {
   indexPattern: IndexPattern;
@@ -47,6 +48,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       },
     },
   } = useMlKibana();
+  const [globalState] = useUrlState('_g');
 
   const recognizerResults = {
     count: 0,
@@ -72,17 +74,21 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       if (searchString && searchQueryLanguage !== undefined) {
         state.query = { query: searchString, language: searchQueryLanguage };
       }
+      if (globalState.time) {
+        state.timeRange = globalState.time;
+      }
+      if (globalState.refreshInterval) {
+        state.refreshInterval = globalState.refreshInterval;
+      }
 
       let discoverUrlGenerator;
       try {
         discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
       } catch (error) {
         // ignore error thrown when url generator is not available
-      }
-
-      if (!discoverUrlGenerator) {
         return;
       }
+
       const discoverUrl = await discoverUrlGenerator.createUrl(state);
       if (!unmounted) {
         setDiscoverLink(discoverUrl);
@@ -92,7 +98,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
     return () => {
       unmounted = true;
     };
-  }, [indexPattern, searchString, searchQueryLanguage]);
+  }, [indexPattern, searchString, searchQueryLanguage, globalState]);
 
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which

@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { LensPublicStart } from '../../../../../../../../lens/public';
 import { FieldVisConfig } from '../../../../stats_table/types';
 import { getCompatibleLensDataType, getLensAttributes } from './lens_utils';
 import { CombinedQuery } from '../../../common';
+import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
 export function getActions(
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   lensPlugin: LensPublicStart,
   combinedQuery: CombinedQuery
 ): Array<Action<FieldVisConfig>> {
@@ -34,7 +34,7 @@ export function getActions(
       available: (item: FieldVisConfig) =>
         getCompatibleLensDataType(item.type) !== undefined && canUseLensEditor,
       onClick: (item: FieldVisConfig) => {
-        const lensAttributes = getLensAttributes(indexPattern!, combinedQuery, item);
+        const lensAttributes = getLensAttributes(indexPattern, combinedQuery, item);
         if (lensAttributes) {
           lensPlugin.navigateToPrefilledEditor({
             id: `ml-dataVisualizer-${item.fieldName}`,
