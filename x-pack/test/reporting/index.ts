@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../functional/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Packaging', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags(['skipCloud', 'smoke']);
     loadTestFile(require.resolve('./reporting'));
   });
 }

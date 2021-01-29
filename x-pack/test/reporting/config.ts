@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       directory: path.resolve(__dirname, 'snapshots'),
     },
     junit: {
-      reportName: 'Packaging integration tests',
+      reportName: 'Reporting integration tests',
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
