@@ -228,15 +228,28 @@ interface BaseBuildColumnArgs {
   indexPattern: IndexPattern;
 }
 
+interface OperationParam {
+  name: string;
+  type: string;
+  required?: boolean;
+}
+
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
   input: 'none';
+
+  /**
+   * The specification of the arguments used by the operations used for both validation,
+   * and use from external managed operations
+   */
+  operationParams?: OperationParam[];
   /**
    * Builds the column object for the given parameters. Should include default p
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       previousColumn?: IndexPatternColumn;
-    }
+    },
+    columnParams?: (IndexPatternColumn & C)['params']
   ) => C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -257,6 +270,12 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   input: 'field';
+
+  /**
+   * The specification of the arguments used by the operations used for both validation,
+   * and use from external managed operations
+   */
+  operationParams?: OperationParam[];
   /**
    * Returns the meta data of the operation if applied to the given field. Undefined
    * if the field is not applicable to the operation.
@@ -269,7 +288,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
-    }
+    },
+    columnParams?: (IndexPatternColumn & C)['params']
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -340,6 +360,12 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   requiredReferences: RequiredReference[];
 
   /**
+   * The specification of the arguments used by the operations used for both validation,
+   * and use from external managed operations
+   */
+  operationParams?: OperationParam[];
+
+  /**
    * The type of UI that is shown in the editor for this function:
    * - full: List of sub-functions and fields
    * - field: List of fields, selects first operation per field
@@ -354,7 +380,8 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     arg: BaseBuildColumnArgs & {
       referenceIds: string[];
       previousColumn?: IndexPatternColumn;
-    }
+    },
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params']
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -379,7 +406,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       previousColumn?: IndexPatternColumn | ReferenceBasedIndexPatternColumn;
-    }
+    },
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params']
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined

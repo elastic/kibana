@@ -46,7 +46,7 @@ export const cumulativeSumOperation: OperationDefinition<
   selectionStyle: 'field',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       specificOperations: ['count', 'sum'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },

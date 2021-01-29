@@ -43,7 +43,13 @@ export const formulaOperation: OperationDefinition<
       return;
     }
     const ast = parse(column.params.ast);
-    const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
+    const extracted = extractColumns(
+      columnId,
+      removeUnderscore(operationDefinitionMap),
+      ast,
+      layer,
+      indexPattern
+    );
 
     const errors = extracted
       .flatMap(({ operationType, label }) => {
@@ -173,7 +179,13 @@ export function regenerateLayerFromAst(
   /*
             { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
             */
-  const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
+  const extracted = extractColumns(
+    columnId,
+    removeUnderscore(operationDefinitionMap),
+    ast,
+    layer,
+    indexPattern
+  );
 
   const columns = {
     ...layer.columns,
@@ -245,18 +257,23 @@ function extractColumns(
     }
     // operation node
     if (nodeOperation.input === 'field') {
-      const fieldName = node.args[0];
+      const [fieldName, ...params] = node.args;
 
       const field = indexPattern.getFieldByName(fieldName);
+
+      const mappedParams = getOperationParams(nodeOperation, params || []);
 
       const newCol = (nodeOperation as OperationDefinition<
         IndexPatternColumn,
         'field'
-      >).buildColumn({
-        layer,
-        indexPattern,
-        field: field ?? ({ displayName: fieldName, name: fieldName } as IndexPatternField),
-      });
+      >).buildColumn(
+        {
+          layer,
+          indexPattern,
+          field: field ?? ({ displayName: fieldName, name: fieldName } as IndexPatternField),
+        },
+        mappedParams
+      );
       const newColId = `${idPrefix}X${columns.length}`;
       newCol.customLabel = true;
       newCol.label = newColId;
@@ -266,7 +283,9 @@ function extractColumns(
     }
 
     if (nodeOperation.input === 'fullReference') {
-      const consumedParam = parseNode(node.args[0]);
+      const [referencedOp, ...params] = node.args;
+
+      const consumedParam = parseNode(referencedOp);
       const variables = findVariables(consumedParam);
       const mathColumn = mathOperation.buildColumn({
         layer,
@@ -277,14 +296,19 @@ function extractColumns(
       columns.push(mathColumn);
       mathColumn.customLabel = true;
       mathColumn.label = `${idPrefix}X${columns.length - 1}`;
+
+      const mappedParams = getOperationParams(nodeOperation, params || []);
       const newCol = (nodeOperation as OperationDefinition<
         IndexPatternColumn,
         'fullReference'
-      >).buildColumn({
-        layer,
-        indexPattern,
-        referenceIds: [`${idPrefix}X${columns.length - 1}`],
-      });
+      >).buildColumn(
+        {
+          layer,
+          indexPattern,
+          referenceIds: [`${idPrefix}X${columns.length - 1}`],
+        },
+        mappedParams
+      );
       const newColId = `${idPrefix}X${columns.length}`;
       newCol.customLabel = true;
       newCol.label = newColId;
@@ -344,4 +368,34 @@ function getSafeFieldName(fieldName: string | undefined) {
     return '';
   }
   return fieldName;
+}
+
+function getOperationParams(
+  operation:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+  params: unknown[]
+) {
+  // TODO: to be converted with named params
+  const formalArgs = operation.operationParams || [];
+  // At the moment is positional as expressed in operationParams
+  return params.reduce((args, param, i) => {
+    if (formalArgs[i]) {
+      const paramName = formalArgs[i].name;
+      args[paramName] = param;
+    }
+    return args;
+  }, {});
+}
+
+function removeUnderscore(
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+): Record<string, GenericOperationDefinition> {
+  return Object.keys(operationDefinitionMap).reduce((memo, operationTypeSnakeCase) => {
+    const operationType = operationTypeSnakeCase.replace(/([_][a-z])/, (group) =>
+      group.replace('_', '')
+    );
+    memo[operationType] = operationDefinitionMap[operationTypeSnakeCase];
+    return memo;
+  }, {} as Record<string, GenericOperationDefinition>);
 }

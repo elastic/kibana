@@ -48,7 +48,7 @@ export const counterRateOperation: OperationDefinition<
   selectionStyle: 'field',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       specificOperations: ['max'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },

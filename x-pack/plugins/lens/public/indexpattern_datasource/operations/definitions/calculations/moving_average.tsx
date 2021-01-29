@@ -36,6 +36,8 @@ const ofName = buildLabelFunction((name?: string) => {
   });
 });
 
+const WINDOW_DEFAULT_VALUE = 5;
+
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
     operationType: 'moving_average';
@@ -57,10 +59,11 @@ export const movingAverageOperation: OperationDefinition<
   selectionStyle: 'full',
   requiredReferences: [
     {
-      input: ['field'],
+      input: ['field', 'managedReference'],
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  operationParams: [{ name: 'window', type: 'number', required: true }],
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {
@@ -78,8 +81,12 @@ export const movingAverageOperation: OperationDefinition<
       window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
     });
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: (
+    { referenceIds, previousColumn, layer },
+    columnParams = { window: WINDOW_DEFAULT_VALUE }
+  ) => {
     const metric = layer.columns[referenceIds[0]];
+    const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
       label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
@@ -93,8 +100,8 @@ export const movingAverageOperation: OperationDefinition<
         previousColumn.params &&
         'format' in previousColumn.params &&
         previousColumn.params.format
-          ? { format: previousColumn.params.format, window: 5 }
-          : { window: 5 },
+          ? { format: previousColumn.params.format, window }
+          : { window },
     };
   },
   paramEditor: MovingAverageParamEditor,
