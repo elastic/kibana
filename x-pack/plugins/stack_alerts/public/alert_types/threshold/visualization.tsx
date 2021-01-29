@@ -201,6 +201,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="firstLoad"
         title={<EuiLoadingChart size="xl" />}
         body={
           <EuiText color="subdued">
