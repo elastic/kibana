@@ -33,8 +33,8 @@ def test() {
     // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
 
-    kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
-    kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
+    kibanaPipeline.scriptTaskDocker('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
+    kibanaPipeline.scriptTaskDocker('API Integration Tests', 'test/scripts/test/api_integration.sh'),
   ])
 }
 

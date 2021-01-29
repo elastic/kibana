@@ -115,7 +115,9 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 def functionalTestProcess(String name, Closure closure) {
   return {
     notifyOnError {
-      withFunctionalTestEnv(["JOB=${name}"], closure)
+      withDocker {
+        withFunctionalTestEnv(["JOB=${name}"], closure)
+      }
     }
   }
 }
@@ -371,7 +373,7 @@ def withCiTaskQueue(Map options = [:], Closure closure) {
     bash("${env.WORKSPACE}/kibana/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
   }
 
-  def config = [parallel: 24, setup: setupClosure] + options
+  def config = [parallel: 16, setup: setupClosure] + options
 
   withTaskQueue(config) {
     closure.call()
@@ -423,7 +425,7 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
     def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
 
     workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
+      withCiTaskQueue(parallel: 16) {
         parallel([
           docker: {
             retry(2) {
@@ -455,6 +457,7 @@ def allCiTasks() {
 }
 
 def pipelineLibraryTests() {
+  return // TODO
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {
