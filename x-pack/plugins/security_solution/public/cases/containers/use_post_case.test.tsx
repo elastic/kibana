@@ -60,16 +60,11 @@ describe('usePostCase', () => {
 
   it('calls postCase with correct result', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, waitFor } = renderHook<string, UsePostCase>(() =>
-        usePostCase()
-      );
+      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
       await waitForNextUpdate();
 
-      const postData = result.current.postCase(samplePost);
-
-      waitFor(() => {
-        expect(postData).toEqual(basicCasePost);
-      });
+      const postData = await result.current.postCase(samplePost);
+      expect(postData).toEqual(basicCasePost);
     });
   });
 
