@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { useStateToaster, errorToToaster } from '../../../common/components/toasters';
 import * as i18n from '../translations';
@@ -21,40 +21,47 @@ export const useActionTypes = (): UseActionTypesResponse => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
   const [actionTypes, setActionTypes] = useState<ActionTypeConnector[]>([]);
+  const didCancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
+  const queryFirstTime = useRef(true);
 
-  const refetchActionTypes = useCallback(() => {
-    let didCancel = false;
-    const abortCtrl = new AbortController();
-    const getActionTypes = async () => {
-      try {
-        setLoading(true);
-        const res = await fetchActionTypes({ signal: abortCtrl.signal });
-        if (!didCancel) {
-          setLoading(false);
-          setActionTypes(res);
-        }
-      } catch (error) {
-        if (!didCancel) {
-          setLoading(false);
-          setActionTypes([]);
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-        }
+  const refetchActionTypes = useCallback(async () => {
+    try {
+      setLoading(true);
+      didCancel.current = false;
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
+
+      const res = await fetchActionTypes({ signal: abortCtrl.current.signal });
+
+      if (!didCancel.current) {
+        setLoading(false);
+        setActionTypes(res);
       }
-    };
-    getActionTypes();
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    } catch (error) {
+      if (!didCancel.current) {
+        setLoading(false);
+        setActionTypes([]);
+        errorToToaster({
+          title: i18n.ERROR_TITLE,
+          error: error.body && error.body.message ? new Error(error.body.message) : error,
+          dispatchToaster,
+        });
+      }
+    }
+  }, [dispatchToaster]);
 
   useEffect(() => {
-    refetchActionTypes();
+    if (queryFirstTime.current) {
+      refetchActionTypes();
+      queryFirstTime.current = false;
+    }
+
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+      queryFirstTime.current = true;
+    };
   }, [refetchActionTypes]);
 
   return {
