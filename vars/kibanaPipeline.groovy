@@ -129,9 +129,9 @@ def functionalTestProcess(String name, String script) {
 }
 
 def ossCiGroupProcess(ciGroup) {
-  sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
-
   return functionalTestProcess("ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -144,9 +144,8 @@ def ossCiGroupProcess(ciGroup) {
 }
 
 def xpackCiGroupProcess(ciGroup) {
-  sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
-
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
