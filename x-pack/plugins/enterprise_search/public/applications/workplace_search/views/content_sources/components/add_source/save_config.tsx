@@ -28,14 +28,10 @@ import {
   BASE_URL_LABEL,
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
+  REMOVE_BUTTON,
 } from '../../../../constants';
 
-import {
-  OAUTH_SAVE_CONFIG_BUTTON,
-  OAUTH_REMOVE_BUTTON,
-  OAUTH_BACK_BUTTON,
-  OAUTH_STEP_2,
-} from './constants';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
 
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
@@ -99,7 +95,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const deleteButton = (
     <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      {OAUTH_REMOVE_BUTTON}
+      {REMOVE_BUTTON}
     </EuiButton>
   );
 
