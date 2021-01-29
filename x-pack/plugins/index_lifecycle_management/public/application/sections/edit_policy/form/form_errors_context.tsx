@@ -12,7 +12,6 @@ import React, {
   useState,
   useRef,
 } from 'react';
-import { produce } from 'immer';
 
 import { useFormData, useFormContext } from '../../../../shared_imports';
 
@@ -20,23 +19,16 @@ import { FormInternal } from '../types';
 
 interface ContextValue {
   hasErrors: boolean;
-  errors: {
-    hot: string[];
-    warm: string[];
-    cold: string[];
-    /**
-     * Errors that are not specific to a phase should go here.
-     */
-    other: string[];
-  };
+  hot: string[];
+  warm: string[];
+  cold: string[];
+  /**
+   * Errors that are not specific to a phase should go here.
+   */
+  other: string[];
 }
 
 const FormErrorsContext = createContext<ContextValue>(null as any);
-
-const defaultContextValue: ContextValue = {
-  hasErrors: false,
-  errors: { hot: [], warm: [], cold: [], other: [] },
-};
 
 const isXPhaseField = (phase: 'hot' | 'warm' | 'cold') => (fieldPath: string): boolean =>
   fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
@@ -45,8 +37,17 @@ const isHotPhaseField = isXPhaseField('hot');
 const isWarmPhaseField = isXPhaseField('warm');
 const isColdPhaseField = isXPhaseField('cold');
 
+const createEmptyContextValue = (): ContextValue => ({
+  hasErrors: false,
+  hot: [],
+  warm: [],
+  cold: [],
+  other: [],
+});
+
 export const FormErrorsProvider: FunctionComponent = ({ children }) => {
-  const [errors, setErrors] = useState<ContextValue>(defaultContextValue);
+  const [contextValue, setContextValue] = useState<ContextValue>(createEmptyContextValue);
+  const { hasErrors } = contextValue;
   const isMounted = useRef<boolean>(false);
 
   const form = useFormContext<FormInternal>();
@@ -62,34 +63,48 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    // This is a hack, we need to wait for the next tick to let all of the async validation complete.
+    if (!isMounted.current) {
+      return;
+    }
+    // This is a hack, we need to wait for the next tick to let all of the async validation complete
+    // and have form errors populate. It would be best if there were another way to listen/hook into
+    // form errors.
     setTimeout(() => {
-      const fields = form.getFields();
-      const result = produce<ContextValue>(defaultContextValue, (draft) => {
-        Object.entries(fields).forEach(([key, value]) => {
-          const errorMessages = value.getErrorsMessages();
+      // For now, we check on the form for any error messages and since we do not have a way to tie
+      // these back to fields we need to loop through the fields. This if check just makes sure we
+      // do not do this work if there are no form errors.
+      if (form.getErrors().length) {
+        const fields = form.getFields();
+        const result: ContextValue = {
+          hasErrors: true,
+          hot: [],
+          warm: [],
+          cold: [],
+          other: [],
+        };
+        Object.entries(fields).forEach(([fieldPath, field]) => {
+          const errorMessages = field.getErrorsMessages();
           if (!errorMessages) {
             return;
           }
-          draft.hasErrors = true;
-          if (isHotPhaseField(key)) {
-            draft.errors.hot.push(errorMessages);
-          } else if (isWarmPhaseField(key)) {
-            draft.errors.warm.push(errorMessages);
-          } else if (isColdPhaseField(key)) {
-            draft.errors.cold.push(errorMessages);
+          if (isHotPhaseField(fieldPath)) {
+            result.hot.push(errorMessages);
+          } else if (isWarmPhaseField(fieldPath)) {
+            result.warm.push(errorMessages);
+          } else if (isColdPhaseField(fieldPath)) {
+            result.cold.push(errorMessages);
           } else {
-            draft.errors.other.push(errorMessages);
+            result.other.push(errorMessages);
           }
         });
-      });
-      if (isMounted.current) {
-        setErrors(result);
+        setContextValue(result);
+      } else if (hasErrors === true) {
+        setContextValue(createEmptyContextValue);
       }
     });
-  }, [form, formData, setErrors]);
+  }, [form, formData, hasErrors, setContextValue]);
 
-  return <FormErrorsContext.Provider value={errors}>{children}</FormErrorsContext.Provider>;
+  return <FormErrorsContext.Provider value={contextValue}>{children}</FormErrorsContext.Provider>;
 };
 
 export const useFormErrorsContext = () => {

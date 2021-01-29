@@ -37,8 +37,8 @@ import {
   ReadonlyField,
   ShrinkField,
 } from '../shared_fields';
-
 import { Phase } from '../phase';
+
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 export const HotPhase: FunctionComponent = () => {
