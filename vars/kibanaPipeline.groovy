@@ -430,13 +430,27 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 }
 
 def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
+  parallel([
+    general: {
+      withTasks {
+        tasks.check()
+        tasks.lint()
+        tasks.test()
+        tasks.functionalOss()
+        tasks.functionalXpack()
+      }
+    },
+    jest: {
+      workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+      }
+    },
+    xpackJest: {
+      workers.ci(name: 'xpack-jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh')()
+      }
+    },
+  ])
 }
 
 def pipelineLibraryTests() {

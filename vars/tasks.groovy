@@ -30,12 +30,9 @@ def lint() {
 
 def test() {
   tasks([
-    // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
+    // This task requires isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
-
-    kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
-    kibanaPipeline.scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
   ])
 }
 
