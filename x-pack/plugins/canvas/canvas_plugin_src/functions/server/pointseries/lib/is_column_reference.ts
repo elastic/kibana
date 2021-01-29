@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-expect-error untyped library
 import { parse } from '@kbn/tinymath';
 
 export function isColumnReference(mathExpression: string | null): boolean {
@@ -12,5 +11,5 @@ export function isColumnReference(mathExpression: string | null): boolean {
     mathExpression = 'null';
   }
   const parsedMath = parse(mathExpression);
-  return typeof parsedMath === 'string';
+  return typeof parsedMath !== 'number' && parsedMath.type === 'variable';
 }
