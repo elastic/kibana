@@ -15,9 +15,16 @@ import fs from 'fs';
 const createMockSuite = ({ tests, root = true }: { tests: Test[]; root?: boolean }) => {
   const suite = {
     tests,
-    root,
-    eachTest: (cb: (test: Test) => void) => {
+    root: false,
+    eachTest: (cb) => {
       suite.tests.forEach((test) => cb(test));
+    },
+    parent: {
+      tests,
+      root,
+      eachTest: (cb) => {
+        suite.eachTest(cb);
+      },
     },
   } as Suite;
 
@@ -162,6 +169,41 @@ exports[\`Test2 1\`] = \`"bar"\`;
       expect(() => {
         expectSnapshot('bar').toMatchInline(`"foo"`);
       }).not.toThrow();
+    });
+
+    describe('writing to disk', () => {
+      beforeEach(() => {
+        fs.mkdirSync(path.resolve(__dirname, '__snapshots__'));
+        fs.writeFileSync(
+          snapshotFile,
+          `// Jest Snapshot v1, https://goo.gl/fbAQLP
+  
+  exports[\`Test 1\`] = \`"foo"\`;
+        `,
+          { encoding: 'utf-8' }
+        );
+      });
+
+      it('updates existing external snapshots', async () => {
+        const test = createMockTest();
+
+        await lifecycle.beforeEachTest.trigger(test);
+
+        expect(() => {
+          expectSnapshot('bar').toMatch();
+        }).not.toThrow();
+
+        await lifecycle.afterTestSuite.trigger(test.parent);
+
+        const file = fs.readFileSync(snapshotFile, { encoding: 'utf-8' });
+
+        expect(file).toMatchInlineSnapshot(`
+          "// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+          exports[\`Test 1\`] = \`\\"bar\\"\`;
+          "
+        `);
+      });
     });
   });
 

@@ -103,11 +103,13 @@ export function decorateSnapshotUi({
 
   lifecycle.afterTestSuite.add(function (testSuite: Suite) {
     // save snapshot & check unused after top-level test suite completes
-    if (!testSuite.root) {
+    if (!testSuite.parent?.root) {
       return;
     }
 
-    testSuite.eachTest((test) => {
+    const root = testSuite.parent;
+
+    root.eachTest((test) => {
       const file = test.file;
 
       if (!file) {
