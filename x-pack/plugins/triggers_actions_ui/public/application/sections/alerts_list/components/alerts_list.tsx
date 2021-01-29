@@ -96,7 +96,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
-  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+  const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
   const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
     AlertExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
@@ -249,10 +249,19 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-status',
       render: (executionStatus: AlertExecutionStatus) => {
         const healthColor = getHealthColor(executionStatus.status);
-        return (
+        const tooltipMessage =
+          executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
+        const health = (
           <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
             {alertsStatusesTranslationsMapping[executionStatus.status]}
           </EuiHealth>
+        );
+        return tooltipMessage ? (
+          <EuiToolTip position="top" content={tooltipMessage}>
+            {health}
+          </EuiToolTip>
+        ) : (
+          health
         );
       },
     },
@@ -491,7 +500,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!dissmissAlertErrors && alertsStatusesTotal.error > 0 ? (
+      {!dismissAlertErrors && alertsStatusesTotal.error > 0 ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCallOut
@@ -520,7 +529,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   defaultMessage="View"
                 />
               </EuiButton>
-              <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
+              <EuiButtonEmpty color="danger" onClick={() => setDismissAlertErrors(true)}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.dismissBunnerButtonLabel"
                   defaultMessage="Dismiss"
