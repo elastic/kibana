@@ -27,7 +27,7 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(2);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 
       const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
       const testedIndexThresholdArgs = {
@@ -45,6 +45,44 @@ describe('AlertingBuiltins Plugin', () => {
           ],
           "id": ".index-threshold",
           "name": "Index threshold",
+        }
+      `);
+
+      const geoThresholdArgs = alertingSetup.registerType.mock.calls[1][0];
+      const testedGeoThresholdArgs = {
+        id: geoThresholdArgs.id,
+        name: geoThresholdArgs.name,
+        actionGroups: geoThresholdArgs.actionGroups,
+      };
+      expect(testedGeoThresholdArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "Tracked entity contained",
+              "name": "Tracking containment met",
+            },
+          ],
+          "id": ".geo-containment",
+          "name": "Tracking containment",
+        }
+      `);
+
+      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
+      const testedEsQueryArgs = {
+        id: esQueryArgs.id,
+        name: esQueryArgs.name,
+        actionGroups: esQueryArgs.actionGroups,
+      };
+      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "query matched",
+              "name": "Query matched",
+            },
+          ],
+          "id": ".es-query",
+          "name": "ES query",
         }
       `);
 

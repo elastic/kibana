@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "server/**/*",
+    "public/**/*",
+    "*.ts",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/test_utils/vega_map_test.json"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../visualizations/tsconfig.json" },
+    { "path": "../maps_legacy/tsconfig.json" },
+    { "path": "../expressions/tsconfig.json" },
+    { "path": "../inspector/tsconfig.json" },
+    { "path": "../home/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../vis_default_editor/tsconfig.json" },
+  ]
+}
