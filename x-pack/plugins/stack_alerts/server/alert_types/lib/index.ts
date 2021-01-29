@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TimeSeriesQuery } from './time_series_query';
-export {
-  CoreQueryParams,
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-  validateTimeWindowUnits,
-} from './core_query_types';
+export { ComparatorFns, ComparatorFnNames, getHumanReadableComparator } from './comparator_types';
