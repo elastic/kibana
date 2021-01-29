@@ -299,12 +299,9 @@ def getDocsChangesLink() {
   def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
 
   try {
-    def resp = httpRequest([ method: "HEAD", url: url, validResponseCodes: "0:999" ])
-    if (resp.getStatus() == 200) {
-      return "* [Documentation Changes](${url})"
-    }
-
-    print "Ignoring ${resp.getStatus()} response from ${url}, not including link to documentation"
+    // httpRequest throws on status codes >400 and failures
+    httpRequest([ method: "GET", url: url ])
+    return "* [Documentation Changes](${url})"
   } catch (ex) {
     print "Failed to reach ${url}"
     buildUtils.printStacktrace(ex)
