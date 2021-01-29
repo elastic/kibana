@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
-import { Projection } from '../../../../common/projections';
+import { Projection } from './utils/projections';
 import { RumDashboard } from './RumDashboard';
 
 import { LocalUIFilters } from './LocalUIFilters';

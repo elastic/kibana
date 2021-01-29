@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
-import { Projection } from '../../../../../common/projections';
+import { Projection } from '../utils/projections';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 interface Props {

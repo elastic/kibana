@@ -6,7 +6,7 @@
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { Projection } from '../../../../../common/projections';
+import { Projection } from '../utils/projections';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LocalUIFiltersAPIResponse } from '../../../../../server/lib/ui_filters/local_ui_filters';
@@ -19,7 +19,7 @@ import {
   toQuery,
 } from '../../../../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { useCallApi } from '../../../../hooks/useCallApi';
+import { useCallApi } from './use_call_api';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
