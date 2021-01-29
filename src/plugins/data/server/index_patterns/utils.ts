@@ -105,7 +105,7 @@ export const createFieldItem = (
  * @param beatFields The beatFields to reference
  * @param responsesIndexFields The response index fields to loop over
  */
-export const formatFirstFields = async (
+export const formatFieldsResponsibly = async (
   beatFields: BeatFields,
   responsesIndexFields: FieldDescriptor[]
 ): Promise<IndexField[]> => {
@@ -137,5 +137,5 @@ export const formatIndexFields = async (
 ): Promise<IndexField[]> => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const beatFields: BeatFields = require('./fields').fieldsBeat;
-  return formatFirstFields(beatFields, responsesIndexFields);
+  return formatFieldsResponsibly(beatFields, responsesIndexFields);
 };
