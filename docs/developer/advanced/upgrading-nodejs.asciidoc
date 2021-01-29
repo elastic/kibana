@@ -9,7 +9,7 @@ Theses files must be updated when upgrading Node.js:
 
   - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
     This is used to pull the relevant image from https://hub.docker.com/_/node[Docker Hub].
-    Note that Docker Hub can take 24+ hours to be updated with the new images after a new release of Node.js, so if you're upgrading Node.js in Kibana _just_ after the official Node.js release, you have to check if the new images are present on Docker Hub.
+    Note that Docker Hub can take 24+ hours to be updated with the new images after a new release of Node.js, so if you're upgrading Node.js in Kibana just after the official Node.js release, you have to check if the new images are present on Docker Hub.
     If they are not, and the update is urgent, you can skip this file and update it later once Docker Hub has been updated.
   - {kib-repo}blob/{branch}/.node-version[`.node-version`]
   - {kib-repo}blob/{branch}/.nvmrc[`.nvmrc`]
@@ -29,7 +29,7 @@ Hence, upgrades to either Node.js 14 or Node.js 10 shold be done as separate PRs
 
 ==== Node.js patch upgrades
 
-Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same _major_ Node.js version:
+Typically, you want to backport Node.js *patch* upgrades to all supported release branches that run the same *major* Node.js version:
 
   - If upgrading Node.js 14, and the current release is 7.11.1, the main PR should target `master` and be backported to `7.x` and `7.11`.
   - If upgrading Node.js 10, the main PR should target `6.8` only.

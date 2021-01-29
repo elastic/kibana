@@ -11,8 +11,7 @@ import { pickKeys } from '../../../common/utils/pick_keys';
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import {
-  getEnd,
-  getStart,
+  getDateRange,
   removeUndefinedProps,
   toBoolean,
   toNumber,
@@ -50,14 +49,15 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm,
     percentile,
     latencyAggregationType = LatencyAggregationType.avg,
+    comparisonEnabled,
+    comparisonType,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
 
   return removeUndefinedProps({
     // date params
-    start: getStart(state, rangeFrom),
-    end: getEnd(state, rangeTo),
+    ...getDateRange({ state, rangeFrom, rangeTo }),
     rangeFrom,
     rangeTo,
     refreshPaused: refreshPaused ? toBoolean(refreshPaused) : undefined,
@@ -80,6 +80,10 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType,
+    comparisonEnabled: comparisonEnabled
+      ? toBoolean(comparisonEnabled)
+      : undefined,
+    comparisonType,
 
     // ui filters
     environment,

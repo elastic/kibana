@@ -15,13 +15,28 @@ export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',
-  PENDING = 'pending',
+  NOT_INITIATED = 'not_initiated',
 }
 
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
   error?: IHttpFetchError;
+}
+
+function getDetailsFromErrorResponse(error: IHttpFetchError) {
+  const message = error.body?.message ?? error.response?.statusText;
+  return (
+    <>
+      {message} ({error.response?.status})
+      <h5>
+        {i18n.translate('xpack.apm.fetcher.error.url', {
+          defaultMessage: `URL`,
+        })}
+      </h5>
+      {error.response?.url}
+    </>
+  );
 }
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
@@ -46,7 +61,7 @@ export function useFetcher<TReturn>(
     FetcherResult<InferResponseType<TReturn>>
   >({
     data: undefined,
-    status: FETCH_STATUS.PENDING,
+    status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
 
@@ -82,25 +97,14 @@ export function useFetcher<TReturn>(
 
         if (!didCancel) {
           const errorDetails =
-            'response' in err ? (
-              <>
-                {err.response?.statusText} ({err.response?.status})
-                <h5>
-                  {i18n.translate('xpack.apm.fetcher.error.url', {
-                    defaultMessage: `URL`,
-                  })}
-                </h5>
-                {err.response?.url}
-              </>
-            ) : (
-              err.message
-            );
+            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addWarning({
+            notifications.toasts.addDanger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
+
               text: toMountPoint(
                 <div>
                   <h5>

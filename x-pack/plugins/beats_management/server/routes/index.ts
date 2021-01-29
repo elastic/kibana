@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../lib/types';
 import {
   registerDeleteConfigurationBlocksRoute,
   registerGetConfigurationBlocksRoute,
@@ -29,7 +28,7 @@ import {
   registerGetBeatConfigurationRoute,
 } from './beats';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: BeatsManagementRouter) => {
   // configurations
   registerGetConfigurationBlocksRoute(router);
   registerDeleteConfigurationBlocksRoute(router);

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, {
@@ -48,6 +37,7 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
+  PaletteRegistry,
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 import type { PersistedState } from '../../visualizations/public';
@@ -62,10 +52,11 @@ import {
   getLegendActions,
   useColorPicker,
   getXAccessor,
+  getAllSeries,
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getColorsService, getDataActions } from './services';
+import { getThemeService, getDataActions, getPalettesService } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -74,6 +65,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
+import { ChartSplitter } from './chart_splitter';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -81,22 +73,19 @@ export interface VisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  syncColors: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
-  /**
-   * Stores all series labels to replicate vislib color map lookup
-   */
-  const allSeries: Array<string | number> = useMemo(() => [], []);
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     // TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   useEffect(() => {
     const fn = () => {
       props?.uiState?.emit?.('reload');
@@ -117,11 +106,20 @@ const VisComponent = (props: VisComponentProps) => {
     [props]
   );
 
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await getPalettesService().getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, []);
+
   const handleFilterClick = useCallback(
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>
+      splitSeriesAccessors: Array<Accessor | AccessorFn>,
+      splitChartAccessor?: Accessor | AccessorFn
     ): ElementClickListener => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (elements) => {
@@ -129,7 +127,8 @@ const VisComponent = (props: VisComponentProps) => {
           const event = getFilterFromChartClickEventFn(
             visData,
             xAccessor,
-            splitSeriesAccessorFnMap
+            splitSeriesAccessorFnMap,
+            splitChartAccessor
           )(elements as XYChartElementEvent[]);
           props.fireEvent(event);
         }
@@ -158,12 +157,17 @@ const VisComponent = (props: VisComponentProps) => {
     (
       visData: Datatable,
       xAccessor: Accessor | AccessorFn,
-      splitSeriesAccessors: Array<Accessor | AccessorFn>
+      splitSeriesAccessors: Array<Accessor | AccessorFn>,
+      splitChartAccessor?: Accessor | AccessorFn
     ) => {
       const splitSeriesAccessorFnMap = getSplitSeriesAccessorFnMap(splitSeriesAccessors);
       return (series: XYChartSeriesIdentifier): ClickTriggerEvent | null => {
         if (xAccessor !== null) {
-          return getFilterFromSeriesFn(visData)(series, splitSeriesAccessorFnMap);
+          return getFilterFromSeriesFn(visData)(
+            series,
+            splitSeriesAccessorFnMap,
+            splitChartAccessor
+          );
         }
 
         return null;
@@ -225,7 +229,8 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams } = props;
+  const { visData, visParams, syncColors } = props;
+
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
   const xDomain =
@@ -245,27 +250,98 @@ const VisComponent = (props: VisComponentProps) => {
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
+  const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
+    return { accessor, formatter };
+  });
+
+  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors, config.aspects.y), [
+    config.aspects.y,
+    splitAccessors,
+    visData.rows,
+  ]);
+
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
-      const seriesName = getSeriesName(series);
+      const seriesName = getSeriesName(series) as string;
       if (!seriesName) {
-        return;
+        return null;
       }
-
       const overwriteColors: Record<string, string> = props.uiState?.get
         ? props.uiState.get('vis.colors', {})
         : {};
 
-      allSeries.push(seriesName);
-      return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
+      if (Object.keys(overwriteColors).includes(seriesName)) {
+        return overwriteColors[seriesName];
+      }
+      const outputColor = palettesRegistry?.get(visParams.palette.name).getColor(
+        [
+          {
+            name: seriesName,
+            rankAtDepth: splitAccessors
+              ? allSeries.findIndex((name) => name === seriesName)
+              : config.aspects.y.findIndex((aspect) => aspect.accessor === series.yAccessor),
+            totalSeriesAtDepth: splitAccessors ? allSeries.length : config.aspects.y.length,
+          },
+        ],
+        {
+          maxDepth: 1,
+          totalSeries: splitAccessors ? allSeries.length : config.aspects.y.length,
+          behindText: false,
+          syncColors,
+        }
+      );
+      return outputColor || null;
     },
-    [allSeries, getSeriesName, props.uiState]
+    [
+      allSeries,
+      config.aspects.y,
+      getSeriesName,
+      props.uiState,
+      splitAccessors,
+      syncColors,
+      visParams.palette.name,
+      palettesRegistry,
+    ]
   );
   const xAccessor = getXAccessor(config.aspects.x);
-  const splitSeriesAccessors = config.aspects.series
-    ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
-    : [];
 
+  const splitSeriesAccessors = useMemo(
+    () =>
+      config.aspects.series
+        ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
+        : [],
+    [config.aspects.series]
+  );
+  const splitChartColumnAccessor = config.aspects.splitColumn
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
+    : undefined;
+  const splitChartRowAccessor = config.aspects.splitRow
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
+    : undefined;
+
+  const renderSeries = useMemo(
+    () =>
+      renderAllSeries(
+        config,
+        visParams.seriesParams,
+        visData.rows,
+        getSeriesName,
+        getSeriesColor,
+        timeZone,
+        xAccessor,
+        splitSeriesAccessors
+      ),
+    [
+      config,
+      getSeriesColor,
+      getSeriesName,
+      splitSeriesAccessors,
+      timeZone,
+      visData.rows,
+      visParams.seriesParams,
+      xAccessor,
+    ]
+  );
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -274,6 +350,10 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%">
+        <ChartSplitter
+          splitColumnAccessor={splitChartColumnAccessor}
+          splitRowAccessor={splitChartRowAccessor}
+        />
         <XYSettings
           {...config}
           showLegend={showLegend}
@@ -281,14 +361,24 @@ const VisComponent = (props: VisComponentProps) => {
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
-          onElementClick={handleFilterClick(visData, xAccessor, splitSeriesAccessors)}
+          onElementClick={handleFilterClick(
+            visData,
+            xAccessor,
+            splitSeriesAccessors,
+            splitChartColumnAccessor ?? splitChartRowAccessor
+          )}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
               ? getLegendActions(
                   canFilter,
-                  getFilterEventData(visData, xAccessor, splitSeriesAccessors),
+                  getFilterEventData(
+                    visData,
+                    xAccessor,
+                    splitSeriesAccessors,
+                    splitChartColumnAccessor ?? splitChartRowAccessor
+                  ),
                   handleFilterAction,
                   getSeriesName
                 )
@@ -309,16 +399,7 @@ const VisComponent = (props: VisComponentProps) => {
         {config.yAxes.map((axisProps) => (
           <XYAxis key={axisProps.id} {...axisProps} />
         ))}
-        {renderAllSeries(
-          config,
-          visParams.seriesParams,
-          visData.rows,
-          getSeriesName,
-          getSeriesColor,
-          timeZone,
-          xAccessor,
-          splitSeriesAccessors
-        )}
+        {renderSeries}
       </Chart>
     </div>
   );

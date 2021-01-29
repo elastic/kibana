@@ -7,7 +7,7 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ViewSourceConfigurationButton } from '../../../../components/source_configuration';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 

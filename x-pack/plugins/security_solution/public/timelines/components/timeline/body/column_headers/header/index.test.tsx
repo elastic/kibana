@@ -35,6 +35,7 @@ describe('Header', () => {
   const sort: Sort[] = [
     {
       columnId: columnHeader.id,
+      columnType: columnHeader.type ?? 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -124,6 +125,7 @@ describe('Header', () => {
           sort: [
             {
               columnId: columnHeader.id,
+              columnType: columnHeader.type ?? 'number',
               sortDirection: Direction.asc, // (because the previous state was Direction.desc)
             },
           ],
@@ -191,6 +193,7 @@ describe('Header', () => {
       const nonMatching: Sort[] = [
         {
           columnId: 'differentSocks',
+          columnType: columnHeader.type ?? 'number',
           sortDirection: Direction.desc,
         },
       ];
@@ -201,7 +204,11 @@ describe('Header', () => {
 
   describe('getNextSortDirection', () => {
     test('it returns "asc" when the current direction is "desc"', () => {
-      const sortDescending: Sort = { columnId: columnHeader.id, sortDirection: Direction.desc };
+      const sortDescending: Sort = {
+        columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
+        sortDirection: Direction.desc,
+      };
 
       expect(getNextSortDirection(sortDescending)).toEqual('asc');
     });
@@ -209,6 +216,7 @@ describe('Header', () => {
     test('it returns "desc" when the current direction is "asc"', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
         sortDirection: Direction.asc,
       };
 
@@ -218,6 +226,7 @@ describe('Header', () => {
     test('it returns "desc" by default', () => {
       const sortNone: Sort = {
         columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
         sortDirection: 'none',
       };
 
@@ -230,6 +239,7 @@ describe('Header', () => {
       const sortMatches: Sort[] = [
         {
           columnId: columnHeader.id,
+          columnType: columnHeader.type ?? 'number',
           sortDirection: Direction.desc,
         },
       ];
@@ -246,6 +256,7 @@ describe('Header', () => {
       const sortDoesNotMatch: Sort[] = [
         {
           columnId: 'someOtherColumn',
+          columnType: columnHeader.type ?? 'number',
           sortDirection: 'none',
         },
       ];

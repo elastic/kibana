@@ -20,6 +20,8 @@ export interface Phases {
   delete?: SerializedDeletePhase;
 }
 
+export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
+
 export interface PolicyFromES {
   modified_date: string;
   name: string;
@@ -152,25 +154,6 @@ export interface CommonPhaseSettings {
 export interface PhaseWithMinAge {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
-}
-
-/**
- * Different types of allocation markers we use in deserialized policies.
- *
- * default - use data tier based data allocation based on node roles -- this is ES best practice mode.
- * custom - use node_attrs to allocate data to specific nodes
- * none - do not move data anywhere when entering a phase
- */
-export type DataTierAllocationType = 'default' | 'custom' | 'none';
-
-export interface PhaseWithAllocationAction {
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
-  /**
-   * A string value indicating allocation type. If unspecified we assume the user
-   * wants to use default allocation.
-   */
-  dataTierAllocationType: DataTierAllocationType;
 }
 
 export interface PhaseWithIndexPriority {

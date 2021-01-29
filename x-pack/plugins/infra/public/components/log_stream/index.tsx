@@ -6,7 +6,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 import { LogEntryCursor } from '../../../common/log_entry';
 
@@ -16,7 +16,7 @@ import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
-import { JsonValue } from '../../../common/typed_json';
+import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
 
 const PAGE_THRESHOLD = 2;
 

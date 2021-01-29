@@ -10,7 +10,7 @@ Numeral formatting patterns are used in multiple places in {kib}, including:
 
 * <<advanced-options, Advanced settings>>
 * <<field-formatters-numeric, Index pattern formatters>>
-* <<tsvb, TSVB>>
+* <<tsvb-advanced-editor, TSVB>>
 * <<canvas, Canvas>>
 
 The simplest pattern format is `0`, and the default {kib} pattern is `0,0.[000]`.

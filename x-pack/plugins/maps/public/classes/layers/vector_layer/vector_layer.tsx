@@ -384,14 +384,11 @@ export class VectorLayer extends AbstractLayer {
         join,
         propertiesMap,
       };
-    } catch (e) {
-      if (!(e instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
       }
-      return {
-        dataHasChanged: true,
-        join,
-      };
+      throw error;
     }
   }
 
@@ -430,7 +427,7 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async _performInnerJoins(
+  _performInnerJoins(
     sourceResult: SourceResult,
     joinStates: JoinState[],
     updateSourceData: DataRequestContext['updateSourceData']
@@ -538,9 +535,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
-      return {
-        refreshed: false,
-      };
+      throw error;
     }
   }
 
@@ -621,6 +616,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery,
       isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
+      searchSessionId: dataFilters.searchSessionId,
     } as VectorStyleRequestMeta;
     const prevDataRequest = this.getDataRequest(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
@@ -640,12 +636,14 @@ export class VectorLayer extends AbstractLayer {
         registerCancelCallback: registerCancelCallback.bind(null, requestToken),
         sourceQuery: nextMeta.sourceQuery,
         timeFilters: nextMeta.timeFilters,
+        searchSessionId: dataFilters.searchSessionId,
       });
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
+      throw error;
     }
   }
 
@@ -736,6 +734,7 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
     }
   }
 
@@ -757,19 +756,26 @@ export class VectorLayer extends AbstractLayer {
     if (this.isLoadingBounds()) {
       return;
     }
-    await this._syncSourceStyleMeta(syncContext, source, style);
-    await this._syncSourceFormatters(syncContext, source, style);
-    const sourceResult = await this._syncSource(syncContext, source, style);
-    if (
-      !sourceResult.featureCollection ||
-      !sourceResult.featureCollection.features.length ||
-      !this.hasJoins()
-    ) {
-      return;
-    }
 
-    const joinStates = await this._syncJoins(syncContext, style);
-    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    try {
+      await this._syncSourceStyleMeta(syncContext, source, style);
+      await this._syncSourceFormatters(syncContext, source, style);
+      const sourceResult = await this._syncSource(syncContext, source, style);
+      if (
+        !sourceResult.featureCollection ||
+        !sourceResult.featureCollection.features.length ||
+        !this.hasJoins()
+      ) {
+        return;
+      }
+
+      const joinStates = await this._syncJoins(syncContext, style);
+      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        throw error;
+      }
+    }
   }
 
   _getSourceFeatureCollection() {

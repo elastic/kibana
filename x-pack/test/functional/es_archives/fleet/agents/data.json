@@ -6,9 +6,8 @@
     "source": {
       "type": "fleet-agents",
       "fleet-agents": {
-        "access_api_key_id": "api-key-2",
+        "access_api_key_id": "api-key-1",
         "active": true,
-        "shared_id": "agent1_filebeat",
         "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
@@ -31,7 +30,6 @@
       "fleet-agents": {
         "access_api_key_id": "api-key-2",
         "active": true,
-        "shared_id": "agent2_filebeat",
         "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
@@ -54,7 +52,6 @@
       "fleet-agents": {
         "access_api_key_id": "api-key-3",
         "active": true,
-        "shared_id": "agent3_metricbeat",
         "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
@@ -77,7 +74,6 @@
       "fleet-agents": {
         "access_api_key_id": "api-key-4",
         "active": true,
-        "shared_id": "agent4_metricbeat",
         "policy_id": "policy1",
         "type": "PERMANENT",
         "local_metadata": {},
