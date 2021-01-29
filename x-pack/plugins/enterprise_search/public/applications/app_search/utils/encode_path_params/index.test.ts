@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { encodePathParams } from './';
+import '../../../__mocks__/react_router_history.mock';
+import { useParams } from 'react-router-dom';
+
+import { encodePathParams, useDecodedParams } from './';
 
 describe('encodePathParams', () => {
   it('encodeURIComponent()s all object values', () => {
@@ -15,6 +18,19 @@ describe('encodePathParams', () => {
     expect(encodePathParams(params)).toEqual({
       someValue: 'hello%20world%3F%3F%3F',
       anotherValue: 'test!%40%23%24%25%5E%26*%5B%5D%2F%7C%3B%3A%22%3C%3E~%60',
+    });
+  });
+});
+
+describe('useDecodedParams', () => {
+  it('decodeURIComponent()s all object values from useParams()', () => {
+    (useParams as jest.Mock).mockReturnValue({
+      someValue: 'hello%20world%3F%3F%3F',
+      anotherValue: 'test!%40%23%24%25%5E%26*%5B%5D%2F%7C%3B%3A%22%3C%3E~%60',
+    });
+    expect(useDecodedParams()).toEqual({
+      someValue: 'hello world???',
+      anotherValue: 'test!@#$%^&*[]/|;:"<>~`',
     });
   });
 });
