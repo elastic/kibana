@@ -17,8 +17,8 @@ Response times for the service. You can filter the *Latency* chart to display th
 image::apm/images/latency.png[Service latency]
 
 [discrete]
-[[service-traffic-transactions]]
-=== Traffic and transactions
+[[service-throughput-transactions]]
+=== Throughput and transactions
 
 The *Throughput* chart visualizes the average number of transactions per minute for the selected service.
 
