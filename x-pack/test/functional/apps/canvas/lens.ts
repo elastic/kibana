@@ -11,8 +11,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const esArchiver = getService('esArchiver');
 
   describe('lens in canvas', function () {
-    this.tags('skipFirefox');
-
     before(async () => {
       await esArchiver.load('canvas/lens');
       // open canvas home
