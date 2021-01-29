@@ -44,13 +44,15 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
     ) {
       await testSubjects.setValue('savedObjectTitle', vizName);
 
-      if (saveAsNew) {
+      const hasSaveAsNew = await testSubjects.exists('saveAsNewCheckbox');
+      if (hasSaveAsNew && saveAsNew !== undefined) {
         const state = saveAsNew ? 'check' : 'uncheck';
         log.debug('save as new checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
       }
 
-      if (redirectToOrigin) {
+      const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
+      if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
         const state = redirectToOrigin ? 'check' : 'uncheck';
         log.debug('redirect to origin checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
