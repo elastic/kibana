@@ -58,6 +58,10 @@ export const createMetricThresholdExecutor = (
         // Grab the result of the most recent bucket
         last(result[group].shouldFire)
       );
+      const shouldAlertWarn = alertResults.every((result) =>
+        // Grab the result of the most recent bucket
+        last(result[group].shouldWarn)
+      );
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => last(result[group].isNoData));
@@ -69,12 +73,18 @@ export const createMetricThresholdExecutor = (
         ? AlertStates.NO_DATA
         : shouldAlertFire
         ? AlertStates.ALERT
+        : shouldAlertWarn
+        ? AlertStates.WARNING
         : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT) {
         reason = alertResults
           .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
+          .join('\n');
+      } else if (nextState === AlertStates.WARNING) {
+        reason = alertResults
+          .map((result) => buildFiredAlertReason(formatAlertResult(result[group], true)))
           .join('\n');
       } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         /*
@@ -150,9 +160,11 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number;
     threshold: number[];
-  } & AlertResult
+    warningThreshold?: number[];
+  } & AlertResult,
+  useWarningThreshold?: boolean
 ) => {
-  const { metric, currentValue, threshold } = alertResult;
+  const { metric, currentValue, threshold, warningThreshold } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
     {
@@ -165,12 +177,15 @@ const formatAlertResult = <AlertResult>(
       currentValue: currentValue ?? noDataValue,
     };
   const formatter = createFormatter('percent');
+  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   return {
     ...alertResult,
     currentValue:
       currentValue !== null && typeof currentValue !== 'undefined'
         ? formatter(currentValue)
         : noDataValue,
-    threshold: Array.isArray(threshold) ? threshold.map((v: number) => formatter(v)) : threshold,
+    threshold: Array.isArray(thresholdToFormat)
+      ? thresholdToFormat.map((v: number) => formatter(v))
+      : thresholdToFormat,
   };
 };

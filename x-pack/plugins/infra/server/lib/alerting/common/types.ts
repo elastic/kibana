@@ -28,6 +28,7 @@ export enum Aggregators {
 export enum AlertStates {
   OK,
   ALERT,
+  WARNING,
   NO_DATA,
   ERROR,
 }
