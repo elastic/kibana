@@ -67,10 +67,10 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
               issuer: securityDetails.issuer,
               subjectName: securityDetails.subject_name,
               validFrom: securityDetails.valid_from
-                ? microToMillis(securityDetails.valid_from)
+                ? secondsToMillis(securityDetails.valid_from)
                 : undefined,
               validTo: securityDetails.valid_to
-                ? microToMillis(securityDetails.valid_to)
+                ? secondsToMillis(securityDetails.valid_to)
                 : undefined,
             }
           : undefined,
