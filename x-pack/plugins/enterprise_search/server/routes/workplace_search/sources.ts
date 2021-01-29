@@ -50,6 +50,7 @@ const displaySettingsSchema = schema.object({
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
 });
 
+// Account routes
 export function registerAccountSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -395,6 +396,7 @@ export function registerAccountSourceReindexJobStatusRoute({
   );
 }
 
+// Org routes
 export function registerOrgSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -842,6 +844,30 @@ export function registerOrgSourceOauthConfigurationRoute({
   );
 }
 
+// Same route is used for org and account. `state` passes the context.
+export function registerOauthConnectorParamsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/sources/create',
+      validate: {
+        query: schema.object({
+          kibana_host: schema.string(),
+          code: schema.string(),
+          session_state: schema.string(),
+          state: schema.string(),
+          oauth_verifier: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/create',
+    })
+  );
+}
+
 export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourcesRoute(dependencies);
   registerAccountSourcesStatusRoute(dependencies);
@@ -875,4 +901,5 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
+  registerOauthConnectorParamsRoute(dependencies);
 };
