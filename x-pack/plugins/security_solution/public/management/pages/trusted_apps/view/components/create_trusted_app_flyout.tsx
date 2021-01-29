@@ -35,6 +35,7 @@ import {
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
 import { ABOUT_TRUSTED_APPS } from '../translations';
+import { defaultNewTrustedApp } from '../../store/builders';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -48,7 +49,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
     const policyList = useTrustedAppsSelector(listOfPolicies);
     const isEditMode = useTrustedAppsSelector(isEdit);
-    const formValues = useTrustedAppsSelector(getCreationDialogFormEntry);
+    const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -68,16 +69,19 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       },
       [dataTestSubj]
     );
+
     const handleCancelClick = useCallback(() => {
       if (creationInProgress) {
         return;
       }
       onClose();
     }, [onClose, creationInProgress]);
+
     const handleSaveClick = useCallback(
       () => dispatch({ type: 'trustedAppCreationDialogConfirmed' }),
       [dispatch]
     );
+
     const handleFormOnChange = useCallback<CreateTrustedAppFormProps['onChange']>(
       (newFormState) => {
         dispatch({
