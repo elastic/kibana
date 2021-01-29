@@ -17,6 +17,10 @@ describe('AnalyticsSearch', () => {
   const { navigateToUrl } = mockKibanaValues;
   const preventDefault = jest.fn();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   const wrapper = shallow(<AnalyticsSearch />);
   const setSearchValue = (value: string) =>
     wrapper.find(EuiFieldSearch).simulate('change', { target: { value } });
