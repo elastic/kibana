@@ -754,6 +754,7 @@ function discoverController($route, $scope, Promise) {
   const onChangeUnmappedFields = (value) => {
     showUnmappedFields = value;
     $scope.unmappedFieldsConfig.showUnmappedFields = value;
+    $scope.fetch();
   };
 
   $scope.unmappedFieldsConfig = {
