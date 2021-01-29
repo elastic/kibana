@@ -6,10 +6,11 @@
  * Public License, v 1.
  */
 
-import pkg from '../../../../package.json';
-import { getVersionInfo } from './version_info';
+import { kibanaPackageJSON as pkg } from '@kbn/dev-utils';
 
-jest.mock('./get_build_number');
+import { getVersionInfo } from '../version_info';
+
+jest.mock('../get_build_number');
 
 describe('isRelease = true', () => {
   it('returns unchanged package.version, build sha, and build number', async () => {
