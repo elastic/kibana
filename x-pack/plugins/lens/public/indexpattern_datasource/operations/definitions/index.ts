@@ -197,7 +197,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern?: IndexPattern
+    indexPattern: IndexPattern
   ) => string[] | undefined;
 
   /*
@@ -303,7 +303,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   getErrorMessage: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern?: IndexPattern
+    indexPattern: IndexPattern
   ) => string[] | undefined;
 }
 

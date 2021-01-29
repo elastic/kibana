@@ -8,12 +8,13 @@
 
 import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 
+import { indexPatterns } from '../../../../../data/server';
+
 import type { Framework } from '../../../plugin';
 import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
 import type { VisPayload } from '../../../../common/types';
 import type { IndexPatternsService } from '../../../../../data/common';
-import { indexPatterns } from '../../../../../data/server';
-import { SanitizedFieldType } from '../../../../common/types';
+import type { SanitizedFieldType } from '../../../../common/types';
 import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
 /**
