@@ -12,4 +12,4 @@ export { SerializeResult } from './serialize';
 
 export { OnDoneLoadJsonHandler } from './components';
 
-export { PipelineProcessorsEditor } from './pipeline_processors_editor';
+export { PipelineEditor } from './pipeline_editor';
