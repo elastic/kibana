@@ -68,6 +68,11 @@ describe('isPromise', () => {
     expect(isPromise({ then: 'bar' })).toEqual(false);
   });
 
+  it('returns false for null and undefined', () => {
+    expect(isPromise(null)).toEqual(false);
+    expect(isPromise(undefined)).toEqual(false);
+  });
+
   it('returns true for Promise-Like objects', () => {
     expect(isPromise({ then: () => 12 })).toEqual(true);
   });

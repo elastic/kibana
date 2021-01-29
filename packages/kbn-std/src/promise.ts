@@ -22,5 +22,5 @@ export function withTimeout<T>({
 }
 
 export function isPromise<T>(maybePromise: T | Promise<T>): maybePromise is Promise<T> {
-  return typeof (maybePromise as Promise<T>).then === 'function';
+  return maybePromise ? typeof (maybePromise as Promise<T>).then === 'function' : false;
 }
