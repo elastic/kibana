@@ -14,38 +14,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
 import { IndexPatternField } from '../../../../../data/common/index_patterns';
 
-export type AngularScope = IScope;
-
-export interface AngularDirective {
-  template: string;
-}
-
-/**
- * Compiles and injects the give angular template into the given dom node
- * returns a function to cleanup the injected angular element
- */
-export async function injectAngularElement(
-  domNode: Element,
-  template: string,
-  scopeProps: any,
-  injector: auto.IInjectorService
-) {
-  const rootScope: AngularScope = injector.get('$rootScope');
-  const $compile: ICompileService = injector.get('$compile');
-  const newScope = Object.assign(rootScope.$new(), scopeProps);
-
-  const $target = angular.element(domNode);
-  const $element = angular.element(template);
-
-  newScope.$apply(() => {
-    const linkFn = $compile($element);
-    $target.empty().append($element);
-    linkFn(newScope);
-  });
-
-  return newScope;
-}
-
 export interface DocTableLegacyProps {
   columns: string[];
   searchDescription?: string;
@@ -63,27 +31,57 @@ export interface DocTableLegacyProps {
   sort?: string[][];
   useNewFieldsApi?: boolean;
 }
+export interface AngularDirective {
+  template: string;
+}
+export type AngularScope = IScope & { renderProps?: DocTableLegacyProps };
+
+/**
+ * Compiles and injects the give angular template into the given dom node
+ * returns a function to cleanup the injected angular element
+ */
+export async function injectAngularElement(
+  domNode: Element,
+  template: string,
+  renderProps: any,
+  injector: auto.IInjectorService
+) {
+  const rootScope: IScope = injector.get('$rootScope');
+  const $compile: ICompileService = injector.get('$compile');
+  const newScope = Object.assign(rootScope.$new(), { renderProps });
+
+  const $target = angular.element(domNode);
+  const $element = angular.element(template);
+
+  newScope.$apply(() => {
+    const linkFn = $compile($element);
+    $target.empty().append($element);
+    linkFn(newScope);
+  });
+
+  return newScope;
+}
 
 function getRenderFn(domNode: Element, props: any) {
   const directive = {
     template: `<doc-table
-                columns="columns"
-                data-description="{{searchDescription}}"
+                columns="renderProps.columns"
+                data-description="{{renderProps.searchDescription}}"
                 data-shared-item
-                data-test-subj="discoverDocTable"
-                data-title="{{searchTitle}}"
-                filter="onFilter"
-                hits="rows"
-                index-pattern="indexPattern"
+                data-test-subj="renderProps.discoverDocTable"
+                data-title="{{renderProps.searchTitle}}"
+                filter="renderProps.onFilter"
+                hits="renderProps.rows"
+                index-pattern="renderProps.indexPattern"
                 infinite-scroll="true"
-                minimum-visible-rows="minimumVisibleRows"
-                on-add-column="onAddColumn"
-                on-change-sort-order="onSort"
-                on-move-column="onMoveColumn"
-                on-remove-column="onRemoveColumn"
+                minimum-visible-rows="renderProps.minimumVisibleRows"
+                on-add-column="renderProps.onAddColumn"
+                on-change-sort-order="renderProps.onSort"
+                on-move-column="renderProps.onMoveColumn"
+                on-remove-column="renderProps.onRemoveColumn"
                 render-complete
-                use-new-fields-api="useNewFieldsApi"
-                sorting="sort"></doc_table>`,
+                use-new-fields-api="renderProps.useNewFieldsApi"
+                sorting="renderProps.sort"></doc_table>`,
   };
 
   return async () => {
@@ -92,14 +90,13 @@ function getRenderFn(domNode: Element, props: any) {
       return await injectAngularElement(domNode, directive.template, props, injector);
     } catch (e) {
       render(<div>error</div>, domNode);
-      return () => void 0;
     }
   };
 }
 
 export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const scope = useRef<AngularScope>();
+  const scope = useRef<AngularScope | undefined>();
 
   useEffect(() => {
     if (ref && ref.current && !scope.current) {
@@ -108,7 +105,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
         scope.current = newScope;
       });
     } else if (scope && scope.current) {
-      scope.current = Object.assign(scope.current, renderProps);
+      scope.current.renderProps = renderProps;
       scope.current.$apply();
     }
   }, [renderProps]);
