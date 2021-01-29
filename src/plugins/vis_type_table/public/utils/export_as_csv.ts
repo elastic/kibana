@@ -11,10 +11,9 @@ import { isObject } from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 
 import { CoreStart } from 'kibana/public';
-import { DatatableRow } from 'src/plugins/expressions';
+import { Datatable, DatatableRow } from 'src/plugins/expressions';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { FormattedColumn } from '../types';
-import { Table } from '../table_vis_response_handler';
 
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
@@ -23,7 +22,7 @@ interface ToCsvData {
   filename?: string;
   cols: FormattedColumn[];
   rows: DatatableRow[];
-  table: Table;
+  table: Datatable;
   uiSettings: CoreStart['uiSettings'];
 }
 

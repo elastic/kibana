@@ -11,19 +11,22 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableRow } from 'src/plugins/expressions';
+import { Datatable, DatatableRow } from 'src/plugins/expressions';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../kibana_react/public';
+import { exporters } from '../../../data/public';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
+
 import { FormattedColumn } from '../types';
-import { Table } from '../table_vis_response_handler';
 import { exportAsCsv } from '../utils';
+import { getFormatService } from '../services';
 
 interface TableVisControlsProps {
   dataGridAriaLabel: string;
   filename?: string;
   cols: FormattedColumn[];
   rows: DatatableRow[];
-  table: Table;
+  table: Datatable;
 }
 
 export const TableVisControls = memo(({ dataGridAriaLabel, ...props }: TableVisControlsProps) => {
@@ -36,11 +39,27 @@ export const TableVisControls = memo(({ dataGridAriaLabel, ...props }: TableVisC
   } = useKibana<CoreStart>();
 
   const onClickExport = useCallback(
-    (formatted: boolean) =>
+    (formatted: boolean) => {
+      const csvSeparator = uiSettings.get(CSV_SEPARATOR_SETTING);
+      const quoteValues = uiSettings.get(CSV_QUOTE_VALUES_SETTING);
+
+      // exporters.datatableToCSV(
+      //   {
+      //     columns: props.cols,
+      //     rows: props.rows,
+      //   },
+      //   {
+      //     csvSeparator,
+      //     quoteValues,
+      //     formatFactory: getFormatService().deserialize,
+      //     raw: !formatted,
+      //   }
+      // );
       exportAsCsv(formatted, {
         ...props,
         uiSettings,
-      }),
+      });
+    },
     [props, uiSettings]
   );
 

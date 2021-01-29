@@ -7,7 +7,7 @@
  */
 
 import { createTableVisFn } from './table_vis_fn';
-import { tableVisResponseHandler } from './table_vis_response_handler';
+import { tableVisResponseHandler } from './utils/table_vis_response_handler';
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 
