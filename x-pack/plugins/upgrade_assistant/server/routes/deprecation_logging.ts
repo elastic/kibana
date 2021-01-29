@@ -23,9 +23,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
       async (
         {
           core: {
-            elasticsearch: {
-              legacy: { client },
-            },
+            elasticsearch: { client },
           },
         },
         request,
@@ -54,9 +52,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
       async (
         {
           core: {
-            elasticsearch: {
-              legacy: { client },
-            },
+            elasticsearch: { client },
           },
         },
         request,

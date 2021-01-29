@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('builtin alertTypes', () => {
     loadTestFile(require.resolve('./index_threshold'));
+    loadTestFile(require.resolve('./es_query'));
   });
 }

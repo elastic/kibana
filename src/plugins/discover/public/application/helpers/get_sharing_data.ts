@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SearchSource } from '../../../../data/common';
@@ -76,3 +76,19 @@ export async function getSharingData(
     indexPatternId: index.id,
   };
 }
+
+export interface DiscoverCapabilities {
+  createShortUrl?: boolean;
+  save?: boolean;
+  saveQuery?: boolean;
+  show?: boolean;
+  storeSearchSession?: boolean;
+}
+
+export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
+  if (!anonymousUserCapabilities.discover) return false;
+
+  const discover = (anonymousUserCapabilities.discover as unknown) as DiscoverCapabilities;
+
+  return !!discover.show;
+};
