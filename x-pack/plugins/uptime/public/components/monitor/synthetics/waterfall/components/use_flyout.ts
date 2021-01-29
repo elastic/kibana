@@ -53,10 +53,13 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
     [metaData, handleFlyout]
   );
 
-  const onSidebarClick = ({ networkItemIndex }: { networkItemIndex: number }) => {
-    const metaDataEntry = metaData[networkItemIndex];
-    handleFlyout(metaDataEntry);
-  };
+  const onSidebarClick = useCallback(
+    ({ networkItemIndex }: { networkItemIndex: number }) => {
+      const metaDataEntry = metaData[networkItemIndex];
+      handleFlyout(metaDataEntry);
+    },
+    [metaData, handleFlyout]
+  );
 
   return {
     flyoutData,

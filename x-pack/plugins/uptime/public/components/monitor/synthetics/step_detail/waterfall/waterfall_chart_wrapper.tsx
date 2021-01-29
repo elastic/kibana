@@ -98,8 +98,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       fetchedNetworkRequests={networkData.length}
       data={series}
       flyoutData={flyoutData}
-      onBarClick={onBarClick}
-      onProjectionClick={onProjectionClick}
       onSidebarClick={onSidebarClick}
       isFlyoutVisible={isFlyoutVisible}
       setIsFlyoutVisible={setIsFlyoutVisible}
@@ -119,6 +117,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
         fullHeight={true}
+        onBarClick={onBarClick}
+        onProjectionClick={onProjectionClick}
       />
     </WaterfallProvider>
   );

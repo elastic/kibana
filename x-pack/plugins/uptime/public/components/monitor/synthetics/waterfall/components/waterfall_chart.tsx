@@ -10,6 +10,8 @@ import {
   Axis,
   BarSeries,
   Chart,
+  ElementClickListener,
+  ProjectionClickListener,
   Position,
   ScaleType,
   Settings,
@@ -70,6 +72,8 @@ export interface WaterfallChartProps {
   tickFormat: TickFormatter;
   domain: DomainRange;
   barStyleAccessor: BarStyleAccessor;
+  onBarClick?: ElementClickListener;
+  onProjectionClick?: ProjectionClickListener;
   renderSidebarItem?: RenderItem;
   renderLegendItem?: RenderItem;
   maxHeight?: string;
@@ -85,6 +89,8 @@ export const WaterfallChart = ({
   tickFormat,
   domain,
   barStyleAccessor,
+  onBarClick,
+  onProjectionClick,
   renderSidebarItem,
   renderLegendItem,
   maxHeight = '800px',
@@ -94,8 +100,6 @@ export const WaterfallChart = ({
     data,
     sidebarItems,
     legendItems,
-    onBarClick,
-    onProjectionClick,
     totalNetworkRequests,
     fetchedNetworkRequests,
   } = useWaterfallContext();

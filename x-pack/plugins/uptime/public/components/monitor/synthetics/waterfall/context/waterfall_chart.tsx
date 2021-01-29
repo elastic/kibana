@@ -5,7 +5,6 @@
  */
 
 import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
-import { ElementClickListener, ProjectionClickListener } from '@elastic/charts';
 import {
   WaterfallData,
   WaterfallDataEntry,
@@ -18,8 +17,6 @@ export interface IWaterfallContext {
   fetchedNetworkRequests: number;
   data: WaterfallData;
   flyoutData?: WaterfallMetaDataEntry;
-  onBarClick?: ElementClickListener;
-  onProjectionClick?: ProjectionClickListener;
   onSidebarClick?: ({ networkItemIndex }: { networkItemIndex: number }) => void;
   isFlyoutVisible?: boolean;
   setIsFlyoutVisible: Dispatch<SetStateAction<boolean>>;
@@ -39,8 +36,6 @@ interface ProviderProps {
   fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
   flyoutData: IWaterfallContext['flyoutData'];
-  onBarClick: IWaterfallContext['onBarClick'];
-  onProjectionClick: IWaterfallContext['onProjectionClick'];
   onSidebarClick: IWaterfallContext['onSidebarClick'];
   isFlyoutVisible: IWaterfallContext['isFlyoutVisible'];
   setIsFlyoutVisible: IWaterfallContext['setIsFlyoutVisible'];
@@ -54,8 +49,6 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
   flyoutData,
-  onBarClick,
-  onProjectionClick,
   onSidebarClick,
   isFlyoutVisible,
   setIsFlyoutVisible,
@@ -74,8 +67,6 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         legendItems,
         metaData,
         isFlyoutVisible,
-        onBarClick,
-        onProjectionClick,
         onSidebarClick,
         setIsFlyoutVisible,
         flyoutData,
