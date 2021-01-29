@@ -8,5 +8,12 @@
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
+
+export interface PresentationUtilPluginStart {
+  ContextProvider: React.FC;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginStart {}
+export interface PresentationUtilPluginSetupDeps {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PresentationUtilPluginStartDeps {}
