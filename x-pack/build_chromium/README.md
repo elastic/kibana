@@ -12,19 +12,22 @@ which is where we have two machines provisioned for the Linux and Windows
 builds. Mac builds can be achieved locally, and are a great place to start to
 gain familiarity.
 
-**NOTE:** Linux builds should be done in Ubuntu on x86 architecture. ARM builds can be created in x86. CentOS is not supported for building Chromium.
+**NOTE:** Linux builds should be done in Ubuntu on x86 architecture. ARM builds
+are created in x86. CentOS is not supported for building Chromium.
 
 1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
 2. Click the "Compute Engine" tab.
-3. Ensure that `chromium-build-linux` and `chromium-build-windows-12-beefy` are there.
-4. If #3 fails, you'll have to spin up new instances. Generally, these need `n1-standard-8` types or 8 vCPUs/30 GB memory.
-5. Ensure that there's enough room left on the disk: 100GB is required. `ncdu` is a good linux util to verify what's claming space.
-6. System dependencies:
+3. Find `chromium-build-linux` or `chromium-build-windows-12-beefy` and start the instance.
+4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
+5. System dependencies:
+    - 8 CPU
+    - 30GB memory
+    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
     - git
     - python2 (`python` must link to `python2`)
     - lsb_release
     - tmux is recommended in case your ssh session is interrupted
-7. Copy the entire `build_chromium` directory into a GCP storage bucket so you can run these scripts on the instance
+6. Copy the entire `build_chromium` directory into a GCP storage bucket, so you can copy the scripts into the instance and run them.
 
 ## Build Script Usage
 
@@ -48,11 +51,17 @@ python ./build_chromium/build.py <commit_id> x86
 python ./build_chromium/build.py <commit_id> arm64
 ```
 
+**NOTE:** The `init.py` script updates git config to make it more possible for
+the Chromium repo to be cloned successfully. If checking out the Chromium fails
+with "early EOF" errors, the instance could be low on memory or disk space.
+
 ## Getting the Commit ID
 The `build.py` script requires a commit ID of the Chromium repo. Getting `<commit_id>` can be tricky. The best technique seems to be:
 1. Create a temporary working directory and intialize yarn
 2. `yarn add puppeteer # install latest puppeter`
-3. Look through Puppeteer documentation and Changelogs to find information about where the "chromium revision" is located in the Puppeteer code. The code containing it might not be distributed in the node module.
+3. Look through Puppeteer documentation and Changelogs to find information
+about where the "chromium revision" is located in the Puppeteer code. The code
+containing it might not be distributed in the node module.
     - Example: https://github.com/puppeteer/puppeteer/blob/b549256/src/revisions.ts
 4. Use `https://crrev.com` and look up the revision and find the git commit info.
     - Example: http://crrev.com/818858 leads to the git commit e62cb7e3fc7c40548cef66cdf19d270535d9350b
@@ -121,8 +130,8 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 - Linux:
   - SSH in using [gcloud](https://cloud.google.com/sdk/)
-  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> gcloud
-  - Their in-browser UI is kinda sluggish, so use the commandline tool
+  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> "View gcloud command"
+  - Their in-browser UI is kinda sluggish, so use the commandline tool (Google Cloud SDK is required)
 
 - Windows:
   - Install Microsoft's Remote Desktop tools
