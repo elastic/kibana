@@ -28,11 +28,10 @@ export async function injectAngularElement(
   domNode: Element,
   template: string,
   scopeProps: any,
-  getInjector: () => Promise<auto.IInjectorService>
-): Promise<() => void> {
-  const $injector = await getInjector();
-  const rootScope: AngularScope = $injector.get('$rootScope');
-  const $compile: ICompileService = $injector.get('$compile');
+  injector: auto.IInjectorService
+) {
+  const rootScope: AngularScope = injector.get('$rootScope');
+  const $compile: ICompileService = injector.get('$compile');
   const newScope = Object.assign(rootScope.$new(), scopeProps);
 
   const $target = angular.element(domNode);
@@ -44,37 +43,7 @@ export async function injectAngularElement(
     linkFn(newScope);
   });
 
-  return () => {
-    newScope.$destroy();
-  };
-}
-
-/**
- * Converts a given legacy angular directive to a render function
- * for usage in a react component. Note that the rendering is async
- */
-export function convertDirectiveToRenderFn(
-  directive: AngularDirective,
-  getInjector: () => Promise<auto.IInjectorService>
-) {
-  return (domNode: Element, props: any) => {
-    let rejected = false;
-
-    const cleanupFnPromise = injectAngularElement(domNode, directive.template, props, getInjector);
-
-    cleanupFnPromise.catch(() => {
-      rejected = true;
-      render(<div>error</div>, domNode);
-    });
-
-    return () => {
-      if (!rejected) {
-        // for cleanup
-        // http://roubenmeschian.com/rubo/?p=51
-        cleanupFnPromise.then((cleanup) => cleanup());
-      }
-    };
-  };
+  return newScope;
 }
 
 export interface DocTableLegacyProps {
@@ -95,10 +64,9 @@ export interface DocTableLegacyProps {
   useNewFieldsApi?: boolean;
 }
 
-export function DocTableLegacy(renderProps: DocTableLegacyProps) {
-  const renderFn = convertDirectiveToRenderFn(
-    {
-      template: `<doc-table
+function getRenderFn(domNode: Element, props: any) {
+  const directive = {
+    template: `<doc-table
                 columns="columns"
                 data-description="{{searchDescription}}"
                 data-shared-item
@@ -116,15 +84,41 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
                 render-complete
                 use-new-fields-api="useNewFieldsApi"
                 sorting="sort"></doc_table>`,
-    },
-    () => getServices().getEmbeddableInjector()
-  );
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (ref && ref.current) {
-      return renderFn(ref.current, renderProps);
+  };
+
+  return async () => {
+    try {
+      const injector = await getServices().getEmbeddableInjector();
+      return await injectAngularElement(domNode, directive.template, props, injector);
+    } catch (e) {
+      render(<div>error</div>, domNode);
+      return () => void 0;
     }
-  }, [renderFn, renderProps]);
+  };
+}
+
+export function DocTableLegacy(renderProps: DocTableLegacyProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const scope = useRef<AngularScope>();
+
+  useEffect(() => {
+    if (ref && ref.current && !scope.current) {
+      const fn = getRenderFn(ref.current, renderProps);
+      fn().then((newScope) => {
+        scope.current = newScope;
+      });
+    } else if (scope && scope.current) {
+      scope.current = Object.assign(scope.current, renderProps);
+      scope.current.$apply();
+    }
+  }, [renderProps]);
+  useEffect(() => {
+    return () => {
+      if (scope.current) {
+        scope.current.$destroy();
+      }
+    };
+  }, []);
   return (
     <div>
       <div ref={ref} />
