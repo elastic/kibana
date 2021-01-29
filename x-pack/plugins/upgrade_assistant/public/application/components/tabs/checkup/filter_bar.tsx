@@ -10,8 +10,7 @@ import React from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { DeprecationInfo } from '../../../../../common/types';
 import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {

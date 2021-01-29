@@ -9,8 +9,9 @@
 import { useMemo } from 'react';
 import { chain, findIndex } from 'lodash';
 
+import { AggTypes } from '../../../common';
 import { Table } from '../../table_vis_response_handler';
-import { FormattedColumn, TableVisConfig, AggTypes } from '../../types';
+import { FormattedColumn, TableVisConfig } from '../../types';
 import { getFormatService } from '../../services';
 import { addPercentageColumn } from '../add_percentage_column';
 

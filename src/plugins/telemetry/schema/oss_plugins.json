@@ -4076,6 +4076,27 @@
     },
     "stack_management": {
       "properties": {
+        "timelion:quandl.key": {
+          "type": "keyword"
+        },
+        "securitySolution:defaultIndex": {
+          "type": "keyword"
+        },
+        "securitySolution:newsFeedUrl": {
+          "type": "keyword"
+        },
+        "xpackReporting:customPdfLogo": {
+          "type": "keyword"
+        },
+        "notifications:banner": {
+          "type": "keyword"
+        },
+        "timelion:graphite.url": {
+          "type": "keyword"
+        },
+        "xpackDashboardMode:roles": {
+          "type": "keyword"
+        },
         "visualize:enableLabs": {
           "type": "boolean"
         },
@@ -4095,7 +4116,7 @@
           "type": "long"
         },
         "securitySolution:ipReputationLinks": {
-          "type": "text"
+          "type": "keyword"
         },
         "csv:separator": {
           "type": "keyword"
@@ -4121,9 +4142,6 @@
         "timelion:default_columns": {
           "type": "long"
         },
-        "timelion:quandl.key": {
-          "type": "keyword"
-        },
         "timelion:es.default_index": {
           "type": "keyword"
         },
@@ -4136,13 +4154,7 @@
         "securitySolution:defaultAnomalyScore": {
           "type": "long"
         },
-        "securitySolution:defaultIndex": {
-          "type": "keyword"
-        },
         "securitySolution:refreshIntervalDefaults": {
-          "type": "keyword"
-        },
-        "securitySolution:newsFeedUrl": {
           "type": "keyword"
         },
         "securitySolution:enableNewsFeed": {
@@ -4169,9 +4181,6 @@
         "rollups:enableIndexPatterns": {
           "type": "boolean"
         },
-        "xpackReporting:customPdfLogo": {
-          "type": "text"
-        },
         "notifications:lifetime:warning": {
           "type": "long"
         },
@@ -4180,9 +4189,6 @@
         },
         "notifications:lifetime:info": {
           "type": "long"
-        },
-        "notifications:banner": {
-          "type": "text"
         },
         "notifications:lifetime:error": {
           "type": "long"
@@ -4200,7 +4206,10 @@
           "type": "long"
         },
         "defaultColumns": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "context:defaultSize": {
           "type": "long"
@@ -4209,7 +4218,10 @@
           "type": "long"
         },
         "context:tieBreakerFields": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "discover:sort:defaultOrder": {
           "type": "keyword"
@@ -4268,9 +4280,6 @@
         "query:queryString:options": {
           "type": "keyword"
         },
-        "pageNavigation": {
-          "type": "keyword"
-        },
         "metrics:max_buckets": {
           "type": "long"
         },
@@ -4278,7 +4287,10 @@
           "type": "boolean"
         },
         "metaFields": {
-          "type": "keyword"
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
         },
         "indexPattern:placeholder": {
           "type": "keyword"
@@ -4342,6 +4354,36 @@
         },
         "dateFormat": {
           "type": "keyword"
+        },
+        "autocomplete:useTimeRange": {
+          "type": "boolean"
+        },
+        "search:timeout": {
+          "type": "long"
+        },
+        "visualization:visualize:legacyChartsLibrary": {
+          "type": "boolean"
+        },
+        "doc_table:legacy": {
+          "type": "boolean"
+        },
+        "discover:modifyColumnsOnSwitch": {
+          "type": "boolean"
+        },
+        "discover:searchFieldsFromSource": {
+          "type": "boolean"
+        },
+        "securitySolution:rulesTableRefresh": {
+          "type": "text"
+        },
+        "apm:enableSignificantTerms": {
+          "type": "boolean"
+        },
+        "apm:enableServiceOverview": {
+          "type": "boolean"
+        },
+        "apm:enableCorrelations": {
+          "type": "boolean"
         }
       }
     },
@@ -5242,6 +5284,36 @@
                   "type": "keyword"
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "vis_type_table": {
+      "properties": {
+        "total": {
+          "type": "long"
+        },
+        "total_split": {
+          "type": "long"
+        },
+        "split_columns": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "enabled": {
+              "type": "long"
+            }
+          }
+        },
+        "split_rows": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "enabled": {
+              "type": "long"
             }
           }
         }
