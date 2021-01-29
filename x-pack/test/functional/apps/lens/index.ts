@@ -35,6 +35,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./chart_data'));
       loadTestFile(require.resolve('./drag_and_drop'));
       loadTestFile(require.resolve('./lens_reporting'));
+      loadTestFile(require.resolve('./lens_tagging'));
 
       // has to be last one in the suite because it overrides saved objects
       loadTestFile(require.resolve('./rollup'));
