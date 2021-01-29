@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
-import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
+import { IScopedClusterClient } from 'src/core/server';
+import {
+  DeprecationAPIResponse,
+  EnrichedDeprecationInfo,
+  UpgradeAssistantStatus,
+} from '../../common/types';
+
 import { getDeprecatedApmIndices } from './apm';
 import { isSystemIndex } from './reindexing';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: ILegacyScopedClusterClient,
+  dataClient: IScopedClusterClient,
   isCloudEnabled: boolean,
   apmIndices: string[]
 ): Promise<UpgradeAssistantStatus> {
-  const [deprecations, apmIndexDeprecations] = await Promise.all([
-    dataClient.callAsCurrentUser('transport.request', {
-      path: '/_migration/deprecations',
-      method: 'GET',
-    }),
+  const [{ body: deprecations }, apmIndexDeprecations] = await Promise.all([
+    dataClient.asCurrentUser.migration.deprecations<DeprecationAPIResponse>(),
     getDeprecatedApmIndices(dataClient, apmIndices),
   ]);
 
@@ -34,10 +34,7 @@ export async function getUpgradeAssistantStatus(
   // If we have found deprecation information for index/indices check whether the index is
   // open or closed.
   if (indexNames.length) {
-    const indexStates = await esIndicesStateCheck(
-      dataClient.callAsCurrentUser.bind(dataClient),
-      indexNames
-    );
+    const indexStates = await esIndicesStateCheck(dataClient.asCurrentUser, indexNames);
 
     indices.forEach((indexData) => {
       indexData.blockerForReindexing =
