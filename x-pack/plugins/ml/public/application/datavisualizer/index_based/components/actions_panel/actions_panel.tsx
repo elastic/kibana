@@ -74,10 +74,10 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       if (searchString && searchQueryLanguage !== undefined) {
         state.query = { query: searchString, language: searchQueryLanguage };
       }
-      if (globalState.time) {
+      if (globalState?.time) {
         state.timeRange = globalState.time;
       }
-      if (globalState.refreshInterval) {
+      if (globalState?.refreshInterval) {
         state.refreshInterval = globalState.refreshInterval;
       }
 
@@ -116,7 +116,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <div style={recognizerResultsCount === 0 ? { display: 'none' } : {}}>
+          <div hidden={recognizerResultsCount === 0}>
             <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
