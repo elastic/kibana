@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import SemVer from 'semver/classes/semver';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { renderApp } from './render_app';
@@ -10,7 +11,8 @@ import { renderApp } from './render_app';
 export async function mountManagementSection(
   coreSetup: CoreSetup,
   isCloudEnabled: boolean,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  kibanaVersion: SemVer
 ) {
   const [{ i18n, docLinks }] = await coreSetup.getStartServices();
   return renderApp({
@@ -19,5 +21,6 @@ export async function mountManagementSection(
     http: coreSetup.http,
     i18n,
     docLinks,
+    kibanaVersion,
   });
 }

@@ -9,14 +9,16 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../common/version';
 import { useAppContext } from '../app_context';
 
 export const LatestMinorBanner: React.FunctionComponent = () => {
-  const { docLinks } = useAppContext();
+  const { docLinks, kibanaVersion } = useAppContext();
 
   const { ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
+
+  const currentMajorVersion = kibanaVersion.major;
+  const nextMajorVersion = currentMajorVersion + 1;
 
   return (
     <EuiCallOut
@@ -48,8 +50,8 @@ export const LatestMinorBanner: React.FunctionComponent = () => {
                 />
               </EuiLink>
             ),
-            nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
-            currentEsVersion: `${CURRENT_MAJOR_VERSION}.x`,
+            nextEsVersion: `${nextMajorVersion}.x`,
+            currentEsVersion: `${currentMajorVersion}.x`,
           }}
         />
       </p>

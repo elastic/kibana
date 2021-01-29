@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SemVer } from 'semver';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -17,8 +18,12 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
+import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
+
+const MOCK_VERSION = '8.0.0';
+const MOCK_CURRENT_MAJOR_VERSION = new SemVer(MOCK_VERSION).major;
+const MOCK_PREV_MAJOR_VERSION = MOCK_CURRENT_MAJOR_VERSION - 1;
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
@@ -47,13 +52,16 @@ describe('ReindexActions', () => {
   });
 
   describe('createReindexOp', () => {
-    beforeEach(() => client.create.mockResolvedValue());
+    beforeEach(() => {
+      versionService.setup(MOCK_VERSION);
+      client.create.mockResolvedValue();
+    });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
+    it(`prepends reindexed-v${MOCK_CURRENT_MAJOR_VERSION} to new name`, async () => {
       await actions.createReindexOp('myIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -65,11 +73,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
+    it(`prepends reindexed-v${MOCK_CURRENT_MAJOR_VERSION} to new name, preserving leading period`, async () => {
       await actions.createReindexOp('.internalIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
-        newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        newIndexName: `.reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-internalIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -82,12 +90,12 @@ describe('ReindexActions', () => {
     });
 
     // in v5.6, the upgrade assistant appended to the index name instead of prepending
-    it(`prepends reindexed-v${CURRENT_MAJOR_VERSION}- and removes reindex appended in v5`, async () => {
+    it(`prepends reindexed-v${MOCK_CURRENT_MAJOR_VERSION}- and removes reindex appended in v5`, async () => {
       const indexName = 'myIndex-reindexed-v5';
       await actions.createReindexOp(indexName);
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -99,11 +107,11 @@ describe('ReindexActions', () => {
       });
     });
 
-    it(`replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
-      await actions.createReindexOp(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`);
+    it(`replaces reindexed-v${MOCK_PREV_MAJOR_VERSION} with reindexed-v${MOCK_CURRENT_MAJOR_VERSION}`, async () => {
+      await actions.createReindexOp(`reindexed-v${MOCK_PREV_MAJOR_VERSION}-myIndex`);
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
-        newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        indexName: `reindexed-v${MOCK_PREV_MAJOR_VERSION}-myIndex`,
+        newIndexName: `reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,

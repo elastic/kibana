@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
+import { SemVer } from 'semver';
 import { BehaviorSubject } from 'rxjs';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { Logger } from 'src/core/server';
@@ -18,11 +19,11 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
+import { versionService } from '../version';
 
 import {
   isMlIndex,
@@ -35,6 +36,10 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
   ({
     body,
   } as RequestEvent<T>);
+
+const MOCK_VERSION = '8.0.0';
+const MOCK_CURRENT_MAJOR_VERSION = new SemVer(MOCK_VERSION).major;
+const MOCK_PREV_MAJOR_VERSION = MOCK_CURRENT_MAJOR_VERSION - 1;
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
@@ -82,6 +87,8 @@ describe('reindexService', () => {
       log,
       licensingPluginSetup
     );
+
+    versionService.setup(MOCK_VERSION);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -107,7 +114,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
+              names: ['anIndex', `reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-anIndex`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -131,7 +138,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              names: ['.ml-anomalies', `.reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-ml-anomalies`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -150,7 +157,7 @@ describe('reindexService', () => {
       );
 
       const hasRequired = await service.hasRequiredPrivileges(
-        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
+        `reindexed-v${MOCK_PREV_MAJOR_VERSION}-anIndex`
       );
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
@@ -159,8 +166,8 @@ describe('reindexService', () => {
           index: [
             {
               names: [
-                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
-                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${MOCK_PREV_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-anIndex`,
                 'anIndex',
               ],
               allow_restricted_indices: true,
@@ -188,7 +195,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
+              names: ['.watches', `.reindexed-v${MOCK_CURRENT_MAJOR_VERSION}-watches`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -497,9 +504,9 @@ describe('reindexService', () => {
     });
 
     it('is true for ML re-indexed indices', () => {
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-state`)).toBe(true);
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`)).toBe(true);
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-config`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${MOCK_PREV_MAJOR_VERSION}-ml-state`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${MOCK_PREV_MAJOR_VERSION}-ml-anomalies`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${MOCK_PREV_MAJOR_VERSION}-ml-config`)).toBe(true);
     });
   });
 
@@ -514,8 +521,8 @@ describe('reindexService', () => {
     });
 
     it('is true for watcher re-indexed indices', () => {
-      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-watches`)).toBe(true);
-      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-triggered-watches`)).toBe(true);
+      expect(isWatcherIndex(`.reindexed-v${MOCK_PREV_MAJOR_VERSION}-watches`)).toBe(true);
+      expect(isWatcherIndex(`.reindexed-v${MOCK_PREV_MAJOR_VERSION}-triggered-watches`)).toBe(true);
     });
   });
 
