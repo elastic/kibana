@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { encodePathParams } from './';
+
+describe('encodePathParams', () => {
+  it('encodeURIComponent()s all object values', () => {
+    const params = {
+      someValue: 'hello world???',
+      anotherValue: 'test!@#$%^&*[]/|;:"<>~`',
+    };
+    expect(encodePathParams(params)).toEqual({
+      someValue: 'hello%20world%3F%3F%3F',
+      anotherValue: 'test!%40%23%24%25%5E%26*%5B%5D%2F%7C%3B%3A%22%3C%3E~%60',
+    });
+  });
+});
