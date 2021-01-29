@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
@@ -72,7 +72,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const search = async (aggs: unknown) => {
+        const search = async (aggs: Record<string, estypes.AggregationContainer>) => {
           const { body: result } = await requestClient.search({
             index: req.params.indexPatternTitle,
             track_total_hits: true,
@@ -118,7 +118,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<unknown>,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => Promise<unknown>,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -205,7 +205,7 @@ export async function getNumberHistogram(
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -244,7 +244,7 @@ export async function getStringSamples(
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {

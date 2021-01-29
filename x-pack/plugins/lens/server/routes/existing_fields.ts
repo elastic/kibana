@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
@@ -141,6 +141,8 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
   });
 }
 
+type LensSearchResponseType = Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>;
+
 async function fetchIndexPatternStats({
   client,
   index,
@@ -157,7 +159,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
-}) {
+}): Promise<LensSearchResponseType> {
   const filter =
     timeFieldName && fromDate && toDate
       ? [
@@ -191,15 +193,15 @@ async function fetchIndexPatternStats({
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
-            lang: field.lang,
-            source: field.script,
+            lang: field.lang!,
+            source: field.script!,
           },
         };
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.ScriptField>),
     },
   });
-  return result.hits.hits;
+  return (result.hits.hits as unknown[]) as LensSearchResponseType;
 }
 
 /**
