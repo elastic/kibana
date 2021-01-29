@@ -18,7 +18,7 @@ export const importFileBodySchema = schema.object({
   mappings: schema.any(),
   /** Ingest pipeline definition */
   ingestPipeline: schema.object({
-    id: schema.string(),
-    pipeline: schema.any(),
+    id: schema.maybe(schema.string()),
+    pipeline: schema.maybe(schema.any()),
   }),
 });
