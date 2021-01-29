@@ -54,34 +54,39 @@ export default function ({ getPageObjects }) {
         });
 
         it('should show index pattern suggestions for index argument', async () => {
-          await PageObjects.timelion.updateExpression('index=');
+          await PageObjects.timelion.updateExpression('index');
+          await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(1);
           expect(suggestions[0].includes('logstash-*')).to.eql(true);
-          await PageObjects.timelion.clickSuggestion(0, 2000);
+          await PageObjects.timelion.clickSuggestion();
         });
 
         it('should show field suggestions for timefield argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',timefield=');
+          await PageObjects.timelion.updateExpression(',timefield');
+          await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(4);
           expect(suggestions[0].includes('@timestamp')).to.eql(true);
-          await PageObjects.timelion.clickSuggestion(0, 2000);
+          await PageObjects.timelion.clickSuggestion();
         });
 
         it('should show field suggestions for split argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',split=');
+          await PageObjects.timelion.updateExpression(',split');
+          await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(51);
+          expect(suggestions.length).not.to.eql(0);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
-          await PageObjects.timelion.clickSuggestion(10, 4000);
+          await PageObjects.timelion.clickSuggestion(10);
         });
 
         it('should show field suggestions for metric argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',metric=avg:');
-          await PageObjects.timelion.clickSuggestion(0, 2000);
+          await PageObjects.timelion.updateExpression(',metric');
+          await PageObjects.timelion.clickSuggestion();
+          await PageObjects.timelion.updateExpression('avg:');
+          await PageObjects.timelion.clickSuggestion(0);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(2);
+          expect(suggestions.length).not.to.eql(0);
           expect(suggestions[0].includes('avg:bytes')).to.eql(true);
         });
       });
