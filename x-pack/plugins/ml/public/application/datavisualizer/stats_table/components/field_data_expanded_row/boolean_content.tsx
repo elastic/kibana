@@ -5,7 +5,7 @@
  */
 
 import React, { FC, ReactNode, useMemo } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,6 +16,7 @@ import { getTFPercentage } from '../../utils';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
+import { ExpandedRowContent } from './expanded_row_content';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -85,7 +86,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   );
 
   return (
-    <EuiFlexGroup data-test-subj={'mlDVBooleanContent'} gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVBooleanContent'}>
       <DocumentStatsTable config={config} />
 
       <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
@@ -138,6 +139,6 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
           />
         </Chart>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };
