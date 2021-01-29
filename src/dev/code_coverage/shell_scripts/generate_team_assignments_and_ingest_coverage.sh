@@ -37,11 +37,15 @@ echo "### Ingesting coverage for functional"
 COVERAGE_SUMMARY_FILE=target/kibana-coverage/functional-combined/coverage-summary.json
 node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
 
-echo "### Ingesting coverage for jest"
-# Need to override COVERAGE_INGESTION_KIBANA_ROOT since json file has original intake worker path
-COVERAGE_SUMMARY_FILE=target/kibana-coverage/jest-combined/coverage-summary.json
-export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
-node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+for x in functional jest; do
+  echo "### Ingesting coverage for ${x}"
+    COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
+    if [[ $x == "jest" ]]; then
+        # Need to override COVERAGE_INGESTION_KIBANA_ROOT since json file has original intake worker path
+        export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
+    fi
+  node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+done
 
 echo "###  Ingesting Code Coverage - Complete"
 echo ""
