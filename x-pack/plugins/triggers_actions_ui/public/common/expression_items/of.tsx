@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
+  EuiFormHelpText,
+  EuiLink,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
@@ -139,6 +141,25 @@ export const OfExpression = ({
                 }}
               />
             </EuiFormRow>
+            <EuiFormHelpText>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
+                defaultMessage="Can't find a metric? {documentationLink}"
+                values={{
+                  documentationLink: (
+                    <EuiLink
+                      href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+                      target="BLANK"
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
+                        defaultMessage="Learn how to add more data"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiFormHelpText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
