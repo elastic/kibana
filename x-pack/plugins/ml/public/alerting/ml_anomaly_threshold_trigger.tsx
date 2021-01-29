@@ -13,7 +13,6 @@ import { HttpService } from '../application/services/http_service';
 import { SeveritySelector } from './severity_selector';
 import { ResultTypeSelector } from './result_type_selector';
 import type { AnomalyResultType } from '../../common/types/anomalies';
-import { IntervalSelector } from './interval_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 
@@ -23,8 +22,7 @@ export interface MlAnomalyThresholdAlertParams {
     groupIds?: string[];
   };
   severity: number;
-  resultTypes: AnomalyResultType[];
-  timeRange: string;
+  resultType: AnomalyResultType;
 }
 
 interface Props {
@@ -46,7 +44,9 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
   const alertingApiService = alertingApiProvider(mlHttpService);
 
   const onAlertParamChange = useCallback(
-    (param) => (update: any) => {
+    <T extends keyof MlAnomalyThresholdAlertParams>(param: T) => (
+      update: MlAnomalyThresholdAlertParams[T]
+    ) => {
       setAlertParams(param, update);
     },
     []
@@ -57,14 +57,16 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
       <JobSelectorControl
         jobSelection={alertParams.jobSelection}
         adJobsApiService={adJobsApiService}
-        onSelectionChange={onAlertParamChange('jobSelection')}
+        onSelectionChange={useCallback(onAlertParamChange('jobSelection'), [])}
       />
       <ResultTypeSelector
-        value={alertParams.resultTypes}
-        onChange={onAlertParamChange('resultTypes')}
+        value={alertParams.resultType}
+        onChange={useCallback(onAlertParamChange('resultType'), [])}
       />
-      <SeveritySelector value={alertParams.severity} onChange={onAlertParamChange('severity')} />
-      <IntervalSelector value={alertParams.timeRange} onChange={onAlertParamChange('timeRange')} />
+      <SeveritySelector
+        value={alertParams.severity}
+        onChange={useCallback(onAlertParamChange('severity'), [])}
+      />
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
 
       <EuiSpacer size="m" />

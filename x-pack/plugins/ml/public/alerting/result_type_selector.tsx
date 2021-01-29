@@ -5,23 +5,19 @@
  */
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 import { AnomalyResultType } from '../../common/types/anomalies';
 
 export interface ResultTypeSelectorProps {
-  value: AnomalyResultType[] | undefined;
-  onChange: (value: AnomalyResultType[]) => void;
+  value: AnomalyResultType | undefined;
+  onChange: (value: AnomalyResultType) => void;
 }
 
 export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
-  value: selectedResultTypes = [],
+  value: selectedResultType = [],
   onChange,
 }) => {
-  const valuesSet: Set<AnomalyResultType> = useMemo(() => new Set(selectedResultTypes), [
-    selectedResultTypes,
-  ]);
-
   const resultTypeOptions = [
     {
       value: ANOMALY_RESULT_TYPE.BUCKET,
@@ -76,14 +72,13 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
                 description={description}
                 selectable={{
                   onClick: () => {
-                    if (valuesSet.has(value)) {
-                      valuesSet.delete(value);
-                    } else {
-                      valuesSet.add(value);
+                    if (selectedResultType === value) {
+                      // don't allow de-select
+                      return;
                     }
-                    onChange([...valuesSet]);
+                    onChange(value);
                   },
-                  isSelected: selectedResultTypes.includes(value),
+                  isSelected: value === selectedResultType,
                 }}
               />
             </EuiFlexItem>
