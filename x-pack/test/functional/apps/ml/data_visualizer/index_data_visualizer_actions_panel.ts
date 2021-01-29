@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('view in discover page action', function () {
       const savedSearch = 'ft_farequote_kuery';
       const expectedQuery = 'airline: A* and responsetime > 5';
+      const docCountFormatted = '34,415';
 
       it('loads the source data in the data visualizer', async () => {
         await ml.testExecution.logTestStep('loads the data visualizer selector page');
@@ -74,6 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
         await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);
+
+        await ml.testExecution.logTestStep(`loads data for full time range`);
+        await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
+        await ml.dataVisualizerIndexBased.clickUseFullDataButton(docCountFormatted);
       });
 
       it('navigates to Discover page', async () => {
@@ -84,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('retains the query in Discover page');
         await ml.dataVisualizerIndexBased.clickViewInDiscoverButton();
         await ml.dataVisualizerIndexBased.assertDiscoverPageQuery(expectedQuery);
+        await ml.dataVisualizerIndexBased.assertDiscoverHitCount(docCountFormatted);
       });
     });
   });

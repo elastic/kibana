@@ -353,6 +353,9 @@ export default function ({ getService }: FtrProviderContext) {
             );
             await ml.dataVisualizerIndexBased.assertActionsPanelExists();
             await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+
+            await ml.testExecution.logTestStep('should not display job cards');
+            await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
           });
 
           it('should display elements on File Data Visualizer page correctly', async () => {

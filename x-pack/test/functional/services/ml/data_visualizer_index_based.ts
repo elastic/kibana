@@ -165,13 +165,25 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
+
     async assertDiscoverPageQuery(expectedQueryString: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await retry.tryForTime(5000, async () => {
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql(
           expectedQueryString,
-          `Expected global query bar to have query ${expectedQueryString}, got ${queryString}`
+          `Expected Discover global query bar to have query '${expectedQueryString}', got '${queryString}'`
+        );
+      });
+    },
+
+    async assertDiscoverHitCount(expectedHitCountFormatted: string) {
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+      await retry.tryForTime(5000, async () => {
+        const hitCount = await PageObjects.discover.getHitCount();
+        expect(hitCount).to.eql(
+          expectedHitCountFormatted,
+          `Expected Discover hit count to be '${expectedHitCountFormatted}' (got '${hitCount}')`
         );
       });
     },
