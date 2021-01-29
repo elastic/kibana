@@ -203,7 +203,6 @@ export const signalRulesAlertType = ({
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
                 : ['@timestamp'],
-              allow_no_indices: false,
               include_unmapped: true,
             }),
           ]);
