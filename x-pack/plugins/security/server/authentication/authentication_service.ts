@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'rxjs/operators';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   LoggerFactory,
@@ -67,10 +66,6 @@ export class AuthenticationService {
     this.license = license;
 
     http.registerAuth(async (request, response, t) => {
-      await license.license$.pipe(take(1)).toPromise();
-      // eslint-disable-next-line no-console
-      console.log('***** AWAIT REGISTER AUTH COMPLETE');
-
       if (!license.isLicenseAvailable()) {
         this.logger.error('License is not available, authentication is not possible.');
         return response.customError({

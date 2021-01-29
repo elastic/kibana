@@ -14,7 +14,6 @@ export interface SecurityLicense {
   isEnabled(): boolean;
   getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
-  license$: Observable<ILicense>;
   features$: Observable<SecurityLicenseFeatures>;
 }
 
@@ -29,15 +28,11 @@ export class SecurityLicenseService {
     let rawLicense: Readonly<ILicense> | undefined;
 
     this.licenseSubscription = license$.subscribe((nextRawLicense) => {
-      // eslint-disable-next-line no-console
-      console.log('***** NEXT RAW LICENSE');
       rawLicense = nextRawLicense;
     });
 
     return {
       license: Object.freeze({
-        license$,
-
         isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
 
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
