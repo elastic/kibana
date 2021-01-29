@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { parse } from 'tinymath';
+import { parse } from '@kbn/tinymath';
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
@@ -67,7 +67,6 @@ export const formulaOperation: OperationDefinition<
     };
   },
   toExpression: (layer, columnId) => {
-    console.log(layer.columns[columnId]);
     return [
       {
         type: 'function',
@@ -121,7 +120,7 @@ export const formulaOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern, operationDefinitionMap) => {
     // Basic idea: if it has any math operation in it, probably it cannot be transferable
     const ast = parse(column.params.ast);
-    return hasMathNode(ast, operationDefinitionMap);
+    return !hasMathNode(ast, operationDefinitionMap);
   },
 
   paramEditor: function ParamEditor({
