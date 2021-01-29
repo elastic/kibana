@@ -224,13 +224,14 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobs('security');
 
-      /*
-      return securityJobs.jobs.map(job => {
-        job.job_id,
-        job.create_time,
-        job.finished_time
-      });
-      */
+      return securityJobs.jobs.map(
+        (job) =>
+          ({
+            job_id: job.job_id,
+            time_start: job.create_time,
+            time_finish: job.finished_time,
+          } as MlJobMetric)
+      );
     } catch (e) {
       // swallow any exceptions
     }
