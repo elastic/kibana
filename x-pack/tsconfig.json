@@ -18,6 +18,7 @@
     "plugins/features/**/*",
     "plugins/embeddable_enhanced/**/*",
     "plugins/event_log/**/*",
+    "plugins/enterprise_search/**/*",
     "plugins/licensing/**/*",
     "plugins/lens/**/*",
     "plugins/maps/**/*",
@@ -40,6 +41,8 @@
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
     "plugins/license_management/**/*",
+    "plugins/painless_lab/**/*",
+    "plugins/watcher/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -89,6 +92,7 @@
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/encrypted_saved_objects/tsconfig.json" },
+    { "path": "./plugins/enterprise_search/tsconfig.json" },
     { "path": "./plugins/event_log/tsconfig.json" },
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/global_search_bar/tsconfig.json" },
@@ -101,6 +105,7 @@
     { "path": "./plugins/maps_file_upload/tsconfig.json" },
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
+    { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/security/tsconfig.json" },
@@ -111,5 +116,6 @@
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "./plugins/watcher/tsconfig.json" },
   ]
 }
