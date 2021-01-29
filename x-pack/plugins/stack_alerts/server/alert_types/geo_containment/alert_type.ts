@@ -98,7 +98,6 @@ export const ParamsSchema = schema.object({
   boundaryIndexId: schema.string({ minLength: 1 }),
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
   indexQuery: schema.maybe(schema.any({})),
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
@@ -114,7 +113,6 @@ export interface GeoContainmentParams extends AlertTypeParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }

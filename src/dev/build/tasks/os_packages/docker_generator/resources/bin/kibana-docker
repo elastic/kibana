@@ -15,11 +15,17 @@
 #       --elasticsearch.logQueries=true
 
 kibana_vars=(
+    apm_oss.apmAgentConfigurationIndex
+    apm_oss.errorIndices
+    apm_oss.indexPattern
+    apm_oss.metricsIndices
+    apm_oss.onboardingIndices
+    apm_oss.sourcemapIndices
+    apm_oss.spanIndices
+    apm_oss.transactionIndices
     console.enabled
     console.proxyConfig
     console.proxyFilter
-    ops.cGroupOverrides.cpuPath
-    ops.cGroupOverrides.cpuAcctPath
     cpu.cgroup.path.override
     cpuacct.cgroup.path.override
     csp.rules
@@ -41,10 +47,10 @@ kibana_vars=(
     elasticsearch.ssl.certificateAuthorities
     elasticsearch.ssl.key
     elasticsearch.ssl.keyPassphrase
-    elasticsearch.ssl.keystore.path
     elasticsearch.ssl.keystore.password
-    elasticsearch.ssl.truststore.path
+    elasticsearch.ssl.keystore.path
     elasticsearch.ssl.truststore.password
+    elasticsearch.ssl.truststore.path
     elasticsearch.ssl.verificationMode
     elasticsearch.username
     enterpriseSearch.accessCheckTimeout
@@ -76,34 +82,42 @@ kibana_vars=(
     map.tilemap.options.minZoom
     map.tilemap.options.subdomains
     map.tilemap.url
+    migrations.batchSize
+    migrations.enableV2
+    migrations.pollInterval
+    migrations.scrollDuration
+    migrations.skip
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.enabled
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
     monitoring.ui.container.elasticsearch.enabled
     monitoring.ui.container.logstash.enabled
+    monitoring.ui.elasticsearch.hosts
+    monitoring.ui.elasticsearch.logFetchCount
     monitoring.ui.elasticsearch.password
     monitoring.ui.elasticsearch.pingTimeout
-    monitoring.ui.elasticsearch.hosts
-    monitoring.ui.elasticsearch.username
-    monitoring.ui.elasticsearch.logFetchCount
     monitoring.ui.elasticsearch.ssl.certificateAuthorities
     monitoring.ui.elasticsearch.ssl.verificationMode
+    monitoring.ui.elasticsearch.username
     monitoring.ui.enabled
     monitoring.ui.max_bucket_size
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
+    ops.cGroupOverrides.cpuAcctPath
+    ops.cGroupOverrides.cpuPath
     ops.interval
     path.data
     pid.file
     regionmap
     security.showInsecureClusterWarning
     server.basePath
-    server.customResponseHeaders
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
     server.cors.origin
+    server.customResponseHeaders
+    server.customResponseHeaders
     server.defaultRoute
     server.host
     server.keepAliveTimeout
@@ -117,20 +131,24 @@ kibana_vars=(
     server.ssl.certificateAuthorities
     server.ssl.cipherSuites
     server.ssl.clientAuthentication
-    server.customResponseHeaders
     server.ssl.enabled
     server.ssl.key
     server.ssl.keyPassphrase
-    server.ssl.keystore.path
     server.ssl.keystore.password
-    server.ssl.truststore.path
-    server.ssl.truststore.password
+    server.ssl.keystore.path
     server.ssl.redirectHttpFromPort
     server.ssl.supportedProtocols
+    server.ssl.truststore.password
+    server.ssl.truststore.path
     server.xsrf.disableProtection
     server.xsrf.whitelist
     status.allowAnonymous
     status.v6ApiFormat
+    telemetry.allowChangingOptInStatus
+    telemetry.enabled
+    telemetry.optIn
+    telemetry.optInStatusUrl
+    telemetry.sendUsageFrom
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
@@ -142,9 +160,9 @@ kibana_vars=(
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
     xpack.actions.preconfigured
-    xpack.actions.proxyUrl
     xpack.actions.proxyHeaders
     xpack.actions.proxyRejectUnauthorizedCertificates
+    xpack.actions.proxyUrl
     xpack.actions.rejectUnauthorized
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
@@ -154,37 +172,29 @@ kibana_vars=(
     xpack.apm.ui.enabled
     xpack.apm.ui.maxTraceItems
     xpack.apm.ui.transactionGroupBucketSize
-    apm_oss.apmAgentConfigurationIndex
-    apm_oss.indexPattern
-    apm_oss.errorIndices
-    apm_oss.onboardingIndices
-    apm_oss.spanIndices
-    apm_oss.sourcemapIndices
-    apm_oss.transactionIndices
-    apm_oss.metricsIndices
     xpack.canvas.enabled
-    xpack.code.ui.enabled
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
-    xpack.code.maxWorkspace
     xpack.code.indexRepoFrequencyMs
-    xpack.code.updateRepoFrequencyMs
     xpack.code.lsp.verbose
-    xpack.code.verbose
+    xpack.code.maxWorkspace
     xpack.code.security.enableGitCertCheck
     xpack.code.security.gitHostWhitelist
     xpack.code.security.gitProtocolWhitelist
+    xpack.code.ui.enabled
+    xpack.code.updateRepoFrequencyMs
+    xpack.code.verbose
     xpack.encryptedSavedObjects.encryptionKey
     xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
     xpack.event_log.enabled
-    xpack.event_log.logEntries
     xpack.event_log.indexEntries
+    xpack.event_log.logEntries
     xpack.fleet.agents.elasticsearch.host
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.registryUrl
-    xpack.graph.enabled
     xpack.graph.canEditDrillDownUrls
+    xpack.graph.enabled
     xpack.graph.savePolicy
     xpack.grokdebugger.enabled
     xpack.infra.enabled
@@ -208,28 +218,28 @@ kibana_vars=(
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
     xpack.reporting.capture.browser.chromium.maxScreenshotDimension
+    xpack.reporting.capture.browser.chromium.proxy.bypass
     xpack.reporting.capture.browser.chromium.proxy.enabled
     xpack.reporting.capture.browser.chromium.proxy.server
-    xpack.reporting.capture.browser.chromium.proxy.bypass
     xpack.reporting.capture.browser.type
     xpack.reporting.capture.concurrency
     xpack.reporting.capture.loadDelay
+    xpack.reporting.capture.maxAttempts
     xpack.reporting.capture.settleTime
     xpack.reporting.capture.timeout
+    xpack.reporting.capture.timeouts.openUrl
+    xpack.reporting.capture.timeouts.renderComplete
+    xpack.reporting.capture.timeouts.waitForElements
     xpack.reporting.capture.viewport.height
     xpack.reporting.capture.viewport.width
     xpack.reporting.capture.zoom
     xpack.reporting.csv.checkForFormulas
-    xpack.reporting.csv.escapeFormulaValues
     xpack.reporting.csv.enablePanelActionDownload
-    xpack.reporting.csv.useByteOrderMarkEncoding
+    xpack.reporting.csv.escapeFormulaValues
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
-    xpack.reporting.capture.maxAttempts
-    xpack.reporting.capture.timeouts.openUrl
-    xpack.reporting.capture.timeouts.waitForElements
-    xpack.reporting.capture.timeouts.renderComplete
+    xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey
     xpack.reporting.index
@@ -248,43 +258,38 @@ kibana_vars=(
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.rollup.enabled
-    xpack.security.audit.enabled
     xpack.searchprofiler.enabled
-    xpack.security.authc.providers
+    xpack.security.audit.enabled
     xpack.security.authc.oidc.realm
-    xpack.security.authc.saml.realm
+    xpack.security.authc.providers
     xpack.security.authc.saml.maxRedirectURLSize
+    xpack.security.authc.saml.realm
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey
-    xpack.security.sameSiteCookies
-    xpack.security.secureCookies
-    xpack.security.sessionTimeout
-    xpack.security.session.idleTimeout
-    xpack.security.session.lifespan
-    xpack.security.session.cleanupInterval
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
+    xpack.security.sameSiteCookies
+    xpack.security.secureCookies
+    xpack.security.session.cleanupInterval
+    xpack.security.session.idleTimeout
+    xpack.security.session.lifespan
+    xpack.security.sessionTimeout
     xpack.spaces.enabled
     xpack.spaces.maxSpaces
     xpack.task_manager.enabled
-    xpack.task_manager.max_attempts
-    xpack.task_manager.poll_interval
-    xpack.task_manager.max_poll_inactivity_cycles
-    xpack.task_manager.request_capacity
     xpack.task_manager.index
+    xpack.task_manager.max_attempts
+    xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
-    xpack.task_manager.monitored_stats_required_freshness
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
+    xpack.task_manager.monitored_stats_required_freshness
     xpack.task_manager.monitored_stats_running_average_window
     xpack.task_manager.monitored_task_execution_thresholds
+    xpack.task_manager.poll_interval
+    xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
-    telemetry.allowChangingOptInStatus
-    telemetry.enabled
-    telemetry.optIn
-    telemetry.optInStatusUrl
-    telemetry.sendUsageFrom
 )
 
 longopts=''
