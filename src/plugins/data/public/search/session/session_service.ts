@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { PublicContract } from '@kbn/utility-types';
@@ -55,6 +44,20 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
 }
 
 /**
+ * Configure a "Search session indicator" UI
+ */
+export interface SearchSessionIndicatorUiConfig {
+  /**
+   * App controls if "Search session indicator" UI should be disabled.
+   * reasonText will appear in a tooltip.
+   *
+   * Could be used, for example, to disable "Search session indicator" UI
+   * in case user doesn't have permissions to store a search session
+   */
+  isDisabled: () => { disabled: true; reasonText: string } | { disabled: false };
+}
+
+/**
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
 export class SessionService {
@@ -62,6 +65,7 @@ export class SessionService {
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
+  private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
   private curApp?: string;
 
@@ -111,17 +115,6 @@ export class SessionService {
         })
       );
     });
-  }
-
-  /**
-   * Set a provider of info about current session
-   * This will be used for creating a search session saved object
-   * @param searchSessionInfoProvider
-   */
-  public setSearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID> | undefined
-  ) {
-    this.searchSessionInfoProvider = searchSessionInfoProvider;
   }
 
   /**
@@ -196,7 +189,8 @@ export class SessionService {
    */
   public clear() {
     this.state.transitions.clear();
-    this.setSearchSessionInfoProvider(undefined);
+    this.searchSessionInfoProvider = undefined;
+    this.searchSessionIndicatorUiConfig = undefined;
   }
 
   private refresh$ = new Subject<void>();
@@ -278,6 +272,36 @@ export class SessionService {
       sessionId,
       isRestore: isCurrentSession ? this.isRestore() : false,
       isStored: isCurrentSession ? this.isStored() : false,
+    };
+  }
+
+  /**
+   * Provide an info about current session which is needed for storing a search session.
+   * To opt-into "Search session indicator" UI app has to call {@link enableStorage}.
+   *
+   * @param searchSessionInfoProvider - info provider for saving a search session
+   * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
+   */
+  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+    searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
+  ) {
+    this.searchSessionInfoProvider = searchSessionInfoProvider;
+    this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
+  }
+
+  /**
+   * If the current app explicitly called {@link enableStorage} and provided all configuration needed
+   * for storing its search sessions
+   */
+  public isSessionStorageReady(): boolean {
+    return !!this.searchSessionInfoProvider;
+  }
+
+  public getSearchSessionIndicatorUiConfig(): SearchSessionIndicatorUiConfig {
+    return {
+      isDisabled: () => ({ disabled: false }),
+      ...this.searchSessionIndicatorUiConfig,
     };
   }
 }

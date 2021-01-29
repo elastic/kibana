@@ -39,10 +39,6 @@ ifeval::["{release-state}"!="unreleased"]
 docker pull {docker-repo}:{version}
 --------------------------------------------
 
-Alternatively, you can download other Docker images that contain only features
-available under the Apache 2.0 license. To download the images, go to
-https://www.docker.elastic.co[www.docker.elastic.co].
-
 [float]
 === Run Kibana on Docker for development
 Kibana can be quickly started and connected to a local Elasticsearch container for development
@@ -132,9 +128,6 @@ images:
 `server.host`:: `"0.0.0.0"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
 `monitoring.ui.container.elasticsearch.enabled`:: `true`
-
-NOTE: The setting `monitoring.ui.container.elasticsearch.enabled` is not
-defined in the `-oss` image.
 
 These settings are defined in the default `kibana.yml`. They can be overridden
 with a <<bind-mount-config,custom `kibana.yml`>> or via

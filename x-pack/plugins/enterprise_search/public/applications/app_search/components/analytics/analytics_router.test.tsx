@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../__mocks__/engine_logic.mock';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Route, Switch } from 'react-router-dom';
@@ -16,6 +18,6 @@ describe('AnalyticsRouter', () => {
     const wrapper = shallow(<AnalyticsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(8);
+    expect(wrapper.find(Route)).toHaveLength(9);
   });
 });

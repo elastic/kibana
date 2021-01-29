@@ -5,10 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
 import { FindAssignableObjectResponse } from '../../../common/http_api_types';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerFindAssignableObjectsRoute = (router: IRouter) => {
+export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/internal/saved_objects_tagging/assignments/_find_assignable_objects',

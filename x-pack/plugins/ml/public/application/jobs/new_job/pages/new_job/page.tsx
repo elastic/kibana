@@ -182,7 +182,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
 
-  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
+  const jobValidator = new JobValidator(jobCreator);
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 

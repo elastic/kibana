@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
@@ -40,24 +41,18 @@ export interface Services {
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    actions?: {
-      getActionsClient: () => ActionsClient;
-      listTypes: ActionTypeRegistry['list'];
-    };
-  }
+export interface ActionsApiRequestHandlerContext {
+  getActionsClient: () => ActionsClient;
+  listTypes: ActionTypeRegistry['list'];
+}
+
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+  actions: ActionsApiRequestHandlerContext;
 }
 
 export interface ActionsPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
-}
-
-export interface ActionsConfigType {
-  enabled: boolean;
-  allowedHosts: string[];
-  enabledActionTypes: string[];
 }
 
 // the parameters passed to an action type executor function
@@ -67,7 +62,6 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
-  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {

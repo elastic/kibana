@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+
 export interface InputOverrides {
   [key: string]: string;
 }
@@ -29,15 +31,27 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      mean_value?: number;
+      median_value?: number;
       max_value?: number;
       min_value?: number;
+      earliest?: string;
+      latest?: string;
     };
   };
   sample_start: string;
   num_messages_analyzed: number;
   mappings: {
-    [fieldName: string]: {
-      type: string;
+    properties: {
+      [fieldName: string]: {
+        // including all possible Elasticsearch types
+        // since find_file_structure API can be enhanced to include new fields in the future
+        type: Exclude<
+          ES_FIELD_TYPES,
+          ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
+        >;
+        format?: string;
+      };
     };
   };
   quote: string;
