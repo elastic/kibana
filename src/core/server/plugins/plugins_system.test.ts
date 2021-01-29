@@ -25,7 +25,6 @@ import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
 
-const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -34,8 +33,8 @@ function createPlugin(
     server = true,
     ui = true,
   }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
-) {
-  return new PluginWrapper({
+): PluginWrapper<any, any> {
+  return new PluginWrapper<any, any>({
     path: 'some-path',
     manifest: {
       id,
@@ -53,25 +52,25 @@ function createPlugin(
   });
 }
 
-let pluginsSystem: PluginsSystem;
-const configService = configServiceMock.create();
-configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
-let env: Env;
-let coreContext: CoreContext;
-
 const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
+let pluginsSystem: PluginsSystem;
+let configService: ReturnType<typeof configServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
+let env: Env;
+let coreContext: CoreContext;
+
 beforeEach(() => {
+  logger = loggingSystemMock.create();
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+  configService = configServiceMock.create();
+  configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
   pluginsSystem = new PluginsSystem(coreContext);
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
 });
 
 test('can be setup even without plugins', async () => {
@@ -208,7 +207,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
         start: { 'order-2': 'started-as-2' },
       },
     ],
-  ] as Array<[PluginWrapper, Contracts]>);
+  ] as Array<[PluginWrapper<any, any>, Contracts]>);
 
   const setupContextMap = new Map();
   const startContextMap = new Map();
@@ -472,7 +471,7 @@ describe('start', () => {
     jest.useRealTimers();
   });
   it('throws timeout error if "start" was not completed in 30 sec.', async () => {
-    const plugin: PluginWrapper = createPlugin('timeout-start');
+    const plugin = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
     jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
@@ -503,5 +502,122 @@ describe('start', () => {
     await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+  });
+});
+
+describe('asynchronous plugins', () => {
+  const runScenario = async ({
+    production,
+    asyncSetup,
+    asyncStart,
+  }: {
+    production: boolean;
+    asyncSetup: boolean;
+    asyncStart: boolean;
+  }) => {
+    env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        cliArgs: {
+          dev: !production,
+          envName: production ? 'production' : 'development',
+        },
+      })
+    );
+    coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+    pluginsSystem = new PluginsSystem(coreContext);
+
+    const syncPlugin = createPlugin('sync-plugin');
+    jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
+    jest.spyOn(syncPlugin, 'start').mockReturnValue('start-sync');
+    pluginsSystem.addPlugin(syncPlugin);
+
+    const asyncPlugin = createPlugin('async-plugin');
+    jest
+      .spyOn(asyncPlugin, 'setup')
+      .mockReturnValue(asyncSetup ? Promise.resolve('setup-async') : 'setup-sync');
+    jest
+      .spyOn(asyncPlugin, 'start')
+      .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
+    pluginsSystem.addPlugin(asyncPlugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+  };
+
+  it('logs a warning if a plugin returns a promise from its setup contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its setup contract in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning if a plugin returns a promise from its start contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its start contract  in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs multiple warnings if both `setup` and `start` return promises', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
   });
 });
