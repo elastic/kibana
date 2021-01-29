@@ -9,7 +9,7 @@ import { ISavedObjectsRepository } from 'kibana/server';
 
 import { getInternalRepository } from './internal_repository';
 
-export const TELEMETRY_DOC_ID = 'ml-telemetry';
+export const TELEMETRY_DOC_ID = 'file-upload-usage-collection-telemetry';
 
 export interface Telemetry {
   file_upload: {
