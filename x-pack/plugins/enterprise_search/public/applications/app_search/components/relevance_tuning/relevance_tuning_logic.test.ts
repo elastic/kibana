@@ -97,6 +97,18 @@ describe('RelevanceTuningLogic', () => {
           schemaConflicts,
         });
       });
+
+      it('should default schemaConflicts if it is not passed', () => {
+        mount({
+          dataLoading: true,
+        });
+        RelevanceTuningLogic.actions.onInitializeRelevanceTuning({
+          searchSettings,
+          schema,
+        });
+
+        expect(RelevanceTuningLogic.values.schemaConflicts).toEqual({});
+      });
     });
 
     describe('setSearchSettings', () => {

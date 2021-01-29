@@ -32,7 +32,7 @@ import {
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
-  schemaConflicts: SchemaConflicts;
+  schemaConflicts?: SchemaConflicts;
 }
 
 interface RelevanceTuningActions {
@@ -176,7 +176,7 @@ export const RelevanceTuningLogic = kea<
     schemaConflicts: [
       {},
       {
-        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts,
+        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],
     showSchemaConflictCallout: [
