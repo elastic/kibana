@@ -17,6 +17,7 @@ function generator({
   dockerTargetFilename,
   baseOSImage,
   ubiImageFlavor,
+  architecture,
 }: TemplateContext) {
   return dedent(`
   #!/usr/bin/env bash
