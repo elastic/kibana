@@ -73,27 +73,6 @@ export const FriendlyFlyoutLabels = {
       defaultMessage: 'Request start',
     }
   ),
-  [Timings.Dns]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metaData.dns', {
-    defaultMessage: 'DNS lookup',
-  }),
-  [Timings.Connect]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.connect',
-    {
-      defaultMessage: 'Initial connection',
-    }
-  ),
-  [Timings.Ssl]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metaData.ssl', {
-    defaultMessage: 'SSL negotation',
-  }),
-  [Timings.Wait]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metaData.wait', {
-    defaultMessage: 'Time to first byte',
-  }),
-  [Timings.Receive]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.receive',
-    {
-      defaultMessage: 'Content downloaded',
-    }
-  ),
   [MetaData.BytesDownloaded]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.metaData.bytesDownloaded',
     {

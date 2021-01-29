@@ -5,7 +5,14 @@
  */
 
 import { colourPalette, getSeriesAndDomain } from './data_formatting';
-import { NetworkItems, MimeType, FriendlyFlyoutLabels, Timings, MetaData } from './types';
+import {
+  NetworkItems,
+  MimeType,
+  FriendlyFlyoutLabels,
+  FriendlyTimingLabels,
+  Timings,
+  MetaData,
+} from './types';
 import { WaterfallDataEntry } from '../../waterfall/types';
 
 export const networkItems: NetworkItems = [
@@ -510,11 +517,11 @@ describe('getSeriesAndDomain', () => {
   it.each([
     [FriendlyFlyoutLabels[MetaData.MimeType], 'text/css'],
     [FriendlyFlyoutLabels[MetaData.RequestStart], '0.000 ms'],
-    [FriendlyFlyoutLabels[Timings.Dns], '3.560 ms'],
-    [FriendlyFlyoutLabels[Timings.Connect], '25.721 ms'],
-    [FriendlyFlyoutLabels[Timings.Ssl], '55.387 ms'],
-    [FriendlyFlyoutLabels[Timings.Wait], '34.578 ms'],
-    [FriendlyFlyoutLabels[Timings.Receive], '0.552 ms'],
+    [FriendlyTimingLabels[Timings.Dns], '3.560 ms'],
+    [FriendlyTimingLabels[Timings.Connect], '25.721 ms'],
+    [FriendlyTimingLabels[Timings.Ssl], '55.387 ms'],
+    [FriendlyTimingLabels[Timings.Wait], '34.578 ms'],
+    [FriendlyTimingLabels[Timings.Receive], '0.552 ms'],
     [FriendlyFlyoutLabels[MetaData.BytesDownloaded], '1.000 KB'],
   ])('handles metaData details formatting', (name, value) => {
     const { metaData } = getSeriesAndDomain(networkItems);

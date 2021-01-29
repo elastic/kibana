@@ -247,23 +247,23 @@ const formatMetaData = ({
         value: getFriendlyMetaDataValue({ value: requestStart, postFix: 'ms' }),
       },
       {
-        name: FriendlyFlyoutLabels[Timings.Dns],
+        name: FriendlyTimingLabels[Timings.Dns],
         value: getFriendlyMetaDataValue({ value: dns, postFix: 'ms' }),
       },
       {
-        name: FriendlyFlyoutLabels[Timings.Connect],
+        name: FriendlyTimingLabels[Timings.Connect],
         value: getFriendlyMetaDataValue({ value: getConnectingTime(connect, ssl), postFix: 'ms' }),
       },
       {
-        name: FriendlyFlyoutLabels[Timings.Ssl],
+        name: FriendlyTimingLabels[Timings.Ssl],
         value: getFriendlyMetaDataValue({ value: ssl, postFix: 'ms' }),
       },
       {
-        name: FriendlyFlyoutLabels[Timings.Wait],
+        name: FriendlyTimingLabels[Timings.Wait],
         value: getFriendlyMetaDataValue({ value: wait, postFix: 'ms' }),
       },
       {
-        name: FriendlyFlyoutLabels[Timings.Receive],
+        name: FriendlyTimingLabels[Timings.Receive],
         value: getFriendlyMetaDataValue({
           value: contentDownloaded,
           postFix: 'ms',
