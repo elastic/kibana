@@ -19,7 +19,7 @@ const createNameNotAllowedValidator = (
   if (namesNotAllowed.includes(value)) {
     return {
       message: i18n.translate(
-        'xpack.runtimeFields.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
+        'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
         {
           defaultMessage: 'There is already a field with this name.',
         }

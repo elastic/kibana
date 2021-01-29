@@ -52,23 +52,7 @@ export interface Props {
  * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
  * anything about where a field comes from and where it should be persisted.
  */
-/*
-export const FieldEditorFlyoutContentContainer = ({
-  field,
-  onSave,
-  onCancel,
-  docLinks,
-  indexPatternService,
-  ctx: { indexPattern },
-}: Props) => {
-  const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
-  const saveField = useCallback(async () => {
-    indexPatternService.updateSavedObject(indexPattern).then(() => {
-      onSave({} as any);
-    });
-  }, [onSave, indexPatternService, indexPattern]);
-  */
 export const FieldEditorFlyoutContentContainer = ({
   field,
   onSave,
@@ -84,12 +68,10 @@ export const FieldEditorFlyoutContentContainer = ({
     async (updatedField: Field) => {
       const indexPatternField = serializeField(updatedField);
       indexPatternService.updateSavedObject(indexPattern).then(() => {
-        onSave({} as any);
+        onSave(indexPatternField);
       });
-      // TODO: here we will put the logic to update the Kibana saved object
-      onSave(indexPatternField);
     },
-    [onSave, indexPatternService, indexPattern]
+    [onSave, indexPattern, indexPatternService]
   );
 
   const loadEditor = useCallback(async () => {

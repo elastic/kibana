@@ -75,7 +75,7 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
             isInvalid={!isValid}
             helpText={
               <FormattedMessage
-                id="xpack.runtimeFields.form.source.scriptFieldHelpText"
+                id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
                 defaultMessage="Runtime fields without a script retrieve values from a field with the same name in {source}. If a field with the same name doesn’t exist, no values return when a search request includes the runtime field. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
@@ -85,9 +85,12 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
                       external
                       data-test-subj="painlessSyntaxLearnMoreLink"
                     >
-                      {i18n.translate('xpack.runtimeFields.form.script.learnMoreLinkText', {
-                        defaultMessage: 'Learn about script syntax.',
-                      })}
+                      {i18n.translate(
+                        'indexPatternFieldEditor.editor.form.script.learnMoreLinkText',
+                        {
+                          defaultMessage: 'Learn about script syntax.',
+                        }
+                      )}
                     </EuiLink>
                   ),
                   source: <EuiCode>{'_source'}</EuiCode>,
@@ -117,9 +120,12 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
                 },
               }}
               data-test-subj="scriptField"
-              aria-label={i18n.translate('xpack.runtimeFields.form.scriptEditorAriaLabel', {
-                defaultMessage: 'Script editor',
-              })}
+              aria-label={i18n.translate(
+                'indexPatternFieldEditor.editor.form.scriptEditorAriaLabel',
+                {
+                  defaultMessage: 'Script editor',
+                }
+              )}
             />
           </EuiFormRow>
         );
