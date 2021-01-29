@@ -48,6 +48,11 @@ export interface IEventLogClient {
     ids: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult>;
+  getEventsForAlertInstancesSummary(
+    ids: string[],
+    start?: string,
+    end?: string
+  ): Promise<Array<{ alertId: string; instances: AlertInstanceSummary[] }>>;
 }
 
 export interface IEventLogger {
@@ -74,3 +79,11 @@ export interface EventLogRequestHandlerContext extends RequestHandlerContext {
  * @internal
  */
 export type EventLogRouter = IRouter<EventLogRequestHandlerContext>;
+
+export interface AlertInstanceSummary {
+  instance_id: string;
+  lastAction: string;
+  actionGroupId?: string;
+  actionSubgroup?: string;
+  activeStartDate?: string;
+}

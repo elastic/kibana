@@ -14,7 +14,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "generated/*.json",
     "common/*"
-  ],
+, "server/routes/.ts"  ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" }
