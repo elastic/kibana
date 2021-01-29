@@ -13,7 +13,14 @@ import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 
-export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizationDependencies) =>
+type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
+  render(visData: VegaParser): Promise<void>;
+  destroy(): void;
+};
+
+export const createVegaVisualization = ({
+  getServiceSettings,
+}: VegaVisualizationDependencies): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
