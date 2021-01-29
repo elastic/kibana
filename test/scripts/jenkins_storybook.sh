@@ -19,3 +19,4 @@ yarn storybook --site infra
 yarn storybook --site security_solution
 yarn storybook --site ui_actions_enhanced
 yarn storybook --site observability
+yarn storybook --site presentation
