@@ -23,7 +23,7 @@ test('Loading state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loading'));
+  await userEvent.click(screen.getByLabelText('Search session loading'));
   await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
@@ -51,9 +51,7 @@ test('Loading in the background state', async () => {
     </Container>
   );
 
-  await userEvent.click(
-    screen.getByLabelText('Search session saved and loading in the background')
-  );
+  await userEvent.click(screen.getByLabelText('Search session saved and loading'));
   await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();

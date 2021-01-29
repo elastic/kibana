@@ -59,7 +59,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
 
     public async viewSearchSessions() {
       await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorviewSearchSessionsLink');
+      await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
     public async save() {

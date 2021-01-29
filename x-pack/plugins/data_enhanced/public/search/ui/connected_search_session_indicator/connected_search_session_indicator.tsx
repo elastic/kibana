@@ -4,33 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import React, { useRef } from 'react';
+import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
+import { EMPTY, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { SearchSessionIndicator } from '../search_session_indicator';
-import { ISessionService, TimefilterContract } from '../../../../../../../src/plugins/data/public/';
+import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
+import {
+  ISessionService,
+  SearchSessionState,
+  TimefilterContract,
+} from '../../../../../../../src/plugins/data/public/';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
+import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
+import { useSearchSessionTour } from './search_session_tour';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
   timeFilter: TimefilterContract;
   application: ApplicationStart;
+  storage: IStorageWrapper;
 }
 
 export const createConnectedSearchSessionIndicator = ({
   sessionService,
   application,
   timeFilter,
+  storage,
 }: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
     .pipe(map(isAutoRefreshEnabled), distinctUntilChanged());
 
+  const debouncedSessionServiceState$ = sessionService.state$.pipe(
+    debounce((_state) => (_state === SearchSessionState.None ? EMPTY : timer(500))) // do not debounce to "NONE" transition
+  );
+
   return () => {
-    const state = useObservable(sessionService.state$.pipe(debounceTime(500)));
+    const ref = useRef<SearchSessionIndicatorRef>(null);
+    const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
     const autoRefreshEnabled = useObservable(isAutoRefreshEnabled$, isAutoRefreshEnabled());
     const isDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
 
@@ -42,10 +56,17 @@ export const createConnectedSearchSessionIndicator = ({
       disabledReasonText = i18n.translate(
         'xpack.data.searchSessionIndicator.disabledDueToAutoRefreshMessage',
         {
-          defaultMessage: 'Send to background is not available when auto refresh is enabled.',
+          defaultMessage: 'Search sessions are not available when auto refresh is enabled.',
         }
       );
     }
+
+    const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
+      storage,
+      ref,
+      state,
+      disabled
+    );
 
     if (isDisabledByApp.disabled) {
       disabled = true;
@@ -53,10 +74,10 @@ export const createConnectedSearchSessionIndicator = ({
     }
 
     if (!sessionService.isSessionStorageReady()) return null;
-    if (!state) return null;
     return (
       <RedirectAppLinks application={application}>
         <SearchSessionIndicator
+          ref={ref}
           state={state}
           onContinueInBackground={() => {
             sessionService.save();
@@ -72,6 +93,12 @@ export const createConnectedSearchSessionIndicator = ({
           }}
           disabled={disabled}
           disabledReasonText={disabledReasonText}
+          onOpened={(openedState) => {
+            markOpenedDone();
+            if (openedState === SearchSessionState.Restored) {
+              markRestoredDone();
+            }
+          }}
         />
       </RedirectAppLinks>
     );

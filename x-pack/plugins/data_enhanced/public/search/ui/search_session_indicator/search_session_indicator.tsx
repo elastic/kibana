@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useImperativeHandle } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -33,6 +33,7 @@ export interface SearchSessionIndicatorProps {
   onRefresh?: () => void;
   disabled?: boolean;
   disabledReasonText?: string;
+  onOpened?: (openedState: SearchSessionState) => void;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -73,7 +74,7 @@ const ViewAllSearchSessionsButton = ({
 }: ActionButtonProps) => (
   <EuiButtonEmpty
     href={viewSearchSessionsLink}
-    data-test-subj={'searchSessionIndicatorviewSearchSessionsLink'}
+    data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
     {...buttonProps}
   >
     <FormattedMessage
@@ -129,11 +130,11 @@ const searchSessionIndicatorViewStateToProps: {
       iconType: 'clock',
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
-        { defaultMessage: 'Loading' }
+        { defaultMessage: 'Search session loading' }
       ),
       tooltipText: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconTooltipText',
-        { defaultMessage: 'Loading' }
+        { defaultMessage: 'Search session loading' }
       ),
     },
     popover: {
@@ -149,8 +150,8 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Completed]: {
     button: {
-      color: 'subdued',
-      iconType: 'checkInCircleFilled',
+      color: 'text',
+      iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',
       }),
@@ -181,25 +182,25 @@ const searchSessionIndicatorViewStateToProps: {
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel',
         {
-          defaultMessage: 'Search session saved and loading in the background',
+          defaultMessage: 'Search session saved and loading',
         }
       ),
       tooltipText: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconTooltipText',
         {
-          defaultMessage: 'Search session saved and loading in the background',
+          defaultMessage: 'Search session saved and loading',
         }
       ),
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
-        defaultMessage: 'Loading in the background',
+        defaultMessage: 'Search session loading',
       }),
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
         {
           defaultMessage:
-            'Search session saved and loading in the background. You can leave the page and get back to the results later.',
+            'Search session is saved. You can leave the page and get back to the results later.',
         }
       ),
       primaryAction: CancelButton,
@@ -233,7 +234,7 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundDescriptionText',
         {
-          defaultMessage: 'You can leave and get back to the results later.',
+          defaultMessage: 'You can leave and get back to the results later',
         }
       ),
       primaryAction: RefreshButton,
@@ -260,7 +261,7 @@ const searchSessionIndicatorViewStateToProps: {
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.restoredDescriptionText', {
         defaultMessage:
-          'You are viewing cached data from the specific time range. Changing the time range or filter will re-run the session.',
+          'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session.',
       }),
       primaryAction: RefreshButton,
       secondaryAction: ViewAllSearchSessionsButton,
@@ -282,7 +283,7 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'Search session canceled',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.canceledDescriptionText', {
-        defaultMessage: 'Canceled by user',
+        defaultMessage: 'You are viewing incomplete data',
       }),
       primaryAction: RefreshButton,
       secondaryAction: ViewAllSearchSessionsButton,
@@ -290,10 +291,38 @@ const searchSessionIndicatorViewStateToProps: {
   },
 };
 
-export const SearchSessionIndicator: React.FC<SearchSessionIndicatorProps> = (props) => {
+export interface SearchSessionIndicatorRef {
+  openPopover: () => void;
+}
+
+export const SearchSessionIndicator = React.forwardRef<
+  SearchSessionIndicatorRef,
+  SearchSessionIndicatorProps
+>((props, ref) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
-  const closePopover = () => setIsPopoverOpen(false);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const onOpened = props.onOpened;
+  const openPopover = useCallback(() => {
+    setIsPopoverOpen(true);
+    if (onOpened) onOpened(props.state);
+  }, [onOpened, props.state]);
+  const onButtonClick = useCallback(() => {
+    if (isPopoverOpen) {
+      closePopover();
+    } else {
+      openPopover();
+    }
+  }, [isPopoverOpen, openPopover, closePopover]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      openPopover: () => {
+        openPopover();
+      },
+    }),
+    [openPopover]
+  );
 
   if (!searchSessionIndicatorViewStateToProps[props.state]) return null;
 
@@ -310,6 +339,7 @@ export const SearchSessionIndicator: React.FC<SearchSessionIndicatorProps> = (pr
       data-test-subj={'searchSessionIndicator'}
       data-state={props.state}
       panelClassName={'searchSessionIndicator__panel'}
+      repositionOnScroll={true}
       button={
         <EuiToolTip
           content={props.disabled ? props.disabledReasonText : button.tooltipText}
@@ -325,35 +355,37 @@ export const SearchSessionIndicator: React.FC<SearchSessionIndicatorProps> = (pr
         </EuiToolTip>
       }
     >
-      <EuiText size="s">
-        <p>{popover.title}</p>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
-      <EuiText size="xs" color={'subdued'}>
-        <p>{popover.description}</p>
-      </EuiText>
-      <EuiSpacer size={'s'} />
-      <EuiFlexGroup
-        wrap={true}
-        responsive={false}
-        alignItems={'center'}
-        justifyContent={'flexEnd'}
-        gutterSize={'s'}
-      >
-        {popover.primaryAction && (
-          <EuiFlexItem grow={false}>
-            <popover.primaryAction {...props} buttonProps={{ size: 'xs' }} />
-          </EuiFlexItem>
-        )}
-        {popover.secondaryAction && (
-          <EuiFlexItem grow={false}>
-            <popover.secondaryAction {...props} buttonProps={{ size: 'xs', flush: 'right' }} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <div data-test-subj="searchSessionIndicatorPopoverContainer">
+        <EuiText size="s">
+          <p>{popover.title}</p>
+        </EuiText>
+        <EuiSpacer size={'xs'} />
+        <EuiText size="xs" color={'subdued'}>
+          <p>{popover.description}</p>
+        </EuiText>
+        <EuiSpacer size={'s'} />
+        <EuiFlexGroup
+          wrap={true}
+          responsive={false}
+          alignItems={'center'}
+          justifyContent={'flexEnd'}
+          gutterSize={'s'}
+        >
+          {popover.primaryAction && (
+            <EuiFlexItem grow={false}>
+              <popover.primaryAction {...props} buttonProps={{ size: 'xs' }} />
+            </EuiFlexItem>
+          )}
+          {popover.secondaryAction && (
+            <EuiFlexItem grow={false}>
+              <popover.secondaryAction {...props} buttonProps={{ size: 'xs', flush: 'right' }} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
     </EuiPopover>
   );
-};
+});
 
 // React.lazy() needs default:
 // eslint-disable-next-line import/no-default-export

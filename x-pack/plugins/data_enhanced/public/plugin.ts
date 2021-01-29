@@ -18,6 +18,7 @@ import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -36,6 +37,7 @@ export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
   private config!: ConfigSchema;
+  private readonly storage = new Storage(window.localStorage);
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -82,6 +84,7 @@ export class DataEnhancedPlugin
               sessionService: plugins.data.search.session,
               application: core.application,
               timeFilter: plugins.data.query.timefilter.timefilter,
+              storage: this.storage,
             })
           )
         ),
