@@ -6,27 +6,14 @@
  * Public License, v 1.
  */
 
-import { map, shareReplay } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
-import { PathConfigType, config as pathConfig } from '@kbn/utils';
-import { pick, deepFreeze } from '@kbn/std';
+import { shareReplay } from 'rxjs/operators';
 import type { RequestHandlerContext } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import {
-  PluginInitializerContext,
-  PluginManifest,
-  PluginOpaqueId,
-  SharedGlobalConfigKeys,
-} from './types';
-import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
-import {
-  ElasticsearchConfigType,
-  config as elasticsearchConfig,
-} from '../elasticsearch/elasticsearch_config';
+import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
 import { IRouter, RequestHandlerContextProvider } from '../http';
-import { SavedObjectsConfigType, savedObjectsConfig } from '../saved_objects/saved_objects_config';
+import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { CoreSetup, CoreStart } from '..';
 
 export interface InstanceInfo {
@@ -78,40 +65,19 @@ export function createPluginInitializerContext(
      */
     config: {
       legacy: {
-        /**
-         * Global configuration
-         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
-         * @deprecated
-         */
-        globalConfig$: combineLatest([
-          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
-          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-          coreContext.configService.atPath<PathConfigType>(pathConfig.path),
-          coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsConfig.path),
-        ]).pipe(
-          map(([kibana, elasticsearch, path, savedObjects]) =>
-            deepFreeze({
-              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
-              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
-              path: pick(path, SharedGlobalConfigKeys.path),
-              savedObjects: pick(savedObjects, SharedGlobalConfigKeys.savedObjects),
-            })
-          )
-        ),
+        globalConfig$: getGlobalConfig$(coreContext.configService),
+        get: () => getGlobalConfig(coreContext.configService),
       },
 
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
-       * manifest and validates it against the schema in the static `schema` on
-       * the given `ConfigClass`.
-       * @param ConfigClass A class (not an instance of a class) that contains a
-       * static `schema` that we validate the config at the given `path` against.
+       * manifest.
        */
       create<T>() {
         return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
       },
-      createIfExists() {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
+      get<T>() {
+        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
       },
     },
   };
