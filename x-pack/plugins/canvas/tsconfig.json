@@ -19,9 +19,13 @@
     "storybook/**/*",
     "tasks/mocks/*",
     "types/**/*",
-    "server/sample_data/*.json",
-    "canvas_plugin_src/functions/server/demodata/*.json",
-    "shareable_runtime/test/workpads/*.json",
+    "**/*.json",
+  ],
+  "exclude": [
+      // these files are too large and upset tsc, so we exclude them
+     "server/sample_data/*.json",
+     "canvas_plugin_src/functions/server/demodata/*.json",
+     "shareable_runtime/test/workpads/*.json",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
