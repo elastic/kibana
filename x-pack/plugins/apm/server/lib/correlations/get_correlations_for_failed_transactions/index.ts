@@ -140,7 +140,7 @@ export async function getErrorRateTimeSeries({
 
   const perTermAggs = topSigTerms.reduce(
     (acc, term, index) => {
-      acc[`term_${String(index)}`] = {
+      acc[`term_${index}`] = {
         filter: { term: { [term.fieldName]: term.fieldValue } },
         aggs: { timeseries: timeseriesAgg },
       };
@@ -178,7 +178,7 @@ export async function getErrorRateTimeSeries({
       ),
     },
     significantTerms: topSigTerms.map((topSig, index) => {
-      const agg = aggregations[`term_${String(index)}`]!;
+      const agg = aggregations[`term_${index}`]!;
 
       return {
         ...topSig,
