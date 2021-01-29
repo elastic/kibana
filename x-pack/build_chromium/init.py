@@ -22,7 +22,6 @@ runcmd('git config --global core.filemode false')
 runcmd('git config --global branch.autosetuprebase always')
 runcmd('git config --global core.compression 0')
 
-
 # Grab Chromium's custom build tools, if they aren't already installed
 # (On Windows, they are installed before this Python script is run)
 # Put depot_tools on the path so we can properly run the fetch command
