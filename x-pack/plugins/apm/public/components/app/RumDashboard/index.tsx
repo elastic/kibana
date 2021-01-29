@@ -10,7 +10,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
 
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { LocalUIFilters } from './LocalUIFilters';
 import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
