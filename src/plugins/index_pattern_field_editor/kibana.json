@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact", "data"]
+  "requiredBundles": ["kibanaReact", "data", "esUiShared"]
 }

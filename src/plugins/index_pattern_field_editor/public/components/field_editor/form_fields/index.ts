@@ -6,10 +6,12 @@
  * Public License, v 1.
  */
 
-export * from './fields';
-export * from './types';
-export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
-export * from './errors';
-export * from './expressions';
-export * from './constants';
+export { TypeField } from './type_field';
+
+export { CustomLabelField } from './custom_label_field';
+
+export { PopularityField } from './popularity_field';
+
+export { ScriptField } from './script_field';
+
+export { FormatField } from './format_field';

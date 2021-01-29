@@ -8,4 +8,21 @@
 
 export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
 
-export { createKibanaReactContext, toMountPoint } from '../../kibana_react/public';
+export { RuntimeType } from '../../data/common';
+
+export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
+
+export {
+  useForm,
+  useFormData,
+  Form,
+  FormSchema,
+  UseField,
+  FormHook,
+  ValidationFunc,
+  FieldConfig,
+} from '../../es_ui_shared/static/forms/hook_form_lib';
+
+export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
+
+export { TextField, ToggleField, NumericField } from '../../es_ui_shared/static/forms/components';

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -17,14 +17,17 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { DocLinksStart } from 'src/core/public';
 
-import { IndexPatternField } from '../shared_imports';
-import { Props as FieldEditorProps } from './field_editor/field_editor';
+import { Field } from '../types';
+import { getLinks } from '../lib';
+import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 
-const geti18nTexts = (field?: IndexPatternField) => {
+const geti18nTexts = (field?: Field) => {
   return {
     flyoutTitle: field
       ? i18n.translate('indexPatternFieldEditor.editor.flyoutEditFieldTitle', {
@@ -52,7 +55,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: IndexPatternField) => void;
+  onSave: (field: Field) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -68,17 +71,34 @@ export interface Props {
   /**
    * Optional field to edit
    */
-  field?: IndexPatternField;
+  field?: Field;
 }
 
-export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor }: Props) => {
+const FieldEditorFlyoutContentComponent = ({
+  field,
+  onSave,
+  onCancel,
+  FieldEditor,
+  docLinks,
+}: Props) => {
   const i18nTexts = geti18nTexts(field);
 
+  const [formState, setFormState] = useState<FieldEditorFormState>({
+    isSubmitted: false,
+    isValid: field ? true : undefined,
+    submit: field
+      ? async () => ({ isValid: true, data: field })
+      : async () => ({ isValid: false, data: {} as Field }),
+  });
+  const { submit, isValid: isFormValid, isSubmitted } = formState;
+
   const onClickSave = useCallback(async () => {
-    // TODO: Here we'll have the logic to retrieve the field editor formData...
-    const updatedField = {} as any;
-    onSave(updatedField);
-  }, [onSave]);
+    const { isValid, data } = await submit();
+
+    if (isValid) {
+      onSave(data);
+    }
+  }, [onSave, submit]);
 
   return (
     <>
@@ -88,35 +108,54 @@ export const FieldEditorFlyoutContent = ({ field, onSave, onCancel, FieldEditor 
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>{FieldEditor && <FieldEditor />}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {FieldEditor && (
+          <FieldEditor links={getLinks(docLinks)} field={field} onChange={setFormState} />
+        )}
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         {FieldEditor && (
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                flush="left"
-                onClick={onCancel}
-                data-test-subj="closeFlyoutButton"
-              >
-                {i18nTexts.closeButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          <>
+            {isSubmitted && !isFormValid && (
+              <>
+                <EuiCallOut
+                  title={i18nTexts.formErrorsCalloutTitle}
+                  color="danger"
+                  iconType="cross"
+                  data-test-subj="formError"
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  flush="left"
+                  onClick={onCancel}
+                  data-test-subj="closeFlyoutButton"
+                >
+                  {i18nTexts.closeButtonLabel}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={onClickSave}
-                data-test-subj="saveFieldButton"
-                fill
-              >
-                {i18nTexts.saveButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={onClickSave}
+                  data-test-subj="saveFieldButton"
+                  fill
+                >
+                  {i18nTexts.saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlyoutFooter>
     </>
   );
 };
+
+export const FieldEditorFlyoutContent = React.memo(FieldEditorFlyoutContentComponent);

@@ -10,12 +10,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
 import { IndexPatternField, IndexPattern } from '../shared_imports';
+import { Field } from '../types';
+import { deserializeField, serializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
 }
+
 export interface Props {
   /**
    * Handler for the "save" footer button
@@ -46,13 +49,17 @@ export interface Props {
  * anything about where a field comes from and where it should be persisted.
  */
 export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, docLinks }: Props) => {
+  const fieldToEdit = deserializeField(field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
-  const saveField = useCallback(async () => {
-    // TODO: here we will put the logic to update the Kibana saved object
-
-    onSave({} as any);
-  }, [onSave]);
+  const saveField = useCallback(
+    async (updatedField: Field) => {
+      const indexPatternField = serializeField(updatedField);
+      // TODO: here we will put the logic to update the Kibana saved object
+      onSave(indexPatternField);
+    },
+    [onSave]
+  );
 
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
@@ -70,7 +77,7 @@ export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, doc
       onSave={saveField}
       onCancel={onCancel}
       docLinks={docLinks}
-      field={field}
+      field={fieldToEdit}
       FieldEditor={Editor}
     />
   );

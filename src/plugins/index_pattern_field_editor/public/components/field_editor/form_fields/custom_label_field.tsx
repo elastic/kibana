@@ -5,11 +5,10 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+import React from 'react';
 
-export * from './fields';
-export * from './types';
-export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
-export * from './errors';
-export * from './expressions';
-export * from './constants';
+import { UseField, TextField } from '../../../shared_imports';
+
+export const CustomLabelField = () => {
+  return <UseField path="customLabel" component={TextField} />;
+};
