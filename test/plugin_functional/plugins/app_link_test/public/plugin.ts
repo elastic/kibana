@@ -10,7 +10,7 @@ import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { renderApp } from './app';
 
 export class CoreAppLinkPlugin implements Plugin<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> {
-  public async setup(core: CoreSetup, deps: {}) {
+  public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'applink_start',
       title: 'AppLink Start',

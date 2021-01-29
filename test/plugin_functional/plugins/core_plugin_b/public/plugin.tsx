@@ -42,7 +42,7 @@ export class CorePluginBPlugin
     };
   }
 
-  public async start(core: CoreStart, deps: {}) {
+  public start(core: CoreStart, deps: {}) {
     return {
       sendSystemRequest: async (asSystemRequest: boolean) => {
         const response = await core.http.post<string>('/core_plugin_b/system_request', {
