@@ -1,10 +1,6 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Build, analyze, and share a map to compare metrics by country or region
-
-++++
-<titleabbrev>Build, analyze, and share a map</titleabbrev>
-++++
+== Build a map to compare metrics by country or region
 
 If you are new to **Maps**, this tutorial is a good place to start.
 It guides you through the common steps for working with your location data.
