@@ -29,7 +29,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.data = getService();
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): Promise<void> {
+  public setup(core: CoreSetup, plugins: PluginsSetup): void {
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
