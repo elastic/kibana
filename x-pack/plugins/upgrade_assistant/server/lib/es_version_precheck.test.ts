@@ -6,13 +6,27 @@
 
 import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
-import { xpackMocks } from '../../../../mocks';
 import { CURRENT_VERSION } from '../../common/version';
 import {
   esVersionCheck,
   getAllNodeVersions,
   verifyAllMatchKibanaVersion,
 } from './es_version_precheck';
+
+import { coreMock } from 'src/core/server/mocks';
+import { licensingMock } from '../../../../plugins/licensing/server/mocks';
+
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 
 describe('getAllNodeVersions', () => {
   it('returns a list of unique node versions', async () => {
