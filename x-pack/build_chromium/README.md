@@ -20,6 +20,7 @@ gain familiarity.
 ## Usage
 
 ```
+export PATH=$HOME/chromium/depot_tools:$PATH
 # Create a dedicated working directory for this directory of Python scripts.
 mkdir ~/chromium && cd ~/chromium
 # Copy the scripts from the Kibana repo to use them conveniently in the working directory
