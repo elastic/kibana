@@ -12,6 +12,7 @@ import {
   CommentRequest,
   CaseStatuses,
   CaseAttributes,
+  CasePatchRequest,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -131,4 +132,24 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   title?: string;
+}
+
+export interface FieldMappings {
+  id: string;
+  title?: string;
+}
+
+export type UpdateKey = keyof Pick<
+  CasePatchRequest,
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+>;
+
+export interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
+  updateCase?: (newCase: Case) => void;
+  caseData: Case;
+  onSuccess?: () => void;
+  onError?: () => void;
 }

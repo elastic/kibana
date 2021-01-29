@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../src/core/server';
+import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -15,6 +15,7 @@ import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_ru
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
 import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
 import { createSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/create_signals_migration_route';
+import { deleteSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/delete_signals_migration_route';
 import { finalizeSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/finalize_signals_migration_route';
 import { getSignalsMigrationStatusRoute } from '../lib/detection_engine/routes/signals/get_signals_migration_status_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
@@ -43,7 +44,7 @@ import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_p
 import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
 
 export const initRoutes = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   usingEphemeralEncryptionKey: boolean,
   security: SetupPlugins['security'],
@@ -83,11 +84,12 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router);
-  finalizeSignalsMigrationRoute(router);
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
+  getSignalsMigrationStatusRoute(router);
+  createSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, security);
+  deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

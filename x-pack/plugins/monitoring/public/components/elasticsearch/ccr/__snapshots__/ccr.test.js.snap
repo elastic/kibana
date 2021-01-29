@@ -30,6 +30,12 @@ exports[`Ccr that it renders normally 1`] = `
                 "sortable": true,
               },
               Object {
+                "field": "alerts",
+                "name": "Alerts",
+                "render": [Function],
+                "sortable": true,
+              },
+              Object {
                 "field": "syncLagOps",
                 "name": "Sync Lag (ops)",
                 "sortable": true,

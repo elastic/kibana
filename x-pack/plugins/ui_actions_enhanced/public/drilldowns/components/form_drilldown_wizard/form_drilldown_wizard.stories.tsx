@@ -7,13 +7,13 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { FormDrilldownWizard } from './index';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
-  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as TriggerId[],
-  getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
+  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'],
+  getTriggerInfo: (id: string) => ({ id } as Trigger),
   onSelectedTriggersChange: () => {},
-  actionFactoryContext: { triggers: [] as TriggerId[] },
+  actionFactoryContext: { triggers: [] as string[] },
 };
 
 const DemoEditName: React.FC = () => {

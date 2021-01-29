@@ -58,7 +58,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
         winlogbeatMWSysmonOperational: getOr(
           null,
           'winlog_module.mwsysmon_operational_event_count.doc_count',
-          response
+          aggregations
         ),
       },
     };

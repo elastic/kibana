@@ -8,13 +8,16 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { ManagementContainer } from './pages';
 import { NotFoundPage } from '../app/404';
+import { CurrentLicense } from '../common/components/current_license';
 
 /**
  * Returns the React Router Routes for the management area
  */
 export const ManagementRoutes = () => (
-  <Switch>
-    <Route path="/" component={ManagementContainer} />
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
+  <CurrentLicense>
+    <Switch>
+      <Route path="/" component={ManagementContainer} />
+      <Route render={() => <NotFoundPage />} />
+    </Switch>
+  </CurrentLicense>
 );

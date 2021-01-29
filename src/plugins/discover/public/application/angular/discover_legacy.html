@@ -1,6 +1,5 @@
 <discover-app>
-  <discover-legacy
-    add-column="addColumn"
+  <discover
     fetch="fetch"
     fetch-counter="fetchCounter"
     fetch-error="fetchError"
@@ -9,6 +8,7 @@
     hits="hits"
     index-pattern="indexPattern"
     minimum-visible-rows="minimumVisibleRows"
+    on-add-column="addColumn"
     on-add-filter="filterQuery"
     on-move-column="moveColumn"
     on-change-interval="changeInterval"
@@ -20,7 +20,6 @@
     reset-query="resetQuery"
     result-state="resultState"
     rows="rows"
-    saved-search="savedSearch"
     search-source="searchSource"
     set-index-pattern="setIndexPattern"
     show-save-query="showSaveQuery"
@@ -30,6 +29,7 @@
     top-nav-menu="topNavMenu"
     update-query="handleRefresh"
     update-saved-query-id="updateSavedQueryId"
+    use-new-fields-api="useNewFieldsApi"
   >
-  </discover-legacy>
+  </discover>
 </discover-app>

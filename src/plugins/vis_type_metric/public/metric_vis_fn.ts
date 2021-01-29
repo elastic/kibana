@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -27,14 +16,14 @@ import {
   Style,
 } from '../../expressions/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
-import { ColorSchemas, vislibColorMaps, ColorModes } from '../../charts/public';
+import { ColorSchemas, vislibColorMaps, ColorMode } from '../../charts/public';
 
 export type Input = Datatable;
 
 interface Arguments {
   percentageMode: boolean;
   colorSchema: ColorSchemas;
-  colorMode: ColorModes;
+  colorMode: ColorMode;
   useRanges: boolean;
   invertColors: boolean;
   showLabels: boolean;
@@ -50,7 +39,6 @@ export interface MetricVisRenderValue {
   visType: typeof visType;
   visData: Input;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
-  params: any;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -86,7 +74,7 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
     colorMode: {
       types: ['string'],
       default: '"None"',
-      options: [ColorModes.NONE, ColorModes.LABELS, ColorModes.BACKGROUND],
+      options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
       help: i18n.translate('visTypeMetric.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -160,7 +148,7 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const dimensions: DimensionsVisParam = {
       metrics: args.metric,
     };
@@ -175,6 +163,9 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
 
     const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
     return {
       type: 'render',
       as: 'metric_vis',
@@ -194,16 +185,13 @@ export const createMetricVisFn = (): MetricVisExpressionFunctionDefinition => ({
             invertColors: args.invertColors,
             style: {
               bgFill: args.bgFill,
-              bgColor: args.colorMode === ColorModes.BACKGROUND,
-              labelColor: args.colorMode === ColorModes.LABELS,
+              bgColor: args.colorMode === ColorMode.Background,
+              labelColor: args.colorMode === ColorMode.Labels,
               subText: args.subText,
               fontSize,
             },
           },
           dimensions,
-        },
-        params: {
-          listenOnChange: true,
         },
       },
     };

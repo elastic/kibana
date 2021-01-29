@@ -65,6 +65,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }

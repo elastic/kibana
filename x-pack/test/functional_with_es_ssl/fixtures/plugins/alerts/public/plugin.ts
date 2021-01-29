@@ -28,7 +28,6 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
 
     triggersActionsUi.alertTypeRegistry.register({
       id: 'test.always-firing',
-      name: 'Test Always Firing',
       description: 'Always fires',
       iconClass: 'alert',
       documentationUrl: null,
@@ -41,7 +40,6 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
 
     triggersActionsUi.alertTypeRegistry.register({
       id: 'test.noop',
-      name: 'Test Noop',
       description: `Doesn't do anything`,
       iconClass: 'alert',
       documentationUrl: null,

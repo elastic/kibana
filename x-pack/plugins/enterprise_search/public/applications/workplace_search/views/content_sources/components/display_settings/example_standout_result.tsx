@@ -11,6 +11,8 @@ import { useValues } from 'kea';
 
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
+import { DESCRIPTION_LABEL } from '../../../../constants';
+
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 import { CustomSourceIcon } from './custom_source_icon';
@@ -30,7 +32,7 @@ export const ExampleStandoutResult: React.FC = () => {
   const result = exampleDocuments[0];
 
   return (
-    <div className="example-standout-result">
+    <div className="example-standout-result" data-test-subj="ExampleStandoutResult">
       <div className="example-standout-result__header" style={{ backgroundColor: color }}>
         <CustomSourceIcon color={isColorDark.apply(null, hexToRgb(color)) ? 'white' : 'black'} />
         <span
@@ -56,7 +58,12 @@ export const ExampleStandoutResult: React.FC = () => {
             {descriptionField ? (
               <span>{result[descriptionField]}</span>
             ) : (
-              <span className="example-result-content-placeholder">Description</span>
+              <span
+                className="example-result-content-placeholder"
+                data-test-subj="DefaultDescriptionLabel"
+              >
+                {DESCRIPTION_LABEL}
+              </span>
             )}
           </div>
         </div>

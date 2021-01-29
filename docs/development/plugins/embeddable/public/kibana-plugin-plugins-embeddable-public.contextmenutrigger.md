@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'>
+contextMenuTrigger: Trigger
 ```

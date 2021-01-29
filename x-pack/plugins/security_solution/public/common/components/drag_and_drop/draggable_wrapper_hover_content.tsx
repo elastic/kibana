@@ -4,12 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFocusTrap,
+  EuiPanel,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
+import styled from 'styled-components';
 
+import { stopPropagationAndPreventDefault } from '../accessibility/helpers';
+import { TooltipWithKeyboardShortcut } from '../accessibility/tooltip_with_keyboard_shortcut';
 import { getAllFieldsByName } from '../../containers/source';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
+import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../lib/clipboard/clipboard';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
@@ -23,35 +33,82 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/component
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
 
+export const AdditionalContent = styled.div`
+  padding: 2px;
+`;
+
+AdditionalContent.displayName = 'AdditionalContent';
+
+const getAdditionalScreenReaderOnlyContext = ({
+  field,
+  value,
+}: {
+  field: string;
+  value?: string[] | string | null;
+}): string => {
+  if (value == null) {
+    return field;
+  }
+
+  return Array.isArray(value) ? `${field} ${value.join(' ')}` : `${field} ${value}`;
+};
+
+const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
+const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
+const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
+const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
+const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
+
 interface Props {
+  additionalContent?: React.ReactNode;
   closePopOver?: () => void;
   draggableId?: DraggableId;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
+  ownFocus: boolean;
   showTopN: boolean;
   timelineId?: string | null;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
 
+/** Returns a value for the `disabled` prop of `EuiFocusTrap` */
+const isFocusTrapDisabled = ({
+  ownFocus,
+  showTopN,
+}: {
+  ownFocus: boolean;
+  showTopN: boolean;
+}): boolean => {
+  if (showTopN) {
+    return false; // we *always* want to trap focus when showing Top N
+  }
+
+  return !ownFocus;
+};
+
 const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
+  additionalContent = null,
   closePopOver,
   draggableId,
   field,
   goGetTimelineId,
   onFilterAdded,
+  ownFocus,
   showTopN,
   timelineId,
   toggleTopN,
   value,
 }) => {
-  const startDragToTimeline = useAddToTimeline({ draggableId, fieldName: field });
+  const { startDragToTimeline } = useAddToTimeline({ draggableId, fieldName: field });
   const kibana = useKibana();
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
   const { getTimelineFilterManager } = useManageTimeline();
+  const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const filterManager = useMemo(
     () =>
@@ -77,7 +134,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
-
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
     if (closePopOver != null) {
@@ -118,97 +174,217 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     }
   }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
-  const handleGoGetTimelineId = useCallback(() => {
-    if (goGetTimelineId != null && timelineId == null) {
+  const isInit = useRef(true);
+
+  useEffect(() => {
+    if (isInit.current && goGetTimelineId != null && timelineId == null) {
+      isInit.current = false;
       goGetTimelineId(true);
     }
   }, [goGetTimelineId, timelineId]);
 
+  useEffect(() => {
+    if (ownFocus) {
+      setTimeout(() => {
+        defaultFocusedButtonRef.current?.focus();
+      }, 0);
+    }
+  }, [ownFocus]);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (!ownFocus) {
+        return;
+      }
+
+      switch (keyboardEvent.key) {
+        case FILTER_FOR_VALUE_KEYBOARD_SHORTCUT:
+          stopPropagationAndPreventDefault(keyboardEvent);
+          filterForValue();
+          break;
+        case FILTER_OUT_VALUE_KEYBOARD_SHORTCUT:
+          stopPropagationAndPreventDefault(keyboardEvent);
+          filterOutValue();
+          break;
+        case ADD_TO_TIMELINE_KEYBOARD_SHORTCUT:
+          stopPropagationAndPreventDefault(keyboardEvent);
+          handleStartDragToTimeline();
+          break;
+        case SHOW_TOP_N_KEYBOARD_SHORTCUT:
+          stopPropagationAndPreventDefault(keyboardEvent);
+          toggleTopN();
+          break;
+        case COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT:
+          stopPropagationAndPreventDefault(keyboardEvent);
+          const copyToClipboardButton = panelRef.current?.querySelector<HTMLButtonElement>(
+            `.${COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}`
+          );
+          if (copyToClipboardButton != null) {
+            copyToClipboardButton.click();
+            if (closePopOver != null) {
+              closePopOver();
+            }
+          }
+          break;
+        case 'Enter':
+          break;
+        case 'Escape':
+          stopPropagationAndPreventDefault(keyboardEvent);
+          if (closePopOver != null) {
+            closePopOver();
+          }
+          break;
+        default:
+          break;
+      }
+    },
+
+    [closePopOver, filterForValue, filterOutValue, handleStartDragToTimeline, ownFocus, toggleTopN]
+  );
+
   return (
-    <>
-      {!showTopN && value != null && (
-        <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
-          <EuiButtonIcon
-            aria-label={i18n.FILTER_FOR_VALUE}
-            color="text"
-            data-test-subj="filter-for-value"
-            iconType="magnifyWithPlus"
-            onClick={filterForValue}
-            onMouseEnter={handleGoGetTimelineId}
-          />
-        </EuiToolTip>
-      )}
+    <EuiPanel onKeyDown={onKeyDown} paddingSize={showTopN ? 'none' : 's'} panelRef={panelRef}>
+      <EuiFocusTrap
+        disabled={isFocusTrapDisabled({
+          ownFocus,
+          showTopN,
+        })}
+      >
+        <EuiScreenReaderOnly>
+          <p>{i18n.YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
+        </EuiScreenReaderOnly>
 
-      {!showTopN && value != null && (
-        <EuiToolTip content={i18n.FILTER_OUT_VALUE}>
-          <EuiButtonIcon
-            aria-label={i18n.FILTER_OUT_VALUE}
-            color="text"
-            data-test-subj="filter-out-value"
-            iconType="magnifyWithMinus"
-            onClick={filterOutValue}
-            onMouseEnter={handleGoGetTimelineId}
-          />
-        </EuiToolTip>
-      )}
+        {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
-      {!showTopN && value != null && draggableId != null && (
-        <EuiToolTip content={i18n.ADD_TO_TIMELINE}>
-          <EuiButtonIcon
-            aria-label={i18n.ADD_TO_TIMELINE}
-            color="text"
-            data-test-subj="add-to-timeline"
-            iconType="timeline"
-            onClick={handleStartDragToTimeline}
-          />
-        </EuiToolTip>
-      )}
-
-      <>
-        {allowTopN({
-          browserField: getAllFieldsByName(browserFields)[field],
-          fieldName: field,
-        }) && (
-          <>
-            {!showTopN && (
-              <EuiToolTip content={i18n.SHOW_TOP(field)}>
-                <EuiButtonIcon
-                  aria-label={i18n.SHOW_TOP(field)}
-                  color="text"
-                  data-test-subj="show-top-field"
-                  iconType="visBarVertical"
-                  onClick={toggleTopN}
-                  onMouseEnter={handleGoGetTimelineId}
-                />
-              </EuiToolTip>
-            )}
-
-            {showTopN && (
-              <StatefulTopN
-                browserFields={browserFields}
-                field={field}
-                indexPattern={indexPattern}
-                indexNames={selectedPatterns}
-                onFilterAdded={onFilterAdded}
-                timelineId={timelineId ?? undefined}
-                toggleTopN={toggleTopN}
-                value={value}
+        {!showTopN && value != null && (
+          <EuiToolTip
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.FILTER_FOR_VALUE}
+                shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
               />
-            )}
-          </>
+            }
+          >
+            <EuiButtonIcon
+              aria-label={i18n.FILTER_FOR_VALUE}
+              buttonRef={defaultFocusedButtonRef}
+              color="text"
+              data-test-subj="filter-for-value"
+              iconType="magnifyWithPlus"
+              onClick={filterForValue}
+            />
+          </EuiToolTip>
         )}
-      </>
 
-      {!showTopN && (
-        <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
+        {!showTopN && value != null && (
+          <EuiToolTip
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.FILTER_OUT_VALUE}
+                shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
+          >
+            <EuiButtonIcon
+              aria-label={i18n.FILTER_OUT_VALUE}
+              color="text"
+              data-test-subj="filter-out-value"
+              iconType="magnifyWithMinus"
+              onClick={filterOutValue}
+            />
+          </EuiToolTip>
+        )}
+
+        {!showTopN && value != null && draggableId != null && (
+          <EuiToolTip
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={i18n.ADD_TO_TIMELINE}
+                shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
+          >
+            <EuiButtonIcon
+              aria-label={i18n.ADD_TO_TIMELINE}
+              color="text"
+              data-test-subj="add-to-timeline"
+              iconType="timeline"
+              onClick={handleStartDragToTimeline}
+            />
+          </EuiToolTip>
+        )}
+
+        <>
+          {allowTopN({
+            browserField: getAllFieldsByName(browserFields)[field],
+            fieldName: field,
+          }) && (
+            <>
+              {!showTopN && (
+                <EuiToolTip
+                  content={
+                    <TooltipWithKeyboardShortcut
+                      additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                        field,
+                        value,
+                      })}
+                      content={i18n.SHOW_TOP(field)}
+                      shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
+                      showShortcut={ownFocus}
+                    />
+                  }
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.SHOW_TOP(field)}
+                    color="text"
+                    data-test-subj="show-top-field"
+                    iconType="visBarVertical"
+                    onClick={toggleTopN}
+                  />
+                </EuiToolTip>
+              )}
+
+              {showTopN && (
+                <StatefulTopN
+                  browserFields={browserFields}
+                  field={field}
+                  indexPattern={indexPattern}
+                  indexNames={selectedPatterns}
+                  onFilterAdded={onFilterAdded}
+                  timelineId={timelineId ?? undefined}
+                  toggleTopN={toggleTopN}
+                  value={value}
+                />
+              )}
+            </>
+          )}
+        </>
+
+        {!showTopN && (
           <WithCopyToClipboard
             data-test-subj="copy-to-clipboard"
+            keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
             text={`${field}${value != null ? `: "${value}"` : ''}`}
             titleSummary={i18n.FIELD}
           />
-        </EuiToolTip>
-      )}
-    </>
+        )}
+      </EuiFocusTrap>
+    </EuiPanel>
   );
 };
 

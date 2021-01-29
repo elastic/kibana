@@ -22,6 +22,7 @@ import { CriteriaField } from './index';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 interface ResultResponse {
   success: boolean;
@@ -68,6 +69,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       query: object | undefined,
       metricFunction: string, // ES aggregation name
       metricFieldName: string,
+      summaryCountFieldName: string | undefined,
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
@@ -153,9 +155,9 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         body.query.bool.minimum_should_match = shouldCriteria.length / 2;
       }
 
-      if (metricFieldName !== undefined && metricFieldName !== '') {
-        body.aggs.byTime.aggs = {};
+      body.aggs.byTime.aggs = {};
 
+      if (metricFieldName !== undefined && metricFieldName !== '' && metricFunction) {
         const metricAgg: any = {
           [metricFunction]: {},
         };
@@ -186,8 +188,23 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         } else {
           body.aggs.byTime.aggs.metric = metricAgg;
         }
+      } else {
+        // if metricFieldName is not defined, it's probably a variation of the non zero count function
+        // refer to buildConfigFromDetector
+        if (summaryCountFieldName !== undefined && metricFunction === ES_AGGREGATION.CARDINALITY) {
+          // if so, check if summaryCountFieldName is an aggregation field
+          if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+            // first item under aggregations can be any name, not necessarily 'buckets'
+            const accessor = Object.keys(aggFields)[0];
+            const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
+            const foundCardinalityField = findAggField(tempAggs, summaryCountFieldName);
+            if (foundCardinalityField !== undefined) {
+              tempAggs.metric = foundCardinalityField;
+            }
+            body.aggs.byTime.aggs = tempAggs;
+          }
+        }
       }
-
       return mlApiServices.esSearch$({ index, body }).pipe(
         map((resp: any) => {
           const obj: MetricData = { success: true, results: {} };

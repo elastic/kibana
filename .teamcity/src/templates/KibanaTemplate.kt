@@ -1,5 +1,9 @@
 package templates
 
+import StandardAgents
+import co.elastic.teamcity.common.requireAgent
+import getProjectBranch
+import isReportingEnabled
 import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
@@ -21,10 +25,7 @@ object KibanaTemplate : Template({
 //    checkoutDir = "/dev/shm/%system.teamcity.buildType.id%/%system.build.number%/kibana"
   }
 
-  requirements {
-    equals("system.cloud.profile_id", "kibana", "RQ_CLOUD_PROFILE_ID")
-    startsWith("teamcity.agent.name", "kibana-standard-2-", "RQ_AGENT_NAME")
-  }
+  requireAgent(StandardAgents["2"]!!)
 
   features {
     perfmon {  }
@@ -34,14 +35,14 @@ object KibanaTemplate : Template({
         authType = token {
           token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
         }
-        filterTargetBranch = "refs/heads/master_teamcity"
+        filterTargetBranch = "refs/heads/${getProjectBranch()}"
         filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
       }
     }
   }
 
   failureConditions {
-    executionTimeoutMin = 120
+    executionTimeoutMin = 160
     testFailure = false
   }
 
@@ -64,6 +65,8 @@ object KibanaTemplate : Template({
     param("env.GIT_COMMIT", "%build.vcs.number%")
     param("env.branch_specifier", "%vcsroot.branch%")
 
+    param("env.CI_REPORTING_ENABLED", isReportingEnabled().toString())
+
     password("env.KIBANA_CI_STATS_CONFIG", "", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_TOKEN", "credentialsJSON:ea975068-ca68-4da5-8189-ce90f4286bc0", display = ParameterDisplay.HIDDEN)
     password("env.CI_STATS_HOST", "credentialsJSON:933ba93e-4b06-44c1-8724-8c536651f2b6", display = ParameterDisplay.HIDDEN)
@@ -73,10 +76,19 @@ object KibanaTemplate : Template({
     // password("env.CI_STATS_HOST", "%vault:kibana-issues:secret/kibana-issues/dev/kibana_ci_stats!/api_host%", display = ParameterDisplay.HIDDEN)
 
     // TODO remove this once we are able to pull it out of vault and put it closer to the things that require it
-    password("env.GITHUB_TOKEN", "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b", display = ParameterDisplay.HIDDEN)
-    password("env.KIBANA_CI_REPORTER_KEY", "", display = ParameterDisplay.HIDDEN)
-    password("env.KIBANA_CI_REPORTER_KEY_BASE64", "credentialsJSON:86878779-4cf7-4434-82af-5164a1b992fb", display = ParameterDisplay.HIDDEN)
-
+    if(isReportingEnabled()) {
+      password(
+        "env.GITHUB_TOKEN",
+        "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b",
+        display = ParameterDisplay.HIDDEN
+      )
+      password("env.KIBANA_CI_REPORTER_KEY", "", display = ParameterDisplay.HIDDEN)
+      password(
+        "env.KIBANA_CI_REPORTER_KEY_BASE64",
+        "credentialsJSON:86878779-4cf7-4434-82af-5164a1b992fb",
+        display = ParameterDisplay.HIDDEN
+      )
+    }
   }
 
   steps {

@@ -7,22 +7,49 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { px, unit } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
+import { TimeComparison } from './time_comparison';
+import { useBreakPoints } from '../../hooks/use_break_points';
 
 const SearchBarFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) =>
     `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
 `;
 
-export function SearchBar() {
+interface Props {
+  prepend?: React.ReactNode | string;
+  showTimeComparison?: boolean;
+}
+
+function getRowDirection(showColumn: boolean) {
+  return showColumn ? 'column' : 'row';
+}
+
+export function SearchBar({ prepend, showTimeComparison = false }: Props) {
+  const { isMedium, isLarge } = useBreakPoints();
+  const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
   return (
-    <SearchBarFlexGroup alignItems="flexStart" gutterSize="s">
-      <EuiFlexItem grow={3}>
-        <KueryBar />
+    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
+      <EuiFlexItem>
+        <KueryBar prepend={prepend} />
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <DatePicker />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          gutterSize="s"
+          direction={getRowDirection(isMedium)}
+        >
+          {showTimeComparison && (
+            <EuiFlexItem style={{ ...itemsStyle, minWidth: px(300) }}>
+              <TimeComparison />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem style={itemsStyle}>
+            <DatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </SearchBarFlexGroup>
   );

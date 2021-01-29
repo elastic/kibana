@@ -8,7 +8,7 @@ import { bisector } from 'd3-array';
 import { sortBy, throttle } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {

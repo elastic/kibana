@@ -28,7 +28,7 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob, collectAggs } from './util/general';
+import { collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -56,6 +56,7 @@ export class JobCreator {
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
   protected _scriptFields: Field[] = [];
+  protected _runtimeMappings: Field[] = [];
   protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
@@ -487,12 +488,16 @@ export class JobCreator {
     return this._scriptFields;
   }
 
+  public get runtimeMappings(): Field[] {
+    return this._runtimeMappings;
+  }
+
   public get aggregationFields(): Field[] {
     return this._aggregationFields;
   }
 
   public get additionalFields(): Field[] {
-    return [...this._scriptFields, ...this._aggregationFields];
+    return [...this._scriptFields, ...this._runtimeMappings, ...this._aggregationFields];
   }
 
   public get subscribers(): ProgressSubscriber[] {
@@ -626,7 +631,7 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
-  private _initPerPartitionCategorization() {
+  protected _initPerPartitionCategorization() {
     if (this._job_config.analysis_config.per_partition_categorization === undefined) {
       this._job_config.analysis_config.per_partition_categorization = {};
     }
@@ -676,11 +681,20 @@ export class JobCreator {
     ) {
       this.useDedicatedIndex = true;
     }
-    this._sparseData = isSparseDataJob(job, datafeed);
 
     this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
       this._scriptFields = Object.keys(this._datafeed_config.script_fields).map((f) => ({
+        id: f,
+        name: f,
+        type: ES_FIELD_TYPES.KEYWORD,
+        aggregatable: true,
+      }));
+    }
+
+    this._runtimeMappings = [];
+    if (this._datafeed_config.runtime_mappings !== undefined) {
+      this._runtimeMappings = Object.keys(this._datafeed_config.runtime_mappings).map((f) => ({
         id: f,
         name: f,
         type: ES_FIELD_TYPES.KEYWORD,

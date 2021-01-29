@@ -6,42 +6,40 @@
 
 import { ElasticUser } from '../types';
 import {
+  ActionConnector,
+  ActionTypeConnector,
   ActionType,
-  CasesConfigurationMaps,
+  CaseConnector,
   CaseField,
+  CasesConfigure,
   ClosureType,
   ThirdPartyField,
-  CasesConfigure,
-  ActionConnector,
-  CaseConnector,
 } from '../../../../../case/common/api';
 
 export {
+  ActionConnector,
+  ActionTypeConnector,
   ActionType,
-  CasesConfigurationMaps,
+  CaseConnector,
   CaseField,
   ClosureType,
   ThirdPartyField,
-  ActionConnector,
-  CaseConnector,
 };
 
-export interface CasesConfigurationMapping {
-  source: CaseField;
-  target: ThirdPartyField;
+export interface CaseConnectorMapping {
   actionType: ActionType;
+  source: CaseField;
+  target: string;
 }
 
 export interface CaseConfigure {
+  closureType: ClosureType;
+  connector: CasesConfigure['connector'];
   createdAt: string;
   createdBy: ElasticUser;
-  connector: CasesConfigure['connector'];
-  closureType: ClosureType;
+  error: string | null;
+  mappings: CaseConnectorMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;
-}
-
-export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {
-  actionType?: ActionType;
 }

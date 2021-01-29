@@ -18,6 +18,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -260,6 +261,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -280,6 +282,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -324,6 +327,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -569,6 +573,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -589,6 +594,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -634,6 +640,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -876,6 +883,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -896,6 +904,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {
@@ -939,6 +948,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -1181,6 +1191,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--primary"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -1201,6 +1212,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
             <button
               className="euiButton euiButton--primary euiButton--fill"
               data-test-subj="canvasCustomElementForm-submit"
+              disabled={false}
               onClick={[Function]}
               style={
                 Object {

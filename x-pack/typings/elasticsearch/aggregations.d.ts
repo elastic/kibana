@@ -7,7 +7,7 @@
 import { Unionize, UnionToIntersection } from 'utility-types';
 import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
-type SortOrder = 'asc' | 'desc';
+export type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
 export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 
@@ -99,6 +99,7 @@ export interface AggregationOptionsByType {
   extended_stats: {
     field: string;
   };
+  string_stats: { field: string };
   top_hits: {
     from?: number;
     size?: number;
@@ -182,6 +183,11 @@ export interface AggregationOptionsByType {
   top_metrics: {
     metrics: { field: string } | MaybeReadonlyArray<{ field: string }>;
     sort: SortOptions;
+  };
+  avg_bucket: {
+    buckets_path: string;
+    gap_policy?: 'skip' | 'insert_zeros';
+    format?: string;
   };
 }
 
@@ -268,6 +274,13 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       upper: number | null;
       lower: number | null;
     };
+  };
+  string_stats: {
+    count: number;
+    min_length: number;
+    max_length: number;
+    avg_length: number;
+    entropy: number;
   };
   top_hits: {
     hits: {
@@ -374,22 +387,27 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   };
   bucket_sort: undefined;
   bucket_selector: undefined;
-  top_metrics: [
-    {
-      sort: [string | number];
-      metrics: UnionToIntersection<
-        TAggregationOptionsMap extends {
-          top_metrics: { metrics: { field: infer TFieldName } };
-        }
-          ? TopMetricsMap<TFieldName>
-          : TAggregationOptionsMap extends {
-              top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
-            }
-          ? TopMetricsMap<TFieldName>
-          : TopMetricsMap<string>
-      >;
-    }
-  ];
+  top_metrics: {
+    top: [
+      {
+        sort: [string | number];
+        metrics: UnionToIntersection<
+          TAggregationOptionsMap extends {
+            top_metrics: { metrics: { field: infer TFieldName } };
+          }
+            ? TopMetricsMap<TFieldName>
+            : TAggregationOptionsMap extends {
+                top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
+              }
+            ? TopMetricsMap<TFieldName>
+            : TopMetricsMap<string>
+        >;
+      }
+    ];
+  };
+  avg_bucket: {
+    value: number | null;
+  };
 }
 
 type TopMetricsMap<TFieldName> = TFieldName extends string

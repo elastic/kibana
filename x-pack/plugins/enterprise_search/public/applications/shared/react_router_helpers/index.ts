@@ -6,4 +6,4 @@
 
 export { letBrowserHandleEvent } from './link_events';
 export { createHref, CreateHrefOptions } from './create_href';
-export { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo } from './eui_components';
+export { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';

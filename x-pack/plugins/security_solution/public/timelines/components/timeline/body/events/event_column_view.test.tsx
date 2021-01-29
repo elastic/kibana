@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -11,15 +13,24 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineTabs, TimelineType, TimelineId } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
 jest.mock('../../../../../common/hooks/use_selector');
+
+jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
+  return {
+    AddToCaseAction: () => {
+      return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
+    },
+  };
+});
 
 describe('EventColumnView', () => {
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
 
   const props = {
+    ariaRowindex: 2,
     id: 'event-id',
     actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
     associateNote: jest.fn(),
@@ -35,8 +46,10 @@ describe('EventColumnView', () => {
     },
     eventIdToNoteIds: {},
     expanded: false,
+    hasRowRenderers: false,
     loading: false,
     loadingEventIds: [],
+    notesCount: 0,
     onEventToggled: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
@@ -45,7 +58,8 @@ describe('EventColumnView', () => {
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
-    timelineId: 'timeline-test',
+    tabType: TimelineTabs.query,
+    timelineId: TimelineId.active,
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
@@ -102,5 +116,40 @@ describe('EventColumnView', () => {
     wrapper.find('[data-test-subj="pin"]').first().simulate('click');
 
     expect(props.onPinEvent).toHaveBeenCalled();
+  });
+
+  test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {
+    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.detectionsPage} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
+  });
+
+  test('it render AddToCaseAction if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
+    const wrapper = mount(
+      <EventColumnView {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
+
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
+  });
+
+  test('it render AddToCaseAction if timelineId === TimelineId.active', () => {
+    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.active} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
+  });
+
+  test('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
+    const wrapper = mount(<EventColumnView {...props} timelineId="timeline-test" />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
   });
 });

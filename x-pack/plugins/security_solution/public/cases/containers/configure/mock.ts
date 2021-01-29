@@ -6,13 +6,14 @@
 
 import {
   ActionConnector,
+  ActionTypeConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
 } from '../../../../../case/common/api';
-import { CaseConfigure, CasesConfigurationMapping } from './types';
+import { CaseConfigure, CaseConnectorMapping } from './types';
 
-export const mapping: CasesConfigurationMapping[] = [
+export const mappings: CaseConnectorMapping[] = [
   {
     source: 'title',
     target: 'short_description',
@@ -21,7 +22,7 @@ export const mapping: CasesConfigurationMapping[] = [
   {
     source: 'description',
     target: 'description',
-    actionType: 'append',
+    actionType: 'overwrite',
   },
   {
     source: 'comments',
@@ -29,6 +30,7 @@ export const mapping: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
 ];
+
 export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
@@ -36,10 +38,6 @@ export const connectorsMock: ActionConnector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      incidentConfiguration: {
-        mapping,
-      },
-      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
@@ -50,25 +48,6 @@ export const connectorsMock: ActionConnector[] = [
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'name',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },
@@ -78,27 +57,51 @@ export const connectorsMock: ActionConnector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'summary',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
+  },
+];
+
+export const actionTypesMock: ActionTypeConnector[] = [
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.index',
+    name: 'Index',
+    minimumLicenseRequired: 'basic',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.resilient',
+    name: 'IBM Resilient',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
   },
 ];
 
@@ -112,6 +115,8 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
+  error: null,
+  mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
@@ -137,6 +142,8 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
+  error: null,
+  mappings: [],
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',

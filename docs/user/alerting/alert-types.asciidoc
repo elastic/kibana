@@ -1,6 +1,6 @@
 [role="xpack"]
 [[alert-types]]
-== Alert types
+== Standard stack alert types
 
 {kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
 
@@ -8,7 +8,7 @@ This section covers stack alerts. For domain-specific alert types, refer to the 
 Users will need `all` access to the *Stack Alerts* feature to be able to create and edit any of the alerts listed below.
 See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
 
-Currently {kib} provides one stack alert: the <<alert-type-index-threshold>> type.
+Currently {kib} provides two stack alerts: <<alert-type-index-threshold>> and <<alert-type-es-query>>.
 
 [float]
 [[alert-type-index-threshold]]
@@ -112,6 +112,47 @@ You can interactively change the time window and observe the effect it has on th
 [role="screenshot"]
 image::images/alert-types-index-threshold-example-comparison.png[Comparing two time windows]
 
+[float]
+[[alert-type-es-query]]
+=== ES query
 
+The ES query alert type is designed to run a user-configured {es} query over indices, compare the number of matches to a configured threshold, and schedule
+actions to run when the threshold condition is met.
 
+[float]
+==== Creating the alert
 
+An ES query alert can be created from the *Create* button in the <<alert-management, alert management UI>>. Fill in the <<defining-alerts-general-details, general alert details>>, then select *ES query*.
+
+[role="screenshot"]
+image::images/alert-types-es-query-select.png[Choosing an ES query alert type]
+
+[float]
+==== Defining the conditions
+
+The ES query alert has 4 clauses that define the condition to detect.
+
+[role="screenshot"]
+image::images/alert-types-es-query-conditions.png[Four clauses define the condition to detect]
+
+Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
+ES query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaulated against the threshold
+condition. Aggregations are not supported at this time. 
+Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.
+Time window:: This clause determines how far back to search for documents, using the *time field* set in the *index* clause. Generally this value should be set to a value higher than the *check every* value in the <<defining-alerts-general-details, general alert details>>, to avoid gaps in detection. 
+
+[float]
+==== Testing your query
+
+Use the *Test query* feature to verify that your query DSL is valid.
+
+When your query is valid:: Valid queries will be executed against the configured *index* using the configured *time window*. The number of documents that
+match the query will be displayed.
+
+[role="screenshot"]
+image::images/alert-types-es-query-valid.png[Test ES query returns number of matches when valid]
+
+When your query is invalid:: An error message is shown if the query is invalid.
+
+[role="screenshot"]
+image::images/alert-types-es-query-invalid.png[Test ES query shows error when invalid]

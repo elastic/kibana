@@ -208,6 +208,10 @@ describe('params validation', () => {
       Object {
         "bcc": Array [],
         "cc": Array [],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Kibana",
+        },
         "message": "this is the message",
         "subject": "this is a test",
         "to": Array [
@@ -228,35 +232,40 @@ describe('params validation', () => {
 });
 
 describe('execute()', () => {
-  test('ensure parameters are as expected', async () => {
-    const config: ActionTypeConfigType = {
-      service: '__json',
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: true,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: 'bob',
-      password: 'supersecret',
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
-    };
+  const config: ActionTypeConfigType = {
+    service: '__json',
+    host: 'a host',
+    port: 42,
+    secure: true,
+    from: 'bob@example.com',
+    hasAuth: true,
+  };
+  const secrets: ActionTypeSecretsType = {
+    user: 'bob',
+    password: 'supersecret',
+  };
+  const params: ActionParamsType = {
+    to: ['jim@example.com'],
+    cc: ['james@example.com'],
+    bcc: ['jimmy@example.com'],
+    subject: 'the subject',
+    message: 'a message to you',
+    kibanaFooterLink: {
+      path: '/',
+      text: 'Go to Kibana',
+    },
+  };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
+  const actionId = 'some-id';
+  const executorOptions: EmailActionTypeExecutorOptions = {
+    actionId,
+    config,
+    params,
+    secrets,
+    services,
+  };
+
+  test('ensure parameters are as expected', async () => {
     sendEmailMock.mockReset();
     const result = await actionType.executor(executorOptions);
     expect(result).toMatchInlineSnapshot(`
@@ -267,73 +276,85 @@ describe('execute()', () => {
       }
     `);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
-          Object {
-            "content": Object {
-              "message": "a message to you",
-              "subject": "the subject",
-            },
-            "hasAuth": true,
-            "proxySettings": undefined,
-            "routing": Object {
-              "bcc": Array [
-                "jimmy@example.com",
-              ],
-              "cc": Array [
-                "james@example.com",
-              ],
-              "from": "bob@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "password": "supersecret",
-              "service": "__json",
-              "user": "bob",
-            },
-          }
+      Object {
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "content": Object {
+          "message": "a message to you
+
+      --
+
+      This message was sent by Kibana.",
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
     `);
   });
 
   test('parameters are as expected with no auth', async () => {
-    const config: ActionTypeConfigType = {
-      service: null,
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: false,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: null,
-      password: null,
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        service: null,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
     };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
     sendEmailMock.mockReset();
-    await actionType.executor(executorOptions);
+    await actionType.executor(customExecutorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
         "content": Object {
-          "message": "a message to you",
+          "message": "a message to you
+
+      --
+
+      This message was sent by Kibana.",
           "subject": "the subject",
         },
         "hasAuth": false,
-        "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
             "jimmy@example.com",
@@ -356,37 +377,23 @@ describe('execute()', () => {
   });
 
   test('returns expected result when an error is thrown', async () => {
-    const config: ActionTypeConfigType = {
-      service: null,
-      host: 'a host',
-      port: 42,
-      secure: true,
-      from: 'bob@example.com',
-      hasAuth: false,
-    };
-    const secrets: ActionTypeSecretsType = {
-      user: null,
-      password: null,
-    };
-    const params: ActionParamsType = {
-      to: ['jim@example.com'],
-      cc: ['james@example.com'],
-      bcc: ['jimmy@example.com'],
-      subject: 'the subject',
-      message: 'a message to you',
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      config: {
+        ...config,
+        service: null,
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
     };
 
-    const actionId = 'some-id';
-    const executorOptions: EmailActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
     sendEmailMock.mockReset();
     sendEmailMock.mockRejectedValue(new Error('wops'));
-    const result = await actionType.executor(executorOptions);
+    const result = await actionType.executor(customExecutorOptions);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
@@ -394,6 +401,98 @@ describe('execute()', () => {
         "serviceMessage": "wops",
         "status": "error",
       }
+    `);
+  });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+      kibanaFooterLink: {
+        path: '/',
+        text: 'Go to Kibana',
+      },
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    // Yes, this is tested in the snapshot below, but it's double-escaped there,
+    // so easier to see here that the escaping is correct.
+    expect(renderedParams.message).toBe('\\*bold\\*');
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "kibanaFooterLink": Object {
+          "path": "/",
+          "text": "Go to Kibana",
+        },
+        "message": "\\\\*bold\\\\*",
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
+
+  test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
+    const actionTypeWithPublicUrl = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+
+    await actionTypeWithPublicUrl.executor(executorOptions);
+
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`
+      "a message to you
+
+      --
+
+      This message was sent by Kibana. [Go to Kibana](https://localhost:1234/foo/bar)."
+    `);
+  });
+
+  test('allows to generate a deep link into Kibana when publicBaseUrl is defined', async () => {
+    const actionTypeWithPublicUrl = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+      publicBaseUrl: 'https://localhost:1234/foo/bar',
+    });
+
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        kibanaFooterLink: {
+          path: '/my/app',
+          text: 'View this in Kibana',
+        },
+      },
+    };
+
+    await actionTypeWithPublicUrl.executor(customExecutorOptions);
+
+    expect(sendEmailMock).toHaveBeenCalledTimes(1);
+    const sendMailCall = sendEmailMock.mock.calls[0][1];
+    expect(sendMailCall.content.message).toMatchInlineSnapshot(`
+      "a message to you
+
+      --
+
+      This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
     `);
   });
 });

@@ -7,7 +7,8 @@
     "bfetch",
     "expressions",
     "uiActions",
-    "share"
+    "share",
+    "inspector"
   ],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],

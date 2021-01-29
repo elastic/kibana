@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useRef, useState, createContext } from 'react';
+import React, { Fragment, FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -100,25 +100,17 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   // The DEFINE state
   const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig)
+    applyTransformConfigToDefineState(
+      getDefaultStepDefineState(searchItems),
+      cloneConfig,
+      indexPattern
+    )
   );
 
   // The DETAILS state
   const [stepDetailsState, setStepDetailsState] = useState(
     applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
   );
-
-  const stepDetails =
-    currentStep === WIZARD_STEPS.DETAILS ? (
-      <StepDetailsForm
-        onChange={setStepDetailsState}
-        overrides={stepDetailsState}
-        searchItems={searchItems}
-        stepDefineState={stepDefineState}
-      />
-    ) : (
-      <StepDetailsSummary {...stepDetailsState} />
-    );
 
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
@@ -157,22 +149,8 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     stepDetailsState
   );
 
-  const stepCreate =
-    currentStep === WIZARD_STEPS.CREATE ? (
-      <StepCreateForm
-        createIndexPattern={stepDetailsState.createIndexPattern}
-        transformId={stepDetailsState.transformId}
-        transformConfig={transformConfig}
-        onChange={setStepCreateState}
-        overrides={stepCreateState}
-        timeFieldName={stepDetailsState.indexPatternTimeField}
-      />
-    ) : (
-      <StepCreateSummary />
-    );
-
-  const stepsConfig = [
-    {
+  const stepDefine = useMemo(() => {
+    return {
       title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
         defaultMessage: 'Configuration',
       }),
@@ -185,14 +163,26 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
           searchItems={searchItems}
         />
       ),
-    },
-    {
+    };
+  }, [currentStep, stepDefineState, setCurrentStep, setStepDefineState, searchItems]);
+
+  const stepDetails = useMemo(() => {
+    return {
       title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
         defaultMessage: 'Transform details',
       }),
       children: (
         <Fragment>
-          {stepDetails}
+          {currentStep === WIZARD_STEPS.DETAILS ? (
+            <StepDetailsForm
+              onChange={setStepDetailsState}
+              overrides={stepDetailsState}
+              searchItems={searchItems}
+              stepDefineState={stepDefineState}
+            />
+          ) : (
+            <StepDetailsSummary {...stepDetailsState} />
+          )}
           {currentStep === WIZARD_STEPS.DETAILS && (
             <WizardNav
               previous={() => {
@@ -205,22 +195,47 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         </Fragment>
       ),
       status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-    },
-    {
+    };
+  }, [currentStep, setStepDetailsState, stepDetailsState, searchItems, stepDefineState]);
+
+  const stepCreate = useMemo(() => {
+    return {
       title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
         defaultMessage: 'Create',
       }),
       children: (
         <Fragment>
-          {stepCreate}
+          {currentStep === WIZARD_STEPS.CREATE ? (
+            <StepCreateForm
+              createIndexPattern={stepDetailsState.createIndexPattern}
+              transformId={stepDetailsState.transformId}
+              transformConfig={transformConfig}
+              onChange={setStepCreateState}
+              overrides={stepCreateState}
+              timeFieldName={stepDetailsState.indexPatternTimeField}
+            />
+          ) : (
+            <StepCreateSummary />
+          )}
           {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
             <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
           )}
         </Fragment>
       ),
       status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-    },
-  ];
+    };
+  }, [
+    currentStep,
+    setCurrentStep,
+    stepDetailsState.createIndexPattern,
+    stepDetailsState.transformId,
+    transformConfig,
+    setStepCreateState,
+    stepCreateState,
+    stepDetailsState.indexPatternTimeField,
+  ]);
+
+  const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   return (
     <CreateTransformWizardContext.Provider value={{ indexPattern }}>

@@ -11,6 +11,8 @@ import React from 'react';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
+export const COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME = 'copy-to-clipboard';
+
 export type OnCopy = ({
   content,
   isSuccess,
@@ -47,6 +49,7 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
   return (
     <EuiButtonIcon
       aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+      className={COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}
       color="text"
       data-test-subj="clipboard"
       iconType="copyClipboard"

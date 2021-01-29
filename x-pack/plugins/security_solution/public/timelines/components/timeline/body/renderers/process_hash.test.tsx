@@ -12,6 +12,15 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { ProcessHash } from './process_hash';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('ProcessHash', () => {
   const mount = useMountAppended();
 

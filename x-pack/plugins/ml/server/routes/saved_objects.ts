@@ -7,8 +7,15 @@
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
-import { jobsAndSpaces, syncJobObjects, jobTypeSchema } from './schemas/saved_objects';
-import { jobIdsSchema } from './schemas/job_service_schema';
+import {
+  jobsAndSpaces,
+  jobsAndCurrentSpace,
+  syncJobObjects,
+  jobTypeSchema,
+  canDeleteJobSchema,
+} from './schemas/saved_objects';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -187,6 +194,55 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
+   * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
+   * @apiName RemoveJobsFromCurrentSpace
+   * @apiDescription Remove a list of jobs from the current space
+   *
+   * @apiSchema (body) jobsAndCurrentSpace
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/remove_job_from_current_space',
+      validate: {
+        body: jobsAndCurrentSpace,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
+
+        const currentSpaceId = await getCurrentSpaceId();
+        if (currentSpaceId === null) {
+          return response.ok({
+            body: jobIds.map((id) => ({
+              [id]: {
+                success: false,
+                error: 'Cannot remove current space. Spaces plugin is disabled.',
+              },
+            })),
+          });
+        }
+
+        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, [
+          currentSpaceId,
+        ]);
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
    * @api {get} /api/ml/saved_objects/jobs_spaces All spaces in all jobs
    * @apiName JobsSpaces
    * @apiDescription List all jobs and their spaces
@@ -228,13 +284,23 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/delete_job_check Check whether user can delete a job
-   * @apiName DeleteJobCheck
+   * @api {post} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
+   * @apiName CanDeleteJob
    * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
    *                 to fully delete the job and whether they are able to remove it from
    *                 the current space.
+   *                 Note, this is only for enabling UI controls. A user calling endpoints
+   *                 directly will still be able to delete or remove the job from a space.
    *
-   * @apiSchema (body) jobIdsSchema (params) jobTypeSchema
+   * @apiSchema (params) jobTypeSchema
+   * @apiSchema (body) jobIdsSchema
+   * @apiSuccessExample {json} Error-Response:
+   * {
+   *   "my_job": {
+   *     "canDelete": false,
+   *     "canRemoveFromSpace": true
+   *   }
+   * }
    *
    */
   router.post(
@@ -242,7 +308,7 @@ export function savedObjectsRoutes(
       path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
         params: jobTypeSchema,
-        body: jobIdsSchema,
+        body: canDeleteJobSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],

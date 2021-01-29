@@ -59,6 +59,7 @@ describe('LayerPanel', () => {
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       index: 0,
+      setLayerRef: jest.fn(),
     };
   }
 
@@ -331,7 +332,7 @@ describe('LayerPanel', () => {
             columns: {},
             columnOrder: [],
           },
-          true
+          { shouldReplaceDimension: true }
         );
       });
       expect(updateAll).toHaveBeenCalled();

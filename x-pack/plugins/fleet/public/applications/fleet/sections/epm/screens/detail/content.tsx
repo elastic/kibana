@@ -5,11 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { Redirect } from 'react-router-dom';
 import { DetailParams } from '.';
-import { PackageInfo } from '../../../../types';
+import { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
@@ -18,6 +18,7 @@ import { SettingsPanel } from './settings_panel';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../../components/extension_wrapper';
 import { useLink } from '../../../../hooks';
+import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 
@@ -34,12 +35,17 @@ const ContentFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function Content(props: ContentProps) {
-  const showRightColumn = props.panel !== 'policies';
+  const { panel } = props;
+  const showRightColumn = useMemo(() => {
+    const fullWidthContentPages: DetailViewPanelName[] = ['policies', 'custom'];
+    return !fullWidthContentPages.includes(panel!);
+  }, [panel]);
+
   return (
     <ContentFlexGroup>
       <LeftSideColumn {...(!showRightColumn ? { columnGrow: 1 } : undefined)} />
       <CenterColumn {...(!showRightColumn ? { columnGrow: 6 } : undefined)}>
-        <ContentPanel {...props} />
+        <ContentPanel panel={panel!} packageInfo={props} />
       </CenterColumn>
       {showRightColumn && (
         <RightColumn>
@@ -50,9 +56,14 @@ export function Content(props: ContentProps) {
   );
 }
 
-type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
-export function ContentPanel(props: ContentPanelProps) {
-  const { panel, name, version, assets, title, removable, latestVersion } = props;
+interface ContentPanelProps {
+  packageInfo: PackageInfo;
+  panel: DetailViewPanelName;
+}
+export const ContentPanel = memo<ContentPanelProps>(({ panel, packageInfo }) => {
+  const { name, version, assets, title, removable, latestVersion } = packageInfo;
+  const pkgkey = pkgKeyFromPackageInfo(packageInfo);
+
   const CustomView = useUIExtension(name, 'package-detail-custom');
   const { getPath } = useLink();
 
@@ -73,16 +84,16 @@ export function ContentPanel(props: ContentPanelProps) {
     case 'custom':
       return CustomView ? (
         <ExtensionWrapper>
-          <CustomView />
+          <CustomView pkgkey={pkgkey} packageInfo={packageInfo} />
         </ExtensionWrapper>
       ) : (
-        <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />
+        <Redirect to={getPath('integration_details', { pkgkey })} />
       );
     case 'overview':
     default:
-      return <OverviewPanel {...props} />;
+      return <OverviewPanel {...packageInfo} />;
   }
-}
+});
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {

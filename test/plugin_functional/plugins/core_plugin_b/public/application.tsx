@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { History } from 'history';
@@ -36,7 +25,7 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="barAppHome">
@@ -90,7 +79,7 @@ const PageB = ({ location }: RouteComponentProps) => {
 };
 
 type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
 };
 const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   <EuiSideNav
@@ -123,11 +112,11 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   />
 ));
 
-const BarApp = ({ history, context }: { history: History; context: AppMountContext }) => (
+const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
     <EuiPage>
       <EuiPageSideBar>
-        <Nav navigateToApp={context.core.application.navigateToApp} />
+        <Nav navigateToApp={coreStart.application.navigateToApp} />
       </EuiPageSideBar>
       <Route path="/" exact component={Home} />
       <Route path="/page-b" component={PageB} />
@@ -135,8 +124,8 @@ const BarApp = ({ history, context }: { history: History; context: AppMountConte
   </Router>
 );
 
-export const renderApp = (context: AppMountContext, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<BarApp history={history} context={context} />, element);
+export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
+  ReactDOM.render(<BarApp history={history} coreStart={coreStart} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -9,22 +9,38 @@ import { i18n } from '@kbn/i18n';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
-import { EMSFileSource, sourceTitle } from './ems_file_source';
+import { EMSFileSource, getSourceTitle } from './ems_file_source';
+
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
 
+function getDescription() {
+  const emsSettings = getEMSSettings();
+  return i18n.translate('xpack.maps.source.emsFileSourceDescription', {
+    defaultMessage: 'Administrative boundaries from {host}',
+    values: {
+      host: emsSettings.isEMSUrlSet() ? emsSettings.getEMSRoot() : 'Elastic Maps Service',
+    },
+  });
+}
+
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();
-    return emsSettings!.isEMSEnabled();
+    return emsSettings.isIncludeElasticMapsService();
   },
-  description: i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+  description: getDescription(),
+  disabledReason: i18n.translate('xpack.maps.source.emsFileDisabledReason', {
+    defaultMessage: 'Elastic Maps Server requires an Enterprise license',
   }),
+  getIsDisabled: () => {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() && !emsSettings.hasOnPremLicense();
+  },
   icon: EMSBoundariesLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
@@ -34,5 +50,5 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
-  title: sourceTitle,
+  title: getSourceTitle(),
 };

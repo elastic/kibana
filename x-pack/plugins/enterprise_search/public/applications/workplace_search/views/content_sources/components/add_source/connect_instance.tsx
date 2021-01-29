@@ -7,6 +7,8 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -28,10 +30,22 @@ import {
 import { LicensingLogic } from '../../../../../../applications/shared/licensing';
 
 import { AppLogic } from '../../../../app_logic';
-import { SourceLogic } from '../../source_logic';
+import { AddSourceLogic } from './add_source_logic';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
 import { SourceFeatures } from './source_features';
+
+import { LEARN_MORE_LINK } from '../../constants';
+import {
+  CONNECT_REMOTE,
+  CONNECT_PRIVATE,
+  CONNECT_WHICH_OPTION_LINK,
+  CONNECT_DOC_PERMISSIONS_LABEL,
+  CONNECT_DOC_PERMISSIONS_TITLE,
+  CONNECT_NEEDS_PERMISSIONS,
+  CONNECT_NOT_SYNCED_TITLE,
+  CONNECT_NOT_SYNCED_TEXT,
+} from './constants';
 
 interface ConnectInstanceProps {
   header: React.ReactNode;
@@ -69,10 +83,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourcePasswordValue,
     setSourceSubdomainValue,
     setSourceIndexPermissionsValue,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
 
   const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    SourceLogic
+    AddSourceLogic
   );
 
   const { isOrganization } = useValues(AppLogic);
@@ -82,7 +96,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
-  const redirectOauth = (oauthUrl: string) => (window.location.href = oauthUrl);
+  const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
   const handleFormSubmitError = () => setFormLoading(false);
@@ -145,8 +159,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       return (
         <>
           <EuiBadgeGroup>
-            {isRemote && <EuiBadge color="hollow">Remote</EuiBadge>}
-            {isPrivate && <EuiBadge color="hollow">Private</EuiBadge>}
+            {isRemote && <EuiBadge color="hollow">{CONNECT_REMOTE}</EuiBadge>}
+            {isPrivate && <EuiBadge color="hollow">{CONNECT_PRIVATE}</EuiBadge>}
           </EuiBadgeGroup>
           <EuiSpacer />
         </>
@@ -164,7 +178,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const whichDocsLink = (
     <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-      Which option should I choose?
+      {CONNECT_WHICH_OPTION_LINK}
     </EuiLink>
   );
 
@@ -172,12 +186,12 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     <>
       <EuiTitle size="xs">
         <span>
-          <EuiTextColor color="default">Document-level permissions</EuiTextColor>
+          <EuiTextColor color="default">{CONNECT_DOC_PERMISSIONS_TITLE}</EuiTextColor>
         </span>
       </EuiTitle>
       <EuiSpacer />
       <EuiSwitch
-        label={<strong>Enable document-level permission synchronization</strong>}
+        label={<strong>{CONNECT_DOC_PERMISSIONS_LABEL}</strong>}
         name="index_permissions"
         onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
         checked={indexPermissionsValue}
@@ -186,17 +200,23 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
         {!needsPermissions && (
-          <span>
-            Document-level permissions are not yet available for this source.{' '}
-            <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-              Learn more
-            </EuiLink>
+          <span data-test-subj="NeedsPermissionsMessage">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
+              defaultMessage="Document-level permissions are not yet available for this source. {link}"
+              values={{
+                link: (
+                  <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                    {LEARN_MORE_LINK}
+                  </EuiLink>
+                ),
+              }}
+            />
           </span>
         )}
         {needsPermissions && indexPermissionsValue && (
           <span>
-            Document-level permission information will be synchronized. Additional configuration is
-            required following the initial connection before documents are available for search.
+            {CONNECT_NEEDS_PERMISSIONS}
             <br />
             {whichDocsLink}
           </span>
@@ -204,11 +224,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       </EuiText>
       <EuiSpacer size="s" />
       {!indexPermissionsValue && (
-        <EuiCallOut title="Document-level permissions will not be synchronized" color="warning">
+        <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
           <p>
-            All documents accessible to the connecting service user will be synchronized and made
-            available to the organization’s users, or group’s users. Documents are immediately
-            available for search. {needsPermissions && whichDocsLink}
+            {CONNECT_NOT_SYNCED_TEXT}
+            {needsPermissions && whichDocsLink}
           </p>
         </EuiCallOut>
       )}
@@ -224,7 +243,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
       <EuiFormRow>
         <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
-          Connect {name}
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
+            defaultMessage: 'Connect {name}',
+            values: { name },
+          })}
         </EuiButton>
       </EuiFormRow>
     </>

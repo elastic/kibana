@@ -16,6 +16,15 @@ import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';

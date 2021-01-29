@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -29,14 +29,14 @@ import {
   ServiceNowExecutorResultData,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
+export const ActionTypeId = '.servicenow';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -48,7 +48,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.servicenow',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
@@ -60,14 +60,17 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 // action executor
 const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: ActionTypeExecutorOptions<
     ServiceNowPublicConfigurationType,
     ServiceNowSecretConfigurationType,
@@ -84,7 +87,7 @@ async function executor(
       secrets,
     },
     logger,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {
@@ -101,17 +104,9 @@ async function executor(
 
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const incidentConfiguration = config.incidentConfiguration;
-    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
-    const externalObject =
-      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       secrets,
       logger,
     });

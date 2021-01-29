@@ -17,11 +17,3 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
-
-// TODO: remove when Case mappings will be removed
-export const MAPPING_EMPTY = i18n.translate(
-  'xpack.actions.builtin.jira.configuration.emptyMapping',
-  {
-    defaultMessage: '[incidentConfiguration.mapping]: expected non-empty but got empty',
-  }
-);

@@ -6,7 +6,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -18,22 +18,23 @@ import {
   CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
+import type { CasesRequestHandlerContext } from '../../types';
 
 import { GetActionTypeParams } from '..';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
-export const CASE_ACTION_TYPE_ID = '.case';
 // action type definition
 export function getActionType({
   logger,
   caseService,
   caseConfigureService,
+  connectorMappingsService,
   userActionService,
   alertsService,
 }: GetActionTypeParams): CaseActionType {
   return {
-    id: CASE_ACTION_TYPE_ID,
+    id: '.case',
     minimumLicenseRequired: 'basic',
     name: i18n.NAME,
     validate: {
@@ -41,11 +42,12 @@ export function getActionType({
       params: CaseExecutorParamsSchema,
     },
     executor: curry(executor)({
-      logger,
-      caseService,
-      caseConfigureService,
-      userActionService,
       alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      logger,
+      userActionService,
     }),
   };
 }
@@ -53,11 +55,12 @@ export function getActionType({
 // action executor
 async function executor(
   {
-    logger,
-    caseService,
-    caseConfigureService,
-    userActionService,
     alertsService,
+    caseConfigureService,
+    caseService,
+    connectorMappingsService,
+    logger,
+    userActionService,
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
@@ -71,10 +74,11 @@ async function executor(
     request: {} as KibanaRequest,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
     alertsService,
     // TODO: When case connector is enabled we should figure out how to pass the context.
-    context: {} as RequestHandlerContext,
+    context: {} as CasesRequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {

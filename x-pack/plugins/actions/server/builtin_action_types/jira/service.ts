@@ -26,7 +26,7 @@ import {
 
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
@@ -39,7 +39,7 @@ const createMetaCapabilities = ['list-project-issuetypes', 'list-issuetype-field
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
@@ -102,9 +102,13 @@ export const createExternalService = (
     return fields;
   };
 
-  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
+  const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
     if (errorResponse == null) {
       return '';
+    }
+    if (typeof errorResponse === 'string') {
+      // Jira error.response.data can be string!!
+      return errorResponse;
     }
 
     const { errorMessages, errors } = errorResponse;
@@ -133,21 +137,24 @@ export const createExternalService = (
     [key: string]: {
       allowedValues?: Array<{}>;
       defaultValue?: {};
+      name: string;
       required: boolean;
       schema: FieldSchema;
     };
   }) =>
-    Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
-      return {
+    Object.keys(fields ?? {}).reduce(
+      (fieldsAcc, fieldKey) => ({
         ...fieldsAcc,
         [fieldKey]: {
           required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
           schema: fields[fieldKey]?.schema,
+          name: fields[fieldKey]?.name,
         },
-      };
-    }, {});
+      }),
+      {}
+    );
 
   const normalizeSearchResults = (
     issues: Array<{ id: string; key: string; fields: { summary: string } }>
@@ -166,7 +173,7 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       const { fields, ...rest } = res.data;
@@ -215,7 +222,7 @@ export const createExternalService = (
         data: {
           fields,
         },
-        proxySettings,
+        configurationUtilities,
       });
 
       const updatedIncident = await getIncident(res.data.id);
@@ -256,7 +263,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { fields },
-        proxySettings,
+        configurationUtilities,
       });
 
       const updatedIncident = await getIncident(incidentId as string);
@@ -290,7 +297,7 @@ export const createExternalService = (
         url: getCommentsURL(incidentId),
         logger,
         data: { body: comment.comment },
-        proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -317,7 +324,7 @@ export const createExternalService = (
         method: 'get',
         url: capabilitiesUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return { ...res.data };
@@ -343,7 +350,7 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesOldAPIURL,
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const issueTypes = res.data.projects[0]?.issuetypes ?? [];
@@ -354,7 +361,7 @@ export const createExternalService = (
           method: 'get',
           url: getIssueTypesUrl,
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const issueTypes = res.data.values;
@@ -382,11 +389,10 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsOldAPIURL, issueTypeId),
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-
         return normalizeFields(fields);
       } else {
         const res = await request({
@@ -394,7 +400,7 @@ export const createExternalService = (
           method: 'get',
           url: createGetIssueTypeFieldsUrl(getIssueTypeFieldsUrl, issueTypeId),
           logger,
-          proxySettings,
+          configurationUtilities,
         });
 
         const fields = res.data.values.reduce(
@@ -453,7 +459,7 @@ export const createExternalService = (
         method: 'get',
         url: query,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return normalizeSearchResults(res.data?.issues ?? []);
@@ -477,7 +483,7 @@ export const createExternalService = (
         method: 'get',
         url: getIssueUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       return normalizeIssue(res.data ?? {});

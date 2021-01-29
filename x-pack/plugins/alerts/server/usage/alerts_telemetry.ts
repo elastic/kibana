@@ -215,7 +215,6 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
 
   const results = await callCluster('search', {
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -251,7 +250,7 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [key.replace('.', '__')]: results.aggregations.byAlertTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: results.aggregations.byAlertTypeId.value.types[key],
       }),
       {}
     ),
@@ -289,7 +288,6 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
 export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaInex: string) {
   const searchResult: SearchResponse<unknown> = await callCluster('search', {
     index: kibanaInex,
-    rest_total_hits_as_int: true,
     body: {
       query: {
         bool: {
@@ -312,11 +310,20 @@ export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaIne
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [key.replace('.', '__')]: searchResult.aggregations.byAlertTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: searchResult.aggregations.byAlertTypeId.value.types[
+          key
+        ],
       }),
       {}
     ),
   };
+}
+
+function replaceFirstAndLastDotSymbols(strToReplace: string) {
+  const hasFirstSymbolDot = strToReplace.startsWith('.');
+  const appliedString = hasFirstSymbolDot ? strToReplace.replace('.', '__') : strToReplace;
+  const hasLastSymbolDot = strToReplace.endsWith('.');
+  return hasLastSymbolDot ? `${appliedString.slice(0, -1)}__` : appliedString;
 }
 
 // TODO: Implement executions count telemetry with eventLog, when it will write to index

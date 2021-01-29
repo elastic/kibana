@@ -7,7 +7,7 @@
 import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { EventsTd, EventsTdContent } from '../../styles';
+import { EventsTdContent } from '../../styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 
 interface ActionIconItemProps {
@@ -31,7 +31,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
   onClick,
   children,
 }) => (
-  <EventsTd>
+  <div>
     <EventsTdContent textAlign="center" width={width}>
       {children ?? (
         <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
@@ -45,7 +45,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
         </EuiToolTip>
       )}
     </EventsTdContent>
-  </EventsTd>
+  </div>
 );
 
 ActionIconItemComponent.displayName = 'ActionIconItemComponent';

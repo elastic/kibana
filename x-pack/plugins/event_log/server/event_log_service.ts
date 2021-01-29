@@ -5,14 +5,14 @@
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
 import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 type SystemLogger = Plugin['systemLogger'];

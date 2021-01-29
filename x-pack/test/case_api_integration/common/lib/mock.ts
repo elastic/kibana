@@ -23,7 +23,7 @@ export const postCaseReq: CasePostRequest = {
   connector: {
     id: 'none',
     name: 'none',
-    type: '.none' as ConnectorTypes,
+    type: ConnectorTypes.none,
     fields: null,
   },
   settings: {

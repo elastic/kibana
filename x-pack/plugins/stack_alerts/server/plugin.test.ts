@@ -40,7 +40,7 @@ describe('AlertingBuiltins Plugin', () => {
           "actionGroups": Array [
             Object {
               "id": "threshold met",
-              "name": "Threshold Met",
+              "name": "Threshold met",
             },
           ],
           "id": ".index-threshold",
@@ -58,12 +58,31 @@ describe('AlertingBuiltins Plugin', () => {
         Object {
           "actionGroups": Array [
             Object {
-              "id": "tracking threshold met",
-              "name": "Tracking threshold met",
+              "id": "Tracked entity contained",
+              "name": "Tracking containment met",
             },
           ],
-          "id": ".geo-threshold",
-          "name": "Geo tracking threshold",
+          "id": ".geo-containment",
+          "name": "Tracking containment",
+        }
+      `);
+
+      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
+      const testedEsQueryArgs = {
+        id: esQueryArgs.id,
+        name: esQueryArgs.name,
+        actionGroups: esQueryArgs.actionGroups,
+      };
+      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "query matched",
+              "name": "Query matched",
+            },
+          ],
+          "id": ".es-query",
+          "name": "ES query",
         }
       `);
 

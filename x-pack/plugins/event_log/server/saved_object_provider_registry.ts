@@ -13,7 +13,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 export type SavedObjectGetter = (
   ...params: Parameters<SavedObjectsClientContract['get']>
 ) => Promise<unknown>;
-export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectGetter;
+
+export type SavedObjectBulkGetter = (
+  ...params: Parameters<SavedObjectsClientContract['bulkGet']>
+) => Promise<unknown>;
+
+export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
+
+export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
@@ -34,7 +41,7 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public getProvidersClient(request: KibanaRequest): SavedObjectGetter {
+  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetterResult {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -49,9 +56,13 @@ export class SavedObjectProviderRegistry {
     // `scopedProviders` is a cache of providers which are scoped t othe current request.
     // The client will only instantiate a provider on-demand and it will cache each
     // one to enable the request to reuse each provider.
-    const scopedProviders = new Map<string, SavedObjectGetter>();
+
+    // would be nice to have a simple version support in API:
+    // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
+    const scopedProviders = new Map<string, SavedObjectBulkGetter>();
     const defaultGetter = this.defaultProvider(request);
-    return (type: string, id: string) => {
+    return (type: string, ids: string[]) => {
+      const objects = ids.map((id: string) => ({ type, id }));
       const getter = pipe(
         fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
@@ -62,7 +73,7 @@ export class SavedObjectProviderRegistry {
           return client;
         })
       );
-      return getter(type, id);
+      return getter(objects);
     };
   }
 }

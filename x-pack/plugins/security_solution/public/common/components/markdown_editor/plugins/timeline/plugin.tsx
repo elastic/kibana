@@ -8,6 +8,7 @@ import React, { useCallback, memo } from 'react';
 import {
   EuiSelectableOption,
   EuiModalBody,
+  EuiModalHeader,
   EuiMarkdownEditorUiPlugin,
   EuiCodeBlock,
 } from '@elastic/eui';
@@ -47,24 +48,32 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
     []
   );
 
+  const handleTimelineChange = useCallback(
+    (timelineTitle, timelineId, graphEventId) => {
+      const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
+        absolute: true,
+        skipSearch: true,
+      });
+      onInsert(`[${timelineTitle}](${url})`, {
+        block: false,
+      });
+    },
+    [formatUrl, onInsert]
+  );
+
   return (
-    <EuiModalBody>
-      <SelectableTimeline
-        hideUntitled={true}
-        getSelectableOptions={handleGetSelectableOptions}
-        onTimelineChange={(timelineTitle, timelineId, graphEventId) => {
-          const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
-            absolute: true,
-            skipSearch: true,
-          });
-          onInsert(`[${timelineTitle}](${url})`, {
-            block: false,
-          });
-        }}
-        onClosePopover={onClosePopover}
-        timelineType={TimelineType.default}
-      />
-    </EuiModalBody>
+    <>
+      <EuiModalHeader />
+      <EuiModalBody>
+        <SelectableTimeline
+          hideUntitled={true}
+          getSelectableOptions={handleGetSelectableOptions}
+          onTimelineChange={handleTimelineChange}
+          onClosePopover={onClosePopover}
+          timelineType={TimelineType.default}
+        />
+      </EuiModalBody>
+    </>
   );
 };
 

@@ -7,16 +7,24 @@
 import React from 'react';
 
 import { Result as ResultType } from '../../../result/types';
+import { Schema } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
 
 export interface Props {
   result: ResultType;
+  schemaForTypeHighlights?: Schema;
+  isMetaEngine: boolean;
 }
 
-export const ResultView: React.FC<Props> = ({ result }) => {
+export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights, isMetaEngine }) => {
   return (
     <li>
-      <Result result={result} />
+      <Result
+        result={result}
+        shouldLinkToDetailPage={true}
+        schemaForTypeHighlights={schemaForTypeHighlights}
+        isMetaEngine={isMetaEngine}
+      />
     </li>
   );
 };

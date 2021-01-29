@@ -12,25 +12,25 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ReducerAction } from './connector_reducer';
 import {
-  ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  ActionTypeModel,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { SectionLoading } from '../../components/section_loading';
+import { ConnectorReducerAction } from './connector_reducer';
 
-export function validateBaseProperties(actionObject: ActionConnector) {
+export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
+  actionObject: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>
+) {
   const validationResult = { errors: {} };
   const verrors = {
     name: new Array<string>(),
@@ -49,19 +49,44 @@ export function validateBaseProperties(actionObject: ActionConnector) {
   return validationResult;
 }
 
+export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+  connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
+  actionTypeModel: ActionTypeModel
+) {
+  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const configErrors = (connectorValidationResult.config
+    ? connectorValidationResult.config.errors
+    : {}) as IErrorObject;
+  const secretsErrors = (connectorValidationResult.secrets
+    ? connectorValidationResult.secrets.errors
+    : {}) as IErrorObject;
+  const connectorBaseErrors = validateBaseProperties(connector).errors;
+  const connectorErrors = {
+    ...configErrors,
+    ...secretsErrors,
+    ...connectorBaseErrors,
+  } as IErrorObject;
+  return {
+    configErrors,
+    secretsErrors,
+    connectorBaseErrors,
+    connectorErrors,
+  };
+}
+
 interface ActionConnectorProps<
   ConnectorConfig = Record<string, any>,
   ConnectorSecrets = Record<string, any>
 > {
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>;
-  dispatch: React.Dispatch<ReducerAction>;
-  actionTypeName: string;
-  serverError?: {
-    body: { message: string; error: string };
-  };
+  dispatch: React.Dispatch<ConnectorReducerAction<ConnectorConfig, ConnectorSecrets>>;
   errors: IErrorObject;
   actionTypeRegistry: ActionTypeRegistryContract;
   consumer?: string;
+  actionTypeName?: string;
+  serverError?: {
+    body: { message: string; error: string };
+  };
 }
 
 export const ActionConnectorForm = ({
@@ -79,15 +104,31 @@ export const ActionConnectorForm = ({
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const setActionProperty = (key: string, value: any) => {
+  const setActionProperty = <
+    Key extends keyof UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >
+  >(
+    key: Key,
+    value:
+      | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>[Key]
+      | null
+  ) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setActionConfigProperty = (key: string, value: any) => {
+  const setActionConfigProperty = <Key extends keyof Record<string, unknown>>(
+    key: Key,
+    value: Record<string, unknown>[Key]
+  ) => {
     dispatch({ command: { type: 'setConfigProperty' }, payload: { key, value } });
   };
 
-  const setActionSecretsProperty = (key: string, value: any) => {
+  const setActionSecretsProperty = <Key extends keyof Record<string, unknown>>(
+    key: Key,
+    value: Record<string, unknown>[Key]
+  ) => {
     dispatch({ command: { type: 'setSecretsProperty' }, payload: { key, value } });
   };
 
@@ -111,7 +152,7 @@ export const ActionConnectorForm = ({
                 id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
                 defaultMessage="To create this connector, you must configure at least one {actionType} account. {docLink}"
                 values={{
-                  actionType: actionTypeName,
+                  actionType: actionTypeName ?? connector.actionTypeId,
                   docLink: (
                     <EuiLink
                       href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
@@ -181,11 +222,12 @@ export const ActionConnectorForm = ({
           <EuiErrorBoundary>
             <Suspense
               fallback={
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                    defaultMessage="Loading connector settings…"
+                  />
+                </SectionLoading>
               }
             >
               <FieldsComponent

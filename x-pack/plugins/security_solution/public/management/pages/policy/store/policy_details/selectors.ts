@@ -6,6 +6,8 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { ILicense } from '../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -14,12 +16,46 @@ import {
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
+/** Returns current active license */
+export const licenseState = (state: Immutable<PolicyDetailsState>) => state.license;
+
+export const licensedPolicy: (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<PolicyData> | undefined = createSelector(
+  policyDetails,
+  licenseState,
+  (policyData, license) => {
+    if (policyData) {
+      const policyValue = unsetPolicyFeaturesAboveLicenseLevel(
+        policyData.inputs[0].config.policy.value,
+        license as ILicense
+      );
+      const newPolicyData: Immutable<PolicyData> = {
+        ...policyData,
+        inputs: [
+          {
+            ...policyData.inputs[0],
+            config: {
+              ...policyData.inputs[0].config,
+              policy: {
+                ...policyData.inputs[0].config.policy,
+                value: policyValue,
+              },
+            },
+          },
+        ],
+      };
+      return newPolicyData;
+    }
+    return policyData;
+  }
+);
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
@@ -75,7 +111,7 @@ export const getPolicyDataForUpdate = (
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
-) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
+) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
     return getPolicyDataForUpdate(policy);
   }
@@ -89,6 +125,11 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
       exact: true,
     }) !== null
   );
+};
+
+/** Returns the license info fetched from the license service */
+export const license = (state: Immutable<PolicyDetailsState>) => {
+  return state.license;
 };
 
 /** Returns the policyId from the url */
@@ -111,7 +152,7 @@ const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
  * Note: this will return a default full policy if the `policyItem` is `undefined`
  */
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
-  policyDetails,
+  licensedPolicy,
   (policyData) => {
     return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
@@ -142,6 +183,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        ransomware: windows.ransomware,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -149,6 +191,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        ransomware: mac.ransomware,
         popup: mac.popup,
       },
       linux: {

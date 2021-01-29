@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertTypeParams } from '../../../../alerts/common';
 import { Query } from '../../../../../../src/plugins/data/common';
 
-export interface GeoContainmentAlertParams {
+export interface GeoContainmentAlertParams extends AlertTypeParams {
   index: string;
   indexId: string;
   geoField: string;
@@ -17,7 +18,6 @@ export interface GeoContainmentAlertParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }

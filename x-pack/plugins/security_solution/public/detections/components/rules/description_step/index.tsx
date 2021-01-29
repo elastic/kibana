@@ -18,11 +18,7 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  AboutStepRiskScore,
-  AboutStepSeverity,
-  IMitreEnterpriseAttack,
-} from '../../../pages/detection_engine/rules/types';
+import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { FieldValueTimeline } from '../pick_timeline';
 import { FormSchema } from '../../../../shared_imports';
 import { ListItems } from './types';
@@ -42,7 +38,7 @@ import {
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Threats, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
 
@@ -179,7 +175,7 @@ export const getDescriptionItem = (
       indexPatterns,
     });
   } else if (field === 'threat') {
-    const threats: IMitreEnterpriseAttack[] = get(field, data);
+    const threats: Threats = get(field, data);
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);

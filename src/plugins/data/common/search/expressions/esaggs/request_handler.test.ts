@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -39,7 +28,6 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockParams = {
       abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
-      addFilters: jest.fn(),
       aggs: ({
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
         setTimeRange: jest.fn(),
@@ -151,7 +139,8 @@ describe('esaggs expression function - public', () => {
     });
   });
 
-  test('calls agg.postFlightRequest if it exiests', async () => {
+  test('calls agg.postFlightRequest if it exiests and agg is enabled', async () => {
+    mockParams.aggs.aggs[0].enabled = true;
     await handleRequest(mockParams);
     expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(1);
 
@@ -159,6 +148,12 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockParams.aggs.aggs[0] = ({ type: { name: 'count' } } as unknown) as IAggConfig;
     expect(async () => await handleRequest(mockParams)).not.toThrowError();
+  });
+
+  test('should skip agg.postFlightRequest call if the agg is disabled', async () => {
+    mockParams.aggs.aggs[0].enabled = false;
+    await handleRequest(mockParams);
+    expect(mockParams.aggs.aggs[0].type.postFlightRequest).toHaveBeenCalledTimes(0);
   });
 
   test('tabifies response data', async () => {

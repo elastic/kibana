@@ -5,14 +5,16 @@
  */
 
 import {
+  AlertServiceContract,
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
-  AlertServiceContract,
+  ConnectorMappingsServiceSetup,
 } from '.';
 
 export type CaseServiceMock = jest.Mocked<CaseServiceSetup>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureServiceSetup>;
+export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsServiceSetup>;
 export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
 export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 
@@ -40,6 +42,11 @@ export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
   get: jest.fn(),
   find: jest.fn(),
   patch: jest.fn(),
+  post: jest.fn(),
+});
+
+export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => ({
+  find: jest.fn(),
   post: jest.fn(),
 });
 

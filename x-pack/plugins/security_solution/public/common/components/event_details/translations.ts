@@ -55,9 +55,8 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
   }
 );
 
-export const TOGGLE_COLUMN_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.eventDetails.toggleColumnTooltip',
-  {
-    defaultMessage: 'Toggle column',
-  }
-);
+export const VIEW_COLUMN = (field: string) =>
+  i18n.translate('xpack.securitySolution.eventDetails.viewColumnCheckboxAriaLabel', {
+    values: { field },
+    defaultMessage: 'View {field} column',
+  });
