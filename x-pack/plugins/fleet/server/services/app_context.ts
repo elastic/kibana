@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BehaviorSubject, Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   SavedObjectsServiceStart,
@@ -37,7 +38,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
-  public start(appContext: FleetAppContext) {
+  public async start(appContext: FleetAppContext) {
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
@@ -50,9 +51,10 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
 
-    if (appContext.config$ && appContext.initialConfig) {
+    if (appContext.config$) {
       this.config$ = appContext.config$;
-      this.configSubject$ = new BehaviorSubject(appContext.initialConfig);
+      const initialValue = await this.config$.pipe(first()).toPromise();
+      this.configSubject$ = new BehaviorSubject(initialValue);
       this.config$.subscribe(this.configSubject$);
     }
   }
