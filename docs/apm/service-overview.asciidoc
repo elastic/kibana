@@ -62,6 +62,9 @@ each dependency. By default, dependencies are sorted by _Impact_ to show the mos
 If there is a particular dependency you are interested in, click *View service map* to view the related
 <<service-maps, service map>>.
 
+IMPORTANT: A known issue prevents Real User Monitoring (RUM) dependencies from being shown in the
+*Dependencies* table. We are working on a fix for this issue.
+
 [role="screenshot"]
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
