@@ -23,15 +23,12 @@ describe('search settings routes', () => {
   });
 
   describe('GET /api/app_search/engines/{name}/search_settings/details', () => {
-    let mockRouter: MockRouter;
+    const mockRouter = new MockRouter({
+      method: 'get',
+      path: '/api/app_search/engines/{engineName}/search_settings/details',
+    });
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/engines/{engineName}/search_settings/details',
-      });
-
       registerSearchSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
@@ -50,16 +47,13 @@ describe('search settings routes', () => {
   });
 
   describe('PUT /api/app_search/engines/{name}/search_settings', () => {
-    let mockRouter: MockRouter;
+    const mockRouter = new MockRouter({
+      method: 'put',
+      path: '/api/app_search/engines/{engineName}/search_settings',
+      payload: 'body',
+    });
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'put',
-        path: '/api/app_search/engines/{engineName}/search_settings',
-        payload: 'body',
-      });
-
       registerSearchSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
@@ -91,15 +85,12 @@ describe('search settings routes', () => {
   });
 
   describe('POST /api/app_search/engines/{name}/search_settings/reset', () => {
-    let mockRouter: MockRouter;
+    const mockRouter = new MockRouter({
+      method: 'post',
+      path: '/api/app_search/engines/{engineName}/search_settings/reset',
+    });
 
     beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{engineName}/search_settings/reset',
-      });
-
       registerSearchSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
@@ -118,20 +109,20 @@ describe('search settings routes', () => {
   });
 
   describe('POST /api/app_search/engines/{name}/search_settings_search', () => {
-    let mockRouter: MockRouter;
+    const mockRouter = new MockRouter({
+      method: 'post',
+      path: '/api/app_search/engines/{engineName}/search_settings_search',
+      payload: 'body',
+    });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{engineName}/search_settings_search',
-        payload: 'body',
-      });
-
+    beforeEach(() => {
       registerSearchSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
+    it('creates a request to enterprise search', () => {
       mockRouter.callRoute({
         params: { engineName: 'some-engine' },
         body: searchSettings,
@@ -143,19 +134,6 @@ describe('search settings routes', () => {
     });
 
     describe('validates body', () => {
-      beforeEach(() => {
-        mockRouter = new MockRouter({
-          method: 'post',
-          path: '/api/app_search/engines/{engineName}/search_settings_search',
-          payload: 'body',
-        });
-
-        registerSearchSettingsRoutes({
-          ...mockDependencies,
-          router: mockRouter.router,
-        });
-      });
-
       it('correctly', () => {
         const request = {
           body: {
@@ -173,16 +151,16 @@ describe('search settings routes', () => {
     });
 
     describe('validates query', () => {
-      it('correctly', () => {
-        mockRouter = new MockRouter({
-          method: 'post',
-          path: '/api/app_search/engines/{engineName}/search_settings_search',
-          payload: 'query',
-        });
+      const queryRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/engines/{engineName}/search_settings_search',
+        payload: 'query',
+      });
 
+      it('correctly', () => {
         registerSearchSettingsRoutes({
           ...mockDependencies,
-          router: mockRouter.router,
+          router: queryRouter.router,
         });
 
         const request = {
@@ -190,12 +168,12 @@ describe('search settings routes', () => {
             query: 'foo',
           },
         };
-        mockRouter.shouldValidate(request);
+        queryRouter.shouldValidate(request);
       });
 
       it('missing required fields', () => {
         const request = { query: {} };
-        mockRouter.shouldThrow(request);
+        queryRouter.shouldThrow(request);
       });
     });
   });
