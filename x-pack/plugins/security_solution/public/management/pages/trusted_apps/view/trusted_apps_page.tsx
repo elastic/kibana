@@ -48,7 +48,10 @@ export const TrustedAppsPage = memo(() => {
     show: 'create',
     id: undefined,
   }));
-  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
+    show: undefined,
+    id: undefined,
+  }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));

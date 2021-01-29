@@ -53,6 +53,8 @@ export interface TrustedAppsListPageState {
       entry: NewTrustedApp;
       isValid: boolean;
     };
+    /** The trusted app to be edited (when in edit mode)  */
+    editItem?: AsyncResourceState<TrustedApp>;
     confirmed: boolean;
     submissionResourceState: AsyncResourceState<TrustedApp>;
   };

@@ -29,6 +29,7 @@ import {
   TrustedAppCreationDialogClosed,
   TrustedAppsExistResponse,
   TrustedAppsPoliciesStateChanged,
+  TrustedAppCreationEditItemStateChanged,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -125,6 +126,16 @@ const trustedAppCreationDialogFormStateUpdated: CaseReducer<TrustedAppCreationDi
   };
 };
 
+const handleUpdateToEditItemState: CaseReducer<TrustedAppCreationEditItemStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    creationDialog: { ...state.creationDialog, editItem: action.payload },
+  };
+};
+
 const trustedAppCreationDialogConfirmed: CaseReducer<TrustedAppCreationDialogConfirmed> = (
   state
 ) => {
@@ -196,6 +207,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'trustedAppCreationDialogFormStateUpdated':
       return trustedAppCreationDialogFormStateUpdated(state, action);
+
+    case 'trustedAppCreationEditItemStateChanged':
+      return handleUpdateToEditItemState(state, action);
 
     case 'trustedAppCreationDialogConfirmed':
       return trustedAppCreationDialogConfirmed(state, action);

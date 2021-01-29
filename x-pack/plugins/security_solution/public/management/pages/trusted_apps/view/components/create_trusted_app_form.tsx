@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
   EffectScope,
+  Immutable,
   MacosLinuxConditionEntry,
   NewTrustedApp,
   OperatingSystem,
@@ -161,9 +162,11 @@ export type CreateTrustedAppFormProps = Pick<
     options: EffectedPolicySelectProps['options'];
     isLoading?: EffectedPolicySelectProps['isLoading'];
   };
+  /** If defined, then trusted app values will be used in the form (edit use case)  */
+  trustedApp?: NewTrustedApp | Immutable<NewTrustedApp>;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, policies = { options: [] }, ...formProps }) => {
+  ({ fullWidth, onChange, trustedApp, policies = { options: [] }, ...formProps }) => {
     const dataTestSubj = formProps['data-test-subj'];
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
@@ -357,6 +360,16 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       },
       []
     );
+
+    // Anytime the `trustedApp` prop changes, copy its values to the form state if necessary
+    useEffect(() => {
+      setFormValues((prevState) => {
+        if (trustedApp && prevState !== trustedApp) {
+          return trustedApp as NewTrustedApp;
+        }
+        return prevState;
+      });
+    }, [trustedApp]);
 
     // Anytime the form values change, re-validate
     useEffect(() => {

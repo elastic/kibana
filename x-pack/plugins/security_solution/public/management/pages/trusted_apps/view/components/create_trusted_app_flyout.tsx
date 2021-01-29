@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import {
+  getCreationDialogFormEntry,
   getCreationError,
   isCreationDialogFormValid,
   isCreationInProgress,
@@ -47,6 +48,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
     const policyList = useTrustedAppsSelector(listOfPolicies);
     const isEditMode = useTrustedAppsSelector(isEdit);
+    const formValues = useTrustedAppsSelector(getCreationDialogFormEntry);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -114,16 +116,19 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EuiText color="subdued" size="xs">
-            <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
-            <EuiSpacer size="m" />
-          </EuiText>
+          {!isEditMode && (
+            <EuiText color="subdued" size="xs">
+              <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+              <EuiSpacer size="m" />
+            </EuiText>
+          )}
           <CreateTrustedAppForm
             fullWidth
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
             error={creationErrors?.message}
             policies={policies}
+            trustedApp={formValues}
             data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>
