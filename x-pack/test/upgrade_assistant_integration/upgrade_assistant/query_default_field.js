@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const indexName = `metricbeat-6.7.0-2019.03.11`;
 
@@ -28,10 +28,10 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ fieldTypes: ['text', 'keyword', 'ip'], otherFields: ['fields.*'] })
         .expect(200);
-      expect(body.acknowledged).to.be(true);
+      expect(body.body.acknowledged).to.be(true);
 
       // The index.query.default_field setting should now be set
-      const settingsResp = await es.indices.getSettings({ index: indexName });
+      const { body: settingsResp } = await es.indices.getSettings({ index: indexName });
       expect(settingsResp[indexName].settings.index.query.default_field).to.not.be(undefined);
 
       // Deprecation message should be gone

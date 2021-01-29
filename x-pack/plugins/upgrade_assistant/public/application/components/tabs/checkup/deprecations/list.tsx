@@ -6,9 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption } from '../../../types';
 
 import { COLOR_MAP, LEVEL_MAP } from '../constants';

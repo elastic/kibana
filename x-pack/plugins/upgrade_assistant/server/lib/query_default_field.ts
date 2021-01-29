@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { get } from 'lodash';
 
@@ -20,13 +20,13 @@ import { MappingProperties } from './reindexing/types';
  * @param otherFields - Other fields that should be included in the generated default_field that do not match `fieldTypes`
  */
 export const addDefaultField = async (
-  clusterClient: ILegacyScopedClusterClient,
+  clusterClient: IScopedClusterClient,
   indexName: string,
   fieldTypes: ReadonlySet<string>,
   otherFields: ReadonlySet<string> = new Set()
 ) => {
   // Verify index.query.default_field is not already set.
-  const settings = await clusterClient.callAsCurrentUser('indices.getSettings', {
+  const { body: settings } = await clusterClient.asCurrentUser.indices.getSettings({
     index: indexName,
   });
   if (get(settings, `${indexName}.settings.index.query.default_field`)) {
@@ -34,14 +34,14 @@ export const addDefaultField = async (
   }
 
   // Get the mapping and generate the default_field based on `fieldTypes`
-  const mappingResp = await clusterClient.callAsCurrentUser('indices.getMapping', {
+  const { body: mappingResp } = await clusterClient.asCurrentUser.indices.getMapping({
     index: indexName,
   });
   const mapping = mappingResp[indexName].mappings.properties as MappingProperties;
   const generatedDefaultFields = new Set(generateDefaultFields(mapping, fieldTypes));
 
   // Update the setting with the generated default_field
-  return clusterClient.callAsCurrentUser('indices.putSettings', {
+  return clusterClient.asCurrentUser.indices.putSettings({
     index: indexName,
     body: {
       index: { query: { default_field: [...generatedDefaultFields, ...otherFields] } },

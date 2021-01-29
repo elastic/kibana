@@ -3,13 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { getDeprecatedApmIndices, isLegacyApmIndex } from './index';
 
-function mockedCallWithRequest() {
-  const createMock = () =>
-    jest.fn().mockImplementation(async () => {
-      return {
+describe('getDeprecatedApmIndices', () => {
+  let clusterClient: ScopedClusterClientMock;
+
+  const asApiResponse = <T>(body: T): RequestEvent<T> =>
+    ({
+      body,
+    } as RequestEvent<T>);
+
+  beforeEach(() => {
+    clusterClient = elasticsearchServiceMock.createScopedClusterClient();
+
+    clusterClient.asCurrentUser.indices.getMapping.mockResolvedValueOnce(
+      asApiResponse({
         'foo-1': {
           mappings: {},
         },
@@ -34,28 +46,21 @@ function mockedCallWithRequest() {
             },
           },
         },
-      };
-    });
-  return {
-    callAsInternalUser: createMock(),
-    callAsCurrentUser: createMock(),
-  };
-}
+      })
+    );
+  });
 
-describe('getDeprecatedApmIndices', () => {
   it('calls indices.getMapping', async () => {
-    const callWithRequest = mockedCallWithRequest();
-    await getDeprecatedApmIndices(callWithRequest, ['foo-*', 'bar-*']);
+    await getDeprecatedApmIndices(clusterClient, ['foo-*', 'bar-*']);
 
-    expect(callWithRequest.callAsCurrentUser).toHaveBeenCalledWith('indices.getMapping', {
+    expect(clusterClient.asCurrentUser.indices.getMapping).toHaveBeenCalledWith({
       index: 'foo-*,bar-*',
-      filterPath: '*.mappings._meta.version,*.mappings.properties.@timestamp',
+      filter_path: '*.mappings._meta.version,*.mappings.properties.@timestamp',
     });
   });
 
   it('includes mappings not yet at 7.0.0', async () => {
-    const callWithRequest = mockedCallWithRequest();
-    const deprecations = await getDeprecatedApmIndices(callWithRequest, ['foo-*']);
+    const deprecations = await getDeprecatedApmIndices(clusterClient, ['foo-*']);
 
     expect(deprecations).toHaveLength(2);
     expect(deprecations[0].index).toEqual('foo-1');
@@ -63,9 +68,8 @@ describe('getDeprecatedApmIndices', () => {
   });
 
   it('formats the deprecations', async () => {
-    const callWithRequest = mockedCallWithRequest();
     // @ts-ignore
-    const [deprecation, _] = await getDeprecatedApmIndices(callWithRequest, ['foo-*']);
+    const [deprecation, _] = await getDeprecatedApmIndices(clusterClient, ['foo-*']);
 
     expect(deprecation.level).toEqual('warning');
     expect(deprecation.message).toEqual('APM index requires conversion to 7.x format');
