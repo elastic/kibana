@@ -15,6 +15,7 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
+    { "path": "./plugins/enterprise_search/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
     { "path": "./plugins/maps_file_upload/tsconfig.json" },
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
