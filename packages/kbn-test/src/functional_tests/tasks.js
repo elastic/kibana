@@ -95,6 +95,8 @@ export async function runTests(options) {
       try {
         es = await runElasticsearch({ config, options: opts });
         await runKibanaServer({ procs, config, options: opts });
+        // wait 5 seconds to let kibana startup completes
+        await silence(log, 5000);
         await runFtr({ configPath, options: opts });
       } finally {
         try {
