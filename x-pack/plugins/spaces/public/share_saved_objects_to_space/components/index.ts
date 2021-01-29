@@ -6,4 +6,4 @@
  */
 
 export { ContextWrapper } from './context_wrapper';
-export { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
+export { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';

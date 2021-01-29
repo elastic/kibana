@@ -43,7 +43,7 @@ interface Props {
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
-export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
+export const ShareToSpaceFlyoutInternal = (props: Props) => {
   const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
   const { namespaces: currentNamespaces = [] } = savedObject;
   const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });

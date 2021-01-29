@@ -8,7 +8,7 @@
 import React from 'react';
 import Boom from '@hapi/boom';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
+import { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
@@ -100,7 +100,7 @@ const setup = async (opts: SetupOpts = {}) => {
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   const wrapper = mountWithIntl(
     <ContextWrapper getStartServices={getStartServices}>
-      <ShareSavedObjectsToSpaceFlyout
+      <ShareToSpaceFlyoutInternal
         savedObject={savedObjectToShare}
         spacesManager={(mockSpacesManager as unknown) as SpacesManager}
         toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
