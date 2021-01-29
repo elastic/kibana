@@ -282,6 +282,10 @@ export async function unmuteAlerts({
   await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
 }
 
-export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+export async function alertingFrameworkHealth({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<AlertingFrameworkHealth> {
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }
