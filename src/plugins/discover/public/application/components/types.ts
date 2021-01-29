@@ -20,7 +20,7 @@ import {
   TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 import { TopNavMenuData } from '../../../../navigation/public';
 
 export interface DiscoverProps {
@@ -99,6 +99,14 @@ export interface DiscoverProps {
      * Client of uiSettings
      */
     config: IUiSettingsClient;
+
+    getFieldCounts: () => Promise<Record<string, number>>;
+
+    navigateTo: () => void;
+
+    stateContainer: GetStateReturn;
+
+    inspectorAdapters: any;
     /**
      * Data plugin
      */
