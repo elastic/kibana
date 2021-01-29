@@ -62,6 +62,17 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      detectionMetrics: {
+        ml_jobs: {
+          type: 'array',
+          items: {
+            // @pjhampton: these are still undecided - taking id and times for now
+            job_id: { type: 'keyword' },
+            time_start: { type: 'long' },
+            time_finish: { type: 'long' },
+          },
+        },
+      },
       endpoints: {
         total_installed: { type: 'long' },
         active_within_last_24_hours: { type: 'long' },
@@ -82,36 +93,21 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
-      detectionMetrics: {
-        ml_jobs: {
-          type: 'array',
-          items: {
-            // @pjhampton: these are still undecided - taking id and times for now
-            job_id: { type: 'keyword' },
-            time_start: { type: 'long' },
-            time_finish: { type: 'long' },
-          },
-        },
-      },
     },
     isReady: () => kibanaIndex.length > 0,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
-      const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const [detections, endpoints, detectionMetrics] = await Promise.allSettled([
-        fetchDetectionsUsage(
-          kibanaIndex,
-          esClient,
-          ml,
-          (savedObjectsClient as unknown) as SavedObjectsClientContract
-        ),
-        getEndpointTelemetryFromFleet(savedObjectsClient),
-        fetchDetectionMetrics(ml, (savedObjectsClient as unknown) as SavedObjectsClientContract),
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
+      const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
+      const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
+        fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
+        fetchDetectionMetrics(ml, savedObjectsClient),
+        getEndpointTelemetryFromFleet(internalSavedObjectsClient),
       ]);
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
-        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
+        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },
   });

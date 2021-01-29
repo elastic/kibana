@@ -1771,13 +1771,6 @@
         }
       }
     },
-    "fileUploadTelemetry": {
-      "properties": {
-        "filesUploadedTotalCount": {
-          "type": "long"
-        }
-      }
-    },
     "fleet": {
       "properties": {
         "agents_enabled": {
@@ -2212,6 +2205,13 @@
               "type": "long"
             }
           }
+        }
+      }
+    },
+    "fileUploadTelemetry": {
+      "properties": {
+        "filesUploadedTotalCount": {
+          "type": "long"
         }
       }
     },
@@ -3238,6 +3238,26 @@
                     "disabled": {
                       "type": "long"
                     }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "detectionMetrics": {
+          "properties": {
+            "ml_jobs": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "job_id": {
+                    "type": "keyword"
+                  },
+                  "time_start": {
+                    "type": "long"
+                  },
+                  "time_finish": {
+                    "type": "long"
                   }
                 }
               }

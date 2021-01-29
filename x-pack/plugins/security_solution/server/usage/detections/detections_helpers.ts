@@ -233,7 +233,7 @@ export const getMlJobMetrics = async (
           } as MlJobMetric)
       );
     } catch (e) {
-      // swallow any exceptions
+      // ignore failure, usage will be zeroed
     }
   }
 

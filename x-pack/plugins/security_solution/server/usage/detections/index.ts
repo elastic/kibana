@@ -70,9 +70,9 @@ export const fetchDetectionMetrics = async (
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionMetrics> => {
-  const mlJobMetrics = await getMlJobMetrics(ml, savedObjectClient);
+  const [mlJobMetrics] = await Promise.allSettled([getMlJobMetrics(ml, savedObjectClient)]);
 
   return {
-    ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : {},
+    ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : [],
   };
 };
