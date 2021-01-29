@@ -140,6 +140,7 @@ const securityDeepLinks: SecurityDeepLinks = {
   },
 };
 
+// TODO: Find more approriate keywords to use for these
 const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
   detections: ['detections'],
   hosts: ['hosts'],
@@ -150,7 +151,12 @@ const subpluginKeywords: { [key in SecuritySubPluginNames]: string[] } = {
   administration: ['administration'],
 };
 
-function getSearchDeepLinksAndKeywords(
+/**
+ * A function that generates a subPlugin's meta tag
+ * @param subPluginName SubPluginName of the app to retrieve meta information for.
+ * @param licenseType optional string for license level, if not provided basic is assumed.
+ */
+export function getSearchDeepLinksAndKeywords(
   subPluginName: SecuritySubPluginNames,
   licenseType?: LicenseType
 ): AppMeta {
@@ -175,7 +181,12 @@ function getSearchDeepLinksAndKeywords(
     searchDeepLinks: baseRoutes,
   };
 }
-
+/**
+ * A function that updates a subplugin's meta property as appropriate when license level changes.
+ * @param subPluginName SubPluginName of the app to register searchDeepLinks for
+ * @param appUpdater an instance of appUpdater$ observable to update search links when needed.
+ * @param licenseType A string representing the current license level.
+ */
 export function registerSearchLinks(
   subPluginName: SecuritySubPluginNames,
   appUpdater?: BehaviorSubject<AppUpdater>,

@@ -46,7 +46,7 @@ import {
 } from '../common/constants';
 
 import { SecurityPageName } from './app/types';
-import { registerSearchLinks } from './app/search';
+import { registerSearchLinks, getSearchDeepLinksAndKeywords } from './app/search';
 import { manageOldSiemRoutes } from './helpers';
 import {
   OVERVIEW,
@@ -255,6 +255,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
+      meta: getSearchDeepLinksAndKeywords(SecurityPageName.timelines),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { timelines: subPlugin } = await this.subPlugins();
