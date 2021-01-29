@@ -12,7 +12,7 @@ import {
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
-import { DetectionRulesUsage, MlJobsUsage } from './index';
+import { DetectionRulesUsage, MlJobsUsage, MlJobMetric } from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
@@ -211,4 +211,30 @@ export const getMlJobsUsage = async (
   }
 
   return jobsUsage;
+};
+
+export const getMlJobMetrics = async (
+  ml: MlPluginSetup | undefined,
+  savedObjectClient: SavedObjectsClientContract
+): Promise<MlJobMetric[]> => {
+  if (ml) {
+    try {
+      const fakeRequest = { headers: {} } as KibanaRequest;
+      const securityJobs = await ml
+        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
+        .jobs('security');
+
+      /*
+      return securityJobs.jobs.map(job => {
+        job.job_id,
+        job.create_time,
+        job.finished_time
+      });
+      */
+    } catch (e) {
+      // swallow any exceptions
+    }
+  }
+
+  return [];
 };

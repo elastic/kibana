@@ -7,6 +7,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import {
   getMlJobsUsage,
+  getMlJobMetrics,
   getRulesUsage,
   initialRulesUsage,
   initialMlJobsUsage,
@@ -33,6 +34,16 @@ export interface DetectionsUsage {
   ml_jobs: MlJobsUsage;
 }
 
+export interface DetectionMetrics {
+  ml_jobs: MlJobMetric[];
+}
+
+export interface MlJobMetric {
+  job_id: string;
+  time_start: number;
+  time_finish: number;
+}
+
 export const defaultDetectionsUsage = {
   detection_rules: initialRulesUsage,
   ml_jobs: initialMlJobsUsage,
@@ -52,5 +63,16 @@ export const fetchDetectionsUsage = async (
   return {
     detection_rules: rulesUsage.status === 'fulfilled' ? rulesUsage.value : initialRulesUsage,
     ml_jobs: mlJobsUsage.status === 'fulfilled' ? mlJobsUsage.value : initialMlJobsUsage,
+  };
+};
+
+export const fetchDetectionMetrics = async (
+  ml: MlPluginSetup | undefined,
+  savedObjectClient: SavedObjectsClientContract
+): Promise<DetectionMetrics> => {
+  const mlJobMetrics = await getMlJobMetrics(ml, savedObjectClient);
+
+  return {
+    ml_jobs: mlJobMetrics.status === 'fulfilled' ? mlJobMetrics.value : {},
   };
 };

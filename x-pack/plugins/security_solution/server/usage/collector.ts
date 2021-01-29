@@ -7,13 +7,19 @@
 import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
-import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
+import {
+  DetectionsUsage,
+  fetchDetectionsUsage,
+  defaultDetectionsUsage,
+  fetchDetectionMetrics,
+} from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detections: DetectionsUsage;
   endpoints: EndpointUsage | {};
+  detectionMetrics: {};
 }
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
@@ -76,11 +82,22 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      detectionMetrics: {
+        ml_jobs: {
+          type: 'array',
+          items: {
+            // @pjhampton: these are still undecided - taking id and times for now
+            job_id: { type: 'keyword' },
+            time_start: { type: 'long' },
+            time_finish: { type: 'long' },
+          },
+        },
+      },
     },
     isReady: () => kibanaIndex.length > 0,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const [detections, endpoints] = await Promise.allSettled([
+      const [detections, endpoints, detectionMetrics] = await Promise.allSettled([
         fetchDetectionsUsage(
           kibanaIndex,
           esClient,
@@ -88,11 +105,13 @@ export const registerCollector: RegisterCollector = ({
           (savedObjectsClient as unknown) as SavedObjectsClientContract
         ),
         getEndpointTelemetryFromFleet(savedObjectsClient),
+        fetchDetectionMetrics(ml, (savedObjectsClient as unknown) as SavedObjectsClientContract),
       ]);
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
         endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
+        detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
       };
     },
   });
