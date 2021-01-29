@@ -17,11 +17,7 @@ import { WaterfallMetaData, WaterfallMetaDataEntry } from '../types';
 
 export const useFlyout = (metaData: WaterfallMetaData) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [flyoutData, setFlyoutData] = useState<WaterfallMetaDataEntry>({
-    x: 0,
-    url: '',
-    details: [],
-  });
+  const [flyoutData, setFlyoutData] = useState<WaterfallMetaDataEntry | undefined>(undefined);
 
   const handleFlyout = useCallback(
     (flyoutEntry: WaterfallMetaDataEntry) => {
