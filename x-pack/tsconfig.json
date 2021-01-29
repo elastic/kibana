@@ -38,6 +38,7 @@
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
     "plugins/license_management/**/*",
+    "plugins/painless_lab/**/*",
     "plugins/watcher/**/*",
     "test/**/*"
   ],
@@ -110,6 +111,7 @@
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/stack_alerts/tsconfig.json"},
     { "path": "./plugins/license_management/tsconfig.json" },
+    { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/watcher/tsconfig.json" },
   ]
 }
