@@ -19,7 +19,7 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import tableVisTemplate from './table_vis.html';
 import { TablePluginStartDependencies } from '../plugin';
 import { TableVisConfig } from '../types';
-import { TableContext } from '../table_vis_response_handler';
+import { TableContext } from './table_vis_legacy_response_handler';
 
 const innerAngularName = 'kibana/table_vis';
 
