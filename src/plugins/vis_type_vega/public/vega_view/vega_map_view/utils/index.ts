@@ -6,5 +6,5 @@
  * Public License, v 1.
  */
 
-export { validateZoomSettings } from './validataion_helper';
+export { validateZoomSettings } from './validation_helper';
 export { injectMapPropsIntoSpec } from './vsi_helper';

@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import { validateZoomSettings } from './validataion_helper';
+import { validateZoomSettings } from './validation_helper';
 
 type ValidateZoomSettingsParams = Parameters<typeof validateZoomSettings>;
 
