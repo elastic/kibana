@@ -9,9 +9,20 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer, EuiFormRow } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiComboBoxOptionOption,
+  EuiLink,
+  EuiSpacer,
+  EuiFormRow,
+  EuiComboBox,
+} from '@elastic/eui';
 
-import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+  useFormData,
+} from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -137,8 +148,9 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
     <>
       <UseField<string> path={waitForSnapshotFormField}>
         {(field) => {
-          const singleSelectionArray: [selectedSnapshot?: string] = field.value
-            ? [field.value]
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+          const singleSelectionArray: EuiComboBoxOptionOption[] = field.value
+            ? [{ label: field.value }]
             : [];
 
           return (
@@ -161,31 +173,29 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
                   <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
                 </>
               }
+              error={errorMessage}
+              isInvalid={isInvalid}
             >
-              <ComboBoxField
-                field={
-                  {
-                    ...field,
-                    value: singleSelectionArray,
-                  } as any
-                }
-                euiFieldProps={{
-                  'data-test-subj': 'snapshotPolicyCombobox',
-                  options: policies,
-                  singleSelection: { asPlainText: true },
-                  isLoading,
-                  noSuggestions: !!(error || data.length === 0),
-                  onCreateOption: (newOption: string) => {
-                    field.setValue(newOption);
-                  },
-                  onChange: (options: EuiComboBoxOptionOption[]) => {
-                    if (options.length > 0) {
-                      field.setValue(options[0].label);
-                    } else {
-                      field.setValue('');
-                    }
-                  },
+              <EuiComboBox
+                selectedOptions={singleSelectionArray}
+                data-test-subj={'snapshotPolicyCombobox'}
+                options={policies}
+                singleSelection={{ asPlainText: true }}
+                isLoading={isLoading}
+                noSuggestions={!!(error || data.length === 0)}
+                onCreateOption={(newOption: string) => {
+                  field.setValue(newOption);
                 }}
+                onChange={(options: EuiComboBoxOptionOption[]) => {
+                  if (options.length > 0) {
+                    field.setValue(options[0].label);
+                  } else {
+                    field.setValue('');
+                  }
+                }}
+                placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
+                  defaultMessage: 'Type and then hit "ENTER"',
+                })}
               />
             </EuiFormRow>
           );
