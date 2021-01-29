@@ -56,6 +56,11 @@ export interface UiSettingsParams<T = unknown> {
   requiresPageReload?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
+  /**
+   * a flag indicating that value might contain user sensitive data.
+   * used by telemetry to mask the value of the setting when sent.
+   */
+  sensitive?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
