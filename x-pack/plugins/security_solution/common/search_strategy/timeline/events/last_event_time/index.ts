@@ -26,12 +26,12 @@ export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchRe
 }
 
 export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
-  destinationIpCount: Maybe<number>;
+  destinationIpCount: number;
   inspect?: Maybe<Inspect>;
-  hostCount: Maybe<number>;
-  processCount: Maybe<number>;
-  sourceIpCount: Maybe<number>;
-  userCount: Maybe<number>;
+  hostCount: number;
+  processCount: number;
+  sourceIpCount: number;
+  userCount: number;
 }
 
 export interface TimelineEventsLastEventTimeRequestOptions

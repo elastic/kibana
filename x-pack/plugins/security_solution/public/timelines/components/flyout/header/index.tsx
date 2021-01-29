@@ -30,7 +30,7 @@ import { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-
+import { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
@@ -251,18 +251,19 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
-  const from = useDeepEqualSelector((state) => {
+  const timerange: TimerangeInput = useDeepEqualSelector((state) => {
     if (isActive) {
-      return getStartSelector(state.inputs.timeline);
+      return {
+        from: getStartSelector(state.inputs.timeline),
+        to: getEndSelector(state.inputs.timeline),
+        interval: '',
+      };
     } else {
-      return getStartSelector(state.inputs.global);
-    }
-  });
-  const to = useDeepEqualSelector((state) => {
-    if (isActive) {
-      return getEndSelector(state.inputs.timeline);
-    } else {
-      return getEndSelector(state.inputs.global);
+      return {
+        from: getStartSelector(state.inputs.global),
+        to: getEndSelector(state.inputs.global),
+        interval: '',
+      };
     }
   });
   const { uiSettings } = useKibana().services;
@@ -303,11 +304,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const [loading, kpis] = useTimelineKpis({
     defaultIndex: selectedPatterns,
     docValueFields,
-    timerange: {
-      to,
-      from,
-      interval: '',
-    },
+    timerange,
     isBlankTimeline,
     filterQuery: combinedQueries?.filterQuery ?? '',
   });

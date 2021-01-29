@@ -39,23 +39,21 @@ export const useTimelineKpis = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [timelineKpiRequest, setTimelineKpiRequest] = useState<TimelineRequestBasicOptions | null>(
     null
   );
-
   const [
     timelineKpiResponse,
     setTimelineKpiResponse,
   ] = useState<TimelineKpiStrategyResponse | null>(null);
-
   const timelineKpiSearch = useCallback(
     (request: TimelineRequestBasicOptions | null) => {
       if (request == null) {
         return;
       }
-
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -68,13 +66,13 @@ export const useTimelineKpis = ({
           .subscribe({
             next: (response) => {
               if (isCompleteResponse(response)) {
-                if (!didCancel) {
+                if (!didCancel.current) {
                   setLoading(false);
                   setTimelineKpiResponse(response);
                 }
                 searchSubscription$.unsubscribe();
               } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                if (!didCancel.current) {
                   setLoading(false);
                 }
                 notifications.toasts.addWarning('An error has occurred');
@@ -82,7 +80,7 @@ export const useTimelineKpis = ({
               }
             },
             error: (msg) => {
-              if (!didCancel) {
+              if (!didCancel.current) {
                 setLoading(false);
               }
               if (!(msg instanceof AbortError)) {
@@ -94,10 +92,6 @@ export const useTimelineKpis = ({
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -121,12 +115,15 @@ export const useTimelineKpis = ({
 
   useEffect(() => {
     if (isBlankTimeline) {
-      timelineKpiSearch(null);
       setLoading(false);
       setTimelineKpiResponse(null);
     } else {
       timelineKpiSearch(timelineKpiRequest);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [isBlankTimeline, timelineKpiRequest, timelineKpiSearch]);
   return [loading, timelineKpiResponse];
 };

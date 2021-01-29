@@ -43,6 +43,7 @@ describe('Timeline KPIs', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
+    // Mocking these services is required for the header component to render.
     mockUseSourcererScope.mockImplementation(() => defaultMocks);
     useKibanaMock().services.application.capabilities = {
       navLinks: {},
