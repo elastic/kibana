@@ -64,15 +64,8 @@ import {
   transactionThroughputChatsRoute,
 } from './transactions';
 import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
+  uiFiltersEnvironmentsRoute,
 } from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
@@ -174,13 +167,6 @@ const createApmApi = () => {
     .add(transactionThroughputChatsRoute)
 
     // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
 
     // Service map
