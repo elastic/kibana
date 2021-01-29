@@ -24,7 +24,7 @@ test('Loading state', async () => {
   );
 
   await userEvent.click(screen.getByLabelText('Loading'));
-  await userEvent.click(screen.getByText('Cancel session'));
+  await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -37,7 +37,7 @@ test('Completed state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loaded'));
+  await userEvent.click(screen.getByLabelText('Search session complete'));
   await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
@@ -51,8 +51,10 @@ test('Loading in the background state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loading results in the background'));
-  await userEvent.click(screen.getByText('Cancel session'));
+  await userEvent.click(
+    screen.getByLabelText('Search session saved and loading in the background')
+  );
+  await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -67,8 +69,8 @@ test('BackgroundCompleted state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Results loaded in the background'));
-  expect(screen.getByRole('link', { name: 'View all sessions' }).getAttribute('href')).toBe(
+  await userEvent.click(screen.getByLabelText('Search session complete'));
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );
 });
@@ -81,8 +83,8 @@ test('Restored state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Results no longer current'));
-  await userEvent.click(screen.getByText('Refresh'));
+  await userEvent.click(screen.getByLabelText('Search session restored'));
+  await userEvent.click(screen.getByText('Re-run session'));
 
   expect(onRefresh).toBeCalled();
 });
@@ -95,8 +97,8 @@ test('Canceled state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Canceled'));
-  await userEvent.click(screen.getByText('Refresh'));
+  await userEvent.click(screen.getByLabelText('Search session canceled'));
+  await userEvent.click(screen.getByText('Re-run session'));
 
   expect(onRefresh).toBeCalled();
 });
