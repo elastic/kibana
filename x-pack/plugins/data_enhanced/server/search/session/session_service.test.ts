@@ -487,8 +487,8 @@ describe('SearchSessionService', () => {
       const name = 'my saved background search session';
       const appId = 'my_app_id';
       const urlGeneratorId = 'my_url_generator_id';
-      const created = new Date().toISOString();
-      const expires = new Date().toISOString();
+      const created = '2021-01-28T19:02:57.466Z';
+      const expires = '2021-02-28T19:02:57.466Z';
 
       const mockIdMapping = createMockIdMapping([]);
       const setSpy = jest.fn();
@@ -520,7 +520,7 @@ describe('SearchSessionService', () => {
           Object {
             "appId": "my_app_id",
             "created": "2021-01-28T19:02:57.466Z",
-            "expires": "2021-01-28T19:02:57.466Z",
+            "expires": "2021-02-28T19:02:57.466Z",
             "idMapping": Object {},
             "initialState": Object {},
             "name": "my saved background search session",
