@@ -15,7 +15,7 @@ interface Props {
 
 const i18nTexts = {
   toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.phaseErrorIcon.tooltipDescription', {
-    defaultMessage: 'This phase contains validation errors.',
+    defaultMessage: 'This phase contains errors.',
   }),
 };
 
