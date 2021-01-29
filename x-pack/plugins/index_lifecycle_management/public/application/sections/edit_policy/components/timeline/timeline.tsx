@@ -171,7 +171,12 @@ export const Timeline: FunctionComponent<Props> = memo(
                           <>
                             {i18nTexts.hotPhase}
                             &nbsp;
-                            <EuiIconTip type="iInCircle" content={i18nTexts.rolloverTooltip} />
+                            <div
+                              className="ilmTimeline__rolloverIcon"
+                              data-test-subj="timelineHotPhaseRolloverToolTip"
+                            >
+                              <EuiIconTip type="iInCircle" content={i18nTexts.rolloverTooltip} />
+                            </div>
                           </>
                         ) : (
                           i18nTexts.hotPhase
