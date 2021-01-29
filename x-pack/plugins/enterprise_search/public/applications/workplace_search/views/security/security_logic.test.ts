@@ -5,23 +5,13 @@
  */
 
 import { LogicMounter } from '../../../__mocks__/kea.mock';
-import { HttpLogic } from '../../../shared/http';
-import { mockHttpValues } from '../../../__mocks__';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
 import { SecurityLogic } from './security_logic';
 import { nextTick } from '@kbn/test/jest';
 
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: {
-    values: { http: mockHttpValues.http },
-  },
-}));
-
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-
 describe('SecurityLogic', () => {
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SecurityLogic);
 
   beforeEach(() => {
@@ -118,10 +108,10 @@ describe('SecurityLogic', () => {
     describe('initializeSourceRestrictions', () => {
       it('calls API and sets values', async () => {
         const setServerPropsSpy = jest.spyOn(SecurityLogic.actions, 'setServerProps');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve(serverProps));
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         SecurityLogic.actions.initializeSourceRestrictions();
 
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+        expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/org/security/source_restrictions'
         );
         await nextTick();
@@ -129,9 +119,7 @@ describe('SecurityLogic', () => {
       });
 
       it('handles error', async () => {
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(
-          Promise.reject('this is an error')
-        );
+        http.get.mockReturnValue(Promise.reject('this is an error'));
 
         SecurityLogic.actions.initializeSourceRestrictions();
         try {
@@ -144,11 +132,11 @@ describe('SecurityLogic', () => {
 
     describe('saveSourceRestrictions', () => {
       it('calls API and sets values', async () => {
-        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(Promise.resolve(serverProps));
+        http.patch.mockReturnValue(Promise.resolve(serverProps));
         SecurityLogic.actions.setSourceRestrictionsUpdated(serverProps);
         SecurityLogic.actions.saveSourceRestrictions();
 
-        expect(HttpLogic.values.http.patch).toHaveBeenCalledWith(
+        expect(http.patch).toHaveBeenCalledWith(
           '/api/workplace_search/org/security/source_restrictions',
           {
             body: JSON.stringify(serverProps),
@@ -157,9 +145,7 @@ describe('SecurityLogic', () => {
       });
 
       it('handles error', async () => {
-        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(
-          Promise.reject('this is an error')
-        );
+        http.patch.mockReturnValue(Promise.reject('this is an error'));
 
         SecurityLogic.actions.saveSourceRestrictions();
         try {
