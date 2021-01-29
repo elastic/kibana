@@ -18,7 +18,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { Link } from 'react-router-dom';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
@@ -31,9 +30,10 @@ import { isFullLicense } from '../../../../license';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 import { useUrlState } from '../../../../util/url_state';
+import type { IIndexPattern } from '../../../../../../../../../src/plugins/data/common';
 
 interface Props {
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
 }
