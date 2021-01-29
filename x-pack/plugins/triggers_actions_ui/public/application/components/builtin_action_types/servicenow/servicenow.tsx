@@ -10,13 +10,13 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import { serviceNowIMConfiguration, serviceNowSIRConfiguration } from './config';
+import { serviceNowITSMConfiguration, serviceNowSIRConfiguration } from './config';
 import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
   ServiceNowSecrets,
-  ServiceNowIMActionParams,
+  ServiceNowITSMActionParams,
   ServiceNowSIRActionParams,
 } from './types';
 import * as i18n from './translations';
@@ -61,19 +61,21 @@ const validateConnector = (
   return validationResult;
 };
 
-export function getServiceNowIMActionType(): ActionTypeModel<
+export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
-  ServiceNowIMActionParams
+  ServiceNowITSMActionParams
 > {
   return {
-    id: serviceNowIMConfiguration.id,
+    id: serviceNowITSMConfiguration.id,
     iconClass: logo,
-    selectMessage: serviceNowIMConfiguration.desc,
-    actionTypeTitle: serviceNowIMConfiguration.name,
+    selectMessage: serviceNowITSMConfiguration.desc,
+    actionTypeTitle: serviceNowITSMConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
-    validateParams: (actionParams: ServiceNowIMActionParams): GenericValidationResult<unknown> => {
+    validateParams: (
+      actionParams: ServiceNowITSMActionParams
+    ): GenericValidationResult<unknown> => {
       const errors = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
@@ -90,7 +92,7 @@ export function getServiceNowIMActionType(): ActionTypeModel<
       }
       return validationResult;
     },
-    actionParamsFields: lazy(() => import('./servicenow_params')),
+    actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
   };
 }
 

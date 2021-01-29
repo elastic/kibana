@@ -7,7 +7,7 @@
 import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
 import {
-  ExecutorSubActionPushParamsIM,
+  ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
@@ -17,9 +17,9 @@ export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowSecrets
 >;
 
-export interface ServiceNowIMActionParams {
+export interface ServiceNowITSMActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParamsIM;
+  subActionParams: ExecutorSubActionPushParamsITSM;
 }
 
 export interface ServiceNowSIRActionParams {

@@ -35,7 +35,7 @@ export type {
   SlackActionParams,
   WebhookActionTypeId,
   WebhookActionParams,
-  ServiceNowIMActionTypeId,
+  ServiceNowITSMActionTypeId,
   ServiceNowSIRActionTypeId,
   ServiceNowActionParams,
   JiraActionTypeId,

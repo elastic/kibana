@@ -19,7 +19,7 @@ import {
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
   ResilientPushToServiceApiParams,
-  ServiceNowIMPushToServiceApiParams,
+  ServiceNowITSMPushToServiceApiParams,
   SimpleComment,
   Transformer,
   TransformerArgs,
@@ -109,7 +109,7 @@ export const serviceFormatter = (
         severity,
         urgency,
         impact,
-      } = params as ServiceNowIMPushToServiceApiParams['incident'];
+      } = params as ServiceNowITSMPushToServiceApiParams['incident'];
       return {
         incident: { severity, urgency, impact },
         thirdPartyName: 'ServiceNow',

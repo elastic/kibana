@@ -7,10 +7,10 @@
 import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const serviceNowIMConfiguration = {
+export const serviceNowITSMConfiguration = {
   id: '.servicenow',
-  name: i18n.SERVICENOW_TITLE,
-  desc: i18n.SERVICENOW_DESC,
+  name: i18n.SERVICENOW_ITSM_TITLE,
+  desc: i18n.SERVICENOW_ITSM_DESC,
   logo,
   enabled: true,
   enabledInConfig: true,

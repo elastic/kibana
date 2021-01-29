@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 
 import { ActionConnector } from '../../../../types';
 import { useGetChoices } from './use_get_choices';
-import ServiceNowParamsFields from './servicenow_params';
+import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from './types';
 
 jest.mock('./use_get_choices');
@@ -83,7 +83,7 @@ const useGetChoicesResponse = {
     .flat(),
 };
 
-describe('ServiceNowParamsFields renders', () => {
+describe('ServiceNowITSMParamsFields renders', () => {
   let onChoices = (choices: Choice[]) => {};
 
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('ServiceNowParamsFields renders', () => {
   });
 
   test('all params fields is rendered', () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
@@ -110,7 +110,7 @@ describe('ServiceNowParamsFields renders', () => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    const wrapper = mount(<ServiceNowParamsFields {...newProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...newProps} />);
     const title = wrapper.find('[data-test-subj="short_descriptionInput"]').first();
     expect(title.prop('isInvalid')).toBeTruthy();
   });
@@ -122,7 +122,7 @@ describe('ServiceNowParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ServiceNowParamsFields {...newProps} />);
+    mount(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
@@ -136,12 +136,12 @@ describe('ServiceNowParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ServiceNowParamsFields {...newProps} />);
+    mount(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
 
   test('Resets fields when connector changes', () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
     expect(editAction.mock.calls.length).toEqual(1);
@@ -152,7 +152,7 @@ describe('ServiceNowParamsFields renders', () => {
   });
 
   test('it transforms the urgencies to options correctly', async () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -167,7 +167,7 @@ describe('ServiceNowParamsFields renders', () => {
   });
 
   test('it transforms the severities to options correctly', async () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -182,7 +182,7 @@ describe('ServiceNowParamsFields renders', () => {
   });
 
   test('it transforms the impacts to options correctly', async () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
@@ -208,7 +208,7 @@ describe('ServiceNowParamsFields renders', () => {
 
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+        const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
@@ -216,14 +216,14 @@ describe('ServiceNowParamsFields renders', () => {
     );
 
     test('A comment triggers editAction', () => {
-      const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+      const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
     });
 
     test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+      const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
       const emptyComment = { target: { value: '' } };
       const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
       expect(comments.simulate('change', emptyComment));

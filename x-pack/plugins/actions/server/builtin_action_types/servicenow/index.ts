@@ -11,7 +11,7 @@ import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
-  ExecutorParamsSchemaIM,
+  ExecutorParamsSchemaITSM,
   ExecutorParamsSchemaSIR,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
@@ -32,7 +32,7 @@ import {
 } from './types';
 
 export type ActionParamsType =
-  | TypeOf<typeof ExecutorParamsSchemaIM>
+  | TypeOf<typeof ExecutorParamsSchemaITSM>
   | TypeOf<typeof ExecutorParamsSchemaSIR>;
 
 interface GetActionTypeParams {
@@ -40,14 +40,14 @@ interface GetActionTypeParams {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const serviceNowIMTable = 'incident';
+const serviceNowITSMTable = 'incident';
 const serviceNowSIRTable = 'sn_si_incident';
 
-export const ServiceNowIMActionTypeId = '.servicenow';
+export const ServiceNowITSMActionTypeId = '.servicenow';
 export const ServiceNowSIRActionTypeId = '.servicenow-sir';
 
 // action type definition
-export function getServiceNowIMActionType(
+export function getServiceNowITSMActionType(
   params: GetActionTypeParams
 ): ActionType<
   ServiceNowPublicConfigurationType,
@@ -57,9 +57,9 @@ export function getServiceNowIMActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: ServiceNowIMActionTypeId,
+    id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
-    name: i18n.SERVICENOW,
+    name: i18n.SERVICENOW_ITSM,
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -67,9 +67,9 @@ export function getServiceNowIMActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
-      params: ExecutorParamsSchemaIM,
+      params: ExecutorParamsSchemaITSM,
     },
-    executor: curry(executor)({ logger, table: serviceNowIMTable }),
+    executor: curry(executor)({ logger, table: serviceNowITSMTable }),
   };
 }
 

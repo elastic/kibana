@@ -33,7 +33,7 @@ const defaultFields: Fields = {
 const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
-const ServiceNowParamsFields: React.FunctionComponent<
+const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
@@ -292,4 +292,4 @@ const ServiceNowParamsFields: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowParamsFields as default };
+export { ServiceNowSIRParamsFields as default };

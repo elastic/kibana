@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getServiceNowIMActionType, getServiceNowSIRActionType } from './servicenow';
+export { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';

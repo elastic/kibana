@@ -8,7 +8,7 @@ import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
 
-const SERVICENOW_ACTION_TYPE_ID = '.servicenow';
+const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
 let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 
@@ -18,7 +18,7 @@ beforeAll(() => {
 });
 
 describe('actionTypeRegistry.get() works', () => {
-  [SERVICENOW_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
     test(`${id}: action type static data is as expected`, () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       expect(actionTypeModel.id).toEqual(id);
@@ -27,7 +27,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('servicenow connector validation', () => {
-  [SERVICENOW_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
     test(`${id}: connector validation succeeds when connector config is valid`, () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionConnector = {
@@ -89,7 +89,7 @@ describe('servicenow connector validation', () => {
 });
 
 describe('servicenow action params validation', () => {
-  [SERVICENOW_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
     test(`${id}: action params validation succeeds when action params is valid`, () => {
       const actionTypeModel = actionTypeRegistry.get(id);
       const actionParams = {

@@ -46,8 +46,8 @@ const CommonAttributes = {
   externalId: schema.nullable(schema.string()),
 };
 
-// Schema for ServiceNow Incident Management (IM)
-export const ExecutorSubActionPushParamsSchemaIM = schema.object({
+// Schema for ServiceNow Incident Management (ITSM)
+export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
   incident: schema.object({
     ...CommonAttributes,
     severity: schema.nullable(schema.string()),
@@ -83,8 +83,8 @@ export const ExecutorSubActionGetChoicesParamsSchema = schema.object({
   fields: schema.arrayOf(schema.string()),
 });
 
-// Executor parameters for ServiceNow Incident Management (IM)
-export const ExecutorParamsSchemaIM = schema.oneOf([
+// Executor parameters for ServiceNow Incident Management (ITSM)
+export const ExecutorParamsSchemaITSM = schema.oneOf([
   schema.object({
     subAction: schema.literal('getFields'),
     subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
@@ -99,7 +99,7 @@ export const ExecutorParamsSchemaIM = schema.oneOf([
   }),
   schema.object({
     subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchemaIM,
+    subActionParams: ExecutorSubActionPushParamsSchemaITSM,
   }),
   schema.object({
     subAction: schema.literal('getChoices'),

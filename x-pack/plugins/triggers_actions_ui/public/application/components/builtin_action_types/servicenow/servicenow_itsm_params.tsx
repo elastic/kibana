@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowIMActionParams, Choice, Options } from './types';
+import { ServiceNowITSMActionParams, Choice, Options } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
@@ -29,7 +29,7 @@ const defaultOptions: Options = {
 };
 
 const ServiceNowParamsFields: React.FunctionComponent<
-  ActionParamsProps<ServiceNowIMActionParams>
+  ActionParamsProps<ServiceNowITSMActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
     http,
@@ -43,7 +43,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
       (({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowIMActionParams['subActionParams']),
+      } as unknown) as ServiceNowITSMActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
