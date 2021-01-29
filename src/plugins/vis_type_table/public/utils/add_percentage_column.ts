@@ -32,8 +32,8 @@ export function addPercentageColumn(table: TableContext, name: string) {
   const percentageColumnId = `${id}-percents`;
   const formatter = getFormatService().deserialize({ id: 'percent' });
   const percentageColumnName = i18n.translate('visTypeTable.params.percentageTableColumnName', {
-    defaultMessage: '{name} percentages',
-    values: { name },
+    defaultMessage: '{title} percentages',
+    values: { title: name },
   });
   const newCols = insertColumn(columns, insertAtIndex, {
     name: percentageColumnName,
