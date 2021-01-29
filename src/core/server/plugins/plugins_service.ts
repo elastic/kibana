@@ -219,10 +219,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
                 configDescriptor.deprecations
               );
             }
-            await this.coreContext.configService.setSchema(
-              plugin.configPath,
-              configDescriptor.schema
-            );
+            this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
           }
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
