@@ -70,7 +70,7 @@ const getFriendlyMetaDataValue = ({ value, postFix }: { value?: number; postFix?
   let formattedValue = formatValueForDisplay(value);
 
   if (postFix) {
-    formattedValue = `${formattedValue}${postFix}`;
+    formattedValue = `${formattedValue} ${postFix}`;
   }
 
   return formattedValue;
@@ -273,7 +273,7 @@ const formatMetaData = ({
         name: FriendlyFlyoutLabels[MetaData.BytesDownloaded],
         value: getFriendlyMetaDataValue({
           value: bytesDownloaded ? bytesDownloaded / 1000 : undefined,
-          postFix: ' KB',
+          postFix: 'KB',
         }),
       },
     ],
