@@ -68,7 +68,7 @@ To enable a blended layer that dynamically shows clusters or documents:
 
 [role="xpack"]
 [[maps-top-hits-aggregation]]
-=== Display the most relevant entities
+=== Display the most relevant documents per entity
 
 Use *Top hits per entity* to display the most relevant documents per entity, for example, the most recent GPS tracks per flight route.
 To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
