@@ -64,6 +64,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const response = await shimAbortSignal(
       esClient.asCurrentUser.msearch(
         {
+          // @ts-expect-error client types don't support plain string bodies
           body,
         },
         {

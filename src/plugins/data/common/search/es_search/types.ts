@@ -11,9 +11,9 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
-export type ISearchRequestParams<T = Record<string, any>> = {
+export type ISearchRequestParams = {
   trackTotalHits?: boolean;
-} & estypes.SearchRequest<T>;
+} & estypes.SearchRequest;
 
 export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;

@@ -91,10 +91,7 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
-          { statusCode: 404 }
-        )
+        elasticsearchClientMock.createSuccessTransportRequestPromise([], { statusCode: 404 })
       );
       options.client.indices.get.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
@@ -284,7 +281,6 @@ describe('KibanaMigrator', () => {
       it('rejects when the migration state machine terminates in a FATAL state', () => {
         const options = mockV2MigrationOptions();
         options.client.indices.get.mockReturnValue(
-          // @ts-expect-error `TypeMapping` requires several properties that should be optional
           elasticsearchClientMock.createSuccessTransportRequestPromise(
             {
               '.my-index_8.2.4_001': {
@@ -340,7 +336,6 @@ const mockV2MigrationOptions = () => {
   const options = mockOptions({ enableV2: true });
 
   options.client.indices.get.mockReturnValue(
-    // @ts-expect-error `TypeMapping` requires several properties that should be optional
     elasticsearchClientMock.createSuccessTransportRequestPromise(
       {
         '.my-index': {
@@ -352,7 +347,6 @@ const mockV2MigrationOptions = () => {
       { statusCode: 200 }
     )
   );
-  // @ts-expect-error
   options.client.indices.addBlock.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
   );

@@ -47,6 +47,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
+  // @ts-expect-error IndexState.alias and IndexState.mappings should be required
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
@@ -71,7 +72,6 @@ export function reader(
   const nextBatch = () =>
     scrollId !== undefined
       ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
-          // @ts-expect-error `ScrollRequest` does not allow the `scroll` parameter
           scroll,
           scroll_id: scrollId,
         })

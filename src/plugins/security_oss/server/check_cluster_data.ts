@@ -24,7 +24,6 @@ export const createClusterDataCheck = () => {
           const isInternalIndex =
             indexCount.index.startsWith('.') || indexCount.index.startsWith('kibana_sample_');
 
-          // @ts-expect-error docs.count should be typed as a string
           return !isInternalIndex && parseInt(indexCount['docs.count'], 10) > 0;
         });
       } catch (e) {

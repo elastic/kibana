@@ -235,7 +235,6 @@ describe('migration actions', () => {
       await client.indices.create({
         index: 'clone_yellow_then_green_index_2',
         body: {
-          // @ts-expect-error
           mappings: { properties: {} },
           settings: {
             // Allocate 1 replica so that this index stays yellow
@@ -909,7 +908,6 @@ describe('migration actions', () => {
         {
           index: 'yellow_then_green_index',
           body: {
-            // @ts-expect-error
             mappings: { properties: {} },
             settings: {
               // Allocate 1 replica so that this index stays yellow

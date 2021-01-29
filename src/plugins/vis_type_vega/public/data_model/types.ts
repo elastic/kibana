@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { SearchResponse, SearchParams } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { Filter } from 'src/plugins/data/public';
 import { DslQuery } from 'src/plugins/data/common';
@@ -15,7 +15,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
 interface Body {
-  aggs?: SearchParams['body']['aggs'];
+  aggs?: Record<string, estypes.AggregationContainer>;
   query?: Query;
   timeout?: string;
 }
@@ -74,7 +74,7 @@ interface Projection {
 interface RequestDataObject<TUrlData = UrlObject> {
   name?: string;
   url?: TUrlData;
-  values: SearchResponse<unknown>;
+  values: estypes.SearchResponse;
 }
 
 type ContextVarsObjectProps =

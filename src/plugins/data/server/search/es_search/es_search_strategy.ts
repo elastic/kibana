@@ -35,7 +35,6 @@ export const esSearchStrategyProvider = (
         ...getShardTimeout(config),
         ...request.params,
       };
-      // @ts-expect-error docvalue_fields should allow string
       const promise = esClient.asCurrentUser.search(params);
       const { body } = await shimAbortSignal(promise, abortSignal);
       return toKibanaSearchResponse(body);

@@ -57,20 +57,22 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
-  return client.indices
-    .get(
-      {
-        index: indicesToFetch,
-        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-      },
-      { ignore: [404], maxRetries: 0 }
-    )
-    .then(({ body }) => {
-      return Either.right(body);
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
+  // @ts-expect-error IndexState.alias and IndexState.mappings should be required
+  () => {
+    return client.indices
+      .get(
+        {
+          index: indicesToFetch,
+          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+        },
+        { ignore: [404], maxRetries: 0 }
+      )
+      .then(({ body }) => {
+        return Either.right(body);
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
 /**
  * Sets a write block in place for the given index. If the response includes
@@ -88,37 +90,34 @@ export const setWriteBlock = (
   { type: 'index_not_found_exception' } | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
-  return (
-    client.indices
-      // @ts-expect-error API missing from types, remove `any` on response type below once fixed
-      .addBlock<{
-        acknowledged: boolean;
-        shards_acknowledged: boolean;
-      }>(
-        {
-          index,
-          block: 'write',
-        },
-        { maxRetries: 0 /** handle retry ourselves for now */ }
-      )
-      .then((res: any) => {
-        return res.body.acknowledged === true
-          ? Either.right('set_write_block_succeeded' as const)
-          : Either.left({
-              type: 'retryable_es_client_error' as const,
-              message: 'set_write_block_failed',
-            });
-      })
-      .catch((e: ElasticsearchClientError) => {
-        if (e instanceof EsErrors.ResponseError) {
-          if (e.message === 'index_not_found_exception') {
-            return Either.left({ type: 'index_not_found_exception' as const });
-          }
+  return client.indices
+    .addBlock<{
+      acknowledged: boolean;
+      shards_acknowledged: boolean;
+    }>(
+      {
+        index,
+        block: 'write',
+      },
+      { maxRetries: 0 /** handle retry ourselves for now */ }
+    )
+    .then((res: any) => {
+      return res.body.acknowledged === true
+        ? Either.right('set_write_block_succeeded' as const)
+        : Either.left({
+            type: 'retryable_es_client_error' as const,
+            message: 'set_write_block_failed',
+          });
+    })
+    .catch((e: ElasticsearchClientError) => {
+      if (e instanceof EsErrors.ResponseError) {
+        if (e.message === 'index_not_found_exception') {
+          return Either.left({ type: 'index_not_found_exception' as const });
         }
-        throw e;
-      })
-      .catch(catchRetryableEsClientErrors)
-  );
+      }
+      throw e;
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 /**
@@ -383,7 +382,6 @@ export const reindex = (
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
-      // @ts-expect-error `ReindexRequest` does not allow the `require_alias` property
       require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents

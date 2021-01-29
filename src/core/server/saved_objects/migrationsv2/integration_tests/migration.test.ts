@@ -142,6 +142,7 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
+      // @ts-expect-error IndexState.alias and IndexState.mappings should be required
       expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
     });
 
@@ -199,6 +200,7 @@ describe('migration v2', () => {
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
+      // @ts-expect-error IndexState.alias and IndexState.mappings should be required
       expect(Object.keys(response.aliases).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
     });
 

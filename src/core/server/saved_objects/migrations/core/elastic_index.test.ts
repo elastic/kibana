@@ -101,7 +101,6 @@ describe('ElasticIndex', () => {
 
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
-        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
@@ -125,7 +124,6 @@ describe('ElasticIndex', () => {
 
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
-        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
@@ -154,7 +152,6 @@ describe('ElasticIndex', () => {
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
-        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
@@ -233,7 +230,6 @@ describe('ElasticIndex', () => {
 
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
-        // @ts-expect-error `AliasDefinition` requires properties that should be optional
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })

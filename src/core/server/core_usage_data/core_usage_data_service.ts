@@ -105,10 +105,10 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              docsCount: stats['docs.count'],
-              docsDeleted: stats['docs.deleted'],
-              storeSizeBytes: stats['store.size'],
-              primaryStoreSizeBytes: stats['pri.store.size'],
+              docsCount: parseInt(stats['docs.count'], 10),
+              docsDeleted: parseInt(stats['docs.deleted'], 10),
+              storeSizeBytes: parseInt(stats['store.size'], 10),
+              primaryStoreSizeBytes: parseInt(stats['pri.store.size'], 10),
             };
           });
       })
