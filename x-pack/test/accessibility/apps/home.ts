@@ -10,6 +10,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('Kibana Home', () => {
     before(async () => {
@@ -85,7 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
-      await PageObjects.home.collapseObservabibilitySideNav();
+      await find.clickByCssSelector(
+        '[data-test-subj="collapsibleNavGroup-observability"] .euiCollapsibleNavGroup__title'
+      );
       await a11y.testAppSnapshot();
     });
 
