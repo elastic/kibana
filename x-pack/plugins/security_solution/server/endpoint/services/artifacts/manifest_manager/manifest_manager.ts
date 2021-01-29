@@ -293,7 +293,13 @@ export class ManifestManager {
             };
 
             try {
-              await this.packagePolicyService.update(this.savedObjectsClient, id, newPackagePolicy);
+              await this.packagePolicyService.update(
+                this.savedObjectsClient,
+                // @ts-ignore
+                undefined,
+                id,
+                newPackagePolicy
+              );
               this.logger.debug(
                 `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
               );

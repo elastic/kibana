@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88796
-  describe.skip('Connectors', function () {
+  describe('Connectors', function () {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
@@ -285,7 +284,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     await testSubjects.setValue('nameInput', connectorName);
 
-    await comboBox.set('connectorIndexesComboBox', indexName);
+    await retry.try(async () => {
+      // At times we find the driver controlling the ComboBox in tests
+      // can select the wrong item, this ensures we always select the correct index
+      await comboBox.set('connectorIndexesComboBox', indexName);
+      expect(
+        await comboBox.isOptionSelected(
+          await testSubjects.find('connectorIndexesComboBox'),
+          indexName
+        )
+      ).to.be(true);
+    });
 
     await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
     await pageObjects.common.closeToast();

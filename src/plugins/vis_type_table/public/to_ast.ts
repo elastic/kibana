@@ -11,9 +11,10 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { getVisSchemas, VisToExpressionAst } from '../../visualizations/public';
+import { TableVisParams } from '../common';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
-import { TableVisConfig, TableVisParams } from './types';
+import { TableVisConfig } from './types';
 
 const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
@@ -40,7 +41,7 @@ const buildTableVisConfig = (
   return visConfig;
 };
 
-export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

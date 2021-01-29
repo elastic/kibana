@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
 import { FormInternal } from '../types';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import {
   ifExistsNumberGreaterThanZero,
@@ -54,7 +54,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -69,18 +68,11 @@ export const schema: FormSchema<FormInternal> = {
           { defaultMessage: 'Activate warm phase' }
         ),
       },
-      warmPhaseOnRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
-          defaultMessage: 'Move to warm phase on rollover',
-        }),
-      },
       minAgeUnit: {
         defaultValue: 'ms',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -218,9 +210,14 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: defaultSetPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.hot as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
           },
         },
@@ -239,9 +236,12 @@ export const schema: FormSchema<FormInternal> = {
         allocate: {
           number_of_replicas: {
             label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
+              defaultMessage: 'Number of replicas',
             }),
             validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
               {
                 validator: ifExistsNumberNonNegative,
               },
@@ -289,9 +289,14 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: defaultPhaseIndexPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.warm as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
           },
         },
@@ -310,9 +315,12 @@ export const schema: FormSchema<FormInternal> = {
         allocate: {
           number_of_replicas: {
             label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
+              defaultMessage: 'Number of replicas',
             }),
             validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
               {
                 validator: ifExistsNumberNonNegative,
               },
@@ -322,9 +330,14 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: '0' as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.cold as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
           },
         },

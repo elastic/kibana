@@ -18,6 +18,8 @@ import {
 
 import { SourceIcon } from '../../../components/shared/source_icon';
 
+import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
+
 interface SourceInfoCardProps {
   sourceName: string;
   sourceType: string;
@@ -54,7 +56,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
           <EuiFlexItem grow={null}>
             <EuiSpacer size="xs" />
             <EuiBadge iconType="online" iconSide="left">
-              Remote Source
+              {REMOTE_SOURCE_LABEL}
             </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -63,7 +65,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
 
     <EuiFlexItem>
       <EuiText textAlign="right" size="s">
-        <strong>Created: </strong>
+        <strong>{CREATED_LABEL}</strong>
         {dateCreated}
       </EuiText>
 
@@ -71,12 +73,12 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={null}>
             <EuiText textAlign="right" size="s">
-              <strong>Status: </strong>
+              <strong>{STATUS_LABEL}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
             <EuiText textAlign="right" size="s">
-              <EuiHealth color="success">Ready to search</EuiHealth>
+              <EuiHealth color="success">{READY_TEXT}</EuiHealth>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

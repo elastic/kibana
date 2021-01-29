@@ -13,5 +13,5 @@ export {
   ConfigDeprecationFactory,
   ConfigDeprecationProvider,
 } from './types';
-export { configDeprecationFactory, copyFromRoot } from './deprecation_factory';
+export { configDeprecationFactory } from './deprecation_factory';
 export { applyDeprecations } from './apply_deprecations';

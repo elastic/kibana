@@ -34,7 +34,6 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     basePath = BASE_PATH,
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
-    bundledJDK = false,
     esArgs = [],
   } = options;
 
@@ -64,7 +63,7 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     await appendToConfig(installPath, 'xpack.security.enabled', 'true');
 
     await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-    await configureKeystore(installPath, log, bundledJDK, [
+    await configureKeystore(installPath, log, [
       ['bootstrap.password', password],
       ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
     ]);
@@ -89,20 +88,11 @@ async function appendToConfig(installPath, key, value) {
  *
  * @param {String} installPath
  * @param {ToolingLog} log
- * @param {boolean} bundledJDK
  * @param {Array<[string, string]>} secureSettings List of custom Elasticsearch secure settings to
  * add into the keystore.
  */
-async function configureKeystore(
-  installPath,
-  log = defaultLog,
-  bundledJDK = false,
-  secureSettings
-) {
-  const env = {};
-  if (bundledJDK) {
-    env.JAVA_HOME = '';
-  }
+async function configureKeystore(installPath, log = defaultLog, secureSettings) {
+  const env = { JAVA_HOME: '' };
   await execa(ES_KEYSTORE_BIN, ['create'], { cwd: installPath, env });
 
   for (const [secureSettingName, secureSettingValue] of secureSettings) {

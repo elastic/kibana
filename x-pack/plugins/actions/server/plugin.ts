@@ -14,7 +14,6 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  RequestHandler,
   IContextProvider,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
@@ -46,6 +45,7 @@ import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
+  ActionsRequestHandlerContext,
 } from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
@@ -228,7 +228,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     }
 
     this.kibanaIndexConfig.subscribe((config) => {
-      core.http.registerRouteHandlerContext(
+      core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
         'actions',
         this.createRouteHandlerContext(core, config.kibana.index)
       );
@@ -243,7 +243,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
     getActionRoute(router, this.licenseState);
@@ -357,15 +357,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
-      proxySettings:
-        this.actionsConfig && this.actionsConfig.proxyUrl
-          ? {
-              proxyUrl: this.actionsConfig.proxyUrl,
-              proxyHeaders: this.actionsConfig.proxyHeaders,
-              proxyRejectUnauthorizedCertificates: this.actionsConfig
-                .proxyRejectUnauthorizedCertificates,
-            }
-          : undefined,
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -448,7 +439,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
+  ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey,

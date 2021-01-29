@@ -5,3 +5,5 @@
  */
 
 export const ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE = 'fleet-enrollment-api-keys';
+
+export const ENROLLMENT_API_KEYS_INDEX = '.fleet-enrollment-api-keys';
