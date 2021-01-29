@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload'];
+const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload', 'emptyKibanaIndex'];
 const KIBANA_INDEX = '.kibana';
 
 export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) {
