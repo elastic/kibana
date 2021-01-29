@@ -8,6 +8,7 @@
 
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { isPromise } from '@kbn/std';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
@@ -104,10 +105,12 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
-    this.instance = await this.createPluginInstance();
-
-    return await this.instance.setup(setupContext, plugins);
+  public setup(
+    setupContext: CoreSetup<TPluginsStart, TStart>,
+    plugins: TPluginsSetup
+  ): TSetup | Promise<TSetup> {
+    this.instance = this.createPluginInstance();
+    return this.instance.setup(setupContext, plugins);
   }
 
   /**
@@ -117,16 +120,21 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: CoreStart, plugins: TPluginsStart) {
+  public start(startContext: CoreStart, plugins: TPluginsStart) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = await this.instance.start(startContext, plugins);
-
-    this.startDependencies$.next([startContext, plugins, startContract]);
-
-    return startContract;
+    const startContract = this.instance.start(startContext, plugins);
+    if (isPromise(startContract)) {
+      return startContract.then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
+    } else {
+      this.startDependencies$.next([startContext, plugins, startContract]);
+      return startContract;
+    }
   }
 
   /**
@@ -144,7 +152,7 @@ export class PluginWrapper<
     this.instance = undefined;
   }
 
-  private async createPluginInstance() {
+  private createPluginInstance() {
     const initializer = read(this.name) as PluginInitializer<
       TSetup,
       TStart,

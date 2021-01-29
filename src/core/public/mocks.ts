@@ -110,14 +110,14 @@ function pluginInitializerContextMock(config: any = {}) {
   return mock;
 }
 
-function createCoreContext(): CoreContext {
+function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext {
   return {
     coreId: Symbol('core context mock'),
     env: {
       mode: {
-        dev: true,
-        name: 'development',
-        prod: false,
+        dev: !production,
+        name: production ? 'production' : 'development',
+        prod: production,
       },
       packageInfo: {
         version: 'version',

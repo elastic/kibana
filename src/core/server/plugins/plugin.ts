@@ -6,11 +6,11 @@
  * Public License, v 1.
  */
 
-import { isPromise } from '@kbn/std';
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
