@@ -6,13 +6,71 @@
 
 import { TableSource } from './table_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
-import { MapFilters, MapQuery, VectorSourceSyncMeta } from '../../../../common/descriptor_types';
+import {
+  MapFilters,
+  MapQuery,
+  VectorJoinSourceRequestMeta,
+  VectorSourceSyncMeta,
+} from '../../../../common/descriptor_types';
 
 describe('TableSource', () => {
   describe('getName', () => {
     it('should get default display name', async () => {
       const tableSource = new TableSource({});
       expect((await tableSource.getDisplayName()).startsWith('table source')).toBe(true);
+    });
+  });
+
+  describe('getPropertiesMap', () => {
+    it('should roll up results', async () => {
+      const tableSource = new TableSource({
+        term: 'iso',
+        __rows: [
+          {
+            iso: 'US',
+            population: 100,
+          },
+          {
+            iso: 'CN',
+            population: 400,
+            foo: 'bar', // ignore this prop, not defined in `__columns`
+          },
+          {
+            // ignore this row, cannot be joined
+            population: 400,
+          },
+          {
+            // ignore this row, `US` not a PK
+            iso: 'US',
+            population: -1,
+          },
+        ],
+        __columns: [
+          {
+            name: 'iso',
+            type: 'string',
+          },
+          {
+            name: 'population',
+            type: 'number',
+          },
+        ],
+      });
+
+      const propertiesMap = await tableSource.getPropertiesMap(
+        ({} as unknown) as VectorJoinSourceRequestMeta,
+        'a',
+        'b',
+        () => {}
+      );
+
+      expect(propertiesMap.size).toEqual(2);
+      expect(propertiesMap.get('US')).toEqual({
+        population: 100,
+      });
+      expect(propertiesMap.get('CN')).toEqual({
+        population: 400,
+      });
     });
   });
 
