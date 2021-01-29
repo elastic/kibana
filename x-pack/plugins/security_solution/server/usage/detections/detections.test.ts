@@ -12,14 +12,14 @@ import {
   getMockListModulesResponse,
   getMockRulesResponse,
 } from './detections.mocks';
-import { fetchDetectionsUsage } from './index';
+import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
 
-describe('Detections Usage', () => {
+describe('Detections Usage and Metrics', () => {
+  let esClientMock: jest.Mocked<ElasticsearchClient>;
+  let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
+  let mlMock: ReturnType<typeof mlServicesMock.create>;
+
   describe('fetchDetectionsUsage()', () => {
-    let esClientMock: jest.Mocked<ElasticsearchClient>;
-    let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
-    let mlMock: ReturnType<typeof mlServicesMock.create>;
-
     beforeEach(() => {
       esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlMock = mlServicesMock.create();
@@ -97,6 +97,32 @@ describe('Detections Usage', () => {
               disabled: 1,
             },
           },
+        })
+      );
+    });
+  });
+
+  describe('fetchDetectionsMetrics()', () => {
+    beforeEach(() => {
+      mlMock = mlServicesMock.create();
+    });
+
+    it('tallies jobs data given jobs results', async () => {
+      const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          ml_jobs: [],
+        })
+      );
+    });
+
+    it('returns an empty array if there is no data', async () => {
+      const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          ml_jobs: [],
         })
       );
     });

@@ -173,3 +173,41 @@ export const getMockRulesResponse = () => ({
     ],
   },
 });
+
+export const getMockMlJobDetailsResponse = () => ({
+  job_id: 'high_distinct_count_error_message',
+  job_type: 'anomaly_detector',
+  job_version: '8.0.0',
+  create_time: 1603838214983,
+  finished_time: 1611739871669,
+  model_snapshot_id: '1611740107',
+  custom_settings: {
+    created_by: 'ml-module-siem-cloudtrail',
+  },
+  groups: ['cloudtrail', 'security'],
+  description: 'Security: Cloudtrail',
+  analysis_config: {
+    bucket_span: '15m',
+    detectors: [
+      {
+        detector_description: 'high_distinct_count("aws.cloudtrail.error_message")',
+        function: 'high_distinct_count',
+        field_name: 'aws.cloudtrail.error_message',
+        detector_index: 0,
+      },
+    ],
+    influencers: ['aws.cloudtrail.user_identity.arn', 'source.ip', 'source.geo.city_name'],
+  },
+  analysis_limits: {
+    model_memory_limit: '16mb',
+    categorization_examples_limit: 4,
+  },
+  data_description: {
+    time_field: '@timestamp',
+    time_format: 'epoch_ms',
+  },
+  model_snapshot_retention_days: 10,
+  daily_model_snapshot_retention_after_days: 1,
+  results_index_name: 'custom-high_distinct_count_error_message',
+  allow_lazy_open: true,
+});

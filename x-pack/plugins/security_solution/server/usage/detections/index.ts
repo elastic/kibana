@@ -66,7 +66,7 @@ export const fetchDetectionsUsage = async (
   };
 };
 
-export const fetchDetectionMetrics = async (
+export const fetchDetectionsMetrics = async (
   ml: MlPluginSetup | undefined,
   savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionMetrics> => {

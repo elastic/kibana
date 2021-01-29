@@ -11,7 +11,7 @@ import {
   DetectionsUsage,
   fetchDetectionsUsage,
   defaultDetectionsUsage,
-  fetchDetectionMetrics,
+  fetchDetectionsMetrics,
 } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
@@ -100,7 +100,7 @@ export const registerCollector: RegisterCollector = ({
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
-        fetchDetectionMetrics(ml, savedObjectsClient),
+        fetchDetectionsMetrics(ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(internalSavedObjectsClient),
       ]);
 
