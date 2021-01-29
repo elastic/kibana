@@ -314,7 +314,6 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    aliases: object;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];
