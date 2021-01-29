@@ -285,11 +285,10 @@ export function ReorderProvider({
 export const reorderAnnouncements = {
   moved: (itemLabel: string, position: number, prevPosition: number) => {
     return prevPosition === position
-      ? i18n.translate('xpack.lens.dragDrop.elementMoved', {
+      ? i18n.translate('xpack.lens.dragDrop.elementMovedBack', {
           defaultMessage: `You have moved back the item {itemLabel} to position {prevPosition}`,
           values: {
             itemLabel,
-            position,
             prevPosition,
           },
         })
