@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallow } from 'enzyme';
 
-import { IndexDeprecationTableProps, IndexDeprecationTableUI } from './index_table';
+import { IndexDeprecationTableProps, IndexDeprecationTable } from './index_table';
 
 describe('IndexDeprecationTable', () => {
   const defaultProps = {
@@ -22,7 +22,7 @@ describe('IndexDeprecationTable', () => {
   // This test simply verifies that the props passed to EuiBaseTable are the ones
   // expected.
   test('render', () => {
-    expect(shallowWithIntl(<IndexDeprecationTableUI {...defaultProps} />)).toMatchInlineSnapshot(`
+    expect(shallow(<IndexDeprecationTable {...defaultProps} />)).toMatchInlineSnapshot(`
       <EuiBasicTable
         columns={
           Array [
