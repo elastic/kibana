@@ -10,10 +10,9 @@ import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntry,
-  LogColumn,
   LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
