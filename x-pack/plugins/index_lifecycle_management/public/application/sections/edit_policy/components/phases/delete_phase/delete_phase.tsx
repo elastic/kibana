@@ -44,7 +44,7 @@ export const DeletePhase: FunctionComponent = () => {
   }
 
   return (
-    <EuiPanel color={'warning'} className={'ilmDeletePhase'} hasShadow={false}>
+    <EuiPanel color={'danger'} className={'ilmDeletePhase'} hasShadow={false}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size={'s'}>
