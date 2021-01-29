@@ -7,7 +7,7 @@
 import { Unionize, UnionToIntersection } from 'utility-types';
 import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
-type SortOrder = 'asc' | 'desc';
+export type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
 export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 
