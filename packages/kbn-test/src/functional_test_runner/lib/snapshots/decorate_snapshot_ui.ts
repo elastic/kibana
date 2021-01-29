@@ -17,7 +17,7 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { once } from 'lodash';
 import { Lifecycle } from '../lifecycle';
-import { Suite, Test } from '../../fake_mocha_types';
+import { Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -101,49 +101,44 @@ export function decorateSnapshotUi({
     globalState.currentTest = test;
   });
 
-  lifecycle.afterTestSuite.add(function (testSuite: Suite) {
-    // save snapshot & check unused after top-level test suite completes
-    if (!testSuite.parent?.root) {
-      return;
-    }
+  lifecycle.beforeTests.add((root) => {
+    lifecycle.cleanup.add(() => {
+      root.eachTest((test) => {
+        const file = test.file;
 
-    const root = testSuite.parent;
+        if (!file) {
+          return;
+        }
 
-    root.eachTest((test) => {
-      const file = test.file;
+        const snapshotState = globalState.snapshotStates[file];
 
-      if (!file) {
-        return;
+        if (snapshotState && !test.isPassed()) {
+          snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+        }
+      });
+
+      const unused: string[] = [];
+
+      Object.values(globalState.snapshotStates).forEach((state) => {
+        if (globalState.updateSnapshot === 'all') {
+          state.removeUncheckedKeys();
+        }
+
+        unused.push(...state.getUncheckedKeys());
+
+        state.save();
+      });
+
+      if (unused.length) {
+        throw new Error(
+          `${unused.length} obsolete snapshot(s) found:\n${unused.join(
+            '\n\t'
+          )}.\n\nRun tests again with \`--updateSnapshots\` to remove them.`
+        );
       }
 
-      const snapshotState = globalState.snapshotStates[file];
-
-      if (snapshotState && !test.isPassed()) {
-        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
-      }
+      globalState.snapshotStates = {};
     });
-
-    const unused: string[] = [];
-
-    Object.values(globalState.snapshotStates).forEach((state) => {
-      if (globalState.updateSnapshot === 'all') {
-        state.removeUncheckedKeys();
-      }
-
-      unused.push(...state.getUncheckedKeys());
-
-      state.save();
-    });
-
-    if (unused.length) {
-      throw new Error(
-        `${unused.length} obsolete snapshot(s) found:\n${unused.join(
-          '\n\t'
-        )}.\n\nRun tests again with \`--updateSnapshots\` to remove them.`
-      );
-    }
-
-    globalState.snapshotStates = {};
   });
 }
 
