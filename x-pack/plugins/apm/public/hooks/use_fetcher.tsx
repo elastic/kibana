@@ -10,7 +10,7 @@ import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import {
   callApmApi,
-  LifecycleManagedAPMClient,
+  AutoAbortedAPMClient,
 } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
@@ -42,12 +42,12 @@ function getDetailsFromErrorResponse(error: IHttpFetchError) {
   );
 }
 
-const createLifecycleManagedCallApmApi = (
+const createAutoAbortedAPMClient = (
   signal: AbortSignal
-): LifecycleManagedAPMClient => {
-  return ((options: Parameters<LifecycleManagedAPMClient>[0]) => {
+): AutoAbortedAPMClient => {
+  return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
     return callApmApi({ ...options, signal });
-  }) as LifecycleManagedAPMClient;
+  }) as AutoAbortedAPMClient;
 };
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
@@ -59,7 +59,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: LifecycleManagedAPMClient) => TReturn,
+  fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -86,7 +86,7 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createLifecycleManagedCallApmApi(signal));
+      const promise = fn(createAutoAbortedAPMClient(signal));
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success

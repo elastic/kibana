@@ -12,10 +12,7 @@ import { APMAPI } from '../../../server/routes/create_apm_api';
 import { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
-export type LifecycleManagedAPMClient = Client<
-  APMAPI['_S'],
-  { lifecycleManaged: true }
->;
+export type AutoAbortedAPMClient = Client<APMAPI['_S'], { abortable: false }>;
 
 export type APMClientOptions = Omit<
   FetchOptions,
