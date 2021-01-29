@@ -76,7 +76,7 @@ describe('reassignAgent (singular)', () => {
 });
 
 describe('reassignAgents (plural)', () => {
-  it('cannot reassign from a managed policy', async () => {
+  it('agents in managed policies are not updated', async () => {
     const soClient = createClientMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const idsToReassign = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO.id];
@@ -85,7 +85,7 @@ describe('reassignAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = soClient.bulkUpdate.mock.calls[0][0];
     const expectedResults = [agentInUnmanagedSO.id, agentInUnmanagedSO.id];
-    expect(calledWith.length).toBe(expectedResults.length); // only 2 in agentIds are unmanaged
+    expect(calledWith.length).toBe(expectedResults.length); // only 2 are unmanaged
     expect(calledWith.map(({ id }) => id)).toEqual(expectedResults);
   });
 });

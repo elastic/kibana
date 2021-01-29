@@ -48,7 +48,7 @@ export async function reassignAgentIsAllowed(
     throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy.id}`);
   }
 
-  const newAgentPolicy = await getAgentPolicyForAgent(soClient, esClient, newAgentPolicyId);
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
     throw new Error(`Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`);
   }

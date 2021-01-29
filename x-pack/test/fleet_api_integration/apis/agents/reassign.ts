@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
           policy_id: 'policy2',
         })
         .expect(200);
-      const { body } = await supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx');
+      const { body } = await supertest.get(`/api/fleet/agents/agent1`);
       expect(body.item.policy_id).to.eql('policy2');
     });
 

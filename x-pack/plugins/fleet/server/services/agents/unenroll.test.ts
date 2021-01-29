@@ -17,6 +17,10 @@ const agentInUnmanagedSO = {
   id: 'agent-in-unmanaged-policy',
   attributes: { policy_id: 'unmanaged-agent-policy' },
 } as SavedObject<Agent>;
+const agentInUnmanagedSO2 = {
+  id: 'agent-in-unmanaged-policy2',
+  attributes: { policy_id: 'unmanaged-agent-policy' },
+} as SavedObject<Agent>;
 const unmanagedAgentPolicySO = {
   id: 'unmanaged-agent-policy',
   attributes: { is_managed: false },
@@ -49,15 +53,31 @@ describe('unenrollAgent (singular)', () => {
 });
 
 describe('unenrollAgents (plural)', () => {
-  it('cannot unenroll from a managed policy', async () => {
+  it('can unenroll from an unmanaged policy', async () => {
     const soClient = createClientMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const idsToUnenroll = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO.id];
+    const idsToUnenroll = [agentInUnmanagedSO.id, agentInUnmanagedSO2.id];
     await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
     const calledWith = soClient.bulkUpdate.mock.calls[0][0];
-    expect(calledWith.length).toBe(2); // only 2 in agentIds are unmanaged
+    expect(calledWith.length).toBe(idsToUnenroll.length);
+    expect(calledWith.map(({ id }) => id)).toEqual(idsToUnenroll);
+    for (const params of calledWith) {
+      expect(params.attributes).toHaveProperty('unenrollment_started_at');
+    }
+  });
+  it('cannot unenroll from a managed policy', async () => {
+    const soClient = createClientMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const idsToUnenroll = [agentInUnmanagedSO.id, agentInManagedSO.id, agentInUnmanagedSO2.id];
+    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
+
+    // calls ES update with correct values
+    const calledWith = soClient.bulkUpdate.mock.calls[0][0];
+    const onlyUnmanaged = [agentInUnmanagedSO.id, agentInUnmanagedSO2.id];
+    expect(calledWith.length).toBe(onlyUnmanaged.length);
+    expect(calledWith.map(({ id }) => id)).toEqual(onlyUnmanaged);
     for (const params of calledWith) {
       expect(params.attributes).toHaveProperty('unenrollment_started_at');
     }
@@ -83,6 +103,8 @@ function createClientMock() {
         return managedAgentPolicySO;
       case agentInManagedSO.id:
         return agentInManagedSO;
+      case agentInUnmanagedSO2.id:
+        return agentInUnmanagedSO2;
       case agentInUnmanagedSO.id:
       default:
         return agentInUnmanagedSO;
