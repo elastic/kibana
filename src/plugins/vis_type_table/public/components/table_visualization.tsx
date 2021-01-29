@@ -14,7 +14,7 @@ import { CoreStart } from 'kibana/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import type { PersistedState } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { TableVisConfig, TableContext } from '../types';
+import { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 import { useUiState } from '../utils';
@@ -22,14 +22,14 @@ import { useUiState } from '../utils';
 interface TableVisualizationComponentProps {
   core: CoreStart;
   handlers: IInterpreterRenderHandlers;
-  visData: TableContext;
+  visData: TableVisData;
   visConfig: TableVisConfig;
 }
 
 const TableVisualizationComponent = ({
   core,
   handlers,
-  visData: { direction, formattedColumns, table, tables },
+  visData: { direction, table, tables },
   visConfig,
 }: TableVisualizationComponentProps) => {
   useEffect(() => {
@@ -51,7 +51,6 @@ const TableVisualizationComponent = ({
             <div className="tbvChart__split">
               <TableVisBasic
                 fireEvent={handlers.event}
-                formattedColumns={formattedColumns}
                 table={table}
                 visConfig={visConfig}
                 uiStateProps={uiStateProps}
@@ -60,7 +59,6 @@ const TableVisualizationComponent = ({
           ) : (
             <TableVisSplit
               fireEvent={handlers.event}
-              formattedColumns={formattedColumns}
               tables={tables}
               visConfig={visConfig}
               uiStateProps={uiStateProps}

@@ -11,100 +11,103 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { Datatable, DatatableRow } from 'src/plugins/expressions';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../kibana_react/public';
 import { exporters } from '../../../data/public';
-import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
-
-import { FormattedColumn } from '../types';
-import { exportAsCsv } from '../utils';
+import {
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+  downloadFileAs,
+} from '../../../share/public';
 import { getFormatService } from '../services';
 
 interface TableVisControlsProps {
   dataGridAriaLabel: string;
   filename?: string;
-  cols: FormattedColumn[];
+  columns: DatatableColumn[];
   rows: DatatableRow[];
-  table: Datatable;
 }
 
-export const TableVisControls = memo(({ dataGridAriaLabel, ...props }: TableVisControlsProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const togglePopover = useCallback(() => setIsPopoverOpen((state) => !state), []);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+export const TableVisControls = memo(
+  ({ dataGridAriaLabel, filename, columns, rows }: TableVisControlsProps) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsPopoverOpen((state) => !state), []);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const {
-    services: { uiSettings },
-  } = useKibana<CoreStart>();
+    const {
+      services: { uiSettings },
+    } = useKibana<CoreStart>();
 
-  const onClickExport = useCallback(
-    (formatted: boolean) => {
-      const csvSeparator = uiSettings.get(CSV_SEPARATOR_SETTING);
-      const quoteValues = uiSettings.get(CSV_QUOTE_VALUES_SETTING);
+    const onClickExport = useCallback(
+      (formatted: boolean) => {
+        const csvSeparator = uiSettings.get(CSV_SEPARATOR_SETTING);
+        const quoteValues = uiSettings.get(CSV_QUOTE_VALUES_SETTING);
 
-      // exporters.datatableToCSV(
-      //   {
-      //     columns: props.cols,
-      //     rows: props.rows,
-      //   },
-      //   {
-      //     csvSeparator,
-      //     quoteValues,
-      //     formatFactory: getFormatService().deserialize,
-      //     raw: !formatted,
-      //   }
-      // );
-      exportAsCsv(formatted, {
-        ...props,
-        uiSettings,
-      });
-    },
-    [props, uiSettings]
-  );
+        const content = exporters.datatableToCSV(
+          {
+            type: 'datatable',
+            columns,
+            rows,
+          },
+          {
+            csvSeparator,
+            quoteValues,
+            formatFactory: getFormatService().deserialize,
+            raw: !formatted,
+          }
+        );
+        downloadFileAs(`${filename || 'unsaved'}.csv`, { content, type: exporters.CSV_MIME_TYPE });
+      },
+      [columns, rows, filename, uiSettings]
+    );
 
-  const exportBtnAriaLabel = i18n.translate('visTypeTable.vis.controls.exportButtonAriaLabel', {
-    defaultMessage: 'Export {dataGridAriaLabel} as CSV',
-    values: {
-      dataGridAriaLabel,
-    },
-  });
+    const exportBtnAriaLabel = i18n.translate('visTypeTable.vis.controls.exportButtonAriaLabel', {
+      defaultMessage: 'Export {dataGridAriaLabel} as CSV',
+      values: {
+        dataGridAriaLabel,
+      },
+    });
 
-  const button = (
-    <EuiButtonEmpty
-      aria-label={exportBtnAriaLabel}
-      size="xs"
-      iconType="exportAction"
-      color="text"
-      className="euiDataGrid__controlBtn"
-      onClick={togglePopover}
-    >
-      <FormattedMessage id="visTypeTable.vis.controls.exportButtonLabel" defaultMessage="Export" />
-    </EuiButtonEmpty>
-  );
+    const button = (
+      <EuiButtonEmpty
+        aria-label={exportBtnAriaLabel}
+        size="xs"
+        iconType="exportAction"
+        color="text"
+        className="euiDataGrid__controlBtn"
+        onClick={togglePopover}
+      >
+        <FormattedMessage
+          id="visTypeTable.vis.controls.exportButtonLabel"
+          defaultMessage="Export"
+        />
+      </EuiButtonEmpty>
+    );
 
-  const items = [
-    <EuiContextMenuItem key="rawCsv" onClick={() => onClickExport(false)}>
-      <FormattedMessage id="visTypeTable.vis.controls.rawCSVButtonLabel" defaultMessage="Raw" />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="csv" onClick={() => onClickExport(true)}>
-      <FormattedMessage
-        id="visTypeTable.vis.controls.formattedCSVButtonLabel"
-        defaultMessage="Formatted"
-      />
-    </EuiContextMenuItem>,
-  ];
+    const items = [
+      <EuiContextMenuItem key="rawCsv" onClick={() => onClickExport(false)}>
+        <FormattedMessage id="visTypeTable.vis.controls.rawCSVButtonLabel" defaultMessage="Raw" />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem key="csv" onClick={() => onClickExport(true)}>
+        <FormattedMessage
+          id="visTypeTable.vis.controls.formattedCSVButtonLabel"
+          defaultMessage="Formatted"
+        />
+      </EuiContextMenuItem>,
+    ];
 
-  return (
-    <EuiPopover
-      id="dataTableExportData"
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      repositionOnScroll
-    >
-      <EuiContextMenuPanel className="eui-textNoWrap" items={items} />
-    </EuiPopover>
-  );
-});
+    return (
+      <EuiPopover
+        id="dataTableExportData"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        repositionOnScroll
+      >
+        <EuiContextMenuPanel className="eui-textNoWrap" items={items} />
+      </EuiPopover>
+    );
+  }
+);
