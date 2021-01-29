@@ -10,7 +10,8 @@
     "savedObjects",
     "visualizations",
     "embeddable",
-    "dashboard"
+    "dashboard",
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "home",
@@ -21,7 +22,6 @@
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "presentationUtil",
     "discover"
   ]
 }

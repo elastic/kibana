@@ -10,6 +10,8 @@ import classNames from 'classnames';
 
 import { Result } from '../../../../types';
 
+import { SUBTITLE_LABEL } from './constants';
+
 interface SubtitleFieldProps {
   result: Result;
   subtitleField: string | null;
@@ -31,7 +33,7 @@ export const SubtitleField: React.FC<SubtitleFieldProps> = ({
       <div className="eui-textTruncate">{result[subtitleField]}</div>
     ) : (
       <span data-test-subj="DefaultSubtitleLabel" className="example-result-content-placeholder">
-        Subtitle
+        {SUBTITLE_LABEL}
       </span>
     )}
   </div>

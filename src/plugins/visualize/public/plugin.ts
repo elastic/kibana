@@ -20,6 +20,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   Storage,
   createKbnUrlTracker,
@@ -52,6 +53,7 @@ export interface VisualizePluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -182,6 +184,7 @@ export class VisualizePlugin
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          presentationUtil: pluginsStart.presentationUtil,
         };
 
         params.element.classList.add('visAppWrapper');

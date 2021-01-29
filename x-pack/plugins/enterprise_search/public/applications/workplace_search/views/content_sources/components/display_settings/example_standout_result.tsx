@@ -11,6 +11,8 @@ import { useValues } from 'kea';
 
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
+import { DESCRIPTION_LABEL } from '../../../../constants';
+
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 import { CustomSourceIcon } from './custom_source_icon';
@@ -60,7 +62,7 @@ export const ExampleStandoutResult: React.FC = () => {
                 className="example-result-content-placeholder"
                 data-test-subj="DefaultDescriptionLabel"
               >
-                Description
+                {DESCRIPTION_LABEL}
               </span>
             )}
           </div>
