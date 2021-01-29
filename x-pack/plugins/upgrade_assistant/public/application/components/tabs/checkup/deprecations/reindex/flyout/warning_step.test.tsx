@@ -11,6 +11,19 @@ import React from 'react';
 import { ReindexWarning } from '../../../../../../../../common/types';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
+jest.mock('../../../../../../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+      };
+    },
+  };
+});
+
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
