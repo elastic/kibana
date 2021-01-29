@@ -9,6 +9,7 @@ import { HttpLogic } from '../../../shared/http';
 import { mockHttpValues } from '../../../__mocks__';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { SecurityLogic } from './security_logic';
+import { nextTick } from '@kbn/test/jest';
 
 jest.mock('../../../shared/http', () => ({
   HttpLogic: {
@@ -117,24 +118,24 @@ describe('SecurityLogic', () => {
     describe('initializeSourceRestrictions', () => {
       it('calls API and sets values', async () => {
         const setServerPropsSpy = jest.spyOn(SecurityLogic.actions, 'setServerProps');
-        const promise = Promise.resolve(serverProps);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(Promise.resolve(serverProps));
         SecurityLogic.actions.initializeSourceRestrictions();
 
         expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
           '/api/workplace_search/org/security/source_restrictions'
         );
-        await promise;
+        await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(serverProps);
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(
+          Promise.reject('this is an error')
+        );
 
         SecurityLogic.actions.initializeSourceRestrictions();
         try {
-          await promise;
+          await nextTick();
         } catch {
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         }
@@ -143,8 +144,7 @@ describe('SecurityLogic', () => {
 
     describe('saveSourceRestrictions', () => {
       it('calls API and sets values', async () => {
-        const promise = Promise.resolve(serverProps);
-        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(promise);
+        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(Promise.resolve(serverProps));
         SecurityLogic.actions.setSourceRestrictionsUpdated(serverProps);
         SecurityLogic.actions.saveSourceRestrictions();
 
@@ -157,12 +157,13 @@ describe('SecurityLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(promise);
+        (HttpLogic.values.http.patch as jest.Mock).mockReturnValue(
+          Promise.reject('this is an error')
+        );
 
         SecurityLogic.actions.saveSourceRestrictions();
         try {
-          await promise;
+          await nextTick();
         } catch {
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         }
