@@ -417,6 +417,7 @@ const updateExistingDataStream = async ({
     await callCluster('indices.putMapping', {
       index: dataStreamName,
       body: mappings,
+      write_index_only: true,
     });
     // if update fails, rollover data stream
   } catch (err) {
