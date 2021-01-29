@@ -38,9 +38,9 @@ export default async function ({ readConfigFile }) {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+        '--xpack.maps.showMapVisualizationTypes=true', // explicitly turn on legacy visualizations
       ],
     },
 
