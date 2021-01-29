@@ -511,7 +511,7 @@ describe('getSeriesAndDomain', () => {
     [FriendlyFlyoutLabels[MetaData.MimeType], 'text/css'],
     [FriendlyFlyoutLabels[MetaData.RequestStart], '0.000ms'],
     [FriendlyFlyoutLabels[Timings.Dns], '3.560ms'],
-    [FriendlyFlyoutLabels[Timings.Connect], '81.108ms'],
+    [FriendlyFlyoutLabels[Timings.Connect], '25.721ms'],
     [FriendlyFlyoutLabels[Timings.Ssl], '55.387ms'],
     [FriendlyFlyoutLabels[Timings.Wait], '34.578ms'],
     [FriendlyFlyoutLabels[Timings.Receive], '0.552ms'],

@@ -86,6 +86,14 @@ const getCurrentOffset = (item: NetworkItem, zeroOffset: number): number => {
   return offsetValue - zeroOffset;
 };
 
+const getConnectingTime = (connect?: number, ssl?: number) => {
+  if (ssl && connect && ssl > 0) {
+    return connect - ssl;
+  } else {
+    return connect;
+  }
+};
+
 export const getSeriesAndDomain = (items: NetworkItems) => {
   // The earliest point in time a request is sent or started. This will become our notion of "0".
   const zeroOffset = items.reduce<number>((acc, item) => {
@@ -97,12 +105,12 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     if (!timings) return;
 
     // SSL is a part of the connect timing
-    if (timing === Timings.Connect && timings.ssl > 0) {
-      return timings.connect - timings.ssl;
-    } else {
-      return timings[timing];
+    if (timing === Timings.Connect) {
+      return getConnectingTime(timings.connect, timings.ssl);
     }
+    return timings[timing];
   };
+
   const series: WaterfallData = [];
   const metaData: WaterfallMetaData = [];
 
@@ -244,7 +252,7 @@ const formatMetaData = ({
       },
       {
         name: FriendlyFlyoutLabels[Timings.Connect],
-        value: getFriendlyMetaDataValue({ value: connect, postFix: 'ms' }),
+        value: getFriendlyMetaDataValue({ value: getConnectingTime(connect, ssl), postFix: 'ms' }),
       },
       {
         name: FriendlyFlyoutLabels[Timings.Ssl],
