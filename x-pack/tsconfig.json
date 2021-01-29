@@ -19,6 +19,9 @@
     "plugins/event_log/**/*",
     "plugins/licensing/**/*",
     "plugins/lens/**/*",
+    "plugins/maps/**/*",
+    "plugins/maps_file_upload/**/*",
+    "plugins/maps_legacy_licensing/**/*",
     "plugins/searchprofiler/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/task_manager/**/*",
@@ -26,7 +29,6 @@
     "plugins/translations/**/*",
     "plugins/triggers_actions_ui/**/*",
     "plugins/ui_actions_enhanced/**/*",
-    "plugins/vis_type_timeseries_enhanced/**/*",
     "plugins/spaces/**/*",
     "plugins/security/**/*",
     "plugins/stack_alerts/**/*",
@@ -35,6 +37,7 @@
     "plugins/cloud/**/*",
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
+    "plugins/license_management/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -86,11 +89,13 @@
     { "path": "./plugins/event_log/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
     { "path": "./plugins/lens/tsconfig.json" },
+    { "path": "./plugins/maps/tsconfig.json" },
+    { "path": "./plugins/maps_file_upload/tsconfig.json" },
+    { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/vis_type_timeseries_enhanced/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/spaces/tsconfig.json" },
     { "path": "./plugins/security/tsconfig.json" },
@@ -102,6 +107,7 @@
     { "path": "./plugins/actions/tsconfig.json"},
     { "path": "./plugins/alerts/tsconfig.json"},
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
-    { "path": "./plugins/stack_alerts/tsconfig.json"}
+    { "path": "./plugins/stack_alerts/tsconfig.json"},
+    { "path": "./plugins/license_management/tsconfig.json" },
   ]
 }
