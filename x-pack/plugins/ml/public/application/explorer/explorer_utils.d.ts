@@ -186,7 +186,13 @@ export declare interface FilterData {
 export declare interface AppStateSelectedCells {
   type: SwimlaneType;
   lanes: string[];
-  times: number[];
+  times: [number, number];
   showTopFieldValues?: boolean;
   viewByFieldName?: string;
 }
+
+export declare const removeFilterFromQueryString: (
+  currentQueryString: string,
+  fieldName: string,
+  fieldValue: string
+) => string;

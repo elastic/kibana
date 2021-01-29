@@ -44,6 +44,7 @@ export interface UpdateAlertStatusProps {
 
 export interface AlertsIndex {
   name: string;
+  index_mapping_outdated: boolean;
 }
 
 export interface Privilege {
@@ -78,6 +79,7 @@ export interface Privilege {
   index: {
     [indexName: string]: {
       all: boolean;
+      maintenance: boolean;
       manage_ilm: boolean;
       read: boolean;
       create_index: boolean;

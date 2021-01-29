@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
+import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
-import { SectionPanel } from './section_panel';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { KibanaFeature } from '../../../../features/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../../../src/core/public';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -37,8 +38,8 @@ featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
-    icon: 'spacesApp',
     app: [],
+    category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
   }),
 ]);
@@ -57,7 +58,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -69,7 +69,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('textarea[name="description"]');
@@ -116,7 +119,6 @@ describe('ManageSpacePage', () => {
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -128,9 +130,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    });
 
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
     expect(onLoadSpace).toHaveBeenCalledWith({
       ...spaceToUpdate,
     });
@@ -167,7 +171,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -179,10 +182,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Error loading available features',
+    await waitFor(() => {
+      wrapper.update();
+      expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Error loading available features',
+      });
     });
   });
 
@@ -204,7 +208,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -216,9 +219,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -265,7 +269,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -277,9 +280,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -309,16 +313,12 @@ function updateSpace(wrapper: ReactWrapper<any, any>, updateFeature = true) {
 }
 
 function toggleFeature(wrapper: ReactWrapper<any, any>) {
-  const featureSectionButton = wrapper
-    .find(SectionPanel)
-    .filter('[data-test-subj="enabled-features-panel"]')
-    .find(EuiLink);
-
-  featureSectionButton.simulate('click');
-
-  wrapper.update();
-
-  wrapper.find(EuiSwitch).find('button').simulate('click');
+  const {
+    onChange = () => {
+      throw new Error('expected onChange to be defined');
+    },
+  } = wrapper.find('input#featureCategoryCheckbox_kibana').props() as EuiCheckboxProps;
+  onChange({ target: { checked: false } } as any);
 
   wrapper.update();
 }
@@ -329,11 +329,5 @@ async function clickSaveButton(wrapper: ReactWrapper<any, any>) {
 
   await Promise.resolve();
 
-  wrapper.update();
-}
-
-async function waitForDataLoad(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
   wrapper.update();
 }

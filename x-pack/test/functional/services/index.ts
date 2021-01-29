@@ -6,6 +6,7 @@
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 import {
@@ -41,6 +42,7 @@ import { PipelineEditorProvider } from './pipeline_editor';
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { AceEditorProvider } from './ace_editor';
+import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
@@ -64,6 +66,7 @@ export const services = {
   ...commonServices,
 
   supertest: kibanaApiIntegrationServices.supertest,
+  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -91,6 +94,7 @@ export const services = {
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
   aceEditor: AceEditorProvider,
+  canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,

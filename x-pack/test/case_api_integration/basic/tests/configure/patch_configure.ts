@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('post_configure', () => {
+  describe('patch_configure', () => {
     afterEach(async () => {
       await deleteConfiguration(es);
     });
@@ -40,6 +40,36 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromConfigure(body);
       expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
+    });
+
+    it('should not patch a configuration with unsupported connector type', async () => {
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getConfiguration())
+        .expect(200);
+
+      await supertest
+        .patch(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        // @ts-ignore We need it to test unsupported types
+        .send(getConfiguration({ type: '.unsupported' }))
+        .expect(400);
+    });
+
+    it('should not patch a configuration with unsupported connector fields', async () => {
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getConfiguration())
+        .expect(200);
+
+      await supertest
+        .patch(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        // @ts-ignore We need it to test unsupported fields
+        .send(getConfiguration({ type: '.jira', fields: { unsupported: 'value' } }))
+        .expect(400);
     });
 
     it('should handle patch request when there is no configuration', async () => {

@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Rx from 'rxjs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import { kibanaTestUser } from '@kbn/test';
@@ -22,13 +21,11 @@ import {
 } from '../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../src/core/test_helpers/kbn_server';
 import { SpacesService } from '../../spaces_service';
-import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { KibanaFeature } from '../../../../features/server';
-import { spacesConfig } from '../__fixtures__';
-import { securityMock } from '../../../../security/server/mocks';
 import { featuresPluginMock } from '../../../../features/server/mocks';
+import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {
@@ -166,17 +163,18 @@ describe.skip('onPostAuthInterceptor', () => {
     coreStart.savedObjects.createInternalRepository.mockImplementation(mockRepository);
     coreStart.savedObjects.createScopedRepository.mockImplementation(mockRepository);
 
-    const service = new SpacesService(loggingMock);
+    const service = new SpacesService();
 
-    const spacesService = await service.setup({
-      http: (http as unknown) as CoreSetup['http'],
-      getStartServices: async () => [coreStart, {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(spacesConfig),
+    service.setup({
+      basePath: http.basePath,
     });
 
-    spacesService.scopedClient = jest.fn().mockResolvedValue({
+    const spacesServiceStart = service.start({
+      basePath: http.basePath,
+      spacesClientService: spacesClientServiceMock.createStart(),
+    });
+
+    spacesServiceStart.createSpacesClient = jest.fn().mockReturnValue({
       getAll() {
         if (testOptions.simulateGetSpacesFailure) {
           throw Boom.unauthorized('missing credendials', 'Protected Elasticsearch');
@@ -206,7 +204,7 @@ describe.skip('onPostAuthInterceptor', () => {
       http: (http as unknown) as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
     });
 
     const router = http.createRouter('/');
@@ -221,7 +219,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
     return {
       response,
-      spacesService,
+      spacesService: spacesServiceStart,
     };
   }
 
@@ -342,7 +340,7 @@ describe.skip('onPostAuthInterceptor', () => {
                         }
                 `);
 
-    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+    expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.objectContaining({
           authorization: headers.authorization,
@@ -381,7 +379,7 @@ describe.skip('onPostAuthInterceptor', () => {
       }
     `);
 
-    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+    expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.objectContaining({
           authorization: headers.authorization,
@@ -414,7 +412,7 @@ describe.skip('onPostAuthInterceptor', () => {
     expect(response.status).toEqual(302);
     expect(response.header.location).toEqual(`/spaces/space_selector`);
 
-    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+    expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.objectContaining({
           authorization: headers.authorization,
@@ -447,7 +445,7 @@ describe.skip('onPostAuthInterceptor', () => {
     expect(response.status).toEqual(302);
     expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
-    expect(spacesService.scopedClient).toHaveBeenCalledWith(
+    expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.objectContaining({
           authorization: headers.authorization,
@@ -473,7 +471,7 @@ describe.skip('onPostAuthInterceptor', () => {
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual(`/s/a-space/spaces/enter`);
 
-      expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -501,7 +499,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(302);
       expect(response.header.location).toEqual('/spaces/enter');
-      expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -526,7 +524,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(200);
 
-      expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -551,7 +549,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(200);
 
-      expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -576,7 +574,7 @@ describe.skip('onPostAuthInterceptor', () => {
 
       expect(response.status).toEqual(404);
 
-      expect(spacesService.scopedClient).toHaveBeenCalledWith(
+      expect(spacesService.createSpacesClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,

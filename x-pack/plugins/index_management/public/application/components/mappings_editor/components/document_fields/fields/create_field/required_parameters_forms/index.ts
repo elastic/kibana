@@ -23,7 +23,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   dense_vector: DenseVectorRequiredParameters,
 };
 
-export const getParametersFormForType = (
+export const getRequiredParametersFormForType = (
   type: MainType,
   subType?: SubType
 ): ComponentType<ComponentProps> | undefined =>

@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
-import { L } from '../../../maps_legacy/public';
 
 /**
  * Map overlay: canvas layer with leaflet.heat plugin
@@ -30,17 +18,17 @@ import { L } from '../../../maps_legacy/public';
  * @param params {Object}
  */
 export class HeatmapMarkers extends EventEmitter {
-  constructor(featureCollection, options, zoom, max) {
+  constructor(featureCollection, options, zoom, max, leaflet) {
     super();
     this._geojsonFeatureCollection = featureCollection;
     const points = dataToHeatArray(featureCollection, max);
-    this._leafletLayer = new L.HeatLayer(points, options);
+    this._leafletLayer = new leaflet.HeatLayer(points, options);
     this._tooltipFormatter = options.tooltipFormatter;
     this._zoom = zoom;
     this._disableTooltips = false;
     this._getLatLng = _.memoize(
       function (feature) {
-        return L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+        return leaflet.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
       },
       function (feature) {
         // turn coords into a string for the memoize cache

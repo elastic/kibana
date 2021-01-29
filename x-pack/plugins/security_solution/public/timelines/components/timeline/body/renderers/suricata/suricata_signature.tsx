@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -19,7 +19,7 @@ import { Provider } from '../../../data_providers/provider';
 import { TokensFlexItem } from '../helpers';
 import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../../../common/components/draggables';
-import { IS_OPERATOR } from '../../../data_providers/data_provider';
+import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provider';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
@@ -57,41 +57,49 @@ export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
 Tokens.displayName = 'Tokens';
 
 export const DraggableSignatureId = React.memo<{ id: string; signatureId: number }>(
-  ({ id, signatureId }) => (
-    <SignatureFlexItem grow={false}>
-      <DraggableWrapper
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
-          name: String(signatureId),
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: SURICATA_SIGNATURE_ID_FIELD_NAME,
-            value: signatureId,
-            operator: IS_OPERATOR,
-          },
-        }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <EuiToolTip
-              data-test-subj="signature-id-tooltip"
-              content={SURICATA_SIGNATURE_ID_FIELD_NAME}
-            >
-              <Badge iconType="number" color="hollow" title="">
-                {signatureId}
-              </Badge>
-            </EuiToolTip>
-          )
-        }
-      />
-    </SignatureFlexItem>
-  )
+  ({ id, signatureId }) => {
+    const dataProviderProp = useMemo(
+      () => ({
+        and: [],
+        enabled: true,
+        id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
+        name: String(signatureId),
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: SURICATA_SIGNATURE_ID_FIELD_NAME,
+          value: signatureId,
+          operator: IS_OPERATOR as QueryOperator,
+        },
+      }),
+      [id, signatureId]
+    );
+
+    const render = useCallback(
+      (dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <EuiToolTip
+            data-test-subj="signature-id-tooltip"
+            content={SURICATA_SIGNATURE_ID_FIELD_NAME}
+          >
+            <Badge iconType="number" color="hollow" title="">
+              {signatureId}
+            </Badge>
+          </EuiToolTip>
+        ),
+      [signatureId]
+    );
+
+    return (
+      <SignatureFlexItem grow={false}>
+        <DraggableWrapper dataProvider={dataProviderProp} render={render} />
+      </SignatureFlexItem>
+    );
+  }
 );
 
 DraggableSignatureId.displayName = 'DraggableSignatureId';

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeDisplay } from './privilege_display';
@@ -14,7 +14,7 @@ import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { KibanaFeature } from '../../../../../../../../features/public';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 interface TableRow {
   spaces: string[];
@@ -28,6 +28,7 @@ const features = [
     id: 'normal',
     name: 'normal feature',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -43,6 +44,7 @@ const features = [
     id: 'normal_with_sub',
     name: 'normal feature with sub features',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: { all: [], read: [] },
@@ -96,6 +98,7 @@ const features = [
     id: 'bothPrivilegesExcludedFromBase',
     name: 'bothPrivilegesExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,
@@ -113,6 +116,7 @@ const features = [
     id: 'allPrivilegeExcludedFromBase',
     name: 'allPrivilegeExcludedFromBase',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         excludeFromBasePrivileges: true,

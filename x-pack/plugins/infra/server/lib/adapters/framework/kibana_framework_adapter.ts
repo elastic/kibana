@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
-  InfraServerPluginDeps,
+  InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
   InfraDatabaseMultiResponse,
@@ -23,27 +23,26 @@ import {
   CoreSetup,
   IRouter,
   KibanaRequest,
-  RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-  LegacyAPICaller,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 
 export class KibanaFramework {
-  public router: IRouter;
-  public plugins: InfraServerPluginDeps;
+  public router: IRouter<InfraPluginRequestHandlerContext>;
+  public plugins: InfraServerPluginSetupDeps;
 
-  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
     config: InfraRouteConfig<Params, Query, Body, Method>,
-    handler: RequestHandler<Params, Query, Body>
+    handler: RequestHandler<Params, Query, Body, InfraPluginRequestHandlerContext>
   ) {
     const defaultOptions = {
       tags: ['access:infra'],
@@ -89,7 +88,7 @@ export class KibanaFramework {
       },
     };
     async function handler(
-      context: RequestHandlerContext,
+      context: InfraPluginRequestHandlerContext,
       request: KibanaRequest<unknown, unknown, Body>,
       response: KibanaResponseFactory
     ) {
@@ -101,7 +100,7 @@ export class KibanaFramework {
 
         const gqlResponse = await runHttpQuery([context, request], {
           method: request.route.method.toUpperCase(),
-          options: (req: RequestHandlerContext, rawReq: KibanaRequest) => ({
+          options: (req: InfraPluginRequestHandlerContext, rawReq: KibanaRequest) => ({
             context: { req, rawReq },
             schema: gqlSchema,
           }),
@@ -148,48 +147,48 @@ export class KibanaFramework {
   }
 
   callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'msearch',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'fieldCaps',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseFieldCapsResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
     options?: CallWithRequestParams
   ): Promise<boolean>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.getAlias',
     options?: object
   ): Promise<InfraDatabaseGetIndicesAliasResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.get' | 'ml.getBuckets',
     options?: object
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'transport.request',
     options?: CallWithRequestParams
   ): Promise<unknown>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
 
   public async callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     params: CallWithRequestParams
   ) {
@@ -217,12 +216,10 @@ export class KibanaFramework {
     });
   }
 
-  public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
-    return new IndexPatternsFetcher((...rest: Parameters<LegacyAPICaller>) => {
-      rest[1] = rest[1] || {};
-      rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
-    });
+  public getIndexPatternsService(
+    requestContext: InfraPluginRequestHandlerContext
+  ): IndexPatternsFetcher {
+    return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
   }
 
   public getSpaceId(request: KibanaRequest): string {
@@ -240,7 +237,7 @@ export class KibanaFramework {
   }
 
   public async makeTSVBRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     rawRequest: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },

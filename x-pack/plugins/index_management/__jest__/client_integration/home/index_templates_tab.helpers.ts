@@ -6,12 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';

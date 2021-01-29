@@ -30,7 +30,7 @@ export function getDefaultDatafeedQuery() {
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: IIndexPattern,
+  indexPattern: IIndexPattern | undefined,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs

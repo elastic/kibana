@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Fs from 'fs';
@@ -24,7 +13,7 @@ import { promisify } from 'util';
 
 import execa from 'execa';
 
-import { readYarnLock, YarnLock } from './yarn_lock';
+import { YarnLock, resolveDepsForProject } from './yarn_lock';
 import { ProjectMap } from '../utils/projects';
 import { Project } from '../utils/project';
 import { Kibana } from '../utils/kibana';
@@ -146,51 +135,6 @@ async function getLatestSha(project: Project, kbn: Kibana) {
 }
 
 /**
- * Get a list of the absolute dependencies of this project, as resolved
- * in the yarn.lock file, does not include other projects in the workspace
- * or their dependencies
- */
-function resolveDepsForProject(project: Project, yarnLock: YarnLock, kbn: Kibana, log: Log) {
-  /** map of [name@range, name@resolved] */
-  const resolved = new Map<string, string>();
-
-  const queue: Array<[string, string]> = Object.entries(project.allDependencies);
-
-  while (queue.length) {
-    const [name, versionRange] = queue.shift()!;
-    const req = `${name}@${versionRange}`;
-
-    if (resolved.has(req)) {
-      continue;
-    }
-
-    if (!kbn.hasProject(name)) {
-      const pkg = yarnLock[req];
-      if (!pkg) {
-        log.warning(
-          'yarn.lock file is out of date, please run `yarn kbn bootstrap` to re-enable caching'
-        );
-        return;
-      }
-
-      const res = `${name}@${pkg.version}`;
-      resolved.set(req, res);
-
-      const allDepsEntries = [
-        ...Object.entries(pkg.dependencies || {}),
-        ...Object.entries(pkg.optionalDependencies || {}),
-      ];
-
-      for (const [childName, childVersionRange] of allDepsEntries) {
-        queue.push([childName, childVersionRange]);
-      }
-    }
-  }
-
-  return Array.from(resolved.values()).sort((a, b) => a.localeCompare(b));
-}
-
-/**
  * Get the checksum for a specific project in the workspace
  */
 async function getChecksum(
@@ -224,10 +168,21 @@ async function getChecksum(
       })
   );
 
-  const deps = await resolveDepsForProject(project, yarnLock, kbn, log);
-  if (!deps) {
+  const depMap = resolveDepsForProject({
+    project,
+    yarnLock,
+    kbn,
+    log,
+    includeDependentProject: false,
+    productionDepsOnly: false,
+  });
+  if (!depMap) {
     return;
   }
+
+  const deps = Array.from(depMap.values())
+    .map(({ name, version }) => `${name}@${version}`)
+    .sort((a, b) => a.localeCompare(b));
 
   log.verbose(`[${project.name}] resolved %d deps`, deps.length);
 
@@ -256,10 +211,9 @@ async function getChecksum(
  *  - un-committed changes
  *  - resolved dependencies from yarn.lock referenced by project package.json
  */
-export async function getAllChecksums(kbn: Kibana, log: Log) {
+export async function getAllChecksums(kbn: Kibana, log: Log, yarnLock: YarnLock) {
   const projects = kbn.getAllProjects();
   const changesByProject = await getChangesForProjects(projects, kbn, log);
-  const yarnLock = await readYarnLock(kbn);
 
   /** map of [project.name, cacheKey] */
   const cacheKeys: ChecksumMap = new Map();

@@ -5,7 +5,7 @@
  */
 import { FtrProviderContext } from '../ftr_provider_context';
 import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/ingest_manager/server';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/fleet/server';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
@@ -28,6 +28,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
     loadTestFile(require.resolve('./resolver/index'));
     loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./metadata_v1'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./artifacts'));
     loadTestFile(require.resolve('./package'));

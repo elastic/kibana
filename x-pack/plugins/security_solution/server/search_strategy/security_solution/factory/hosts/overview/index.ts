@@ -8,7 +8,7 @@ import { get, getOr } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
-  HostOverviewStrategyResponse,
+  HostsOverviewStrategyResponse,
   HostsQueries,
   HostOverviewRequestOptions,
   OverviewHostHit,
@@ -22,7 +22,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
   parse: async (
     options: HostOverviewRequestOptions,
     response: IEsSearchResponse<OverviewHostHit>
-  ): Promise<HostOverviewStrategyResponse> => {
+  ): Promise<HostsOverviewStrategyResponse> => {
     const aggregations: OverviewHostHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewHostQuery(options))],
@@ -58,7 +58,7 @@ export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
         winlogbeatMWSysmonOperational: getOr(
           null,
           'winlog_module.mwsysmon_operational_event_count.doc_count',
-          response
+          aggregations
         ),
       },
     };

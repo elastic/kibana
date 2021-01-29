@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify, isBoom } from 'boom';
+import { boomify, isBoom } from '@hapi/boom';
 import { ResponseError, CustomHttpResponseOptions } from 'kibana/server';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
@@ -17,7 +17,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
       message: boom,
       ...(statusCode !== 500 && error.body ? { attributes: { body: error.body } } : {}),
     },
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode,
   };
 }

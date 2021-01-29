@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {

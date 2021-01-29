@@ -9,8 +9,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
-
 import {
   indexPatternTitleSchema,
   IndexPatternTitleSchema,
@@ -24,7 +22,7 @@ import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
-import { wrapError } from './error_utils';
+import { wrapError, wrapEsError } from './error_utils';
 
 export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
   router.post<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(

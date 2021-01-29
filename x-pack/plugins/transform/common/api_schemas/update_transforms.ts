@@ -8,12 +8,18 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TransformPivotConfig } from '../types/transform';
 
-import { destSchema, settingsSchema, sourceSchema, syncSchema } from './transforms';
+import { settingsSchema, sourceSchema, syncSchema } from './transforms';
 
 // POST _transform/{transform_id}/_update
 export const postTransformsUpdateRequestSchema = schema.object({
   description: schema.maybe(schema.string()),
-  dest: schema.maybe(destSchema),
+  // we cannot reuse `destSchema` because `index` is optional for the update request
+  dest: schema.maybe(
+    schema.object({
+      index: schema.string(),
+      pipeline: schema.maybe(schema.string()),
+    })
+  ),
   frequency: schema.maybe(schema.string()),
   settings: schema.maybe(settingsSchema),
   source: schema.maybe(sourceSchema),

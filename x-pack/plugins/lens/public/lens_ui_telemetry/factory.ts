@@ -86,7 +86,7 @@ export class LensReportManager {
     this.readFromStorage();
     if (Object.keys(this.events).length || Object.keys(this.suggestionEvents).length) {
       try {
-        await this.http.post(`${BASE_API_URL}/telemetry`, {
+        await this.http.post(`${BASE_API_URL}/stats`, {
           body: JSON.stringify({
             events: this.events,
             suggestionEvents: this.suggestionEvents,

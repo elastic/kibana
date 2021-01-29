@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { get } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,6 +30,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   Capabilities,
   FatalErrorsSetup,
@@ -38,7 +38,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
-import { ScopedHistory } from 'kibana/public';
+import type { DocLinksStart, ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
 import { KibanaFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -61,7 +61,6 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import { SecurityLicense } from '../../../../common/licensing';
 import { UserAPIClient } from '../../users';
-import { DocumentationLinksService } from '../documentation_links';
 import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
@@ -77,7 +76,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>;
   getFeatures: FeaturesPluginStart['getFeatures'];
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
   http: HttpStart;
   license: SecurityLicense;
   uiCapabilities: Capabilities;
@@ -408,7 +407,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRole({
       ...role,
-      name: e.target.value.replace(/\s/g, '_'),
+      name: e.target.value,
     });
 
   const getElasticsearchPrivileges = () => {
@@ -526,7 +525,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       try {
         await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
       } catch (error) {
-        notifications.toasts.addDanger(get(error, 'data.message'));
+        notifications.toasts.addDanger(
+          error?.body?.message ??
+            i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
+              defaultMessage: 'Error saving role',
+            })
+        );
         return;
       }
 
@@ -545,7 +549,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     try {
       await rolesAPIClient.deleteRole(role.name);
     } catch (error) {
-      notifications.toasts.addDanger(get(error, 'data.message'));
+      notifications.toasts.addDanger(
+        error?.data?.message ??
+          i18n.translate('xpack.security.management.editRole.errorDeletingRoleError', {
+            defaultMessage: 'Error deleting role',
+          })
+      );
       return;
     }
 

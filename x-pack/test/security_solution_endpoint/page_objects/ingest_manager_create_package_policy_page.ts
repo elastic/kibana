@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function IngestManagerCreatePackagePolicy({
   getService,
@@ -13,6 +14,7 @@ export function IngestManagerCreatePackagePolicy({
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
 
   return {
     /**
@@ -39,8 +41,10 @@ export function IngestManagerCreatePackagePolicy({
     /**
      * Finds and returns the save button on the sticky bottom bar
      */
-    async findDSaveButton() {
-      return await testSubjects.find('createPackagePolicySaveButton');
+    async findSaveButton(forEditPage: boolean = false) {
+      return await testSubjects.find(
+        forEditPage ? 'saveIntegration' : 'createPackagePolicySaveButton'
+      );
     },
 
     /**
@@ -78,11 +82,22 @@ export function IngestManagerCreatePackagePolicy({
       await testSubjects.setValue('packagePolicyNameInput', name);
     },
 
+    async getPackagePolicyDescriptionValue() {
+      return await testSubjects.getAttribute('packagePolicyDescriptionInput', 'value');
+    },
+
+    async setPackagePolicyDescription(desc: string) {
+      await this.scrollToCenterOfWindow('packagePolicyDescriptionInput');
+      await testSubjects.setValue('packagePolicyDescriptionInput', desc);
+    },
+
     /**
      * Waits for the save Notification toast to be visible
      */
-    async waitForSaveSuccessNotification() {
-      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+    async waitForSaveSuccessNotification(forEditPage: boolean = false) {
+      await testSubjects.existOrFail(
+        forEditPage ? 'policyUpdateSuccessToast' : 'packagePolicyCreateSuccessToast'
+      );
     },
 
     /**
@@ -96,10 +111,45 @@ export function IngestManagerCreatePackagePolicy({
      * Navigates to the Ingest Agent configuration Edit Package Policy page
      */
     async navigateToAgentPolicyEditPackagePolicy(agentPolicyId: string, packagePolicyId: string) {
-      await pageObjects.common.navigateToApp('ingestManager', {
+      await pageObjects.common.navigateToApp('fleet', {
         hash: `/policies/${agentPolicyId}/edit-integration/${packagePolicyId}`,
       });
       await this.ensureOnEditPageOrFail();
+    },
+
+    /**
+     * Returns the Endpoint Callout that is displayed on the Integration Policy create/edit pages
+     */
+    async findEndpointActionsButton() {
+      const button = await testSubjects.find('endpointActions');
+      await this.scrollToCenterOfWindow(button);
+      return button;
+    },
+
+    /**
+     * Center a given Element on the Window viewport
+     * @param element   if defined as a string, it should be the test subject to find
+     */
+    async scrollToCenterOfWindow(element: WebElementWrapper | string) {
+      const ele = typeof element === 'string' ? await testSubjects.find(element) : element;
+
+      const [elementPosition, windowSize] = await Promise.all([
+        ele.getPosition(),
+        browser.getWindowSize(),
+      ]);
+      await browser.execute(
+        `document.scrollingElement.scrollTop = ${elementPosition.y - windowSize.height / 2}`
+      );
+    },
+
+    /**
+     * Will click on the given Endpoint Action (from the Actions dropdown)
+     * @param action
+     */
+    async selectEndpointAction(action: 'policy' | 'trustedApps') {
+      await (await this.findEndpointActionsButton()).click();
+      const testSubjId = action === 'policy' ? 'securityPolicy' : 'trustedAppsAction';
+      await (await testSubjects.find(testSubjId)).click();
     },
   };
 }

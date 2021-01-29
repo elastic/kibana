@@ -36,7 +36,7 @@ export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: 
   };
 }
 
-const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
+export const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
 // Finds datasets related to ML job ids
 export async function getLogEntryDatasets(
@@ -62,7 +62,8 @@ export async function getLogEntryDatasets(
           endTime,
           COMPOSITE_AGGREGATION_BATCH_SIZE,
           afterLatestBatchKey
-        )
+        ),
+        jobIds
       )
     );
 

@@ -8,10 +8,10 @@ import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/dat
 
 import {
   Direction,
-  NetworkUsersRequestOptions,
+  FlowTarget,
   NetworkQueries,
   NetworkUsersFields,
-  FlowTarget,
+  NetworkUsersRequestOptions,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkUsersRequestOptions = {
@@ -115,7 +115,56 @@ export const formattedSearchStrategyResponse = {
   ],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "user_count": {\n        "cardinality": {\n          "field": "user.name"\n        }\n      },\n      "users": {\n        "terms": {\n          "field": "user.name",\n          "size": 10,\n          "order": {\n            "_key": "asc"\n          }\n        },\n        "aggs": {\n          "id": {\n            "terms": {\n              "field": "user.id"\n            }\n          },\n          "groupId": {\n            "terms": {\n              "field": "user.group.id"\n            }\n          },\n          "groupName": {\n            "terms": {\n              "field": "user.group.name"\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-13T10:16:46.870Z",\n                "lte": "2020-09-14T10:16:46.870Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          },\n          {\n            "term": {\n              "source.ip": "10.142.0.7"\n            }\n          }\n        ],\n        "must_not": [\n          {\n            "term": {\n              "event.category": "authentication"\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggs: {
+              user_count: { cardinality: { field: 'user.name' } },
+              users: {
+                terms: { field: 'user.name', size: 10, order: { _key: 'asc' } },
+                aggs: {
+                  id: { terms: { field: 'user.id' } },
+                  groupId: { terms: { field: 'user.group.id' } },
+                  groupName: { terms: { field: 'user.group.name' } },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T10:16:46.870Z',
+                        lte: '2020-09-14T10:16:46.870Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  { term: { 'source.ip': '10.142.0.7' } },
+                ],
+                must_not: [{ term: { 'event.category': 'authentication' } }],
+              },
+            },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: { activePage: 0, fakeTotalCount: 3, showMorePagesIndicator: false },
@@ -139,7 +188,7 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
           {
             range: {
               '@timestamp': {

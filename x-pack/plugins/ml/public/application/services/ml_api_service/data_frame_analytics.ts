@@ -13,7 +13,10 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
-import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
+import {
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  AnalyticsMapReturnType,
+} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -41,6 +44,11 @@ interface DeleteDataFrameAnalyticsWithIndexResponse {
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+}
+interface JobsExistsResponse {
+  results: {
+    [jobId: string]: boolean;
+  };
 }
 
 export const dataFrameAnalytics = {
@@ -79,6 +87,26 @@ export const dataFrameAnalytics = {
     const body = JSON.stringify(updateConfig);
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      method: 'POST',
+      body,
+    });
+  },
+  getDataFrameAnalyticsMap(
+    id: string,
+    treatAsRoot: boolean,
+    type?: string
+  ): Promise<AnalyticsMapReturnType> {
+    const idString = id !== undefined ? `/${id}` : '';
+    return http({
+      path: `${basePath()}/data_frame/analytics/map${idString}`,
+      method: 'GET',
+      query: { treatAsRoot, type },
+    });
+  },
+  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ analyticsIds, allSpaces });
+    return http<JobsExistsResponse>({
+      path: `${basePath()}/data_frame/analytics/jobs_exist`,
       method: 'POST',
       body,
     });
@@ -133,12 +161,6 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
-    });
-  },
-  getAnalyticsBaseline(analyticsId: string) {
-    return http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/baseline`,
-      method: 'POST',
     });
   },
 };

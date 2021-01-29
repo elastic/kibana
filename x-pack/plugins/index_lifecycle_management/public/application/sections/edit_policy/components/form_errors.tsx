@@ -9,7 +9,7 @@ import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 
 type Props = EuiFormRowProps & {
   isShowingErrors: boolean;
-  errors?: string[];
+  errors?: string | string[] | null;
 };
 
 export const ErrableFormRow: React.FunctionComponent<Props> = ({
@@ -18,8 +18,13 @@ export const ErrableFormRow: React.FunctionComponent<Props> = ({
   children,
   ...rest
 }) => {
+  const _errors = errors ? (Array.isArray(errors) ? errors : [errors]) : undefined;
   return (
-    <EuiFormRow isInvalid={errors && isShowingErrors && errors.length > 0} error={errors} {...rest}>
+    <EuiFormRow
+      isInvalid={isShowingErrors || (_errors && _errors.length > 0)}
+      error={errors}
+      {...rest}
+    >
       <Fragment>
         {Children.map(children, (child) =>
           cloneElement(child as ReactElement, {

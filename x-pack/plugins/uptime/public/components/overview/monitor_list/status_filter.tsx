@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFilterGroup } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
 import { useGetUrlParams } from '../../../hooks';
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../common/translations';
 
 export const StatusFilter: React.FC = () => {
   const { statusFilter } = useGetUrlParams();
@@ -28,18 +29,14 @@ export const StatusFilter: React.FC = () => {
         isActive={statusFilter === ''}
       />
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-          defaultMessage: 'Up',
-        })}
+        content={STATUS_UP_LABEL}
         dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
         isActive={statusFilter === 'up'}
       />
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
-          defaultMessage: 'Down',
-        })}
+        content={STATUS_DOWN_LABEL}
         dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}

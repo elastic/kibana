@@ -1,6 +1,5 @@
 {
   "list_id": "simple_list",
-  "_tags": ["endpoint", "process", "malware", "os:linux"],
   "tags": ["user added string for a tag", "malware"],
   "type": "detection",
   "description": "This is a sample endpoint type exception",

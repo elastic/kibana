@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 
 type Schema = PublicMethodsOf<AlertNavigationRegistry>;

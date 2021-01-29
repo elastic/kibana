@@ -27,10 +27,12 @@ const FileDetails = styled.div`
 
 const LibraryFrameFileDetail = styled.span`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  word-break: break-word;
 `;
 
 const AppFrameFileDetail = styled.span`
   color: ${({ theme }) => theme.eui.euiColorFullShade};
+  word-break: break-word;
 `;
 
 interface Props {

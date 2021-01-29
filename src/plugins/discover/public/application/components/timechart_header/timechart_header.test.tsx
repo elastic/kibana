@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
 import { EuiIconTip } from '@elastic/eui';
@@ -29,8 +19,10 @@ describe('timechart header', function () {
 
   beforeAll(() => {
     props = {
-      from: 'May 14, 2020 @ 11:05:13.590',
-      to: 'May 14, 2020 @ 11:20:13.590',
+      timeRange: {
+        from: 'May 14, 2020 @ 11:05:13.590',
+        to: 'May 14, 2020 @ 11:20:13.590',
+      },
       stateInterval: 's',
       options: [
         {
@@ -47,9 +39,11 @@ describe('timechart header', function () {
         },
       ],
       onChangeInterval: jest.fn(),
-      showScaledInfo: undefined,
-      bucketIntervalDescription: 'second',
-      bucketIntervalScale: undefined,
+      bucketInterval: {
+        scaled: undefined,
+        description: 'second',
+        scale: undefined,
+      },
     };
   });
 
@@ -58,8 +52,8 @@ describe('timechart header', function () {
     expect(component.find(EuiIconTip).length).toBe(0);
   });
 
-  it('TimechartHeader renders an info text by providing the showScaledInfo property', () => {
-    props.showScaledInfo = true;
+  it('TimechartHeader renders an info when bucketInterval.scale is set to true', () => {
+    props.bucketInterval!.scaled = true;
     component = mountWithIntl(<TimechartHeader {...props} />);
     expect(component.find(EuiIconTip).length).toBe(1);
   });

@@ -6,6 +6,7 @@
 
 import React, { useEffect, useState, FC } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { parse } from 'query-string';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,14 +30,16 @@ import { useApi } from '../../hooks/use_api';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 
-import { useAppDependencies } from '../../app_dependencies';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { PrivilegesWrapper } from '../../lib/authorization';
 
 import { Wizard } from '../create_transform/components/wizard';
 
 type Props = RouteComponentProps<{ transformId: string }>;
-export const CloneTransformSection: FC<Props> = ({ match }) => {
+export const CloneTransformSection: FC<Props> = ({ match, location }) => {
+  const { indexPatternId }: Record<string, any> = parse(location.search, {
+    sort: false,
+  });
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CLONE_TRANSFORM);
@@ -45,10 +48,6 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
 
   const api = useApi();
 
-  const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const indexPatterns = appDeps.data.indexPatterns;
-
   const { esTransform } = useDocumentationLinks();
 
   const transformId = match.params.transformId;
@@ -56,12 +55,7 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
   const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const {
-    getIndexPatternIdByTitle,
-    loadIndexPatterns,
-    searchItems,
-    setSavedObjectId,
-  } = useSearchItems(undefined);
+  const { searchItems, setSavedObjectId } = useSearchItems(undefined);
 
   const fetchTransformConfig = async () => {
     const transformConfigs = await api.getTransform(transformId);
@@ -73,15 +67,9 @@ export const CloneTransformSection: FC<Props> = ({ match }) => {
     }
 
     try {
-      await loadIndexPatterns(savedObjectsClient, indexPatterns);
-      const indexPatternTitle = Array.isArray(transformConfigs.transforms[0].source.index)
-        ? transformConfigs.transforms[0].source.index.join(',')
-        : transformConfigs.transforms[0].source.index;
-      const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
-
       if (indexPatternId === undefined) {
         throw new Error(
-          i18n.translate('xpack.transform.clone.errorPromptText', {
+          i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
             defaultMessage: 'Could not fetch the Kibana index pattern ID.',
           })
         );

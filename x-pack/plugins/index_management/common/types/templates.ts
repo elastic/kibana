@@ -13,7 +13,7 @@ import { Mappings } from './mappings';
  */
 export interface TemplateSerialized {
   index_patterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
@@ -33,7 +33,7 @@ export interface TemplateSerialized {
 export interface TemplateDeserialized {
   name: string;
   indexPatterns: string[];
-  template: {
+  template?: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
@@ -46,7 +46,11 @@ export interface TemplateDeserialized {
     name: string;
   };
   _meta?: { [key: string]: any }; // Composable template only
-  dataStream?: {}; // Composable template only
+  // Composable template only
+  dataStream?: {
+    hidden?: boolean;
+    [key: string]: any;
+  };
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

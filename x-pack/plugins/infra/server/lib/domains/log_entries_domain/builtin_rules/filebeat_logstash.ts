@@ -34,7 +34,7 @@ export const filebeatLogstashRules = [
   {
     // ECS
     when: {
-      exists: ['ecs.version', 'logstash.slowlog'],
+      all: [{ exists: ['ecs.version'] }, { existsPrefix: ['logstash.slowlog'] }],
     },
     format: [
       {
@@ -47,7 +47,7 @@ export const filebeatLogstashRules = [
         constant: '] ',
       },
       {
-        field: 'logstash.slowlog',
+        fieldsPrefix: 'logstash.slowlog',
       },
     ],
   },

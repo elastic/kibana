@@ -44,7 +44,10 @@ export const datasourceSaga = ({
       yield put(setDatasource({ type: 'none' }));
       notifications.toasts.addDanger(
         i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern not found',
+          defaultMessage: 'Index pattern "{name}" not found',
+          values: {
+            name: action.payload.title,
+          },
         })
       );
     }

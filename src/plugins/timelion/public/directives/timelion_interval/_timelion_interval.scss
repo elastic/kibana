@@ -4,6 +4,12 @@ timelion-interval {
 
 .timInterval__input {
   width: $euiSizeXL * 2;
+  padding: $euiSizeXS $euiSizeM;
+  color: $euiColorDarkestShade;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  transition: border-color .1s linear;
+  font-size: 14px;
 }
 
 .timInterval__input--compact {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, ActionConnector } from '../../types';
+import { ActionType, PreConfiguredActionConnector } from '../../types';
 import {
   checkActionTypeEnabled,
   checkActionFormActionTypeEnabled,
@@ -93,23 +93,19 @@ describe('checkActionTypeEnabled', () => {
 });
 
 describe('checkActionFormActionTypeEnabled', () => {
-  const preconfiguredConnectors: ActionConnector[] = [
+  const preconfiguredConnectors: PreConfiguredActionConnector[] = [
     {
       actionTypeId: '1',
-      config: {},
       id: 'test1',
       isPreconfigured: true,
       name: 'test',
-      secrets: {},
       referencedByCount: 0,
     },
     {
       actionTypeId: '2',
-      config: {},
       id: 'test2',
       isPreconfigured: true,
       name: 'test',
-      secrets: {},
       referencedByCount: 0,
     },
   ];

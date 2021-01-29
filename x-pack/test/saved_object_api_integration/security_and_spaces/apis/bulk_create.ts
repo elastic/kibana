@@ -26,13 +26,24 @@ const unresolvableConflict = (condition?: boolean) =>
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
+  const expectedNamespaces = [spaceId]; // newly created objects should have this `namespaces` array in their return value
   const normalTypes = [
     {
       ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
       ...fail409(!overwrite && spaceId === DEFAULT_SPACE_ID),
+      expectedNamespaces,
     },
-    { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail409(!overwrite && spaceId === SPACE_1_ID) },
-    { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail409(!overwrite && spaceId === SPACE_2_ID) },
+    {
+      ...CASES.SINGLE_NAMESPACE_SPACE_1,
+      ...fail409(!overwrite && spaceId === SPACE_1_ID),
+      expectedNamespaces,
+    },
+    {
+      ...CASES.SINGLE_NAMESPACE_SPACE_2,
+      ...fail409(!overwrite && spaceId === SPACE_2_ID),
+      expectedNamespaces,
+    },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite || (spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID)),
@@ -49,13 +60,14 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...unresolvableConflict(spaceId !== SPACE_2_ID),
     },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
-    CASES.NEW_SINGLE_NAMESPACE_OBJ,
-    CASES.NEW_MULTI_NAMESPACE_OBJ,
+    { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
+    { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
   ];
+  const crossNamespace = [CASES.NEW_EACH_SPACE_OBJ, CASES.NEW_ALL_SPACES_OBJ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(hiddenType);
-  return { normalTypes, hiddenType, allTypes };
+  return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -63,27 +75,48 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
-  const createTests = (overwrite: boolean, spaceId: string) => {
-    const { normalTypes, hiddenType, allTypes } = createTestCases(overwrite, spaceId);
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
+  const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
+    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
+      overwrite,
+      spaceId
+    );
     // use singleRequest to reduce execution time and/or test combined cases
+    const authorizedCommon = [
+      createTestDefinitions(normalTypes, false, overwrite, {
+        spaceId,
+        user,
+        singleRequest: true,
+      }),
+      createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
+      createTestDefinitions(allTypes, true, overwrite, {
+        spaceId,
+        user,
+        singleRequest: true,
+        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
+      }),
+    ].flat();
     return {
-      unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId }),
-      authorized: [
-        createTestDefinitions(normalTypes, false, overwrite, { spaceId, singleRequest: true }),
-        createTestDefinitions(hiddenType, true, overwrite, { spaceId }),
-        createTestDefinitions(allTypes, true, overwrite, {
+      unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
+      authorizedAtSpace: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
+      ].flat(),
+      authorizedEverywhere: [
+        authorizedCommon,
+        createTestDefinitions(crossNamespace, false, overwrite, {
           spaceId,
+          user,
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, {
         spaceId,
+        user,
         singleRequest: true,
       }),
     };
@@ -93,7 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
     getTestScenarios([false, true]).securityAndSpaces.forEach(
       ({ spaceId, users, modifier: overwrite }) => {
         const suffix = ` within the ${spaceId} space${overwrite ? ' with overwrite enabled' : ''}`;
-        const { unauthorized, authorized, superuser } = createTests(overwrite!, spaceId);
         const _addTests = (user: TestUser, tests: BulkCreateTestDefinition[]) => {
           addTests(`${user.description}${suffix}`, { user, spaceId, tests });
         };
@@ -106,11 +138,19 @@ export default function ({ getService }: FtrProviderContext) {
           users.readAtSpace,
           users.allAtOtherSpace,
         ].forEach((user) => {
+          const { unauthorized } = createTests(overwrite!, spaceId, user);
           _addTests(user, unauthorized);
         });
-        [users.dualAll, users.allGlobally, users.allAtSpace].forEach((user) => {
-          _addTests(user, authorized);
+
+        const { authorizedAtSpace } = createTests(overwrite!, spaceId, users.allAtSpace);
+        _addTests(users.allAtSpace, authorizedAtSpace);
+
+        [users.dualAll, users.allGlobally].forEach((user) => {
+          const { authorizedEverywhere } = createTests(overwrite!, spaceId, user);
+          _addTests(user, authorizedEverywhere);
         });
+
+        const { superuser } = createTests(overwrite!, spaceId, users.superuser);
         _addTests(users.superuser, superuser);
       }
     );

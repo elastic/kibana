@@ -1,58 +1,52 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { RuntimeField } from '../types';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { IFieldType } from './types';
+import type { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
-import { FieldTypeUnknownError } from '../errors';
+import { shortenDottedString } from '../../utils';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(spec: FieldSpec, displayName: string) {
+  constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
-    this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
-    if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const msg = i18n.translate('data.indexPatterns.unknownFieldTypeErrorMsg', {
-        values: { type: spec.type, name: spec.name },
-        defaultMessage: `Field '{name}' Unknown field type '{type}'`,
-      });
-      throw new FieldTypeUnknownError(msg, spec);
-    }
   }
 
   // writable attrs
+  /**
+   * Count is used for field popularity
+   */
   public get count() {
     return this.spec.count || 0;
   }
 
-  public set count(count) {
+  public set count(count: number) {
     this.spec.count = count;
   }
 
+  public get runtimeField() {
+    return this.spec.runtimeField;
+  }
+
+  public set runtimeField(runtimeField: RuntimeField | undefined) {
+    this.spec.runtimeField = runtimeField;
+  }
+
+  /**
+   * Script field code
+   */
   public get script() {
     return this.spec.script;
   }
@@ -61,6 +55,9 @@ export class IndexPatternField implements IFieldType {
     this.spec.script = script;
   }
 
+  /**
+   * Script field language
+   */
   public get lang() {
     return this.spec.lang;
   }
@@ -69,6 +66,17 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  public get customLabel() {
+    return this.spec.customLabel;
+  }
+
+  public set customLabel(customLabel) {
+    this.spec.customLabel = customLabel;
+  }
+
+  /**
+   * Description of field type conflicts across different indices in the same index pattern
+   */
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }
@@ -80,6 +88,14 @@ export class IndexPatternField implements IFieldType {
   // read only attrs
   public get name() {
     return this.spec.name;
+  }
+
+  public get displayName(): string {
+    return this.spec.customLabel
+      ? this.spec.customLabel
+      : this.spec.shortDotsEnable
+      ? shortenDottedString(this.spec.name)
+      : this.spec.name;
   }
 
   public get type() {
@@ -110,6 +126,13 @@ export class IndexPatternField implements IFieldType {
     return this.spec.subType;
   }
 
+  /**
+   * Is the field part of the index mapping?
+   */
+  public get isMapped() {
+    return this.spec.isMapped;
+  }
+
   // not writable, not serialized
   public get sortable() {
     return (
@@ -127,7 +150,12 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get visualizable() {
-    return this.aggregatable;
+    const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
+    return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
+  }
+
+  public deleteCount() {
+    delete this.spec.count;
   }
 
   public toJSON() {
@@ -136,7 +164,6 @@ export class IndexPatternField implements IFieldType {
       script: this.script,
       lang: this.lang,
       conflictDescriptions: this.conflictDescriptions,
-
       name: this.name,
       type: this.type,
       esTypes: this.esTypes,
@@ -145,6 +172,7 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      customLabel: this.customLabel,
     };
   }
 
@@ -152,7 +180,7 @@ export class IndexPatternField implements IFieldType {
     getFormatterForField,
   }: {
     getFormatterForField?: IndexPattern['getFormatterForField'];
-  } = {}) {
+  } = {}): FieldSpec {
     return {
       count: this.count,
       script: this.script,
@@ -167,6 +195,10 @@ export class IndexPatternField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
+      customLabel: this.customLabel,
+      shortDotsEnable: this.spec.shortDotsEnable,
+      runtimeField: this.runtimeField,
+      isMapped: this.isMapped,
     };
   }
 }

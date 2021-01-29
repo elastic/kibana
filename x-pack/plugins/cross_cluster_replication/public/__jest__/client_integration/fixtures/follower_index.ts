@@ -5,7 +5,7 @@
  */
 
 import Chance from 'chance';
-import { getRandomString } from '../../../../../../test_utils';
+import { getRandomString } from '@kbn/test/jest';
 import { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();

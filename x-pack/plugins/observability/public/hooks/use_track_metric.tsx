@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityApp } from '../../typings/common';
@@ -20,7 +20,7 @@ import { ObservabilityApp } from '../../typings/common';
 
 interface TrackOptions {
   app?: ObservabilityApp;
-  metricType?: UiStatsMetricType;
+  metricType?: UiCounterMetricType;
   delay?: number; // in ms
 }
 type EffectDeps = unknown[];
@@ -37,14 +37,14 @@ export { METRIC_TYPE };
 export function useUiTracker<Services extends ServiceDeps>({
   app: defaultApp,
 }: { app?: ObservabilityApp } = {}) {
-  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
+  const reportUiCounter = useKibana<Services>().services?.usageCollection?.reportUiCounter;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {
-      if (reportUiStats) {
-        reportUiStats(app as string, metricType, metric);
+      if (reportUiCounter) {
+        reportUiCounter(app as string, metricType, metric);
       }
     };
-  }, [defaultApp, reportUiStats]);
+  }, [defaultApp, reportUiCounter]);
   return trackEvent;
 }
 
@@ -52,13 +52,13 @@ export function useTrackMetric<Services extends ServiceDeps>(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
-  const reportUiStats = useKibana<Services>().services?.usageCollection?.reportUiStats;
+  const reportUiCounter = useKibana<Services>().services?.usageCollection?.reportUiCounter;
 
   useEffect(() => {
-    if (!reportUiStats) {
+    if (!reportUiCounter) {
       // eslint-disable-next-line no-console
       console.log(
-        'usageCollection.reportUiStats is unavailable. Ensure this is setup via <KibanaContextProvider />.'
+        'usageCollection.reportUiCounter is unavailable. Ensure this is setup via <KibanaContextProvider />.'
       );
     } else {
       let decoratedMetric = metric;
@@ -66,7 +66,7 @@ export function useTrackMetric<Services extends ServiceDeps>(
         decoratedMetric += `__delayed_${delay}ms`;
       }
       const id = setTimeout(
-        () => reportUiStats(app as string, metricType, decoratedMetric),
+        () => reportUiCounter(app as string, metricType, decoratedMetric),
         Math.max(delay, 0)
       );
       return () => clearTimeout(id);

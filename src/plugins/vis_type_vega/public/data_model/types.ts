@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { SearchResponse, SearchParams } from 'elasticsearch';
@@ -43,10 +32,17 @@ interface Encoding {
   y: Coordinate;
 }
 
-interface AutoSize {
-  type: string;
-  contains: string;
-}
+type AutoSize =
+  | 'pad'
+  | 'fit'
+  | 'fit-x'
+  | 'fit-y'
+  | 'none'
+  | {
+      type: string;
+      contains: string;
+    }
+  | { signal: string };
 
 interface Padding {
   left: number;
@@ -75,8 +71,9 @@ interface Projection {
   name: string;
 }
 
-interface RequestDataObject {
+interface RequestDataObject<TUrlData = UrlObject> {
   name?: string;
+  url?: TUrlData;
   values: SearchResponse<unknown>;
 }
 
@@ -105,8 +102,8 @@ export interface VegaSpec {
   title?: string;
   autosize?: AutoSize;
   projections?: Projection[];
-  width?: number;
-  height?: number;
+  width?: number | 'container';
+  height?: number | 'container';
   padding?: number | Padding;
   _hostConfig?: KibanaConfig;
   config: VegaSpecConfig;
@@ -179,7 +176,7 @@ export interface CacheBounds {
   max: number;
 }
 
-interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject> {
+interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<TUrlData>> {
   url: TUrlData;
   name: string;
   dataObject: TRequestDataObject;
@@ -200,6 +197,7 @@ export interface TooltipConfig {
   position?: ToolTipPositions;
   padding?: number | Padding;
   centerOnMark?: boolean | number;
+  textTruncate?: boolean;
 }
 
 export interface DstObj {

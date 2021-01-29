@@ -10,7 +10,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -25,27 +24,27 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
-import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const calendarListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const calendarListRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/settings/calendars_list',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
-    {
-      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-        defaultMessage: 'Calendar management',
-      }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list', navigateToPath),
-    },
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB', navigateToPath, basePath),
   ],
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { redirectToMlAccessDeniedPage } = deps;
+
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,
   });
 

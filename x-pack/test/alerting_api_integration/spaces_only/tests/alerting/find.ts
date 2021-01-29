@@ -52,10 +52,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
+        notifyWhen: 'onThrottleInterval',
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: match.createdAt,
         updatedAt: match.updatedAt,
+        executionStatus: match.executionStatus,
       });
       expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);

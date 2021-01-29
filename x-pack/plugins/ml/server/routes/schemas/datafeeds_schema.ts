@@ -31,6 +31,7 @@ export const datafeedConfigSchema = schema.object({
   max_empty_searches: schema.maybe(schema.number()),
   query_delay: schema.maybe(schema.string()),
   script_fields: schema.maybe(schema.any()),
+  runtime_mappings: schema.maybe(schema.any()),
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
   indices_options: schema.maybe(

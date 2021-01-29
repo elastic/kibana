@@ -5,10 +5,13 @@
  */
 
 import React, { FC } from 'react';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 export const LoadingPanel: FC = () => (
-  <EuiPanel className="eui-textCenter">
-    <EuiLoadingSpinner size="xl" />
-  </EuiPanel>
+  <>
+    <EuiPanel className="eui-textCenter">
+      <EuiLoadingSpinner size="xl" />
+    </EuiPanel>
+    <EuiSpacer size="m" />
+  </>
 );

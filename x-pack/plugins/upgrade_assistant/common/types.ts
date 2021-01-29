@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
 export enum ReindexStep {
@@ -164,6 +163,23 @@ export interface UpgradeAssistantTelemetrySavedObjectAttributes {
   [key: string]: any;
 }
 
+export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+export interface DeprecationInfo {
+  level: MIGRATION_DEPRECATION_LEVEL;
+  message: string;
+  url: string;
+  details?: string;
+}
+
+export interface IndexSettingsDeprecationInfo {
+  [indexName: string]: DeprecationInfo[];
+}
+export interface DeprecationAPIResponse {
+  cluster_settings: DeprecationInfo[];
+  ml_settings: DeprecationInfo[];
+  node_settings: DeprecationInfo[];
+  index_settings: IndexSettingsDeprecationInfo;
+}
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;

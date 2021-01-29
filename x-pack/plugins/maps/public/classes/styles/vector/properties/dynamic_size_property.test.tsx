@@ -15,11 +15,11 @@ import { shallow } from 'enzyme';
 
 // @ts-ignore
 import { DynamicSizeProperty } from './dynamic_size_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
 import { Map as MbMap } from 'mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
-import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 export class MockMbMap {
@@ -48,7 +48,7 @@ const makeProperty = (
     field,
     (new MockLayer(mockStyle) as unknown) as IVectorLayer,
     () => {
-      return (value: string | number | undefined) => value + '_format';
+      return (value: RawValue) => value + '_format';
     },
     false
   );

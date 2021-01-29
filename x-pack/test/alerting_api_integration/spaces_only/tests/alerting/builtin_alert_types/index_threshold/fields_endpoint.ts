@@ -10,7 +10,7 @@ import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
 
-const API_URI = 'api/alerting_builtins/index_threshold/_fields';
+const API_URI = 'api/triggers_actions_ui/data/_fields';
 
 // eslint-disable-next-line import/no-default-export
 export default function fieldsEndpointTests({ getService }: FtrProviderContext) {

@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeFilter } from '../../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
   serviceName,
@@ -26,13 +22,13 @@ export async function getBuckets({
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES,
+    ...esFilter,
   ];
 
   if (groupId) {
@@ -77,6 +73,6 @@ export async function getBuckets({
 
   return {
     noHits: resp.hits.total.value === 0,
-    buckets,
+    buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }

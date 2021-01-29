@@ -6,10 +6,12 @@
 
 import { createAlertRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { Alert } from '../../common/alert';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
 
 const alertsClient = alertsClientMock.create();
 
@@ -35,6 +37,7 @@ describe('createAlertRoute', () => {
       bar: true,
     },
     throttle: '30s',
+    notifyWhen: 'onActionGroupChange',
     actions: [
       {
         group: 'default',
@@ -46,7 +49,7 @@ describe('createAlertRoute', () => {
     ],
   };
 
-  const createResult = {
+  const createResult: Alert<{ bar: boolean }> = {
     ...mockedAlert,
     enabled: true,
     muteAll: false,
@@ -55,6 +58,7 @@ describe('createAlertRoute', () => {
     apiKey: '',
     apiKeyOwner: '',
     mutedInstanceIds: [],
+    notifyWhen: 'onActionGroupChange',
     createdAt,
     updatedAt,
     id: '123',
@@ -64,10 +68,14 @@ describe('createAlertRoute', () => {
         actionTypeId: 'test',
       },
     ],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
   };
 
   it('creates an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     createAlertRoute(router, licenseState);
@@ -105,6 +113,7 @@ describe('createAlertRoute', () => {
             "alertTypeId": "1",
             "consumer": "bar",
             "name": "abc",
+            "notifyWhen": "onActionGroupChange",
             "params": Object {
               "bar": true,
             },
@@ -126,7 +135,7 @@ describe('createAlertRoute', () => {
   });
 
   it('ensures the license allows creating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     createAlertRoute(router, licenseState);
@@ -143,7 +152,7 @@ describe('createAlertRoute', () => {
   });
 
   it('ensures the license check prevents creating alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
@@ -161,5 +170,22 @@ describe('createAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the alert type gets validated for the license', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createAlertRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    alertsClient.create.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {}, ['ok', 'forbidden']);
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

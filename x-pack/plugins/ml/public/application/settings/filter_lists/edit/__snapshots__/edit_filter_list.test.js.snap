@@ -80,6 +80,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -93,6 +94,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -108,6 +110,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -193,6 +198,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -206,6 +212,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -221,6 +228,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -301,6 +311,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -314,6 +325,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -329,6 +341,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -393,6 +408,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -406,6 +422,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={true}
               fill={true}
               onClick={[Function]}
@@ -421,6 +438,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -485,6 +505,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -498,6 +519,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -513,6 +535,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -594,6 +619,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -607,6 +633,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -622,6 +649,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -703,6 +733,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -716,6 +747,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -731,6 +763,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
 
@@ -812,6 +847,7 @@ exports[`EditFilterList updates the items per page 1`] = `
             grow={false}
           >
             <EuiButtonEmpty
+              data-test-subj="mlFilterListCancelButton"
               onClick={[Function]}
             >
               <FormattedMessage
@@ -825,6 +861,7 @@ exports[`EditFilterList updates the items per page 1`] = `
             grow={false}
           >
             <EuiButton
+              data-test-subj="mlFilterListSaveButton"
               disabled={false}
               fill={true}
               onClick={[Function]}
@@ -840,5 +877,8 @@ exports[`EditFilterList updates the items per page 1`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;

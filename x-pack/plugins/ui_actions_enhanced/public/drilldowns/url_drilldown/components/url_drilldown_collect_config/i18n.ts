@@ -19,7 +19,8 @@ export const txtUrlTemplatePlaceholder = i18n.translate(
 export const txtUrlPreviewHelpText = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlPreviewHelpText',
   {
-    defaultMessage: 'Please note that \\{\\{event.*\\}\\} variables replaced by dummy values.',
+    defaultMessage:
+      'Please note that in preview \\{\\{event.*\\}\\} variables are substituted with dummy values.',
   }
 );
 
@@ -33,7 +34,7 @@ export const txtAddVariableButtonTitle = i18n.translate(
 export const txtUrlTemplateLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateLabel',
   {
-    defaultMessage: 'Enter URL template:',
+    defaultMessage: 'Enter URL:',
   }
 );
 
@@ -75,6 +76,27 @@ export const txtUrlTemplatePreviewLinkText = i18n.translate(
 export const txtUrlTemplateOpenInNewTab = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.openInNewTabLabel',
   {
-    defaultMessage: 'Open in new tab',
+    defaultMessage: 'Open in new window',
+  }
+);
+
+export const txtUrlTemplateAdditionalOptions = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.additionalOptions',
+  {
+    defaultMessage: 'Additional options',
+  }
+);
+
+export const txtUrlTemplateEncodeUrl = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeUrl',
+  {
+    defaultMessage: 'Encode URL',
+  }
+);
+
+export const txtUrlTemplateEncodeDescription = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.encodeDescription',
+  {
+    defaultMessage: 'If enabled, URL will be escaped using percent encoding',
   }
 );

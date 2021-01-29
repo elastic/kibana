@@ -28,7 +28,7 @@ import {
   SeverityOrUndefined,
   TagsOrUndefined,
   ToOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
@@ -39,9 +39,19 @@ import {
   RuleNameOverrideOrUndefined,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types';
+import {
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+  ListArrayOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatIndexOrUndefined,
+  ThreatLanguageOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatQueryOrUndefined,
+} from '../../../../common/detection_engine/schemas/types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -60,6 +70,7 @@ export interface UpdateProperties {
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -82,8 +93,15 @@ export interface UpdateProperties {
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
@@ -118,15 +136,16 @@ export const calculateVersion = (
   // the version number if only the enabled/disabled flag is being set. Likewise if we get other
   // properties we are not expecting such as updatedAt we do not to cause a version number bump
   // on that either.
-  const removedNullValues = pickBy<UpdateProperties>(
-    (value: unknown) => value != null,
-    updateProperties
-  );
+  const removedNullValues = removeUndefined(updateProperties);
   if (isEmpty(removedNullValues)) {
     return currentVersion;
   } else {
     return currentVersion + 1;
   }
+};
+
+export const removeUndefined = (obj: object) => {
+  return pickBy((value: unknown) => value != null, obj);
 };
 
 export const calculateName = ({

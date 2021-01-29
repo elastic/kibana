@@ -6,7 +6,7 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
 import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
@@ -191,7 +191,7 @@ describe('manifest_manager', () => {
       expect(packagePolicyService.update.mock.calls.length).toEqual(2);
 
       expect(
-        packagePolicyService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+        packagePolicyService.update.mock.calls[0][3].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: '1.0.1',
         schema_version: 'v1',
@@ -271,7 +271,9 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can commit manifest', async () => {
-      const savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create> = savedObjectsClientMock.create();
+      const savedObjectsClient: ReturnType<
+        typeof savedObjectsClientMock.create
+      > = savedObjectsClientMock.create();
       const manifestManager = getManifestManagerMock({
         savedObjectsClient,
       });

@@ -1,0 +1,9 @@
+{
+  "id": "auditLog",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [],
+  "requiredPlugins": [],
+  "server": true,
+  "ui": false
+}

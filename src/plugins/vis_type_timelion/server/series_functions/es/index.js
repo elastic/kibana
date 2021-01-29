@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ES_SEARCH_STRATEGY } from '../../../../data/server';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
@@ -130,11 +118,15 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
-    const deps = (await tlConfig.getStartServices())[1];
-
-    const resp = await deps.data.search.search(tlConfig.context, body, {
-      strategy: ES_SEARCH_STRATEGY,
-    });
+    const resp = await tlConfig.context.search
+      .search(
+        body,
+        {
+          ...tlConfig.request?.body.searchSession,
+        },
+        tlConfig.context
+      )
+      .toPromise();
 
     if (!resp.rawResponse._shards.total) {
       throw new Error(

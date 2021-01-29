@@ -1,44 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
+import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
+import { getServiceSettings } from '../get_service_settings';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) {
+export function BaseMapsVisualizationProvider() {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
-
-  const serviceSettings = mapServiceSettings;
-  const toastService = getToasts();
-
   return class BaseMapsVisualization {
-    constructor(element, vis) {
-      this.vis = vis;
+    constructor(element, handlers, initialVisParams) {
+      this.handlers = handlers;
+      this._params = initialVisParams;
       this._container = element;
       this._kibanaMap = null;
       this._chartData = null; //reference to data currently on the map.
@@ -64,23 +51,29 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, visParams) {
+    async render(esResponse = this._esResponse, visParams = this._params) {
+      await this._mapIsLoaded;
+
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
       }
 
-      await this._mapIsLoaded;
-      this._kibanaMap.resize();
+      this.resize();
       this._params = visParams;
       await this._updateParams();
 
       if (this._hasESResponseChanged(esResponse)) {
+        this._esResponse = esResponse;
         await this._updateData(esResponse);
       }
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
 
       await this._whenBaseLayerIsLoaded();
+    }
+
+    resize() {
+      this._kibanaMap?.resize();
     }
 
     /**
@@ -90,20 +83,20 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
      */
     async _makeKibanaMap() {
       const options = {};
-      const uiState = this.vis.getUiState();
-      const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-      const centerFromUIState = uiState.get('mapCenter');
-      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
-      options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
-      const services = { toastService };
+      const zoomFromUiState = parseInt(this.handlers.uiState?.get('mapZoom'));
+      const centerFromUIState = this.handlers.uiState?.get('mapCenter');
+      const { mapZoom, mapCenter } = this._getMapsParams();
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : mapCenter;
 
-      this._kibanaMap = getKibanaMap(this._container, options, services);
+      const modules = await lazyLoadMapsLegacyModules();
+      this._kibanaMap = new modules.KibanaMap(this._container, options);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
-      this._kibanaMap.persistUiStateForVisualization(this.vis);
+      this._kibanaMap.persistUiStateForVisualization(this.handlers.uiState);
 
       this._kibanaMap.on('baseLayer:loaded', () => {
         this._baseLayerDirty = false;
@@ -138,6 +131,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const mapParams = this._getMapsParams();
       if (!this._tmsConfigured()) {
         try {
+          const serviceSettings = await getServiceSettings();
           const tmsServices = await serviceSettings.getTMSServices();
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
@@ -147,7 +141,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
             this._setTmsLayer(initBasemapLayer);
           }
         } catch (e) {
-          toastService.addWarning(e.message);
+          getToasts().addWarning(e.message);
           return;
         }
         return;
@@ -174,7 +168,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
           this._setTmsLayer(selectedTmsLayer);
         }
       } catch (tmsLoadingError) {
-        toastService.addWarning(tmsLoadingError.message);
+        getToasts().addWarning(tmsLoadingError.message);
       }
     }
 
@@ -189,13 +183,14 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
         isDesaturated = true;
       }
       const isDarkMode = getUiSettings().get('theme:darkMode');
+      const serviceSettings = await getServiceSettings();
       const meta = await serviceSettings.getAttributesForTMSLayer(
         tmsLayer,
         isDesaturated,
         isDarkMode
       );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
-      const options = _.cloneDeep(tmsLayer);
+      const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
@@ -213,7 +208,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
     }
 
     _hasESResponseChanged(data) {
-      return this._chartData !== data;
+      return this._esResponse !== data;
     }
 
     /**
@@ -224,16 +219,11 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
       this._kibanaMap.setShowTooltip(mapParams.addTooltip);
-      this._kibanaMap.useUiStateFromVisualization(this.vis);
+      this._kibanaMap.useUiStateFromVisualization(this.handlers.uiState);
     }
 
     _getMapsParams() {
-      return _.assign(
-        {},
-        this.vis.type.visConfig.defaults,
-        { type: this.vis.type.name },
-        this._params
-      );
+      return this._params;
     }
 
     _whenBaseLayerIsLoaded() {

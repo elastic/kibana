@@ -9,5 +9,7 @@ import { LIST_ID } from '../../constants.mock';
 import { DeleteListSchema } from './delete_list_schema';
 
 export const getDeleteListSchemaMock = (): DeleteListSchema => ({
+  deleteReferences: false,
   id: LIST_ID,
+  ignoreReferences: true,
 });

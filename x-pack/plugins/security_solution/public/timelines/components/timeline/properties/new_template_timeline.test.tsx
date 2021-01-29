@@ -38,6 +38,10 @@ describe('NewTemplateTimeline', () => {
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('render if CRUD', () => {
     beforeAll(() => {
       (useKibana as jest.Mock).mockReturnValue({
@@ -50,10 +54,6 @@ describe('NewTemplateTimeline', () => {
             },
           },
         },
-      });
-
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
       });
 
       wrapper = mount(
@@ -100,14 +100,10 @@ describe('NewTemplateTimeline', () => {
       );
     });
 
-    afterAll(() => {
-      (useKibana as jest.Mock).mockReset();
-    });
-
-    test('no render', () => {
+    test('render', () => {
       expect(
         wrapper.find('[data-test-subj="template-timeline-new-with-border"]').exists()
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 });

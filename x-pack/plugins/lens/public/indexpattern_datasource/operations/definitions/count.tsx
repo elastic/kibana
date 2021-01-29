@@ -5,28 +5,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { getInvalidFieldMessage } from './helpers';
+import {
+  adjustTimeScaleLabelSuffix,
+  adjustTimeScaleOnOtherColumnChange,
+} from '../time_scale_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = FormattedIndexPatternColumn & {
-  operationType: 'count';
-};
+export type CountIndexPatternColumn = FormattedIndexPatternColumn &
+  FieldBasedIndexPatternColumn & {
+    operationType: 'count';
+  };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
     defaultMessage: 'Count',
   }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: field.displayName,
+      label: adjustTimeScaleLabelSuffix(field.displayName, undefined, oldColumn.timeScale),
       sourceField: field.name,
     };
   },
@@ -39,31 +50,40 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  getDefaultLabel: (column) => adjustTimeScaleLabelSuffix(countLabel, undefined, column.timeScale),
+  buildColumn({ field, previousColumn }) {
     return {
-      label: countLabel,
+      label: adjustTimeScaleLabelSuffix(countLabel, undefined, previousColumn?.timeScale),
       dataType: 'number',
       operationType: 'count',
-      suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
+      timeScale: previousColumn?.timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'count',
-    schema: 'metric',
-    params: {},
-  }),
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
+      layer,
+      thisColumnId,
+      changedColumnId
+    ),
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
+    }).toAst();
+  },
   isTransferable: () => {
     return true;
   },
+  timeScalingMode: 'optional',
 };

@@ -5,74 +5,77 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
+import type { MlClient } from '../../../../lib/ml_client';
 
-export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) {
+export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-              {
-                exists: {
-                  field: 'category_id',
+                {
+                  exists: {
+                    field: 'category_id',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       },
-    });
+      []
+    );
     // @ts-ignore total is an object here
     return body?.hits?.total?.value ?? 0;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+    const { body } = await mlClient.anomalySearch<SearchResponse<any>>(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-              {
-                term: {
-                  result_type: 'model_plot',
+                {
+                  term: {
+                    result_type: 'model_plot',
+                  },
                 },
-              },
-              {
-                term: {
-                  by_field_name: 'mlcategory',
+                {
+                  term: {
+                    by_field_name: 'mlcategory',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-        aggs: {
-          cat_count: {
-            terms: {
-              field: 'by_field_value',
-              size: numberOfCategories,
+          aggs: {
+            cat_count: {
+              terms: {
+                field: 'by_field_value',
+                size: numberOfCategories,
+              },
             },
           },
         },
       },
-    });
+      []
+    );
 
     const catCounts: Array<{
       id: CategoryId;
@@ -100,24 +103,26 @@ export function topCategoriesProvider({ asInternalUser }: IScopedClusterClient) 
             field: 'category_id',
           },
         };
-    const { body } = await asInternalUser.search<SearchResponse<any>>({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+    const { body } = await mlClient.anomalySearch<any>(
+      {
+        size,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-              categoryFilter,
-            ],
+                categoryFilter,
+              ],
+            },
           },
         },
       },
-    });
+      []
+    );
 
     return body.hits.hits?.map((c: { _source: Category }) => c._source) || [];
   }

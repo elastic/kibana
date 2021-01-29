@@ -15,10 +15,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
-import { USES_HEADLESS_JOB_TYPES } from '../../../constants';
-import { JobInfo, ReportingAPIClient } from '../../lib/reporting_api_client';
+import React, { Component, Fragment } from 'react';
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { ReportApiJSON } from '../../../common/types';
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
   jobId: string;
@@ -29,14 +30,14 @@ interface State {
   isLoading: boolean;
   isFlyoutVisible: boolean;
   calloutTitle: string;
-  info: JobInfo | null;
+  info: ReportApiJSON | null;
   error: Error | null;
 }
 
 const NA = 'n/a';
 const UNKNOWN = 'unknown';
 
-const getDimensions = (info: JobInfo): string => {
+const getDimensions = (info: ReportApiJSON): string => {
   const defaultDimensions = { width: null, height: null };
   const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
   if (width && height) {
@@ -120,10 +121,6 @@ export class ReportInfoButton extends Component<Props, State> {
       {
         title: 'Title',
         description: get(info, 'payload.title') || NA,
-      },
-      {
-        title: 'Type',
-        description: get(info, 'payload.type') || NA,
       },
       {
         title: 'Layout',
@@ -263,7 +260,7 @@ export class ReportInfoButton extends Component<Props, State> {
   private loadInfo = async () => {
     this.setState({ isLoading: true });
     try {
-      const info: JobInfo = await this.props.apiClient.getInfo(this.props.jobId);
+      const info: ReportApiJSON = await this.props.apiClient.getInfo(this.props.jobId);
       if (this.mounted) {
         this.setState({ isLoading: false, info });
       }

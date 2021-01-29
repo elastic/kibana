@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { defaultsDeep, omit } from 'lodash';
 
 import { SavedObjectsErrorHelpers } from '../saved_objects';
@@ -24,6 +14,7 @@ import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
+import { Cache } from './cache';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -36,7 +27,6 @@ export interface UiSettingsServiceOptions {
 }
 
 interface ReadOptions {
-  ignore401Errors?: boolean;
   autoCreateOrUpgradeIfMissing?: boolean;
 }
 
@@ -58,10 +48,10 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly overrides: NonNullable<UiSettingsServiceOptions['overrides']>;
   private readonly defaults: NonNullable<UiSettingsServiceOptions['defaults']>;
   private readonly log: Logger;
+  private readonly cache: Cache;
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
-
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
@@ -69,6 +59,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = defaults;
     this.overrides = overrides;
     this.log = log;
+    this.cache = new Cache();
   }
 
   getRegistered() {
@@ -95,7 +86,12 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    const userProvided: UserProvided<T> = this.onReadHook<T>(await this.read());
+    const cachedValue = this.cache.get();
+    if (cachedValue) {
+      return cachedValue;
+    }
+
+    const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
@@ -104,10 +100,13 @@ export class UiSettingsClient implements IUiSettingsClient {
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
 
+    this.cache.set(userProvided);
+
     return userProvided;
   }
 
   async setMany(changes: Record<string, any>) {
+    this.cache.del();
     this.onWriteHook(changes);
     await this.write({ changes });
   }
@@ -132,6 +131,11 @@ export class UiSettingsClient implements IUiSettingsClient {
     return this.overrides.hasOwnProperty(key);
   }
 
+  isSensitive(key: string): boolean {
+    const definition = this.defaults[key];
+    return !!definition?.sensitive;
+  }
+
   private assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
@@ -140,7 +144,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   private async getRaw(): Promise<UiSettingsRaw> {
     const userProvided = await this.getUserProvided();
-    return defaultsDeep(userProvided, this.defaults);
+    return defaultsDeep({}, userProvided, this.defaults);
   }
 
   private validateKey(key: string, value: unknown) {
@@ -209,10 +213,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async read({
-    ignore401Errors = false,
-    autoCreateOrUpgradeIfMissing = true,
-  }: ReadOptions = {}): Promise<Record<string, any>> {
+  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
+    Record<string, any>
+  > {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
@@ -227,16 +230,13 @@ export class UiSettingsClient implements IUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this.read({
-            ignore401Errors,
-            autoCreateOrUpgradeIfMissing: false,
-          });
+          return await this.read({ autoCreateOrUpgradeIfMissing: false });
         }
 
         return failedUpgradeAttributes;
       }
 
-      if (this.isIgnorableError(error, ignore401Errors)) {
+      if (this.isIgnorableError(error)) {
         return {};
       }
 
@@ -244,17 +244,9 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private isIgnorableError(error: Error, ignore401Errors: boolean) {
-    const {
-      isForbiddenError,
-      isEsUnavailableError,
-      isNotAuthorizedError,
-    } = this.savedObjectsClient.errors;
+  private isIgnorableError(error: Error) {
+    const { isForbiddenError, isEsUnavailableError } = this.savedObjectsClient.errors;
 
-    return (
-      isForbiddenError(error) ||
-      isEsUnavailableError(error) ||
-      (ignore401Errors && isNotAuthorizedError(error))
-    );
+    return isForbiddenError(error) || isEsUnavailableError(error);
   }
 }

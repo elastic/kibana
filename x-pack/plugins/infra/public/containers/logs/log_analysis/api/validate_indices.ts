@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
+
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
   ValidationIndicesFieldSpecification,
@@ -15,19 +13,19 @@ import {
   validationIndicesResponsePayloadRT,
 } from '../../../../../common/http_api';
 
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export const callValidateIndicesAPI = async (
-  indices: string[],
-  fields: ValidationIndicesFieldSpecification[]
-) => {
-  const response = await npStart.http.fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
+interface RequestArgs {
+  indices: string[];
+  fields: ValidationIndicesFieldSpecification[];
+}
+
+export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
+  const { indices, fields } = requestArgs;
+  const response = await fetch(LOG_ANALYSIS_VALIDATE_INDICES_PATH, {
     method: 'POST',
     body: JSON.stringify(validationIndicesRequestPayloadRT.encode({ data: { indices, fields } })),
   });
 
-  return pipe(
-    validationIndicesResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(validationIndicesResponsePayloadRT)(response);
 };

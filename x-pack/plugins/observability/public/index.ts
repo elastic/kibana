@@ -6,8 +6,7 @@
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { Plugin, ObservabilityPluginSetup, ObservabilityPluginStart } from './plugin';
-
-export { ObservabilityPluginSetup, ObservabilityPluginStart };
+export type { ObservabilityPluginSetup, ObservabilityPluginStart };
 
 export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPluginStart> = (
   context: PluginInitializerContext
@@ -17,6 +16,9 @@ export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPl
 
 export * from './components/shared/action_menu/';
 
+export type { UXMetrics } from './components/shared/core_web_vitals/';
+export { getCoreVitalsComponent, HeaderMenuPortal } from './components/shared/';
+
 export {
   useTrackPageview,
   useUiTracker,
@@ -24,6 +26,8 @@ export {
   TrackMetricOptions,
   METRIC_TYPE,
 } from './hooks/use_track_metric';
+
+export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 
 export * from './typings';
 

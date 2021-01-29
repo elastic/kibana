@@ -66,6 +66,7 @@ export const useGetSeverity = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.SEVERITY_API_ERROR,
             text: error.message,

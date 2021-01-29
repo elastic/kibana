@@ -19,12 +19,19 @@ import {
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { SearchNavTab } from './types';
+import { SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
   if (tab && tab.urlKey != null && URL_STATE_KEYS[tab.urlKey] != null) {
     return URL_STATE_KEYS[tab.urlKey].reduce<Location>(
       (myLocation: Location, urlKey: KeyUrlState) => {
-        let urlStateToReplace: UrlInputsModel | Query | Filter[] | TimelineUrl | string = '';
+        let urlStateToReplace:
+          | Filter[]
+          | Query
+          | SourcererScopePatterns
+          | TimelineUrl
+          | UrlInputsModel
+          | string = '';
 
         if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
           if (urlState.query.query === '') {
@@ -40,6 +47,8 @@ export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
           }
         } else if (urlKey === CONSTANTS.timerange) {
           urlStateToReplace = urlState[CONSTANTS.timerange];
+        } else if (urlKey === CONSTANTS.sourcerer) {
+          urlStateToReplace = urlState[CONSTANTS.sourcerer];
         } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
           const timeline = urlState[CONSTANTS.timeline];
           if (timeline.id === '') {

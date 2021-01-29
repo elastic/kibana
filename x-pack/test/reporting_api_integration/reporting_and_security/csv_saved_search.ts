@@ -38,11 +38,11 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Generation from Saved Search ID', () => {
-    describe('Saved Search Features', () => {
-      after(async () => {
-        await reportingAPI.deleteAllReports();
-      });
+    after(async () => {
+      await reportingAPI.deleteAllReports();
+    });
 
+    describe('Saved Search Features', () => {
       it('With filters and timebased data, explicit UTC format', async () => {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/logs');
@@ -350,12 +350,15 @@ export default function ({ getService }: FtrProviderContext) {
           searchId: 'search:6091ead0-1c6d-11ea-a100-8589bb9d7c6b',
           postPayload: {
             timerange: {
-              min: '2019-06-26T06:20:28Z',
-              max: '2019-06-26T07:27:58Z',
+              min: '2019-05-28T00:00:00Z',
+              max: '2019-06-26T00:00:00Z',
               timezone: 'UTC',
             },
             state: {
-              sort: [{ order_date: { order: 'desc', unmapped_type: 'boolean' } }],
+              sort: [
+                { order_date: { order: 'desc', unmapped_type: 'boolean' } },
+                { order_id: { order: 'asc', unmapped_type: 'boolean' } },
+              ],
               docvalue_fields: [
                 { field: 'customer_birth_date', format: 'date_time' },
                 { field: 'order_date', format: 'date_time' },
@@ -370,8 +373,8 @@ export default function ({ getService }: FtrProviderContext) {
                     {
                       range: {
                         order_date: {
-                          gte: '2019-06-26T06:20:28.066Z',
-                          lte: '2019-06-26T07:27:58.573Z',
+                          gte: '2019-05-28T00:00:00.000Z',
+                          lte: '2019-06-26T00:00:00.000Z',
                           format: 'strict_date_optional_time',
                         },
                       },

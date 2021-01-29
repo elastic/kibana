@@ -15,3 +15,10 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerJobInfoRoutes(reporting);
   registerDiagnosticRoutes(reporting, logger);
 }
+
+export interface ReportingRequestPre {
+  management: {
+    jobTypes: string[];
+  };
+  user: string;
+}

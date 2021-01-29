@@ -19,9 +19,9 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
-import { useAppContext } from '../../../../../app_context';
 import { TemplateDeserialized } from '../../../../../../../common';
-import { getILMPolicyPath } from '../../../../../services/routing';
+import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../../constants';
+import { useUrlGenerator } from '../../../../../services/use_url_generator';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -53,9 +53,13 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const {
-    core: { getUrlForApp },
-  } = useAppContext();
+  const ilmPolicyLink = useUrlGenerator({
+    urlGeneratorId: ILM_URL_GENERATOR_ID,
+    urlGeneratorState: {
+      page: ILM_PAGES_POLICY_EDIT,
+      policyName: ilmPolicy?.name,
+    },
+  });
 
   return (
     <>
@@ -159,16 +163,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {ilmPolicy && ilmPolicy.name ? (
-                    <EuiLink
-                      href={getUrlForApp('management', {
-                        path: getILMPolicyPath(ilmPolicy.name),
-                      })}
-                    >
-                      {ilmPolicy.name}
-                    </EuiLink>
+                  {ilmPolicy?.name && ilmPolicyLink ? (
+                    <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
                   ) : (
-                    i18nTexts.none
+                    ilmPolicy?.name || i18nTexts.none
                   )}
                 </EuiDescriptionListDescription>
               </>

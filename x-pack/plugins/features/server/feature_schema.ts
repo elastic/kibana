@@ -21,12 +21,25 @@ const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 const reservedFeaturePrrivilegePartRegex = /^(?!reserved_)[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
+const validLicenses = ['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'];
+// sub-feature privileges are only available with a `gold` license or better, so restricting sub-feature privileges
+// for `gold` or below doesn't make a whole lot of sense.
+const validSubFeaturePrivilegeLicenses = ['platinum', 'enterprise', 'trial'];
+
 const managementSchema = Joi.object().pattern(
   managementSectionIdRegex,
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 const alertingSchema = Joi.array().items(Joi.string());
+
+const appCategorySchema = Joi.object({
+  id: Joi.string().required(),
+  label: Joi.string().required(),
+  ariaLabel: Joi.string(),
+  euiIconType: Joi.string(),
+  order: Joi.number(),
+}).required();
 
 const kibanaPrivilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
@@ -45,10 +58,11 @@ const kibanaPrivilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
-const kibanaSubFeaturePrivilegeSchema = Joi.object({
+const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
   id: Joi.string().regex(subFeaturePrivilegePartRegex).required(),
   name: Joi.string().required(),
   includeIn: Joi.string().allow('all', 'read', 'none').required(),
+  minimumLicense: Joi.string().valid(...validSubFeaturePrivilegeLicenses),
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: Joi.object({
@@ -64,12 +78,22 @@ const kibanaSubFeaturePrivilegeSchema = Joi.object({
   ui: Joi.array().items(Joi.string().regex(uiCapabilitiesRegex)).required(),
 });
 
+const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema = kibanaIndependentSubFeaturePrivilegeSchema.keys(
+  {
+    minimumLicense: Joi.forbidden(),
+  }
+);
+
 const kibanaSubFeatureSchema = Joi.object({
   name: Joi.string().required(),
   privilegeGroups: Joi.array().items(
     Joi.object({
       groupType: Joi.string().valid('mutually_exclusive', 'independent').required(),
-      privileges: Joi.array().items(kibanaSubFeaturePrivilegeSchema).min(1),
+      privileges: Joi.when('groupType', {
+        is: 'mutually_exclusive',
+        then: Joi.array().items(kibanaMutuallyExclusiveSubFeaturePrivilegeSchema).min(1),
+        otherwise: Joi.array().items(kibanaIndependentSubFeaturePrivilegeSchema).min(1),
+      }),
     })
   ),
 });
@@ -80,14 +104,10 @@ const kibanaFeatureSchema = Joi.object({
     .invalid(...prohibitedFeatureIds)
     .required(),
   name: Joi.string().required(),
+  category: appCategorySchema,
   order: Joi.number(),
   excludeFromBasePrivileges: Joi.boolean(),
-  validLicenses: Joi.array().items(
-    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial')
-  ),
-  icon: Joi.string(),
-  description: Joi.string(),
-  navLinkId: Joi.string().regex(uiCapabilitiesRegex),
+  minimumLicense: Joi.string().valid(...validLicenses),
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,

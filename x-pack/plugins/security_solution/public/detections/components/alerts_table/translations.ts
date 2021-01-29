@@ -48,7 +48,7 @@ export const LOADING_ALERTS = i18n.translate(
 export const TOTAL_COUNT_OF_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle',
   {
-    defaultMessage: 'alerts match the search criteria',
+    defaultMessage: 'alerts',
   }
 );
 
@@ -178,5 +178,12 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
   {
     defaultMessage: 'Failed to mark alert(s) as in progress',
+  }
+);
+
+export const MORE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
+  {
+    defaultMessage: 'More actions',
   }
 );

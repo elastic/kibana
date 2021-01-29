@@ -1,0 +1,60 @@
+{
+  "name": "Query with a indicator mapping",
+  "description": "Query with a threat mapping",
+  "rule_id": "threat-mapping",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "threat_match",
+  "query": "*:*",
+  "tags": ["tag_1", "tag_2"],
+  "threat_index": ["mock-threat-list"],
+  "threat_query": "*:*",
+  "threat_mapping": [
+    {
+      "entries": [
+        {
+          "field": "host.name",
+          "type": "mapping",
+          "value": "host.name"
+        },
+        {
+          "field": "host.ip",
+          "type": "mapping",
+          "value": "host.ip"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "destination.ip",
+          "type": "mapping",
+          "value": "destination.ip"
+        },
+        {
+          "field": "destination.port",
+          "type": "mapping",
+          "value": "destination.port"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "source.port",
+          "type": "mapping",
+          "value": "source.port"
+        }
+      ]
+    },
+    {
+      "entries": [
+        {
+          "field": "source.ip",
+          "type": "mapping",
+          "value": "source.ip"
+        }
+      ]
+    }
+  ]
+}

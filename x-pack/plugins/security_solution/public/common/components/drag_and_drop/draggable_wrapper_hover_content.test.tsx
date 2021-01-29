@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
 import '../../mock/match_media';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
-import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
-
+import { useSourcererScope } from '../../containers/sourcerer';
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 import {
   ManageGlobalTimeline,
@@ -26,12 +25,12 @@ import { TimelineId } from '../../../../common/types/timeline';
 jest.mock('../link_to');
 
 jest.mock('../../lib/kibana');
-jest.mock('../../containers/source', () => {
-  const original = jest.requireActual('../../containers/source');
+jest.mock('../../containers/sourcerer', () => {
+  const original = jest.requireActual('../../containers/sourcerer');
 
   return {
     ...original,
-    useWithSource: jest.fn(),
+    useSourcererScope: jest.fn(),
   };
 });
 
@@ -41,8 +40,14 @@ jest.mock('uuid', () => {
     v4: jest.fn(() => 'uuid.v4()'),
   };
 });
-
-jest.mock('../../hooks/use_add_to_timeline');
+const mockStartDragToTimeline = jest.fn();
+jest.mock('../../hooks/use_add_to_timeline', () => {
+  const original = jest.requireActual('../../hooks/use_add_to_timeline');
+  return {
+    ...original,
+    useAddToTimeline: () => ({ startDragToTimeline: mockStartDragToTimeline }),
+  };
+});
 const mockAddFilters = jest.fn();
 const mockGetTimelineFilterManager = jest.fn().mockReturnValue({
   addFilters: mockAddFilters,
@@ -69,6 +74,7 @@ const goGetTimelineId = jest.fn();
 const defaultProps = {
   field,
   goGetTimelineId,
+  ownFocus: false,
   showTopN: false,
   timelineId,
   toggleTopN,
@@ -77,27 +83,12 @@ const defaultProps = {
 
 describe('DraggableWrapperHoverContent', () => {
   beforeAll(() => {
-    // our mock implementation of the useAddToTimeline hook returns a mock startDragToTimeline function:
-    (useAddToTimeline as jest.Mock).mockReturnValue(jest.fn());
-    (useWithSource as jest.Mock).mockReturnValue({
+    mockStartDragToTimeline.mockReset();
+    (useSourcererScope as jest.Mock).mockReturnValue({
       browserFields: mockBrowserFields,
+      selectedPatterns: [],
+      indexPattern: {},
     });
-  });
-
-  // Suppress warnings about "react-beautiful-dnd"
-  /* eslint-disable no-console */
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-  beforeAll(() => {
-    console.warn = jest.fn();
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-    console.warn = originalWarn;
   });
 
   /**
@@ -203,7 +194,7 @@ describe('DraggableWrapperHoverContent', () => {
           wrapper = mount(
             <TestProviders>
               <DraggableWrapperHoverContent
-                {...{ ...defaultProps, onFilterAdded, timelineId: 'not-active-timeline' }}
+                {...{ ...defaultProps, onFilterAdded, timelineId: TimelineId.test }}
               />
             </TestProviders>
           );
@@ -311,7 +302,7 @@ describe('DraggableWrapperHoverContent', () => {
                 {...{
                   ...defaultProps,
                   onFilterAdded,
-                  timelineId: 'not-active-timeline',
+                  timelineId: TimelineId.test,
                   value: '',
                 }}
               />
@@ -389,7 +380,7 @@ describe('DraggableWrapperHoverContent', () => {
       });
     });
 
-    test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', () => {
+    test('when clicked, it invokes the `startDragToTimeline` function returned by the `useAddToTimeline` hook', async () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableWrapperHoverContent
@@ -402,23 +393,17 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      // The following "startDragToTimeline" function returned by our mock
-      // useAddToTimeline hook is called when the user clicks the
-      // Add to timeline investigation action:
-      const startDragToTimeline = useAddToTimeline({
-        draggableId,
-        fieldName: aggregatableStringField,
-      });
-
       wrapper.find('[data-test-subj="add-to-timeline"]').first().simulate('click');
-      wrapper.update();
 
-      expect(startDragToTimeline).toHaveBeenCalled();
+      await waitFor(() => {
+        wrapper.update();
+        expect(mockStartDragToTimeline).toHaveBeenCalled();
+      });
     });
   });
 
   describe('Top N', () => {
-    test(`it renders the 'Show top field' button when showTopN is false and an aggregatable string field is provided`, async () => {
+    test(`it renders the 'Show top field' button when showTopN is false and an aggregatable string field is provided`, () => {
       const aggregatableStringField = 'cloud.account.id';
       const wrapper = mount(
         <TestProviders>
@@ -436,7 +421,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
-    test(`it renders the 'Show top field' button when showTopN is false and a allowlisted signal field is provided`, async () => {
+    test(`it renders the 'Show top field' button when showTopN is false and a allowlisted signal field is provided`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -454,7 +439,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
-    test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, async () => {
+    test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, () => {
       const notKnownToBrowserFields = 'unknown.field';
       const wrapper = mount(
         <TestProviders>
@@ -472,7 +457,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
-    test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, () => {
+    test(`it should invokes goGetTimelineId when user is over the 'Show top field' button`, async () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -487,10 +472,12 @@ describe('DraggableWrapperHoverContent', () => {
       );
       const button = wrapper.find(`[data-test-subj="show-top-field"]`).first();
       button.simulate('mouseenter');
-      expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      await waitFor(() => {
+        expect(goGetTimelineId).toHaveBeenCalledWith(true);
+      });
     });
 
-    test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
+    test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -511,7 +498,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(toggleTopN).toBeCalled();
     });
 
-    test(`it does NOT render the Top N histogram when when showTopN is false`, async () => {
+    test(`it does NOT render the Top N histogram when when showTopN is false`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -531,7 +518,7 @@ describe('DraggableWrapperHoverContent', () => {
       );
     });
 
-    test(`it does NOT render the 'Show top field' button when showTopN is true`, async () => {
+    test(`it does NOT render the 'Show top field' button when showTopN is true`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -550,7 +537,7 @@ describe('DraggableWrapperHoverContent', () => {
       expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
-    test(`it renders the Top N histogram when when showTopN is true`, async () => {
+    test(`it renders the Top N histogram when when showTopN is true`, () => {
       const allowlistedField = 'signal.rule.name';
       const wrapper = mount(
         <TestProviders>
@@ -606,9 +593,7 @@ describe('DraggableWrapperHoverContent', () => {
     test('filter manager, not active timeline', () => {
       mount(
         <TestProviders>
-          <DraggableWrapperHoverContent
-            {...{ ...defaultProps, timelineId: 'not-active-timeline' }}
-          />
+          <DraggableWrapperHoverContent {...{ ...defaultProps, timelineId: TimelineId.test }} />
         </TestProviders>
       );
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
@@ -33,7 +22,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 
@@ -266,7 +255,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
-      urlSyncStrategy.flush();
+      urlSyncStrategy.kbnUrlControls.flush();
 
       expect(history.length).toBe(startHistoryLength + 1);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
@@ -301,7 +290,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
-      urlSyncStrategy.cancel();
+      urlSyncStrategy.kbnUrlControls.cancel();
 
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
@@ -354,7 +343,7 @@ describe('state_sync', () => {
 
 function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   defaultState: State
 ): INullableBaseStateContainer<State> {
   return {

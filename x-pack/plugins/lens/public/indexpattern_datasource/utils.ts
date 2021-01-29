@@ -5,11 +5,16 @@
  */
 
 import { DataType } from '../types';
+import { IndexPattern, IndexPatternLayer } from './types';
 import { DraggedField } from './indexpattern';
-import {
+import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
+
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -36,7 +41,45 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   return (
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
-    'field' in fieldCandidate &&
-    'indexPatternId' in fieldCandidate
+    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
   );
+}
+
+export function isColumnInvalid(
+  layer: IndexPatternLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+) {
+  const column: IndexPatternColumn | undefined = layer.columns[columnId];
+  if (!column) return;
+
+  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
+  // check also references for errors
+  const referencesHaveErrors =
+    true &&
+    'references' in column &&
+    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+
+  return (
+    !!operationDefinition.getErrorMessage?.(layer, columnId, indexPattern) || referencesHaveErrors
+  );
+}
+
+function getReferencesErrors(
+  layer: IndexPatternLayer,
+  column: ReferenceBasedIndexPatternColumn,
+  indexPattern: IndexPattern
+) {
+  return column.references?.map((referenceId: string) => {
+    const referencedOperation = layer.columns[referenceId]?.operationType;
+    const referencedDefinition = operationDefinitionMap[referencedOperation];
+    return referencedDefinition?.getErrorMessage?.(layer, referenceId, indexPattern);
+  });
+}
+
+export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+  if (!column || !hasField(column)) {
+    return false;
+  }
+  return !!getInvalidFieldMessage(column, indexPattern)?.length;
 }

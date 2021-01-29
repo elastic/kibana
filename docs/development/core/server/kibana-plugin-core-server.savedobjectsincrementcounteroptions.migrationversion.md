@@ -4,6 +4,8 @@
 
 ## SavedObjectsIncrementCounterOptions.migrationVersion property
 
+[SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md)
+
 <b>Signature:</b>
 
 ```typescript

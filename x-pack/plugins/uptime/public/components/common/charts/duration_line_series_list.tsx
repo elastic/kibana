@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { LineSeries, CurveType } from '@elastic/charts';
+import { LineSeries, CurveType, Fit } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 
@@ -28,6 +28,7 @@ export const DurationLineSeriesList = ({ lines }: Props) => (
         yAccessors={[1]}
         yScaleToDataExtent={false}
         yScaleType="linear"
+        fit={Fit.Linear}
       />
     ))}
   </>

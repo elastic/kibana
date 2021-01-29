@@ -44,8 +44,8 @@ describe('ConnectorsDropdown', () => {
           'data-test-subj': 'dropdown-connector-servicenow-1',
         }),
         expect.objectContaining({
-          value: 'servicenow-2',
-          'data-test-subj': 'dropdown-connector-servicenow-2',
+          value: 'resilient-2',
+          'data-test-subj': 'dropdown-connector-resilient-2',
         }),
       ])
     );
@@ -76,6 +76,6 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span').text()).toEqual('My Connector');
+    expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
   });
 });

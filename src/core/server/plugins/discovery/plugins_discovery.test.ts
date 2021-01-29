@@ -1,34 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+// must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { mockPackage } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
 import { first, map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { CoreContext } from '../../core_context';
 
 const KIBANA_ROOT = process.cwd();
@@ -94,6 +84,7 @@ describe('plugins discovery system', () => {
     };
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { envName: 'development' },
       })
@@ -382,6 +373,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'development' },
       })
@@ -409,6 +401,7 @@ describe('plugins discovery system', () => {
     const extraPluginTestPath = resolve(process.cwd(), 'my-extra-plugin');
 
     env = Env.createDefault(
+      REPO_ROOT,
       getEnvOptions({
         cliArgs: { dev: false, envName: 'production' },
       })

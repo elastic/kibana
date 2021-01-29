@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { ApplicationStart } from 'kibana/public';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeatureConfig } from '../../../../../../plugins/features/public';
-import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';
 import { FeatureTable } from './feature_table';
@@ -18,7 +18,6 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
-  securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
@@ -34,8 +33,6 @@ export class EnabledFeatures extends Component<Props, {}> {
 
     return (
       <SectionPanel
-        collapsible
-        initiallyCollapsed
         title={this.getPanelTitle()}
         description={description}
         data-test-subj="enabled-features-panel"
@@ -46,7 +43,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               <h3>
                 <FormattedMessage
                   id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
-                  defaultMessage="Control which features are visible in this space."
+                  defaultMessage="Set feature visibility for this space"
                 />
               </h3>
             </EuiTitle>
@@ -114,7 +111,7 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Customize feature display"
+          defaultMessage="Features"
         />{' '}
         {details}
       </span>
@@ -131,27 +128,6 @@ export class EnabledFeatures extends Component<Props, {}> {
               defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
-          {this.props.securityEnabled && (
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
-                defaultMessage="Want to secure access? Go to {rolesLink}."
-                values={{
-                  rolesLink: (
-                    <EuiLink
-                      data-test-subj="goToRoles"
-                      href={this.props.getUrlForApp('management', { path: 'security/roles' })}
-                    >
-                      <FormattedMessage
-                        id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
-                        defaultMessage="Roles"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          )}
         </EuiText>
       </Fragment>
     );

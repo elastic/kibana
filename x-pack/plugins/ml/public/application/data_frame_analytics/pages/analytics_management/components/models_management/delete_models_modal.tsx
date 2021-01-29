@@ -35,7 +35,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
-              id="xpack.ml.inference.modelsList.deleteModal.header"
+              id="xpack.ml.trainedModels.modelsList.deleteModal.header"
               defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
               values={{
                 modelId: models[0].model_id,
@@ -54,7 +54,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
               size="s"
             >
               <FormattedMessage
-                id="xpack.ml.inference.modelsList.deleteModal.modelsWithPipelinesWarningMessage"
+                id="xpack.ml.trainedModels.modelsList.deleteModal.modelsWithPipelinesWarningMessage"
                 defaultMessage="{modelsWithPipelinesCount, plural, one{Model} other {Models}} {modelsWithPipelines} {modelsWithPipelinesCount, plural, one{has} other {have}} associated pipelines!"
                 values={{
                   modelsWithPipelinesCount: modelsWithPipelines.length,
@@ -68,14 +68,14 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">
             <FormattedMessage
-              id="xpack.ml.inference.modelsList.deleteModal.cancelButtonLabel"
+              id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
 
           <EuiButton onClick={onClose.bind(null, true)} fill color="danger">
             <FormattedMessage
-              id="xpack.ml.inference.modelsList.deleteModal.deleteButtonLabel"
+              id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
               defaultMessage="Delete"
             />
           </EuiButton>

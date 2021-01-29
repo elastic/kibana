@@ -10,10 +10,10 @@ import React from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
-import { LayoutInstance } from '../../common/types';
+import { LayoutParams } from '../../common/types';
 import { JobParamsPNG } from '../../server/export_types/png/types';
 import { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
+import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
@@ -80,7 +80,7 @@ export const reportingPDFPNGProvider = ({
         objectType,
         browserTimezone,
         relativeUrls: [relativeUrl], // multi URL for PDF
-        layout: sharingData.layout as LayoutInstance,
+        layout: sharingData.layout as LayoutParams,
         title: sharingData.title as string,
       };
     };
@@ -96,7 +96,7 @@ export const reportingPDFPNGProvider = ({
         objectType,
         browserTimezone,
         relativeUrl, // single URL for PNG
-        layout: sharingData.layout as LayoutInstance,
+        layout: sharingData.layout as LayoutParams,
         title: sharingData.title as string,
       };
     };
@@ -135,7 +135,6 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="png"
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getPngJobParams}
               isDirty={isDirty}
@@ -162,7 +161,6 @@ export const reportingPDFPNGProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               reportType="printablePdf"
-              objectType={objectType}
               objectId={objectId}
               getJobParams={getPdfJobParams}
               isDirty={isDirty}

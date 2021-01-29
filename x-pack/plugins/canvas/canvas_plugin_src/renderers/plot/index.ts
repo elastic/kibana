@@ -6,7 +6,6 @@
 
 // This bit of hackiness is required because this isn't part of the main kibana bundle
 import 'jquery';
-import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
@@ -18,7 +17,7 @@ import { text } from './plugins/text';
 
 const { plot: strings } = RendererStrings;
 
-const render: RendererSpec<any>['render'] = (domNode, config, handlers) => {
+const render: RendererSpec<any>['render'] = async (domNode, config, handlers) => {
   // TODO: OH NOES
   if (!includes($.plot.plugins, size)) {
     $.plot.plugins.push(size);

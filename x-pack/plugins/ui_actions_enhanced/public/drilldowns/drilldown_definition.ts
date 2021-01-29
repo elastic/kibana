@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_actions';
+import {
+  ActionFactoryDefinition,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
-import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -24,17 +29,20 @@ import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/pu
  */
 
 export interface DrilldownDefinition<
-  Config extends object = object,
-  SupportedTriggers extends TriggerId = TriggerId,
-  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-    triggers: SupportedTriggers[];
-  },
-  ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
-> {
+  Config extends BaseActionConfig = BaseActionConfig,
+  ExecutionContext extends object = object,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.
    */
   id: string;
+
+  /**
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
 
   /**
    * Minimal license level
@@ -58,12 +66,7 @@ export interface DrilldownDefinition<
   /**
    * Function that returns default config for this drilldown.
    */
-  createConfig: ActionFactoryDefinition<
-    Config,
-    SupportedTriggers,
-    FactoryContext,
-    ExecutionContext
-  >['createConfig'];
+  createConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['createConfig'];
 
   /**
    * `UiComponent` that collections config for this drilldown. You can create
@@ -84,23 +87,13 @@ export interface DrilldownDefinition<
    * export const CollectConfig = uiToReactComponent(ReactCollectConfig);
    * ```
    */
-  CollectConfig: ActionFactoryDefinition<
-    Config,
-    SupportedTriggers,
-    FactoryContext,
-    ExecutionContext
-  >['CollectConfig'];
+  CollectConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['CollectConfig'];
 
   /**
    * A validator function for the config object. Should always return a boolean
    * given any input.
    */
-  isConfigValid: ActionFactoryDefinition<
-    Config,
-    SupportedTriggers,
-    FactoryContext,
-    ExecutionContext
-  >['isConfigValid'];
+  isConfigValid: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['isConfigValid'];
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.
@@ -148,5 +141,5 @@ export interface DrilldownDefinition<
    * List of triggers supported by this drilldown type
    * This is used in trigger picker when configuring drilldown
    */
-  supportedTriggers(): SupportedTriggers[];
+  supportedTriggers(): string[];
 }

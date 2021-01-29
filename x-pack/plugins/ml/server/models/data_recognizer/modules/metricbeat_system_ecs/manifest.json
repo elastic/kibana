@@ -8,7 +8,12 @@
   "query": {
     "bool": {
       "filter": {
-        "terms" : { "event.dataset" : ["system.cpu", "system.filesystem"]}
+        "terms": {
+          "event.dataset": [
+            "system.cpu",
+            "system.filesystem"
+          ]
+        }
       }
     }
   },

@@ -9,7 +9,7 @@ import { RouteDefinitionParams } from '../index';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineDeleteUserRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineDeleteUserRoutes({ router }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/internal/security/users/{username}',
@@ -19,9 +19,9 @@ export function defineDeleteUserRoutes({ router, clusterClient }: RouteDefinitio
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.deleteUser', { username: request.params.username });
+        await context.core.elasticsearch.client.asCurrentUser.security.deleteUser({
+          username: request.params.username,
+        });
 
         return response.noContent();
       } catch (error) {

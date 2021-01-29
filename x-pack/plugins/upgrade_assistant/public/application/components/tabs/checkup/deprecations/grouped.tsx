@@ -18,8 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 
 import { DeprecationCountSummary } from './count_summary';

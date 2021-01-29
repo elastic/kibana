@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkDelete } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerDeleteTagsWithIdsRoute = (router: IRouter) => {
+export const registerDeleteTagsWithIdsRoute = (router: BeatsManagementRouter) => {
   router.delete(
     {
       path: '/api/beats/tags/{tagIds}',

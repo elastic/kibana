@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { ResolverPluginSetup } from './types';
 import { resolverStoreFactory } from './store/index';
 import { ResolverWithoutProviders } from './view/resolver_without_providers';
-import { noAncestorsTwoChildren } from './data_access_layer/mocks/no_ancestors_two_children';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from './data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 
 /**
  * These exports are used by the plugin 'resolverTest' defined in x-pack's plugin_functional suite.
@@ -23,7 +23,7 @@ export function resolverPluginSetup(): ResolverPluginSetup {
     ResolverWithoutProviders,
     mocks: {
       dataAccessLayer: {
-        noAncestorsTwoChildren,
+        noAncestorsTwoChildrenWithRelatedEventsOnOrigin,
       },
     },
   };

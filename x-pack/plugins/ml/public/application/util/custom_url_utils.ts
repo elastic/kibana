@@ -117,6 +117,7 @@ function isKibanaUrl(urlConfig: UrlConfig) {
     urlValue.startsWith('dashboards#/') ||
     urlValue.startsWith('apm#/') ||
     // BrowserRouter based plugins
+    urlValue.startsWith('metrics/') ||
     urlValue.startsWith('security/') ||
     // Legacy links
     urlValue.startsWith('siem#/')

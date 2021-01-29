@@ -39,7 +39,6 @@ export class ManifestTask {
     setupContract.taskManager.registerTaskDefinitions({
       [ManifestTaskConstants.TYPE]: {
         title: 'Security Solution Endpoint Exceptions Handler',
-        type: ManifestTaskConstants.TYPE,
         timeout: ManifestTaskConstants.TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {

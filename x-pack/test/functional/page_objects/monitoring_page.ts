@@ -10,7 +10,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header', 'security', 'login']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const find = getService('find');
 
   return new (class MonitoringPage {
     async navigateTo(useSuperUser = false) {
@@ -26,11 +25,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }: FtrProvid
         await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
       }
       await PageObjects.common.navigateToApp('monitoring');
-    }
-
-    async getWelcome() {
-      const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
-      return await el.getVisibleText();
     }
 
     async getAccessDeniedMessage() {

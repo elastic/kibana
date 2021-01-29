@@ -26,6 +26,7 @@ describe('getLinks helper', () => {
     const mockCache = new InMemoryCache({
       dataIdFromObject: () => null,
       fragmentMatcher: new IntrospectionFragmentMatcher({
+        // @ts-expect-error apollo-cache-inmemory types don't match actual introspection data
         introspectionQueryResultData,
       }),
     });

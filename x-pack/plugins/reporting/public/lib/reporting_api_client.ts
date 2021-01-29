@@ -7,57 +7,30 @@
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
-import { JobId, SourceJob } from '../../common/types';
 import {
-  API_BASE_URL,
   API_BASE_GENERATE,
+  API_BASE_URL,
   API_LIST_URL,
   REPORTING_MANAGEMENT_HOME,
-} from '../../constants';
+} from '../../common/constants';
+import {
+  DownloadReportFn,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ReportDocument,
+  ReportSource,
+} from '../../common/types';
 import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;
-  _source: any;
+  _source: ReportSource;
 }
 
 export interface JobContent {
   content: string;
   content_type: boolean;
-}
-
-export interface JobInfo {
-  kibana_name: string;
-  kibana_id: string;
-  browser_type: string;
-  created_at: string;
-  priority: number;
-  jobtype: string;
-  created_by: string;
-  timeout: number;
-  output: {
-    content_type: string;
-    size: number;
-    warnings: string[];
-  };
-  process_expiration: string;
-  completed_at: string;
-  payload: {
-    layout: { id: string; dimensions: { width: number; height: number } };
-    objects: Array<{ relativeUrl: string }>;
-    type: string;
-    title: string;
-    forceNow: string;
-    browserTimezone: string;
-  };
-  meta: {
-    layout: string;
-    objectType: string;
-  };
-  max_attempts: number;
-  started_at: string;
-  attempts: number;
-  status: string;
 }
 
 interface JobParams {
@@ -121,13 +94,13 @@ export class ReportingAPIClient {
     });
   }
 
-  public getInfo(jobId: string): Promise<JobInfo> {
+  public getInfo(jobId: string): Promise<ReportApiJSON> {
     return this.http.get(`${API_LIST_URL}/info/${jobId}`, {
       asSystemRequest: true,
     });
   }
 
-  public findForJobIds = (jobIds: JobId[]): Promise<SourceJob[]> => {
+  public findForJobIds = (jobIds: JobId[]): Promise<ReportDocument[]> => {
     return this.http.fetch(`${API_LIST_URL}/list`, {
       query: { page: 0, ids: jobIds.join(',') },
       method: 'GET',
@@ -159,9 +132,10 @@ export class ReportingAPIClient {
     return resp;
   };
 
-  public getManagementLink = () => this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
+  public getManagementLink: ManagementLinkFn = () =>
+    this.http.basePath.prepend(REPORTING_MANAGEMENT_HOME);
 
-  public getDownloadLink = (jobId: JobId) =>
+  public getDownloadLink: DownloadReportFn = (jobId: JobId) =>
     this.http.basePath.prepend(`${API_LIST_URL}/download/${jobId}`);
 
   /*

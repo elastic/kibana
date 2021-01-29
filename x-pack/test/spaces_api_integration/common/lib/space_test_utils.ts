@@ -13,3 +13,24 @@ export function getUrlPrefix(spaceId?: string) {
 export function getIdPrefix(spaceId?: string) {
   return spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}-`;
 }
+
+export function getTestScenariosForSpace(spaceId: string) {
+  const explicitScenario = {
+    spaceId,
+    urlPrefix: `/s/${spaceId}`,
+    scenario: `when referencing the ${spaceId} space explicitly in the URL`,
+  };
+
+  if (spaceId === DEFAULT_SPACE_ID) {
+    return [
+      {
+        spaceId,
+        urlPrefix: ``,
+        scenario: 'when referencing the default space implicitly',
+      },
+      explicitScenario,
+    ];
+  }
+
+  return [explicitScenario];
+}

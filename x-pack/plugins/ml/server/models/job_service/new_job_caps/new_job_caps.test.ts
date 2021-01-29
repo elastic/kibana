@@ -48,42 +48,38 @@ describe('job_service - job_caps', () => {
   });
 
   describe('farequote newJobCaps()', () => {
-    it('can get job caps for index pattern', async (done) => {
+    it('can get job caps for index pattern', async () => {
       const indexPattern = 'farequote-*';
       const isRollup = false;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(farequoteJobCaps);
-      done();
     });
 
-    it('can get rollup job caps for non rollup index pattern', async (done) => {
+    it('can get rollup job caps for non rollup index pattern', async () => {
       const indexPattern = 'farequote-*';
       const isRollup = true;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(farequoteJobCapsEmpty);
-      done();
     });
   });
 
   describe('cloudwatch newJobCaps()', () => {
-    it('can get rollup job caps for rollup index pattern', async (done) => {
+    it('can get rollup job caps for rollup index pattern', async () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = true;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).toEqual(cloudwatchJobCaps);
-      done();
     });
 
-    it('can get non rollup job caps for rollup index pattern', async (done) => {
+    it('can get non rollup job caps for rollup index pattern', async () => {
       const indexPattern = 'cloud_roll_index';
       const isRollup = false;
       const { newJobCaps } = newJobCapsProvider(mlClusterClientRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, savedObjectsClientMock);
       expect(response).not.toEqual(cloudwatchJobCaps);
-      done();
     });
   });
 });

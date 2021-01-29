@@ -7,8 +7,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { ApmIndices } from '.';
-import * as hooks from '../../../../hooks/useFetcher';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as hooks from '../../../../hooks/use_fetcher';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
@@ -24,11 +24,11 @@ describe('ApmIndices', () => {
     );
 
     expect(getByText('Indices')).toMatchInlineSnapshot(`
-      <h2
-        class="euiTitle euiTitle--medium"
+      <h1
+        class="euiTitle euiTitle--large"
       >
         Indices
-      </h2>
+      </h1>
     `);
 
     expect(spy).toHaveBeenCalledTimes(2);

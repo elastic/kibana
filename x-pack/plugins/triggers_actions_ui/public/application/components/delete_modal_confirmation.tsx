@@ -5,9 +5,9 @@
  */
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
-import { useAppDependencies } from '../app_context';
+import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -17,6 +17,7 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  setIsLoadingState,
 }: {
   idsToDelete: string[];
   apiDeleteCall: ({
@@ -31,10 +32,20 @@ export const DeleteModalConfirmation = ({
   onErrors: () => void;
   singleTitle: string;
   multipleTitle: string;
+  setIsLoadingState: (isLoading: boolean) => void;
 }) => {
-  const { http, toastNotifications } = useAppDependencies();
+  const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
+
+  useEffect(() => {
+    setDeleteModalVisibility(idsToDelete.length > 0);
+  }, [idsToDelete]);
+
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const numIdsToDelete = idsToDelete.length;
-  if (!numIdsToDelete) {
+  if (!deleteModalFlyoutVisible) {
     return null;
   }
   const confirmModalText = i18n.translate(
@@ -65,14 +76,20 @@ export const DeleteModalConfirmation = ({
         buttonColor="danger"
         data-test-subj="deleteIdsConfirmation"
         title={confirmButtonText}
-        onCancel={() => onCancel()}
+        onCancel={() => {
+          setDeleteModalVisibility(false);
+          onCancel();
+        }}
         onConfirm={async () => {
+          setDeleteModalVisibility(false);
+          setIsLoadingState(true);
           const { successes, errors } = await apiDeleteCall({ ids: idsToDelete, http });
+          setIsLoadingState(false);
+
           const numSuccesses = successes.length;
           const numErrors = errors.length;
-          onDeleted(successes);
           if (numSuccesses > 0) {
-            toastNotifications.addSuccess(
+            toasts.addSuccess(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
                 {
@@ -85,7 +102,7 @@ export const DeleteModalConfirmation = ({
           }
 
           if (numErrors > 0) {
-            toastNotifications.addDanger(
+            toasts.addDanger(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
                 {
@@ -95,8 +112,9 @@ export const DeleteModalConfirmation = ({
                 }
               )
             );
-            onErrors();
+            await onErrors();
           }
+          await onDeleted(successes);
         }}
         cancelButtonText={cancelButtonText}
         confirmButtonText={confirmButtonText}

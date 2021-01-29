@@ -7,7 +7,7 @@
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
@@ -47,7 +47,7 @@ TimeRuler.displayName = 'TimeRuler';
 const TimeRulerTickLabel = euiStyled.text`
   font-size: 9px;
   line-height: ${(props) => props.theme.eui.euiLineHeight};
-  fill: ${(props) => props.theme.eui.textColors.subdued};
+  fill: ${(props) => props.theme.eui.euiTextSubduedColor};
   user-select: none;
   pointer-events: none;
 `;

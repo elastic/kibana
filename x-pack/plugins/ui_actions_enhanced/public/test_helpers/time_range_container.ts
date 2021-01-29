@@ -17,7 +17,6 @@ import { TimeRange } from '../../../../../src/plugins/data/public';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InheritedChildrenInput = {
   timeRange: TimeRange;
   id?: string;

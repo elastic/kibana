@@ -27,10 +27,7 @@ import {
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import {
-  EuiTheme,
-  withTheme,
-} from '../../../../../../../../../legacy/common/eui_styled_components';
+import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 interface SelectedOption {
   label: string;

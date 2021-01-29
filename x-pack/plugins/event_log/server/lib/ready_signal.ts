@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ReadySignal<T> {
+export interface ReadySignal<T = void> {
   wait(): Promise<T>;
   signal(value: T): void;
 }

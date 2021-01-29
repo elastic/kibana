@@ -6,15 +6,15 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { IngestManagerStart } from '../../../../ingest_manager/public';
+import { FleetStart } from '../../../../fleet/public';
 
 export const Setup: React.FunctionComponent<{
-  ingestManager: IngestManagerStart;
+  fleet: FleetStart;
   notifications: NotificationsStart;
-}> = ({ ingestManager, notifications }) => {
+}> = ({ fleet, notifications }) => {
   React.useEffect(() => {
     const defaultText = i18n.translate('xpack.securitySolution.endpoint.ingestToastMessage', {
-      defaultMessage: 'Ingest Manager failed during its setup.',
+      defaultMessage: 'Fleet failed during its setup.',
     });
 
     const title = i18n.translate('xpack.securitySolution.endpoint.ingestToastTitle', {
@@ -32,8 +32,8 @@ export const Setup: React.FunctionComponent<{
       });
     };
 
-    ingestManager.isInitialized().catch((error: Error) => displayToastWithModal(error.message));
-  }, [ingestManager, notifications.toasts]);
+    fleet.isInitialized().catch((error: Error) => displayToastWithModal(error.message));
+  }, [fleet, notifications.toasts]);
 
   return null;
 };

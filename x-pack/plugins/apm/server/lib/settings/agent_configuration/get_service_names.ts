@@ -9,17 +9,27 @@ import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
+import { getProcessorEventForAggregatedTransactions } from '../../helpers/aggregated_transactions';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
-export async function getServiceNames({ setup }: { setup: Setup }) {
-  const { apmEventClient } = setup;
+export async function getServiceNames({
+  setup,
+  searchAggregatedTransactions,
+}: {
+  setup: Setup;
+  searchAggregatedTransactions: boolean;
+}) {
+  const { apmEventClient, config } = setup;
+  const maxServiceSelection = config['xpack.apm.maxServiceSelection'];
 
   const params = {
     apm: {
       events: [
-        ProcessorEvent.transaction,
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -31,7 +41,7 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 50,
+            size: maxServiceSelection,
             min_doc_count: 0,
           },
         },

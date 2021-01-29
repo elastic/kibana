@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "__packages_do_not_import__/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "static/**/*"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+  ]
+}

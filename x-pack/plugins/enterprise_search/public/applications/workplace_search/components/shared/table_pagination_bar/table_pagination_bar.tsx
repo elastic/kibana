@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 
-interface ITablePaginationBarProps {
+interface TablePaginationBarProps {
   itemLabel?: string;
   itemsPerPage?: number;
   totalPages: number;
@@ -22,7 +22,7 @@ interface ITablePaginationBarProps {
 
 const MAX_PAGES = 100;
 
-export const TablePaginationBar: React.FC<ITablePaginationBarProps> = ({
+export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
   itemLabel = 'Items',
   itemsPerPage = 10,
   totalPages,

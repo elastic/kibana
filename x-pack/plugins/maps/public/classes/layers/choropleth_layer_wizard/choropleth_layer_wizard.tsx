@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerTemplate } from './layer_template';
+import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 
 export const choroplethLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.choropleth.desc', {
     defaultMessage: 'Shaded areas to compare statistics across boundaries',
   }),
-  icon: 'logoElasticsearch',
+  icon: ChoroplethLayerIcon,
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
     return <LayerTemplate {...renderWizardArguments} />;
   },

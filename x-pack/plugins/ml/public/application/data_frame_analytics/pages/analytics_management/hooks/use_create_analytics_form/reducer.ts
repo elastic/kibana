@@ -10,7 +10,7 @@ import { memoize } from 'lodash';
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { collapseLiteralStrings } from '../../../../../../../shared_imports';
 
 import { Action, ACTION } from './actions';
 import {
@@ -33,13 +33,13 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '../../../../../../../common/constants/validation';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import {
   getDependentVar,
   getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
-  ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
@@ -72,7 +72,7 @@ export function getModelMemoryLimitErrors(mmlValidationResult: any): string[] | 
     if (errorKey === 'min') {
       acc.push(
         i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryUnitsMinError', {
-          defaultMessage: 'Model memory limit cannot be lower than {mml}',
+          defaultMessage: 'Model memory limit is lower than estimated value {mml}',
           values: {
             mml: mmlValidationResult.min.minValue,
           },
@@ -425,12 +425,15 @@ const validateForm = (state: State): State => {
     dependentVariable === '';
 
   const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);
+  const mmlInvalid =
+    mmlValidationResult !== null &&
+    (mmlValidationResult.invalidUnits !== undefined || mmlValidationResult.required === true);
 
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
     !jobTypeEmpty &&
-    !mmlValidationResult &&
+    !mmlInvalid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -496,7 +499,6 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -539,15 +541,8 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });
 
-    case ACTION.SET_JOB_IDS: {
-      const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
-      return newState;
-    }
-
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
-      let { jobConfig } = state;
-      jobConfig = getJobConfigFromFormState(state.form);
+      const jobConfig = getJobConfigFromFormState(state.form);
       const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
 
       return validateAdvancedEditor({
@@ -560,7 +555,7 @@ export function reducer(state: State, action: Action): State {
       });
 
     case ACTION.SWITCH_TO_FORM:
-      const { jobConfig: config, jobIds } = state;
+      const { jobConfig: config } = state;
       const { jobId } = state.form;
       // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
@@ -569,7 +564,6 @@ export function reducer(state: State, action: Action): State {
         formState.jobId = jobId;
       }
 
-      formState.jobIdExists = jobIds.some((id) => formState.jobId === id);
       formState.jobIdEmpty = jobId === '';
       formState.jobIdValid = isJobIdValid(jobId);
       formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);

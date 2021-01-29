@@ -5,13 +5,13 @@
  */
 
 import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
-import { getESQueryPolicyResponseByHostID } from './service';
+import { getESQueryPolicyResponseByAgentID } from './service';
 
 describe('test policy handlers schema', () => {
   it('validate that get policy response query schema', async () => {
     expect(
       GetPolicyResponseSchema.query.validate({
-        hostId: 'id',
+        agentId: 'id',
       })
     ).toBeTruthy();
 
@@ -21,13 +21,13 @@ describe('test policy handlers schema', () => {
 
 describe('test policy query', () => {
   it('queries for the correct host', async () => {
-    const hostID = 'f757d3c0-e874-11ea-9ad9-015510b487f4';
-    const query = getESQueryPolicyResponseByHostID(hostID, 'anyindex');
-    expect(query.body.query.bool.filter.term).toEqual({ 'host.id': hostID });
+    const agentId = 'f757d3c0-e874-11ea-9ad9-015510b487f4';
+    const query = getESQueryPolicyResponseByAgentID(agentId, 'anyindex');
+    expect(query.body.query.bool.filter.term).toEqual({ 'agent.id': agentId });
   });
 
   it('filters out initial policy by ID', async () => {
-    const query = getESQueryPolicyResponseByHostID(
+    const query = getESQueryPolicyResponseByAgentID(
       'f757d3c0-e874-11ea-9ad9-015510b487f4',
       'anyindex'
     );

@@ -1,0 +1,200 @@
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:8a0a4a79-c1e3-4d13-951a-36c168b4be87", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-17T09:46:00.818Z", 
+   "fleet-agents": {
+    "config_id": "25129070-f8c9-11ea-b3d9-2d2b39f3a393", 
+    "default_api_key": "/XDWfZFwXdENtpxpo74Rl5fjAFX0mL8cwrPmOXXPtnri/QW6591rkVO7wcsZe8zN4A4Ld4SXBw1EpBMQILwtL2jVBj/t34qjXJDcQFkAf6CPmO1YP3ilC/L49tGQX0J3MTLVoSmwo/N9ni8v/ywdl8IkhB4dqTp6me/SrL+I31D6vUFxYupWdlg=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-17T09:37:50.171Z", 
+    "default_api_key_id": "oShtm3QBy3Gd1kyfzhpC", 
+    "last_checkin": "2020-09-17T09:46:00.818Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "_8ptm3QB3yUjiqk7XrOs", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-7-158.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "10.0.7.158/22", 
+       "fdbb:cb5c:fb4:68:250:56ff:feb1:371f/64", 
+       "fe80::250:56ff:feb1:371f/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-7-158.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:37:1f"
+      ], 
+      "architecture": "x86_64", 
+      "id": "739e447fc6963034621b714c584eccc1"
+     }, 
+     "os": {
+      "kernel": "4.15.0-38-generic", 
+      "full": "Ubuntu bionic(18.04.1 LTS (Bionic Beaver))", 
+      "name": "Ubuntu", 
+      "family": "debian", 
+      "platform": "ubuntu", 
+      "version": "18.04.1 LTS (Bionic Beaver)"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.0", 
+       "id": "8a0a4a79-c1e3-4d13-951a-36c168b4be87"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:f490a4f2-5022-4a15-b447-86204ebbdd35", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-17T09:46:00.818Z", 
+   "fleet-agents": {
+    "config_id": "25129070-f8c9-11ea-b3d9-2d2b39f3a393", 
+    "default_api_key": "S3lDCj6T1USDsJUQfe/W77/D0sDl6V6K4n+Sk6WxUlev1cInze2xS3DVqETXdK0n4hQrTuBwVMjroXf8I329Yi1qevbPTGH7NhR/dhAPWOQfuVWCWh3auRdBLF3vwupqFZXJPfmo4XFA+nL0o/DHgmhPK6Ur0aKQowrCYOyvSEu9krK1AtPfK8k=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-17T09:38:06.809Z", 
+    "default_api_key_id": "xihum3QBy3Gd1kyfaiLd", 
+    "last_checkin": "2020-09-17T09:46:00.818Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "WMptm3QB3yUjiqk7n7R7", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "mainqa-atlcolo-10-0-7-116.eng.endgames.local", 
+      "ip": [
+       "127.0.0.1/8", 
+       "::1/128", 
+       "fe80::1/64", 
+       "fe80::4de:9ad6:320f:79f5/64", 
+       "fdbb:cb5c:fb4:68:1ca7:3a67:de43:950c/64", 
+       "10.0.7.116/22", 
+       "fdbb:cb5c:fb4:68:3d24:2d96:b634:3165/64", 
+       "fdbb:cb5c:fb4:68:6896:8ae7:78be:f9d0/64", 
+       "fdbb:cb5c:fb4:68:78d9:60b3:632c:c908/64", 
+       "fdbb:cb5c:fb4:68:f1a6:a826:7f63:6b77/64", 
+       "fdbb:cb5c:fb4:68:997d:b66b:2555:6bb7/64", 
+       "fdbb:cb5c:fb4:68:4c21:58bc:9122:1adf/64", 
+       "fdbb:cb5c:fb4:68:d536:51f3:fcbe:7f3/64"
+      ], 
+      "hostname": "mainqa-atlcolo-10-0-7-116.eng.endgames.local", 
+      "mac": [
+       "00:50:56:b1:7e:49"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4231B1A9-25CB-4157-CF54-6BCD11C742E0"
+     }, 
+     "os": {
+      "kernel": "18.2.0", 
+      "full": "Mac OS X(10.14.1)", 
+      "name": "Mac OS X", 
+      "family": "darwin", 
+      "platform": "darwin", 
+      "version": "10.14.1"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.0", 
+       "id": "f490a4f2-5022-4a15-b447-86204ebbdd35"
+      }
+     }
+    }
+   }
+  }
+ }
+}
+
+{
+ "type": "doc", 
+ "value": {
+  "index": ".kibana_1", 
+  "type": "_doc", 
+  "id": "fleet-agents:58bed8d4-fba1-40fa-a7b0-1ceec2fb89e5", 
+  "source": {
+   "type": "fleet-agents", 
+   "references": [], 
+   "updated_at": "2020-09-17T09:46:00.946Z", 
+   "fleet-agents": {
+    "config_id": "25129070-f8c9-11ea-b3d9-2d2b39f3a393", 
+    "default_api_key": "vAM73FEHbqUVOnjN4FY0jdI0EtE+7MLqN5rNj4n6TJRz1Shx3rhNnDi6S555R9pGR2ZLtN57j9Z+5sO4nT9DYW3h8RK4Z15ifgnEvNVFR1Lsp7S/GUbPM6ooQMgNo63eoU8plYSfh1/98Cbe4dOwe+FhB5tbwGK1GqWb2TOshzH01JUbvfKb5jc=", 
+    "current_error_events": "[]", 
+    "config_revision": 1, 
+    "enrolled_at": "2020-09-17T09:37:19.476Z", 
+    "default_api_key_id": "LChtm3QBy3Gd1kyfGhoG", 
+    "last_checkin": "2020-09-17T09:46:00.818Z", 
+    "active": true, 
+    "user_provided_metadata": {}, 
+    "access_api_key_id": "xspsm3QB3yUjiqk75rL_", 
+    "packages": [
+     "system"
+    ], 
+    "type": "PERMANENT", 
+    "local_metadata": {
+     "host": {
+      "name": "DESKTOP-QBBSCUT", 
+      "ip": [
+       "fdbb:cb5c:fb4:68:6ca6:5ea3:ae36:af51/64", 
+       "fdbb:cb5c:fb4:68:2c1b:d329:2b41:de28/128", 
+       "fdbb:cb5c:fb4:68:6d89:d2f8:2825:d739/128", 
+       "fdbb:cb5c:fb4:68:a484:d8c6:87c:c2ee/128", 
+       "fdbb:cb5c:fb4:68:b03f:b84f:8b8a:77b9/128", 
+       "fdbb:cb5c:fb4:68:b42f:f72:b857:40e9/128", 
+       "fdbb:cb5c:fb4:68:e9b5:f8c7:f06d:6fe1/128", 
+       "fdbb:cb5c:fb4:68:f05b:8555:cc24:dfa4/128", 
+       "fe80::6ca6:5ea3:ae36:af51/64", 
+       "10.0.7.235/22", 
+       "::1/128", 
+       "127.0.0.1/8"
+      ], 
+      "hostname": "DESKTOP-QBBSCUT", 
+      "mac": [
+       "00:50:56:b1:65:cb"
+      ], 
+      "architecture": "x86_64", 
+      "id": "4143c277-074e-47a9-b37d-37f94b508705"
+     }, 
+     "os": {
+      "kernel": "10.0.18362.1082 (WinBuild.160101.0800)", 
+      "full": "Windows 10 Pro(10.0)", 
+      "name": "Windows 10 Pro", 
+      "family": "windows", 
+      "platform": "windows", 
+      "version": "10.0"
+     }, 
+     "elastic": {
+      "agent": {
+       "version": "7.9.0", 
+       "id": "58bed8d4-fba1-40fa-a7b0-1ceec2fb89e5"
+      }
+     }
+    }
+   }
+  }
+ }
+}

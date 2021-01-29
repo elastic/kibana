@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'src/core/public';
+import type { HttpHandler } from 'src/core/public';
 import {
   getLogSourceConfigurationPath,
   patchLogSourceConfigurationSuccessResponsePayloadRT,
@@ -16,7 +16,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 export const callPatchLogSourceConfigurationAPI = async (
   sourceId: string,
   patchedProperties: LogSourceConfigurationPropertiesPatch,
-  fetch: HttpSetup['fetch']
+  fetch: HttpHandler
 ) => {
   const response = await fetch(getLogSourceConfigurationPath(sourceId), {
     method: 'PATCH',

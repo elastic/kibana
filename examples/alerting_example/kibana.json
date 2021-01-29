@@ -1,9 +1,0 @@
-{
-  "id": "alertingExample",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["triggers_actions_ui", "charts", "data", "alerts", "actions", "features", "developerExamples"],
-  "optionalPlugins": []
-}

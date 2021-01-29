@@ -4,43 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
-
-/**
- * When the user wants to bring a process node front-and-center on the map.
- */
-interface UserBroughtProcessIntoView {
-  readonly type: 'userBroughtProcessIntoView';
-  readonly payload: {
-    /**
-     * Used to identify the process node that should be brought into view.
-     */
-    readonly process: ResolverEvent;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
-
-/**
- * When an examination of query params in the UI indicates that state needs to
- * be updated to reflect the new selection
- */
-interface AppDetectedNewIdFromQueryParams {
-  readonly type: 'appDetectedNewIdFromQueryParams';
-  readonly payload: {
-    /**
-     * Used to identify the process the process that should be synced with state.
-     */
-    readonly process: ResolverEvent;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
 
 /**
  * The action dispatched when the app requests related event data for one
@@ -48,15 +12,6 @@ interface AppDetectedNewIdFromQueryParams {
  */
 interface UserRequestedRelatedEventData {
   readonly type: 'userRequestedRelatedEventData';
-  readonly payload: string;
-}
-
-/**
- * The action dispatched when the app requests related event data for one
- * subject (whose entity_id should be included as `payload`)
- */
-interface AppDetectedMissingEventData {
-  readonly type: 'appDetectedMissingEventData';
   readonly payload: string;
 }
 
@@ -70,8 +25,16 @@ interface AppDetectedMissingEventData {
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
 
-  /** focused nodeID */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
 }
 
 /**
@@ -82,22 +45,15 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  /**
-   * The nodeID (aka entity_id) that was select.
-   */
-  readonly payload: string;
-}
-
-/**
- * This action should dispatch to indicate that the user chose to
- * focus on examining the related events of a particular ResolverEvent.
- * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
- */
-interface UserSelectedRelatedEventCategory {
-  readonly type: 'userSelectedRelatedEventCategory';
   readonly payload: {
-    subject: SafeResolverEvent;
-    category?: string;
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
   };
 }
 
@@ -130,6 +86,12 @@ interface AppReceivedNewExternalProperties {
      * Indices that the backend will use to find the document.
      */
     indices: string[];
+
+    shouldUpdate: boolean;
+    filters: {
+      from?: string;
+      to?: string;
+    };
   };
 }
 
@@ -137,10 +99,6 @@ export type ResolverAction =
   | CameraAction
   | DataAction
   | AppReceivedNewExternalProperties
-  | UserBroughtProcessIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory
-  | AppDetectedNewIdFromQueryParams
-  | AppDetectedMissingEventData;
+  | UserRequestedRelatedEventData;

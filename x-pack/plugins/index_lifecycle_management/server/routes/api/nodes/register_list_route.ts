@@ -4,35 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
+import { ListNodesRouteResponse, DataTierRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-function convertStatsIntoList(stats: any, disallowedNodeAttributes: string[]): any {
-  return Object.entries(stats.nodes).reduce((accum: any, [nodeId, nodeStats]: [any, any]) => {
-    const attributes = nodeStats.attributes || {};
-    for (const [key, value] of Object.entries(attributes)) {
-      const isNodeAttributeAllowed = !disallowedNodeAttributes.includes(key);
-      if (isNodeAttributeAllowed) {
-        const attributeString = `${key}:${value}`;
-        accum[attributeString] = accum[attributeString] || [];
-        accum[attributeString].push(nodeId);
-      }
-    }
-    return accum;
-  }, {});
-}
-
-async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  const params = {
-    format: 'json',
+interface Settings {
+  nodes: {
+    [nodeId: string]: {
+      attributes: Record<string, string>;
+      roles: string[];
+      settings: {
+        node: {
+          data?: string;
+        };
+      };
+    };
   };
-
-  return await callAsCurrentUser('nodes.stats', params);
 }
 
-export function registerListRoute({ router, config, license, lib }: RouteDependencies) {
+export function convertSettingsIntoLists(
+  settings: Settings,
+  disallowedNodeAttributes: string[]
+): ListNodesRouteResponse {
+  return Object.entries(settings.nodes).reduce(
+    (accum, [nodeId, nodeSettings]) => {
+      const attributes = nodeSettings.attributes || {};
+      for (const [key, value] of Object.entries(attributes)) {
+        const isNodeAttributeAllowed = !disallowedNodeAttributes.includes(key);
+        if (isNodeAttributeAllowed) {
+          const attributeString = `${key}:${value}`;
+          accum.nodesByAttributes[attributeString] = accum.nodesByAttributes[attributeString] ?? [];
+          accum.nodesByAttributes[attributeString].push(nodeId);
+        }
+      }
+
+      const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as DataTierRole[];
+      for (const role of dataRoles) {
+        accum.nodesByRoles[role as DataTierRole] = accum.nodesByRoles[role] ?? [];
+        accum.nodesByRoles[role as DataTierRole]!.push(nodeId);
+      }
+
+      // If we detect a single node using legacy "data:true" setting we know we are not using data roles for
+      // data allocation.
+      if (nodeSettings.settings?.node?.data === 'true') {
+        accum.isUsingDeprecatedDataRoleConfig = true;
+      }
+
+      return accum;
+    },
+    {
+      nodesByAttributes: {},
+      nodesByRoles: {},
+      // Start with assumption that we are not using deprecated config
+      isUsingDeprecatedDataRoleConfig: false,
+    } as ListNodesRouteResponse
+  );
+}
+
+export function registerListRoute({
+  router,
+  config,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   const { filteredNodeAttributes } = config;
 
   const NODE_ATTRS_KEYS_TO_IGNORE: string[] = [
@@ -51,20 +86,22 @@ export function registerListRoute({ router, config, license, lib }: RouteDepende
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const stats = await fetchNodeStats(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
+        const settingsResponse = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+          {
+            method: 'GET',
+            path: '/_nodes/settings',
+            querystring: {
+              format: 'json',
+            },
+          }
         );
-        const okResponse = { body: convertStatsIntoList(stats, disallowedNodeAttributes) };
-        return response.ok(okResponse);
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+        const body: ListNodesRouteResponse = convertSettingsIntoLists(
+          settingsResponse.body as Settings,
+          disallowedNodeAttributes
+        );
+        return response.ok({ body });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

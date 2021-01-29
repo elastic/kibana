@@ -10,6 +10,5 @@ export {
   UseRequestConfig,
   sendRequest,
   useRequest,
+  XJson,
 } from '../../../../../src/plugins/es_ui_shared/public';
-
-export { useXJsonMode } from '../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';

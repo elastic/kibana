@@ -20,8 +20,9 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { getLayerList } from './LayerList';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useLayerList } from './useLayerList';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
 import { useMapFilters } from './useMapFilters';
@@ -50,18 +51,21 @@ interface KibanaDeps {
 }
 export function EmbeddedMapComponent() {
   const { urlParams } = useUrlParams();
+  const apmPluginContext = useApmPluginContext();
 
   const { start, end, serviceName } = urlParams;
 
   const mapFilters = useMapFilters();
 
+  const layerList = useLayerList();
+
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<
-    HTMLDivElement
-  >(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
+    null
+  );
 
   const {
     services: { embeddable: embeddablePlugin },
@@ -75,6 +79,7 @@ export function EmbeddedMapComponent() {
   );
 
   const input: MapEmbeddableInput = {
+    attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
     refreshConfig: {
@@ -148,7 +153,13 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList());
+        const basemapLayerDescriptor = apmPluginContext.plugins.maps
+          ? await apmPluginContext.plugins.maps.createLayerDescriptors.createBasemapLayerDescriptor()
+          : null;
+        if (basemapLayerDescriptor) {
+          layerList.unshift(basemapLayerDescriptor);
+        }
+        await embeddableObject.setLayerList(layerList);
       }
 
       setEmbeddable(embeddableObject);
@@ -162,10 +173,10 @@ export function EmbeddedMapComponent() {
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
+    if (embeddableRoot.current && embeddable && serviceName) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable, embeddableRoot]);
+  }, [embeddable, embeddableRoot, serviceName]);
 
   return (
     <EmbeddedPanel>

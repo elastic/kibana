@@ -75,8 +75,9 @@ export function BreakdownFilter({
   const onOptionChange = (value: string) => {
     if (value === NO_BREAKDOWN) {
       onBreakdownChange(null);
+    } else {
+      onBreakdownChange(items.find(({ fieldName }) => fieldName === value)!);
     }
-    onBreakdownChange(items.find(({ fieldName }) => fieldName === value)!);
   };
 
   return (

@@ -42,7 +42,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
           <EuiFormRow
             label={strings.getFormLabel()}
             helpText={strings.getFormDescription()}
-            compressed
+            display="rowCompressed"
           >
             <EuiFieldText
               isInvalid={isInvalid}
@@ -54,7 +54,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={true} compressed>
+          <EuiFormRow hasEmptyLabelSpace={true} display="rowCompressed">
             <EuiButton
               disabled={isInvalid}
               size={buttonSize}

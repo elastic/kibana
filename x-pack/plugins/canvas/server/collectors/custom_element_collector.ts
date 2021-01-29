@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
 import { get } from 'lodash';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
@@ -19,7 +20,7 @@ interface CustomElementSearch {
   [CUSTOM_ELEMENT_TYPE]: TelemetryCustomElementDocument;
 }
 
-interface CustomElementTelemetry {
+export interface CustomElementTelemetry {
   custom_elements?: {
     count: number;
     elements: {
@@ -30,6 +31,18 @@ interface CustomElementTelemetry {
     functions_in_use: string[];
   };
 }
+
+export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
+  custom_elements: {
+    count: { type: 'long' },
+    elements: {
+      min: { type: 'long' },
+      max: { type: 'long' },
+      avg: { type: 'float' },
+    },
+    functions_in_use: { type: 'array', items: { type: 'keyword' } },
+  },
+};
 
 function isCustomElement(maybeCustomElement: any): maybeCustomElement is TelemetryCustomElement {
   return (
@@ -101,9 +114,9 @@ export function summarizeCustomElements(
 
 const customElementCollector: TelemetryCollector = async function customElementCollector(
   kibanaIndex,
-  callCluster
+  esClient
 ) {
-  const customElementParams: SearchParams = {
+  const customElementParams = {
     size: 10000,
     index: kibanaIndex,
     ignoreUnavailable: true,
@@ -111,7 +124,9 @@ const customElementCollector: TelemetryCollector = async function customElementC
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
+  const { body: esResponse } = await esClient.search<SearchResponse<CustomElementSearch>>(
+    customElementParams
+  );
 
   if (get(esResponse, 'hits.hits.length') > 0) {
     const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);

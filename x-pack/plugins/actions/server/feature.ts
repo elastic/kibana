@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export const ACTIONS_FEATURE = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Actions',
+    defaultMessage: 'Actions and Connectors',
   }),
-  icon: 'bell',
-  navLinkId: 'actions',
+  category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {
     insightsAndAlerting: ['triggersActions'],

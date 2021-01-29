@@ -4,86 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../../common/store';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
-  DetailItem,
-  TimelineQueries,
-  TimelineDetailsRequestOptions,
-  TimelineDetailsStrategyResponse,
+  TimelineEventsDetailsItem,
+  TimelineEventsQueries,
+  TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 export interface EventsArgs {
-  detailsData: DetailItem[] | null;
-  loading: boolean;
+  detailsData: TimelineEventsDetailsItem[] | null;
 }
 
-export interface TimelineDetailsProps {
+export interface UseTimelineEventsDetailsProps {
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
-  executeQuery: boolean;
+  skip: boolean;
 }
 
-const getDetailsEvent = memoizeOne(
-  (variables: string, detail: DetailItem[]): DetailItem[] => detail
-);
-
-export const useTimelineDetails = ({
+export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
   eventId,
-  executeQuery,
-}: TimelineDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  skip,
+}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [timelineDetailsRequest, setTimelineDetailsRequest] = useState<
-    TimelineDetailsRequestOptions
-  >({
-    defaultIndex,
-    docValueFields,
-    executeQuery,
-    indexName,
-    eventId,
-    factoryQueryType: TimelineQueries.details,
-  });
+  const [
+    timelineDetailsRequest,
+    setTimelineDetailsRequest,
+  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
 
   const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
     null
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null || skip || isEmpty(request.eventId)) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
 
         const searchSubscription$ = data.search
-          .search<TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse>(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            request,
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+              abortSignal: abortCtrl.current.signal,
+            }
+          )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
-                  setTimelineDetailsResponse(
-                    getDetailsEvent(JSON.stringify(timelineDetailsRequest), response.data || [])
-                  );
+                  setTimelineDetailsResponse(response.data || []);
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -92,8 +85,13 @@ export const useTimelineDetails = ({
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger('Failed to run search');
+              }
             },
           });
       };
@@ -105,28 +103,28 @@ export const useTimelineDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts, timelineDetailsRequest]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
         docValueFields,
         indexName,
         eventId,
+        factoryQueryType: TimelineEventsQueries.details,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
-    if (executeQuery) timelineDetailsSearch(timelineDetailsRequest);
-  }, [executeQuery, timelineDetailsRequest, timelineDetailsSearch]);
+    timelineDetailsSearch(timelineDetailsRequest);
+  }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];
 };

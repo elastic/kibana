@@ -26,7 +26,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, tags: ['unique'] });
+        .send({ ...postCaseReq, tags: ['unique'] })
+        .expect(200);
 
       const { body } = await supertest
         .get(CASE_TAGS_URL)

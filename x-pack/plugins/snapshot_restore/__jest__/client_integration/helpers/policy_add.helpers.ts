@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 import { PolicyAdd } from '../../../public/application/sections/policy_add';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 import { WithAppDependencies } from './setup_environment';

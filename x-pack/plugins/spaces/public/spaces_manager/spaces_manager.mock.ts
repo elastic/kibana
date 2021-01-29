@@ -5,7 +5,7 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { Space } from '../../common/model/space';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from './spaces_manager';
 
 function createSpacesManagerMock() {
@@ -21,6 +21,7 @@ function createSpacesManagerMock() {
     shareSavedObjectAdd: jest.fn().mockResolvedValue(undefined),
     shareSavedObjectRemove: jest.fn().mockResolvedValue(undefined),
     resolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(undefined),
+    getShareSavedObjectPermissions: jest.fn().mockResolvedValue(undefined),
     redirectToSpaceSelector: jest.fn().mockResolvedValue(undefined),
   } as unknown) as jest.Mocked<SpacesManager>;
 }

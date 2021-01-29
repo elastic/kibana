@@ -17,12 +17,12 @@ import {
 import { CreateExceptionListSchema } from './create_exception_list_schema';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
-  _tags: [],
   description: DESCRIPTION,
   list_id: undefined,
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: [],
   tags: [],
   type: ENDPOINT_TYPE,
   version: VERSION,
@@ -45,4 +45,14 @@ export const getCreateExceptionListMinimalSchemaMockWithoutId = (): CreateExcept
   description: DESCRIPTION,
   name: NAME,
   type: ENDPOINT_TYPE,
+});
+
+/**
+ * Useful for end to end testing with detections
+ */
+export const getCreateExceptionListDetectionSchemaMock = (): CreateExceptionListSchema => ({
+  description: DESCRIPTION,
+  list_id: LIST_ID,
+  name: NAME,
+  type: 'detection',
 });

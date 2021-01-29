@@ -94,6 +94,10 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
     }
 
+    public async assertJobRowMapButtonExists(analyticsId: string) {
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+    }
+
     public async assertJobRowViewButtonEnabled(analyticsId: string, expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled(
         this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton')
@@ -110,6 +114,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await this.assertJobRowViewButtonExists(analyticsId);
       await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
+    }
+
+    public async openMapView(analyticsId: string) {
+      await this.assertJobRowMapButtonExists(analyticsId);
+      await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap', { timeout: 20 * 1000 });
     }
 
     public async assertAnalyticsSearchInputValue(expectedSearchValue: string) {

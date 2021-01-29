@@ -16,14 +16,16 @@
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement"
+    "indexPatternManagement",
+    "discover"
   ],
   "optionalPlugins": [
     "home",
     "security",
     "spaces",
     "management",
-    "licenseManagement"
+    "licenseManagement",
+    "maps"
   ],
   "server": true,
   "ui": true,
@@ -33,6 +35,11 @@
     "kibanaReact",
     "dashboard",
     "savedObjects",
-    "home"
+    "home",
+    "spaces",
+    "maps"
+  ],
+  "extraPublicDirs": [
+    "common"
   ]
 }

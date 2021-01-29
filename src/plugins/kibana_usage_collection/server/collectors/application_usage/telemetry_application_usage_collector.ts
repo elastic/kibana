@@ -1,48 +1,56 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import moment from 'moment';
-import { ISavedObjectsRepository, SavedObjectsServiceSetup } from 'kibana/server';
+import { timer } from 'rxjs';
+import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { findAll } from '../find_all';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { serializeKey } from './rollups';
+
 import {
+  ApplicationUsageDaily,
   ApplicationUsageTotal,
   ApplicationUsageTransactional,
   registerMappings,
+  SAVED_OBJECTS_DAILY_TYPE,
+  SAVED_OBJECTS_TOTAL_TYPE,
+  SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
+import { rollDailyData, rollTotals } from './rollups';
+import {
+  ROLL_TOTAL_INDICES_INTERVAL,
+  ROLL_DAILY_INDICES_INTERVAL,
+  ROLL_INDICES_START,
+} from './constants';
 
-/**
- * Roll indices every 24h
- */
-export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+export interface ApplicationViewUsage {
+  appId: string;
+  viewId: string;
+  clicks_total: number;
+  clicks_7_days: number;
+  clicks_30_days: number;
+  clicks_90_days: number;
+  minutes_on_screen_total: number;
+  minutes_on_screen_7_days: number;
+  minutes_on_screen_30_days: number;
+  minutes_on_screen_90_days: number;
+}
 
-/**
- * Start rolling indices after 5 minutes up
- */
-export const ROLL_INDICES_START = 5 * 60 * 1000;
-
-export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
-export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
+export interface ApplicationUsageViews {
+  [serializedKey: string]: ApplicationViewUsage;
+}
 
 export interface ApplicationUsageTelemetryReport {
   [appId: string]: {
+    appId: string;
+    viewId: string;
     clicks_total: number;
     clicks_7_days: number;
     clicks_30_days: number;
@@ -51,10 +59,33 @@ export interface ApplicationUsageTelemetryReport {
     minutes_on_screen_7_days: number;
     minutes_on_screen_30_days: number;
     minutes_on_screen_90_days: number;
+    views?: ApplicationViewUsage[];
   };
 }
 
+export const transformByApplicationViews = (
+  report: ApplicationUsageViews
+): ApplicationUsageTelemetryReport => {
+  const reportMetrics = Object.values(report);
+  const mainApplications = reportMetrics.filter(
+    (appView) => appView.viewId === MAIN_APP_DEFAULT_VIEW_ID
+  );
+  const appViews = reportMetrics.filter((appView) => appView.viewId !== MAIN_APP_DEFAULT_VIEW_ID);
+
+  return mainApplications.reduce((acc, mainApplication) => {
+    const currentAppViews = appViews.filter((appView) => appView.appId === mainApplication.appId);
+
+    acc[mainApplication.appId] = {
+      ...mainApplication,
+      views: currentAppViews,
+    };
+
+    return acc;
+  }, {} as ApplicationUsageTelemetryReport);
+};
+
 export function registerApplicationUsageCollector(
+  logger: Logger,
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined
@@ -71,19 +102,43 @@ export function registerApplicationUsageCollector(
         if (typeof savedObjectsClient === 'undefined') {
           return;
         }
-        const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
-          findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
-          findAll<ApplicationUsageTransactional>(savedObjectsClient, {
+        const [
+          { saved_objects: rawApplicationUsageTotals },
+          { saved_objects: rawApplicationUsageDaily },
+          { saved_objects: rawApplicationUsageTransactional },
+        ] = await Promise.all([
+          savedObjectsClient.find<ApplicationUsageTotal>({
+            type: SAVED_OBJECTS_TOTAL_TYPE,
+            perPage: 10000, // We only have 44 apps for now. This limit is OK.
+          }),
+          savedObjectsClient.find<ApplicationUsageDaily>({
+            type: SAVED_OBJECTS_DAILY_TYPE,
+            perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
+          }),
+          savedObjectsClient.find<ApplicationUsageTransactional>({
             type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+            perPage: 10000, // If we have more than those, we won't report the rest (they'll be rolled up to the daily soon enough to become a problem)
           }),
         ]);
 
         const applicationUsageFromTotals = rawApplicationUsageTotals.reduce(
-          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks } }) => {
+          (
+            acc,
+            {
+              attributes: {
+                appId,
+                viewId = MAIN_APP_DEFAULT_VIEW_ID,
+                minutesOnScreen,
+                numberOfClicks,
+              },
+            }
+          ) => {
             const existing = acc[appId] || { clicks_total: 0, minutes_on_screen_total: 0 };
             return {
               ...acc,
-              [appId]: {
+              [serializeKey(appId, viewId)]: {
+                appId,
+                viewId,
                 clicks_total: numberOfClicks + existing.clicks_total,
                 clicks_7_days: 0,
                 clicks_30_days: 0,
@@ -101,9 +156,25 @@ export function registerApplicationUsageCollector(
         const nowMinus30 = moment().subtract(30, 'days');
         const nowMinus90 = moment().subtract(90, 'days');
 
-        const applicationUsage = rawApplicationUsageTransactional.reduce(
-          (acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
-            const existing = acc[appId] || {
+        const applicationUsage = [
+          ...rawApplicationUsageDaily,
+          ...rawApplicationUsageTransactional,
+        ].reduce(
+          (
+            acc,
+            {
+              attributes: {
+                appId,
+                viewId = MAIN_APP_DEFAULT_VIEW_ID,
+                minutesOnScreen,
+                numberOfClicks,
+                timestamp,
+              },
+            }
+          ) => {
+            const existing = acc[serializeKey(appId, viewId)] || {
+              appId,
+              viewId,
               clicks_total: 0,
               clicks_7_days: 0,
               clicks_30_days: 0,
@@ -114,7 +185,7 @@ export function registerApplicationUsageCollector(
               minutes_on_screen_90_days: 0,
             };
 
-            const timeOfEntry = moment(timestamp as string);
+            const timeOfEntry = moment(timestamp);
             const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
             const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
             const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
@@ -134,7 +205,7 @@ export function registerApplicationUsageCollector(
 
             return {
               ...acc,
-              [appId]: {
+              [serializeKey(appId, viewId)]: {
                 ...existing,
                 clicks_total: existing.clicks_total + numberOfClicks,
                 minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
@@ -147,72 +218,17 @@ export function registerApplicationUsageCollector(
           applicationUsageFromTotals
         );
 
-        return applicationUsage;
+        return transformByApplicationViews(applicationUsage);
       },
     }
   );
 
   usageCollection.registerCollector(collector);
 
-  setInterval(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_INTERVAL);
-  setTimeout(() => rollTotals(getSavedObjectsClient()), ROLL_INDICES_START);
-}
-
-async function rollTotals(savedObjectsClient?: ISavedObjectsRepository) {
-  if (!savedObjectsClient) {
-    return;
-  }
-
-  try {
-    const [rawApplicationUsageTotals, rawApplicationUsageTransactional] = await Promise.all([
-      findAll<ApplicationUsageTotal>(savedObjectsClient, { type: SAVED_OBJECTS_TOTAL_TYPE }),
-      findAll<ApplicationUsageTransactional>(savedObjectsClient, {
-        type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-        filter: `${SAVED_OBJECTS_TRANSACTIONAL_TYPE}.attributes.timestamp < now-90d`,
-      }),
-    ]);
-
-    const existingTotals = rawApplicationUsageTotals.reduce(
-      (acc, { attributes: { appId, numberOfClicks, minutesOnScreen } }) => {
-        return {
-          ...acc,
-          // No need to sum because there should be 1 document per appId only
-          [appId]: { appId, numberOfClicks, minutesOnScreen },
-        };
-      },
-      {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>
-    );
-
-    const totals = rawApplicationUsageTransactional.reduce((acc, { attributes, id }) => {
-      const { appId, numberOfClicks, minutesOnScreen } = attributes;
-
-      const existing = acc[appId] || { minutesOnScreen: 0, numberOfClicks: 0 };
-
-      return {
-        ...acc,
-        [appId]: {
-          appId,
-          numberOfClicks: numberOfClicks + existing.numberOfClicks,
-          minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
-        },
-      };
-    }, existingTotals);
-
-    await Promise.all([
-      Object.entries(totals).length &&
-        savedObjectsClient.bulkCreate<ApplicationUsageTotal>(
-          Object.entries(totals).map(([id, entry]) => ({
-            type: SAVED_OBJECTS_TOTAL_TYPE,
-            id,
-            attributes: entry,
-          })),
-          { overwrite: true }
-        ),
-      ...rawApplicationUsageTransactional.map(
-        ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_TRANSACTIONAL_TYPE, id) // There is no bulkDelete :(
-      ),
-    ]);
-  } catch (err) {
-    // Silent failure
-  }
+  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(() =>
+    rollDailyData(logger, getSavedObjectsClient())
+  );
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
+    rollTotals(logger, getSavedObjectsClient())
+  );
 }

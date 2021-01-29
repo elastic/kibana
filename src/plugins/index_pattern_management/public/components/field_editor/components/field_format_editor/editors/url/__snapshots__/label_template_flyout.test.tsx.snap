@@ -4,6 +4,7 @@ exports[`LabelTemplateFlyout should not render if not visible 1`] = `""`;
 
 exports[`LabelTemplateFlyout should render normally 1`] = `
 <EuiFlyout
+  data-test-subj="labelTemplateFlyoutTestSubj"
   onClose={[Function]}
 >
   <EuiFlyoutBody>

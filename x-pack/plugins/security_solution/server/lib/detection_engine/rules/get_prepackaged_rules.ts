@@ -15,6 +15,8 @@ import {
   AddPrepackagedRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { BadRequestError } from '../errors/bad_request_error';
+
+// TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
 
 /**
@@ -49,5 +51,7 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (rules = rawRules): AddPrepackagedRulesSchemaDecoded[] =>
-  validateAllPrepackagedRules(rules);
+export const getPrepackagedRules = (
+  // @ts-expect-error mock data is too loosely typed
+  rules: AddPrepackagedRulesSchema[] = rawRules
+): AddPrepackagedRulesSchemaDecoded[] => validateAllPrepackagedRules(rules);

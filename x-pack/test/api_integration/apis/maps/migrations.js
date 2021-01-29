@@ -41,7 +41,7 @@ export default function ({ getService }) {
           type: 'index-pattern',
         },
       ]);
-      expect(resp.body.migrationVersion).to.eql({ map: '7.9.0' });
+      expect(resp.body.migrationVersion).to.eql({ map: '7.10.0' });
       expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
     });
   });

@@ -10,6 +10,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockReportingCore, createMockLevelLogger } from '../../test_helpers';
 import { registerDiagnoseConfig } from './config';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -25,7 +26,11 @@ describe('POST /diagnose/config', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     mockSetupDeps = ({
       elasticsearch: {
@@ -35,7 +40,15 @@ describe('POST /diagnose/config', () => {
     } as unknown) as any;
 
     config = {
-      get: jest.fn(),
+      get: jest.fn().mockImplementation((...keys) => {
+        const key = keys.join('.');
+        switch (key) {
+          case 'queue.timeout':
+            return 120000;
+          case 'csv.maxSizeBytes':
+            return 1024;
+        }
+      }),
       kbnConfig: { get: jest.fn() },
     };
 

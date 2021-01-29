@@ -5,45 +5,41 @@
  */
 
 import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../../detections/components/alerts_histogram_panel/config';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { SetAbsoluteRangeDatePicker } from '../../../network/pages/types';
-import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import * as i18n from '../../pages/translations';
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: Filter[] = [];
-
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: IIndexPattern;
   /** Override all defaults, and only display this field */
   onlyField?: string;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   timelineId?: string;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   from,
   headerChildren,
   onlyField,
-  query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
+  query,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
   timelineId,
   to,
 }) => {
+  const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -51,14 +47,15 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({
-        id: setAbsoluteRangeDatePickerTarget,
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: setAbsoluteRangeDatePickerTarget,
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        })
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setAbsoluteRangeDatePicker]
+    [dispatch, setAbsoluteRangeDatePickerTarget]
   );
 
   return (

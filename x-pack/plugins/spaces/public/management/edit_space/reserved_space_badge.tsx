@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { isReservedSpace } from '../../../common';
-import { Space } from '../../../common/model/space';
 
 interface Props {
   space?: Space;
@@ -28,7 +28,9 @@ export const ReservedSpaceBadge = (props: Props) => {
           />
         }
       >
-        <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
+        <EuiBadge color="warning" iconType="questionInCircle" iconSide="right">
+          Reserved space
+        </EuiBadge>
       </EuiToolTip>
     );
   }

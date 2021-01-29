@@ -100,18 +100,6 @@ describe('update_exception_list_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "_tags" but return an array', () => {
-    const inputPayload = getUpdateExceptionListSchemaMock();
-    const outputPayload = getUpdateExceptionListSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
-    const decoded = updateExceptionListSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
   test('it should accept an undefined for "list_id" and generate a correct body not counting the uuid', () => {
     const inputPayload = getUpdateExceptionListSchemaMock();
     delete inputPayload.list_id;

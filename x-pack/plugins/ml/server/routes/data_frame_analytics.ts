@@ -8,19 +8,25 @@ import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
+import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
+  analyticsMapQuerySchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
+  jobsExistSchema,
 } from './schemas/data_analytics_schema';
+import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import { analyticsFeatureImportanceProvider } from '../models/data_frame_analytics/feature_importance';
+import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -32,10 +38,28 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
+function getAnalyticsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: GetAnalyticsMapArgs
+) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  return analytics.getAnalyticsMap(idOptions);
+}
+
+function getExtendedMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: ExtendAnalyticsMapArgs
+) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
+}
+
 /**
  * Routes for the data frame analytics
  */
-export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: RouteInitialization) {
   async function userCanDeleteIndex(
     client: IScopedClusterClient,
     destinationIndex: string
@@ -76,9 +100,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({ size: 1000 });
+        const { body } = await mlClient.getDataFrameAnalytics({ size: 1000 });
         return response.ok({
           body,
         });
@@ -107,10 +131,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+        const { body } = await mlClient.getDataFrameAnalytics({
           id: analyticsId,
         });
         return response.ok({
@@ -137,9 +161,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats({ size: 1000 });
+        const { body } = await mlClient.getDataFrameAnalyticsStats({ size: 1000 });
         return response.ok({
           body,
         });
@@ -168,10 +192,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await client.asInternalUser.ml.getDataFrameAnalyticsStats({
+        const { body } = await mlClient.getDataFrameAnalyticsStats({
           id: analyticsId,
         });
         return response.ok({
@@ -205,10 +229,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await client.asInternalUser.ml.putDataFrameAnalytics(
+        const { body } = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
             body: request.body,
@@ -243,9 +267,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.evaluateDataFrame(
+        const { body } = await mlClient.evaluateDataFrame(
           {
             body: request.body,
           },
@@ -280,11 +304,14 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await client.asInternalUser.ml.explainDataFrameAnalytics({
-          body: request.body,
-        });
+        const { body } = await mlClient.explainDataFrameAnalytics(
+          {
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
         return response.ok({
           body,
         });
@@ -314,7 +341,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response, context }) => {
       try {
         const { analyticsId } = request.params;
         const { deleteDestIndex, deleteDestIndexPattern } = request.query;
@@ -327,7 +354,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
 
         try {
           // Check if analyticsId is valid and get destination index
-          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics({
+          const { body } = await mlClient.getDataFrameAnalytics({
             id: analyticsId,
           });
           if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
@@ -375,7 +402,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         // Delete the data frame analytics
 
         try {
-          await client.asInternalUser.ml.deleteDataFrameAnalytics({
+          await mlClient.deleteDataFrameAnalytics({
             id: analyticsId,
           });
           analyticsJobDeleted.success = true;
@@ -415,10 +442,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await client.asInternalUser.ml.startDataFrameAnalytics({
+        const { body } = await mlClient.startDataFrameAnalytics({
           id: analyticsId,
         });
         return response.ok({
@@ -451,18 +478,13 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: { id: string; force?: boolean | undefined } = {
+        const { body } = await mlClient.stopDataFrameAnalytics({
           id: request.params.analyticsId,
-        };
-        // @ts-expect-error TODO: update types
-        if (request.url?.query?.force !== undefined) {
-          // @ts-expect-error TODO: update types
-          options.force = request.url.query.force;
-        }
+          force: request.query.force,
+        });
 
-        const { body } = await client.asInternalUser.ml.stopDataFrameAnalytics(options);
         return response.ok({
           body,
         });
@@ -492,10 +514,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await client.asInternalUser.ml.updateDataFrameAnalytics(
+        const { body } = await mlClient.updateDataFrameAnalytics(
           {
             id: analyticsId,
             body: request.body,
@@ -530,7 +552,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { analyticsId } = request.params;
         const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(client);
@@ -548,30 +570,96 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} /api/ml/data_frame/analytics/baseline Get analytics's feature importance baseline
-   * @apiName GetDataFrameAnalyticsBaseline
-   * @apiDescription Returns the baseline for data frame analytics job.
+   * @api {post} /api/ml/data_frame/analytics/job_exists Check whether jobs exists in current or any space
+   * @apiName JobExists
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   *                 If allSpaces is true, the check will look across all spaces.
    *
    * @apiSchema (params) analyticsIdSchema
    */
   router.post(
     {
-      path: '/api/ml/data_frame/analytics/{analyticsId}/baseline',
+      path: '/api/ml/data_frame/analytics/jobs_exist',
       validate: {
-        params: analyticsIdSchema,
+        body: jobsExistSchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const { analyticsId } = request.params;
-        const { getRegressionAnalyticsBaseline } = analyticsFeatureImportanceProvider(client);
-        const baseline = await getRegressionAnalyticsBaseline(analyticsId);
+        const { analyticsIds, allSpaces } = request.body;
+        const results: { [id: string]: boolean } = {};
+        for (const id of analyticsIds) {
+          try {
+            const { body } = allSpaces
+              ? await client.asInternalUser.ml.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                })
+              : await mlClient.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                });
+            results[id] = body.data_frame_analytics.length > 0;
+          } catch (error) {
+            if (error.statusCode !== 404) {
+              throw error;
+            }
+            results[id] = false;
+          }
+        }
 
         return response.ok({
-          body: { baseline },
+          body: { results },
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/map/:analyticsId Get objects leading up to analytics job
+   * @apiName GetDataFrameAnalyticsIdMap
+   * @apiDescription Returns map of objects leading up to analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/map/{analyticsId}',
+      validate: {
+        params: analyticsIdSchema,
+        query: analyticsMapQuerySchema,
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const treatAsRoot = request.query?.treatAsRoot;
+        const type = request.query?.type;
+
+        let results;
+        if (treatAsRoot === 'true' || treatAsRoot === true) {
+          results = await getExtendedMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+            index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+          });
+        } else {
+          results = await getAnalyticsMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+            modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+          });
+        }
+
+        return response.ok({
+          body: results,
         });
       } catch (e) {
         return response.customError(wrapError(e));

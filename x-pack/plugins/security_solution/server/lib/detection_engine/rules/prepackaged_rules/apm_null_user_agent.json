@@ -38,9 +38,9 @@
   "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
   "severity": "medium",
   "tags": [
-    "APM",
-    "Elastic"
+    "Elastic",
+    "APM"
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

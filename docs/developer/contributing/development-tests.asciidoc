@@ -1,8 +1,6 @@
 [[development-tests]]
 == Testing
 
-To ensure that your changes will not break other functionality, please run the test suite and build (<<building-kibana>>) before submitting your Pull Request.
-
 [discrete]
 === Running specific {kib} tests
 
@@ -13,61 +11,51 @@ invoke them:
 |===
 |Test runner |Test location |Runner command (working directory is {kib}
 root)
-|Jest |`src/**/*.test.js` `src/**/*.test.ts`
-|`yarn test:jest -t regexp [test path]`
+|Jest |`**/*.test.{js,mjs,ts,tsx}`
+|`yarn test:jest [test path]`
 
-|Jest (integration) |`**/integration_tests/**/*.test.js`
-|`yarn test:jest_integration -t regexp [test path]`
-
-|Mocha
-|`src/**/__tests__/**/*.js` `!src/**/public/__tests__/*.js` `packages/kbn-dev-utils/src/**/__tests__/**/*.js` `tasks/**/__tests__/**/*.js`
-|`node scripts/mocha --grep=regexp [test path]`
+|Jest (integration) |`**/integration_tests/**/*.test.{js,mjs,ts,tsx}`
+|`yarn test:jest_integration [test path]`
 
 |Functional
-|`test/*integration/**/config.js` `test/*functional/**/config.js` `test/accessibility/config.js`
-|`yarn test:ftr:server --config test/[directory]/config.js``yarn test:ftr:runner --config test/[directory]/config.js --grep=regexp`
+|`test/**/config.js` `x-pack/test/**/config.js`
+|`node scripts/functional_tests_server --config [directory]/config.js``node scripts/functional_test_runner_ --config [directory]/config.js --grep=regexp`
 |===
 
-For X-Pack tests located in `x-pack/` see
-link:{kib-repo}tree/{branch}/x-pack/README.md#testing[X-Pack Testing]
-
 Test runner arguments: - Where applicable, the optional arguments
-`-t=regexp` or `--grep=regexp` will only run tests or test suites
+`--grep=regexp` will only run tests or test suites
 whose descriptions matches the regular expression. - `[test path]` is
 the relative path to the test file.
 
-Examples: - Run the entire elasticsearch_service test suite:
-`yarn test:jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-- Run the jest test case whose description matches
-`stops both admin and data clients`:
-`yarn test:jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
-- Run the api integration test case whose description matches the given
-string: ``` yarn test:ftr:server –config test/api_integration/config.js
-yarn test:ftr:runner –config test/api_integration/config
+=== Unit Testing
 
-[discrete]
-=== Cross-browser compatibility
+Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends link:{kib-repo}tree/{branch}/packages/kbn-test/jest-preset.js[a preset] provided by the link:{kib-repo}tree/{branch}/packages/kbn-test[`@kbn/test`] package. Unless you intend to run all unit tests within the project, it's most efficient to provide the Jest configuration file for the plugin or package you're testing.
 
-**Testing IE on OS X**
+[source,bash]
+----
+yarn jest --config src/plugins/dashboard/jest.config.js
+----
 
-* http://www.vmware.com/products/fusion/fusion-evaluation.html[Download
-VMWare Fusion].
-* https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads[Download
-IE virtual machines] for VMWare.
-* Open VMWare and go to Window > Virtual Machine Library. Unzip the
-virtual machine and drag the .vmx file into your Virtual Machine
-Library.
-* Right-click on the virtual machine you just added to your library and
-select "`Snapshots…`", and then click the "`Take`" button in the modal
-that opens. You can roll back to this snapshot when the VM expires in 90
-days.
-* In System Preferences > Sharing, change your computer name to be
-something simple, e.g. "`computer`".
-* Run {kib} with `yarn start --host=computer.local` (substituting
-your computer name).
-* Now you can run your VM, open the browser, and navigate to
-`http://computer.local:5601` to test {kib}.
-* Alternatively you can use browserstack
+A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use `yarn test:jest`. Like the Jest CLI, you can also supply a path to determine which tests to run.
+
+[source,bash]
+----
+kibana/src/plugins/dashboard/server$ yarn test:jest #or
+kibana/src/plugins/dashboard$ yarn test:jest server #or
+kibana$ yarn test:jest src/plugins/dashboard/server
+----
+
+Any additional options supplied to `test:jest` will be passed onto the Jest CLI with the resulting Jest command always being outputted.
+
+[source,bash]
+----
+kibana/src/plugins/dashboard/server$ yarn test:jest --coverage
+
+# is equivelant to
+
+yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/plugins/dashboard/jest.config.js server
+----
+
 
 [discrete]
 === Running browser automation tests
@@ -92,3 +80,29 @@ include::development-functional-tests.asciidoc[leveloffset=+1]
 include::development-unit-tests.asciidoc[leveloffset=+1]
 
 include::development-accessibility-tests.asciidoc[leveloffset=+1]
+
+[discrete]
+=== Cross-browser compatibility
+
+**Testing IE on OS X**
+
+**Note:** IE11 is not supported from 7.9 onwards.
+
+* http://www.vmware.com/products/fusion/fusion-evaluation.html[Download
+VMWare Fusion].
+* https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads[Download
+IE virtual machines] for VMWare.
+* Open VMWare and go to Window > Virtual Machine Library. Unzip the
+virtual machine and drag the .vmx file into your Virtual Machine
+Library.
+* Right-click on the virtual machine you just added to your library and
+select "`Snapshots…`", and then click the "`Take`" button in the modal
+that opens. You can roll back to this snapshot when the VM expires in 90
+days.
+* In System Preferences > Sharing, change your computer name to be
+something simple, e.g. "`computer`".
+* Run {kib} with `yarn start --host=computer.local` (substituting
+your computer name).
+* Now you can run your VM, open the browser, and navigate to
+`http://computer.local:5601` to test {kib}.
+* Alternatively you can use browserstack

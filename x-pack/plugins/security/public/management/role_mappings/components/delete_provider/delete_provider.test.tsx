@@ -7,8 +7,8 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { RoleMapping } from '../../../../../common/model';
 import { DeleteProvider } from '.';
 

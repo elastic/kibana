@@ -115,10 +115,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
                 throttle: '1m',
+                notifyWhen: 'onThrottleInterval',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
+                executionStatus: response.body.executionStatus,
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);

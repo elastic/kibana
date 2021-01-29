@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -49,7 +49,7 @@ describe('OpenTimelineModal', () => {
     sortField: DEFAULT_SORT_FIELD,
     timelineType: TimelineType.default,
     timelineStatus: TimelineStatus.active,
-    templateTimelineFilter: [<div />],
+    templateTimelineFilter: [<div key={0} />],
     title,
     totalSearchResultsCount: mockSearchResults.length,
   });

@@ -13,7 +13,7 @@ import { http, http$ } from '../http_service';
 import { basePath } from './index';
 
 export const annotations = {
-  getAnnotations(obj: {
+  getAnnotations$(obj: {
     jobIds: string[];
     earliestMs: number;
     latestMs: number;
@@ -24,6 +24,23 @@ export const annotations = {
   }) {
     const body = JSON.stringify(obj);
     return http$<GetAnnotationsResponse>({
+      path: `${basePath()}/annotations`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnnotations(obj: {
+    jobIds: string[];
+    earliestMs: number | null;
+    latestMs: number | null;
+    maxAnnotations: number;
+    fields?: FieldToBucket[];
+    detectorIndex?: number;
+    entities?: any[];
+  }) {
+    const body = JSON.stringify(obj);
+    return http<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
       method: 'POST',
       body,

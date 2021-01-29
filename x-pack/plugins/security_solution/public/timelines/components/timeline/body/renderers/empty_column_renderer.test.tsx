@@ -8,7 +8,8 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { TimelineNonEcsData } from '../../../../../graphql/types';
+import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../../../../../common/components/drag_and_drop/translations';
+import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -72,6 +73,8 @@ describe('empty_column_renderer', () => {
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual(getEmptyValue());
+    expect(wrapper.text()).toEqual(
+      `source.ip${getEmptyValue()}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
+    );
   });
 });

@@ -14,25 +14,25 @@ import {
   Logger,
 } from 'src/core/server';
 import { ConfigType } from '../index';
-import { JSON_HEADER } from '../../common/constants';
+import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
-interface IConstructorDependencies {
+interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface IRequestParams<ResponseBody> {
+interface RequestParams {
   path: string;
   params?: object;
-  hasValidData?: (body?: ResponseBody) => boolean;
+  hasValidData?: Function;
 }
-interface IErrorResponse {
+interface ErrorResponse {
   message: string;
   attributes: {
     errors: string[];
   };
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
+  createRequest(requestParams?: RequestParams): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -46,17 +46,14 @@ export interface IEnterpriseSearchRequestHandler {
 export class EnterpriseSearchRequestHandler {
   private enterpriseSearchUrl: string;
   private log: Logger;
+  private headers: Record<string, string> = {};
 
-  constructor({ config, log }: IConstructorDependencies) {
+  constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest<ResponseBody>({
-    path,
-    params = {},
-    hasValidData = () => true,
-  }: IRequestParams<ResponseBody>) {
+  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -64,11 +61,12 @@ export class EnterpriseSearchRequestHandler {
     ) => {
       try {
         // Set up API URL
+        const encodedPath = this.encodePathParams(path, request.params as Record<string, string>);
         const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
+        const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
         const { method } = request.route;
@@ -80,15 +78,28 @@ export class EnterpriseSearchRequestHandler {
         // Call the Enterprise Search API
         const apiResponse = await fetch(url, { method, headers, body });
 
-        // Handle authentication redirects
-        if (apiResponse.url.endsWith('/login') || apiResponse.url.endsWith('/ent/select')) {
+        // Handle response headers
+        this.setResponseHeaders(apiResponse);
+
+        // Handle unauthenticated users / authentication redirects
+        if (
+          apiResponse.status === 401 ||
+          apiResponse.url.endsWith('/login') ||
+          apiResponse.url.endsWith('/ent/select')
+        ) {
           return this.handleAuthenticationError(response);
         }
 
         // Handle 400-500+ responses from the Enterprise Search server
         const { status } = apiResponse;
         if (status >= 500) {
-          return this.handleServerError(response, apiResponse, url);
+          if (this.headers[READ_ONLY_MODE_HEADER] === 'true') {
+            // Handle 503 read-only mode errors
+            return this.handleReadOnlyModeError(response);
+          } else {
+            // Handle unexpected server errors
+            return this.handleServerError(response, apiResponse, url);
+          }
         } else if (status >= 400) {
           return this.handleClientError(response, apiResponse);
         }
@@ -100,12 +111,46 @@ export class EnterpriseSearchRequestHandler {
         }
 
         // Pass successful responses back to the front-end
-        return response.custom({ statusCode: status, body: json });
+        return response.custom({
+          statusCode: status,
+          headers: this.headers,
+          body: json,
+        });
       } catch (e) {
         // Catch connection/auth errors
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * This path helper is similar to React Router's generatePath, but much simpler &
+   * does not use regexes. It enables us to pass a static '/foo/:bar/baz' string to
+   * createRequest({ path }) and have :bar be automatically replaced by the value of
+   * request.params.bar.
+   * It also (very importantly) wraps all URL request params with encodeURIComponent(),
+   * which is an extra layer of encoding required by the Enterprise Search server in
+   * order to correctly & safely parse user-generated IDs with special characters in
+   * their names - just encodeURI alone won't work.
+   */
+  encodePathParams(path: string, params: Record<string, string>) {
+    const hasParams = path.includes(':');
+    if (!hasParams) {
+      return path;
+    } else {
+      return path
+        .split('/')
+        .map((pathPart) => {
+          const isParam = pathPart.startsWith(':');
+          if (!isParam) {
+            return pathPart;
+          } else {
+            const pathParam = pathPart.replace(':', '');
+            return encodeURIComponent(params[pathParam]);
+          }
+        })
+        .join('/');
+    }
   }
 
   /**
@@ -118,7 +163,7 @@ export class EnterpriseSearchRequestHandler {
     const contentType = apiResponse.headers.get('content-type') || '';
 
     // Default response
-    let body: IErrorResponse = {
+    let body: ErrorResponse = {
       message: statusText,
       attributes: { errors: [statusText] },
     };
@@ -160,7 +205,7 @@ export class EnterpriseSearchRequestHandler {
     const { status } = apiResponse;
     const body = await this.getErrorResponseBody(apiResponse);
 
-    return response.customError({ statusCode: status, body });
+    return response.customError({ statusCode: status, headers: this.headers, body });
   }
 
   async handleServerError(response: KibanaResponseFactory, apiResponse: Response, url: string) {
@@ -172,14 +217,22 @@ export class EnterpriseSearchRequestHandler {
       'Enterprise Search encountered an internal server error. Please contact your system administrator if the problem persists.';
 
     this.log.error(`Enterprise Search Server Error ${status} at <${url}>: ${message}`);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+  }
+
+  handleReadOnlyModeError(response: KibanaResponseFactory) {
+    const errorMessage =
+      'Enterprise Search is in read-only mode. Actions that create, update, or delete information are disabled.';
+
+    this.log.error(`Cannot perform action: ${errorMessage}`);
+    return response.customError({ statusCode: 503, headers: this.headers, body: errorMessage });
   }
 
   handleInvalidDataError(response: KibanaResponseFactory, url: string, json: object) {
     const errorMessage = 'Invalid data received from Enterprise Search';
 
     this.log.error(`Invalid data received from <${url}>: ${JSON.stringify(json)}`);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
   }
 
   handleConnectionError(response: KibanaResponseFactory, e: Error) {
@@ -188,14 +241,30 @@ export class EnterpriseSearchRequestHandler {
     this.log.error(errorMessage);
     if (e instanceof Error) this.log.debug(e.stack as string);
 
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
   }
 
+  /**
+   * Note: Kibana auto logs users out when it receives a 401 response, so we want to catch and
+   * return 401 responses from Enterprise Search as a 502 so Kibana sessions aren't interrupted
+   */
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
 
     this.log.error(errorMessage);
-    return response.customError({ statusCode: 502, body: errorMessage });
+    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+  }
+
+  /**
+   * Set response headers
+   *
+   * Currently just forwards the read-only mode header, but we can expand this
+   * in the future to pass more headers from Enterprise Search as we need them
+   */
+
+  setResponseHeaders(apiResponse: Response) {
+    const readOnlyMode = apiResponse.headers.get(READ_ONLY_MODE_HEADER);
+    this.headers[READ_ONLY_MODE_HEADER] = readOnlyMode as 'true' | 'false';
   }
 
   /**

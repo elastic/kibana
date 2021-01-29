@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
 import { ScaledCirclesMarkers } from './scaled_circles';
-import { L } from '../../../maps_legacy/public';
 
 export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
   getMarkerFunction() {
@@ -27,7 +15,7 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
     const scaleFactor = 0.8;
     return (feature, latlng) => {
       const radius = this._geohashMinDistance(feature) * scaleFactor;
-      return L.circle(latlng, radius);
+      return this._leaflet.circle(latlng, radius);
     };
   }
 
@@ -49,12 +37,12 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
     //   clockwise, each value being an array of [lat, lng]
 
     // center lat and southeast lng
-    const east = L.latLng([centerPoint[0], geohashRect[2][1]]);
+    const east = this._leaflet.latLng([centerPoint[0], geohashRect[2][1]]);
     // southwest lat and center lng
-    const north = L.latLng([geohashRect[3][0], centerPoint[1]]);
+    const north = this._leaflet.latLng([geohashRect[3][0], centerPoint[1]]);
 
     // get latLng of geohash center point
-    const center = L.latLng([centerPoint[0], centerPoint[1]]);
+    const center = this._leaflet.latLng([centerPoint[0], centerPoint[1]]);
 
     // get smallest radius at center of geohash grid rectangle
     const eastRadius = Math.floor(center.distanceTo(east));

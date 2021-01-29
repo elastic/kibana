@@ -8,9 +8,20 @@
 If you enable the Elastic {monitor-features} in your cluster, you can
 optionally collect metrics about {kib}.
 
+[IMPORTANT]
+=========================
+{metricbeat} is the recommended method for collecting and shipping monitoring
+data to a monitoring cluster.
+
+If you have previously configured legacy collection methods, you should migrate
+to using {metricbeat} collection methods. Use either {metricbeat} collection or
+legacy collection methods; do not use both.
+
+For the recommended method, refer to <<monitoring-metricbeat>>.
+=========================
+
 The following method involves sending the metrics to the production cluster,
-which ultimately routes them to the monitoring cluster. For the recommended
-method, see <<monitoring-metricbeat>>.
+which ultimately routes them to the monitoring cluster.
 
 To learn about monitoring in general, see
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
@@ -37,7 +48,7 @@ By default, if you are running {kib} locally, go to `http://localhost:5601/`.
 If {security-features} are enabled, log in.
 --
 
-... Open the menu, then go to *Stack Monitoring*. If data collection is
+... Open the main menu, then click *Stack Monitoring*. If data collection is
 disabled, you are prompted to turn it on. 
 
 ** From the Console or command line, set `xpack.monitoring.collection.enabled`

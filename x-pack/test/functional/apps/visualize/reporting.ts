@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  describe('Visualize', () => {
+  describe('Visualize Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('reporting/ecommerce');
@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Print PDF button', () => {
       it('is not available if new', async () => {
         await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
+        await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
         await PageObjects.reporting.openPdfReportingPanel();
@@ -68,8 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url);
 
-        expect(res.statusCode).to.equal(200);
-        expect(res.headers['content-type']).to.equal('application/pdf');
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('application/pdf');
       });
     });
   });

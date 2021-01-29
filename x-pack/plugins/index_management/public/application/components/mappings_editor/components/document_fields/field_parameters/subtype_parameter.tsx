@@ -85,6 +85,7 @@ export const SubTypeParameter = ({
                 selectedOptions={subTypeField.value as ComboBoxOption[]}
                 onChange={subTypeField.setValue}
                 isClearable={false}
+                data-test-subj="fieldSubType"
               />
             </EuiFormRow>
           );

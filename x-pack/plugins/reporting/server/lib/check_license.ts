@@ -24,9 +24,7 @@ const messages = {
   },
 };
 
-const makeManagementFeature = (
-  exportTypes: Array<ExportTypeDefinition<unknown, unknown, unknown, unknown>>
-) => {
+const makeManagementFeature = (exportTypes: ExportTypeDefinition[]) => {
   return {
     id: 'management',
     checkLicense: (license?: ILicense) => {
@@ -59,9 +57,7 @@ const makeManagementFeature = (
   };
 };
 
-const makeExportTypeFeature = (
-  exportType: ExportTypeDefinition<unknown, unknown, unknown, unknown>
-) => {
+const makeExportTypeFeature = (exportType: ExportTypeDefinition) => {
   return {
     id: exportType.id,
     checkLicense: (license?: ILicense) => {

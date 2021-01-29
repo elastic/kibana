@@ -9,16 +9,16 @@ import {
   SavedObjectsClientWrapperOptions,
 } from 'src/core/server';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-import { SpacesServiceSetup } from '../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function spacesSavedObjectsClientWrapperFactory(
-  spacesService: SpacesServiceSetup
+  getSpacesService: () => SpacesServiceStart
 ): SavedObjectsClientWrapperFactory {
   return (options: SavedObjectsClientWrapperOptions) =>
     new SpacesSavedObjectsClient({
       baseClient: options.client,
       request: options.request,
-      spacesService,
+      getSpacesService,
       typeRegistry: options.typeRegistry,
     });
 }

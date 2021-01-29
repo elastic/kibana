@@ -27,6 +27,7 @@ import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kiban
 
 import { NavigationMenu } from '../components/navigation_menu';
 import { getMaxBytesFormatted } from './file_based/components/utils';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (
@@ -52,8 +53,13 @@ function startTrialDescription() {
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { licenseManagement },
+    services: {
+      licenseManagement,
+      http: { basePath },
+      docLinks,
+    },
   } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
@@ -183,13 +189,18 @@ export const DatavisualizerSelector: FC = () => {
                     }
                     description={startTrialDescription()}
                     footer={
-                      <EuiButton target="_blank" href="management/stack/license_management/home">
+                      <EuiButton
+                        target="_blank"
+                        href={`${basePath.get()}/app/management/stack/license_management/home`}
+                        data-test-subj="mlDataVisualizerStartTrialButton"
+                      >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                           defaultMessage="Start trial"
                         />
                       </EuiButton>
                     }
+                    data-test-subj="mlDataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -197,6 +208,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

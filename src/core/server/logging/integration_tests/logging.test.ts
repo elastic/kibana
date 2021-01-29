@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
@@ -146,12 +135,18 @@ describe('logging service', () => {
       ],
     };
 
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
     let root: ReturnType<typeof createRoot>;
     let setup: InternalCoreSetup;
     let mockConsoleLog: jest.SpyInstance;
     const loggingConfig$ = new Subject<LoggerContextConfigInput>();
-    const setContextConfig = (enable: boolean) =>
-      enable ? loggingConfig$.next(CUSTOM_LOGGING_CONFIG) : loggingConfig$.next({});
+    const setContextConfig = async (enable: boolean) => {
+      loggingConfig$.next(enable ? CUSTOM_LOGGING_CONFIG : {});
+      // need to wait for config to reload. nextTick is enough, using delay just to be sure
+      await delay(10);
+    };
+
     beforeAll(async () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
       root = kbnTestServer.createRoot();
@@ -171,12 +166,12 @@ describe('logging service', () => {
 
     it('does not write to custom appenders when not configured', async () => {
       const logger = root.logger.get('plugins.myplugin.debug_pattern');
-      setContextConfig(false);
+      await setContextConfig(false);
       logger.info('log1');
-      setContextConfig(true);
+      await setContextConfig(true);
       logger.debug('log2');
       logger.info('log3');
-      setContextConfig(false);
+      await setContextConfig(false);
       logger.info('log4');
       expect(mockConsoleLog).toHaveBeenCalledTimes(2);
       expect(mockConsoleLog).toHaveBeenCalledWith(
@@ -188,7 +183,7 @@ describe('logging service', () => {
     });
 
     it('writes debug_json context to custom JSON appender', async () => {
-      setContextConfig(true);
+      await setContextConfig(true);
       const logger = root.logger.get('plugins.myplugin.debug_json');
       logger.debug('log1');
       logger.info('log2');
@@ -214,7 +209,7 @@ describe('logging service', () => {
     });
 
     it('writes info_json context to custom JSON appender', async () => {
-      setContextConfig(true);
+      await setContextConfig(true);
       const logger = root.logger.get('plugins.myplugin.info_json');
       logger.debug('i should not be logged!');
       logger.info('log2');
@@ -230,7 +225,7 @@ describe('logging service', () => {
     });
 
     it('writes debug_pattern context to custom pattern appender', async () => {
-      setContextConfig(true);
+      await setContextConfig(true);
       const logger = root.logger.get('plugins.myplugin.debug_pattern');
       logger.debug('log1');
       logger.info('log2');
@@ -245,7 +240,7 @@ describe('logging service', () => {
     });
 
     it('writes info_pattern context to custom pattern appender', async () => {
-      setContextConfig(true);
+      await setContextConfig(true);
       const logger = root.logger.get('plugins.myplugin.info_pattern');
       logger.debug('i should not be logged!');
       logger.info('log2');
@@ -256,7 +251,7 @@ describe('logging service', () => {
     });
 
     it('writes all context to both appenders', async () => {
-      setContextConfig(true);
+      await setContextConfig(true);
       const logger = root.logger.get('plugins.myplugin.all');
       logger.debug('log1');
       logger.info('log2');

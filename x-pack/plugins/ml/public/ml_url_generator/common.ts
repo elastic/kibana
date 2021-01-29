@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 import { MlGenericUrlState } from '../../common/types/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -19,37 +19,40 @@ export function extractParams<UrlState>(urlState: UrlState) {
  * Creates generic index based search ML url
  * e.g. `jobs/new_job/datavisualizer?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a`
  */
-export function createIndexBasedMlUrl(
+export function createGenericMlUrl(
   appBasePath: string,
   page: MlGenericUrlState['page'],
   pageState: MlGenericUrlState['pageState']
 ): string {
-  const { globalState, appState, index, savedSearchId, ...restParams } = pageState;
   let url = `${appBasePath}/${page}`;
 
-  if (index !== undefined && savedSearchId === undefined) {
-    url = `${url}?index=${index}`;
-  }
-  if (index === undefined && savedSearchId !== undefined) {
-    url = `${url}?savedSearchId=${savedSearchId}`;
+  if (pageState) {
+    const { globalState, appState, index, savedSearchId, ...restParams } = pageState;
+    if (index !== undefined && savedSearchId === undefined) {
+      url = `${url}?index=${index}`;
+    }
+    if (index === undefined && savedSearchId !== undefined) {
+      url = `${url}?savedSearchId=${savedSearchId}`;
+    }
+
+    if (!isEmpty(restParams)) {
+      Object.keys(restParams).forEach((key) => {
+        url = setStateToKbnUrl(
+          key,
+          restParams[key],
+          { useHash: false, storeInHashQuery: false },
+          url
+        );
+      });
+    }
+
+    if (globalState) {
+      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+    }
+    if (appState) {
+      url = setStateToKbnUrl('_a', appState, { useHash: false, storeInHashQuery: false }, url);
+    }
   }
 
-  if (!isEmpty(restParams)) {
-    Object.keys(restParams).forEach((key) => {
-      url = setStateToKbnUrl(
-        key,
-        restParams[key],
-        { useHash: false, storeInHashQuery: false },
-        url
-      );
-    });
-  }
-
-  if (globalState) {
-    url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
-  }
-  if (appState) {
-    url = setStateToKbnUrl('_a', appState, { useHash: false, storeInHashQuery: false }, url);
-  }
   return url;
 }

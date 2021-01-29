@@ -5,27 +5,29 @@
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { BaseActionFactoryContext, SerializedAction } from './types';
+import {
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedAction,
+  SerializedEvent,
+} from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
-  TriggerContextMapping,
-  TriggerId,
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface for registering new action factories.
  */
 export interface ActionFactoryDefinition<
-  Config extends object = object,
-  SupportedTriggers extends TriggerId = TriggerId,
-  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-    triggers: SupportedTriggers[];
-  },
-  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+  Config extends BaseActionConfig = BaseActionConfig,
+  ExecutionContext extends object = object,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
-    Configurable<Config, FactoryContext> {
+    Configurable<Config, FactoryContext>,
+    PersistableStateDefinition<SerializedEvent> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
    * factory in the registry as well as to construct actions of this type and
@@ -47,12 +49,18 @@ export interface ActionFactoryDefinition<
   licenseFeatureName?: string;
 
   /**
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
    * This method should return a definition of a new action, normally used to
    * register it in `ui_actions` registry.
    */
   create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionDefinition<ActionContext>;
+  ): ActionDefinition<ExecutionContext>;
 
-  supportedTriggers(): SupportedTriggers[];
+  supportedTriggers(): string[];
 }

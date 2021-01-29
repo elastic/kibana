@@ -88,7 +88,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
         ...(time !== undefined ? { time } : {}),
       });
     }
-  }, [jobs, validIds]);
+  }, [jobs, validIds, setGlobalState, globalState?.ml]);
 
   return jobSelection;
 };

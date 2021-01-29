@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-// @ts-expect-error
-import { MBMap } from '../map/mb';
+import { MBMap } from '../mb_map';
 // @ts-expect-error
 import { WidgetOverlay } from '../widget_overlay';
 // @ts-expect-error
@@ -23,9 +22,10 @@ import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE, RawValue } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
 import { FLYOUT_STATE } from '../../reducers/ui';
+import { MapSettings } from '../../reducers/map';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
@@ -35,21 +35,24 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
-interface Props {
+export interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   areLayersLoaded: boolean;
   cancelAllInFlightRequests: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
-  hideToolbarOverlay: boolean;
   isFullScreen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   refreshConfig: MapRefreshConfig;
   renderTooltipContent?: RenderToolTipContent;
   triggerRefreshTimer: () => void;
+  title?: string;
+  description?: string;
+  settings: MapSettings;
 }
 
 interface State {
@@ -188,6 +191,7 @@ export class MapContainer extends Component<Props, State> {
       addFilters,
       getFilterActions,
       getActionContext,
+      onSingleValueTrigger,
       flyoutDisplay,
       isFullScreen,
       exitFullScreen,
@@ -197,7 +201,12 @@ export class MapContainer extends Component<Props, State> {
 
     if (mapInitError) {
       return (
-        <div data-render-complete data-shared-item>
+        <div
+          data-render-complete
+          data-shared-item
+          data-title={this.props.title}
+          data-description={this.props.description}
+        >
           <EuiCallOut
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
@@ -231,16 +240,22 @@ export class MapContainer extends Component<Props, State> {
         data-dom-id={this.state.domId}
         data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
+        data-title={this.props.title}
+        data-description={this.props.description}
       >
-        <EuiFlexItem className="mapMapWrapper">
+        <EuiFlexItem
+          className="mapMapWrapper"
+          style={{ backgroundColor: this.props.settings.backgroundColor }}
+        >
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}
             getActionContext={getActionContext}
+            onSingleValueTrigger={onSingleValueTrigger}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}
           />
-          {!this.props.hideToolbarOverlay && (
+          {!this.props.settings.hideToolbarOverlay && (
             <ToolbarOverlay
               addFilters={addFilters}
               geoFields={this.state.geoFields}

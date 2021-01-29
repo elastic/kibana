@@ -1,0 +1,6 @@
+pid.enabled: true
+pid.file: '/var/run/kibana.pid'
+pid.obj: { val: 3 }
+pid.arr: [1, 2]
+pid.empty_obj: {}
+pid.empty_arr: []

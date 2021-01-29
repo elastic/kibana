@@ -43,6 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         destinationURLTemplate: urlTemplate,
         trigger: 'SELECT_RANGE_TRIGGER',
       });
+
+      await testSubjects.click('urlDrilldownAdditionalOptions');
+      await testSubjects.click('urlDrilldownOpenInNewTab');
+
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
 

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsModel } from '../store';
@@ -15,21 +14,16 @@ import { DocValueFields } from '../../common/containers/source';
 export const hostsPagePath = '/';
 export const hostDetailsPagePath = `/:detailName`;
 
-export type HostsTabsProps = HostsComponentProps &
-  GlobalTimeArgs & {
-    docValueFields: DocValueFields[];
-    filterQuery: string;
-    type: hostsModel.HostsType;
-    indexPattern: IIndexPattern;
-    setAbsoluteRangeDatePicker: ActionCreator<{
-      id: InputsModelId;
-      from: string;
-      to: string;
-    }>;
-  };
+export type HostsTabsProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
+  filterQuery: string;
+  indexNames: string[];
+  type: hostsModel.HostsType;
+  setAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: string;
+    to: string;
+  }>;
+};
 
 export type HostsQueryProps = GlobalTimeArgs;
-
-export interface HostsComponentProps {
-  hostsPagePath: string;
-}

@@ -21,6 +21,9 @@ export const auditServiceMock = {
   create() {
     return {
       getLogger: jest.fn(),
+      asScoped: jest.fn().mockReturnValue({
+        log: jest.fn(),
+      }),
     } as jest.Mocked<ReturnType<AuditService['setup']>>;
   },
 };

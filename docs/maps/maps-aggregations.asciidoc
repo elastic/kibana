@@ -23,6 +23,8 @@ You can add the following metric aggregations:
 
 * *Min.* The lowest value.
 
+* *Percentile.* The value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values.
+
 * *Sum.* The total value.
 
 * *Top term.* The most common value.
@@ -95,6 +97,13 @@ Thicker, darker lines symbolize more connections between a source and destinatio
 Point to point uses an {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by destination.
 Then, a nested {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] groups sources for each destination into grids.
 A line connects each source grid centroid to each destination.
+
+Point-to-point layers are used in several common use cases:
+
+* Source-destination maps for network traffic
+* Origin-destination maps for flight data
+* Origin-destination flows for import/export/migration
+* Origin-destination for pick-up/drop-off data
 
 image::maps/images/point_to_point.png[]
 

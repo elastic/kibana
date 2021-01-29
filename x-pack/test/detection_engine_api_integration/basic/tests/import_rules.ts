@@ -23,7 +23,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules without an index', () => {
@@ -39,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
             .send();
           return body.status_code === 404;
-        });
+        }, `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`);
 
         // Try to fetch the rule which should still be a 404 (not found)
         const { body } = await supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`).send();
@@ -86,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -138,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1'));
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1', false));
       });
 
       it('should fail validation when importing a rule with malformed "from" params on the rules', async () => {
@@ -189,6 +188,56 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+        });
+      });
+
+      // import is very slow in 7.10+ due to the alerts client find api
+      // when importing 100 rules it takes about 30 seconds for this
+      // test to complete so at 10 rules completing in about 10 seconds
+      // I figured this is enough to make sure the import route is doing its job.
+      it('should be able to import 10 rules', async () => {
+        const ruleIds = new Array(10).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 10,
+        });
+      });
+
+      // uncomment the below test once we speed up the alerts client find api
+      // in another PR.
+      // it('should be able to import 10000 rules', async () => {
+      //   const ruleIds = new Array(10000).fill(undefined).map((_, index) => `rule-${index}`);
+      //   const { body } = await supertest
+      //     .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+      //     .set('kbn-xsrf', 'true')
+      //     .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+      //     .expect(200);
+
+      //   expect(body).to.eql({
+      //     errors: [],
+      //     success: true,
+      //     success_count: 10000,
+      //   });
+      // });
+
+      it('should NOT be able to import more than 10,000 rules', async () => {
+        const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(ruleIds, false), 'rules.ndjson')
+          .expect(500);
+
+        expect(body).to.eql({
+          status_code: 500,
+          message: "Can't import more than 10000 rules",
         });
       });
 

@@ -1,0 +1,46 @@
+[role="xpack"]
+[[import-geospatial-data]]
+== Import geospatial data
+
+To import geospatical data into the Elastic Stack, the data must be indexed as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
+Geospatial data comes in many formats.
+Choose an import tool based on the format of your geospatial data.
+
+[discrete]
+=== Upload CSV with latitude and longitude columns
+
+*File Data Visualizer* indexes CSV files with latitude and longitude columns as a geo_point.
+
+. Open the main menu, then click *Machine Learning*.
+. Select the *Data Visualizer* tab, then click *Upload file*.
+. Use the file chooser to select a CSV file.
+. Click *Import*.
+. Select the *Advanced* tab.
+. Set *Index name*.
+. Click *Add combined field*, then click *Add geo point field*.
+. Fill out the form and click *Add*.
+. Click *Import*.
+
+[discrete]
+=== Upload a GeoJSON file
+
+*Upload GeoJSON* indexes GeoJSON features as a geo_point or geo_shape.
+
+. <<maps-create, Create a new map>>.
+. Click *Add layer*.
+. Select *Upload GeoJSON*.
+. Use the file chooser to select a GeoJSON file.
+. Click *Import file*.
+
+[discrete]
+=== Upload data with IP addresses
+
+The GeoIP processor adds information about the geographical location of IP addresses.
+See {ref}/geoip-processor.html[GeoIP processor] for details.
+For private IP addresses, see https://www.elastic.co/blog/enriching-elasticsearch-data-geo-ips-internal-private-ip-addresses[Enriching data with GeoIPs from internal, private IP addresses].
+
+[discrete]
+=== Upload data with GDAL
+
+https://www.gdal.org/[GDAL] (Geospatial Data Abstraction Library) contains command line tools that can convert geospatial data between 75 different geospatial file formats and index that geospatial data into {es}.
+See https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal[Ingest geospatial data into Elasticsearch with GDAL] for details.

@@ -10,7 +10,7 @@ import React from 'react';
 import * as i18n from '../../../translations';
 
 export const OptionalFieldLabel = (
-  <EuiText color="subdued" size="xs">
+  <EuiText color="subdued" size="xs" data-test-subj="form-optional-field-label">
     {i18n.OPTIONAL}
   </EuiText>
 );

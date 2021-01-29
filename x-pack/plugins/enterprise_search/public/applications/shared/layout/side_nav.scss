@@ -52,7 +52,7 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
     font-weight: $euiFontWeightMedium;
     line-height: $euiFontSizeM;
 
-    $activeBgColor: rgba($euiColorFullShade, 0.05);
+    $activeBgColor: rgba($euiColorFullShade, .05);
 
     &--isActive {
       background-color: $activeBgColor;
@@ -70,6 +70,17 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
         outline: solid 0 $activeBgColor;
         background-color: $activeBgColor;
       }
+    }
+  }
+
+  &__subNav {
+    padding-left: $euiSizeML;
+
+    // Extends the click area of links more to the left, so that second tiers
+    // of subnavigation links still have the same hitbox as first tier links
+    .enterpriseSearchNavLinks__item {
+      margin-left: -$euiSizeML;
+      padding-left: $euiSizeXXL;
     }
   }
 }

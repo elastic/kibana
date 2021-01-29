@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to exploit privilege escalation vulnerabilities related to the Print Spooler service including CVE-2020-1048 and CVE-2020-1337. .",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious PrintSpooler SPL File Created",
+  "note": "Refer to CVEs, CVE-2020-1048 and CVE-2020-1337 for further information on the vulnerability and exploit. Verify that the relevant system is patched.",
+  "query": "event.category:file and not event.type:deletion and file.extension:(spl or SPL) and file.path:C\\:\\\\Windows\\\\System32\\\\spool\\\\PRINTERS\\\\* and not process.name:(spoolsv.exe or printfilterpipelinesvc.exe or PrintIsolationHost.exe or splwow64.exe or msiexec.exe or poqexec.exe)",
+  "references": [
+    "https://safebreach.com/Post/How-we-bypassed-CVE-2020-1048-Patch-and-got-CVE-2020-1337"
+  ],
+  "risk_score": 74,
+  "rule_id": "a7ccae7b-9d2c-44b2-a061-98e5946971fa",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "reference": "https://attack.mitre.org/techniques/T1068/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

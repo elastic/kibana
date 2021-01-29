@@ -23,6 +23,7 @@ import {
   useRenderCellValue,
   EsSorting,
   UseIndexDataReturnType,
+  getProcessedFields,
 } from '../../../../components/data_grid';
 import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
@@ -81,6 +82,8 @@ export const useIndexData = (
         query, // isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
+        fields: ['*'],
+        _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
       },
     };
@@ -88,8 +91,7 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map((d) => d._source);
-
+      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
       setRowCount(resp.hits.total.value);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);

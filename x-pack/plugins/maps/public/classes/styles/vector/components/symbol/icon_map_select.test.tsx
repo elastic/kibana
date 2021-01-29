@@ -47,9 +47,7 @@ class MockDynamicStyleProperty {
 const defaultProps = {
   iconPaletteId: 'filledShapes',
   onChange: () => {},
-  styleProperty: (new MockDynamicStyleProperty() as unknown) as IDynamicStyleProperty<
-    IconDynamicOptions
-  >,
+  styleProperty: (new MockDynamicStyleProperty() as unknown) as IDynamicStyleProperty<IconDynamicOptions>,
   isCustomOnly: false,
 };
 

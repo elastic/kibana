@@ -13,23 +13,28 @@ import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_r
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
 import {
-  DEFAULT_APP_TIME_RANGE,
   DEFAULT_APP_REFRESH_INTERVAL,
-  DEFAULT_INDEX_KEY,
+  DEFAULT_APP_TIME_RANGE,
+  DEFAULT_BYTES_FORMAT,
+  DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
-  DEFAULT_DARK_MODE,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_REFRESH_RATE_INTERVAL,
   DEFAULT_FROM,
-  DEFAULT_TO,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_BYTES_FORMAT,
-  DEFAULT_INDEX_PATTERN,
+  DEFAULT_REFRESH_RATE_INTERVAL,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TO,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_RULE_REFRESH_INTERVAL_ON,
+  DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULE_REFRESH_IDLE_VALUE,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
+import { MlUrlGenerator } from '../../../../../ml/public';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -47,6 +52,11 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
   [DEFAULT_DARK_MODE]: false,
+  [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
+    on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
+    value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  },
 };
 
 export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {
@@ -77,14 +87,49 @@ export const createStartServicesMock = (): StartServices => {
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
 
-  const services = ({
+  return ({
     ...core,
-    data,
+    data: {
+      ...data,
+      query: {
+        ...data.query,
+        savedQueries: {
+          ...data.query.savedQueries,
+          getAllSavedQueries: jest.fn(() =>
+            Promise.resolve({
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            })
+          ),
+          findSavedQueries: jest.fn(() =>
+            Promise.resolve({
+              total: 123,
+              queries: [],
+            })
+          ),
+        },
+      },
+      search: {
+        ...data.search,
+        search: jest.fn().mockImplementation(() => ({
+          subscribe: jest.fn().mockImplementation(() => ({
+            error: jest.fn(),
+            next: jest.fn(),
+          })),
+        })),
+      },
+    },
     security,
     storage,
+    ml: {
+      urlGenerator: new MlUrlGenerator({
+        appBasePath: '/app/ml',
+        useHash: false,
+      }),
+    },
   } as unknown) as StartServices;
-
-  return services;
 };
 
 export const createWithKibanaMock = () => {

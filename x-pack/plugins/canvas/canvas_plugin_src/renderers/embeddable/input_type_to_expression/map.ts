@@ -12,7 +12,7 @@ export function toExpression(input: MapEmbeddableInput): string {
   expressionParts.push('savedMap');
   expressionParts.push(`id="${input.id}"`);
 
-  if (input.title) {
+  if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);
   }
 

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import type { ILegacyScopedClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -18,13 +16,12 @@ export interface Dependencies {
 export interface ServerShim {
   route: any;
   plugins: {
-    xpack_main: XPackMainPlugin;
     watcher: any;
   };
 }
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: WatcherRouter;
   getLicenseStatus: () => LicenseStatus;
 }
 
@@ -32,3 +29,22 @@ export interface LicenseStatus {
   hasRequired: boolean;
   message?: string;
 }
+
+/**
+ * @internal
+ */
+export interface WatcherContext {
+  client: ILegacyScopedClusterClient;
+}
+
+/**
+ * @internal
+ */
+export interface WatcherRequestHandlerContext extends RequestHandlerContext {
+  watcher: WatcherContext;
+}
+
+/**
+ * @internal
+ */
+export type WatcherRouter = IRouter<WatcherRequestHandlerContext>;

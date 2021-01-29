@@ -9,24 +9,7 @@
 ```typescript
 toSpec({ getFormatterForField, }?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
-    }): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: {
-            id: any;
-            params: any;
-        } | undefined;
-    };
+    }): FieldSpec;
 ```
 
 ## Parameters
@@ -37,22 +20,5 @@ toSpec({ getFormatterForField, }?: {
 
 <b>Returns:</b>
 
-`{
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: {
-            id: any;
-            params: any;
-        } | undefined;
-    }`
+`FieldSpec`
 

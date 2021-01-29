@@ -12,3 +12,4 @@ export {
 } from './encrypted_saved_objects_service';
 export { EncryptionError } from './encryption_error';
 export { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+export { EncryptionKeyRotationService } from './encryption_key_rotation_service';

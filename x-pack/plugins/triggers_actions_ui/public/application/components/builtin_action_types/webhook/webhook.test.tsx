@@ -28,7 +28,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('webhook connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when hasAuth is true and connector config is valid', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -42,15 +42,56 @@ describe('webhook connector validation', () => {
         method: 'PUT',
         url: 'http://test.com',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
       },
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: [],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
+      },
+    });
+  });
+
+  test('connector validation succeeds when hasAuth is false and connector config is valid', () => {
+    const actionConnector = {
+      secrets: {
+        user: '',
+        password: '',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      isPreconfigured: false,
+      config: {
+        method: 'PUT',
+        url: 'http://test.com',
+        headers: { 'content-type': 'text' },
+        hasAuth: false,
+      },
+    } as WebhookActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -65,15 +106,22 @@ describe('webhook connector validation', () => {
       name: 'webhook',
       config: {
         method: 'PUT',
+        hasAuth: true,
       },
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is required.'],
-        method: [],
-        user: [],
-        password: ['Password is required.'],
+      config: {
+        errors: {
+          url: ['URL is required.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: ['Password is required when username is used.'],
+        },
       },
     });
   });
@@ -90,15 +138,22 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
         url: 'invalid.url',
+        hasAuth: true,
       },
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is invalid.'],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: ['URL is invalid.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });

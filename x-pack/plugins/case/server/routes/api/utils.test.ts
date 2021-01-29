@@ -17,19 +17,30 @@ import {
   sortToSnake,
 } from './utils';
 import { newCase } from './__mocks__/request_responses';
-import { isBoom, boomify } from 'boom';
+import { isBoom, boomify } from '@hapi/boom';
 import {
   mockCases,
   mockCaseComments,
   mockCaseNoConnectorId,
 } from './__fixtures__/mock_saved_objects';
+import { ConnectorTypes, ESCaseConnector, CommentType, CaseStatuses } from '../../../common/api';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {
+    const connector: ESCaseConnector = {
+      id: '123',
+      name: 'My connector',
+      type: ConnectorTypes.jira,
+      fields: [
+        { key: 'issueType', value: 'Task' },
+        { key: 'priority', value: 'High' },
+        { key: 'parent', value: null },
+      ],
+    };
     it('transform correctly', () => {
       const myCase = {
         newCase,
-        connectorId: '123',
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -42,11 +53,11 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector_id: '123',
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -55,7 +66,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const myCase = {
         newCase,
-        connectorId: '123',
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -65,11 +76,11 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector_id: '123',
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -78,7 +89,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const myCase = {
         newCase,
-        connectorId: '123',
+        connector,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -91,11 +102,11 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
-        connector_id: '123',
+        connector,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         updated_at: null,
         updated_by: null,
       });
@@ -106,6 +117,7 @@ describe('Utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -115,6 +127,7 @@ describe('Utils', () => {
       const res = transformNewComment(comment);
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         pushed_at: null,
@@ -127,6 +140,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -134,6 +148,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         pushed_at: null,
@@ -146,6 +161,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -156,6 +172,7 @@ describe('Utils', () => {
 
       expect(res).toEqual({
         comment: 'A comment',
+        type: CommentType.user,
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         pushed_at: null,
@@ -230,8 +247,8 @@ describe('Utils', () => {
         },
         2,
         2,
-        extraCaseData,
-        '123'
+        2,
+        extraCaseData
       );
       expect(res).toEqual({
         page: 1,
@@ -239,11 +256,11 @@ describe('Utils', () => {
         total: mockCases.length,
         cases: flattenCaseSavedObjects(
           mockCases.map((obj) => ({ ...obj, score: 1 })),
-          extraCaseData,
-          '123'
+          extraCaseData
         ),
         count_open_cases: 2,
         count_closed_cases: 2,
+        count_in_progress_cases: 2,
       });
     });
   });
@@ -252,13 +269,19 @@ describe('Utils', () => {
     it('flattens correctly', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];
 
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, '123');
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
+
       expect(res).toEqual([
         {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
-          connector_id: 'none',
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -268,7 +291,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -279,20 +302,28 @@ describe('Utils', () => {
           comments: [],
           totalComment: 2,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 0 }];
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, '123');
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
 
       expect(res).toEqual([
         {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
-          connector_id: 'none',
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -302,7 +333,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -313,10 +344,14 @@ describe('Utils', () => {
           comments: [],
           totalComment: 0,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
-    it('inserts missing connectorId', () => {
+
+    it('inserts missing connector', () => {
       const extraCaseData = [
         {
           caseId: mockCaseNoConnectorId.id,
@@ -324,53 +359,20 @@ describe('Utils', () => {
         },
       ];
 
-      // @ts-ignore this is to update old case saved objects to include connector_id
-      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData, '123');
-      expect(res).toEqual([
-        {
-          id: mockCaseNoConnectorId.id,
-          closed_at: null,
-          closed_by: null,
-          connector_id: '123',
-          created_at: '2019-11-25T21:54:48.952Z',
-          created_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          description: 'This is a brand new case of a bad meanie defacing data',
-          external_service: null,
-          title: 'Super Bad Security Issue',
-          status: 'open',
-          tags: ['defacement'],
-          updated_at: '2019-11-25T21:54:48.952Z',
-          updated_by: {
-            full_name: 'elastic',
-            email: 'testemail@elastic.co',
-            username: 'elastic',
-          },
-          comments: [],
-          totalComment: 0,
-          version: 'WzAsMV0=',
-        },
-      ]);
-    });
-    it('inserts missing connectorId (none)', () => {
-      const extraCaseData = [
-        {
-          caseId: mockCaseNoConnectorId.id,
-          totalComment: 0,
-        },
-      ];
-
-      // @ts-ignore this is to update old case saved objects to include connector_id
+      // @ts-ignore this is to update old case saved objects to include connector
       const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
+
       expect(res).toEqual([
         {
           id: mockCaseNoConnectorId.id,
           closed_at: null,
           closed_by: null,
-          connector_id: 'none',
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -380,7 +382,7 @@ describe('Utils', () => {
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
-          status: 'open',
+          status: CaseStatuses.open,
           tags: ['defacement'],
           updated_at: '2019-11-25T21:54:48.952Z',
           updated_by: {
@@ -391,6 +393,9 @@ describe('Utils', () => {
           comments: [],
           totalComment: 0,
           version: 'WzAsMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         },
       ]);
     });
@@ -398,55 +403,89 @@ describe('Utils', () => {
 
   describe('flattenCaseSavedObject', () => {
     it('flattens correctly', () => {
-      const myCase = { ...mockCases[0] };
-      const res = flattenCaseSavedObject({ savedObject: myCase, totalComment: 2 });
+      const myCase = { ...mockCases[2] };
+      const res = flattenCaseSavedObject({
+        savedObject: myCase,
+        totalComment: 2,
+      });
+
       expect(res).toEqual({
         id: myCase.id,
         version: myCase.version,
         comments: [],
         totalComment: 2,
         ...myCase.attributes,
+        connector: {
+          ...myCase.attributes.connector,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
       });
     });
 
     it('flattens correctly without version', () => {
-      const myCase = { ...mockCases[0] };
+      const myCase = { ...mockCases[2] };
       myCase.version = undefined;
-      const res = flattenCaseSavedObject({ savedObject: myCase, totalComment: 2 });
+      const res = flattenCaseSavedObject({
+        savedObject: myCase,
+        totalComment: 2,
+      });
+
       expect(res).toEqual({
         id: myCase.id,
         version: '0',
         comments: [],
         totalComment: 2,
         ...myCase.attributes,
+        connector: {
+          ...myCase.attributes.connector,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
       });
     });
 
     it('flattens correctly with comments', () => {
-      const myCase = { ...mockCases[0] };
+      const myCase = { ...mockCases[2] };
       const comments = [{ ...mockCaseComments[0] }];
-      const res = flattenCaseSavedObject({ savedObject: myCase, comments, totalComment: 2 });
+      const res = flattenCaseSavedObject({
+        savedObject: myCase,
+        comments,
+        totalComment: 2,
+      });
+
       expect(res).toEqual({
         id: myCase.id,
         version: myCase.version,
         comments: flattenCommentSavedObjects(comments),
         totalComment: 2,
         ...myCase.attributes,
+        connector: {
+          ...myCase.attributes.connector,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
       });
     });
-    it('inserts missing connectorId', () => {
+
+    it('inserts missing connector', () => {
       const extraCaseData = {
         totalComment: 2,
-        caseConfigureConnectorId: '123',
       };
 
-      // @ts-ignore this is to update old case saved objects to include connector_id
-      const res = flattenCaseSavedObject({ savedObject: mockCaseNoConnectorId, ...extraCaseData });
+      const res = flattenCaseSavedObject({
+        // @ts-ignore this is to update old case saved objects to include connector
+        savedObject: mockCaseNoConnectorId,
+        ...extraCaseData,
+      });
+
       expect(res).toEqual({
         id: mockCaseNoConnectorId.id,
         closed_at: null,
         closed_by: null,
-        connector_id: '123',
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
         created_at: '2019-11-25T21:54:48.952Z',
         created_by: {
           full_name: 'elastic',
@@ -456,7 +495,7 @@ describe('Utils', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         external_service: null,
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         updated_at: '2019-11-25T21:54:48.952Z',
         updated_by: {
@@ -467,41 +506,9 @@ describe('Utils', () => {
         comments: [],
         totalComment: 2,
         version: 'WzAsMV0=',
-      });
-    });
-    it('inserts missing connectorId (none)', () => {
-      const extraCaseData = {
-        totalComment: 2,
-        caseConfigureConnectorId: 'none',
-      };
-
-      // @ts-ignore this is to update old case saved objects to include connector_id
-      const res = flattenCaseSavedObject({ savedObject: mockCaseNoConnectorId, ...extraCaseData });
-      expect(res).toEqual({
-        id: mockCaseNoConnectorId.id,
-        closed_at: null,
-        closed_by: null,
-        connector_id: 'none',
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
+        settings: {
+          syncAlerts: true,
         },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        external_service: null,
-        title: 'Super Bad Security Issue',
-        status: 'open',
-        tags: ['defacement'],
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: {
-          full_name: 'elastic',
-          email: 'testemail@elastic.co',
-          username: 'elastic',
-        },
-        comments: [],
-        totalComment: 2,
-        version: 'WzAsMV0=',
       });
     });
   });

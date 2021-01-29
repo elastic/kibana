@@ -16,7 +16,7 @@ import {
 } from 'react-router-dom';
 import { APMRouteDefinition, BreadcrumbTitle } from '../application/routes';
 import { getAPMHref } from '../components/shared/Links/apm/APMLink';
-import { useApmPluginContext } from './useApmPluginContext';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 interface BreadcrumbWithoutLink extends ChromeBreadcrumb {
   match: Match<Record<string, string>>;

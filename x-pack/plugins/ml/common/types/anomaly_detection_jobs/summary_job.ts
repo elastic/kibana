@@ -28,6 +28,7 @@ export interface MlSummaryJob {
   nodeName?: string;
   auditMessage?: Partial<AuditMessage>;
   isSingleMetricViewerJob: boolean;
+  isNotSingleMetricViewerJobMessage?: string;
   deleting?: boolean;
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;
@@ -45,6 +46,8 @@ export interface AuditMessage {
 export type MlSummaryJobs = MlSummaryJob[];
 
 export interface MlJobWithTimeRange extends CombinedJobWithStats {
+  id: string;
+  isNotSingleMetricViewerJobMessage?: string;
   timeRange: {
     from: number;
     to: number;

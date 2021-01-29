@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpResourcesRequestHandler, RouteConfig } from '../../../../../../src/core/server';
 import { Session } from '../../session_management';
 import { defineLoggedOutRoutes } from './logged_out';
@@ -18,7 +18,8 @@ describe('LoggedOut view routes', () => {
   let routeConfig: RouteConfig<any, any, any, 'get'>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    session = routeParamsMock.session;
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     defineLoggedOutRoutes(routeParamsMock);
 

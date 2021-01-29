@@ -16,7 +16,7 @@ import {
   SelectOption,
   SuperSelectOption,
 } from '../../../types';
-import { useIndexSettings } from '../../../index_settings_context';
+import { useConfig } from '../../../config_context';
 import { AnalyzerParameterSelects } from './analyzer_parameter_selects';
 
 interface Props {
@@ -71,7 +71,9 @@ export const AnalyzerParameter = ({
   allowsIndexDefaultOption = true,
   'data-test-subj': dataTestSubj,
 }: Props) => {
-  const { value: indexSettings } = useIndexSettings();
+  const {
+    value: { indexSettings },
+  } = useConfig();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
   const analyzerOptions = allowsIndexDefaultOption
     ? ANALYZER_OPTIONS

@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './data_panel_wrapper.scss';
+
 import React, { useMemo, memo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { NativeRenderer } from '../../native_renderer';
 import { Action } from './state_management';
-import { DragContext } from '../../drag_drop';
+import { DragContext, Dragging } from '../../drag_drop';
 import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
 import { Query, Filter } from '../../../../../../src/plugins/data/public';
 
@@ -24,6 +26,8 @@ interface DataPanelWrapperProps {
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
   filters: Filter[];
+  dropOntoWorkspace: (field: Dragging) => void;
+  hasSuggestionForField: (field: Dragging) => boolean;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
@@ -49,6 +53,8 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dateRange: props.dateRange,
     filters: props.filters,
     showNoDataPopover: props.showNoDataPopover,
+    dropOntoWorkspace: props.dropOntoWorkspace,
+    hasSuggestionForField: props.hasSuggestionForField,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

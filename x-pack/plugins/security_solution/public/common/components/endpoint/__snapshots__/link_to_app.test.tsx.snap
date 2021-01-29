@@ -2,16 +2,16 @@
 
 exports[`LinkToApp component should render with href 1`] = `
 <Memo()
-  appId="ingestManager"
-  href="/app/ingest"
+  appId="fleet"
+  href="/app/fleet"
 >
   <EuiLink
-    href="/app/ingest"
+    href="/app/fleet"
     onClick={[Function]}
   >
     <a
       className="euiLink euiLink--primary"
-      href="/app/ingest"
+      href="/app/fleet"
       onClick={[Function]}
       rel="noreferrer"
     >
@@ -23,13 +23,14 @@ exports[`LinkToApp component should render with href 1`] = `
 
 exports[`LinkToApp component should render with minimum input 1`] = `
 <Memo()
-  appId="ingestManager"
+  appId="fleet"
 >
   <EuiLink
     onClick={[Function]}
   >
     <button
       className="euiLink euiLink--primary"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >

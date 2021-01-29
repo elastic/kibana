@@ -5,16 +5,16 @@
  */
 
 import { renameColumns } from './rename_columns';
-import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {
-    const input: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const input: Datatable = {
+      type: 'datatable',
       columns: [
-        { id: 'a', name: 'A' },
-        { id: 'b', name: 'B' },
+        { id: 'a', name: 'A', meta: { type: 'number' } },
+        { id: 'b', name: 'B', meta: { type: 'number' } },
       ],
       rows: [
         { a: 1, b: 2 },
@@ -46,10 +46,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "b",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Austrailia",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Boomerang",
           },
         ],
@@ -71,15 +77,15 @@ describe('rename_columns', () => {
             "c": 8,
           },
         ],
-        "type": "kibana_datatable",
+        "type": "datatable",
       }
     `);
   });
 
   it('should replace "" with a visible value', () => {
-    const input: KibanaDatatable = {
-      type: 'kibana_datatable',
-      columns: [{ id: 'a', name: 'A' }],
+    const input: Datatable = {
+      type: 'datatable',
+      columns: [{ id: 'a', name: 'A', meta: { type: 'string' } }],
       rows: [{ a: '' }],
     };
 
@@ -100,11 +106,11 @@ describe('rename_columns', () => {
   });
 
   it('should keep columns which are not mapped', () => {
-    const input: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const input: Datatable = {
+      type: 'datatable',
       columns: [
-        { id: 'a', name: 'A' },
-        { id: 'b', name: 'B' },
+        { id: 'a', name: 'A', meta: { type: 'number' } },
+        { id: 'b', name: 'B', meta: { type: 'number' } },
       ],
       rows: [
         { a: 1, b: 2 },
@@ -129,10 +135,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "a",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "A",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Catamaran",
           },
         ],
@@ -154,17 +166,17 @@ describe('rename_columns', () => {
             "c": 8,
           },
         ],
-        "type": "kibana_datatable",
+        "type": "datatable",
       }
     `);
   });
 
   it('should rename date histograms', () => {
-    const input: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const input: Datatable = {
+      type: 'datatable',
       columns: [
-        { id: 'a', name: 'A' },
-        { id: 'b', name: 'banana per 30 seconds' },
+        { id: 'a', name: 'A', meta: { type: 'number' } },
+        { id: 'b', name: 'banana per 30 seconds', meta: { type: 'number' } },
       ],
       rows: [
         { a: 1, b: 2 },
@@ -189,10 +201,16 @@ describe('rename_columns', () => {
         "columns": Array [
           Object {
             "id": "a",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "A",
           },
           Object {
             "id": "c",
+            "meta": Object {
+              "type": "number",
+            },
             "name": "Apple per 30 seconds",
           },
         ],
@@ -214,7 +232,7 @@ describe('rename_columns', () => {
             "c": 8,
           },
         ],
-        "type": "kibana_datatable",
+        "type": "datatable",
       }
     `);
   });

@@ -67,84 +67,6 @@ exports[`scaling form should disable clusters option when clustering is not supp
       >
         <EuiRadio
           checked={false}
-          disabled={false}
-          id="MVT"
-          label="Use vector tiles"
-          onChange={[Function]}
-        />
-      </EuiToolTip>
-    </div>
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <EuiSwitch
-      checked={true}
-      compressed={true}
-      label="Dynamically filter for data in the visible map area"
-      onChange={[Function]}
-    />
-  </EuiFormRow>
-</Fragment>
-`;
-
-exports[`scaling form should disable mvt option when mvt is not supported 1`] = `
-<Fragment>
-  <EuiTitle
-    size="xs"
-  >
-    <h5>
-      <FormattedMessage
-        defaultMessage="Scaling"
-        id="xpack.maps.esSearch.scaleTitle"
-        values={Object {}}
-      />
-    </h5>
-  </EuiTitle>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFormRow
-    describedByIds={Array []}
-    display="row"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    labelType="label"
-  >
-    <div>
-      <EuiRadio
-        checked={true}
-        id="LIMIT"
-        label="Limit results to 10000."
-        onChange={[Function]}
-      />
-      <EuiRadio
-        checked={false}
-        id="TOP_HITS"
-        label="Show top hits per entity."
-        onChange={[Function]}
-      />
-      <EuiRadio
-        checked={false}
-        disabled={false}
-        id="CLUSTERS"
-        label="Show clusters when results exceed 10000."
-        onChange={[Function]}
-      />
-      <EuiToolTip
-        content="Simulated mvt disabled"
-        delay="regular"
-        position="left"
-      >
-        <EuiRadio
-          checked={false}
-          disabled={true}
           id="MVT"
           label="Use vector tiles"
           onChange={[Function]}
@@ -231,7 +153,6 @@ exports[`scaling form should render 1`] = `
       >
         <EuiRadio
           checked={false}
-          disabled={false}
           id="MVT"
           label="Use vector tiles"
           onChange={[Function]}
@@ -318,7 +239,6 @@ exports[`scaling form should render top hits form when scaling type is TOP_HITS 
       >
         <EuiRadio
           checked={false}
-          disabled={false}
           id="MVT"
           label="Use vector tiles"
           onChange={[Function]}

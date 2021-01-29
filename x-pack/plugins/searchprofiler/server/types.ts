@@ -5,18 +5,15 @@
  */
 
 import { IRouter, Logger } from 'kibana/server';
-import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { LicenseStatus } from '../common';
 
 export interface AppServerPluginDependencies {
   licensing: LicensingPluginSetup;
-  elasticsearch: ElasticsearchPlugin;
 }
 
 export interface RouteDependencies {
   getLicenseStatus: () => LicenseStatus;
-  elasticsearch: ElasticsearchPlugin;
   router: IRouter;
   log: Logger;
 }

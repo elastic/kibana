@@ -1,50 +1,40 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { TagCloudVisParams } from './types';
 
 const name = 'tagcloud';
 
 interface Arguments extends TagCloudVisParams {
   metric: any; // these aren't typed yet
-  bucket: any; // these aren't typed yet
+  bucket?: any; // these aren't typed yet
 }
 
-interface RenderValue {
+export interface TagCloudVisRenderValue {
   visType: typeof name;
-  visData: KibanaDatatable;
-  visConfig: Arguments;
-  params: any;
+  visData: Datatable;
+  visParams: Arguments;
 }
 
-export const createTagCloudFn = (): ExpressionFunctionDefinition<
+export type TagcloudExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof name,
-  KibanaDatatable,
+  Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
+  Render<TagCloudVisRenderValue>
+>;
+
+export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
   name,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeTagCloud.function.help', {
     defaultMessage: 'Tagcloud visualization',
   }),
@@ -94,8 +84,8 @@ export const createTagCloudFn = (): ExpressionFunctionDefinition<
       }),
     },
   },
-  fn(input, args) {
-    const visConfig = {
+  fn(input, args, handlers) {
+    const visParams = {
       scale: args.scale,
       orientation: args.orientation,
       minFontSize: args.minFontSize,
@@ -105,19 +95,19 @@ export const createTagCloudFn = (): ExpressionFunctionDefinition<
     } as Arguments;
 
     if (args.bucket !== undefined) {
-      visConfig.bucket = args.bucket;
+      visParams.bucket = args.bucket;
     }
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'tagloud_vis',
       value: {
         visData: input,
         visType: name,
-        visConfig,
-        params: {
-          listenOnChange: true,
-        },
+        visParams,
       },
     };
   },

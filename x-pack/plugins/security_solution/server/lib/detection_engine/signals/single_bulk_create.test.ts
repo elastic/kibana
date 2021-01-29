@@ -19,7 +19,14 @@ import {
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { buildRuleMessageFactory } from './rule_messages';
 
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('singleBulkCreate', () => {
   const mockService: AlertServicesMock = alertsMock.createAlertServices();
 
@@ -158,6 +165,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -192,6 +200,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -218,6 +227,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
@@ -245,6 +255,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
@@ -252,11 +263,11 @@ describe('singleBulkCreate', () => {
     expect(createdItemsCount).toEqual(1);
   });
 
-  test('create successful bulk create when bulk create has multiple error statuses', async () => {
+  test('create failed bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockResolvedValue(sampleBulkCreateErrorResult);
-    const { success, createdItemsCount } = await singleBulkCreate({
+    const { success, createdItemsCount, errors } = await singleBulkCreate({
       filteredEvents: sampleSearchResult(),
       ruleParams: sampleParams,
       services: mockService,
@@ -274,10 +285,11 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
-
     expect(mockLogger.error).toHaveBeenCalled();
-    expect(success).toEqual(true);
+    expect(errors).toEqual(['[4]: internal server error']);
+    expect(success).toEqual(false);
     expect(createdItemsCount).toEqual(1);
   });
 
@@ -318,6 +330,18 @@ describe('singleBulkCreate', () => {
     ]);
   });
 
+  test('filter duplicate rules does not attempt filters when the signal is not an event type of signal but rather a "clash" from the source index having its own numeric signal type', () => {
+    const doc = { ...sampleDocWithAncestors(), _source: { signal: 1234 } };
+    const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', doc);
+    expect(filtered).toEqual([]);
+  });
+
+  test('filter duplicate rules does not attempt filters when the signal is not an event type of signal but rather a "clash" from the source index having its own object signal type', () => {
+    const doc = { ...sampleDocWithAncestors(), _source: { signal: {} } };
+    const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', doc);
+    expect(filtered).toEqual([]);
+  });
+
   test('create successful and returns proper createdItemsCount', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
@@ -339,6 +363,7 @@ describe('singleBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(1);

@@ -12,7 +12,7 @@ import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { ActionType } from './types';
+import { ActionType, ActionsApiRequestHandlerContext } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -56,7 +56,7 @@ describe('Actions Plugin', () => {
       await plugin.setup(coreSetup as any, pluginsSetup);
       expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
@@ -73,7 +73,10 @@ describe('Actions Plugin', () => {
         });
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](
@@ -91,7 +94,7 @@ describe('Actions Plugin', () => {
           } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as RequestHandlerContext['actions'];
+        )) as unknown) as ActionsApiRequestHandlerContext;
         actionsContextHandler!.getActionsClient();
       });
 
@@ -101,7 +104,10 @@ describe('Actions Plugin', () => {
         await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](
@@ -114,9 +120,9 @@ describe('Actions Plugin', () => {
           } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as RequestHandlerContext['actions'];
+        )) as unknown) as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });
@@ -211,6 +217,7 @@ describe('Actions Plugin', () => {
         features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
+        licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       };
@@ -251,7 +258,51 @@ describe('Actions Plugin', () => {
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+        );
+      });
+    });
+
+    describe('isActionTypeEnabled()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
+
+    describe('isActionExecutable()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
         );
       });
     });

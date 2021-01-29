@@ -10,7 +10,6 @@ import { Router } from 'react-router-dom';
 
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import '../../common/mock/match_media';
-import { useWithSource } from '../../common/containers/source';
 import {
   apolloClientObservable,
   TestProviders,
@@ -22,11 +21,11 @@ import {
 import { SiemNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
-import { HostsComponentProps } from './types';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
-jest.mock('../../common/containers/source');
+jest.mock('../../common/containers/sourcerer');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -58,21 +57,17 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-
+const mockUseSourcererScope = useSourcererScope as jest.Mock;
 describe('Hosts - rendering', () => {
-  const hostProps: HostsComponentProps = {
-    hostsPagePath: '',
-  };
-
   test('it renders the Setup Instructions text when no index is available', async () => {
-    (useWithSource as jest.Mock).mockReturnValue({
+    mockUseSourcererScope.mockReturnValue({
       indicesExist: false,
     });
 
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -80,14 +75,14 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    (useWithSource as jest.Mock).mockReturnValue({
+    mockUseSourcererScope.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -95,7 +90,7 @@ describe('Hosts - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
-    (useWithSource as jest.Mock).mockReturnValue({
+    mockUseSourcererScope.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -103,7 +98,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -142,7 +137,7 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    (useWithSource as jest.Mock).mockReturnValue({
+    mockUseSourcererScope.mockReturnValue({
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
@@ -158,7 +153,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 /**
@@ -43,6 +32,7 @@ import {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -68,16 +58,8 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-import {
-  IContextContainer,
-  IContextProvider,
-  ContextSetup,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './context';
 
-export { PackageInfo, EnvironmentMode } from '../server/types';
+export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
@@ -95,11 +77,8 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  PublicAppInfo,
   AppMount,
-  AppMountDeprecated,
   AppUnmount,
-  AppMountContext,
   AppMountParameters,
   AppLeaveHandler,
   AppLeaveActionType,
@@ -108,8 +87,13 @@ export {
   AppLeaveConfirmAction,
   AppStatus,
   AppNavLinkStatus,
+  AppMeta,
   AppUpdatableFields,
   AppUpdater,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppMetaInfo,
+  PublicAppSearchDeepLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';
@@ -131,6 +115,7 @@ export {
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
@@ -142,9 +127,12 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
 
 export {
@@ -161,12 +149,22 @@ export {
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
+  IExternalUrl,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
 
 export {
   Toast,
@@ -201,11 +199,6 @@ export { URL_MAX_LENGTH } from './core_app';
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /**
-   * {@link ContextSetup}
-   * @deprecated
-   */
-  context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -287,6 +280,7 @@ export {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -300,12 +294,6 @@ export {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeStart,
-  IContextContainer,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-  IContextProvider,
-  ContextSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,

@@ -66,8 +66,8 @@ export const WhenExpression = ({
       }}
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
-      withTitle
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>

@@ -10,8 +10,7 @@ import { RouteDefinitionParams } from '..';
 
 export function defineCheckPrivilegesRoutes({
   router,
-  clusterClient,
-  authc,
+  getAuthenticationService,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -20,22 +19,28 @@ export function defineCheckPrivilegesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const scopedClusterClient = clusterClient.asScoped(request);
-
         const [
           {
-            cluster: {
-              manage_security: manageSecurity,
-              manage_api_key: manageApiKey,
-              manage_own_api_key: manageOwnApiKey,
+            body: {
+              cluster: {
+                manage_security: manageSecurity,
+                manage_api_key: manageApiKey,
+                manage_own_api_key: manageOwnApiKey,
+              },
             },
           },
           areApiKeysEnabled,
         ] = await Promise.all([
-          scopedClusterClient.callAsCurrentUser('shield.hasPrivileges', {
+          context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<{
+            cluster: {
+              manage_security: boolean;
+              manage_api_key: boolean;
+              manage_own_api_key: boolean;
+            };
+          }>({
             body: { cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key'] },
           }),
-          authc.areAPIKeysEnabled(),
+          getAuthenticationService().apiKeys.areAPIKeysEnabled(),
         ]);
 
         const isAdmin = manageSecurity || manageApiKey;

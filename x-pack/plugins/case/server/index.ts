@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
+export { CaseRequestContext } from './types';
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);

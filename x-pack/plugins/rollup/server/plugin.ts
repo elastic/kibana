@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    rollup?: RollupContext;
-  }
-}
-
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
@@ -17,36 +11,29 @@ import {
   ILegacyCustomClusterClient,
   Plugin,
   Logger,
-  KibanaRequest,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
-  LegacyAPICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies, CallWithRequestFactoryShim } from './types';
+import { Dependencies, RollupHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { registerRollupSearchStrategy } from './lib/search_strategies';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
-import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
+import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
-interface RollupContext {
-  client: ILegacyScopedClusterClient;
-}
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
   // Extend the elasticsearchJs client with additional endpoints.
   const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+
   return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
 }
 
@@ -94,12 +81,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('rollup', async (context, request) => {
-      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.rollupEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
+      'rollup',
+      async (context, request) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.rollupEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),
@@ -108,7 +98,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         isEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
-        mergeCapabilitiesWithFields,
       },
       sharedImports: {
         IndexPatternsFetcher,
@@ -130,22 +119,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         schema: schema.boolean(),
       },
     });
-
-    if (visTypeTimeseries) {
-      // TODO: When vis_type_timeseries is fully migrated to the NP, it shouldn't require this shim.
-      const callWithRequestFactoryShim = (
-        elasticsearchServiceShim: CallWithRequestFactoryShim,
-        request: KibanaRequest
-      ): LegacyAPICaller => {
-        return async (...args: Parameters<LegacyAPICaller>) => {
-          this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-          return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
-        };
-      };
-
-      const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
-    }
 
     if (usageCollection) {
       this.globalConfig$

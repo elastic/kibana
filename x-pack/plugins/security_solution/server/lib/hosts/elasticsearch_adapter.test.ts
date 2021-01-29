@@ -30,7 +30,12 @@ import { HostAggEsItem } from './types';
 import { EndpointAppContext } from '../../endpoint/types';
 import { mockLogger } from '../detection_engine/signals/__mocks__/es_results';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContextServiceStartContract } from '../../endpoint/mocks';
+import {
+  createMockEndpointAppContextServiceStartContract,
+  createMockPackageService,
+} from '../../endpoint/mocks';
+import { PackageService } from '../../../../fleet/server/services';
+import { ElasticsearchAssetType } from '../../../../fleet/common/types/models';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
@@ -49,7 +54,7 @@ jest.mock('./query.last_first_seen_host.dsl', () => {
     buildLastFirstSeenHostQuery: jest.fn(() => mockGetHostLastFirstSeenDsl),
   };
 });
-jest.mock('../../endpoint/routes/metadata', () => {
+jest.mock('../../endpoint/routes/metadata/handlers', () => {
   return {
     getHostData: jest.fn(() => mockEndpointMetadata),
   };
@@ -167,8 +172,16 @@ describe('hosts elasticsearch_adapter', () => {
 
   const endpointAppContextService = new EndpointAppContextService();
   const startContract = createMockEndpointAppContextServiceStartContract();
-  endpointAppContextService.start(startContract);
-
+  const mockPackageService: jest.Mocked<PackageService> = createMockPackageService();
+  mockPackageService.getInstalledEsAssetReferences.mockReturnValue(
+    Promise.resolve([
+      {
+        id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
+        type: ElasticsearchAssetType.transform,
+      },
+    ])
+  );
+  endpointAppContextService.start({ ...startContract, packageService: mockPackageService });
   const endpointContext: EndpointAppContext = {
     logFactory: mockLogger,
     service: endpointAppContextService,

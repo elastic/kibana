@@ -152,7 +152,7 @@ export interface AggregationResultBuckets {
   doc_count: number;
 }
 
-export interface SearchResponse {
+export interface ReportingUsageSearchResponse {
   aggregations: {
     ranges: {
       buckets: {
@@ -161,9 +161,4 @@ export interface SearchResponse {
       };
     };
   };
-}
-
-export interface AvailableTotal {
-  available: boolean;
-  total: number;
 }

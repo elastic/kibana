@@ -12,6 +12,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
 import { registerDiagnoseBrowser } from './browser';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 jest.mock('child_process');
 jest.mock('readline');
@@ -33,13 +34,25 @@ describe('POST /diagnose/browser', () => {
   const mockedCreateInterface: any = createInterface;
 
   const config = {
-    get: jest.fn().mockImplementation(() => ({})),
+    get: jest.fn().mockImplementation((...keys) => {
+      const key = keys.join('.');
+      switch (key) {
+        case 'queue.timeout':
+          return 120000;
+        case 'capture.browser.chromium.proxy':
+          return { enabled: false };
+      }
+    }),
     kbnConfig: { get: jest.fn() },
   };
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     const mockSetupDeps = ({
       elasticsearch: {

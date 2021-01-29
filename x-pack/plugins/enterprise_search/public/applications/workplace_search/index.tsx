@@ -4,37 +4,72 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
-import { IInitialAppData } from '../../../common/types';
-import { KibanaContext, IKibanaContext } from '../index';
+import { InitialAppData } from '../../../common/types';
+import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
-import { WorkplaceSearchNav } from './components/layout/nav';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 
-import { SETUP_GUIDE_PATH } from './routes';
+import {
+  GROUPS_PATH,
+  SETUP_GUIDE_PATH,
+  SOURCES_PATH,
+  PERSONAL_SOURCES_PATH,
+  ORG_SETTINGS_PATH,
+  SECURITY_PATH,
+} from './routes';
 
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
+import { GroupsRouter } from './views/groups';
+import { Security } from './views/security';
+import { SourcesRouter } from './views/content_sources';
+import { SettingsRouter } from './views/settings';
 
-export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
+import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
+
+export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
+  const { config } = useValues(KibanaLogic);
   return !config.host ? <WorkplaceSearchUnconfigured /> : <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
+export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
-  const { initializeAppData } = useActions(AppLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { initializeAppData, setContext } = useActions(AppLogic);
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
+
+  const { pathname } = useLocation();
+
+  // We don't want so show the subnavs on the container root pages.
+  const showSourcesSubnav = pathname !== SOURCES_PATH && pathname !== PERSONAL_SOURCES_PATH;
+  const showGroupsSubnav = pathname !== GROUPS_PATH;
+
+  /**
+   * Personal dashboard urls begin with /p/
+   * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
+   */
+  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+
+  // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
+  const isOrganization = !pathname.match(personalSourceUrlRegex);
+  setContext(isOrganization);
 
   useEffect(() => {
-    if (!hasInitialized) initializeAppData(props);
+    if (!hasInitialized) {
+      initializeAppData(props);
+      renderHeaderActions(WorkplaceSearchHeaderActions);
+    }
   }, [hasInitialized]);
 
   return (
@@ -45,20 +80,52 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
       <Route exact path="/">
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
+      <Route path={PERSONAL_SOURCES_PATH}>
+        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
+        <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
+          <SourcesRouter />
+        </Layout>
+      </Route>
+      <Route path={SOURCES_PATH}>
+        <Layout
+          navigation={<WorkplaceSearchNav sourcesSubNav={showSourcesSubnav && <SourceSubNav />} />}
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+        >
+          <SourcesRouter />
+        </Layout>
+      </Route>
+      <Route path={GROUPS_PATH}>
+        <Layout
+          navigation={<WorkplaceSearchNav groupsSubNav={showGroupsSubnav && <GroupSubNav />} />}
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+        >
+          <GroupsRouter />
+        </Layout>
+      </Route>
+      <Route path={SECURITY_PATH}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+          <Security />
+        </Layout>
+      </Route>
+      <Route path={ORG_SETTINGS_PATH}>
+        <Layout
+          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+        >
+          <SettingsRouter />
+        </Layout>
+      </Route>
       <Route>
-        <Layout navigation={<WorkplaceSearchNav />}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorState />
           ) : (
-            <Switch>
-              <Route exact path="/groups">
-                {/* Will replace with groups component subsequent PR */}
-                <div />
-              </Route>
-              <Route>
-                <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
+            <Route>
+              <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
+            </Route>
           )}
         </Layout>
       </Route>

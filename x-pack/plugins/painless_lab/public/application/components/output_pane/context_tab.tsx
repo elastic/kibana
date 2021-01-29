@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import { painlessContextOptions } from '../../constants';
@@ -64,7 +65,7 @@ export const ContextTab: FunctionComponent = () => {
         <EuiSuperSelect
           options={painlessContextOptions}
           valueOfSelected={context}
-          onChange={(nextContext) => updatePayload({ context: nextContext })}
+          onChange={(nextContext: PainlessContext) => updatePayload({ context: nextContext })}
           itemLayoutAlign="top"
           hasDividers
           fullWidth

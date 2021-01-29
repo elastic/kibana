@@ -13,11 +13,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
 import { Projection } from '../../../../common/projections';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 interface Props {
   projection: Projection;
@@ -25,6 +24,7 @@ interface Props {
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
   children?: React.ReactNode;
+  shouldFetch?: boolean;
 }
 
 const ButtonWrapper = styled.div`
@@ -37,11 +37,13 @@ function LocalUIFilters({
   filterNames,
   children,
   showCount = true,
+  shouldFetch = true,
 }: Props) {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
     params,
+    shouldFetch,
   });
 
   const hasValues = filters.some((filter) => filter.value.length > 0);

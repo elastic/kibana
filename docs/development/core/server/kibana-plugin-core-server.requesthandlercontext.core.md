@@ -11,6 +11,8 @@ core: {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
+            exporter: ISavedObjectsExporter;
+            importer: ISavedObjectsImporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
@@ -21,6 +23,5 @@ core: {
         uiSettings: {
             client: IUiSettingsClient;
         };
-        auditor: Auditor;
     };
 ```

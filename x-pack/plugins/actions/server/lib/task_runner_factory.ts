@@ -4,28 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash';
+import type { Request } from '@hapi/hapi';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
+import { addSpaceIdToPath } from '../../../spaces/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  SavedObjectReference,
+  IBasePath,
+} from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { Logger, CoreStart, KibanaRequest } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
-  GetBasePathFunction,
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { asSavedObjectExecutionSource } from './action_execution_source';
 
 export interface TaskRunnerContext {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  getBasePath: GetBasePathFunction;
-  getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
+  basePathService: IBasePath;
+  getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
 }
 
 export class TaskRunnerFactory {
@@ -55,8 +66,8 @@ export class TaskRunnerFactory {
       logger,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
-      getBasePath,
-      getScopedSavedObjectsClient,
+      basePathService,
+      getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
     return {
@@ -66,6 +77,7 @@ export class TaskRunnerFactory {
 
         const {
           attributes: { actionId, params, apiKey },
+          references,
         } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
           ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           actionTaskParamsId,
@@ -77,11 +89,12 @@ export class TaskRunnerFactory {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
+        const path = addSpaceIdToPath('/', spaceId);
+
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = ({
+        const fakeRequest = KibanaRequest.from(({
           headers: requestHeaders,
-          getBasePath: () => getBasePath(spaceId),
           path: '/',
           route: { settings: {} },
           url: {
@@ -92,7 +105,9 @@ export class TaskRunnerFactory {
               url: '/',
             },
           },
-        } as unknown) as KibanaRequest;
+        } as unknown) as Request);
+
+        basePathService.set(fakeRequest, path);
 
         let executorResult: ActionTypeExecutorResult<unknown>;
         try {
@@ -100,6 +115,7 @@ export class TaskRunnerFactory {
             params,
             actionId,
             request: fakeRequest,
+            ...getSourceFromReferences(references),
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {
@@ -121,8 +137,14 @@ export class TaskRunnerFactory {
 
         // Cleanup action_task_params object now that we're done with it
         try {
-          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-          await savedObjectsClient.delete(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, actionTaskParamsId);
+          // If the request has reached this far we can assume the user is allowed to run clean up
+          // We would idealy secure every operation but in order to support clean up of legacy alerts
+          // we allow this operation in an unsecured manner
+          // Once support for legacy alert RBAC is dropped, this can be secured
+          await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskParamsId
+          );
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
@@ -132,4 +154,14 @@ export class TaskRunnerFactory {
       },
     };
   }
+}
+
+function getSourceFromReferences(references: SavedObjectReference[]) {
+  return pipe(
+    fromNullable(references.find((ref) => ref.name === 'source')),
+    map((source) => ({
+      source: asSavedObjectExecutionSource(pick(source, 'id', 'type')),
+    })),
+    getOrElse(() => ({}))
+  );
 }

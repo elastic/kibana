@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { SavedObjectMigrationContext } from 'kibana/server';
@@ -22,36 +11,61 @@ import { searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
+const testMigrateMatchAllQuery = (migrationFn: Function) => {
+  it('should migrate obsolete match_all query', () => {
+    const migratedDoc = migrationFn(
+      {
+        type: 'search',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              query: {
+                match_all: {},
+              },
+            }),
+          },
+        },
+      },
+      savedObjectMigrationContext
+    );
+    const migratedSearchSource = JSON.parse(
+      migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(migratedSearchSource).toEqual({
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+    });
+  });
+
+  it('should return original doc if searchSourceJSON cannot be parsed', () => {
+    const migratedDoc = migrationFn(
+      {
+        type: 'search',
+        attributes: {
+          kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+        },
+      },
+      savedObjectMigrationContext
+    );
+
+    expect(migratedDoc).toEqual({
+      type: 'search',
+      attributes: {
+        kibanaSavedObjectMeta: 'kibanaSavedObjectMeta',
+      },
+    });
+  });
+};
+
 describe('migration search', () => {
   describe('6.7.2', () => {
     const migrationFn = searchMigrations['6.7.2'];
 
-    it('should migrate obsolete match_all query', () => {
-      const migratedDoc = migrationFn(
-        {
-          type: 'search',
-          attributes: {
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                query: {
-                  match_all: {},
-                },
-              }),
-            },
-          },
-        },
-        savedObjectMigrationContext
-      );
-      const migratedSearchSource = JSON.parse(
-        migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
-      );
-
-      expect(migratedSearchSource).toEqual({
-        query: {
-          query: '',
-          language: 'kuery',
-        },
-      });
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrationFn);
     });
   });
 
@@ -326,6 +340,14 @@ Object {
       const migratedDoc = migrationFn(doc, savedObjectMigrationContext);
 
       expect(migratedDoc).toEqual(doc);
+    });
+  });
+
+  describe('7.9.3', () => {
+    const migrationFn = searchMigrations['7.9.3'];
+
+    describe('migrateMatchAllQuery', () => {
+      testMigrateMatchAllQuery(migrationFn);
     });
   });
 });

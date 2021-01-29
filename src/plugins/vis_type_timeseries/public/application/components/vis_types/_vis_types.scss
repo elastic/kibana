@@ -3,11 +3,6 @@
   flex-direction: column;
   flex: 1 1 100%;
 
-  // border used in lieu of padding to prevent overlapping background-color
-  border-width: $euiSizeS;
-  border-style: solid;
-  border-color: transparent;
-
   .tvbVisTimeSeries {
     overflow: hidden;
   }
@@ -15,7 +10,7 @@
     .echReactiveChart_unavailable {
       color: #DFE5EF;
     }
-    .echLegendItem  {
+    .echLegendItem {
       color: #DFE5EF;
     }
   }
@@ -23,9 +18,8 @@
     .echReactiveChart_unavailable {
       color: #343741;
     }
-    .echLegendItem  {
+    .echLegendItem {
       color: #343741;
     }
   }
 }
-

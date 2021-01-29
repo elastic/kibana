@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from '../../../../../../src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import {
   getMlJobsUsage,
   getRulesUsage,
@@ -40,12 +40,13 @@ export const defaultDetectionsUsage = {
 
 export const fetchDetectionsUsage = async (
   kibanaIndex: string,
-  callCluster: LegacyAPICaller,
-  ml: MlPluginSetup | undefined
+  esClient: ElasticsearchClient,
+  ml: MlPluginSetup | undefined,
+  savedObjectClient: SavedObjectsClientContract
 ): Promise<DetectionsUsage> => {
   const [rulesUsage, mlJobsUsage] = await Promise.allSettled([
-    getRulesUsage(kibanaIndex, callCluster),
-    getMlJobsUsage(ml),
+    getRulesUsage(kibanaIndex, esClient),
+    getMlJobsUsage(ml, savedObjectClient),
   ]);
 
   return {

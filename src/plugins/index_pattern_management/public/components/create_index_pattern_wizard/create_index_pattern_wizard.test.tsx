@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
@@ -143,7 +132,9 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('invokes the provided services when creating an index pattern', async () => {
-    const create = jest.fn().mockImplementation(() => 'id');
+    const newIndexPatternAndSave = jest.fn().mockImplementation(async () => {
+      return indexPattern;
+    });
     const clear = jest.fn();
     mockContext.data.indexPatterns.clearCache = clear;
     const indexPattern = ({
@@ -151,11 +142,10 @@ describe('CreateIndexPatternWizard', () => {
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [],
-      create,
+      _fetchFields: jest.fn(),
     } as unknown) as IndexPattern;
-    mockContext.data.indexPatterns.make = async () => {
-      return indexPattern;
-    };
+    mockContext.data.indexPatterns.createAndSave = newIndexPatternAndSave;
+    mockContext.data.indexPatterns.setDefault = jest.fn();
 
     const component = createComponentWithContext(
       CreateIndexPatternWizard,
@@ -165,9 +155,8 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({ indexPattern: 'foo' });
     await (component.instance() as CreateIndexPatternWizard).createIndexPattern(undefined, 'id');
-    expect(mockContext.uiSettings.get).toBeCalled();
-    expect(create).toBeCalled();
-    expect(clear).toBeCalledWith('id');
-    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/id`);
+    expect(newIndexPatternAndSave).toBeCalled();
+    expect(clear).toBeCalledWith('1');
+    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
   });
 });

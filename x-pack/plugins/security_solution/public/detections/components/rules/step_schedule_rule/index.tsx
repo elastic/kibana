@@ -64,9 +64,13 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.scheduleRule, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   return isReadOnlyView ? (

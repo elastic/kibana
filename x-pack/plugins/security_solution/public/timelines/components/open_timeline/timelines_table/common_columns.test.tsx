@@ -9,9 +9,10 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import '../../../../common/mock/match_media';
+import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';

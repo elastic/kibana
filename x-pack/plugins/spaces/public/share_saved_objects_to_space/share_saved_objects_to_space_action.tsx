@@ -5,13 +5,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, StartServicesAccessor } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
 } from '../../../../../src/plugins/saved_objects_management/public';
-import { ShareSavedObjectsToSpaceFlyout } from './components';
+import { ContextWrapper, ShareSavedObjectsToSpaceFlyout } from './components';
 import { SpacesManager } from '../spaces_manager';
+import { PluginsStart } from '../plugin';
 
 export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
   public id: string = 'share_saved_objects_to_space';
@@ -26,7 +27,10 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     icon: 'share',
     type: 'icon',
     available: (object: SavedObjectsManagementRecord) => {
-      return object.meta.namespaceType === 'multiple';
+      const hasCapability =
+        !this.actionContext ||
+        !!this.actionContext.capabilities.savedObjectsManagement.shareIntoSpace;
+      return object.meta.namespaceType === 'multiple' && hasCapability;
     },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.isDataChanged = false;
@@ -39,7 +43,8 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   constructor(
     private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart
+    private readonly notifications: NotificationsStart,
+    private readonly getStartServices: StartServicesAccessor<PluginsStart>
   ) {
     super();
   }
@@ -50,13 +55,15 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     }
 
     return (
-      <ShareSavedObjectsToSpaceFlyout
-        onClose={this.onClose}
-        onObjectUpdated={() => (this.isDataChanged = true)}
-        savedObject={this.record}
-        spacesManager={this.spacesManager}
-        toastNotifications={this.notifications.toasts}
-      />
+      <ContextWrapper getStartServices={this.getStartServices}>
+        <ShareSavedObjectsToSpaceFlyout
+          onClose={this.onClose}
+          onObjectUpdated={() => (this.isDataChanged = true)}
+          savedObject={this.record}
+          spacesManager={this.spacesManager}
+          toastNotifications={this.notifications.toasts}
+        />
+      </ContextWrapper>
     );
   };
 

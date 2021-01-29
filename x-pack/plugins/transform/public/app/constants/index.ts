@@ -10,12 +10,6 @@ export enum SECTION_SLUG {
   CREATE_TRANSFORM = 'create_transform',
 }
 
-export enum TRANSFORM_DOC_PATHS {
-  default = 'docs.html',
-  plugins = 'plugins.html',
-  transforms = 'transforms.html',
-}
-
 // UI Metric constants
 export const UIM_APP_NAME = 'transform';
 export const UIM_TRANSFORM_LIST_LOAD = 'transform_list_load';

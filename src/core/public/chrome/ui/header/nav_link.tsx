@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { EuiIcon } from '@elastic/eui';
@@ -22,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
+import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
@@ -87,6 +77,7 @@ export interface RecentNavLink {
   title: string;
   'aria-label': string;
   iconType?: string;
+  onClick: React.MouseEventHandler;
 }
 
 /**
@@ -102,8 +93,9 @@ export interface RecentNavLink {
 export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
-  basePath: HttpStart['basePath']
-) {
+  basePath: HttpStart['basePath'],
+  navigateToUrl: InternalApplicationStart['navigateToUrl']
+): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
@@ -125,5 +117,12 @@ export function createRecentNavLink(
     title: titleAndAriaLabel,
     'aria-label': titleAndAriaLabel,
     iconType: navLink?.euiIconType,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+      if (event.button === 0 && !isModifiedOrPrevented(event)) {
+        event.preventDefault();
+        navigateToUrl(href);
+      }
+    },
   };
 }

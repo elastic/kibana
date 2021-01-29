@@ -45,7 +45,7 @@ export class RollupPlugin implements Plugin {
   ) {
     setFatalErrors(core.fatalErrors);
     if (usageCollection) {
-      setUiStatsReporter(usageCollection.reportUiStats.bind(usageCollection, UIM_APP_NAME));
+      setUiStatsReporter(usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME));
     }
 
     if (indexManagement) {

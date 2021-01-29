@@ -68,7 +68,7 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
         ],
   });
 
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: {
       type: STYLE_TYPE.STATIC,
       options: { color: euiVisColorPalette[1] },
@@ -121,7 +121,7 @@ function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTi
         ],
   });
 
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: {
       type: STYLE_TYPE.STATIC,
       options: { color: euiVisColorPalette[2] },
@@ -168,7 +168,7 @@ function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: st
     ],
   });
 
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.LINE_COLOR]: {
       type: STYLE_TYPE.STATIC,
       options: { color: euiVisColorPalette[1] },
@@ -176,7 +176,7 @@ function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: st
     [VECTOR_STYLES.LINE_WIDTH]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH]!.options as SizeDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options as SizeDynamicOptions),
         field: {
           name: COUNT_PROP_NAME,
           origin: FIELD_ORIGIN.SOURCE,

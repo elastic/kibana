@@ -6,10 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';
@@ -27,16 +28,19 @@ interface ProviderItemBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isPopoverOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
   register?: DataProvidersAnd;
+  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   val: string | number;
   type?: DataProviderType;
+  wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -48,33 +52,42 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     kqlQuery,
     isEnabled,
     isExcluded,
+    isPopoverOpen,
     onDataProviderEdited,
     operator,
     providerId,
     register,
+    setIsPopoverOpen,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
     type = DataProviderType.default,
+    wrapperRef,
   }) => {
-    const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
-    const timelineType = timelineId ? timelineById[timelineId]?.timelineType : TimelineType.default;
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const timelineType = useShallowEqualSelector((state) => {
+      if (!timelineId) {
+        return TimelineType.default;
+      }
+
+      return getTimeline(state, timelineId)?.timelineType ?? TimelineType.default;
+    });
     const { getManageTimelineById } = useManageTimeline();
     const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
       getManageTimelineById,
       timelineId,
     ]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
-    }, [isPopoverOpen]);
+    }, [isPopoverOpen, setIsPopoverOpen]);
 
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    }, []);
+      wrapperRef?.current?.focus();
+    }, [wrapperRef, setIsPopoverOpen]);
 
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
@@ -116,21 +129,38 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       [unRegisterProvider]
     );
 
-    const button = (
-      <ProviderBadge
-        deleteProvider={!isLoading ? deleteProvider : noop}
-        field={field}
-        kqlQuery={kqlQuery}
-        isEnabled={isEnabled}
-        isExcluded={isExcluded}
-        providerId={providerId}
-        togglePopover={togglePopover}
-        toggleType={onToggleTypeProvider}
-        val={val}
-        operator={operator}
-        type={type}
-        timelineType={timelineType}
-      />
+    const button = useMemo(
+      () => (
+        <ProviderBadge
+          deleteProvider={!isLoading ? deleteProvider : noop}
+          field={field}
+          kqlQuery={kqlQuery}
+          isEnabled={isEnabled}
+          isExcluded={isExcluded}
+          providerId={providerId}
+          togglePopover={togglePopover}
+          toggleType={onToggleTypeProvider}
+          val={val}
+          operator={operator}
+          type={type}
+          timelineType={timelineType}
+        />
+      ),
+      [
+        deleteProvider,
+        field,
+        isEnabled,
+        isExcluded,
+        isLoading,
+        kqlQuery,
+        onToggleTypeProvider,
+        operator,
+        providerId,
+        timelineType,
+        togglePopover,
+        type,
+        val,
+      ]
     );
 
     return (

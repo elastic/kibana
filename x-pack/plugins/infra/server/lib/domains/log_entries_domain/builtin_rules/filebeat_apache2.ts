@@ -8,7 +8,7 @@ export const filebeatApache2Rules = [
   {
     // pre-ECS
     when: {
-      exists: ['apache2.access'],
+      existsPrefix: ['apache2.access'],
     },
     format: [
       {

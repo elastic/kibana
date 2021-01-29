@@ -14,7 +14,7 @@ import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function Status({ stats }) {
+export function Status({ alerts, stats }) {
   const {
     apms: { total },
     totalEvents,
@@ -68,6 +68,7 @@ export function Status({ stats }) {
   return (
     <SummaryStatus
       metrics={metrics}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="apmDetailStatus"
     />

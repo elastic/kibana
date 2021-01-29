@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
+
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -27,6 +28,9 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 export const APP_ICON_SOLUTION = 'logoKibana';
+export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
+  defaultMessage: 'Maps',
+});
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
@@ -37,9 +41,15 @@ export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
+export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+// Identifies vector tile "too many features" feature.
+// "too many features" feature is a box showing area that contains too many features for single ES search response
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
+// Identifies centroid feature.
+// Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -47,6 +57,9 @@ export function getNewMapPath() {
 }
 export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
+}
+export function getEditPath(id: string) {
+  return `/${MAP_PATH}/${id}`;
 }
 
 export enum LAYER_TYPE {
@@ -58,15 +71,11 @@ export enum LAYER_TYPE {
   TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
 }
 
-export enum SORT_ORDER {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 export enum SOURCE_TYPES {
   EMS_TMS = 'EMS_TMS',
   EMS_FILE = 'EMS_FILE',
   ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
@@ -152,6 +161,7 @@ export enum AGG_TYPE {
   MIN = 'min',
   SUM = 'sum',
   TERMS = 'terms',
+  PERCENTILE = 'percentile',
   UNIQUE_COUNT = 'cardinality',
 }
 
@@ -165,9 +175,15 @@ export enum GRID_RESOLUTION {
   COARSE = 'COARSE',
   FINE = 'FINE',
   MOST_FINE = 'MOST_FINE',
+  SUPER_FINE = 'SUPER_FINE',
 }
 
+export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
+export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
+export const GEOCENTROID_AGG_NAME = 'gridCentroid';
+
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+export const DEFAULT_PERCENTILE = 50;
 
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
@@ -230,7 +246,10 @@ export enum SCALING_TYPES {
   MVT = 'MVT',
 }
 
-export const RGBA_0000 = 'rgba(0,0,0,0)';
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
+}
 
 export enum MVT_FIELD_TYPE {
   STRING = 'String',
@@ -263,3 +282,13 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export enum DATA_MAPPING_FUNCTION {
+  INTERPOLATE = 'INTERPOLATE',
+  PERCENTILES = 'PERCENTILES',
+}
+export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
+
+export type RawValue = string | number | boolean | undefined | null;
+
+export type FieldFormatter = (value: RawValue) => string | number;

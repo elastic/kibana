@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+import { DeprecationInfo } from '../../../../../common/types';
 import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {

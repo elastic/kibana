@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -71,6 +60,9 @@ export const ServiceStatusLevels = deepFreeze({
   available: {
     toString: () => 'available',
     valueOf: () => 0,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Some features may not be working.
@@ -78,6 +70,9 @@ export const ServiceStatusLevels = deepFreeze({
   degraded: {
     toString: () => 'degraded',
     valueOf: () => 1,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * The service is unavailable, but other functions that do not depend on this service should work.
@@ -85,6 +80,9 @@ export const ServiceStatusLevels = deepFreeze({
   unavailable: {
     toString: () => 'unavailable',
     valueOf: () => 2,
+    toJSON() {
+      return this.toString();
+    },
   },
   /**
    * Block all user functions and display the status page, reserved for Core services only.
@@ -92,6 +90,9 @@ export const ServiceStatusLevels = deepFreeze({
   critical: {
     toString: () => 'critical',
     valueOf: () => 3,
+    toJSON() {
+      return this.toString();
+    },
   },
 });
 
@@ -217,11 +218,17 @@ export interface StatusServiceSetup {
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
+
+  /**
+   * Whether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is
+   * present.
+   */
+  isStatusPageAnonymous: () => boolean;
 }
 
 /** @internal */
-export interface InternalStatusServiceSetup extends Pick<StatusServiceSetup, 'core$' | 'overall$'> {
-  isStatusPageAnonymous: () => boolean;
+export interface InternalStatusServiceSetup
+  extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

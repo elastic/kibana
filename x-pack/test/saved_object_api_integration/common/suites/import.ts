@@ -36,7 +36,7 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_4a, originId: conflict_4
 // using the seven conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
 const CID = 'conflict_';
-export const TEST_CASES = Object.freeze({
+export const TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
   ...CASES,
   CONFLICT_1_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1` }),
   CONFLICT_1A_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1a`, originId: `${CID}1` }),
@@ -71,7 +71,7 @@ const getConflictDest = (id: string) => ({
 });
 
 export function importTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ImportTestCase | ImportTestCase[],
     statusCode: 200 | 403,
@@ -83,7 +83,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectForbidden(types)(response);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const { success, successCount, successResults, errors } = response.body;
@@ -264,6 +264,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

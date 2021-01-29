@@ -6,9 +6,10 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { useSetState } from 'react-use';
+import useSetState from 'react-use/lib/useSetState';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
 
 type TimeKeyOrNull = TimeKey | null;
 
@@ -55,7 +56,6 @@ export interface LogPositionCallbacks {
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
 
-const DEFAULT_DATE_RANGE = { startDateExpression: 'now-1d', endDateExpression: 'now' };
 const DESIRED_BUFFER_PAGES = 2;
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
@@ -80,7 +80,17 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
   return store.currentValue;
 };
 
+const TIME_DEFAULTS = { from: 'now-1d', to: 'now' };
+
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
+  const [getTime, setTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { from: start, to: end } = getTime();
+
+  const DEFAULT_DATE_RANGE = {
+    startDateExpression: start,
+    endDateExpression: end,
+  };
+
   // Flag to determine if `LogPositionState` has been fully initialized.
   //
   // When the page loads, there might be initial state in the URL. We want to
@@ -109,6 +119,17 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
     timestampsLastUpdate: Date.now(),
   });
+
+  useEffect(() => {
+    if (isInitialized) {
+      if (
+        TIME_DEFAULTS.from !== dateRange.startDateExpression ||
+        TIME_DEFAULTS.to !== dateRange.endDateExpression
+      ) {
+        setTime({ from: dateRange.startDateExpression, to: dateRange.endDateExpression });
+      }
+    }
+  }, [isInitialized, dateRange.startDateExpression, dateRange.endDateExpression, setTime]);
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 

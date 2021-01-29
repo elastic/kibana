@@ -10,35 +10,61 @@ import { mount } from 'enzyme';
 import '../../../common/mock/match_media';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent, CaseProps, CaseView } from '.';
-import { basicCase, basicCaseClosed, caseUserActions } from '../../containers/mock';
+import {
+  basicCase,
+  basicCaseClosed,
+  caseUserActions,
+  alertComment,
+  getAlertUserAction,
+} from '../../containers/mock';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
-
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_query');
+jest.mock('../user_action_tree/user_action_timestamp');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useQueryAlertsMock = useQueryAlerts as jest.Mock;
 
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
   userCanCrud: true,
-  caseData: { ...basicCase, connectorId: 'servicenow-2' },
+  caseData: {
+    ...basicCase,
+    comments: [...basicCase.comments, alertComment],
+    connector: {
+      id: 'resilient-2',
+      name: 'Resilient',
+      type: ConnectorTypes.resilient,
+      fields: null,
+    },
+  },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
 };
@@ -47,6 +73,33 @@ export const caseClosedProps: CaseProps = {
   ...caseProps,
   caseData: basicCaseClosed,
 };
+
+const alertsHit = [
+  {
+    _id: 'alert-id-1',
+    _index: 'alert-index-1',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+        },
+      },
+    },
+  },
+  {
+    _id: 'alert-id-2',
+    _index: 'alert-index-2',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-2',
+          name: 'Awesome rule 2',
+        },
+      },
+    },
+  },
+];
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
@@ -63,16 +116,6 @@ describe('CaseView ', () => {
     updateCase,
     fetchCase,
   };
-  /* eslint-disable no-console */
-  // Silence until enzyme fixed to use ReactTestUtils.act()
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
 
   const defaultUpdateCaseState = {
     isLoading: false,
@@ -82,7 +125,7 @@ describe('CaseView ', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions,
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
     caseServices: {},
     fetchCaseUserActions,
     firstIndexPushToService: -1,
@@ -94,12 +137,18 @@ describe('CaseView ', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
+
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
+    useQueryAlertsMock.mockImplementation(() => ({
+      loading: false,
+      data: { hits: { hits: alertsHit } },
+    }));
   });
 
   it('should render CaseComponent', async () => {
@@ -110,38 +159,44 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
         data.title
       );
-      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
-        data.status
+
+      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
+        'Open'
       );
+
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-coke"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
           .first()
           .text()
       ).toEqual(data.tags[0]);
+
       expect(
         wrapper
-          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-pepsi"]`)
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
           .first()
           .text()
       ).toEqual(data.tags[1]);
+
       expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
         data.createdBy.username
       );
-      expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-      expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
-        data.createdAt
-      );
+
+      expect(
+        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
+      ).toEqual(data.createdAt);
+
       expect(
         wrapper
           .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
           .first()
-          .prop('raw')
-      ).toEqual(data.description);
+          .text()
+      ).toBe(data.description);
     });
   });
 
@@ -150,6 +205,7 @@ describe('CaseView ', () => {
       ...defaultUpdateCaseState,
       caseData: basicCaseClosed,
     }));
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -157,18 +213,18 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
-      expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-      expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
-        basicCaseClosed.closedAt
-      );
-      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
-        basicCaseClosed.status
+      expect(
+        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
+      ).toEqual(basicCaseClosed.closedAt);
+      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
+        'Closed'
       );
     });
   });
 
-  it('should dispatch update state when button is toggled', async () => {
+  it('should update status', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -176,15 +232,23 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
+      wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
+      wrapper.update();
       wrapper
-        .find('input[data-test-subj="toggle-case-status"]')
-        .simulate('change', { target: { checked: true } });
-      expect(updateCaseProperty).toHaveBeenCalled();
+        .find('button[data-test-subj="case-view-status-dropdown-closed"]')
+        .first()
+        .simulate('click');
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('status');
+      expect(updateObject.updateValue).toEqual('closed');
     });
   });
 
-  it('should display EditableTitle isLoading', () => {
+  it('should display EditableTitle isLoading', async () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
       isLoading: true,
@@ -197,31 +261,17 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="editable-title-loading"]').first().exists()).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
-    ).toBeFalsy();
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="editable-title-loading"]').first().exists()
+      ).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
+      ).toBeFalsy();
+    });
   });
 
-  it('should display Toggle Status isLoading', () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'status',
-    }));
-    const wrapper = mount(
-      <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
-      </TestProviders>
-    );
-    expect(
-      wrapper.find('[data-test-subj="toggle-case-status"]').first().prop('isLoading')
-    ).toBeTruthy();
-  });
-
-  it('should display description isLoading', () => {
+  it('should display description isLoading', async () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
       isLoading: true,
@@ -234,21 +284,25 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="description-action"] [data-test-subj="user-action-title-loading"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="description-action"] [data-test-subj="property-actions"]')
-        .first()
-        .exists()
-    ).toBeFalsy();
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find(
+            '[data-test-subj="description-action"] [data-test-subj="user-action-title-loading"]'
+          )
+          .first()
+          .exists()
+      ).toBeTruthy();
+      expect(
+        wrapper
+          .find('[data-test-subj="description-action"] [data-test-subj="property-actions"]')
+          .first()
+          .exists()
+      ).toBeFalsy();
+    });
   });
 
-  it('should display tags isLoading', () => {
+  it('should display tags isLoading', async () => {
     useUpdateCaseMock.mockImplementation(() => ({
       ...defaultUpdateCaseState,
       isLoading: true,
@@ -261,16 +315,19 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="case-view-tag-list"] [data-test-subj="tag-list-loading"]')
-        .first()
-        .exists()
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find('[data-test-subj="case-view-tag-list"] [data-test-subj="tag-list-loading"]')
+          .first()
+          .exists()
+      ).toBeTruthy();
+
+      expect(wrapper.find('button[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
+    });
   });
 
-  it('should update title', () => {
+  it('should update title', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -278,21 +335,23 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    const newTitle = 'The new title';
-    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
-    wrapper.update();
-    wrapper
-      .find(`[data-test-subj="editable-title-input-field"]`)
-      .last()
-      .simulate('change', { target: { value: newTitle } });
+    await waitFor(() => {
+      const newTitle = 'The new title';
+      wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
+      wrapper.update();
+      wrapper
+        .find(`[data-test-subj="editable-title-input-field"]`)
+        .last()
+        .simulate('change', { target: { value: newTitle } });
 
-    wrapper.update();
-    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
+      wrapper.update();
+      wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
 
-    wrapper.update();
-    const updateObject = updateCaseProperty.mock.calls[0][0];
-    expect(updateObject.updateKey).toEqual('title');
-    expect(updateObject.updateValue).toEqual(newTitle);
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('title');
+      expect(updateObject.updateValue).toEqual(newTitle);
+    });
   });
 
   it('should push updates on button click', async () => {
@@ -322,7 +381,7 @@ describe('CaseView ', () => {
     });
   });
 
-  it('should return null if error', () => {
+  it('should return null if error', async () => {
     (useGetCase as jest.Mock).mockImplementation(() => ({
       ...defaultGetCase,
       isError: true,
@@ -339,10 +398,12 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper).toEqual({});
+    await waitFor(() => {
+      expect(wrapper).toEqual({});
+    });
   });
 
-  it('should return spinner if loading', () => {
+  it('should return spinner if loading', async () => {
     (useGetCase as jest.Mock).mockImplementation(() => ({
       ...defaultGetCase,
       isLoading: true,
@@ -359,10 +420,12 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="case-view-loading"]').exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-view-loading"]').exists()).toBeTruthy();
+    });
   });
 
-  it('should return case view when data is there', () => {
+  it('should return case view when data is there', async () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
@@ -376,10 +439,12 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
+    });
   });
 
-  it('should refresh data on refresh', () => {
+  it('should refresh data on refresh', async () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
@@ -393,12 +458,14 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
-    expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
-    expect(fetchCase).toBeCalled();
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
+      expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
+      expect(fetchCase).toBeCalled();
+    });
   });
 
-  it('should disable the push button when connector is invalid', () => {
+  it('should disable the push button when connector is invalid', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
       hasDataToPush: true,
@@ -417,39 +484,225 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-
-    expect(
-      wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
-    ).toBeTruthy();
+    await waitFor(() => {
+      expect(
+        wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
+      ).toBeTruthy();
+    });
   });
 
-  it('should revert to the initial connector in case of failure', async () => {
+  // TO DO fix when the useEffects in edit_connector are cleaned up
+  it.skip('should revert to the initial connector in case of failure', async () => {
     updateCaseProperty.mockImplementation(({ onError }) => {
       onError();
     });
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
           <CaseComponent
             {...caseProps}
-            caseData={{ ...caseProps.caseData, connectorId: 'servicenow-1' }}
+            caseData={{
+              ...caseProps.caseData,
+              connector: {
+                id: 'servicenow-1',
+                name: 'SN 1',
+                type: ConnectorTypes.servicenow,
+                fields: null,
+              },
+            }}
           />
         </Router>
       </TestProviders>
     );
+    const connectorName = wrapper
+      .find('[data-test-subj="settings-connector-card"] .euiTitle')
+      .first()
+      .text();
+
     await waitFor(() => {
+      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    });
+
+    await waitFor(() => {
+      wrapper.update();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
       wrapper.update();
       wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-      wrapper.update();
     });
+
     await waitFor(() => {
       wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('connector');
       expect(
-        wrapper.find('[data-test-subj="dropdown-connectors"]').at(0).prop('valueOfSelected')
-      ).toBe('servicenow-1');
+        wrapper.find('[data-test-subj="settings-connector-card"] .euiTitle').first().text()
+      ).toBe(connectorName);
+    });
+  });
+
+  // TO DO fix when the useEffects in edit_connector are cleaned up
+  it.skip('should update connector', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...caseProps}
+            caseData={{
+              ...caseProps.caseData,
+              connector: {
+                id: 'servicenow-1',
+                name: 'SN 1',
+                type: ConnectorTypes.servicenow,
+                fields: null,
+              },
+            }}
+          />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
+    });
+
+    await waitFor(() => {
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
+      wrapper.update();
+    });
+
+    act(() => {
+      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+    });
+
+    await waitFor(() => {
+      wrapper.update();
+    });
+
+    const updateObject = updateCaseProperty.mock.calls[0][0];
+    expect(updateObject.updateKey).toEqual('connector');
+    expect(updateObject.updateValue).toEqual({
+      id: 'resilient-2',
+      name: 'My Connector 2',
+      type: ConnectorTypes.resilient,
+      fields: {
+        incidentTypes: null,
+        severityCode: null,
+      },
+    });
+  });
+
+  it('it should create a new timeline on mount', async () => {
+    mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'x-pack/security_solution/local/timeline/CREATE_TIMELINE',
+        payload: {
+          columns: [],
+          expandedEvent: {},
+          id: 'timeline-case',
+          indexNames: [],
+          show: false,
+        },
+      });
+    });
+  });
+
+  it('should show loading content when loading alerts', async () => {
+    useQueryAlertsMock.mockImplementation(() => ({
+      loading: true,
+      data: { hits: { hits: [] } },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="case-view-loading-content"]').first().exists()
+      ).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="user-actions"]').first().exists()).toBeFalsy();
+    });
+  });
+
+  it('should open the alert flyout', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper
+        .find('[data-test-subj="comment-action-show-alert-alert-action-id"] button')
+        .first()
+        .simulate('click');
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        payload: {
+          event: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
+          timelineId: 'timeline-case',
+        },
+      });
+    });
+  });
+
+  it('should show the rule name', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find(
+            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
+          )
+          .first()
+          .text()
+      ).toBe('added an alert from Awesome rule');
+    });
+  });
+
+  it('should update settings', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('settings');
+      expect(updateObject.updateValue).toEqual({ syncAlerts: false });
     });
   });
 });

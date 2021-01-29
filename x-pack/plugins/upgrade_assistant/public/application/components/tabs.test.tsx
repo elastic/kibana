@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from 'src/core/public/mocks';
 import { UpgradeAssistantTabs } from './tabs';
 import { LoadingState } from './types';
@@ -16,6 +16,19 @@ import { OverviewTab } from './tabs/overview';
 const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const mockHttp = httpServiceMock.createSetupContract();
+
+jest.mock('../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+      };
+    },
+  };
+});
 
 describe('UpgradeAssistantTabs', () => {
   test('renders loading state', async () => {

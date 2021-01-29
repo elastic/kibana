@@ -13,7 +13,7 @@ To get started copy and paste this example to `test/functional/config.js`:
 ["source","js"]
 -----------
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { MyServiceProvider } from './services/my_service';
 import { MyAppPageProvider } from './services/my_app_page';

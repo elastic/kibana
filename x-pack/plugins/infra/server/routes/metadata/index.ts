@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -58,7 +58,14 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           nameToFeature('metrics')
         );
 
-        const info = await getNodeInfo(framework, requestContext, configuration, nodeId, nodeType);
+        const info = await getNodeInfo(
+          framework,
+          requestContext,
+          configuration,
+          nodeId,
+          nodeType,
+          timeRange
+        );
         const cloudInstanceId = get(info, 'cloud.instance.id');
 
         const cloudMetricsMetadata = cloudInstanceId

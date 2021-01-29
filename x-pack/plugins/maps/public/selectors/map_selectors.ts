@@ -20,10 +20,9 @@ import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { IJoin } from '../classes/joins/join';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
-import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -31,9 +30,10 @@ import {
   SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
-import { extractFeaturesFromFilters } from '../../common/elasticsearch_geo_utils';
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
+  AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
   Goto,
@@ -52,9 +52,9 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
 
-function createLayerInstance(
+export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters: Adapters
+  inspectorAdapters?: Adapters
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -62,11 +62,11 @@ function createLayerInstance(
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source: source as ITMSSource });
     case VectorLayer.type:
-      const joins: IJoin[] = [];
+      const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
         vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source);
+          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
           joins.push(join);
         });
       }
@@ -76,7 +76,7 @@ function createLayerInstance(
         joins,
       });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source });
+      return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
@@ -94,7 +94,13 @@ function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters: Adapters): ISource {
+function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor | null,
+  inspectorAdapters?: Adapters
+): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
@@ -144,21 +150,6 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): Layer
 
 export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
 
-export const isInteractiveDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableInteractive;
-
-export const isTooltipControlDisabled = ({ map }: MapStoreState): boolean =>
-  map.mapState.disableTooltipControl;
-
-export const isToolbarOverlayHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideToolbarOverlay;
-
-export const isLayerControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideLayerControl;
-
-export const isViewControlHidden = ({ map }: MapStoreState): boolean =>
-  map.mapState.hideViewControl;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
@@ -177,6 +168,9 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
+
+export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.searchSessionId;
 
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
@@ -229,7 +223,17 @@ export const getDataFilters = createSelector(
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query, filters) => {
+  getSearchSessionId,
+  (
+    mapExtent,
+    mapBuffer,
+    mapZoom,
+    timeFilters,
+    refreshTimerLastTriggeredAt,
+    query,
+    filters,
+    searchSessionId
+  ) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
@@ -238,6 +242,7 @@ export const getDataFilters = createSelector(
       refreshTimerLastTriggeredAt,
       query,
       filters,
+      searchSessionId,
     };
   }
 );
@@ -250,10 +255,10 @@ export const getSpatialFiltersLayer = createSelector(
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
     };
-    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
-      featureCollection,
-      'spatialFilters'
-    );
+    const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: featureCollection,
+      name: 'spatialFilters',
+    });
 
     return new VectorLayer({
       layerDescriptor: VectorLayer.createDescriptor({
@@ -281,7 +286,7 @@ export const getSpatialFiltersLayer = createSelector(
           },
         }),
       }),
-      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+      source: new GeoJsonFileSource(geoJsonSourceDescriptor),
     });
   }
 );
@@ -350,7 +355,7 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: IJoin) => {
+  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });
@@ -365,13 +370,25 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList)
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds);
-});
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const indexPatternIds: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    }
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {

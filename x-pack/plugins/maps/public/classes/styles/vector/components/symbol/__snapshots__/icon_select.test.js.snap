@@ -44,6 +44,7 @@ exports[`Should render icon select 1`] = `
     clickOutsideDisables={true}
   >
     <EuiSelectable
+      isPreFiltered={false}
       onChange={[Function]}
       options={
         Array [

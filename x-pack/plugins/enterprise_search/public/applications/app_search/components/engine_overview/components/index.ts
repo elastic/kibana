@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineOverviewHeader } from './header';
-export { LoadingState } from './loading_state';
-export { EmptyState } from './empty_state';
+export { UnavailablePrompt } from './unavailable_prompt';
+export { TotalStats } from './total_stats';
+export { TotalCharts } from './total_charts';
+export { RecentApiLogs } from './recent_api_logs';

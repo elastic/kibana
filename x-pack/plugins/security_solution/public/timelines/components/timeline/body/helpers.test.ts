@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../../../graphql/types';
-
 import {
   eventHasNotes,
   eventIsPinned,
@@ -14,6 +12,7 @@ import {
   stringifyEvent,
   isInvestigateInResolverActionEnabled,
 } from './helpers';
+import { Ecs } from '../../../../../common/ecs';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
@@ -145,11 +144,7 @@ describe('helpers', () => {
       };
       const toStringify: Ecs = {
         _id: '4',
-        timestamp: null,
-        host: {
-          name: null,
-          ip: null,
-        },
+        host: {},
         event: {
           id: ['4'],
           category: ['theory'],

@@ -58,18 +58,6 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
     });
 
-    test('it does NOT render the data providers when show is false', () => {
-      const testProps = { ...props, show: false };
-
-      const wrapper = mount(
-        <TestProviders>
-          <TimelineHeader {...testProps} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(false);
-    });
-
     test('it renders the unauthorized call out providers', () => {
       const testProps = {
         ...props,

@@ -4,28 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCreateRulesSchemaMock } from './create_rules_schema.mock';
-import { CreateRulesSchema } from './create_rules_schema';
+import { getCreateRulesSchemaMock, getCreateThreatMatchRulesSchemaMock } from './rule_schemas.mock';
+import { CreateRulesSchema } from './rule_schemas';
 import { createRuleValidateTypeDependents } from './create_rules_type_dependents';
 
 describe('create_rules_type_dependents', () => {
-  test('saved_id is required when type is saved_query and will not validate without out', () => {
-    const schema: CreateRulesSchema = { ...getCreateRulesSchemaMock(), type: 'saved_query' };
-    delete schema.saved_id;
-    const errors = createRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "saved_query", "saved_id" is required']);
-  });
-
-  test('saved_id is required when type is saved_query and validates with it', () => {
-    const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'saved_query',
-      saved_id: '123',
-    };
-    const errors = createRuleValidateTypeDependents(schema);
-    expect(errors).toEqual([]);
-  });
-
   test('You cannot omit timeline_title when timeline_id is present', () => {
     const schema: CreateRulesSchema = {
       ...getCreateRulesSchemaMock(),
@@ -66,25 +49,35 @@ describe('create_rules_type_dependents', () => {
     expect(errors).toEqual(['when "timeline_title" exists, "timeline_id" must also exist']);
   });
 
-  test('threshold is required when type is threshold and validates with it', () => {
+  test('validates that both "items_per_search" and "concurrent_searches" works when together', () => {
     const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'threshold',
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+      items_per_search: 10,
     };
     const errors = createRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
+    expect(errors).toEqual([]);
   });
 
-  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
+  test('does NOT validate when only "items_per_search" is present', () => {
     const schema: CreateRulesSchema = {
-      ...getCreateRulesSchemaMock(),
-      type: 'threshold',
-      threshold: {
-        field: '',
-        value: -1,
-      },
+      ...getCreateThreatMatchRulesSchemaMock(),
+      items_per_search: 10,
     };
     const errors = createRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
+    expect(errors).toEqual([
+      'when "items_per_search" exists, "concurrent_searches" must also exist',
+    ]);
+  });
+
+  test('does NOT validate when only "concurrent_searches" is present', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "concurrent_searches" exists, "items_per_search" must also exist',
+    ]);
   });
 });

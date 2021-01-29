@@ -4,33 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import { createMockReportingCore } from '../../test_helpers';
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import { ReportingInternalSetup } from '../../core';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../test_helpers';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 let mockCore: ReportingCore;
-const kbnConfig = {
-  'server.basePath': '/sbp',
-};
-const reportingConfig = {
-  'roles.allow': ['reporting_user'],
-};
-const mockReportingConfig = {
-  get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')] || 'whoah!',
-  kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-};
+const mockConfig: any = { 'server.basePath': '/sbp', 'roles.allow': ['reporting_user'] };
+const mockReportingConfigSchema = createMockConfigSchema(mockConfig);
+const mockReportingConfig = createMockConfig(mockReportingConfigSchema);
 
 const getMockContext = () =>
   (({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown) as RequestHandlerContext);
+  } as unknown) as ReportingRequestHandlerContext);
 
 const getMockRequest = () =>
   ({
-    url: { port: '5601', query: '', path: '/foo' },
+    url: { port: '5601', search: '', pathname: '/foo' },
     route: { path: '/foo', options: {} },
   } as KibanaRequest);
 
@@ -133,7 +131,7 @@ describe('authorized_user_pre_routing', function () {
     ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
   });
 
-  it('should return from handler when security is enabled and user has explicitly allowed role', async function (done) {
+  it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore

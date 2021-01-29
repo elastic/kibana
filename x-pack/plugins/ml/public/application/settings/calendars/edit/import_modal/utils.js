@@ -42,7 +42,10 @@ export function filterEvents(events) {
 }
 
 export function parseICSFile(data) {
-  const cal = icalendar.parse_calendar(data);
+  // force a new line char on the end of the data
+  // icalendar must split on new lines and so parsing fails
+  // if there isn't at least one new line at the end.
+  const cal = icalendar.parse_calendar(data + '\n');
   return createEvents(cal);
 }
 

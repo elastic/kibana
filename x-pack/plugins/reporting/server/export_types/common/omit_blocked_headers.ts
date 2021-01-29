@@ -9,13 +9,7 @@ import {
   KBN_SCREENSHOT_HEADER_BLOCK_LIST_STARTS_WITH_PATTERN,
 } from '../../../common/constants';
 
-export const omitBlockedHeaders = <TaskPayloadType>({
-  job,
-  decryptedHeaders,
-}: {
-  job: TaskPayloadType;
-  decryptedHeaders: Record<string, string>;
-}) => {
+export const omitBlockedHeaders = (decryptedHeaders: Record<string, string>) => {
   const filteredHeaders: Record<string, string> = omitBy(
     decryptedHeaders,
     (_value, header: string) =>

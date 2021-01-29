@@ -13,6 +13,7 @@ import { sendEmail } from './send_email';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -64,7 +65,7 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions(
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
       {
         transport: {
           host: 'example.com',
@@ -76,12 +77,7 @@ describe('send_email module', () => {
         proxyRejectUnauthorizedCertificates: false,
       }
     );
-    // @ts-expect-error
-    delete sendEmailOptions.transport.service;
-    // @ts-expect-error
-    delete sendEmailOptions.transport.user;
-    // @ts-expect-error
-    delete sendEmailOptions.transport.password;
+
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -141,7 +137,7 @@ describe('send_email module', () => {
           "port": 1025,
           "secure": false,
           "tls": Object {
-            "rejectUnauthorized": undefined,
+            "rejectUnauthorized": true,
           },
         },
       ]
@@ -228,6 +224,10 @@ function getSendEmailOptions(
   { content = {}, routing = {}, transport = {} } = {},
   proxySettings?: ProxySettings
 ) {
+  const configurationUtilities = actionsConfigMock.create();
+  if (proxySettings) {
+    configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
   return {
     content: {
       ...content,
@@ -247,6 +247,36 @@ function getSendEmailOptions(
       user: 'elastic',
       password: 'changeme',
     },
-    proxySettings,
+    hasAuth: true,
+    configurationUtilities,
+  };
+}
+
+function getSendEmailOptionsNoAuth(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings
+) {
+  const configurationUtilities = actionsConfigMock.create();
+  if (proxySettings) {
+    configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
+  return {
+    content: {
+      ...content,
+      message: 'a message',
+      subject: 'a subject',
+    },
+    routing: {
+      ...routing,
+      from: 'fred@example.com',
+      to: ['jim@example.com'],
+      cc: ['bob@example.com', 'robert@example.com'],
+      bcc: [],
+    },
+    transport: {
+      ...transport,
+    },
+    hasAuth: false,
+    configurationUtilities,
   };
 }

@@ -5,27 +5,27 @@
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
-import { SpacesServiceSetup } from '../../spaces/server';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
   savedObjectProviderRegistry: SavedObjectProviderRegistry;
-  spacesService?: SpacesServiceSetup;
+  spacesService?: SpacesServiceStart;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClientService implements IEventLogClientService {
   private esContext: EsContext;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
-  private spacesService?: SpacesServiceSetup;
+  private spacesService?: SpacesServiceStart;
 
   constructor({
     esContext,

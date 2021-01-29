@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
-import _ from 'lodash';
+import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../common/constants/origin';
@@ -380,7 +369,7 @@ export class KibanaMap extends EventEmitter {
 
     const distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
     const distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
-    return _.min([distanceX, distanceY]);
+    return Math.min(distanceX, distanceY);
   }
 
   _getLeafletBounds(resizeOnFail) {
@@ -544,7 +533,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   setBaseLayer(settings) {
-    if (_.isEqual(settings, this._baseLayerSettings)) {
+    if (isEqual(settings, this._baseLayerSettings)) {
       return;
     }
 
@@ -567,7 +556,7 @@ export class KibanaMap extends EventEmitter {
     let baseLayer;
     if (settings.baseLayerType === 'wms') {
       //This is user-input that is rendered with the Leaflet attribution control. Needs to be sanitized.
-      this._baseLayerSettings.options.attribution = _.escape(settings.options.attribution);
+      this._baseLayerSettings.options.attribution = escape(settings.options.attribution);
       baseLayer = this._getWMSBaseLayer(settings.options);
     } else if (settings.baseLayerType === 'tms') {
       baseLayer = this._getTMSBaseLayer(settings.options);
@@ -661,7 +650,7 @@ export class KibanaMap extends EventEmitter {
   _updateDesaturation() {
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps
-    if (_.get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
+    if (get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
       tiles.addClass('filters-off');
     } else {
       if (this._baseLayerIsDesaturated) {
@@ -672,14 +661,13 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  persistUiStateForVisualization(visualization) {
+  persistUiStateForVisualization(uiState) {
     function persistMapStateInUiState() {
-      const uiState = visualization.getUiState();
       const centerFromUIState = uiState.get('mapCenter');
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
 
       if (isNaN(zoomFromUiState) || this.getZoomLevel() !== zoomFromUiState) {
-        visualization.uiStateVal('mapZoom', this.getZoomLevel());
+        uiState.set('mapZoom', this.getZoomLevel());
       }
       const centerFromMap = this.getCenter();
       if (
@@ -687,24 +675,17 @@ export class KibanaMap extends EventEmitter {
         centerFromMap.lon !== centerFromUIState[1] ||
         centerFromMap.lat !== centerFromUIState[0]
       ) {
-        visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
+        uiState.set('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
     }
 
-    this._leafletMap.on('resize', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
-    this._leafletMap.on('load', () => {
-      visualization.sessionState.mapBounds = this.getBounds();
-    });
     this.on('dragend', persistMapStateInUiState);
     this.on('zoomend', persistMapStateInUiState);
   }
 
-  useUiStateFromVisualization(visualization) {
-    const uiState = visualization.getUiState();
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
+  useUiStateFromVisualization(uiState) {
+    const zoomFromUiState = parseInt(uiState?.get('mapZoom'));
+    const centerFromUIState = uiState?.get('mapCenter');
     if (!isNaN(zoomFromUiState)) {
       this.setZoomLevel(zoomFromUiState);
     }

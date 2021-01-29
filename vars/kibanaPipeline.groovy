@@ -1,4 +1,4 @@
-def withPostBuildReporting(Closure closure) {
+def withPostBuildReporting(Map params, Closure closure) {
   try {
     closure()
   } finally {
@@ -9,8 +9,10 @@ def withPostBuildReporting(Closure closure) {
       print ex
     }
 
-    catchErrors {
-      runErrorReporter([pwd()] + parallelWorkspaces)
+    if (params.runErrorReporter) {
+      catchErrors {
+        runErrorReporter([pwd()] + parallelWorkspaces)
+      }
     }
 
     catchErrors {
@@ -85,8 +87,10 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def kibanaPort = "61${parallelId}1"
   def esPort = "61${parallelId}2"
   def esTransportPort = "61${parallelId}3"
-  def ingestManagementPackageRegistryPort = "61${parallelId}4"
+  def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
+  def corsTestServerPort = "61${parallelId}6"
+  def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -97,9 +101,12 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+    "TEST_CORS_SERVER_PORT=${corsTestServerPort}",
     "KBN_NP_PLUGINS_BUILT=true",
-    "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
-    "ALERTING_PROXY_PORT=${alertingProxyPort}"
+    "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
+    "ALERTING_PROXY_PORT=${alertingProxyPort}",
+    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
   }
@@ -107,22 +114,24 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
 def functionalTestProcess(String name, Closure closure) {
   return {
-    withFunctionalTestEnv(["JOB=${name}"], closure)
+    notifyOnError {
+      withFunctionalTestEnv(["JOB=${name}"], closure)
+    }
   }
 }
 
 def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
-    notifyOnError {
-      retryable(name) {
-        runbld(script, "Execute ${name}")
-      }
+    retryable(name) {
+      runbld(script, "Execute ${name}")
     }
   }
 }
 
 def ossCiGroupProcess(ciGroup) {
   return functionalTestProcess("ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -136,6 +145,7 @@ def ossCiGroupProcess(ciGroup) {
 
 def xpackCiGroupProcess(ciGroup) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -388,12 +398,7 @@ def scriptTaskDocker(description, script) {
 
 def buildDocker() {
   sh(
-    script: """
-      cp /usr/local/bin/runbld .ci/
-      cp /usr/local/bin/bash_standard_lib.sh .ci/
-      cd .ci
-      docker build -t kibana-ci -f ./Dockerfile .
-    """,
+    script: "./.ci/build_docker.sh",
     label: 'Build CI Docker image'
   )
 }
@@ -442,16 +447,31 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 }
 
 def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
+  parallel([
+    general: {
+      withTasks {
+        tasks.check()
+        tasks.lint()
+        tasks.test()
+        tasks.functionalOss()
+        tasks.functionalXpack()
+      }
+    },
+    jest: {
+      workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+      }
+    },
+    xpackJest: {
+      workers.ci(name: 'xpack-jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh')()
+      }
+    },
+  ])
 }
 
 def pipelineLibraryTests() {
+  return
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {

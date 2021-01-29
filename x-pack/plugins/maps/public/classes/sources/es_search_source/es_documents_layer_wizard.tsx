@@ -15,8 +15,16 @@ import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_ve
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
 import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
+import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
+import {
+  ESSearchSourceDescriptor,
+  VectorLayerDescriptor,
+} from '../../../../common/descriptor_types';
 
-export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: string[]) {
+export function createDefaultLayerDescriptor(
+  sourceConfig: Partial<ESSearchSourceDescriptor>,
+  mapColors: string[]
+): VectorLayerDescriptor {
   const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
 
   if (sourceDescriptor.scalingType === SCALING_TYPES.CLUSTERS) {
@@ -33,9 +41,9 @@ export const esDocumentsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Points, lines, and polygons from Elasticsearch',
   }),
-  icon: 'logoElasticsearch',
+  icon: DocumentsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor>) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

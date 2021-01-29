@@ -51,9 +51,17 @@ You can request to overwrite any objects that already exist in the target space 
   (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target
   spaces. The default value is `false`.
 
+`createNewCopies`::
+  (Optional, boolean) Creates new copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
+  errors are avoided. The default value is `true`.
++
+NOTE: This cannot be used with the `overwrite` option.
+
 `overwrite`::
   (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id`
   exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
++
+NOTE: This cannot be used with the `createNewCopies` option.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
@@ -128,8 +136,7 @@ $ curl -X POST api/spaces/_copy_saved_objects
     "id": "my-dashboard"
   }],
   "spaces": ["marketing"],
-  "includeReferences": true,
-  "createNewcopies": true
+  "includeReferences": true
 }
 ----
 // KIBANA
@@ -193,7 +200,8 @@ $ curl -X POST api/spaces/_copy_saved_objects
     "id": "my-dashboard"
   }],
   "spaces": ["marketing"],
-  "includeReferences": true
+  "includeReferences": true,
+  "createNewCopies": false
 }
 ----
 // KIBANA
@@ -254,7 +262,8 @@ $ curl -X POST api/spaces/_copy_saved_objects
     "id": "my-dashboard"
   }],
   "spaces": ["marketing", "sales"],
-  "includeReferences": true
+  "includeReferences": true,
+  "createNewCopies": false
 }
 ----
 // KIBANA
@@ -405,7 +414,8 @@ $ curl -X POST api/spaces/_copy_saved_objects
     "id": "my-dashboard"
   }],
   "spaces": ["marketing"],
-  "includeReferences": true
+  "includeReferences": true,
+  "createNewCopies": false
 }
 ----
 // KIBANA

@@ -4,14 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../types';
-import { createExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler, CreateExecutionHandlerOptions } from './create_execution_handler';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+import {
+  actionsMock,
+  actionsClientMock,
+  renderActionParameterTemplatesDefault,
+} from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
+import { asSavedObjectExecutionSource } from '../../../actions/server';
+import { InjectActionParamsOpts } from './inject_action_params';
+import { NormalizedAlertType } from '../alert_type_registry';
+import {
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
 
-const alertType: AlertType = {
+jest.mock('./inject_action_params', () => ({
+  injectActionParams: jest.fn(),
+}));
+
+const alertType: NormalizedAlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default' | 'other-group',
+  'recovered'
+> = {
   id: 'test',
   name: 'Test',
   actionGroups: [
@@ -19,23 +42,38 @@ const alertType: AlertType = {
     { id: 'other-group', name: 'Other Group' },
   ],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };
 
 const actionsClient = actionsClientMock.create();
-const createExecutionHandlerParams = {
-  actionsPlugin: actionsMock.createStart(),
+
+const mockActionsPlugin = actionsMock.createStart();
+const mockEventLogger = eventLoggerMock.create();
+const createExecutionHandlerParams: jest.Mocked<
+  CreateExecutionHandlerOptions<
+    AlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    'default' | 'other-group',
+    'recovered'
+  >
+> = {
+  actionsPlugin: mockActionsPlugin,
   spaceId: 'default',
   alertId: '1',
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  getBasePath: jest.fn().mockReturnValue(undefined),
   alertType,
   logger: loggingSystemMock.create().get(),
-  eventLogger: eventLoggerMock.create(),
+  eventLogger: mockEventLogger,
   actions: [
     {
       id: '1',
@@ -59,10 +97,16 @@ const createExecutionHandlerParams = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-  createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
-    actionsClient
+  jest
+    .requireMock('./inject_action_params')
+    .injectActionParams.mockImplementation(
+      ({ actionParams }: InjectActionParamsOpts) => actionParams
+    );
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+  mockActionsPlugin.isActionExecutable.mockReturnValue(true);
+  mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  mockActionsPlugin.renderActionParameterTemplates.mockImplementation(
+    renderActionParameterTemplatesDefault
   );
 });
 
@@ -74,29 +118,35 @@ test('enqueues execution per selected action', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(
-    createExecutionHandlerParams.actionsPlugin.getActionsClientWithRequest
-  ).toHaveBeenCalledWith(createExecutionHandlerParams.request);
+  expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
+    createExecutionHandlerParams.request
+  );
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 
-  const eventLogger = createExecutionHandlerParams.eventLogger;
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+  expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(mockEventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
         Object {
@@ -105,6 +155,8 @@ test('enqueues execution per selected action', async () => {
           },
           "kibana": Object {
             "alerting": Object {
+              "action_group_id": "default",
+              "action_subgroup": undefined,
               "instance_id": "2",
             },
             "saved_objects": Array [
@@ -124,13 +176,24 @@ test('enqueues execution per selected action', async () => {
       ],
     ]
   `);
+
+  expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
+    alertId: '1',
+    actionTypeId: 'test',
+    actionParams: {
+      alertVal: 'My 1 name-of-alert default tag-A,tag-B 2 goes here',
+      contextVal: 'My  goes here',
+      foo: true,
+      stateVal: 'My  goes here',
+    },
+  });
 });
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
   // Mock two calls, one for check against actions[0] and the second for actions[1]
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValueOnce(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
+  mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [
@@ -161,15 +224,19 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       contextVal: 'My other  goes here',
       stateVal: 'My other  goes here',
     },
+    source: asSavedObjectExecutionSource({
+      id: '1',
+      type: 'alert',
+    }),
     spaceId: 'default',
     apiKey: createExecutionHandlerParams.apiKey,
   });
 });
 
 test('trow error error message when action type is disabled', async () => {
-  createExecutionHandlerParams.actionsPlugin.preconfiguredActions = [];
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(false);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(false);
+  mockActionsPlugin.preconfiguredActions = [];
+  mockActionsPlugin.isActionExecutable.mockReturnValue(false);
+  mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
   const executionHandler = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [
@@ -196,7 +263,7 @@ test('trow error error message when action type is disabled', async () => {
 
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
-  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
+  mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
   const executionHandlerForPreconfiguredAction = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [...createExecutionHandlerParams.actions],
@@ -231,20 +298,27 @@ test('context attribute gets parameterized', async () => {
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My context-val goes here",
+          "foo": true,
+          "stateVal": "My  goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My context-val goes here",
-              "foo": true,
-              "stateVal": "My  goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test('state attribute gets parameterized', async () => {
@@ -257,26 +331,35 @@ test('state attribute gets parameterized', async () => {
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "apiKey": "MTIzOmFiYw==",
+    Array [
+      Object {
+        "apiKey": "MTIzOmFiYw==",
+        "id": "1",
+        "params": Object {
+          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "contextVal": "My  goes here",
+          "foo": true,
+          "stateVal": "My state-val goes here",
+        },
+        "source": Object {
+          "source": Object {
             "id": "1",
-            "params": Object {
-              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
-              "contextVal": "My  goes here",
-              "foo": true,
-              "stateVal": "My state-val goes here",
-            },
-            "spaceId": "default",
+            "type": "alert",
           },
-        ]
-    `);
+          "type": "SAVED_OBJECT",
+        },
+        "spaceId": "default",
+      },
+    ]
+  `);
 });
 
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   const result = await executionHandler({
-    actionGroup: 'invalid-group',
+    // we have to trick the compiler as this is an invalid type and this test checks whether we
+    // enforce this at runtime as well as compile time
+    actionGroup: 'invalid-group' as 'default' | 'other-group',
     context: {},
     state: {},
     alertInstanceId: '2',

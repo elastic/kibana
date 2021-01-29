@@ -8,16 +8,9 @@ import { render } from '../../../utils/test_helper';
 import { Header } from './';
 
 describe('Header', () => {
-  it('renders without add data button', () => {
-    const { getByText, queryAllByText, getByTestId } = render(<Header color="#fff" />);
+  it('renders', () => {
+    const { getByText, getByTestId } = render(<Header color="#fff" />);
     expect(getByTestId('observability-logo')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
-    expect(queryAllByText('Add data')).toEqual([]);
-  });
-  it('renders with add data button', () => {
-    const { getByText, getByTestId } = render(<Header color="#fff" showAddData />);
-    expect(getByTestId('observability-logo')).toBeInTheDocument();
-    expect(getByText('Observability')).toBeInTheDocument();
-    expect(getByText('Add data')).toBeInTheDocument();
   });
 });

@@ -38,3 +38,8 @@ export const SpacesSavedObjectMappings = deepFreeze({
     },
   },
 });
+
+export const UsageStatsMappings = deepFreeze({
+  dynamic: false as false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+  properties: {},
+});

@@ -15,4 +15,11 @@ describe('RuleStatusFailedCallOut', () => {
 
     expect(wrapper.find('EuiCallOut')).toHaveLength(1);
   });
+  it('renders correctly with optional params', () => {
+    const wrapper = shallow(
+      <RuleStatusFailedCallOut date="date" message="message" color="warning" />
+    );
+
+    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+  });
 });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Path from 'path';
@@ -23,7 +12,6 @@ import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
@@ -64,6 +52,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     optimization: {
       noEmitOnErrors: true,
+      splitChunks: {
+        maxAsyncRequests: 10,
+        cacheGroups: {
+          default: {
+            reuseExistingChunk: false,
+          },
+        },
+      },
     },
 
     externals: [UiSharedDeps.externals],
@@ -200,6 +196,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'babel-loader',
             options: {
               babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
               presets: IS_CODE_COVERAGE
                 ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
                 : [BABEL_PRESET_PATH],
@@ -216,10 +213,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', 'json'],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
-        tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
     },

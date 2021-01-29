@@ -10,3 +10,10 @@ export const labelField = (label: string, field: string) => [
   { constant: '=' },
   { field },
 ];
+
+export const labelFieldsPrefix = (label: string, fieldsPrefix: string) => [
+  { constant: ' ' },
+  { constant: label },
+  { constant: '=' },
+  { fieldsPrefix },
+];

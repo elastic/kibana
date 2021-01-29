@@ -90,6 +90,7 @@ describe('patch_rules', () => {
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
+          type: 'machine_learning',
           rule_id: 'my-rule-id',
           anomaly_threshold: 4,
           machine_learning_job_id: 'some_job_id',

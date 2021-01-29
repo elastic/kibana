@@ -4,25 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
-import { BaseParams, BasePayload, ReportingUser } from '../types';
+import { KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import type {
+  BaseParams,
+  BasePayload,
+  ReportingUser,
+  ReportingRequestHandlerContext,
+} from '../types';
 
 export type HandlerFunction = (
   user: ReportingUser,
   exportType: string,
   jobParams: BaseParams,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   req: KibanaRequest,
   res: KibanaResponseFactory
 ) => any;
 
 export type HandlerErrorFunction = (res: KibanaResponseFactory, err: Error) => any;
 
-export interface QueuedJobPayload<JobParamsType> {
+export interface QueuedJobPayload {
   error?: boolean;
   source: {
     job: {
-      payload: BasePayload<JobParamsType>;
+      payload: BasePayload;
     };
   };
 }

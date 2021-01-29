@@ -10,6 +10,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 export interface NetworkKpiProps {
   filterQuery: string;
   from: string;
+  indexNames: string[];
   to: string;
   narrowDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];

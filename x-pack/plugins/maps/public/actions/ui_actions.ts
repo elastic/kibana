@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -35,12 +36,15 @@ export function updateFlyout(display: FLYOUT_STATE) {
   };
 }
 export function openMapSettings() {
-  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     const flyoutDisplay = getFlyoutDisplay(getState());
     if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
       return;
     }
-    dispatch<any>(setSelectedLayer(null));
+    dispatch(setSelectedLayer(null));
     dispatch(trackMapSettings());
     dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
   };

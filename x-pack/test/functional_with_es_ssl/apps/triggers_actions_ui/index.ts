@@ -11,7 +11,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     this.tags('ciGroup10');
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./connectors'));
-    loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./alerts_list'));
+    loadTestFile(require.resolve('./alert_create_flyout'));
     loadTestFile(require.resolve('./details'));
   });
 };

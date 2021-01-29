@@ -9,7 +9,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { TimeKey } from '../../../../common/time';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
-import { LogEntry, LogEntriesHighlightsResponse } from '../../../../common/http_api';
+import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogEntryHighlights = (
   sourceId: string,
@@ -21,6 +23,7 @@ export const useLogEntryHighlights = (
   filterQuery: string | null,
   highlightTerms: string[]
 ) => {
+  const { services } = useKibanaContextForPlugin();
   const [logEntryHighlights, setLogEntryHighlights] = useState<
     LogEntriesHighlightsResponse['data']
   >([]);
@@ -32,15 +35,18 @@ export const useLogEntryHighlights = (
           throw new Error('Skipping request: Insufficient parameters');
         }
 
-        return await fetchLogEntriesHighlights({
-          sourceId,
-          startTimestamp,
-          endTimestamp,
-          center: centerPoint,
-          size,
-          query: filterQuery || undefined,
-          highlightTerms,
-        });
+        return await fetchLogEntriesHighlights(
+          {
+            sourceId,
+            startTimestamp,
+            endTimestamp,
+            center: centerPoint,
+            size,
+            query: filterQuery || undefined,
+            highlightTerms,
+          },
+          services.http.fetch
+        );
       },
       onResolve: (response) => {
         setLogEntryHighlights(response.data);

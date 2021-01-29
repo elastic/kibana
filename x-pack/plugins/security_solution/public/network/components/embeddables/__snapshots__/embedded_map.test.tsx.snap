@@ -1,34 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
-<Embeddable>
-  <EmbeddableHeader
-    title="Network map"
-  >
-    <EuiText
-      size="xs"
-    >
-      <EuiLink
-        href="https://www.elastic.co/guide/en/security/mocked-test-branch/conf-map-ui.html"
-        target="_blank"
-      >
-        Map configuration help
-      </EuiLink>
-    </EuiText>
-  </EmbeddableHeader>
-  <InPortal
-    node={<div />}
-  >
-    <MapToolTip />
-  </InPortal>
-  <EmbeddableMap
-    maintainRatio={true}
-  >
-    <Loader
-      data-test-subj="loading-panel"
-      overlay={true}
-      size="xl"
-    />
-  </EmbeddableMap>
-</Embeddable>
+<EmbeddedMapComponent
+  endDate="2019-08-28T05:50:57.877Z"
+  filters={Array []}
+  query={
+    Object {
+      "language": "kuery",
+      "query": "",
+    }
+  }
+  setQuery={[MockFunction]}
+  startDate="2019-08-28T05:50:47.877Z"
+/>
 `;

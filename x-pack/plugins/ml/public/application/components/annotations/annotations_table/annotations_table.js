@@ -10,11 +10,10 @@
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
 
-import uniq from 'lodash/uniq';
+import { uniq } from 'lodash';
 
 import PropTypes from 'prop-types';
-import rison from 'rison-node';
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, useContext } from 'react';
 import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
@@ -32,8 +31,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
-import { formatDate } from '@elastic/eui/lib/services/format';
-
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
@@ -43,23 +40,23 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
-import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 
-import {
-  annotation$,
-  annotationsRefresh$,
-  annotationsRefreshed,
-} from '../../../services/annotations_service';
+import { annotationsRefresh$, annotationsRefreshed } from '../../../services/annotations_service';
 import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { timeFormatter } from '../../../../../common/util/date_utils';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 const CURRENT_SERIES = 'current_series';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
-export class AnnotationsTable extends Component {
+class AnnotationsTableUI extends Component {
   static propTypes = {
     annotations: PropTypes.array,
     jobs: PropTypes.array,
@@ -98,7 +95,7 @@ export class AnnotationsTable extends Component {
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
       ml.annotations
-        .getAnnotations({
+        .getAnnotations$({
           jobIds: [job.job_id],
           earliestMs: null,
           latestMs: null,
@@ -199,7 +196,17 @@ export class AnnotationsTable extends Component {
     }
   }
 
-  openSingleMetricView = (annotation = {}) => {
+  openSingleMetricView = async (annotation = {}) => {
+    const {
+      services: {
+        application: { navigateToApp },
+
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start to the end of the annotation.
     const job = this.getJob(annotation.job_id);
@@ -210,30 +217,10 @@ export class AnnotationsTable extends Component {
     );
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(resultLatest).toISOString();
-
-    const globalSettings = {
-      ml: {
-        jobIds: [job.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from,
-        to,
-        mode: 'absolute',
-      },
-    };
-
-    const appState = {
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
-        },
-      },
+    const timeRange = {
+      from,
+      to,
+      mode: 'absolute',
     };
     let mlTimeSeriesExplorer = {};
     const entityCondition = {};
@@ -247,11 +234,11 @@ export class AnnotationsTable extends Component {
       };
 
       if (annotation.timestamp < dataCounts.earliest_record_timestamp) {
-        globalSettings.time.from = new Date(annotation.timestamp).toISOString();
+        timeRange.from = new Date(annotation.timestamp).toISOString();
       }
 
       if (annotation.end_timestamp > dataCounts.latest_record_timestamp) {
-        globalSettings.time.to = new Date(annotation.end_timestamp).toISOString();
+        timeRange.to = new Date(annotation.end_timestamp).toISOString();
       }
     }
 
@@ -274,14 +261,34 @@ export class AnnotationsTable extends Component {
       entityCondition[annotation.by_field_name] = annotation.by_field_value;
     }
     mlTimeSeriesExplorer.entities = entityCondition;
-    appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
+    // appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-    const _g = rison.encode(globalSettings);
-    const _a = rison.encode(appState);
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        timeRange,
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        jobIds: [job.job_id],
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
+        },
+        ...mlTimeSeriesExplorer,
+      },
+      excludeBasePath: true,
+    });
 
-    const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
-    window.open(`#/timeseriesexplorer${url}`, '_self');
+    addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, singleMetricViewerLink);
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerLink,
+    });
   };
 
   onMouseOverRow = (record) => {
@@ -309,7 +316,11 @@ export class AnnotationsTable extends Component {
   };
 
   render() {
-    const { isSingleMetricViewerLinkVisible = true, isNumberBadgeVisible = false } = this.props;
+    const {
+      isSingleMetricViewerLinkVisible = true,
+      isNumberBadgeVisible = false,
+      annotationUpdatesService,
+    } = this.props;
 
     const { queryText, searchError } = this.state;
 
@@ -365,10 +376,6 @@ export class AnnotationsTable extends Component {
       );
     }
 
-    function renderDate(date) {
-      return formatDate(date, TIME_FORMAT);
-    }
-
     const columns = [
       {
         field: 'annotation',
@@ -385,7 +392,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'From',
         }),
         dataType: 'date',
-        render: renderDate,
+        render: timeFormatter,
         sortable: true,
       },
       {
@@ -394,7 +401,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'To',
         }),
         dataType: 'date',
-        render: renderDate,
+        render: timeFormatter,
         sortable: true,
       },
       {
@@ -403,7 +410,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'Last modified date',
         }),
         dataType: 'date',
-        render: renderDate,
+        render: timeFormatter,
         sortable: true,
       },
       {
@@ -468,7 +475,7 @@ export class AnnotationsTable extends Component {
         return (
           <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
             <EuiButtonIcon
-              onClick={() => annotation$.next(originalAnnotation ?? annotation)}
+              onClick={() => annotationUpdatesService.setValue(originalAnnotation ?? annotation)}
               iconType="pencil"
               aria-label={editAnnotationsTooltipAriaLabelText}
             />
@@ -686,3 +693,8 @@ export class AnnotationsTable extends Component {
     );
   }
 }
+
+export const AnnotationsTable = withKibana((props) => {
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
+  return <AnnotationsTableUI annotationUpdatesService={annotationUpdatesService} {...props} />;
+});

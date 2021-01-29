@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { testTable } from '../../canvas_plugin_src/functions/common/__tests__/fixtures/test_tables';
+import { testTable } from '../../canvas_plugin_src/functions/common/__fixtures__/test_tables';
 import { Handlebars } from './handlebars';
 
 describe('handlebars', () => {

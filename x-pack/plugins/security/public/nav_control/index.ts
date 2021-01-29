@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityNavControlService } from './nav_control_service';
+export { SecurityNavControlService, SecurityNavControlServiceStart } from './nav_control_service';
+export { UserMenuLink } from './nav_control_component';

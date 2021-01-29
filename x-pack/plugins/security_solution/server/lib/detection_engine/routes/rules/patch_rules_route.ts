@@ -11,7 +11,7 @@ import {
   PatchRulesSchemaDecoded,
   patchRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -25,7 +25,7 @@ import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_s
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -50,6 +50,7 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query,
@@ -77,6 +78,13 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         type,
         threat,
         threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
+        threat_language: threatLanguage,
+        concurrent_searches: concurrentSearches,
+        items_per_search: itemsPerSearch,
         timestamp_override: timestampOverride,
         throttle,
         references,
@@ -98,7 +106,12 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         if (type) {
           // reject an unauthorized "promotion" to ML
           throwHttpError(await mlAuthz.validateRuleType(type));
@@ -117,6 +130,7 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           query,
@@ -144,6 +158,13 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           type,
           threat,
           threshold,
+          threatFilters,
+          threatIndex,
+          threatQuery,
+          threatMapping,
+          threatLanguage,
+          concurrentSearches,
+          itemsPerSearch,
           timestampOverride,
           references,
           note,

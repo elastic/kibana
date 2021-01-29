@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { PipelineDefinition } from '../../../common/types/inference';
+import { PipelineDefinition } from '../../../common/types/trained_models';
 
 export function modelsProvider(client: IScopedClusterClient) {
   return {

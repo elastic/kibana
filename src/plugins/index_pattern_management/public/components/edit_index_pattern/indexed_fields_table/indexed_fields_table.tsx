@@ -1,41 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import {
-  IndexPatternField,
-  IIndexPattern,
-  IFieldType,
-} from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
-import { getFieldFormat } from './lib';
 import { IndexedFieldItem } from './types';
 
 interface IndexedFieldsTableProps {
   fields: IndexPatternField[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
     redirectToRoute: (obj: any) => void;
-    getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType) => string[];
+    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }
@@ -77,7 +61,7 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             displayName: field.displayName,
-            format: getFieldFormat(indexPattern, field.name),
+            format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
           };
@@ -94,7 +78,11 @@ export class IndexedFieldsTable extends Component<
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
-        fields = fields.filter((field) => field.name.toLowerCase().includes(normalizedFieldFilter));
+        fields = fields.filter(
+          (field) =>
+            field.name.toLowerCase().includes(normalizedFieldFilter) ||
+            (field.displayName && field.displayName.toLowerCase().includes(normalizedFieldFilter))
+        );
       }
 
       if (indexedFieldTypeFilter) {

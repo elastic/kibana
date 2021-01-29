@@ -80,7 +80,7 @@ describe('useAsync', () => {
 
   it('populates the loading state while the function is pending', async () => {
     let resolve: () => void;
-    fn.mockImplementation(() => new Promise((_resolve) => (resolve = _resolve)));
+    fn.mockImplementation(() => new Promise<void>((_resolve) => (resolve = _resolve)));
 
     const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
 

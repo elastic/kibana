@@ -6,9 +6,10 @@
 import * as t from 'io-ts';
 import { createApi } from './index';
 import { CoreSetup, Logger } from 'src/core/server';
-import { Params } from '../typings';
+import { RouteParamsRT } from '../typings';
 import { BehaviorSubject } from 'rxjs';
 import { APMConfig } from '../..';
+import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 const getCoreMock = () => {
   const get = jest.fn();
@@ -51,30 +52,37 @@ describe('createApi', () => {
 
     createApi()
       .add(() => ({
-        path: '/foo',
+        endpoint: 'GET /foo',
+        options: { tags: ['access:apm'] },
         handler: async () => null,
       }))
       .add(() => ({
-        path: '/bar',
-        method: 'POST',
-        params: {
+        endpoint: 'POST /bar',
+        params: t.type({
           body: t.string,
-        },
+        }),
+        options: { tags: ['access:apm'] },
         handler: async () => null,
       }))
       .add(() => ({
-        path: '/baz',
-        method: 'PUT',
+        endpoint: 'PUT /baz',
         options: {
           tags: ['access:apm', 'access:apm_write'],
         },
         handler: async () => null,
       }))
+      .add({
+        endpoint: 'GET /qux',
+        options: {
+          tags: ['access:apm', 'access:apm_write'],
+        },
+        handler: async () => null,
+      })
       .init(mock, context);
 
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledTimes(2);
     expect(post).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(1);
 
@@ -83,6 +91,14 @@ describe('createApi', () => {
         tags: ['access:apm'],
       },
       path: '/foo',
+      validate: expect.anything(),
+    });
+
+    expect(get.mock.calls[1][0]).toEqual({
+      options: {
+        tags: ['access:apm', 'access:apm_write'],
+      },
+      path: '/qux',
       validate: expect.anything(),
     });
 
@@ -104,18 +120,20 @@ describe('createApi', () => {
   });
 
   describe('when validating', () => {
-    const initApi = (params: Params) => {
+    const initApi = (params?: RouteParamsRT) => {
       const { mock, context, createRouter, get, post } = getCoreMock();
       const handlerMock = jest.fn();
       createApi()
         .add(() => ({
-          path: '/foo',
+          endpoint: 'GET /foo',
           params,
+          options: { tags: ['access:apm'] },
           handler: handlerMock,
         }))
         .init(mock, context);
 
       const routeHandler = get.mock.calls[0][1];
+
       const responseMock = {
         ok: jest.fn(),
         internalError: jest.fn(),
@@ -142,15 +160,15 @@ describe('createApi', () => {
     };
 
     it('adds a _debug query parameter by default', async () => {
-      const { simulate, handlerMock, responseMock } = initApi({});
+      const { simulate, handlerMock, responseMock } = initApi();
 
       await simulate({ query: { _debug: 'true' } });
+
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
 
       expect(handlerMock).toHaveBeenCalledTimes(1);
 
       expect(responseMock.ok).toHaveBeenCalled();
-
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
 
       const params = handlerMock.mock.calls[0][0].context.params;
 
@@ -170,7 +188,7 @@ describe('createApi', () => {
     });
 
     it('throws if any parameters are used but no types are defined', async () => {
-      const { simulate, responseMock } = initApi({});
+      const { simulate, responseMock } = initApi();
 
       await simulate({
         query: {
@@ -197,11 +215,13 @@ describe('createApi', () => {
     });
 
     it('validates path parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi({
-        path: t.type({
-          foo: t.string,
-        }),
-      });
+      const { simulate, handlerMock, responseMock } = initApi(
+        t.type({
+          path: t.type({
+            foo: t.string,
+          }),
+        })
+      );
 
       await simulate({
         params: {
@@ -252,17 +272,19 @@ describe('createApi', () => {
     });
 
     it('validates body parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi({
-        body: t.string,
-      });
+      const { simulate, handlerMock, responseMock } = initApi(
+        t.type({
+          body: t.string,
+        })
+      );
 
       await simulate({
         body: '',
       });
 
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
       expect(handlerMock).toHaveBeenCalledTimes(1);
       expect(responseMock.ok).toHaveBeenCalledTimes(1);
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
 
       const params = handlerMock.mock.calls[0][0].context.params;
 
@@ -281,20 +303,26 @@ describe('createApi', () => {
     });
 
     it('validates query parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi({
-        query: t.type({ bar: t.string }),
-      });
+      const { simulate, handlerMock, responseMock } = initApi(
+        t.type({
+          query: t.type({
+            bar: t.string,
+            filterNames: jsonRt.pipe(t.array(t.string)),
+          }),
+        })
+      );
 
       await simulate({
         query: {
           bar: '',
           _debug: 'true',
+          filterNames: JSON.stringify(['hostName', 'agentName']),
         },
       });
 
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
       expect(handlerMock).toHaveBeenCalledTimes(1);
       expect(responseMock.ok).toHaveBeenCalledTimes(1);
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
 
       const params = handlerMock.mock.calls[0][0].context.params;
 
@@ -302,6 +330,7 @@ describe('createApi', () => {
         query: {
           bar: '',
           _debug: true,
+          filterNames: ['hostName', 'agentName'],
         },
       });
 

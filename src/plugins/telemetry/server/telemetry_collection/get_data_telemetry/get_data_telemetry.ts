@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
+
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
   DataPatternName,
@@ -224,42 +214,50 @@ interface IndexMappings {
   };
 }
 
-export async function getDataTelemetry(callCluster: LegacyAPICaller) {
+export async function getDataTelemetry(esClient: ElasticsearchClient) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
       '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
-    const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
+    const indexMappingsParams: { index: string; filter_path: string[] } = {
       // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value
-      callCluster('indices.getMapping', {
-        index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
-        filterPath: [
-          // _meta.beat tells the shipper
-          '*.mappings._meta.beat',
-          // _meta.package.name tells the Ingest Manager's package
-          '*.mappings._meta.package.name',
-          // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
-          '*.mappings._meta.managed_by',
-          // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
-          '*.mappings.properties.ecs.properties.version.type',
+      index: '*', // Request all indices because filter_path already filters out the indices without any of those fields
+      filter_path: [
+        // _meta.beat tells the shipper
+        '*.mappings._meta.beat',
+        // _meta.package.name tells the Ingest Manager's package
+        '*.mappings._meta.package.name',
+        // _meta.managed_by is usually populated by Ingest Manager for the UI to identify it
+        '*.mappings._meta.managed_by',
+        // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
+        '*.mappings.properties.ecs.properties.version.type',
 
-          // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
-          '*.mappings.properties.data_stream.properties.type.value',
-          // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
-          '*.mappings.properties.data_stream.properties.dataset.value',
-        ],
-      }),
+        // If `data_stream.type` is a `constant_keyword`, it can be reported as a type
+        '*.mappings.properties.data_stream.properties.type.value',
+        // If `data_stream.dataset` is a `constant_keyword`, it can be reported as the dataset
+        '*.mappings.properties.data_stream.properties.dataset.value',
+      ],
+    };
+    const indicesStatsParams: {
+      index: string | string[] | undefined;
+      level: 'cluster' | 'indices' | 'shards' | undefined;
+      metric: string[];
+      filter_path: string[];
+    } = {
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
-      callCluster<IndexStats>('indices.stats', {
-        index,
-        level: 'indices',
-        metric: ['docs', 'store'],
-        filterPath: ['indices.*.total'],
-      }),
+      index,
+      level: 'indices',
+      metric: ['docs', 'store'],
+      filter_path: ['indices.*.total'],
+    };
+    const [{ body: indexMappings }, { body: indexStats }] = await Promise.all([
+      esClient.indices.getMapping<IndexMappings>(indexMappingsParams),
+      esClient.indices.stats<IndexStats>(indicesStatsParams),
     ]);
 
     const indexNames = Object.keys({ ...indexMappings, ...indexStats?.indices });
+
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,

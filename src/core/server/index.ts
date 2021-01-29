@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 /**
@@ -58,16 +47,41 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
+  ISavedObjectsExporter,
+  ISavedObjectsImporter,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceStart } from './metrics';
+import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { Auditor, AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
 
-export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup } from './audit_trail';
+// Because of #79265 we need to explicity import, then export these types for
+// scripts/telemetry_check.js to work as expected
+import {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+} from './core_usage_data';
+
+export {
+  CoreUsageStats,
+  CoreUsageData,
+  CoreConfigUsageData,
+  CoreEnvironmentUsageData,
+  CoreServicesUsageData,
+};
+
 export { bootstrap } from './bootstrap';
-export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
+export {
+  Capabilities,
+  CapabilitiesProvider,
+  CapabilitiesSwitcher,
+  ResolveCapabilitiesOptions,
+} from './capabilities';
 export {
   ConfigPath,
   ConfigService,
@@ -118,6 +132,7 @@ export {
   DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
+export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -161,6 +176,7 @@ export {
   OnPostAuthToolkit,
   OnPreResponseHandler,
   OnPreResponseToolkit,
+  OnPreResponseRender,
   OnPreResponseExtensions,
   OnPreResponseInfo,
   RedirectResponseOptions,
@@ -245,13 +261,12 @@ export {
   SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsExportOptions,
   SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
@@ -262,10 +277,12 @@ export {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsResolveResponse,
   SavedObjectsSerializer,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -273,6 +290,8 @@ export {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -281,6 +300,7 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
@@ -294,9 +314,22 @@ export {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectsUtils,
-  exportSavedObjectsToStream,
-  importSavedObjectsFromStream,
-  resolveSavedObjectsImportErrors,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportError,
+  SavedObjectsExportTransform,
+  SavedObjectsExportTransformContext,
+  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportError,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
 
 export {
@@ -320,8 +353,12 @@ export {
   OpsServerMetrics,
   OpsProcessMetrics,
   MetricsServiceSetup,
+  MetricsServiceStart,
 } from './metrics';
 
+export { I18nServiceSetup } from './i18n';
+
+export { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 
 export {
@@ -334,17 +371,11 @@ export {
   MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
 } from './types';
 
-export {
-  LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
-  LegacyServiceDiscoverPlugins,
-  LegacyConfig,
-  LegacyUiExports,
-  LegacyInternals,
-} from './legacy';
+export { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig } from './legacy';
 
 export {
   CoreStatus,
@@ -353,6 +384,8 @@ export {
   ServiceStatusLevels,
   StatusServiceSetup,
 } from './status';
+
+export { CoreUsageDataStart } from './core_usage_data';
 
 /**
  * Plugin specific context passed to a route handler.
@@ -368,7 +401,6 @@ export {
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
- *    - {@link Auditor | uiSettings.auditor} - AuditTrail client scoped to the incoming request
  *
  * @public
  */
@@ -377,17 +409,21 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
+      exporter: ISavedObjectsExporter;
+      importer: ISavedObjectsImporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;
       legacy: {
+        /*
+         * @deprecated Use {@link IScopedClusterClient}.
+         */
         client: ILegacyScopedClusterClient;
       };
     };
     uiSettings: {
       client: IUiSettingsClient;
     };
-    auditor: Auditor;
   };
 }
 
@@ -412,8 +448,12 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     /** {@link HttpResources} */
     resources: HttpResources;
   };
+  /** {@link I18nServiceSetup} */
+  i18n: I18nServiceSetup;
   /** {@link LoggingServiceSetup} */
   logging: LoggingServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -422,8 +462,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: UiSettingsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-  /** {@link AuditTrailSetup} */
-  auditTrail: AuditTrailSetup;
 }
 
 /**
@@ -457,8 +495,8 @@ export interface CoreStart {
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
   uiSettings: UiSettingsServiceStart;
-  /** {@link AuditTrailSetup} */
-  auditTrail: AuditTrailStart;
+  /** @internal {@link CoreUsageDataStart} */
+  coreUsageData: CoreUsageDataStart;
 }
 
 export {
@@ -469,7 +507,6 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
-  AuditTrailStart,
 };
 
 /**

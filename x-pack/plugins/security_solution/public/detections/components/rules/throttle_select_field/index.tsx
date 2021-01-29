@@ -25,14 +25,13 @@ export const DEFAULT_THROTTLE_OPTION = THROTTLE_OPTIONS[0];
 type ThrottleSelectField = typeof SelectField;
 
 export const ThrottleSelectField: ThrottleSelectField = (props) => {
+  const { setValue } = props.field;
   const onChange = useCallback(
     (e) => {
       const throttle = e.target.value;
-      props.field.setValue(throttle);
-      props.handleChange(throttle);
+      setValue(throttle);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [props.field.setValue, props.handleChange]
+    [setValue]
   );
   const newEuiFieldProps = { ...props.euiFieldProps, onChange };
   return <SelectField {...props} euiFieldProps={newEuiFieldProps} />;

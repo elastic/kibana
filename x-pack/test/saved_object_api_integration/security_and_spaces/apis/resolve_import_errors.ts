@@ -55,6 +55,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
   const group1All = [...group1Importable, ...group1NonImportable];
   const group2 = [
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
       ...fail409(!overwrite && (spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID)),
@@ -87,11 +88,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = resolveImportErrorsTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     // use singleRequest to reduce execution time and/or test combined cases
     const singleRequest = true;
@@ -106,7 +107,11 @@ export default function ({ getService }: FtrProviderContext) {
             createNewCopies,
             spaceId,
             singleRequest,
-            responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype', 'sharedtype']),
+            responseBodyOverride: expectSavedObjectForbidden([
+              'globaltype',
+              'isolatedtype',
+              'sharedtype',
+            ]),
           }),
         ].flat(),
         authorized: createTestDefinitions(all, false, { createNewCopies, spaceId, singleRequest }),
@@ -125,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite,
           spaceId,
           singleRequest,
-          responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
+          responseBodyOverride: expectSavedObjectForbidden(['globaltype', 'isolatedtype']),
         }),
         createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
       ].flat(),

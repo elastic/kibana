@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/source';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
@@ -38,7 +38,7 @@ export const ToolbarWrapper = (props: Props) => {
   } = useWaffleOptionsContext();
   const { createDerivedIndexPattern } = useSourceContext();
   return (
-    <>
+    <EuiFlexGroup responsive={false} wrap gutterSize="m">
       <EuiFlexItem grow={false}>
         <WaffleInventorySwitcher />
       </EuiFlexItem>
@@ -62,7 +62,7 @@ export const ToolbarWrapper = (props: Props) => {
         customMetrics,
         changeCustomMetrics,
       })}
-    </>
+    </EuiFlexGroup>
   );
 };
 

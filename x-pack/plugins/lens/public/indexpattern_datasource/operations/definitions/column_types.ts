@@ -4,50 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operation, DimensionPriority } from '../../../types';
+import type { Operation } from '../../../types';
+import { TimeScaleUnit } from '../../time_scale';
+import type { OperationType } from '../definitions';
 
-/**
- * This is the root type of a column. If you are implementing a new
- * operation, extend your column type on `BaseIndexPatternColumn` to make
- * sure it's matching all the basic requirements.
- */
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
-  sourceField: string;
-  suggestedPriority?: DimensionPriority;
   customLabel?: boolean;
+  timeScale?: TimeScaleUnit;
 }
 
 // Formatting can optionally be added to any column
-export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+// export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
   params?: {
-    format: {
+    format?: {
       id: string;
       params?: {
         decimals: number;
       };
     };
   };
-}
-
-/**
- * Base type for a column that doesn't have additional parameter.
- *
- * * `TOperationType` should be a string type containing just the type
- *   of the operation (e.g. `"sum"`).
- * * `TBase` is the base column interface the operation type is set for -
- *   by default this is `FieldBasedIndexPatternColumn`, so
- *   `ParameterlessIndexPatternColumn<'foo'>` will give you a column type
- *   for an operation named foo that operates on a field.
- *   By passing in another `TBase` (e.g. just `BaseIndexPatternColumn`),
- *   you can also create other column types.
- */
-export type ParameterlessIndexPatternColumn<
-  TOperationType extends string,
-  TBase extends BaseIndexPatternColumn = FieldBasedIndexPatternColumn
-> = TBase & { operationType: TOperationType };
+};
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
-  suggestedPriority?: DimensionPriority;
+  sourceField: string;
+}
+
+export interface ReferenceBasedIndexPatternColumn
+  extends BaseIndexPatternColumn,
+    FormattedIndexPatternColumn {
+  references: string[];
+}
+
+// Used to store the temporary invalid state
+export interface IncompleteColumn {
+  operationType?: OperationType;
+  sourceField?: string;
 }

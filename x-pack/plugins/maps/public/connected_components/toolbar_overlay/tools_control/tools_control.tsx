@@ -50,7 +50,7 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
   }
 );
 
-interface Props {
+export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
   initiateDraw: (drawState: DrawState) => void;
@@ -235,7 +235,6 @@ export class ToolsControl extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="leftUp"
       >
         <EuiContextMenu initialPanelId={0} panels={this._getDrawPanels()} />

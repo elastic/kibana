@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import { pick } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
 
 import { CommentPatchRequestRt, CaseResponseRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
+import { escapeHatch, wrapError, flattenCaseSavedObject, decodeComment } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getConnectorId } from '../helpers';
 
 export function initPatchCommentApi({
   caseConfigureService,
@@ -43,6 +43,9 @@ export function initPatchCommentApi({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
+        decodeComment(queryRestAttributes);
+
         const myCase = await caseService.getCase({
           client,
           caseId,
@@ -50,19 +53,23 @@ export function initPatchCommentApi({
 
         const myComment = await caseService.getComment({
           client,
-          commentId: query.id,
+          commentId: queryCommentId,
         });
 
         if (myComment == null) {
-          throw Boom.notFound(`This comment ${query.id} does not exist anymore.`);
+          throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
+        }
+
+        if (myComment.attributes.type !== queryRestAttributes.type) {
+          throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
         const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
         if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
-          throw Boom.notFound(`This comment ${query.id} does not exist in ${caseId}).`);
+          throw Boom.notFound(`This comment ${queryCommentId} does not exist in ${caseId}).`);
         }
 
-        if (query.version !== myComment.version) {
+        if (queryCommentVersion !== myComment.version) {
           throw Boom.conflict(
             'This case has been updated. Please refresh before saving additional updates.'
           );
@@ -71,16 +78,16 @@ export function initPatchCommentApi({
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const [updatedComment, updatedCase, myCaseConfigure] = await Promise.all([
+        const [updatedComment, updatedCase] = await Promise.all([
           caseService.patchComment({
             client,
-            commentId: query.id,
+            commentId: queryCommentId,
             updatedAttributes: {
-              comment: query.comment,
+              ...queryRestAttributes,
               updated_at: updatedDate,
               updated_by: { email, full_name, username },
             },
-            version: query.version,
+            version: queryCommentVersion,
           }),
           caseService.patchCase({
             client,
@@ -91,7 +98,6 @@ export function initPatchCommentApi({
             },
             version: myCase.version,
           }),
-          caseConfigureService.find({ client }),
         ]);
 
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
@@ -103,7 +109,7 @@ export function initPatchCommentApi({
             perPage: 1,
           },
         });
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
             client,
@@ -124,8 +130,12 @@ export function initPatchCommentApi({
                 caseId: request.params.case_id,
                 commentId: updatedComment.id,
                 fields: ['comment'],
-                newValue: query.comment,
-                oldValue: myComment.attributes.comment,
+                newValue: JSON.stringify(queryRestAttributes),
+                oldValue: JSON.stringify(
+                  // We are interested only in ContextBasicRt attributes
+                  // myComment.attribute contains also CommentAttributesBasicRt attributes
+                  pick(Object.keys(queryRestAttributes), myComment.attributes)
+                ),
               }),
             ],
           }),
@@ -142,7 +152,6 @@ export function initPatchCommentApi({
                 references: myCase.references,
               },
               comments: comments.saved_objects,
-              caseConfigureConnectorId,
             })
           ),
         });

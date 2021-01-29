@@ -6,12 +6,10 @@
 
 import { range } from 'lodash';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';
 

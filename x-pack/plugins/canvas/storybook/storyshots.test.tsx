@@ -101,11 +101,17 @@ if (!fs.existsSync(cssDir)) {
   fs.mkdirSync(cssDir, { recursive: true });
 }
 
+// Mock index for datasource stories
+jest.mock('../public/lib/es_service', () => ({
+  getDefaultIndex: () => Promise.resolve('test index'),
+}));
+
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
   configPath: path.resolve(__dirname, './../storybook'),
+  framework: 'react',
   test: multiSnapshotWithOptions({}),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,

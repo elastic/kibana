@@ -9,7 +9,7 @@ import { Router, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 
-import { useWithSource } from '../../../common/containers/source';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { FlowTarget } from '../../../graphql/types';
 import {
   apolloClientObservable,
@@ -23,10 +23,17 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
 import { NetworkDetails } from './index';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
-
-type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -40,7 +47,7 @@ jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/containers/source');
+jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -81,11 +88,11 @@ const getMockHistory = (ip: string) => ({
 describe('Network Details', () => {
   const mount = useMountAppended();
   beforeAll(() => {
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
     });
-    (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
+    global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         json: () => {
@@ -137,7 +144,7 @@ describe('Network Details', () => {
 
   test('it renders ipv6 headline', async () => {
     const ip = 'fe80--24ce-f7ff-fede-a571';
-    (useWithSource as jest.Mock).mockReturnValue({
+    (useSourcererScope as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });

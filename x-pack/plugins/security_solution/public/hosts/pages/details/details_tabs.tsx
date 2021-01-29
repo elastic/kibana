@@ -28,12 +28,13 @@ import {
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
-    docValueFields,
-    pageFilters,
-    filterQuery,
     detailName,
-    setAbsoluteRangeDatePicker,
+    docValueFields,
+    filterQuery,
+    indexNames,
     indexPattern,
+    pageFilters,
+    setAbsoluteRangeDatePicker,
     hostDetailsPagePath,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
@@ -73,6 +74,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       startDate: from,
       type,
       indexPattern,
+      indexNames,
       hostName: detailName,
       narrowDateRange,
       updateDateRange,

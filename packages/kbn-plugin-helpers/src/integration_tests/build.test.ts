@@ -1,27 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { createStripAnsiSerializer, REPO_ROOT, createReplaceSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/dev-utils';
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
@@ -76,7 +66,8 @@ it('builds a generated plugin into a viable archive', async () => {
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
-     info copying source into the build and converting with babel
+     info copying assets from \`public/assets\` to build
+     info copying server source into the build and converting with babel
      info running yarn to install dependencies
      info compressing plugin into [fooTestPlugin-7.5.0.zip]"
   `);

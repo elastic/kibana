@@ -58,13 +58,12 @@ export default function ({ getService, getPageObjects }) {
           ],
         },
       });
-      await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'kibanauser',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'kibanafirst kibanalast',
+        confirm_password: 'changeme',
+        full_name: 'kibanafirst kibanalast',
         email: 'kibanauser@myEmail.com',
         save: true,
         roles: ['rbac_all'],
@@ -76,13 +75,12 @@ export default function ({ getService, getPageObjects }) {
       expect(users.kibanauser.roles).to.eql(['rbac_all']);
       expect(users.kibanauser.fullname).to.eql('kibanafirst kibanalast');
       expect(users.kibanauser.reserved).to.be(false);
-      await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'kibanareadonly',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'kibanareadonlyFirst kibanareadonlyLast',
+        confirm_password: 'changeme',
+        full_name: 'kibanareadonlyFirst kibanareadonlyLast',
         email: 'kibanareadonly@myEmail.com',
         save: true,
         roles: ['rbac_read'],
@@ -105,7 +103,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('log in as kibanauser with rbac_all role');
       await PageObjects.security.login('kibanauser', 'changeme');
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();

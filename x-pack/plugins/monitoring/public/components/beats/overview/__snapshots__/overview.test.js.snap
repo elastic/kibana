@@ -12,129 +12,130 @@ exports[`Overview that overview page renders normally 1`] = `
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent>
+    <EuiPanel>
       <Stats
         stats={Array []}
       />
+    </EuiPanel>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPanel>
       <EuiFlexGroup
         wrap={true}
       >
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle
-              size="s"
-            >
-              <h2>
-                <FormattedMessage
-                  defaultMessage="Active Beats in Last Day"
-                  id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
-                  values={Object {}}
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer
-              size="s"
-            />
-            <LatestActive
-              latestActive={
-                Array [
-                  Object {
-                    "count": 5,
-                    "range": "last1m",
-                  },
-                  Object {
-                    "count": 5,
-                    "range": "last5m",
-                  },
-                  Object {
-                    "count": 5,
-                    "range": "last20m",
-                  },
-                  Object {
-                    "count": 6,
-                    "range": "last1h",
-                  },
-                  Object {
-                    "count": 10,
-                    "range": "last1d",
-                  },
-                ]
-              }
-            />
-          </EuiPanel>
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Active Beats in last day"
+                id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestActive
+            latestActive={
+              Array [
+                Object {
+                  "count": 5,
+                  "range": "last1m",
+                },
+                Object {
+                  "count": 5,
+                  "range": "last5m",
+                },
+                Object {
+                  "count": 5,
+                  "range": "last20m",
+                },
+                Object {
+                  "count": 6,
+                  "range": "last1h",
+                },
+                Object {
+                  "count": 10,
+                  "range": "last1d",
+                },
+              ]
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle
-              size="s"
-            >
-              <h2>
-                <FormattedMessage
-                  defaultMessage="Top 5 Beat Types in Last Day"
-                  id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
-                  values={Object {}}
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer
-              size="s"
-            />
-            <LatestTypes
-              latestTypes={
-                Array [
-                  Object {
-                    "count": 4,
-                    "type": "Packetbeat",
-                  },
-                  Object {
-                    "count": 4,
-                    "type": "Metricbeat",
-                  },
-                  Object {
-                    "count": 2,
-                    "type": "Heartbeat",
-                  },
-                ]
-              }
-            />
-          </EuiPanel>
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Top 5 Beat Types in last day"
+                id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestTypes
+            latestTypes={
+              Array [
+                Object {
+                  "count": 4,
+                  "type": "Packetbeat",
+                },
+                Object {
+                  "count": 4,
+                  "type": "Metricbeat",
+                },
+                Object {
+                  "count": 2,
+                  "type": "Heartbeat",
+                },
+              ]
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle
-              size="s"
-            >
-              <h2>
-                <FormattedMessage
-                  defaultMessage="Top 5 Versions in Last Day"
-                  id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
-                  values={Object {}}
-                />
-              </h2>
-            </EuiTitle>
-            <EuiSpacer
-              size="s"
-            />
-            <LatestVersions
-              latestVersions={
-                Array [
-                  Object {
-                    "count": 8,
-                    "version": "6.3.1",
-                  },
-                  Object {
-                    "count": 2,
-                    "version": "6.3.0",
-                  },
-                ]
-              }
-            />
-          </EuiPanel>
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Top 5 Versions in last day"
+                id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          />
+          <LatestVersions
+            latestVersions={
+              Array [
+                Object {
+                  "count": 8,
+                  "version": "6.3.1",
+                },
+                Object {
+                  "count": 2,
+                  "version": "6.3.0",
+                },
+              ]
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer
-        size="s"
-      />
+    </EuiPanel>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPageContent>
       <EuiFlexGroup
         wrap={true}
       >
@@ -212,18 +213,25 @@ exports[`Overview that overview page shows a message if there is no beats data 1
         />
       </h1>
     </EuiScreenReaderOnly>
-    <EuiPageContent>
+    <EuiPanel>
       <Stats
         stats={Array []}
       />
+    </EuiPanel>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPanel>
       <EuiCallOut
         data-test-subj="noRecentActivityMessage"
         iconType="gear"
         title="Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day."
       />
-      <EuiSpacer
-        size="s"
-      />
+    </EuiPanel>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPageContent>
       <EuiFlexGroup
         wrap={true}
       >

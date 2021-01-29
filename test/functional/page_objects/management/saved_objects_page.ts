@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { keyBy } from 'lodash';
@@ -37,6 +26,11 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await searchBox.pressKeys(browser.keys.ENTER);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitTableIsLoaded();
+    }
+
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
     }
 
     async importFile(path: string, overwriteAll = true) {
@@ -85,6 +79,14 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
+    async checkImportError() {
+      await testSubjects.existOrFail('importSavedObjectsErrorText', { timeout: 20000 });
+    }
+
+    async getImportErrorText() {
+      return await testSubjects.getVisibleText('importSavedObjectsErrorText');
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
       await this.waitTableIsLoaded();
@@ -126,6 +128,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       }
     }
 
+    async setOverriddenIndexPatternValue(oldName: string, newName: string) {
+      const select = await testSubjects.find(`managementChangeIndexSelection-${oldName}`);
+      const option = await testSubjects.findDescendant(`indexPatternOption-${newName}`, select);
+      await option.click();
+    }
+
     async clickCopyToSpaceByTitle(title: string) {
       const table = keyBy(await this.getElementsInTable(), 'title');
       // should we check if table size > 0 and log error if not?
@@ -141,6 +149,20 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         log.debug(
           `we didn't find a menu element so should be a "copy to space" element for (${title}) to click`
         );
+        // or the action elements are on the row without the menu
+        await table[title].copySaveObjectsElement?.click();
+      }
+    }
+
+    async clickInspectByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      if (table[title].menuElement) {
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        const panelButton = await menuPanel.findByTestSubject('savedObjectsTableAction-inspect');
+        await panelButton.click();
+      } else {
         // or the action elements are on the row without the menu
         await table[title].copySaveObjectsElement?.click();
       }
@@ -260,6 +282,22 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.click('savedObjectsManagementDelete');
       await testSubjects.click('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
+    }
+
+    async getImportWarnings() {
+      const elements = await testSubjects.findAll('importSavedObjectsWarning');
+      return Promise.all(
+        elements.map(async (element) => {
+          const message = await element
+            .findByClassName('euiCallOutHeader__title')
+            .then((titleEl) => titleEl.getVisibleText());
+          const buttons = await element.findAllByClassName('euiButton');
+          return {
+            message,
+            type: buttons.length ? 'action_required' : 'simple',
+          };
+        })
+      );
     }
   }
 

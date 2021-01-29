@@ -14,17 +14,14 @@ import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useApolloClient } from '../../common/utils/apollo_context';
-import { useWithSource } from '../../common/containers/source';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
-
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import { NEW_TEMPLATE_TIMELINE } from '../components/timeline/properties/translations';
 import { NewTemplateTimeline } from '../components/timeline/properties/new_template_timeline';
 import { NewTimeline } from '../components/timeline/properties/helpers';
-
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
+import { useSourcererScope } from '../../common/containers/sourcerer';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -38,9 +35,8 @@ export const TimelinesPageComponent: React.FC = () => {
   const onImportTimelineBtnClick = useCallback(() => {
     setImportDataModalToggle(true);
   }, [setImportDataModalToggle]);
-  const { indicesExist } = useWithSource();
+  const { indicesExist } = useSourcererScope();
 
-  const apolloClient = useApolloClient();
   const capabilitiesCanUserCRUD: boolean = !!useKibana().services.application.capabilities.siem
     .crud;
 
@@ -49,7 +45,7 @@ export const TimelinesPageComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <WrapperPage>
-            <HeaderPage border title={i18n.PAGE_TITLE}>
+            <HeaderPage border hideSourcerer={true} title={i18n.PAGE_TITLE}>
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem>
                   {capabilitiesCanUserCRUD && (
@@ -84,7 +80,6 @@ export const TimelinesPageComponent: React.FC = () => {
 
             <TimelinesContainer>
               <StatefulOpenTimeline
-                apolloClient={apolloClient!}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
                 isModal={false}
                 importDataModalToggle={importDataModalToggle && capabilitiesCanUserCRUD}
@@ -97,7 +92,7 @@ export const TimelinesPageComponent: React.FC = () => {
         </>
       ) : (
         <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <HeaderPage hideSourcerer={true} border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </WrapperPage>
       )}

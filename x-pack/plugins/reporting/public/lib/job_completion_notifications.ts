@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../constants';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../common/constants';
 
 type JobId = string;
 

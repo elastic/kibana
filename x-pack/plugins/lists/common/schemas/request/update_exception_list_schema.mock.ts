@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DESCRIPTION, ID, LIST_ID, META, NAME, NAMESPACE_TYPE, _TAGS } from '../../constants.mock';
+import { DESCRIPTION, ID, LIST_ID, META, NAME, NAMESPACE_TYPE } from '../../constants.mock';
 
 import { UpdateExceptionListSchema } from './update_exception_list_schema';
 
 export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema => ({
-  _tags: _TAGS,
   _version: undefined,
   description: DESCRIPTION,
   id: ID,
@@ -17,6 +16,7 @@ export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema =>
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: [],
   tags: ['malware'],
   type: 'endpoint',
 });

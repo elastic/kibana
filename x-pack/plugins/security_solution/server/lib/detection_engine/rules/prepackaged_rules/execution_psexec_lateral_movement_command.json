@@ -11,16 +11,19 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "PsExec Network Connection",
-  "query": "event.category:network and event.type:connection and process.name:PsExec.exe",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"PsExec.exe\" and event.type == \"start\"]\n  [network where process.name : \"PsExec.exe\"]\n",
   "risk_score": 21,
   "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -32,9 +35,16 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1569",
+          "name": "System Services",
+          "reference": "https://attack.mitre.org/techniques/T1569/",
+          "subtechnique": [
+            {
+              "id": "T1569.002",
+              "name": "Service Execution",
+              "reference": "https://attack.mitre.org/techniques/T1569/002/"
+            }
+          ]
         }
       ]
     },
@@ -45,15 +55,9 @@
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
       },
-      "technique": [
-        {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
-        }
-      ]
+      "technique": []
     }
   ],
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 6
 }

@@ -5,74 +5,36 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContentBody,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { Route, Switch } from 'react-router-dom';
+import { useValues } from 'kea';
 
-import { IInitialAppData } from '../../../common/types';
-import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
+import { KibanaLogic } from '../shared/kibana';
+import { InitialAppData } from '../../../common/types';
 
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../shared/kibana_chrome';
-import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../shared/telemetry';
+import { HttpLogic } from '../shared/http';
 
-import { ProductCard } from './components/product_card';
+import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
-import AppSearchImage from './assets/app_search.png';
-import WorkplaceSearchImage from './assets/workplace_search.png';
+import { ErrorConnecting } from './components/error_connecting';
+import { ProductSelector } from './components/product_selector';
+import { SetupGuide } from './components/setup_guide';
+
 import './index.scss';
 
-export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
-  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
+export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {} }) => {
+  const { errorConnecting } = useValues(HttpLogic);
+  const { config } = useValues(KibanaLogic);
+
+  const showErrorConnecting = !!(config.host && errorConnecting);
 
   return (
-    <EuiPage restrictWidth className="enterpriseSearchOverview">
-      <SetPageChrome isRoot />
-      <SendTelemetry action="viewed" metric="overview" />
-
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection className="enterpriseSearchOverview__header">
-            <EuiTitle size="l">
-              <h1 className="enterpriseSearchOverview__heading">
-                {i18n.translate('xpack.enterpriseSearch.overview.heading', {
-                  defaultMessage: 'Welcome to Elastic Enterprise Search',
-                })}
-              </h1>
-            </EuiTitle>
-            <EuiTitle size="s">
-              <p className="enterpriseSearchOverview__subheading">
-                {i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                  defaultMessage: 'Select a product to get started',
-                })}
-              </p>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContentBody>
-          <EuiFlexGroup justifyContent="center" gutterSize="xl">
-            {hasAppSearchAccess && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={APP_SEARCH_PLUGIN} image={AppSearchImage} />
-              </EuiFlexItem>
-            )}
-            {hasWorkplaceSearchAccess && (
-              <EuiFlexItem grow={false} className="enterpriseSearchOverview__card">
-                <ProductCard product={WORKPLACE_SEARCH_PLUGIN} image={WorkplaceSearchImage} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageBody>
-    </EuiPage>
+    <Switch>
+      <Route exact path={SETUP_GUIDE_PATH}>
+        <SetupGuide />
+      </Route>
+      <Route exact path={ROOT_PATH}>
+        {showErrorConnecting ? <ErrorConnecting /> : <ProductSelector access={access} />}
+      </Route>
+    </Switch>
   );
 };

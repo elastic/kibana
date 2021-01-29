@@ -5,7 +5,7 @@ Object {
   "as": "markdown_vis",
   "type": "render",
   "value": Object {
-    "visConfig": Object {
+    "visParams": Object {
       "fontSize": 12,
       "markdown": "## hello _markdown_",
       "openLinksInNewTab": true,

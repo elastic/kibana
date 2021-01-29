@@ -11,7 +11,7 @@ import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../../types';
+import { ConditionalHeaders } from '../../common';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const getScreenshots = await reporting.getScreenshotsObservable();
@@ -19,7 +19,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
   return function generatePngObservable(
     logger: LevelLogger,
     url: string,
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
   ): Rx.Observable<{ base64: string | null; warnings: string[] }> {

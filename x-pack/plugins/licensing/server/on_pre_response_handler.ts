@@ -15,9 +15,11 @@ export function createOnPreResponseHandler(
   return async (req, res, t) => {
     // If we're returning an error response, refresh license info from
     // Elasticsearch in case the error is due to a change in license information
-    // in Elasticsearch.
-    // https://github.com/elastic/x-pack-kibana/pull/2876
-    if (res.statusCode >= 400) {
+    // in Elasticsearch. https://github.com/elastic/x-pack-kibana/pull/2876
+    // We're explicit ignoring a 429 "Too Many Requests". This is being used to communicate
+    // that back-pressure should be applied, and we don't need to refresh the license in these
+    // situations.
+    if (res.statusCode >= 400 && res.statusCode !== 429) {
       await refresh();
     }
     const license = await license$.pipe(take(1)).toPromise();

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Tls, X509Expiry } from '../../../../../common/runtime_types';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants';
 import { MonListDescription, MonListTitle } from './status_bar';
-import { CertStatusColumn } from '../../../overview/monitor_list/cert_status_column';
+import { CertStatusColumn } from '../../../overview/monitor_list/columns/cert_status_column';
 
 interface Props {
   /**

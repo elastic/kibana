@@ -7,7 +7,7 @@
 import React from 'react';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';

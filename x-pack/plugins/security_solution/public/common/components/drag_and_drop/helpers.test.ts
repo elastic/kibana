@@ -22,7 +22,7 @@ import {
   draggableIsField,
   droppableIdPrefix,
   droppableTimelineColumnsPrefix,
-  droppableTimelineFlyoutButtonPrefix,
+  droppableTimelineFlyoutBottomBarPrefix,
   droppableTimelineProvidersPrefix,
   escapeDataProviderId,
   escapeFieldId,
@@ -338,7 +338,7 @@ describe('helpers', () => {
       expect(
         destinationIsTimelineButton({
           destination: {
-            droppableId: `${droppableTimelineFlyoutButtonPrefix}.timeline`,
+            droppableId: `${droppableTimelineFlyoutBottomBarPrefix}.timeline`,
             index: 0,
           },
           draggableId: getDraggableId('685260508808089'),

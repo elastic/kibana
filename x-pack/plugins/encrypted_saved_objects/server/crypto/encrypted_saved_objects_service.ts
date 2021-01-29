@@ -53,6 +53,38 @@ interface CommonParameters {
 }
 
 /**
+ * Describes parameters for the decrypt methods.
+ */
+interface DecryptParameters extends CommonParameters {
+  /**
+   * Indicates whether decryption should only be performed using secondary decryption-only keys.
+   */
+  omitPrimaryEncryptionKey?: boolean;
+}
+
+interface EncryptedSavedObjectsServiceOptions {
+  /**
+   * Service logger instance.
+   */
+  logger: Logger;
+
+  /**
+   * Audit logger instance.
+   */
+  audit: EncryptedSavedObjectsAuditLogger;
+
+  /**
+   * NodeCrypto instance used for both encryption and decryption.
+   */
+  primaryCrypto: Crypto;
+
+  /**
+   * NodeCrypto instances used ONLY for decryption (i.e. rotated encryption keys).
+   */
+  decryptionOnlyCryptos?: Readonly<Crypto[]>;
+}
+
+/**
  * Utility function that gives array representation of the saved object descriptor respecting
  * optional `namespace` property.
  * @param descriptor Saved Object descriptor to turn into array.
@@ -79,16 +111,7 @@ export class EncryptedSavedObjectsService {
     EncryptedSavedObjectAttributesDefinition
   > = new Map();
 
-  /**
-   * @param crypto nodeCrypto instance.
-   * @param logger Ordinary logger instance.
-   * @param audit Audit logger instance.
-   */
-  constructor(
-    private readonly crypto: Readonly<Crypto>,
-    private readonly logger: Logger,
-    private readonly audit: EncryptedSavedObjectsAuditLogger
-  ) {}
+  constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
 
   /**
    * Registers saved object type as the one that contains attributes that should be encrypted.
@@ -136,7 +159,7 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T,
     originalAttributes?: T,
-    params?: CommonParameters
+    params?: DecryptParameters
   ) {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
@@ -174,7 +197,7 @@ export class EncryptedSavedObjectsService {
               Object.fromEntries(
                 Object.entries(attributes).filter(([key]) => !typeDefinition.shouldBeStripped(key))
               ) as T,
-              { user: params?.user }
+              params
             );
           } catch (err) {
             decryptionError = err;
@@ -210,10 +233,10 @@ export class EncryptedSavedObjectsService {
         try {
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
-          this.logger.error(
+          this.options.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
           );
-          this.audit.encryptAttributeFailure(attributeName, descriptor, params?.user);
+          this.options.audit.encryptAttributeFailure(attributeName, descriptor, params?.user);
 
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
@@ -229,7 +252,7 @@ export class EncryptedSavedObjectsService {
     // not the case we should collect and log them to make troubleshooting easier.
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
-      this.logger.debug(
+      this.options.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been encrypted: ${Array.from(
@@ -242,7 +265,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor, params?.user);
+    this.options.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,
@@ -270,7 +293,9 @@ export class EncryptedSavedObjectsService {
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
       try {
-        iteratorResult = iterator.next(await this.crypto.encrypt(attributeValue, encryptionAAD));
+        iteratorResult = iterator.next(
+          await this.options.primaryCrypto.encrypt(attributeValue, encryptionAAD)
+        );
       } catch (err) {
         iterator.throw!(err);
       }
@@ -299,7 +324,9 @@ export class EncryptedSavedObjectsService {
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
       try {
-        iteratorResult = iterator.next(this.crypto.encryptSync(attributeValue, encryptionAAD));
+        iteratorResult = iterator.next(
+          this.options.primaryCrypto.encryptSync(attributeValue, encryptionAAD)
+        );
       } catch (err) {
         iterator.throw!(err);
       }
@@ -321,19 +348,31 @@ export class EncryptedSavedObjectsService {
   public async decryptAttributes<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters
+    params?: DecryptParameters
   ): Promise<T> {
+    const decrypters = this.getDecrypters(params?.omitPrimaryEncryptionKey);
     const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(
-          (await this.crypto.decrypt(attributeValue, encryptionAAD)) as string
-        );
-      } catch (err) {
-        iterator.throw!(err);
+
+      let decryptionError;
+      for (const decrypter of decrypters) {
+        try {
+          iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
+          decryptionError = undefined;
+          break;
+        } catch (err) {
+          // Remember the error thrown when we tried to decrypt with the primary key.
+          if (!decryptionError) {
+            decryptionError = err;
+          }
+        }
+      }
+
+      if (decryptionError) {
+        iterator.throw!(decryptionError);
       }
     }
 
@@ -353,17 +392,31 @@ export class EncryptedSavedObjectsService {
   public decryptAttributesSync<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
-    params?: CommonParameters
+    params?: DecryptParameters
   ): T {
+    const decrypters = this.getDecrypters(params?.omitPrimaryEncryptionKey);
     const iterator = this.attributesToDecryptIterator<T>(descriptor, attributes, params);
 
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(this.crypto.decryptSync(attributeValue, encryptionAAD));
-      } catch (err) {
-        iterator.throw!(err);
+
+      let decryptionError;
+      for (const decrypter of decrypters) {
+        try {
+          iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
+          decryptionError = undefined;
+          break;
+        } catch (err) {
+          // Remember the error thrown when we tried to decrypt with the primary key.
+          if (!decryptionError) {
+            decryptionError = err;
+          }
+        }
+      }
+
+      if (decryptionError) {
+        iterator.throw!(decryptionError);
       }
     }
 
@@ -388,7 +441,7 @@ export class EncryptedSavedObjectsService {
       }
 
       if (typeof attributeValue !== 'string') {
-        this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
+        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -401,8 +454,10 @@ export class EncryptedSavedObjectsService {
       try {
         decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
       } catch (err) {
-        this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
-        this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
+        this.options.logger.error(
+          `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
+        );
+        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -417,7 +472,7 @@ export class EncryptedSavedObjectsService {
     // not the case we should collect and log them to make troubleshooting easier.
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
-      this.logger.debug(
+      this.options.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been decrypted: ${Array.from(
@@ -430,7 +485,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
+    this.options.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,
@@ -459,7 +514,7 @@ export class EncryptedSavedObjectsService {
     }
 
     if (Object.keys(attributesAAD).length === 0) {
-      this.logger.debug(
+      this.options.logger.debug(
         `The AAD for saved object "${descriptorToArray(
           descriptor
         )}" does not include any attributes.`
@@ -467,5 +522,24 @@ export class EncryptedSavedObjectsService {
     }
 
     return stringify([...descriptorToArray(descriptor), attributesAAD]);
+  }
+
+  /**
+   * Returns list of NodeCrypto instances used for decryption.
+   * @param omitPrimaryEncryptionKey Specifies whether returned decrypters shouldn't include primary
+   * encryption/decryption crypto.
+   */
+  private getDecrypters(omitPrimaryEncryptionKey?: boolean) {
+    if (omitPrimaryEncryptionKey) {
+      if (!this.options.decryptionOnlyCryptos || this.options.decryptionOnlyCryptos.length === 0) {
+        throw new Error(
+          `"omitPrimaryEncryptionKey" cannot be set when secondary keys aren't configured.`
+        );
+      }
+
+      return this.options.decryptionOnlyCryptos;
+    }
+
+    return [this.options.primaryCrypto, ...(this.options.decryptionOnlyCryptos ?? [])];
   }
 }

@@ -7,17 +7,16 @@
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 
-import { RequestHandlerContext, KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { ESQuery } from '../../../common/typed_json';
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
   PaginationInput,
   PaginationInputPaginated,
   SortField,
   SourceConfiguration,
   TimerangeInput,
-  Maybe,
-  HistogramType,
   DocValueFieldsInput,
 } from '../../graphql/types';
 
@@ -47,7 +46,7 @@ export interface FrameworkAdapter {
 
 export interface FrameworkRequest extends Pick<KibanaRequest, 'body'> {
   [internalFrameworkRequest]: KibanaRequest;
-  context: RequestHandlerContext;
+  context: SecuritySolutionRequestHandlerContext;
   user: AuthenticatedUser | null;
 }
 
@@ -117,11 +116,6 @@ export interface RequestBasicOptions {
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFieldsInput[];
-}
-
-export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField: Maybe<string>;
-  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

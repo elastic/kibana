@@ -4,9 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum KpiHostsChartColors {
-  authSuccess = '#54B399',
-  authFailure = '#E7664C',
+import { UpdateDateRange } from '../../../common/components/charts/common';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+
+export interface HostsKpiProps {
+  filterQuery: string;
+  from: string;
+  to: string;
+  indexNames: string[];
+  narrowDateRange: UpdateDateRange;
+  setQuery: GlobalTimeArgs['setQuery'];
+  skip: boolean;
+}
+
+export enum HostsKpiChartColors {
+  authenticationsSuccess = '#54B399',
+  authenticationsFailure = '#E7664C',
   uniqueSourceIps = '#D36086',
   uniqueDestinationIps = '#9170B8',
   hosts = '#6092C0',

@@ -3,11 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../../common/endpoint/types';
+import { fullPolicy, isOnPolicyDetailsPage, license } from './selectors';
+import {
+  Immutable,
+  PolicyConfig,
+  UIPolicyConfig,
+  PolicyData,
+} from '../../../../../../common/endpoint/types';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { PolicyDetailsState } from '../../types';
+
+const updatePolicyConfigInPolicyData = (
+  policyData: Immutable<PolicyData>,
+  policyConfig: Immutable<PolicyConfig>
+) => ({
+  ...policyData,
+  inputs: policyData.inputs.map((input) => ({
+    ...input,
+    config: input.config && {
+      ...input.config,
+      policy: {
+        ...input.config.policy,
+        value: policyConfig,
+      },
+    },
+  })),
+});
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.
@@ -71,6 +93,13 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
   }
 
+  if (action.type === 'licenseChanged') {
+    return {
+      ...state,
+      license: action.payload,
+    };
+  }
+
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyDetailsState> = {
       ...state,
@@ -78,6 +107,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     };
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
+    const currentLicense = license(newState);
 
     if (isCurrentlyOnDetailsPage) {
       // Did user just enter the Detail page? if so, then
@@ -96,6 +126,7 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     return {
       ...initialPolicyDetailsState(),
       location: action.payload,
+      license: currentLicense,
     };
   }
 
@@ -124,6 +155,27 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     });
 
     return newState;
+  }
+
+  if (action.type === 'userChangedAntivirusRegistration') {
+    if (state.policyItem) {
+      const policyConfig = fullPolicy(state);
+
+      return {
+        ...state,
+        policyItem: updatePolicyConfigInPolicyData(state.policyItem, {
+          ...policyConfig,
+          windows: {
+            ...policyConfig.windows,
+            antivirus_registration: {
+              enabled: action.payload.enabled,
+            },
+          },
+        }),
+      };
+    } else {
+      return state;
+    }
   }
 
   return state;

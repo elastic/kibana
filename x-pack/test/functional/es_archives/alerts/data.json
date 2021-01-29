@@ -81,3 +81,114 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+    "index": ".kibana_1",
+    "source": {
+      "action": {
+        "actionTypeId": ".pagerduty",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/pagerduty"
+        },
+        "name": "A pagerduty action",
+        "secrets": "kvjaTWYKGmCqptyv4giaN+nQGgsZrKXmlULcbAP8KK3JmR8Ei9ADqh5mB+uVC+x+Q7/vTQ5SKZCj3dHv3pmNzZ5WGyZYQFBaaa63Mkp3kIcnpE1OdSAv+3Z/Y+XihHAM19zUm3JRpojnIpYegoS5/vMx1sOzcf/+miYUuZw2lgo0lNE="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-22T15:16:06.924Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:b6087f72-994f-46fb-8120-c6e5c50d0f8f",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+          {
+            "actionRef": "action_0",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "eventAction": "trigger",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          },
+          {
+            "actionRef": "action_1",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "eventAction": "resolve",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          },
+          {
+            "actionRef": "action_2",
+            "actionTypeId": ".pagerduty",
+            "group": "default",
+            "params": {
+              "component": "",
+              "dedupKey": "{{alertInstanceId}}",
+              "eventAction": "resolve",
+              "summary": "fired {{alertInstanceId}}"
+            }
+          }
+        ],
+        "alertTypeId": "test.noop",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "alertsFixture",
+        "createdAt": "2020-09-22T15:16:07.451Z",
+        "createdBy": null,
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "abc",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "8a7c6ff0-fce6-11ea-a888-9337d77a2c25",
+        "tags": [
+          "foo"
+        ],
+        "throttle": "1m",
+        "updatedBy": null
+      },
+      "migrationVersion": {
+        "alert": "7.9.0"
+      },
+      "references": [
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_0",
+          "type": "action"
+        },
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_1",
+          "type": "action"
+        },
+        {
+          "id": "a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
+          "name": "action_2",
+          "type": "action"
+        }
+      ],
+      "type": "alert",
+      "updated_at": "2020-09-22T15:16:08.456Z"
+    }
+  }
+}

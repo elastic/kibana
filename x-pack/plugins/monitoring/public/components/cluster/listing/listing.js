@@ -79,7 +79,7 @@ const getColumns = (
         if (cluster.isSupported) {
           return (
             <EuiLink
-              href={getSafeForExternalLink(`#/overview?_g=(cluster_uuid:${cluster.cluster_uuid})`)}
+              href={getSafeForExternalLink(`#/overview`, { cluster_uuid: cluster.cluster_uuid })}
               data-test-subj="clusterLink"
             >
               {value}
@@ -112,7 +112,7 @@ const getColumns = (
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
-        defaultMessage: 'Status',
+        defaultMessage: 'Alerts Status',
       }),
       field: 'status',
       'data-test-subj': 'alertsStatus',

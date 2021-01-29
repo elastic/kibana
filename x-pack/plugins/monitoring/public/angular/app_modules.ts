@@ -12,7 +12,7 @@ import 'angular-route';
 import '../index.scss';
 import { upperFirst } from 'lodash';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import {
   createTopNavDirective,
@@ -40,10 +40,6 @@ import { featuresProvider } from '../services/features';
 import { licenseProvider } from '../services/license';
 // @ts-ignore
 import { titleProvider } from '../services/title';
-// @ts-ignore
-import { monitoringBeatsBeatProvider } from '../directives/beats/beat';
-// @ts-ignore
-import { monitoringBeatsOverviewProvider } from '../directives/beats/overview';
 // @ts-ignore
 import { monitoringMlListingProvider } from '../directives/elasticsearch/ml_job_listing';
 // @ts-ignore
@@ -103,28 +99,31 @@ function createLocalStateModule(
 ) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
-    .service('globalState', function (
-      Private: IPrivate,
-      $rootScope: ng.IRootScopeService,
-      $location: ng.ILocationService
-    ) {
-      function GlobalStateProvider(this: any) {
-        const state = new GlobalState(query, toasts, $rootScope, $location, this);
-        const initialState: any = state.getState();
-        for (const key in initialState) {
-          if (!initialState.hasOwnProperty(key)) {
-            continue;
+    .service(
+      'globalState',
+      function (
+        Private: IPrivate,
+        $rootScope: ng.IRootScopeService,
+        $location: ng.ILocationService
+      ) {
+        function GlobalStateProvider(this: any) {
+          const state = new GlobalState(query, toasts, $rootScope, $location, this);
+          const initialState: any = state.getState();
+          for (const key in initialState) {
+            if (!initialState.hasOwnProperty(key)) {
+              continue;
+            }
+            this[key] = initialState[key];
           }
-          this[key] = initialState[key];
+          this.save = () => {
+            const newState = { ...this };
+            delete newState.save;
+            state.setState(newState);
+          };
         }
-        this.save = () => {
-          const newState = { ...this };
-          delete newState.save;
-          state.setState(newState);
-        };
+        return Private(GlobalStateProvider);
       }
-      return Private(GlobalStateProvider);
-    });
+    );
 }
 
 function createMonitoringAppServices() {
@@ -153,8 +152,6 @@ function createMonitoringAppServices() {
 function createMonitoringAppDirectives() {
   angular
     .module('monitoring/directives', [])
-    .directive('monitoringBeatsBeat', monitoringBeatsBeatProvider)
-    .directive('monitoringBeatsOverview', monitoringBeatsOverviewProvider)
     .directive('monitoringMlListing', monitoringMlListingProvider)
     .directive('monitoringMain', monitoringMainProvider);
 }
@@ -221,7 +218,7 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createHrefModule(core: AppMountContext['core']) {
+function createHrefModule(core: CoreStart) {
   const name: string = 'kbnHref';
   angular.module('monitoring/href', []).directive(name, function () {
     return {

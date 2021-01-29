@@ -6,3 +6,4 @@
 
 export { analyticsAuditMessagesProvider } from './analytics_audit_messages';
 export { modelsProvider } from './models_provider';
+export { AnalyticsManager } from './analytics_manager';

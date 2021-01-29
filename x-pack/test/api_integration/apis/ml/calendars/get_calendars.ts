@@ -73,8 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/calendars`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
-        expect(body.error).to.eql('Not Found');
+          .expect(403);
+        expect(body.error).to.eql('Forbidden');
       });
     });
 
@@ -126,9 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/calendars/${calendarId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
       });
     });
 

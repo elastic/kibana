@@ -9,13 +9,9 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
-import { Markdown } from '../../../common/components/markdown';
 import { Form, useForm, UseField } from '../../../shared_imports';
 import { schema, Content } from './schema';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
-import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
-import { useTimelineClick } from '../utils/use_timeline_click';
+import { MarkdownRenderer, MarkdownEditorForm } from '../../../common/components/markdown_editor';
 
 const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -41,16 +37,13 @@ export const UserActionMarkdown = ({
     options: { stripEmptyFields: false },
     schema,
   });
+
+  const fieldName = 'content';
   const { submit } = form;
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Content>(
-    form,
-    'content'
-  );
+
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
   }, [id, onChangeEditable]);
-
-  const handleTimelineClick = useTimelineClick();
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -93,32 +86,22 @@ export const UserActionMarkdown = ({
   return isEditable ? (
     <Form form={form} data-test-subj="user-action-markdown-form">
       <UseField
-        path="content"
+        path={fieldName}
         component={MarkdownEditorForm}
         componentProps={{
+          'aria-label': 'Cases markdown editor',
+          value: content,
+          id,
           bottomRightContent: renderButtons({
             cancelAction: handleCancelAction,
             saveAction: handleSaveAction,
           }),
-          onClickTimeline: handleTimelineClick,
-          onCursorPositionUpdate: handleCursorChange,
-          topRightContent: (
-            <InsertTimelinePopover
-              hideUntitled={true}
-              isDisabled={false}
-              onTimelineChange={handleOnTimelineChange}
-            />
-          ),
         }}
       />
     </Form>
   ) : (
-    <ContentWrapper>
-      <Markdown
-        onClickTimeline={handleTimelineClick}
-        raw={content}
-        data-test-subj="user-action-markdown"
-      />
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <MarkdownRenderer>{content}</MarkdownRenderer>
     </ContentWrapper>
   );
 };

@@ -36,5 +36,8 @@ exports[`HeaderPage it renders 1`] = `
       </p>
     </FlexItem>
   </EuiFlexGroup>
+  <Sourcerer
+    scope="default"
+  />
 </Header>
 `;

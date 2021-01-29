@@ -19,6 +19,7 @@ export default async function (context: FtrConfigProviderContext) {
       'xpack.security.authc.api_key.enabled=true',
     ];
     config.testFiles = [require.resolve('./apis/security/security_basic')];
+    config.junit.reportName = 'X-Pack API Integration Tests (Security Basic)';
     return config;
   });
 }

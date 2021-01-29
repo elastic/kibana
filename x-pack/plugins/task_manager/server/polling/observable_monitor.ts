@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject, Observable, throwError, interval, timer, Subscription } from 'rxjs';
-import { exhaustMap, tap, takeUntil, switchMap, switchMapTo, catchError } from 'rxjs/operators';
+import { Subject, Observable, throwError, timer, Subscription } from 'rxjs';
 import { noop } from 'lodash';
+import { exhaustMap, tap, takeUntil, switchMap, switchMapTo, catchError } from 'rxjs/operators';
 
 const DEFAULT_HEARTBEAT_INTERVAL = 1000;
 
@@ -29,7 +29,7 @@ export function createObservableMonitor<T, E>(
   }: ObservableMonitorOptions<E> = {}
 ): Observable<T> {
   return new Observable((subscriber) => {
-    const subscription: Subscription = interval(heartbeatInterval)
+    const subscription: Subscription = timer(0, heartbeatInterval)
       .pipe(
         // switch from the heartbeat interval to the instantiated observable until it completes / errors
         exhaustMap(() => takeUntilDurationOfInactivity(observableFactory(), inactivityTimeout)),

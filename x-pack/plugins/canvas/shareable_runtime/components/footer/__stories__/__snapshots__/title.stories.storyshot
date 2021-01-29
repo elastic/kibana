@@ -31,7 +31,7 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <div
+        <span
           data-euiicon-type="logoElastic"
           size="l"
         />
@@ -95,7 +95,7 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <div
+        <span
           data-euiicon-type="logoElastic"
           size="l"
         />
@@ -159,7 +159,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         rel=""
         title="Powered by Elastic.co"
       >
-        <div
+        <span
           data-euiicon-type="logoElastic"
           size="l"
         />

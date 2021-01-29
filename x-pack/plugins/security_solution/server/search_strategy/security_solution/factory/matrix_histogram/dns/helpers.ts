@@ -17,15 +17,16 @@ export const getDnsParsedData = <T>(
 ): MatrixHistogramData[] => {
   let result: MatrixHistogramData[] = [];
   data.forEach((bucketData: unknown) => {
-    const time = get('key', bucketData);
+    const questionName = get('key', bucketData);
     const histData = getOr([], keyBucket, bucketData).map(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ key, doc_count }: DnsHistogramSubBucket) => ({
-        x: time,
+        x: key,
         y: doc_count,
-        g: key,
+        g: questionName,
       })
     );
+
     result = [...result, ...histData];
   });
   return result;

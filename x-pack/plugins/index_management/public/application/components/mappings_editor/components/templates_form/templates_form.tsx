@@ -36,11 +36,10 @@ const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData)
     // Silently swallow errors
   }
 
-  return Array.isArray(parsedTemplates) && parsedTemplates.length > 0
-    ? {
-        dynamic_templates: parsedTemplates,
-      }
-    : undefined;
+  return {
+    dynamic_templates:
+      Array.isArray(parsedTemplates) && parsedTemplates.length > 0 ? parsedTemplates : [],
+  };
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {

@@ -37,6 +37,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
   settingErrors,
 }) => {
   const {
+    name,
     settings: {
       delegateType,
       uri,

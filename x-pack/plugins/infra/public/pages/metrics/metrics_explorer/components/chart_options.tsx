@@ -121,7 +121,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
     >
       <EuiForm>
         <EuiFormRow
-          compressed
+          display="rowCompressed"
           label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.typeLabel', {
             defaultMessage: 'Chart style',
           })}
@@ -134,7 +134,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           />
         </EuiFormRow>
         <EuiFormRow
-          compressed
+          display="rowCompressed"
           label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.stackLabel', {
             defaultMessage: 'Stack series',
           })}
@@ -148,7 +148,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
           />
         </EuiFormRow>
         <EuiFormRow
-          compressed
+          display="rowCompressed"
           label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.yAxisDomainLabel', {
             defaultMessage: 'Y Axis Domain',
           })}

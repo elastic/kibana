@@ -5,17 +5,20 @@
  */
 
 import { routeDefinitionParamsMock } from '../index.mock';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { defineRoleMappingPostRoutes } from './post';
 
 describe('POST role mappings', () => {
   it('allows a role mapping to be created', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-
-    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    mockScopedClusterClient.callAsCurrentUser.mockResolvedValue({ created: true });
+    const mockContext = {
+      core: coreMock.createRequestHandlerContext(),
+      licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } } as any,
+    };
+    mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResolvedValue({
+      body: { created: true },
+    } as any);
 
     defineRoleMappingPostRoutes(mockRouteDefinitionParams);
 
@@ -39,37 +42,41 @@ describe('POST role mappings', () => {
       },
       headers,
     });
-    const mockContext = ({
-      licensing: {
-        license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
-      },
-    } as unknown) as RequestHandlerContext;
 
     const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ created: true });
 
-    expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-      'shield.saveRoleMapping',
-      {
-        name,
-        body: {
-          enabled: true,
-          roles: ['foo', 'bar'],
-          rules: {
-            field: {
-              dn: 'CN=bob,OU=example,O=com',
-            },
+    expect(
+      mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
+    ).toHaveBeenCalledWith({
+      name,
+      body: {
+        enabled: true,
+        roles: ['foo', 'bar'],
+        rules: {
+          field: {
+            dn: 'CN=bob,OU=example,O=com',
           },
         },
-      }
-    );
+      },
+    });
   });
 
   describe('failure', () => {
     it('returns result of license check', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: {
+          license: {
+            check: jest.fn().mockReturnValue({
+              state: 'invalid',
+              message: 'test forbidden message',
+            }),
+          },
+        } as any,
+      };
 
       defineRoleMappingPostRoutes(mockRouteDefinitionParams);
 
@@ -81,22 +88,14 @@ describe('POST role mappings', () => {
         path: `/internal/security/role_mapping`,
         headers,
       });
-      const mockContext = ({
-        licensing: {
-          license: {
-            check: jest.fn().mockReturnValue({
-              state: 'invalid',
-              message: 'test forbidden message',
-            }),
-          },
-        },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
 
-      expect(mockRouteDefinitionParams.clusterClient.asScoped).not.toHaveBeenCalled();
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
+      ).not.toHaveBeenCalled();
     });
   });
 });

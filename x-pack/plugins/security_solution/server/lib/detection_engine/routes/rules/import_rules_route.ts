@@ -6,13 +6,13 @@
 
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
+import { schema } from '@kbn/config-schema';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '../../../../../common/validate';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
-  importRulesPayloadSchema,
-  ImportRulesPayloadSchemaDecoded,
   ImportRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
@@ -20,8 +20,7 @@ import {
   importRulesSchema as importRulesResponseSchema,
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { IRouter } from '../../../../../../../../src/core/server';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils/';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -48,9 +47,13 @@ import { PartialFilter } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
-const CHUNK_PARSED_OBJECT_SIZE = 10;
+const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  ml: SetupPlugins['ml']
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
@@ -58,10 +61,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         query: buildRouteValidation<typeof importRulesQuerySchema, ImportRulesQuerySchemaDecoded>(
           importRulesQuerySchema
         ),
-        body: buildRouteValidation<
-          typeof importRulesPayloadSchema,
-          ImportRulesPayloadSchemaDecoded
-        >(importRulesPayloadSchema),
+        body: schema.any(), // validation on file object is accomplished later in the handler.
       },
       options: {
         tags: ['access:securitySolution'],
@@ -84,7 +84,12 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
 
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
@@ -139,6 +144,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   building_block_type: buildingBlockType,
                   description,
                   enabled,
+                  event_category_override: eventCategoryOverride,
                   false_positives: falsePositives,
                   from,
                   immutable,
@@ -162,6 +168,13 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   severity_mapping: severityMapping,
                   tags,
                   threat,
+                  threat_filters: threatFilters,
+                  threat_index: threatIndex,
+                  threat_query: threatQuery,
+                  threat_mapping: threatMapping,
+                  threat_language: threatLanguage,
+                  concurrent_searches: concurrentSearches,
+                  items_per_search: itemsPerSearch,
                   threshold,
                   timestamp_override: timestampOverride,
                   to,
@@ -194,6 +207,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       buildingBlockType,
                       description,
                       enabled,
+                      eventCategoryOverride,
                       falsePositives,
                       from,
                       immutable,
@@ -222,6 +236,13 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       type,
                       threat,
                       threshold,
+                      threatFilters,
+                      threatIndex,
+                      threatQuery,
+                      threatMapping,
+                      threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       timestampOverride,
                       references,
                       note,
@@ -238,6 +259,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       savedObjectsClient,
                       description,
                       enabled,
+                      eventCategoryOverride,
                       falsePositives,
                       from,
                       query,
@@ -265,6 +287,13 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       type,
                       threat,
                       threshold,
+                      threatFilters,
+                      threatIndex,
+                      threatQuery,
+                      threatMapping,
+                      threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       references,
                       note,
                       version,

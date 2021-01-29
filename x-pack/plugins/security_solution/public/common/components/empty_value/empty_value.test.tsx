@@ -8,7 +8,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 import {
   defaultToEmptyTag,

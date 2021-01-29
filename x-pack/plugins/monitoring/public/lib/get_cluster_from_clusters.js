@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { find, first } from 'lodash';
 
-export function getClusterFromClusters(clusters, globalState) {
+export function getClusterFromClusters(clusters, globalState, unsetGlobalState = false) {
   const cluster = (() => {
-    const existingCurrent = _.find(clusters, { cluster_uuid: globalState.cluster_uuid });
+    const existingCurrent = find(clusters, { cluster_uuid: globalState.cluster_uuid });
     if (existingCurrent) {
       return existingCurrent;
     }
 
-    const firstCluster = _.first(clusters);
+    const firstCluster = first(clusters);
     if (firstCluster && firstCluster.cluster_uuid) {
       return firstCluster;
     }
@@ -22,8 +22,8 @@ export function getClusterFromClusters(clusters, globalState) {
   })();
 
   if (cluster && cluster.license) {
-    globalState.cluster_uuid = cluster.cluster_uuid;
-    globalState.ccs = cluster.ccs;
+    globalState.cluster_uuid = unsetGlobalState ? undefined : cluster.cluster_uuid;
+    globalState.ccs = unsetGlobalState ? undefined : cluster.ccs;
     globalState.save();
     return cluster;
   }

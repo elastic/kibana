@@ -22,7 +22,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {
-  return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
+  return typeof value === 'number' ? `${value}` : UNSET_CONFIG_ITEM;
 }
 
 export interface ListItems {
@@ -135,7 +135,12 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
           defaultMessage: 'Top classes',
         }),
-        description: `${numTopClasses}`,
+        description:
+          numTopClasses === -1
+            ? i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.allClasses', {
+                defaultMessage: 'All classes',
+              })
+            : getStringValue(numTopClasses),
       });
     }
 

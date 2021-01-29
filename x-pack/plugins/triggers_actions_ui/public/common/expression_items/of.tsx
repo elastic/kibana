@@ -101,10 +101,10 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      withTitle
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>

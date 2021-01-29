@@ -4,31 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  ILegacyClusterClient,
-} from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, ILegacyClusterClient } from 'kibana/server';
 import { identity } from 'lodash';
+import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
-import { AlertType } from '../../common';
+import { AlertsHealth, AlertType } from '../../common';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
     esClient = elasticsearchServiceMock.createLegacyClusterClient(),
+    getFrameworkHealth,
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
     esClient?: jest.Mocked<ILegacyClusterClient>;
+    getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
+      (() => Promise<AlertsHealth>);
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
+): [
+  AlertingRequestHandlerContext,
+  KibanaRequest<unknown, unknown, unknown>,
+  KibanaResponseFactory
+] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
@@ -38,8 +42,9 @@ export function mockHandlerArguments(
         getAlertsClient() {
           return alertsClient || alertsClientMock.create();
         },
+        getFrameworkHealth,
       },
-    } as unknown) as RequestHandlerContext,
+    } as unknown) as AlertingRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];

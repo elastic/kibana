@@ -4,106 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { IndexField } from '../../../../common/search_strategy/index_fields';
+import { getBrowserFields } from '.';
+import { mockBrowserFields, mocksSource } from './mock';
 
-import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
-import { NO_ALERT_INDEX } from '../../../../common/constants';
-import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
-
-jest.mock('../../lib/kibana');
-jest.mock('../../utils/apollo_context', () => ({
-  useApolloClient: jest.fn().mockReturnValue({
-    query: jest.fn().mockImplementation(() => Promise.resolve(mocksSource[0].result)),
-  }),
-}));
-
-describe('Index Fields & Browser Fields', () => {
-  test('At initialization the value of indicesExists should be true', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
-    const initialResult = result.current;
-
-    await waitForNextUpdate();
-
-    return expect(initialResult).toEqual({
-      browserFields: {},
-      docValueFields: [],
-      errorMessage: null,
-      indexPattern: {
-        fields: [],
-        title:
-          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
-      },
-      indicesExist: true,
-      loading: true,
+describe('source/index.tsx', () => {
+  describe('getBrowserFields', () => {
+    test('it returns an empty object given an empty array', () => {
+      const fields = getBrowserFields('title 1', []);
+      expect(fields).toEqual({});
     });
-  });
 
-  test('returns memoized value', async () => {
-    const { result, waitForNextUpdate, rerender } = renderHook(() => useWithSource());
-    await waitForNextUpdate();
-
-    const result1 = result.current;
-    act(() => rerender());
-    const result2 = result.current;
-
-    return expect(result1).toBe(result2);
-  });
-
-  test('Index Fields', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
-
-    await waitForNextUpdate();
-
-    return expect(result).toEqual({
-      current: {
-        indicesExist: true,
-        browserFields: mockBrowserFields,
-        docValueFields: [
-          {
-            field: '@timestamp',
-            format: 'date_time',
-          },
-          {
-            field: 'event.end',
-            format: 'date_time',
-          },
-        ],
-        indexPattern: {
-          fields: mockIndexFields,
-          title:
-            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
-        },
-        loading: false,
-        errorMessage: null,
-      },
-      error: undefined,
+    test('it returns the same input with the same title', () => {
+      getBrowserFields('title 1', []);
+      // Since it is memoized it will return the same output which is empty object given 'title 1' a second time
+      const fields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      expect(fields).toEqual({});
     });
-  });
 
-  test('Make sure we are not querying for NO_ALERT_INDEX and it is not includes in the index pattern', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useWithSource('default', [NO_ALERT_INDEX])
-    );
-
-    await waitForNextUpdate();
-    return expect(result.current.indexPattern.title).toEqual(
-      'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*'
-    );
-  });
-
-  describe('indicesExistOrDataTemporarilyUnavailable', () => {
-    test('it returns true when undefined', () => {
-      let undefVar;
-      const result = indicesExistOrDataTemporarilyUnavailable(undefVar);
-      expect(result).toBeTruthy();
-    });
-    test('it returns true when true', () => {
-      const result = indicesExistOrDataTemporarilyUnavailable(true);
-      expect(result).toBeTruthy();
-    });
-    test('it returns false when false', () => {
-      const result = indicesExistOrDataTemporarilyUnavailable(false);
-      expect(result).toBeFalsy();
+    test('it transforms input into output as expected', () => {
+      const fields = getBrowserFields('title 2', mocksSource.indexFields as IndexField[]);
+      expect(fields).toEqual(mockBrowserFields);
     });
   });
 });

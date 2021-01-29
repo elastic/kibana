@@ -2,15 +2,10 @@
   "id": "dataEnhanced",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": [
-    "xpack", "data_enhanced"
-  ],
-  "requiredPlugins": [
-    "data",
-    "features"
-  ],
+  "configPath": ["xpack", "data_enhanced"],
+  "requiredPlugins": ["bfetch", "data", "features", "management", "share", "taskManager"],
   "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

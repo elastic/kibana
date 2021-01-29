@@ -113,12 +113,6 @@ You should see the new exception list created like so:
 
 ```sh
 {
-  "_tags": [
-    "endpoint",
-    "process",
-    "malware",
-    "os:linux"
-  ],
   "created_at": "2020-05-28T19:16:31.052Z",
   "created_by": "yo",
   "description": "This is a sample endpoint type exception",
@@ -141,12 +135,6 @@ And you can attach exception list items like so:
 
 ```ts
 {
-  "_tags": [
-    "endpoint",
-    "process",
-    "malware",
-    "os:linux"
-  ],
   "comments": [],
   "created_at": "2020-05-28T19:17:21.099Z",
   "created_by": "yo",
@@ -173,6 +161,7 @@ And you can attach exception list items like so:
   "list_id": "endpoint_list",
   "name": "Sample Endpoint Exception List",
   "namespace_type": "single",
+  "os_types": ["linux"],
   "tags": [
     "user added string for a tag",
     "malware"
@@ -222,12 +211,6 @@ or for finding exception lists:
 {
   "data": [
     {
-      "_tags": [
-        "endpoint",
-        "process",
-        "malware",
-        "os:linux"
-      ],
       "created_at": "2020-05-28T19:16:31.052Z",
       "created_by": "yo",
       "description": "This is a sample endpoint type exception",
@@ -235,6 +218,7 @@ or for finding exception lists:
       "list_id": "endpoint_list",
       "name": "Sample Endpoint Exception List",
       "namespace_type": "single",
+      "os_types": ["linux"],
       "tags": [
         "user added string for a tag",
         "malware"

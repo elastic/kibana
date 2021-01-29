@@ -4,11 +4,7 @@
 
 ## IndexPatternAttributes interface
 
-> Warning: This API is now obsolete.
-> 
-> 
-
-Use data plugin interface instead
+Interface for an index pattern saved object
 
 <b>Signature:</b>
 
@@ -20,9 +16,12 @@ export interface IndexPatternAttributes
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-server.indexpatternattributes.allownoindex.md) | <code>boolean</code> | prevents errors when index pattern exists before indices |
+|  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpatternattributes.fieldattrs.md) | <code>string</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpatternattributes.fieldformatmap.md) | <code>string</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpatternattributes.fields.md) | <code>string</code> |  |
 |  [intervalName](./kibana-plugin-plugins-data-server.indexpatternattributes.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-server.indexpatternattributes.runtimefieldmap.md) | <code>string</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpatternattributes.sourcefilters.md) | <code>string</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpatternattributes.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpatternattributes.title.md) | <code>string</code> |  |

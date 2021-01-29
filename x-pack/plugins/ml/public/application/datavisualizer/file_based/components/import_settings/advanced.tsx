@@ -17,7 +17,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { CombinedField, CombinedFieldsForm } from '../combined_fields';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {
@@ -36,6 +38,9 @@ interface Props {
   onPipelineStringChange(): void;
   indexNameError: string;
   indexPatternNameError: string;
+  combinedFields: CombinedField[];
+  onCombinedFieldsChange(combinedFields: CombinedField[]): void;
+  results: FindFileStructureResponse;
 }
 
 export const AdvancedSettings: FC<Props> = ({
@@ -54,6 +59,9 @@ export const AdvancedSettings: FC<Props> = ({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
+  combinedFields,
+  onCombinedFieldsChange,
+  results,
 }) => {
   return (
     <React.Fragment>
@@ -122,6 +130,17 @@ export const AdvancedSettings: FC<Props> = ({
           isInvalid={indexPatternNameError !== ''}
         />
       </EuiFormRow>
+
+      <CombinedFieldsForm
+        mappingsString={mappingsString}
+        pipelineString={pipelineString}
+        onMappingsStringChange={onMappingsStringChange}
+        onPipelineStringChange={onPipelineStringChange}
+        combinedFields={combinedFields}
+        onCombinedFieldsChange={onCombinedFieldsChange}
+        results={results}
+        isDisabled={initialized === true}
+      />
 
       <EuiFlexGroup>
         <EuiFlexItem>

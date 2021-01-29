@@ -8,6 +8,7 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import { metadataQueryStrategyV2 } from './support/query_strategies';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -22,7 +23,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataCurrentIndexPattern
+        metadataQueryStrategyV2()
       );
       expect(query).toEqual({
         body: {
@@ -36,6 +37,7 @@ describe('query builder', () => {
               },
             },
           ],
+          track_total_hits: true,
         },
         from: 0,
         size: 10,
@@ -59,7 +61,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataCurrentIndexPattern,
+          metadataQueryStrategyV2(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -83,6 +85,7 @@ describe('query builder', () => {
                 },
               },
             ],
+            track_total_hits: true,
           },
           from: 0,
           size: 10,
@@ -107,7 +110,7 @@ describe('query builder', () => {
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
         },
-        metadataCurrentIndexPattern
+        metadataQueryStrategyV2()
       );
 
       expect(query).toEqual({
@@ -141,6 +144,7 @@ describe('query builder', () => {
               },
             },
           ],
+          track_total_hits: true,
         },
         from: 0,
         size: 10,
@@ -166,7 +170,7 @@ describe('query builder', () => {
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
           },
-          metadataCurrentIndexPattern,
+          metadataQueryStrategyV2(),
           {
             unenrolledAgentIds: [unenrolledElasticAgentId],
           }
@@ -212,6 +216,7 @@ describe('query builder', () => {
                 },
               },
             ],
+            track_total_hits: true,
           },
           from: 0,
           size: 10,
@@ -225,11 +230,11 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID, metadataCurrentIndexPattern);
+      const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'HostDetails.host.id': mockID } },
+          query: { match: { 'HostDetails.agent.id': mockID } },
           sort: [{ 'HostDetails.event.created': { order: 'desc' } }],
           size: 1,
         },

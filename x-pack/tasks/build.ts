@@ -10,7 +10,8 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
-import { ToolingLog, REPO_ROOT, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';
@@ -60,9 +61,6 @@ async function copySourceAndBabelify() {
         'plugins/**/*',
         'plugins/reporting/.phantom/*',
         'plugins/reporting/.chromium/*',
-        'legacy/common/**/*',
-        'legacy/plugins/**/*',
-        'legacy/server/**/*',
         'typings/**/*',
       ],
       {
@@ -75,7 +73,7 @@ async function copySourceAndBabelify() {
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
-          '**/public/**',
+          '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
           'plugins/canvas/shareable_runtime/test/**',
         ],

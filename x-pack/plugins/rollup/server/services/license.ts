@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from 'src/core/server';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'src/core/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
+import type { RollupHandlerContext } from '../types';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -59,11 +55,11 @@ export class License {
     });
   }
 
-  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, RollupHandlerContext>) {
     const license = this;
 
     return function licenseCheck(
-      ctx: RequestHandlerContext,
+      ctx: RollupHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {

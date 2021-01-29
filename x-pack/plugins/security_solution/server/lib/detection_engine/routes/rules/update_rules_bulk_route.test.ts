@@ -18,7 +18,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -68,6 +68,7 @@ describe('update_rules_bulk', () => {
 
     it('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      // @ts-expect-error
       const response = await server.inject(getUpdateBulkRequest(), contextWithoutSecuritySolution);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -150,9 +151,7 @@ describe('update_rules_bulk', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('allows rule type of query and custom from and interval', async () => {

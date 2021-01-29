@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
   getLogEntryAnomaliesSuccessReponsePayloadRT,
   getLogEntryAnomaliesRequestPayloadRT,
   GetLogEntryAnomaliesRequestPayload,
-  Sort,
-  Pagination,
 } from '../../../../common/http_api/log_analysis';
+import { AnomaliesSort, Pagination } from '../../../../common/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getLogEntryAnomalies } from '../../../lib/log_analysis';
@@ -98,7 +97,7 @@ const getSortAndPagination = (
   sort: Partial<GetLogEntryAnomaliesRequestPayload['data']['sort']> = {},
   pagination: Partial<GetLogEntryAnomaliesRequestPayload['data']['pagination']> = {}
 ): {
-  sort: Sort;
+  sort: AnomaliesSort;
   pagination: Pagination;
 } => {
   const sortDefaults = {

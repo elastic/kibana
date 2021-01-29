@@ -5,21 +5,22 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  IRouter,
+import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../common/runtime_types';
 import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
-
-export type ESAPICaller = ILegacyScopedClusterClient['callAsCurrentUser'];
+import { UptimeESClient } from '../../lib';
+import type { UptimeRouter } from '../../../types';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: ESAPICaller; dynamicSettings: DynamicSettings } & P
+  params: {
+    uptimeEsClient: UptimeESClient;
+    esClient?: IScopedClusterClient;
+  } & P
 ) => Promise<R>;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
@@ -28,7 +29,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  router: IRouter;
+  router: UptimeRouter;
 }
 
 export interface UptimeCorePlugins {

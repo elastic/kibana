@@ -17,13 +17,12 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { ComponentStrings, DataSourceStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n';
 import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
 const { DatasourceDatasourceComponent: strings } = ComponentStrings;
-const { DemoData: demoDataStrings } = DataSourceStrings;
 
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
@@ -133,14 +132,17 @@ export class DatasourceComponent extends PureComponent {
       />
     ) : null;
 
-    const datasourceRender = stateDatasource.render({
-      args: stateArgs,
-      updateArgs,
-      datasourceDef,
-      isInvalid,
-      setInvalid,
-      defaultIndex,
-    });
+    const datasourceRender = () =>
+      stateDatasource.render({
+        args: stateArgs,
+        updateArgs,
+        datasourceDef,
+        isInvalid,
+        setInvalid,
+        defaultIndex,
+      });
+
+    const hasExpressionArgs = Object.values(stateArgs).some((a) => a && typeof a[0] === 'object');
 
     return (
       <Fragment>
@@ -157,26 +159,34 @@ export class DatasourceComponent extends PureComponent {
             {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
-          {stateDatasource.name === 'demodata' ? (
-            <EuiCallOut title={demoDataStrings.getHeading()} iconType="iInCircle">
-              {datasourceRender}
-            </EuiCallOut>
+          {!hasExpressionArgs ? (
+            <>
+              {datasourceRender()}
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
+                    {strings.getPreviewButtonLabel()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    disabled={isInvalid}
+                    size="s"
+                    onClick={this.save}
+                    fill
+                    color="secondary"
+                  >
+                    {strings.getSaveButtonLabel()}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           ) : (
-            datasourceRender
+            <EuiCallOut color="warning">
+              <p>{strings.getExpressionArgDescription()}</p>
+            </EuiCallOut>
           )}
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
-                {strings.getPreviewButtonLabel()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="secondary">
-                {strings.getSaveButtonLabel()}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </div>
 
         {datasourcePreview}

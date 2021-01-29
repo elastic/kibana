@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { AuthenticatedUser } from '../../common/model';
 import { AccountManagementPage } from './account_management_page';
 import { coreMock } from 'src/core/public/mocks';

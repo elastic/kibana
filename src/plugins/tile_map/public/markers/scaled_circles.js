@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { L, colorUtil } from '../../../maps_legacy/public';
+import { colorUtil } from '../../../maps_legacy/public';
 import { truncatedColorMaps } from '../../../charts/public';
 
 export class ScaledCirclesMarkers extends EventEmitter {
@@ -31,14 +20,13 @@ export class ScaledCirclesMarkers extends EventEmitter {
     options,
     targetZoom,
     kibanaMap,
-    metricAgg
+    leaflet
   ) {
     super();
     this._featureCollection = featureCollection;
     this._featureCollectionMetaData = featureCollectionMetaData;
 
     this._zoom = targetZoom;
-    this._metricAgg = metricAgg;
 
     this._valueFormatter =
       options.valueFormatter ||
@@ -55,6 +43,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._legendColors = null;
     this._legendQuantizer = null;
+    this._leaflet = leaflet;
 
     this._popups = [];
 
@@ -72,7 +61,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
         return kibanaMap.isInside(bucketRectBounds);
       };
     }
-    this._leafletLayer = L.geoJson(null, layerOptions);
+    this._leafletLayer = this._leaflet.geoJson(null, layerOptions);
     this._leafletLayer.addData(this._featureCollection);
   }
 
@@ -143,7 +132,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
       mouseover: (e) => {
         const layer = e.target;
         // bring layer to front if not older browser
-        if (!L.Browser.ie && !L.Browser.opera) {
+        if (!this._leaflet.Browser.ie && !this._leaflet.Browser.opera) {
           layer.bringToFront();
         }
         this._showTooltip(feature);
@@ -170,7 +159,10 @@ export class ScaledCirclesMarkers extends EventEmitter {
       return;
     }
 
-    const latLng = L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+    const latLng = this._leaflet.latLng(
+      feature.geometry.coordinates[1],
+      feature.geometry.coordinates[0]
+    );
     this.emit('showTooltip', {
       content: content,
       position: latLng,
@@ -182,7 +174,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     return (feature, latlng) => {
       const value = feature.properties.value;
       const scaledRadius = this._radiusScale(value) * scaleFactor;
-      return L.circleMarker(latlng).setRadius(scaledRadius);
+      return this._leaflet.circleMarker(latlng).setRadius(scaledRadius);
     };
   }
 

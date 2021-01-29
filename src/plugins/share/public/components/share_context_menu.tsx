@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -24,9 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import { HttpStart } from 'kibana/public';
+import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowEmbed: boolean;
@@ -40,6 +31,8 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
+  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -73,6 +66,8 @@ export class ShareContextMenu extends Component<Props> {
           basePath={this.props.basePath}
           post={this.props.post}
           shareableUrl={this.props.shareableUrl}
+          anonymousAccess={this.props.anonymousAccess}
+          showPublicUrlSwitch={this.props.showPublicUrlSwitch}
         />
       ),
     };
@@ -102,6 +97,8 @@ export class ShareContextMenu extends Component<Props> {
             post={this.props.post}
             shareableUrl={this.props.shareableUrl}
             urlParamExtensions={this.props.embedUrlParamExtensions}
+            anonymousAccess={this.props.anonymousAccess}
+            showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           />
         ),
       };

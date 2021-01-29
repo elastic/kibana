@@ -11,19 +11,19 @@ import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import { TimelineId } from '../../../../common/types/timeline';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
+import { Ecs } from '../../../../common/ecs';
+import { GetOneTimeline, TimelineResult } from '../../../graphql/types';
 import {
   TimelineNonEcsData,
-  GetOneTimeline,
-  TimelineResult,
-  Ecs,
-  TimelineStatus,
-  TimelineType,
-  GetTimelineDetailsQuery,
-  DetailItem,
-} from '../../../graphql/types';
+  TimelineEventsDetailsItem,
+  TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsStrategyResponse,
+  TimelineEventsQueries,
+} from '../../../../common/search_strategy/timeline';
 import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
@@ -38,7 +38,6 @@ import {
 } from './helpers';
 import { KueryFilterQueryKind } from '../../../common/store';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { timelineDetailsQuery } from '../../../timelines/containers/details/index.gql_query';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -79,7 +78,6 @@ export const updateAlertStatusAction = async ({
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-
     const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
@@ -118,11 +116,21 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   return { to, from };
 };
 
+const getFiltersFromRule = (filters: string[]): Filter[] =>
+  filters.reduce((acc, filterString) => {
+    try {
+      const objFilter: Filter = JSON.parse(filterString);
+      return [...acc, objFilter];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as Filter[]);
+
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
-  const aggregationField = ecsData.signal?.rule?.threshold.field;
+  const aggregationField = ecsData.signal?.rule?.threshold?.field!;
   const aggregationValue =
     get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
   const dataProviderValue = Array.isArray(aggregationValue)
@@ -139,7 +147,7 @@ export const getThresholdAggregationDataProvider = (
     {
       and: [],
       id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-      name: ecsData.signal?.rule?.threshold.field,
+      name: aggregationField,
       enabled: true,
       excluded: false,
       kqlQuery: '',
@@ -152,20 +160,28 @@ export const getThresholdAggregationDataProvider = (
   ];
 };
 
+export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length &&
+  ecsData.signal?.rule?.type[0] === 'eql' &&
+  ecsData.signal?.group?.id?.length;
+
+export const isThresholdRule = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
+
 export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
   ecsData,
   nonEcsData,
   updateTimelineIsLoading,
+  searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
-  let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
   const { to, from } = determineToAndFrom({ ecsData });
 
-  if (timelineId !== '' && apolloClient != null) {
+  if (!isEmpty(timelineId) && apolloClient != null) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -174,25 +190,28 @@ export const sendAlertToTimelineAction = async ({
           fetchPolicy: 'no-cache',
           variables: {
             id: timelineId,
+            timelineType: TimelineType.template,
           },
         }),
-        apolloClient.query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>({
-          query: timelineDetailsQuery,
-          fetchPolicy: 'no-cache',
-          variables: {
-            defaultIndex: [],
-            docValueFields: [],
-            eventId: ecsData._id,
-            indexName: ecsData._index ?? '',
-            sourceId: 'default',
-          },
-        }),
+        searchStrategyClient
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            {
+              defaultIndex: [],
+              docValueFields: [],
+              indexName: ecsData._index ?? '',
+              eventId: ecsData._id,
+              factoryQueryType: TimelineEventsQueries.details,
+            },
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+            }
+          )
+          .toPromise(),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-      const eventData: DetailItem[] = getOr([], 'data.source.TimelineDetails.data', eventDataResp);
+      const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
-        openAlertInBasicTimeline = false;
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
@@ -233,10 +252,6 @@ export const sendAlertToTimelineAction = async ({
                 },
                 serializedQuery: convertKueryToElasticSearchQuery(query),
               },
-              filterQueryDraft: {
-                kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-                expression: query,
-              },
             },
             noteIds: notes?.map((n) => n.noteId) ?? [],
             show: true,
@@ -247,38 +262,21 @@ export const sendAlertToTimelineAction = async ({
         });
       }
     } catch {
-      openAlertInBasicTimeline = true;
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
     }
   }
 
-  if (
-    ecsData.signal?.rule?.type?.length &&
-    ecsData.signal?.rule?.type[0] === 'threshold' &&
-    openAlertInBasicTimeline
-  ) {
+  if (isThresholdRule(ecsData)) {
     return createTimeline({
       from,
       notes: null,
       timeline: {
         ...timelineDefaults,
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
-        ],
+        description: `_id: ${ecsData._id}`,
+        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
+        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
         id: TimelineId.active,
+        indexNames: [],
         dateRange: {
           start: from,
           end: to,
@@ -296,39 +294,52 @@ export const sendAlertToTimelineAction = async ({
               ? ecsData.signal?.rule?.query[0]
               : '',
           },
-          filterQueryDraft: {
-            kind: ecsData.signal?.rule?.language?.length
-              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-              : 'kuery',
-            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
-          },
         },
       },
       to,
       ruleNote: noteContent,
     });
   } else {
+    let dataProviders = [
+      {
+        and: [],
+        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
+        name: ecsData._id,
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: '_id',
+          value: ecsData._id,
+          operator: ':' as const,
+        },
+      },
+    ];
+    if (isEqlRuleWithGroupId(ecsData)) {
+      const signalGroupId = ecsData.signal?.group?.id?.length
+        ? ecsData.signal?.group?.id[0]
+        : 'unknown-signal-group-id';
+      dataProviders = [
+        {
+          ...dataProviders[0],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
+          queryMatch: {
+            field: 'signal.group.id',
+            value: signalGroupId,
+            operator: ':' as const,
+          },
+        },
+      ];
+    }
+
     return createTimeline({
       from,
       notes: null,
       timeline: {
         ...timelineDefaults,
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-        ],
+        dataProviders,
         id: TimelineId.active,
+        indexNames: [],
         dateRange: {
           start: from,
           end: to,
@@ -341,10 +352,6 @@ export const sendAlertToTimelineAction = async ({
               expression: '',
             },
             serializedQuery: '',
-          },
-          filterQueryDraft: {
-            kind: 'kuery',
-            expression: '',
           },
         },
       },

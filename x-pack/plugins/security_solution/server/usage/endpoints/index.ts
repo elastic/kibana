@@ -6,8 +6,8 @@
 import { cloneDeep } from 'lodash';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
-import { Agent, NewAgentEvent } from './../../../../ingest_manager/common/types/models/agent';
-import { AgentMetadata } from '../../../../ingest_manager/common/types/models/agent';
+import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
+import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
 import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
 
 export interface AgentOSMetadataTelemetry {

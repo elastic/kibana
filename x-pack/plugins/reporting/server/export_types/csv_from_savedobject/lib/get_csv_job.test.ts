@@ -13,7 +13,7 @@ describe('Get CSV Job', () => {
   let mockSavedObjectsClient: any;
   let mockUiSettingsClient: any;
   beforeEach(() => {
-    mockJobParams = { isImmediate: true, savedObjectType: 'search', savedObjectId: '234-ididid' };
+    mockJobParams = { savedObjectType: 'search', savedObjectId: '234-ididid' };
     mockSearchPanel = {
       indexPatternSavedObjectId: '123-indexId',
       attributes: {
@@ -45,6 +45,7 @@ describe('Get CSV Job', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "browserTimezone": "PST",
         "conflictedTypesFields": Array [],
         "fields": Array [],
         "indexPatternSavedObject": Object {
@@ -56,9 +57,6 @@ describe('Get CSV Job', () => {
           "fields": Array [],
           "timeFieldName": null,
           "title": null,
-        },
-        "jobParams": Object {
-          "browserTimezone": "PST",
         },
         "metaFields": Array [],
         "searchRequest": Object {
@@ -99,6 +97,7 @@ describe('Get CSV Job', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "browserTimezone": "PST",
         "conflictedTypesFields": Array [],
         "fields": Array [],
         "indexPatternSavedObject": Object {
@@ -110,9 +109,6 @@ describe('Get CSV Job', () => {
           "fields": Array [],
           "timeFieldName": null,
           "title": null,
-        },
-        "jobParams": Object {
-          "browserTimezone": "PST",
         },
         "metaFields": Array [],
         "searchRequest": Object {
@@ -156,6 +152,7 @@ describe('Get CSV Job', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "browserTimezone": "Africa/Timbuktu",
         "conflictedTypesFields": Array [],
         "fields": Array [],
         "indexPatternSavedObject": Object {
@@ -167,9 +164,6 @@ describe('Get CSV Job', () => {
           "fields": Array [],
           "timeFieldName": null,
           "title": null,
-        },
-        "jobParams": Object {
-          "browserTimezone": "Africa/Timbuktu",
         },
         "metaFields": Array [],
         "searchRequest": Object {
@@ -212,6 +206,7 @@ describe('Get CSV Job', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "browserTimezone": "Africa/Timbuktu",
         "conflictedTypesFields": Array [],
         "fields": Array [
           "@test_time",
@@ -225,9 +220,6 @@ describe('Get CSV Job', () => {
           "fields": Array [],
           "timeFieldName": "@test_time",
           "title": "test search",
-        },
-        "jobParams": Object {
-          "browserTimezone": "Africa/Timbuktu",
         },
         "metaFields": Array [],
         "searchRequest": Object {
@@ -286,6 +278,7 @@ describe('Get CSV Job', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "browserTimezone": "Africa/Timbuktu",
         "conflictedTypesFields": Array [],
         "fields": Array [
           "@test_time",
@@ -299,9 +292,6 @@ describe('Get CSV Job', () => {
           "fields": Array [],
           "timeFieldName": "@test_time",
           "title": "test search",
-        },
-        "jobParams": Object {
-          "browserTimezone": "Africa/Timbuktu",
         },
         "metaFields": Array [],
         "searchRequest": Object {

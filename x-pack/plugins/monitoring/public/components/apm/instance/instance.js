@@ -42,9 +42,7 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
 
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <EuiPanel>
-        <MonitoringTimeseriesContainer series={data} {...props} />
-      </EuiPanel>
+      <MonitoringTimeseriesContainer series={data} {...props} />
     </EuiFlexItem>
   ));
 
@@ -55,15 +53,15 @@ export function ApmServerInstance({ summary, metrics, ...props }) {
           <h1>
             <FormattedMessage
               id="xpack.monitoring.apm.instance.heading"
-              defaultMessage="APM Instance"
+              defaultMessage="APM server instance"
             />
           </h1>
         </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={summary} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={summary} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>

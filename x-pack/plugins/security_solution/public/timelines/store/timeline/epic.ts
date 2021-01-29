@@ -60,14 +60,14 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateKqlMode,
   updateProviders,
   updateRange,
   updateSort,
   upsertColumn,
+  updateIndexNames,
   updateTimeline,
-  updateTitle,
+  updateTitleAndDescription,
   updateAutoSaveMsg,
   setExcludedRowRendererIds,
   setFilters,
@@ -77,6 +77,7 @@ import {
   createTimeline,
   addTimeline,
   showCallOutUnauthorizedMsg,
+  saveTimeline,
 } from './actions';
 import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -94,6 +95,7 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  saveTimeline.type,
   setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
@@ -102,12 +104,12 @@ const timelineActionsType = [
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDataProviderType.type,
-  updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
+  updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
-  updateTitle.type,
+  updateTitleAndDescription.type,
   updateRange.type,
   upsertColumn.type,
 ];
@@ -181,7 +183,6 @@ export const createTimelineEpic = <State>(): Epic<
         ) {
           return true;
         }
-        return false;
       }),
       debounceTime(500),
       mergeMap(([action]) => {
@@ -280,6 +281,7 @@ export const createTimelineEpic = <State>(): Epic<
                       id: action.payload.id,
                       timeline: {
                         ...savedTimeline,
+                        updated: response.timeline.updated ?? undefined,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
                         status: response.timeline.status ?? TimelineStatus.active,
@@ -339,6 +341,7 @@ const timelineInput: TimelineInput = {
   filters: null,
   kqlMode: null,
   kqlQuery: null,
+  indexNames: null,
   title: null,
   timelineType: TimelineType.default,
   templateTimelineVersion: null,

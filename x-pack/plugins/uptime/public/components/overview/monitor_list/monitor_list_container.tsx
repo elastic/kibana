@@ -14,7 +14,6 @@ import { UptimeRefreshContext } from '../../../contexts';
 
 export interface MonitorListProps {
   filters?: string;
-  linkParameters?: string;
 }
 
 const DEFAULT_PAGE_SIZE = 10;

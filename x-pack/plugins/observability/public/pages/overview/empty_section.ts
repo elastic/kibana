@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { AppMountContext } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { ISection } from '../../typings/section';
 
-export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): ISection[] => {
+export const getEmptySections = ({ core }: { core: CoreStart }): ISection[] => {
   return [
     {
       id: 'infra_logs',
@@ -29,7 +29,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       title: i18n.translate('xpack.observability.emptySection.apps.apm.title', {
         defaultMessage: 'APM',
       }),
-      icon: 'logoAPM',
+      icon: 'logoObservability',
       description: i18n.translate('xpack.observability.emptySection.apps.apm.description', {
         defaultMessage:
           'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
@@ -68,6 +68,21 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
         defaultMessage: 'Install Heartbeat',
       }),
       href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+    },
+    {
+      id: 'ux',
+      title: i18n.translate('xpack.observability.emptySection.apps.ux.title', {
+        defaultMessage: 'User Experience',
+      }),
+      icon: 'logoObservability',
+      description: i18n.translate('xpack.observability.emptySection.apps.ux.description', {
+        defaultMessage:
+          'Performance is a distribution. Measure the experiences of all visitors to your web application and understand how to improve the experience for everyone.',
+      }),
+      linkTitle: i18n.translate('xpack.observability.emptySection.apps.ux.link', {
+        defaultMessage: 'Install RUM Agent',
+      }),
+      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'alert',

@@ -10,6 +10,13 @@ jest.mock('./data_request_actions', () => {
     syncDataForAllLayers: () => {},
   };
 });
+jest.mock('../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
 
 import { mapExtentChanged, setMouseCoordinates, setQuery } from './map_actions';
 
@@ -26,6 +33,10 @@ describe('map_actions', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
           return {};
+        };
+
+        require('../selectors/map_selectors').getLayerList = () => {
+          return [];
         };
       });
 
@@ -249,6 +260,7 @@ describe('map_actions', () => {
         $state: { store: 'appState' },
       },
     ];
+    const searchSessionId = '1234';
 
     beforeEach(() => {
       //Mocks the "previous" state
@@ -260,6 +272,9 @@ describe('map_actions', () => {
       };
       require('../selectors/map_selectors').getFilters = () => {
         return filters;
+      };
+      require('../selectors/map_selectors').getSearchSessionId = () => {
+        return searchSessionId;
       };
       require('../selectors/map_selectors').getMapSettings = () => {
         return {
@@ -277,20 +292,35 @@ describe('map_actions', () => {
       const setQueryAction = await setQuery({
         query: newQuery,
         filters,
+        searchSessionId,
       });
       await setQueryAction(dispatchMock, getStoreMock);
 
       expect(dispatchMock.mock.calls).toEqual([
         [
           {
+            searchSessionId,
             timeFilters,
             query: newQuery,
             filters,
             type: 'SET_QUERY',
           },
         ],
-        [undefined], // dispatch<any>(syncDataForAllLayers());
+        [undefined], // dispatch(syncDataForAllLayers());
       ]);
+    });
+
+    it('should dispatch query action when searchSessionId changes', async () => {
+      const setQueryAction = await setQuery({
+        timeFilters,
+        query,
+        filters,
+        searchSessionId: '5678',
+      });
+      await setQueryAction(dispatchMock, getStoreMock);
+
+      // dispatchMock calls: dispatch(SET_QUERY) and dispatch(syncDataForAllLayers())
+      expect(dispatchMock.mock.calls.length).toEqual(2);
     });
 
     it('should not dispatch query action when nothing changes', async () => {
@@ -298,6 +328,7 @@ describe('map_actions', () => {
         timeFilters,
         query,
         filters,
+        searchSessionId,
       });
       await setQueryAction(dispatchMock, getStoreMock);
 

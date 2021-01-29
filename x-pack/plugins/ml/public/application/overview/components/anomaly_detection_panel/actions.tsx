@@ -27,9 +27,9 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
   return (
     <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
       <EuiButtonEmpty
+        href={createLinkWithUserDefaults('explorer', jobsList)}
         color="text"
         size="xs"
-        href={createLinkWithUserDefaults('explorer', jobsList)}
         iconType="visTable"
         aria-label={openJobsInAnomalyExplorerText}
         className="results-button"

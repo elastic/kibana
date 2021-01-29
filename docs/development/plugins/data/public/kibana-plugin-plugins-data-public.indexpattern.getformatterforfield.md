@@ -4,17 +4,19 @@
 
 ## IndexPattern.getFormatterForField() method
 
+Provide a field, get its formatter
+
 <b>Signature:</b>
 
 ```typescript
-getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
+getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  field | <code>IndexPatternField &#124; IndexPatternField['spec']</code> |  |
+|  field | <code>IndexPatternField &#124; IndexPatternField['spec'] &#124; IFieldType</code> |  |
 
 <b>Returns:</b>
 

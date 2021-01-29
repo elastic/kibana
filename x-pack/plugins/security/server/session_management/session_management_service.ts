@@ -6,8 +6,8 @@
 
 import { Observable, Subscription } from 'rxjs';
 import {
+  ElasticsearchClient,
   HttpServiceSetup,
-  ILegacyClusterClient,
   Logger,
   SavedObjectsErrorHelpers,
 } from '../../../../../src/core/server';
@@ -21,17 +21,17 @@ import { Session } from './session';
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
   readonly config: ConfigType;
-  readonly clusterClient: ILegacyClusterClient;
-  readonly kibanaIndexName: string;
   readonly taskManager: TaskManagerSetupContract;
 }
 
 export interface SessionManagementServiceStartParams {
+  readonly elasticsearchClient: ElasticsearchClient;
+  readonly kibanaIndexName: string;
   readonly online$: Observable<OnlineStatusRetryScheduler>;
   readonly taskManager: TaskManagerStartContract;
 }
 
-export interface SessionManagementServiceSetup {
+export interface SessionManagementServiceStart {
   readonly session: Session;
 }
 
@@ -46,53 +46,44 @@ export const SESSION_INDEX_CLEANUP_TASK_NAME = 'session_cleanup';
 export class SessionManagementService {
   private statusSubscription?: Subscription;
   private sessionIndex!: SessionIndex;
+  private sessionCookie!: SessionCookie;
   private config!: ConfigType;
+  private isCleanupTaskScheduled = false;
 
   constructor(private readonly logger: Logger) {}
 
-  setup({
-    config,
-    clusterClient,
-    http,
-    kibanaIndexName,
-    taskManager,
-  }: SessionManagementServiceSetupParams): SessionManagementServiceSetup {
+  setup({ config, http, taskManager }: SessionManagementServiceSetupParams) {
     this.config = config;
 
-    const sessionCookie = new SessionCookie({
+    this.sessionCookie = new SessionCookie({
       config,
       createCookieSessionStorageFactory: http.createCookieSessionStorageFactory,
       serverBasePath: http.basePath.serverBasePath || '/',
       logger: this.logger.get('cookie'),
     });
 
-    this.sessionIndex = new SessionIndex({
-      config,
-      clusterClient,
-      kibanaIndexName,
-      logger: this.logger.get('index'),
-    });
-
     // Register task that will perform periodic session index cleanup.
     taskManager.registerTaskDefinitions({
       [SESSION_INDEX_CLEANUP_TASK_NAME]: {
         title: 'Cleanup expired or invalid user sessions',
-        type: SESSION_INDEX_CLEANUP_TASK_NAME,
         createTaskRunner: () => ({ run: () => this.sessionIndex.cleanUp() }),
       },
     });
-
-    return {
-      session: new Session({
-        logger: this.logger,
-        sessionCookie,
-        sessionIndex: this.sessionIndex,
-        config,
-      }),
-    };
   }
 
-  start({ online$, taskManager }: SessionManagementServiceStartParams) {
+  start({
+    elasticsearchClient,
+    kibanaIndexName,
+    online$,
+    taskManager,
+  }: SessionManagementServiceStartParams): SessionManagementServiceStart {
+    this.sessionIndex = new SessionIndex({
+      config: this.config,
+      elasticsearchClient,
+      kibanaIndexName,
+      logger: this.logger.get('index'),
+    });
+
     this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
       try {
         await Promise.all([this.sessionIndex.initialize(), this.scheduleCleanupTask(taskManager)]);
@@ -100,6 +91,15 @@ export class SessionManagementService {
         scheduleRetry();
       }
     });
+
+    return {
+      session: new Session({
+        logger: this.logger,
+        sessionCookie: this.sessionCookie,
+        sessionIndex: this.sessionIndex,
+        config: this.config,
+      }),
+    };
   }
 
   stop() {
@@ -124,7 +124,12 @@ export class SessionManagementService {
 
     // Check if currently scheduled task is scheduled with the correct interval.
     const cleanupInterval = `${this.config.session.cleanupInterval.asSeconds()}s`;
-    if (currentTask && currentTask.schedule?.interval !== cleanupInterval) {
+    if (currentTask) {
+      if (currentTask.schedule?.interval === cleanupInterval) {
+        this.logger.debug('Session index cleanup task is already scheduled.');
+        return;
+      }
+
       this.logger.debug(
         'Session index cleanup interval has changed, the cleanup task will be rescheduled.'
       );
@@ -139,6 +144,13 @@ export class SessionManagementService {
           throw err;
         }
       }
+    } else if (this.isCleanupTaskScheduled) {
+      // WORKAROUND: This is a workaround for the Task Manager issue: https://github.com/elastic/kibana/issues/75501
+      // and should be removed as soon as this issue is resolved.
+      this.logger.error(
+        'Session index cleanup task has been already scheduled, but is missing in the task list for some reason. Please restart Kibana to automatically reschedule this task.'
+      );
+      return;
     }
 
     try {
@@ -151,10 +163,11 @@ export class SessionManagementService {
         state: {},
       });
     } catch (err) {
-      this.logger.error(`Failed to register session index cleanup task: ${err.message}`);
+      this.logger.error(`Failed to schedule session index cleanup task: ${err.message}`);
       throw err;
     }
 
+    this.isCleanupTaskScheduled = true;
     this.logger.debug('Successfully scheduled session index cleanup task.');
   }
 }

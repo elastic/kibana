@@ -27,6 +27,7 @@ describe('useGetCasesStatus', () => {
       expect(result.current).toEqual({
         countClosedCases: null,
         countOpenCases: null,
+        countInProgressCases: null,
         isLoading: true,
         isError: false,
         fetchCasesStatus: result.current.fetchCasesStatus,
@@ -56,6 +57,7 @@ describe('useGetCasesStatus', () => {
       expect(result.current).toEqual({
         countClosedCases: casesStatus.countClosedCases,
         countOpenCases: casesStatus.countOpenCases,
+        countInProgressCases: casesStatus.countInProgressCases,
         isLoading: false,
         isError: false,
         fetchCasesStatus: result.current.fetchCasesStatus,
@@ -79,6 +81,7 @@ describe('useGetCasesStatus', () => {
       expect(result.current).toEqual({
         countClosedCases: 0,
         countOpenCases: 0,
+        countInProgressCases: 0,
         isLoading: false,
         isError: true,
         fetchCasesStatus: result.current.fetchCasesStatus,

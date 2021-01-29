@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+import { sep } from 'path';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -25,35 +15,55 @@ import { Project } from '../utils/project';
 import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
+import { readYarnLock } from '../utils/yarn_lock';
+import { validateDependencies } from '../utils/validate_dependencies';
+import { installBazelTools } from '../utils/bazel';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 
-  async run(projects, projectGraph, { options, kbn }) {
-    const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
-      batchByWorkspace: true,
-    });
+  async run(projects, projectGraph, { options, kbn, rootPath }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
-
+    const kibanaProjectPath = projects.get('kibana')?.path;
     const extraArgs = [
       ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
     ];
 
-    for (const batch of batchedProjectsByWorkspace) {
+    // Install bazel machinery tools if needed
+    await installBazelTools(rootPath);
+
+    // Install monorepo npm dependencies
+    for (const batch of batchedProjects) {
       for (const project of batch) {
-        if (project.isWorkspaceProject) {
-          log.verbose(`Skipping workspace project: ${project.name}`);
+        const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${sep}plugins`);
+
+        if (!project.hasDependencies()) {
           continue;
         }
 
-        if (project.hasDependencies()) {
+        if (project.isSinglePackageJsonProject || isExternalPlugin) {
           await project.installDependencies({ extraArgs });
+          continue;
+        }
+
+        if (!project.isEveryDependencyLocal() && !isExternalPlugin) {
+          throw new Error(
+            `[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
+          );
         }
       }
     }
 
+    const yarnLock = await readYarnLock(kbn);
+
+    if (options.validate) {
+      await validateDependencies(kbn, yarnLock);
+    }
+
+    // Assure all kbn projects with bin defined scripts
+    // copy those scripts into the top level node_modules folder
     await linkProjectExecutables(projects, projectGraph);
 
     /**
@@ -63,7 +73,7 @@ export const BootstrapCommand: ICommand = {
      * have to, as it will slow down the bootstrapping process.
      */
 
-    const checksums = await getAllChecksums(kbn, log);
+    const checksums = await getAllChecksums(kbn, log, yarnLock);
     const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
     let cachedProjectCount = 0;
 

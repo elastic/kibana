@@ -29,7 +29,11 @@ const createStartContract = (): Start => {
     ...uiActionsPluginMock.createStartContract(),
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
+    hasActionFactory: jest.fn(),
     FlyoutManageDrilldowns: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
   };
 
   return startContract;

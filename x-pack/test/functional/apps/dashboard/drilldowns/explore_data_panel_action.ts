@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Explore underlying data - panel action', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/84011
+  // FLAKY: https://github.com/elastic/kibana/issues/84012
+  describe.skip('Explore underlying data - panel action', function () {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
       async () => {
@@ -43,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean-up custom time range on panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
-      await panelActions.openContextMenu();
+      await panelActions.openContextMenuMorePanel();
       await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
       await panelActionsTimeRange.clickRemovePerPanelTimeRangeButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart');
@@ -77,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
-      await panelActions.openContextMenu();
+      await panelActions.openContextMenuMorePanel();
       await panelActionsTimeRange.clickTimeRangeActionInContextMenu();
       await panelActionsTimeRange.clickToggleQuickMenuButton();
       await panelActionsTimeRange.clickCommonlyUsedTimeRange('Last_90 days');

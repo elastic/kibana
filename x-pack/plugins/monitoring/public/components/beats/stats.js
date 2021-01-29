@@ -9,7 +9,7 @@ import { formatMetric } from '../../lib/format_number';
 import { SummaryStatus } from '../summary_status';
 import { i18n } from '@kbn/i18n';
 
-export function Stats({ stats }) {
+export function Stats({ stats, alerts }) {
   const {
     total,
     types,
@@ -51,5 +51,5 @@ export function Stats({ stats }) {
     'data-test-subj': 'bytesSent',
   });
 
-  return <SummaryStatus metrics={metrics} data-test-subj="beatsSummaryStatus" />;
+  return <SummaryStatus metrics={metrics} alerts={alerts} data-test-subj="beatsSummaryStatus" />;
 }

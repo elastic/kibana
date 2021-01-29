@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -12,7 +12,6 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
@@ -21,23 +20,22 @@ import {
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
   ALERTS,
+  SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
-// @ts-ignore
 import { requireUIRoutes } from './routes';
-// @ts-ignore
 import { initBulkUploader } from './kibana_monitoring';
-// @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
 import {
@@ -48,7 +46,10 @@ import {
   PluginsSetup,
   PluginsStart,
   LegacyRequest,
+  RequestHandlerContextMonitoringPlugin,
 } from './types';
+
+import { Globals } from './static_globals';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -58,7 +59,7 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
   const boom = Boom.isBoom(error) ? error : Boom.boomify(error, options);
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 };
@@ -71,7 +72,7 @@ export class Plugin {
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader: IBulkUploader = {} as IBulkUploader;
+  private bulkUploader: IBulkUploader | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -89,7 +90,7 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
     this.legacyShimDependencies = {
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
@@ -115,41 +116,35 @@ export class Plugin {
       config,
       log: this.log,
     });
-    await this.licenseService.refresh();
 
+    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
     const serverInfo = core.http.getServerInfo();
-    let kibanaUrl = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
-    if (core.http.basePath.serverBasePath) {
-      kibanaUrl += `/${core.http.basePath.serverBasePath}`;
-    }
-    const getUiSettingsService = async () => {
-      const coreStart = (await core.getStartServices())[0];
-      return coreStart.uiSettings;
-    };
-    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(
-        getUiSettingsService,
-        cluster,
-        this.getLogger,
-        config,
-        kibanaUrl,
-        isCloud
-      );
-      plugins.alerts.registerType(alert.getAlertType());
-    }
-
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
-        maxBucketSize: config.ui.max_bucket_size,
-      });
+      plugins.alerts?.registerType(alert.getAlertType());
     }
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(plugins.usageCollection, config);
+      core.savedObjects.registerType({
+        name: SAVED_OBJECT_TELEMETRY,
+        hidden: true,
+        namespaceType: 'agnostic',
+        mappings: {
+          properties: {
+            reportedClusterUuids: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
     // Always create the bulk uploader
@@ -158,6 +153,7 @@ export class Plugin {
       elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
+      opsMetrics$: core.metrics.getOpsMetrics$(),
       statusGetter$: core.status.overall$,
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
@@ -184,7 +180,7 @@ export class Plugin {
           const monitoringBulkEnabled =
             mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
           if (monitoringBulkEnabled) {
-            bulkUploader.start(plugins.usageCollection);
+            bulkUploader.start();
           } else {
             bulkUploader.handleNotEnabled();
           }
@@ -209,14 +205,17 @@ export class Plugin {
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
-        this.cluster
+        this.cluster,
+        plugins
       );
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
+        cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -224,7 +223,7 @@ export class Plugin {
     return {
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
-      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
+      getKibanaStats: () => bulkUploader.getKibanaStats(),
     };
   }
 
@@ -237,6 +236,7 @@ export class Plugin {
     if (this.licenseService) {
       this.licenseService.stop();
     }
+    this.bulkUploader?.stop();
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
@@ -245,8 +245,7 @@ export class Plugin {
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
         defaultMessage: 'Stack Monitoring',
       }),
-      icon: 'monitoringApp',
-      navLinkId: 'monitoring',
+      category: DEFAULT_APP_CATEGORIES.management,
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
@@ -281,7 +280,8 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ILegacyCustomClusterClient
+    cluster: ILegacyCustomClusterClient,
+    setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -307,7 +307,7 @@ export class Plugin {
       route: (options: any) => {
         const method = options.method;
         const handler = async (
-          context: RequestHandlerContext,
+          context: RequestHandlerContextMonitoringPlugin,
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
@@ -337,10 +337,11 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
-                  plugins,
+                  plugins: setupPlugins,
                 },
               },
               plugins: {

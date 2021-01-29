@@ -1,0 +1,7 @@
+{
+  "id": "visDefaultEditor",
+  "version": "kibana",
+  "ui": true,
+  "optionalPlugins": ["visualize"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
+}

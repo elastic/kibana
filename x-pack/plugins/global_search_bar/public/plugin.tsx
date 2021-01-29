@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
 import ReactDOM from 'react-dom';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { I18nProvider } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import { SearchBar } from '../public/components/search_bar';
+import { CoreStart, Plugin } from 'src/core/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { GlobalSearchPluginStart } from '../../global_search/public';
+import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { SearchBar } from './components/search_bar';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
@@ -21,26 +26,61 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     return {};
   }
 
-  public start(core: CoreStart, { globalSearch }: GlobalSearchBarPluginStartDeps) {
+  public start(
+    core: CoreStart,
+    { globalSearch, savedObjectsTagging, usageCollection }: GlobalSearchBarPluginStartDeps
+  ) {
+    const trackUiMetric = usageCollection
+      ? usageCollection.reportUiCounter.bind(usageCollection, 'global_search_bar')
+      : (metricType: UiCounterMetricType, eventName: string | string[]) => {};
+
     core.chrome.navControls.registerCenter({
       order: 1000,
-      mount: (target) => this.mount(target, globalSearch, core.application.navigateToUrl),
+      mount: (container) =>
+        this.mount({
+          container,
+          globalSearch,
+          savedObjectsTagging,
+          navigateToUrl: core.application.navigateToUrl,
+          basePathUrl: core.http.basePath.prepend('/plugins/globalSearchBar/assets/'),
+          darkMode: core.uiSettings.get('theme:darkMode'),
+          trackUiMetric,
+        }),
     });
     return {};
   }
 
-  private mount(
-    targetDomElement: HTMLElement,
-    globalSearch: GlobalSearchPluginStart,
-    navigateToUrl: ApplicationStart['navigateToUrl']
-  ) {
+  private mount({
+    container,
+    globalSearch,
+    savedObjectsTagging,
+    navigateToUrl,
+    basePathUrl,
+    darkMode,
+    trackUiMetric,
+  }: {
+    container: HTMLElement;
+    globalSearch: GlobalSearchPluginStart;
+    savedObjectsTagging?: SavedObjectTaggingPluginStart;
+    navigateToUrl: ApplicationStart['navigateToUrl'];
+    basePathUrl: string;
+    darkMode: boolean;
+    trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  }) {
     ReactDOM.render(
       <I18nProvider>
-        <SearchBar globalSearch={globalSearch.find} navigateToUrl={navigateToUrl} />
+        <SearchBar
+          globalSearch={globalSearch}
+          navigateToUrl={navigateToUrl}
+          taggingApi={savedObjectsTagging}
+          basePathUrl={basePathUrl}
+          darkMode={darkMode}
+          trackUiMetric={trackUiMetric}
+        />
       </I18nProvider>,
-      targetDomElement
+      container
     );
 
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => ReactDOM.unmountComponentAtNode(container);
   }
 }

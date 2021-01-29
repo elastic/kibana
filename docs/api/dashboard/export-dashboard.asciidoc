@@ -11,11 +11,14 @@ experimental[] Export dashboards and corresponding saved objects.
 
 `GET <kibana host>:<port>/api/kibana/dashboards/export`
 
+`GET <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/export`
+
 [[dashboard-api-export-params]]
 ==== Query parameters
 
 `dashboard`::
   (Required, array|string) The IDs of the dashboards that you want to export.
+  To export multiple dashboards, repeat the query parameter.
 
 [[dashboard-api-export-response-body]]
 ==== Response body

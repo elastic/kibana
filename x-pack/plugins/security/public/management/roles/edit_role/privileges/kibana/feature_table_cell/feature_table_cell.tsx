@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './feature_table_cell.scss';
-
 import React from 'react';
-import { EuiText, EuiIconTip, EuiIcon, IconType } from '@elastic/eui';
+import { EuiText, EuiIconTip } from '@elastic/eui';
 import { SecuredFeature } from '../../../../model';
 
 interface Props {
@@ -35,8 +33,7 @@ export const FeatureTableCell = ({ feature }: Props) => {
   }
 
   return (
-    <span>
-      <EuiIcon size="m" type={feature.icon as IconType} className="secPrivilegeFeatureIcon" />
+    <span data-test-subj={`featureTableCell`}>
       {feature.name} {tooltipElement}
     </span>
   );

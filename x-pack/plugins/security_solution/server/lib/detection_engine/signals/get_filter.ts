@@ -15,9 +15,14 @@ import {
   Language,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
+import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
@@ -25,7 +30,7 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }
@@ -48,7 +53,7 @@ export const getFilter = async ({
   type,
   query,
   lists,
-}: GetFilterArgs): Promise<unknown> => {
+}: GetFilterArgs): Promise<QueryFilter> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter(query, language, filters || [], index, lists);
@@ -89,7 +94,7 @@ export const getFilter = async ({
   };
 
   switch (type) {
-    case 'eql':
+    case 'threat_match':
     case 'threshold': {
       return savedId != null ? savedQueryFilter() : queryFilter();
     }
@@ -103,6 +108,9 @@ export const getFilter = async ({
       throw new BadRequestError(
         'Unsupported Rule of type "machine_learning" supplied to getFilter'
       );
+    }
+    case 'eql': {
+      throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
     }
     default: {
       return assertUnreachable(type);

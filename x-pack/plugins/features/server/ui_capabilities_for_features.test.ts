@@ -46,6 +46,7 @@ describe('populateUICapabilities', () => {
             id: 'newFeature',
             name: 'my new feature',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(),
               read: createKibanaFeaturePrivilege(),
@@ -91,8 +92,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(),
@@ -144,8 +145,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             catalogue: ['anotherFooEntry', 'anotherBarEntry'],
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
@@ -213,8 +214,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(['capability3', 'capability4', 'capability5']),
@@ -243,8 +244,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: null,
             reserved: {
               description: '',
@@ -287,8 +288,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
@@ -358,8 +359,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'newFeature',
             name: 'my new feature',
-            navLinkId: 'newFeatureNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
@@ -369,6 +370,7 @@ describe('populateUICapabilities', () => {
             id: 'anotherNewFeature',
             name: 'another new feature',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
@@ -377,8 +379,8 @@ describe('populateUICapabilities', () => {
           new KibanaFeature({
             id: 'yetAnotherNewFeature',
             name: 'yet another new feature',
-            navLinkId: 'yetAnotherNavLink',
             app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
             privileges: {
               all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
               read: createKibanaFeaturePrivilege(['something1', 'something2', 'something3']),

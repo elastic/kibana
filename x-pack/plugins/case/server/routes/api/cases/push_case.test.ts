@@ -44,7 +44,7 @@ describe('Push case', () => {
       body: caseExternalServiceRequestBody,
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -66,7 +66,7 @@ describe('Push case', () => {
       body: caseExternalServiceRequestBody,
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: [
@@ -97,7 +97,7 @@ describe('Push case', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })

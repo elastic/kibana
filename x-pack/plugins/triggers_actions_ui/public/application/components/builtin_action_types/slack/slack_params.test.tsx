@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import SlackParamsFields from './slack_params';
-import { DocLinksStart } from 'kibana/public';
 
 describe('SlackParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -20,7 +19,6 @@ describe('SlackParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();

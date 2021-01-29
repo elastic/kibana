@@ -53,9 +53,9 @@ export function Overview(props) {
           alerts={props.alerts}
         />
 
-        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} />
+        <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} alerts={props.alerts} />
 
-        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} />
+        <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} alerts={props.alerts} />
       </EuiPageBody>
     </EuiPage>
   );

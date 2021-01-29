@@ -43,16 +43,23 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -72,16 +79,23 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: false,
       },
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -96,16 +110,23 @@ describe('connector validation', () => {
       name: 'email',
       config: {
         from: 'test@test.com',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: ['Port is required.'],
+          host: ['Host is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -124,16 +145,23 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: ['Password is required when username is used.'],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: ['Password is required when username is used.'],
+        },
       },
     });
   });
@@ -152,16 +180,23 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: ['Username is required when password is used.'],
-        password: [],
+      config: {
+        errors: {
+          from: [],
+          port: [],
+          host: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: ['Username is required when password is used.'],
+          password: [],
+        },
       },
     });
   });

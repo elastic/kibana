@@ -1,7 +1,6 @@
 [[development]]
 = Developer guide
 
-[partintro]
 --
 Contributing to {kib} can be daunting at first, but it doesn't have to be. The following sections should get you up and
 running in no time. If you have any problems, file an issue in the https://github.com/elastic/kibana/issues[Kibana repo].

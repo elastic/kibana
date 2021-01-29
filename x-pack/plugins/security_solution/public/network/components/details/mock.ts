@@ -6,10 +6,9 @@
 
 import { NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 
-export const mockData: Readonly<Record<
-  string,
-  NetworkDetailsStrategyResponse['networkDetails']
->> = {
+export const mockData: Readonly<
+  Record<string, NetworkDetailsStrategyResponse['networkDetails']>
+> = {
   complete: {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',

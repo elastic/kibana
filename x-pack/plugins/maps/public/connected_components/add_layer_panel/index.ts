@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { FLYOUT_STATE } from '../../reducers/ui';
@@ -26,19 +27,19 @@ function mapStateToProps(state: MapStoreState) {
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => {
-      dispatch<any>(addPreviewLayers(layerDescriptors));
+      dispatch(addPreviewLayers(layerDescriptors));
     },
     promotePreviewLayers: () => {
-      dispatch<any>(setFirstPreviewLayerToSelectedLayer());
+      dispatch(setFirstPreviewLayerToSelectedLayer());
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
-      dispatch<any>(promotePreviewLayers());
+      dispatch(promotePreviewLayers());
     },
     closeFlyout: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      dispatch<any>(removePreviewLayers());
+      dispatch(removePreviewLayers());
     },
   };
 }

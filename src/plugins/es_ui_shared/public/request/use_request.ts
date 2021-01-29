@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
@@ -49,7 +38,7 @@ export const useRequest = <D = any, E = Error>(
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const requestCountRef = useRef<number>(0);
-  const isInitialRequest = requestCountRef.current === 0;
+  const isInitialRequestRef = useRef<boolean>(true);
   const pollIntervalIdRef = useRef<any>(null);
 
   const clearPollInterval = useCallback(() => {
@@ -97,6 +86,9 @@ export const useRequest = <D = any, E = Error>(
     if (isOutdatedRequest || isUnmounted) {
       return;
     }
+
+    // Surface to consumers that at least one request has resolved.
+    isInitialRequestRef.current = false;
 
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
@@ -146,7 +138,7 @@ export const useRequest = <D = any, E = Error>(
   }, [clearPollInterval]);
 
   return {
-    isInitialRequest,
+    isInitialRequest: isInitialRequestRef.current,
     isLoading,
     error,
     data,

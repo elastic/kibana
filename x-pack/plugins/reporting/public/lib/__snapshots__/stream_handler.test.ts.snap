@@ -6,20 +6,20 @@ Object {
     Object {
       "csvContainsFormulas": false,
       "id": "job-source-mock1",
+      "jobtype": undefined,
       "maxSizeReached": false,
       "status": "completed",
       "title": "specimen",
-      "type": "spectacular",
     },
   ],
   "failed": Array [
     Object {
       "csvContainsFormulas": false,
       "id": "job-source-mock2",
+      "jobtype": undefined,
       "maxSizeReached": false,
       "status": "failed",
       "title": "specimen",
-      "type": "spectacular",
     },
   ],
 }
@@ -49,9 +49,9 @@ Array [
             Object {
               "csvContainsFormulas": true,
               "id": "yas3",
+              "jobtype": "yas",
               "status": "completed",
               "title": "Yas",
-              "type": "yas",
             }
           }
         />
@@ -149,10 +149,10 @@ Array [
           job={
             Object {
               "id": "yas2",
+              "jobtype": "yas",
               "maxSizeReached": true,
               "status": "completed",
               "title": "Yas",
-              "type": "yas",
             }
           }
         />
@@ -191,9 +191,9 @@ Array [
           job={
             Object {
               "id": "yas1",
+              "jobtype": "yas",
               "status": "completed",
               "title": "Yas",
-              "type": "yas",
             }
           }
         />

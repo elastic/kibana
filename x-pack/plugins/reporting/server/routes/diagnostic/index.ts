@@ -15,3 +15,9 @@ export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logge
   registerDiagnoseConfig(reporting, logger);
   registerDiagnoseScreenshot(reporting, logger);
 };
+
+export interface DiagnosticResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
+}

@@ -36,7 +36,6 @@ export const CreateButtonPopOver = ({ anchorPosition = 'upCenter' }: Props) => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
-      withTitle
       anchorPosition={anchorPosition}
       repositionOnScroll
     >

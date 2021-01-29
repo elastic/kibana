@@ -7,7 +7,6 @@
 
 import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
-import { IStyle } from '../styles/style';
 import { AGG_TYPE, FIELD_ORIGIN, LAYER_STYLE_TYPE, VECTOR_STYLES } from '../../../common/constants';
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
@@ -37,8 +36,6 @@ class MockSource {
     return this._fitToBounds;
   }
 }
-
-class MockStyle {}
 
 describe('cloneDescriptor', () => {
   describe('with joins', () => {
@@ -77,6 +74,8 @@ describe('cloneDescriptor', () => {
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
               type: 'joinSource',
+              applyGlobalQuery: true,
+              applyGlobalTime: true,
             },
           },
         ],
@@ -84,7 +83,6 @@ describe('cloneDescriptor', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource() as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -122,7 +120,6 @@ describe('cloneDescriptor', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource() as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -165,7 +162,6 @@ describe('isFittable', () => {
       const layer = new MockLayer({
         layerDescriptor,
         source: (new MockSource({ fitToBounds: test.fitToBounds }) as unknown) as ISource,
-        style: (new MockStyle() as unknown) as IStyle,
       });
       expect(await layer.isFittable()).toBe(test.canFit);
     });

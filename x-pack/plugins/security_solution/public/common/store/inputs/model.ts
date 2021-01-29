@@ -11,8 +11,8 @@ import { Query, Filter, SavedQuery } from '../../../../../../../src/plugins/data
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
-  fromStr: undefined;
-  toStr: undefined;
+  fromStr?: string;
+  toStr?: string;
   from: string;
   to: string;
 }

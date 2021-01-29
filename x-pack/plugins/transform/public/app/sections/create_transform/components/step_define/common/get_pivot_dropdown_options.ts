@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   IndexPattern,
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../../src/plugins/data/public';
+
+import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
 
 import {
   DropDownLabel,
@@ -42,7 +43,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
   fields.forEach((field) => {
     // Group by
-    const availableGroupByAggs: [] = get(pivotGroupByFieldSupport, field.type);
+    const availableGroupByAggs: [] = getNestedProperty(pivotGroupByFieldSupport, field.type);
 
     if (availableGroupByAggs !== undefined) {
       availableGroupByAggs.forEach((groupByAgg) => {
@@ -63,7 +64,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
     // Aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
-    const availableAggs: [] = get(pivotAggsFieldSupport, field.type);
+    const availableAggs: [] = getNestedProperty(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {
       availableAggs.forEach((agg) => {

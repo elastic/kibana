@@ -7,6 +7,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { toStringArray } from '../../../../helpers/to_array';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
 
@@ -36,7 +37,10 @@ export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
   HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
-      return set(fieldName, fieldValue, flattenedFields);
+      if (fieldName === '_id') {
+        return set('_id', fieldValue, flattenedFields);
+      }
+      return set(fieldName, toStringArray(fieldValue), flattenedFields);
     }
     return flattenedFields;
   }, {});
@@ -72,6 +76,9 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
       case 'host.os.version':
         return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
     }
+  } else if (aggField === '_id') {
+    const hostName = get(`host_name`, bucket);
+    return hostName ? getFirstItem(hostName) : null;
   }
   return null;
 };

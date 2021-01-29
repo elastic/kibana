@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Path from 'path';
@@ -24,9 +13,18 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap, filter } from 'rxjs/operators';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
+import { tap, filter } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  OptimizerUpdate,
+  logOptimizerState,
+  readLimits,
+} from '@kbn/optimizer';
+
+import { allValuesFrom } from '../common';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
@@ -71,15 +69,17 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     dist: false,
   });
 
+  expect(config.limits).toEqual(readLimits());
+  (config as any).limits = '<Limits>';
+
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const msgs = await runOptimizer(config)
-    .pipe(
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
       logOptimizerState(log, config),
-      filter((x) => x.event?.type !== 'worker stdio'),
-      toArray()
+      filter((x) => x.event?.type !== 'worker stdio')
     )
-    .toPromise();
+  );
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
     if (!truth) {
@@ -198,17 +198,16 @@ it('uses cache on second run and exist cleanly', async () => {
     dist: false,
   });
 
-  const msgs = await runOptimizer(config)
-    .pipe(
+  const msgs = await allValuesFrom(
+    runOptimizer(config).pipe(
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
           console.log('worker', state.event.stream, state.event.line);
         }
-      }),
-      toArray()
+      })
     )
-    .toPromise();
+  );
 
   expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
@@ -223,6 +222,10 @@ it('uses cache on second run and exist cleanly', async () => {
 });
 
 it('prepares assets for distribution', async () => {
+  if (process.env.CODE_COVERAGE) {
+    // test fails when testing coverage because source includes instrumentation, so skip it
+    return;
+  }
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
@@ -230,7 +233,7 @@ it('prepares assets for distribution', async () => {
     dist: true,
   });
 
-  await runOptimizer(config).pipe(logOptimizerState(log, config), toArray()).toPromise();
+  await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
@@ -251,7 +254,6 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

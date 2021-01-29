@@ -5,7 +5,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,14 +35,36 @@ export function ResultLinks({ jobs }) {
   );
   const singleMetricVisible = jobs.length < 2;
   const singleMetricEnabled = jobs.length === 1 && jobs[0].isSingleMetricViewerJob;
+  const singleMetricDisabledMessage =
+    jobs.length === 1 && jobs[0].isNotSingleMetricViewerJobMessage;
+
+  const singleMetricDisabledMessageText =
+    singleMetricDisabledMessage !== undefined
+      ? i18n.translate('xpack.ml.jobsList.resultActions.singleMetricDisabledMessageText', {
+          defaultMessage: 'Disabled because {reason}.',
+          values: {
+            reason: singleMetricDisabledMessage,
+          },
+        })
+      : undefined;
+
   const jobActionsDisabled = jobs.length === 1 && jobs[0].deleting === true;
   const { createLinkWithUserDefaults } = useCreateADLinks();
+  const timeSeriesExplorerLink = useMemo(
+    () => createLinkWithUserDefaults('timeseriesexplorer', jobs),
+    [jobs]
+  );
+  const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
+
   return (
     <React.Fragment>
       {singleMetricVisible && (
-        <EuiToolTip position="bottom" content={openJobsInSingleMetricViewerText}>
+        <EuiToolTip
+          position="bottom"
+          content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
+        >
           <EuiButtonIcon
-            href={createLinkWithUserDefaults('timeseriesexplorer', jobs)}
+            href={timeSeriesExplorerLink}
             iconType="visLine"
             aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
@@ -53,7 +75,7 @@ export function ResultLinks({ jobs }) {
       )}
       <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
         <EuiButtonIcon
-          href={createLinkWithUserDefaults('explorer', jobs)}
+          href={anomalyExplorerLink}
           iconType="visTable"
           aria-label={openJobsInAnomalyExplorerText}
           className="results-button"

@@ -8,32 +8,36 @@ import { SuperTest } from 'supertest';
 import expect from '@kbn/expect/expect.js';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import {
-  createRequest,
-  expectResponses,
-  getUrlPrefix,
-  getTestTitle,
-} from '../lib/saved_object_test_utils';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface DeleteTestDefinition extends TestDefinition {
-  request: { type: string; id: string };
+  request: { type: string; id: string; force?: boolean };
 }
 export type DeleteTestSuite = TestSuite<DeleteTestDefinition>;
 export interface DeleteTestCase extends TestCase {
-  failure?: 403 | 404;
+  force?: boolean;
+  failure?: 400 | 403 | 404;
 }
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, DeleteTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
+
+/**
+ * Test cases have additional properties that we don't want to send in HTTP Requests
+ */
+const createRequest = ({ type, id, force }: DeleteTestCase) => ({ type, id, force });
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('delete');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('delete');
   const expectResponseBody = (testCase: DeleteTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
     if (testCase.failure === 403) {
-      await expectForbidden(testCase.type)(response);
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
       // permitted
       const object = response.body;
@@ -78,9 +82,10 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const { type, id } = test.request;
+          const { type, id, force } = test.request;
           await supertest
             .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
+            .query({ ...(force && { force }) })
             .auth(user?.username, user?.password)
             .expect(test.responseStatusCode)
             .then(test.responseBody);

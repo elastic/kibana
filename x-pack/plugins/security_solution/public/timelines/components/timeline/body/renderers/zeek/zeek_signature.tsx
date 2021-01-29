@@ -6,10 +6,10 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import {
   DragEffects,
   DraggableWrapper,
@@ -17,7 +17,7 @@ import {
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
-import { IS_OPERATOR } from '../../../data_providers/data_provider';
+import { IS_OPERATOR, QueryOperator } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
@@ -68,42 +68,46 @@ export const DraggableZeekElement = React.memo<{
   field: string;
   value: string | null | undefined;
   stringRenderer?: StringRenderer;
-}>(({ id, field, value, stringRenderer = defaultStringRenderer }) =>
-  value != null ? (
+}>(({ id, field, value, stringRenderer = defaultStringRenderer }) => {
+  const dataProviderProp = useMemo(
+    () => ({
+      and: [],
+      enabled: true,
+      id: escapeDataProviderId(`draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`),
+      name: value!,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field,
+        value: value!,
+        operator: IS_OPERATOR as QueryOperator,
+      },
+    }),
+    [field, id, value]
+  );
+
+  const render = useCallback(
+    (dataProvider, _, snapshot) =>
+      snapshot.isDragging ? (
+        <DragEffects>
+          <Provider dataProvider={dataProvider} />
+        </DragEffects>
+      ) : (
+        <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+          <Badge iconType="tag" color="hollow" title="">
+            {stringRenderer(value!)}
+          </Badge>
+        </EuiToolTip>
+      ),
+    [field, stringRenderer, value]
+  );
+
+  return value != null ? (
     <TokensFlexItem grow={false}>
-      <DraggableWrapper
-        dataProvider={{
-          and: [],
-          enabled: true,
-          id: escapeDataProviderId(
-            `draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`
-          ),
-          name: value,
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field,
-            value,
-            operator: IS_OPERATOR,
-          },
-        }}
-        render={(dataProvider, _, snapshot) =>
-          snapshot.isDragging ? (
-            <DragEffects>
-              <Provider dataProvider={dataProvider} />
-            </DragEffects>
-          ) : (
-            <EuiToolTip data-test-subj="badge-tooltip" content={field}>
-              <Badge iconType="tag" color="hollow" title="">
-                {stringRenderer(value)}
-              </Badge>
-            </EuiToolTip>
-          )
-        }
-      />
+      <DraggableWrapper dataProvider={dataProviderProp} render={render} />
     </TokensFlexItem>
-  ) : null
-);
+  ) : null;
+});
 
 DraggableZeekElement.displayName = 'DraggableZeekElement';
 

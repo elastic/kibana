@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, FC } from 'react';
 import d3 from 'd3';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 
 const COLOR_RANGE_RESOLUTION = 10;
 
@@ -134,15 +134,11 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{title}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <svg ref={d3Container} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiText size="xs" color="subdued">
+        <p>{title}</p>
+      </EuiText>
+      <svg ref={d3Container} />
+    </>
   );
 };

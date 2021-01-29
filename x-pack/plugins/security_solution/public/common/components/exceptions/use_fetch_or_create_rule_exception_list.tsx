@@ -82,7 +82,6 @@ export const useFetchOrCreateRuleExceptionList = ({
           type: exceptionListType,
           namespace_type: 'single',
           list_id: undefined,
-          _tags: undefined,
           tags: undefined,
           meta: undefined,
         };

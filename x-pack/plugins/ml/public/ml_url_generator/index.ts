@@ -4,3 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { MlUrlGenerator, registerUrlGenerator } from './ml_url_generator';
+export { useMlHref } from './use_ml_href';
+export { ML_PAGES } from '../../common/constants/ml_url_generator';

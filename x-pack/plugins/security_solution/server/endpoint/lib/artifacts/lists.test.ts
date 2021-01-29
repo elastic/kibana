@@ -62,7 +62,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it should convert simple fields', async () => {
     const testEntries: EntriesArray = [
-      { field: 'server.domain', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'host.os.full', operator: 'included', type: 'match', value: 'windows' },
       { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
       { field: 'host.hostname', operator: 'included', type: 'match', value: 'estc' },
     ];
@@ -71,10 +71,10 @@ describe('buildEventTypeSignal', () => {
       type: 'simple',
       entries: [
         {
-          field: 'server.domain',
+          field: 'host.os.full',
           operator: 'included',
           type: 'exact_cased',
-          value: 'DOMAIN',
+          value: 'windows',
         },
         {
           field: 'server.ip',
@@ -108,10 +108,10 @@ describe('buildEventTypeSignal', () => {
 
   test('it should convert fields case sensitive', async () => {
     const testEntries: EntriesArray = [
-      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'host.os.full.caseless', operator: 'included', type: 'match', value: 'windows' },
       { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
       {
-        field: 'host.hostname.text',
+        field: 'host.hostname.caseless',
         operator: 'included',
         type: 'match_any',
         value: ['estc', 'kibana'],
@@ -122,10 +122,10 @@ describe('buildEventTypeSignal', () => {
       type: 'simple',
       entries: [
         {
-          field: 'server.domain',
+          field: 'host.os.full',
           operator: 'included',
           type: 'exact_caseless',
-          value: 'DOMAIN',
+          value: 'windows',
         },
         {
           field: 'server.ip',
@@ -159,12 +159,12 @@ describe('buildEventTypeSignal', () => {
 
   test('it should deduplicate exception entries', async () => {
     const testEntries: EntriesArray = [
-      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
-      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
-      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'host.os.full.caseless', operator: 'included', type: 'match', value: 'windows' },
+      { field: 'host.os.full.caseless', operator: 'included', type: 'match', value: 'windows' },
+      { field: 'host.os.full.caseless', operator: 'included', type: 'match', value: 'windows' },
       { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
       {
-        field: 'host.hostname.text',
+        field: 'host.hostname',
         operator: 'included',
         type: 'match_any',
         value: ['estc', 'kibana'],
@@ -175,10 +175,10 @@ describe('buildEventTypeSignal', () => {
       type: 'simple',
       entries: [
         {
-          field: 'server.domain',
+          field: 'host.os.full',
           operator: 'included',
           type: 'exact_caseless',
-          value: 'DOMAIN',
+          value: 'windows',
         },
         {
           field: 'server.ip',
@@ -189,7 +189,7 @@ describe('buildEventTypeSignal', () => {
         {
           field: 'host.hostname',
           operator: 'included',
-          type: 'exact_caseless_any',
+          type: 'exact_cased_any',
           value: ['estc', 'kibana'],
         },
       ],
@@ -264,7 +264,7 @@ describe('buildEventTypeSignal', () => {
 
   test('it should deduplicate exception items', async () => {
     const testEntries: EntriesArray = [
-      { field: 'server.domain.text', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'host.os.full.caseless', operator: 'included', type: 'match', value: 'windows' },
       { field: 'server.ip', operator: 'included', type: 'match', value: '192.168.1.1' },
     ];
 
@@ -272,10 +272,10 @@ describe('buildEventTypeSignal', () => {
       type: 'simple',
       entries: [
         {
-          field: 'server.domain',
+          field: 'host.os.full',
           operator: 'included',
           type: 'exact_caseless',
-          value: 'DOMAIN',
+          value: 'windows',
         },
         {
           field: 'server.ip',
@@ -308,9 +308,9 @@ describe('buildEventTypeSignal', () => {
   test('it should ignore unsupported entries', async () => {
     // Lists and exists are not supported by the Endpoint
     const testEntries: EntriesArray = [
-      { field: 'server.domain', operator: 'included', type: 'match', value: 'DOMAIN' },
+      { field: 'host.os.full', operator: 'included', type: 'match', value: 'windows' },
       {
-        field: 'server.domain',
+        field: 'host.os.full',
         operator: 'included',
         type: 'list',
         list: {
@@ -325,10 +325,10 @@ describe('buildEventTypeSignal', () => {
       type: 'simple',
       entries: [
         {
-          field: 'server.domain',
+          field: 'host.os.full',
           operator: 'included',
           type: 'exact_cased',
-          value: 'DOMAIN',
+          value: 'windows',
         },
       ],
     };

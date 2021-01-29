@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job creation sets the timerange');
+      await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Feb 7, 2016 @ 00:00:00.000',
         'Feb 11, 2016 @ 23:59:54.000'
@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-      await ml.testExecution.logTestStep('job cloning sets the timerange');
+      await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
         'Feb 7, 2016 @ 00:00:00.000',
         'Feb 11, 2016 @ 23:59:54.000'
@@ -326,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job deletion confirms the delete modal');
       await ml.jobTable.confirmDeleteJobModal();
+      await ml.api.waitForAnomalyDetectionJobNotToExist(jobIdClone, 30 * 1000);
 
       await ml.testExecution.logTestStep(
         'job deletion does not display the deleted job in the job list any more'

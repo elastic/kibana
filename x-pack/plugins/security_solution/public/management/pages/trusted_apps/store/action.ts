@@ -4,13 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux';
+
+import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { AsyncResourceState, TrustedAppsListData } from '../state';
 
-export interface TrustedAppsListResourceStateChanged {
-  type: 'trustedAppsListResourceStateChanged';
-  payload: {
-    newState: AsyncResourceState<TrustedAppsListData>;
-  };
+export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
+
+interface ResourceStateChanged<T, D = null> extends Action<T> {
+  payload: { newState: AsyncResourceState<D> };
 }
 
-export type TrustedAppsPageAction = TrustedAppsListResourceStateChanged;
+export type TrustedAppsListResourceStateChanged = ResourceStateChanged<
+  'trustedAppsListResourceStateChanged',
+  TrustedAppsListData
+>;
+
+export type TrustedAppDeletionSubmissionResourceStateChanged = ResourceStateChanged<'trustedAppDeletionSubmissionResourceStateChanged'>;
+
+export type TrustedAppDeletionDialogStarted = Action<'trustedAppDeletionDialogStarted'> & {
+  payload: {
+    entry: TrustedApp;
+  };
+};
+
+export type TrustedAppDeletionDialogConfirmed = Action<'trustedAppDeletionDialogConfirmed'>;
+
+export type TrustedAppDeletionDialogClosed = Action<'trustedAppDeletionDialogClosed'>;
+
+export type TrustedAppCreationSubmissionResourceStateChanged = ResourceStateChanged<
+  'trustedAppCreationSubmissionResourceStateChanged',
+  TrustedApp
+>;
+
+export type TrustedAppCreationDialogStarted = Action<'trustedAppCreationDialogStarted'> & {
+  payload: {
+    entry: NewTrustedApp;
+  };
+};
+
+export type TrustedAppCreationDialogFormStateUpdated = Action<'trustedAppCreationDialogFormStateUpdated'> & {
+  payload: {
+    entry: NewTrustedApp;
+    isValid: boolean;
+  };
+};
+
+export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialogConfirmed'>;
+
+export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
+
+export type TrustedAppsExistResponse = Action<'trustedAppsExistStateChanged'> & {
+  payload: AsyncResourceState<boolean>;
+};
+
+export type TrustedAppsPageAction =
+  | TrustedAppsListDataOutdated
+  | TrustedAppsListResourceStateChanged
+  | TrustedAppDeletionSubmissionResourceStateChanged
+  | TrustedAppDeletionDialogStarted
+  | TrustedAppDeletionDialogConfirmed
+  | TrustedAppDeletionDialogClosed
+  | TrustedAppCreationSubmissionResourceStateChanged
+  | TrustedAppCreationDialogStarted
+  | TrustedAppCreationDialogFormStateUpdated
+  | TrustedAppCreationDialogConfirmed
+  | TrustedAppsExistResponse
+  | TrustedAppCreationDialogClosed;

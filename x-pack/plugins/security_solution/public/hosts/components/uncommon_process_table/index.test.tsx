@@ -19,6 +19,15 @@ import { mockData } from './mock';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../common/components/link_to');
 
 describe('Uncommon Process Table Component', () => {
@@ -30,18 +39,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = shallow(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -54,18 +59,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -79,18 +80,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -105,18 +102,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -131,25 +124,21 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
       );
 
       expect(wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world,hello-world-2 '
+        'Host nameshello-worldhello-world-2 '
       );
     });
 
@@ -157,18 +146,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -183,18 +168,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -208,18 +189,14 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -233,24 +210,20 @@ describe('Uncommon Process Table Component', () => {
       const wrapper = mount(
         <TestProviders>
           <UncommonProcessTable
-            data={mockData.UncommonProcess.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.UncommonProcess.pageInfo)}
+            data={mockData.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
             id="uncommonProcess"
             isInspect={false}
             loading={false}
             loadPage={loadPage}
-            showMorePagesIndicator={getOr(
-              false,
-              'showMorePagesIndicator',
-              mockData.UncommonProcess.pageInfo
-            )}
-            totalCount={mockData.UncommonProcess.totalCount}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
+            totalCount={mockData.totalCount}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
       );
       expect(wrapper.find('.euiTableRow').at(4).find('.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world,hello-world-2 '
+        'Host nameshello-worldhello-world-2 '
       );
     });
   });

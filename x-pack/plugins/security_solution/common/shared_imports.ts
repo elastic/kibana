@@ -42,4 +42,6 @@ export {
   ExceptionListType,
   Type,
   ENDPOINT_LIST_ID,
+  osTypeArray,
+  OsTypeArray,
 } from '../../lists/common';

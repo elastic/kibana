@@ -28,6 +28,7 @@ import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
+import { StartDatafeedSwitch } from './components/start_datafeed_switch';
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,
@@ -38,7 +39,10 @@ import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      http: { basePath },
+    },
   } = useMlKibana();
 
   const navigateToPath = useNavigateToPath();
@@ -50,6 +54,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [creatingJob, setCreatingJob] = useState(false);
   const [isValid, setIsValid] = useState(jobValidator.validationSummary.basic);
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
+  const [startDatafeed, setStartDatafeed] = useState(true);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
   const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
@@ -59,15 +64,17 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }, []);
 
   async function start() {
+    setCreatingJob(true);
     if (isAdvanced) {
-      await startAdvanced();
+      await createAdvancedJob();
+    } else if (startDatafeed === true) {
+      await createAndStartJob();
     } else {
-      await startInline();
+      await createAdvancedJob(false);
     }
   }
 
-  async function startInline() {
-    setCreatingJob(true);
+  async function createAndStartJob() {
     try {
       const jr = await jobCreator.createAndStartJob();
       setJobRunner(jr);
@@ -76,12 +83,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     }
   }
 
-  async function startAdvanced() {
-    setCreatingJob(true);
+  async function createAdvancedJob(showStartModal: boolean = true) {
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator, navigateToPath);
+      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToPath);
     } catch (error) {
       handleJobCreationError(error);
     }
@@ -105,7 +111,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       jobCreator.end,
       isSingleMetricJobCreator(jobCreator) === true ? 'timeseriesexplorer' : 'explorer'
     );
-    window.open(url, '_blank');
+    navigateToPath(`${basePath.get()}/app/ml/${url}`);
   }
 
   function clickResetJob() {
@@ -130,6 +136,14 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           <JobProgress progress={progress} />
           <EuiSpacer size="m" />
           <JobDetails />
+
+          {isAdvanced === false && (
+            <StartDatafeedSwitch
+              startDatafeed={startDatafeed}
+              setStartDatafeed={setStartDatafeed}
+              disabled={creatingJob}
+            />
+          )}
 
           {isAdvanced && (
             <Fragment>

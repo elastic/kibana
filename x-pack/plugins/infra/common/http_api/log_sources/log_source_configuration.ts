@@ -48,7 +48,7 @@ const logSourceFieldColumnConfigurationRT = rt.strict({
   ]),
 });
 
-const logSourceColumnConfigurationRT = rt.union([
+export const logSourceColumnConfigurationRT = rt.union([
   logSourceTimestampColumnConfigurationRT,
   logSourceMessageColumnConfigurationRT,
   logSourceFieldColumnConfigurationRT,

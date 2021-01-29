@@ -34,6 +34,11 @@ interface Props {
 
 type ValueType = 'percentage' | 'absolute';
 
+interface FieldsType {
+  min: number;
+  max: number;
+}
+
 export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
   const [valueType, setValueType] = useState<ValueType>(
     field.source.fielddata_frequency_filter !== undefined
@@ -43,21 +48,22 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
       : 'percentage'
   );
 
-  const getConfig = (fieldProp: 'min' | 'max', type = valueType) =>
-    type === 'percentage'
-      ? getFieldConfig('fielddata_frequency_filter_percentage', fieldProp)
-      : getFieldConfig('fielddata_frequency_filter_absolute', fieldProp);
+  function getConfig<T = unknown>(fieldProp: 'min' | 'max', type = valueType) {
+    return type === 'percentage'
+      ? getFieldConfig<T>('fielddata_frequency_filter_percentage', fieldProp)
+      : getFieldConfig<T>('fielddata_frequency_filter_absolute', fieldProp);
+  }
 
-  const switchType = (min: FieldHook, max: FieldHook) => () => {
+  const switchType = (min: FieldHook<number>, max: FieldHook<number>) => () => {
     const nextValueType = valueType === 'percentage' ? 'absolute' : 'percentage';
-    const nextMinConfig = getConfig('min', nextValueType);
-    const nextMaxConfig = getConfig('max', nextValueType);
+    const nextMinConfig = getConfig<number>('min', nextValueType);
+    const nextMaxConfig = getConfig<number>('max', nextValueType);
 
     min.setValue(
-      nextMinConfig.deserializer?.(nextMinConfig.defaultValue) ?? nextMinConfig.defaultValue
+      nextMinConfig.deserializer?.(nextMinConfig.defaultValue!) ?? nextMinConfig.defaultValue!
     );
     max.setValue(
-      nextMaxConfig.deserializer?.(nextMaxConfig.defaultValue) ?? nextMaxConfig.defaultValue
+      nextMaxConfig.deserializer?.(nextMaxConfig.defaultValue!) ?? nextMaxConfig.defaultValue!
     );
 
     setValueType(nextValueType);
@@ -85,15 +91,15 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
       defaultToggleValue={defaultToggleValue}
     >
       {/* fielddata_frequency_filter */}
-      <UseMultiFields
+      <UseMultiFields<FieldsType>
         fields={{
           min: {
             path: 'fielddata_frequency_filter.min',
-            config: getConfig('min'),
+            config: getConfig<number>('min'),
           },
           max: {
             path: 'fielddata_frequency_filter.max',
-            config: getConfig('max'),
+            config: getConfig<number>('max'),
           },
         }}
       >

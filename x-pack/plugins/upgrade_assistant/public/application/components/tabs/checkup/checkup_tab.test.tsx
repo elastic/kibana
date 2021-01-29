@@ -20,11 +20,25 @@ const defaultProps = {
   setSelectedTabIndex: jest.fn(),
 };
 
+jest.mock('../../../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+      };
+    },
+  };
+});
+
 /**
  * Mostly a dumb container with copy, test the three main states.
  */
 describe('CheckupTab', () => {
   test('render with deprecations', () => {
+    // @ts-expect-error mock data is too loosely typed
     expect(shallow(<CheckupTab {...defaultProps} />)).toMatchSnapshot();
   });
 

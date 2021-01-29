@@ -10,7 +10,7 @@ import React from 'react';
 export const LogEntryExampleMessagesEmptyIndicator: React.FunctionComponent<{
   onReload: () => void;
 }> = ({ onReload }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="center">
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={false} className="eui-textNoWrap">
       <FormattedMessage
         id="xpack.infra.logs.logEntryExamples.exampleEmptyDescription"

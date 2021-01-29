@@ -7,13 +7,13 @@
 import { BuiltinESPrivileges } from '../../../../common/model';
 import { RouteDefinitionParams } from '../..';
 
-export function defineGetBuiltinPrivilegesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
   router.get(
     { path: '/internal/security/esPrivileges/builtin', validate: false },
     async (context, request, response) => {
-      const privileges: BuiltinESPrivileges = await clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.getBuiltinPrivileges');
+      const {
+        body: privileges,
+      } = await context.core.elasticsearch.client.asCurrentUser.security.getBuiltinPrivileges<BuiltinESPrivileges>();
 
       // Exclude the `none` privilege, as it doesn't make sense as an option within the Kibana UI
       privileges.cluster = privileges.cluster.filter((privilege) => privilege !== 'none');

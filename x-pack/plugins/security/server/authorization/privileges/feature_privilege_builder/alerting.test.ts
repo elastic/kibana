@@ -33,6 +33,7 @@ describe(`feature_privilege_builder`, () => {
         id: 'my-feature',
         name: 'my-feature',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: privilege,
           read: privilege,
@@ -64,6 +65,7 @@ describe(`feature_privilege_builder`, () => {
           id: 'my-feature',
           name: 'my-feature',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: privilege,
             read: privilege,
@@ -101,6 +103,7 @@ describe(`feature_privilege_builder`, () => {
           id: 'my-feature',
           name: 'my-feature',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: privilege,
             read: privilege,
@@ -148,6 +151,7 @@ describe(`feature_privilege_builder`, () => {
           id: 'my-feature',
           name: 'my-feature',
           app: [],
+          category: { id: 'foo', label: 'foo' },
           privileges: {
             all: privilege,
             read: privilege,

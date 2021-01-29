@@ -1,30 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
+import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
+import { WmsOptions } from '../../../maps_legacy/public';
+import { RegionMapVisParams } from '../region_map_types';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -37,11 +27,11 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 });
 
 export type RegionMapOptionsProps = {
-  serviceSettings: IServiceSettings;
-} & VisOptionsProps<RegionMapVisParams>;
+  getServiceSettings: () => Promise<IServiceSettings>;
+} & VisEditorOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { serviceSettings, stateParams, vis, setValue } = props;
+  const { getServiceSettings, stateParams, vis, setValue } = props;
   const { vectorLayers } = vis.type.editorConfig.collections;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
   const fieldOptions = useMemo(
@@ -54,10 +44,11 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   const setEmsHotLink = useCallback(
     async (layer: VectorLayer) => {
+      const serviceSettings = await getServiceSettings();
       const emsHotLink = await serviceSettings.getEMSHotLink(layer);
       setValue('emsHotLink', emsHotLink);
     },
-    [setValue, serviceSettings]
+    [setValue, getServiceSettings]
   );
 
   const setLayer = useCallback(
@@ -211,4 +202,6 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
   );
 }
 
-export { RegionMapOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RegionMapOptions as default };

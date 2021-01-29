@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../__mocks__';
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {
+  const { mount } = new LogicMounter(AppLogic);
+
   beforeEach(() => {
-    resetContext({});
-    AppLogic.mount();
+    mount();
   });
 
   const DEFAULT_VALUES = {
     account: {},
     hasInitialized: false,
     isFederatedAuth: true,
+    isOrganization: false,
     organization: {},
   };
 
@@ -34,6 +36,7 @@ describe('AppLogic', () => {
     },
     hasInitialized: true,
     isFederatedAuth: false,
+    isOrganization: false,
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',
@@ -49,6 +52,24 @@ describe('AppLogic', () => {
       AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
       expect(AppLogic.values).toEqual(expectedLogicValues);
+    });
+
+    it('gracefully handles missing initial data', () => {
+      AppLogic.actions.initializeAppData({});
+
+      expect(AppLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        hasInitialized: true,
+        isFederatedAuth: false,
+      });
+    });
+  });
+
+  describe('setContext()', () => {
+    it('sets context', () => {
+      AppLogic.actions.setContext(true);
+
+      expect(AppLogic.values.isOrganization).toEqual(true);
     });
   });
 });

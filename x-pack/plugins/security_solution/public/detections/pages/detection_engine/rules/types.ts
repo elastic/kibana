@@ -21,8 +21,13 @@ import {
   TimestampOverride,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { List } from '../../../../../common/detection_engine/schemas/types';
+import {
+  List,
+  ThreatIndex,
+  ThreatMapping,
+} from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -95,7 +100,7 @@ export interface AboutStepRule {
   ruleNameOverride: string;
   tags: string[];
   timestampOverride: string;
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
   note: string;
 }
 
@@ -124,6 +129,9 @@ export interface DefineStepRule {
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
+  threatIndex: ThreatIndex;
+  threatQueryBar: FieldValueQueryBar;
+  threatMapping: ThreatMapping;
 }
 
 export interface ScheduleStepRule {
@@ -151,6 +159,11 @@ export interface DefineStepRuleJson {
     field: string;
     value: number;
   };
+  threat_query?: string;
+  threat_mapping?: ThreatMapping;
+  threat_language?: string;
+  threat_index?: string[];
+  threat_filters?: Filter[];
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
@@ -171,7 +184,7 @@ export interface AboutStepRuleJson {
   false_positives: string[];
   rule_name_override?: RuleNameOverride;
   tags: string[];
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
   timestamp_override?: TimestampOverride;
   note?: string;
 }
@@ -188,15 +201,4 @@ export interface ActionsStepRuleJson {
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
-}
-
-export interface IMitreAttack {
-  id: string;
-  name: string;
-  reference: string;
-}
-export interface IMitreEnterpriseAttack {
-  framework: string;
-  tactic: IMitreAttack;
-  technique: IMitreAttack[];
 }

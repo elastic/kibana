@@ -33,7 +33,7 @@ For more information, see
 |===
 | `monitoring.enabled`
   | Set to `true` (default) to enable the {monitor-features} in {kib}. Unlike the
-  `monitoring.ui.enabled` setting, when this setting is `false`, the
+  <<monitoring-ui-enabled, `monitoring.ui.enabled`>> setting, when this setting is `false`, the
   monitoring back-end does not run and {kib} stats are not sent to the monitoring
   cluster.
 
@@ -44,7 +44,7 @@ a|`monitoring.cluster_alerts.`
 
 | `monitoring.ui.elasticsearch.hosts`
   | Specifies the location of the {es} cluster where your monitoring data is stored.
-  By default, this is the same as `elasticsearch.hosts`. This setting enables
+  By default, this is the same as <<elasticsearch-hosts, `elasticsearch.hosts`>>. This setting enables
   you to use a single {kib} instance to search and visualize data in your
   production cluster as well as monitor data sent to a dedicated monitoring
   cluster.
@@ -58,7 +58,7 @@ a|`monitoring.cluster_alerts.`
   cluster uses the authenticated user's credentials, which must be the same on
   both the {es} monitoring cluster and the {es} production cluster. +
   +
-  If not set, {kib} uses the value of the `elasticsearch.username` setting.
+  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.username`>> setting.
 
 | `monitoring.ui.elasticsearch.password`
   | Specifies the password used by {kib} monitoring to establish a persistent connection
@@ -69,12 +69,15 @@ a|`monitoring.cluster_alerts.`
   cluster uses the authenticated user's credentials, which must be the same on
   both the {es} monitoring cluster and the {es} production cluster. +
   +
-  If not set, {kib} uses the value of the `elasticsearch.password` setting.
+  If not set, {kib} uses the value of the <<elasticsearch-user-passwd, `elasticsearch.password`>> setting.
 
 | `monitoring.ui.elasticsearch.pingTimeout`
   | Specifies the time in milliseconds to wait for {es} to respond to internal
-  health checks. By default, it matches the `elasticsearch.pingTimeout` setting,
+  health checks. By default, it matches the <<elasticsearch-pingTimeout, `elasticsearch.pingTimeout`>> setting,
   which has a default value of `30000`.
+
+| `monitoring.ui.elasticsearch.ssl`
+  | Shares the same configuration as <<elasticsearch-ssl-cert-key, `elasticsearch.ssl`>>. These settings configure encrypted communication between {kib} and the monitoring cluster.
 
 |===
 
@@ -112,7 +115,7 @@ about configuring {kib}, see
   | Specifies the number of log entries to display in *{stack-monitor-app}*.
   Defaults to `10`. The maximum value is `50`.
 
-| `monitoring.ui.enabled`
+|[[monitoring-ui-enabled]] `monitoring.ui.enabled`
   | Set to `false` to hide *{stack-monitor-app}*. The monitoring back-end
     continues to run as an agent for sending {kib} stats to the monitoring
     cluster. Defaults to `true`.

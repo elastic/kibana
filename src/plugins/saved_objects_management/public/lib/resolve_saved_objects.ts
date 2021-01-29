@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,10 +13,11 @@ import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
-  IIndexPattern,
   injectSearchSourceReferences,
+  IndexPatternSpec,
 } from '../../../data/public';
 import { FailedImport } from './process_import_response';
+import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -70,11 +60,10 @@ function addJsonFieldToIndexPattern(
 async function importIndexPattern(
   doc: SavedObjectsRawDoc,
   indexPatterns: IndexPatternsContract,
-  overwriteAll: boolean,
+  overwriteAll: boolean = false,
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const emptyPattern = await indexPatterns.make();
   const {
     title,
     timeFieldName,
@@ -84,50 +73,53 @@ async function importIndexPattern(
     type,
     typeMeta,
   } = doc._source;
-  const importedIndexPattern = {
+  const indexPatternSpec: IndexPatternSpec = {
     id: doc._id,
     title,
     timeFieldName,
-  } as IIndexPattern;
+  };
+  let emptyPattern: IndexPattern;
   if (type) {
-    importedIndexPattern.type = type;
+    indexPatternSpec.type = type;
   }
-  addJsonFieldToIndexPattern(importedIndexPattern, fields, 'fields', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, fieldFormatMap, 'fieldFormatMap', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, sourceFilters, 'sourceFilters', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, typeMeta, 'typeMeta', title);
-  Object.assign(emptyPattern, importedIndexPattern);
-
-  let newId = await emptyPattern.create(overwriteAll);
-  if (!newId) {
-    // We can override and we want to prompt for confirmation
-    const isConfirmed = await openConfirm(
-      i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
-        values: { title },
-        defaultMessage: "Are you sure you want to overwrite '{title}'?",
-      }),
-      {
-        title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
-          defaultMessage: 'Overwrite {type}?',
-          values: { type },
+  addJsonFieldToIndexPattern(indexPatternSpec, fields, 'fields', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, fieldFormatMap, 'fieldFormatMap', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, sourceFilters, 'sourceFilters', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
+  try {
+    emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, overwriteAll, true);
+  } catch (err) {
+    if (err instanceof DuplicateIndexPatternError) {
+      // We can override and we want to prompt for confirmation
+      const isConfirmed = await openConfirm(
+        i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
+          values: { title },
+          defaultMessage: "Are you sure you want to overwrite '{title}'?",
         }),
-        confirmButtonText: i18n.translate(
-          'savedObjectsManagement.indexPattern.confirmOverwriteButton',
-          {
-            defaultMessage: 'Overwrite',
-          }
-        ),
-      }
-    );
+        {
+          title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
+            defaultMessage: 'Overwrite {type}?',
+            values: { type },
+          }),
+          confirmButtonText: i18n.translate(
+            'savedObjectsManagement.indexPattern.confirmOverwriteButton',
+            {
+              defaultMessage: 'Overwrite',
+            }
+          ),
+        }
+      );
 
-    if (isConfirmed) {
-      newId = (await emptyPattern.create(true)) as string;
-    } else {
-      return;
+      if (isConfirmed) {
+        emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, true, true);
+      } else {
+        return;
+      }
     }
   }
-  indexPatterns.clearCache(newId);
-  return newId;
+
+  indexPatterns.clearCache(emptyPattern!.id);
+  return emptyPattern!.id;
 }
 
 async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {

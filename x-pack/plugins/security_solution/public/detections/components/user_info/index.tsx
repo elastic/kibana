@@ -14,23 +14,29 @@ import { useKibana } from '../../../common/lib/kibana';
 export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
+  hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   loading: boolean;
   signalIndexName: string | null;
+  signalIndexMappingOutdated: boolean | null;
 }
 
-const initialState: State = {
+export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
+  hasIndexMaintenance: null,
   hasIndexWrite: null,
+  hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   hasEncryptionKey: null,
   loading: true,
   signalIndexName: null,
+  signalIndexMappingOutdated: null,
 };
 
 export type Action =
@@ -40,8 +46,16 @@ export type Action =
       hasIndexManage: boolean | null;
     }
   | {
+      type: 'updateHasIndexMaintenance';
+      hasIndexMaintenance: boolean | null;
+    }
+  | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexUpdateDelete';
+      hasIndexUpdateDelete: boolean | null;
     }
   | {
       type: 'updateIsSignalIndexExists';
@@ -62,6 +76,10 @@ export type Action =
   | {
       type: 'updateSignalIndexName';
       signalIndexName: string | null;
+    }
+  | {
+      type: 'updateSignalIndexMappingOutdated';
+      signalIndexMappingOutdated: boolean | null;
     };
 
 export const userInfoReducer = (state: State, action: Action): State => {
@@ -78,10 +96,22 @@ export const userInfoReducer = (state: State, action: Action): State => {
         hasIndexManage: action.hasIndexManage,
       };
     }
+    case 'updateHasIndexMaintenance': {
+      return {
+        ...state,
+        hasIndexMaintenance: action.hasIndexMaintenance,
+      };
+    }
     case 'updateHasIndexWrite': {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexUpdateDelete': {
+      return {
+        ...state,
+        hasIndexUpdateDelete: action.hasIndexUpdateDelete,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -114,6 +144,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
         signalIndexName: action.signalIndexName,
       };
     }
+    case 'updateSignalIndexMappingOutdated': {
+      return {
+        ...state,
+        signalIndexMappingOutdated: action.signalIndexMappingOutdated,
+      };
+    }
     default:
       return state;
   }
@@ -138,12 +174,15 @@ export const useUserInfo = (): State => {
     {
       canUserCRUD,
       hasIndexManage,
+      hasIndexMaintenance,
       hasIndexWrite,
+      hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
       loading,
       signalIndexName,
+      signalIndexMappingOutdated,
     },
     dispatch,
   ] = useUserData();
@@ -152,12 +191,15 @@ export const useUserInfo = (): State => {
     isAuthenticated: isApiAuthenticated,
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
+    hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexWrite: hasApiIndexWrite,
+    hasIndexUpdateDelete: hasApiIndexUpdateDelete,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
     signalIndexExists: isApiSignalIndexExists,
     signalIndexName: apiSignalIndexName,
+    signalIndexMappingOutdated: apiSignalIndexMappingOutdated,
     createDeSignalIndex: createSignalIndex,
   } = useSignalIndex();
 
@@ -166,25 +208,45 @@ export const useUserInfo = (): State => {
     typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
 
   useEffect(() => {
-    if (loading !== privilegeLoading || indexNameLoading) {
+    if (loading !== (privilegeLoading || indexNameLoading)) {
       dispatch({ type: 'updateLoading', loading: privilegeLoading || indexNameLoading });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, privilegeLoading, indexNameLoading]);
+  }, [dispatch, loading, privilegeLoading, indexNameLoading]);
 
   useEffect(() => {
     if (!loading && hasIndexManage !== hasApiIndexManage && hasApiIndexManage != null) {
       dispatch({ type: 'updateHasIndexManage', hasIndexManage: hasApiIndexManage });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, hasIndexManage, hasApiIndexManage]);
+  }, [dispatch, loading, hasIndexManage, hasApiIndexManage]);
 
   useEffect(() => {
     if (!loading && hasIndexWrite !== hasApiIndexWrite && hasApiIndexWrite != null) {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, hasIndexWrite, hasApiIndexWrite]);
+  }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexUpdateDelete !== hasApiIndexUpdateDelete &&
+      hasApiIndexUpdateDelete != null
+    ) {
+      dispatch({
+        type: 'updateHasIndexUpdateDelete',
+        hasIndexUpdateDelete: hasApiIndexUpdateDelete,
+      });
+    }
+  }, [dispatch, loading, hasIndexUpdateDelete, hasApiIndexUpdateDelete]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexMaintenance !== hasApiIndexMaintenance &&
+      hasApiIndexMaintenance != null
+    ) {
+      dispatch({ type: 'updateHasIndexMaintenance', hasIndexMaintenance: hasApiIndexMaintenance });
+    }
+  }, [dispatch, loading, hasIndexMaintenance, hasApiIndexMaintenance]);
 
   useEffect(() => {
     if (
@@ -194,49 +256,64 @@ export const useUserInfo = (): State => {
     ) {
       dispatch({ type: 'updateIsSignalIndexExists', isSignalIndexExists: isApiSignalIndexExists });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isSignalIndexExists, isApiSignalIndexExists]);
+  }, [dispatch, loading, isSignalIndexExists, isApiSignalIndexExists]);
 
   useEffect(() => {
     if (!loading && isAuthenticated !== isApiAuthenticated && isApiAuthenticated != null) {
       dispatch({ type: 'updateIsAuthenticated', isAuthenticated: isApiAuthenticated });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isAuthenticated, isApiAuthenticated]);
+  }, [dispatch, loading, isAuthenticated, isApiAuthenticated]);
 
   useEffect(() => {
     if (!loading && hasEncryptionKey !== isApiEncryptionKey && isApiEncryptionKey != null) {
       dispatch({ type: 'updateHasEncryptionKey', hasEncryptionKey: isApiEncryptionKey });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, hasEncryptionKey, isApiEncryptionKey]);
+  }, [dispatch, loading, hasEncryptionKey, isApiEncryptionKey]);
 
   useEffect(() => {
     if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
       dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, canUserCRUD, capabilitiesCanUserCRUD]);
+  }, [dispatch, loading, canUserCRUD, capabilitiesCanUserCRUD]);
 
   useEffect(() => {
     if (!loading && signalIndexName !== apiSignalIndexName && apiSignalIndexName != null) {
       dispatch({ type: 'updateSignalIndexName', signalIndexName: apiSignalIndexName });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, signalIndexName, apiSignalIndexName]);
+  }, [dispatch, loading, signalIndexName, apiSignalIndexName]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      signalIndexMappingOutdated !== apiSignalIndexMappingOutdated &&
+      apiSignalIndexMappingOutdated != null
+    ) {
+      dispatch({
+        type: 'updateSignalIndexMappingOutdated',
+        signalIndexMappingOutdated: apiSignalIndexMappingOutdated,
+      });
+    }
+  }, [dispatch, loading, signalIndexMappingOutdated, apiSignalIndexMappingOutdated]);
 
   useEffect(() => {
     if (
       isAuthenticated &&
       hasEncryptionKey &&
       hasIndexManage &&
-      isSignalIndexExists != null &&
-      !isSignalIndexExists &&
+      ((isSignalIndexExists != null && !isSignalIndexExists) ||
+        (signalIndexMappingOutdated != null && signalIndexMappingOutdated)) &&
       createSignalIndex != null
     ) {
       createSignalIndex();
     }
-  }, [createSignalIndex, isAuthenticated, hasEncryptionKey, isSignalIndexExists, hasIndexManage]);
+  }, [
+    createSignalIndex,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    hasIndexManage,
+    signalIndexMappingOutdated,
+  ]);
 
   return {
     loading,
@@ -245,7 +322,10 @@ export const useUserInfo = (): State => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexManage,
+    hasIndexMaintenance,
     hasIndexWrite,
+    hasIndexUpdateDelete,
     signalIndexName,
+    signalIndexMappingOutdated,
   };
 };

@@ -74,3 +74,5 @@ export interface AnomalyCategorizerStatsDoc {
   log_time: number;
   timestamp: number;
 }
+
+export type EntityFieldType = 'partition_field' | 'over_field' | 'by_field';

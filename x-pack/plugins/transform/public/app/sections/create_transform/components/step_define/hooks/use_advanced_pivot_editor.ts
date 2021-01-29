@@ -5,12 +5,16 @@
  */
 
 import { useEffect, useState } from 'react';
+import { XJsonMode } from '@kbn/ace';
 
-import { useXJsonMode } from '../../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
+import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { PostTransformsPreviewRequestSchema } from '../../../../../../../common/api_schemas/transforms';
 
 import { StepDefineExposedState } from '../common';
+
+const { useXJsonMode } = XJson;
+const xJsonMode = new XJsonMode();
 
 export const useAdvancedPivotEditor = (
   defaults: StepDefineExposedState,
@@ -38,7 +42,6 @@ export const useAdvancedPivotEditor = (
     convertToJson,
     setXJson: setAdvancedEditorConfig,
     xJson: advancedEditorConfig,
-    xJsonMode,
   } = useXJsonMode(stringifiedPivotConfig);
 
   useEffect(() => {

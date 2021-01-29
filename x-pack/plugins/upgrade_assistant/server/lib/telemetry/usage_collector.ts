@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import {
-  LegacyAPICaller,
+  ElasticsearchClient,
   ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
@@ -38,12 +38,10 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(
-  callAsCurrentUser: LegacyAPICaller
-): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(esClient: ElasticsearchClient): Promise<boolean> {
   try {
-    const loggerDeprecationCallResult = await callAsCurrentUser('cluster.getSettings', {
-      includeDefaults: true,
+    const { body: loggerDeprecationCallResult } = await esClient.cluster.getSettings({
+      include_defaults: true,
     });
 
     return isDeprecationLoggingEnabled(loggerDeprecationCallResult);
@@ -53,7 +51,7 @@ async function getDeprecationLoggingStatusValue(
 }
 
 export async function fetchUpgradeAssistantMetrics(
-  { legacy: { client: esClient } }: ElasticsearchServiceStart,
+  { client: esClient }: ElasticsearchServiceStart,
   savedObjects: SavedObjectsServiceStart
 ): Promise<UpgradeAssistantTelemetry> {
   const savedObjectsRepository = savedObjects.createInternalRepository();
@@ -62,8 +60,9 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const callAsInternalUser = esClient.callAsInternalUser.bind(esClient);
-  const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callAsInternalUser);
+  const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(
+    esClient.asInternalUser
+  );
 
   const getTelemetrySavedObject = (
     upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null
@@ -122,31 +121,31 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<
-    UpgradeAssistantTelemetry
-  >({
-    type: 'upgrade-assistant-telemetry',
-    isReady: () => true,
-    schema: {
-      features: {
-        deprecation_logging: {
-          enabled: { type: 'boolean' },
+  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>(
+    {
+      type: 'upgrade-assistant-telemetry',
+      isReady: () => true,
+      schema: {
+        features: {
+          deprecation_logging: {
+            enabled: { type: 'boolean' },
+          },
+        },
+        ui_open: {
+          cluster: { type: 'long' },
+          indices: { type: 'long' },
+          overview: { type: 'long' },
+        },
+        ui_reindex: {
+          close: { type: 'long' },
+          open: { type: 'long' },
+          start: { type: 'long' },
+          stop: { type: 'long' },
         },
       },
-      ui_open: {
-        cluster: { type: 'long' },
-        indices: { type: 'long' },
-        overview: { type: 'long' },
-      },
-      ui_reindex: {
-        close: { type: 'long' },
-        open: { type: 'long' },
-        start: { type: 'long' },
-        stop: { type: 'long' },
-      },
-    },
-    fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
-  });
+      fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
+    }
+  );
 
   usageCollection.registerCollector(upgradeAssistantUsageCollector);
 }

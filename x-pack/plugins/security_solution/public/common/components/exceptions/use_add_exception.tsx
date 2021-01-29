@@ -17,7 +17,10 @@ import {
 } from '../../../lists_plugin_deps';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
-import { buildAlertStatusFilter } from '../../../detections/components/alerts_table/default_config';
+import {
+  buildAlertStatusFilter,
+  buildAlertsRuleIdFilter,
+} from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
@@ -25,12 +28,14 @@ import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
+ * @param ruleId id of the rule where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
+  ruleId: string,
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
   bulkCloseIndex?: Index
@@ -63,9 +68,10 @@ export const useAddOrUpdateException = ({
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (ruleId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
       if (addOrUpdateExceptionRef.current !== null) {
         addOrUpdateExceptionRef.current(
+          ruleId,
           exceptionItemsToAddOrUpdate,
           alertIdToClose,
           bulkCloseIndex
@@ -117,6 +123,7 @@ export const useAddOrUpdateException = ({
     };
 
     const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
+      ruleId,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
@@ -137,7 +144,7 @@ export const useAddOrUpdateException = ({
           const filter = getQueryFilter(
             '',
             'kuery',
-            buildAlertStatusFilter('open'),
+            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false

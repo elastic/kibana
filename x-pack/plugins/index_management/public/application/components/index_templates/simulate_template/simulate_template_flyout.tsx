@@ -125,9 +125,9 @@ export const SimulateTemplateFlyoutContent = ({
 
           <EuiSpacer />
 
-          <FormDataProvider>
+          <FormDataProvider<Filters>>
             {(formData) => {
-              return <SimulateTemplate template={template} filters={formData as Filters} />;
+              return <SimulateTemplate template={template} filters={formData} />;
             }}
           </FormDataProvider>
         </Form>

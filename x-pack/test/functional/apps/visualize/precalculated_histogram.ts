@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('works in visualizations', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch('histogram-test');
         await PageObjects.visChart.waitForVisualization();

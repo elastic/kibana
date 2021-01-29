@@ -64,7 +64,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
 
   const footerFragment = (onClose || footer) && (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onClose && (
             <EuiButtonEmpty

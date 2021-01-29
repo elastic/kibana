@@ -213,6 +213,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         },
       },
     },
+    indexNames: {
+      type: 'text',
+    },
     kqlMode: {
       type: 'keyword',
     },
@@ -263,8 +266,12 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     sort: {
+      dynamic: false,
       properties: {
         columnId: {
+          type: 'keyword',
+        },
+        columnType: {
           type: 'keyword',
         },
         sortDirection: {

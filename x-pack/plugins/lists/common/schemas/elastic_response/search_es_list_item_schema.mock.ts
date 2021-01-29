@@ -70,6 +70,7 @@ export const getSearchListItemMock = (): SearchResponse<SearchEsListItemSchema> 
         _score: 0,
         _source: getSearchEsListItemMock(),
         _type: '',
+        matched_queries: ['0.0'],
       },
     ],
     max_score: 0,

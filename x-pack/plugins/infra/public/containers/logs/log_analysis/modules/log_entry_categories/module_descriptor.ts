@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { HttpHandler } from 'src/core/public';
 import {
   bucketSpan,
   categoriesMessageField,
@@ -42,22 +43,26 @@ const getJobIds = (spaceId: string, sourceId: string) =>
     {} as Record<LogEntryCategoriesJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, logEntryCategoriesJobTypes);
+const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  const response = await callJobsSummaryAPI(
+    { spaceId, sourceId, jobTypes: logEntryCategoriesJobTypes },
+    fetch
+  );
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
-const getModuleDefinition = async () => {
-  return await callGetMlModuleAPI(moduleId);
+const getModuleDefinition = async (fetch: HttpHandler) => {
+  return await callGetMlModuleAPI(moduleId, fetch);
 };
 
 const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
   datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration
+  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
+  fetch: HttpHandler
 ) => {
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
@@ -101,46 +106,59 @@ const setUpModule = async (
   };
 
   return callSetupMlModuleAPI(
-    moduleId,
-    start,
-    end,
-    spaceId,
-    sourceId,
-    indexNamePattern,
-    jobOverrides,
-    [],
-    query
+    {
+      moduleId,
+      start,
+      end,
+      spaceId,
+      sourceId,
+      indexPattern: indexNamePattern,
+      jobOverrides,
+      query,
+    },
+    fetch
   );
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryCategoriesJobTypes);
+const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryCategoriesJobTypes, fetch);
 };
 
-const validateSetupIndices = async (indices: string[], timestampField: string) => {
-  return await callValidateIndicesAPI(indices, [
+const validateSetupIndices = async (
+  indices: string[],
+  timestampField: string,
+  fetch: HttpHandler
+) => {
+  return await callValidateIndicesAPI(
     {
-      name: timestampField,
-      validTypes: ['date'],
+      indices,
+      fields: [
+        {
+          name: timestampField,
+          validTypes: ['date'],
+        },
+        {
+          name: partitionField,
+          validTypes: ['keyword'],
+        },
+        {
+          name: categoriesMessageField,
+          validTypes: ['text'],
+        },
+      ],
     },
-    {
-      name: partitionField,
-      validTypes: ['keyword'],
-    },
-    {
-      name: categoriesMessageField,
-      validTypes: ['text'],
-    },
-  ]);
+    fetch
+  );
 };
 
 const validateSetupDatasets = async (
   indices: string[],
   timestampField: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  fetch: HttpHandler
 ) => {
-  return await callValidateDatasetsAPI(indices, timestampField, startTime, endTime);
+  return await callValidateDatasetsAPI({ indices, timestampField, startTime, endTime }, fetch);
 };
 
 export const logEntryCategoriesModule: ModuleDescriptor<LogEntryCategoriesJobType> = {

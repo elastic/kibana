@@ -8,6 +8,7 @@
  * Kibana Instance
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
@@ -66,6 +67,7 @@ uiRoutes.when('/kibana/instances/:uuid', {
     constructor($injector, $scope) {
       super({
         title: `Kibana - ${get($scope.pageData, 'kibanaSummary.name')}`,
+        telemetryPageViewTitle: 'kibana_instance',
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringKibanaInstanceApp',
@@ -85,8 +87,15 @@ uiRoutes.when('/kibana/instances/:uuid', {
           if (!data || !data.metrics) {
             return;
           }
-
           this.setTitle(`Kibana - ${get(data, 'kibanaSummary.name')}`);
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
+              defaultMessage: 'Kibana instance: {instance}',
+              values: {
+                instance: get($scope.pageData, 'kibanaSummary.name'),
+              },
+            })
+          );
 
           this.renderReact(
             <EuiPage>

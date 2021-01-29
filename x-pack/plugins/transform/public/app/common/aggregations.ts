@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { composeValidators, patternValidator } from '../../../../ml/public';
+import { composeValidators, patternValidator } from '../../../common/shared_imports';
 
 import { AggName } from '../../../common/types/aggregations';
 

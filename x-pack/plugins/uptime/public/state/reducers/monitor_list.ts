@@ -5,11 +5,12 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
+import { IHttpFetchError } from 'src/core/public';
 import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
 
 export interface MonitorList {
-  error?: Error;
+  error?: IHttpFetchError;
   loading: boolean;
   list: MonitorSummariesResult;
 }
@@ -19,12 +20,11 @@ export const initialState: MonitorList = {
     nextPagePagination: null,
     prevPagePagination: null,
     summaries: [],
-    totalSummaryCount: 0,
   },
   loading: false,
 };
 
-type Payload = MonitorSummariesResult & Error;
+type Payload = MonitorSummariesResult & IHttpFetchError;
 
 export const monitorListReducer = handleActions<MonitorList, Payload>(
   {
@@ -41,7 +41,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
       error: undefined,
       list: { ...action.payload },
     }),
-    [String(getMonitorListFailure)]: (state: MonitorList, action: Action<Error>) => ({
+    [String(getMonitorListFailure)]: (state: MonitorList, action: Action<IHttpFetchError>) => ({
       ...state,
       error: action.payload,
       loading: false,

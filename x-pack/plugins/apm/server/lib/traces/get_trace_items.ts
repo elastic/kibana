@@ -88,7 +88,7 @@ export async function getTraceItems(
     // explicit intermediary types to avoid TS "excessively deep" error
     PromiseValueType<typeof errorResponsePromise>,
     PromiseValueType<typeof traceResponsePromise>
-  ] = await Promise.all([errorResponsePromise, traceResponsePromise]);
+  ] = (await Promise.all([errorResponsePromise, traceResponsePromise])) as any;
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
 

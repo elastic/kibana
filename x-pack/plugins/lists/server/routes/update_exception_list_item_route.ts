@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -18,7 +17,7 @@ import { updateExceptionListItemValidate } from '../../common/schemas/request/up
 
 import { getExceptionListClient } from '.';
 
-export const updateExceptionListItemRoute = (router: IRouter): void => {
+export const updateExceptionListItemRoute = (router: ListsPluginRouter): void => {
   router.put(
     {
       options: {
@@ -46,12 +45,12 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           name,
           meta,
           type,
-          _tags,
           _version,
           comments,
           entries,
           item_id: itemId,
           namespace_type: namespaceType,
+          os_types: osTypes,
           tags,
         } = request.body;
         if (id == null && itemId == null) {
@@ -62,7 +61,6 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
         } else {
           const exceptionLists = getExceptionListClient(context);
           const exceptionListItem = await exceptionLists.updateExceptionListItem({
-            _tags,
             _version,
             comments,
             description,
@@ -72,6 +70,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
           });

@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious Conhost child process which may be an indication of code injection activity.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious Process from Conhost",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:conhost.exe",
+  "references": [
+    "https://modexp.wordpress.com/2018/09/12/process-injection-user-data/",
+    "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Defense%20Evasion/evasion_codeinj_odzhan_conhost_sysmon_10_1.evtx"
+  ],
+  "risk_score": 73,
+  "rule_id": "28896382-7d4f-4d50-9b72-67091901fd26",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

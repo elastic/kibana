@@ -8,6 +8,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { ExplorerNoJobsFound } from './explorer_no_jobs_found';
 
+jest.mock('../../../contexts/kibana/use_create_url', () => ({
+  useMlLink: jest.fn().mockReturnValue('/jobs'),
+}));
 describe('ExplorerNoInfluencersFound', () => {
   test('snapshot', () => {
     const wrapper = shallow(<ExplorerNoJobsFound />);

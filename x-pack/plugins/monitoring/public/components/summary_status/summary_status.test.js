@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { SummaryStatus } from './summary_status';
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 

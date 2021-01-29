@@ -8,8 +8,7 @@ import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
+import { DeprecationInfo } from '../../../../../common/types';
 import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
 import { FilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';

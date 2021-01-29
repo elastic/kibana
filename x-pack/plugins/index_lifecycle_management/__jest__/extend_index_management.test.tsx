@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
 import { Index } from '../common/types';
 import {

@@ -2,6 +2,7 @@
   "id": "kibanaUtils",
   "version": "kibana",
   "ui": true,
+  "server": false,
   "extraPublicDirs": [
     "common",
     "demos/state_containers/todomvc",

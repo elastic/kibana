@@ -23,7 +23,7 @@ import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 
 import { ViewLink } from './actions';
 

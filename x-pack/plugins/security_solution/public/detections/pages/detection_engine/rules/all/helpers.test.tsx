@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bucketRulesResponse, showRulesTable } from './helpers';
+import { bucketRulesResponse, caseInsensitiveSort, showRulesTable } from './helpers';
 import { mockRule, mockRuleError } from './__mocks__/mock';
 import uuid from 'uuid';
 import { Rule, RuleError } from '../../../../containers/detection_engine/rules';
@@ -84,6 +84,17 @@ describe('AllRulesTable Helpers', () => {
         rulesInstalled: 5,
       });
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe('caseInsensitiveSort', () => {
+    describe('when an array of differently cased tags is passed', () => {
+      const unsortedTags = ['atest', 'Ctest', 'Btest', 'ctest', 'btest', 'Atest'];
+      const result = caseInsensitiveSort(unsortedTags);
+      it('returns an alphabetically sorted array with no regard for casing', () => {
+        const expected = ['atest', 'Atest', 'Btest', 'btest', 'Ctest', 'ctest'];
+        expect(result).toEqual(expected);
+      });
     });
   });
 });

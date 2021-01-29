@@ -17,7 +17,9 @@ const LimitRows = (key: string, value: any) => {
 
 export const Debug = ({ payload }: any) => (
   <EuiCode className="canvasDebug">
-    <pre className="canvasDebug__content">{JSON.stringify(payload, LimitRows, 2)}</pre>
+    <pre className="canvasDebug__content" data-test-subj="canvasDebug__content">
+      {JSON.stringify(payload, LimitRows, 2)}
+    </pre>
   </EuiCode>
 );
 

@@ -5,6 +5,7 @@
  */
 
 import { ObservabilityApp } from '../../../typings/common';
+import { UXMetrics } from '../../components/shared/core_web_vitals';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
@@ -24,17 +25,36 @@ export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
   bucketSize: string;
+  serviceName?: string;
+}
+
+export interface HasDataParams {
+  absoluteTime: { start: number; end: number };
+}
+
+export interface UXHasDataResponse {
+  hasData: boolean;
+  serviceName: string | number | undefined;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = () => Promise<boolean>;
+export type HasData<T extends ObservabilityFetchDataPlugins> = (
+  params?: HasDataParams
+) => Promise<ObservabilityHasDataResponse[T]>;
 
-export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+export type ObservabilityFetchDataPlugins = Exclude<
+  ObservabilityApp,
+  'observability-overview' | 'stack_monitoring'
+>;
+
+export interface DataHandler<
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+> {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
-  hasData: HasData;
+  hasData: HasData<T>;
 }
 
 export interface FetchDataResponse {
@@ -51,12 +71,6 @@ export interface MetricsFetchDataResponse extends FetchDataResponse {
     hosts: Stat;
     cpu: Stat;
     memory: Stat;
-    inboundTraffic: Stat;
-    outboundTraffic: Stat;
-  };
-  series: {
-    inboundTraffic: Series;
-    outboundTraffic: Series;
   };
 }
 
@@ -82,9 +96,22 @@ export interface ApmFetchDataResponse extends FetchDataResponse {
   };
 }
 
+export interface UxFetchDataResponse extends FetchDataResponse {
+  coreWebVitals: UXMetrics;
+}
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
+  ux: UxFetchDataResponse;
+}
+
+export interface ObservabilityHasDataResponse {
+  apm: boolean;
+  infra_metrics: boolean;
+  infra_logs: boolean;
+  uptime: boolean;
+  ux: UXHasDataResponse;
 }

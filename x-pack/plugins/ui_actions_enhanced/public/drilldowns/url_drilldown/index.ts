@@ -12,7 +12,3 @@ export {
 } from './url_validation';
 export { compile as urlDrilldownCompileUrl } from './url_template';
 export { globalScopeProvider as urlDrilldownGlobalScopeProvider } from './url_drilldown_global_scope';
-export {
-  buildScope as urlDrilldownBuildScope,
-  buildScopeSuggestions as urlDrilldownBuildScopeSuggestions,
-} from './url_drilldown_scope';

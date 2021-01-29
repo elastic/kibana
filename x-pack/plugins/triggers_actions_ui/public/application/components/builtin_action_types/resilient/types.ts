@@ -4,38 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/resilient/types';
 
-export interface ResilientActionConnector {
-  config: ResilientConfig;
-  secrets: ResilientSecrets;
-}
+export type ResilientActionConnector = UserConfiguredActionConnector<
+  ResilientConfig,
+  ResilientSecrets
+>;
 
 export interface ResilientActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    externalId: string | null;
-    incidentTypes: number[];
-    severityCode: number;
-    comments: Array<{ commentId: string; comment: string }>;
-  };
+  subActionParams: ExecutorSubActionPushParams;
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
-}
-
-interface ResilientConfig {
+export interface ResilientConfig {
   apiUrl: string;
   orgId: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
-interface ResilientSecrets {
+export interface ResilientSecrets {
   apiKeyId: string;
   apiKeySecret: string;
 }

@@ -7,7 +7,7 @@
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { JobStatuses } from '../../../constants';
+import { JOB_STATUSES } from '../../../common/constants';
 import { JobContent, ReportingAPIClient } from '../../lib/reporting_api_client';
 import { Job as ListingJob } from '../report_listing';
 
@@ -43,7 +43,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
   public render() {
     const { record, intl } = this.props;
 
-    if (record.status !== JobStatuses.FAILED) {
+    if (record.status !== JOB_STATUSES.FAILED) {
       return null;
     }
 

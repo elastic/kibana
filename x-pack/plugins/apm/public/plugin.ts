@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { lazy } from 'react';
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
+  HasDataParams,
   ObservabilityPluginSetup,
 } from '../../observability/public';
 import {
@@ -34,31 +33,36 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { MapsStartApi } from '../../maps/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
+  ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerts?: AlertingPluginPublicStart;
+  ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -79,14 +83,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       const getApmDataHelper = async () => {
         const {
-          fetchOverviewPageData,
+          fetchObservabilityOverviewPageData,
           hasData,
           createCallApmApi,
-        } = await import('./services/rest/apm_overview_fetchers');
+        } = await import('./services/rest/apm_observability_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core.http);
 
-        return { fetchOverviewPageData, hasData };
+        return { fetchObservabilityOverviewPageData, hasData };
       };
       plugins.observability.dashboard.register({
         appName: 'apm',
@@ -96,7 +100,31 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
-          return await dataHelper.fetchOverviewPageData(params);
+          return await dataHelper.fetchObservabilityOverviewPageData(params);
+        },
+      });
+
+      const getUxDataHelper = async () => {
+        const {
+          fetchUxOverviewDate,
+          hasRumData,
+          createCallApmApi,
+        } = await import('./components/app/RumDashboard/ux_overview_fetchers');
+        // have to do this here as well in case app isn't mounted yet
+        createCallApmApi(core.http);
+
+        return { fetchUxOverviewDate, hasRumData };
+      };
+
+      plugins.observability.dashboard.register({
+        appName: 'ux',
+        hasData: async (params?: HasDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.hasRumData(params!);
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUxDataHelper();
+          return await dataHelper.fetchUxOverviewDate(params);
         },
       });
     }
@@ -112,18 +140,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
 
     core.application.register({
-      id: 'csm',
-      title: 'Client Side Monitoring',
+      id: 'ux',
+      title: 'User Experience',
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -147,51 +181,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
-      id: AlertType.ErrorRate,
-      name: i18n.translate('xpack.apm.alertTypes.errorRate', {
-        defaultMessage: 'Error rate',
-      }),
-      iconClass: 'bell',
-      alertParamsExpression: lazy(
-        () => import('./components/shared/ErrorRateAlertTrigger')
-      ),
-      validate: () => ({
-        errors: [],
-      }),
-      requiresAppContext: true,
-    });
-
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
-      id: AlertType.TransactionDuration,
-      name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-        defaultMessage: 'Transaction duration',
-      }),
-      iconClass: 'bell',
-      alertParamsExpression: lazy(
-        () => import('./components/shared/TransactionDurationAlertTrigger')
-      ),
-      validate: () => ({
-        errors: [],
-      }),
-      requiresAppContext: true,
-    });
-
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
-      id: AlertType.TransactionDurationAnomaly,
-      name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
-        defaultMessage: 'Transaction duration anomaly',
-      }),
-      iconClass: 'bell',
-      alertParamsExpression: lazy(
-        () =>
-          import('./components/shared/TransactionDurationAnomalyAlertTrigger')
-      ),
-      validate: () => ({
-        errors: [],
-      }),
-      requiresAppContext: true,
-    });
+    registerApmAlerts(plugins.triggersActionsUi.alertTypeRegistry);
   }
 }

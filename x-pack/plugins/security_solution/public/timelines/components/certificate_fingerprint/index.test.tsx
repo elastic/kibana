@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -43,9 +44,11 @@ describe('CertificateFingerprint', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="certificate-fingerprint-link"]').first().text()).toEqual(
-      '3f4c57934e089f02ae7511200aee2d7e7aabd272'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="certificate-fingerprint-link"]').first().text()
+      )
+    ).toEqual('3f4c57934e089f02ae7511200aee2d7e7aabd272');
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {

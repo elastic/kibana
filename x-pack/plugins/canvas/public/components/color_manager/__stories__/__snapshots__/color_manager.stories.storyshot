@@ -388,7 +388,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -402,7 +402,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -798,7 +798,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -812,7 +812,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -877,7 +877,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -891,7 +891,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -956,7 +956,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -970,7 +970,7 @@ Array [
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"

@@ -12,6 +12,8 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { defineAlertTypes } from './alert_types';
 import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
+import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
+import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -21,6 +23,8 @@ export interface FixtureSetupDeps {
 
 export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
@@ -29,6 +33,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       alerting: [
         'test.always-firing',
         'test.cumulative-firing',
@@ -42,6 +47,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.unrestricted-noop',
         'test.patternFiring',
         'test.throw',
+        'test.longRunning',
       ],
       privileges: {
         all: {
@@ -64,6 +70,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.unrestricted-noop',
               'test.patternFiring',
               'test.throw',
+              'test.longRunning',
             ],
           },
           ui: [],
@@ -88,6 +95,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
               'test.unrestricted-noop',
               'test.patternFiring',
               'test.throw',
+              'test.longRunning',
             ],
           },
           ui: [],

@@ -11,6 +11,7 @@ import {
   EuiIconTip,
   EuiLink,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -80,13 +81,14 @@ export function AlertsSection({ alerts }: Props) {
               const isLastElement = index === alerts.length - 1;
               return (
                 <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
+                  <EuiSpacer size="s" />
                   <EuiFlexItem>
                     <EuiLink
                       href={core.http.basePath.prepend(
                         `/app/management/insightsAndAlerting/triggersActions/alert/${alert.id}`
                       )}
                     >
-                      {alert.name}
+                      <EuiText size="s">{alert.name}</EuiText>
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

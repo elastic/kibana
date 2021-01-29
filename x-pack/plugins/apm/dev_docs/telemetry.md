@@ -53,9 +53,9 @@ added to the cluster's mapping. The mapping is defined in
 
 The mapping for the telemetry data is here under `stack_stats.kibana.plugins.apm`.
 
-The mapping used there can be generated with the output of the [`getTelemetryMapping`](../common/apm_telemetry.ts) function.
+The mapping used there corresponds with the the [`apmSchema`](../server/lib/apm_telemetry/schema.ts) object. The telemetry tooling parses this file to generate its schemas, so some operations in this file (like doing a `reduce` or `map` over an array of properties) will not work.
 
-The `schema` property of the `makeUsageCollector` call in the [`createApmTelemetry` function](../server/lib/apm_telemetry/index.ts) contains the output of `getTelemetryMapping`.
+The `schema` property of the `makeUsageCollector` call in the [`createApmTelemetry` function](../server/lib/apm_telemetry/index.ts) contains the `apmSchema`.
 
 When adding a task, the key of the task and the `took` properties need to be added under the `tasks` properties in the mapping, as when tasks run they report the time they took.
 
@@ -63,7 +63,7 @@ The queries for the stats are in the [collect data telemetry tasks](../server/li
 
 The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
 
-Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which schema should automatically notify the Telemetry team when a pull request is opened so they can update the mapping in the telemetry clusters. (At the time of this writing the APM schema is excluded. #70180 is open to remove these exclusions so at this time any pull requests with mapping changes will have to manually request the Telemetry team as a reviewer.)
+Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which should automatically notify the Infra team when a pull request is opened so they can update the mapping in the telemetry clusters.
 
 ## Behavioral Telemetry
 

@@ -21,6 +21,7 @@ import {
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -31,9 +32,9 @@ type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
  * Ensures that when creating a URL query param string, that the given input strictly
  * matches the expected interface (guards against possibly leaking internal state)
  */
-const querystringStringify: <ExpectedType extends object, ArgType>(
+const querystringStringify = <ExpectedType, ArgType>(
   params: Exact<ExpectedType, ArgType>
-) => string = querystring.stringify;
+): string => querystring.stringify((params as unknown) as querystring.ParsedUrlQueryInput);
 
 /** Make `selected_endpoint` required */
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
@@ -89,33 +90,38 @@ export const getPolicyDetailPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-interface ListPaginationParams {
-  page_index: number;
-  page_size: number;
-}
-
-const isDefaultOrMissing = (value: number | undefined, defaultValue: number) => {
+const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
   return value === undefined || value === defaultValue;
 };
 
-const normalizeListPaginationParams = (
-  params?: Partial<ListPaginationParams>
-): Partial<ListPaginationParams> => {
-  if (params) {
+const normalizeTrustedAppsPageLocation = (
+  location?: Partial<TrustedAppsListPageLocation>
+): Partial<TrustedAppsListPageLocation> => {
+  if (location) {
     return {
-      ...(!isDefaultOrMissing(params.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: params.page_index }
+      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
+        ? { page_index: location.page_index }
         : {}),
-      ...(!isDefaultOrMissing(params.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: params.page_size }
+      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { page_size: location.page_size }
         : {}),
+      ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
+      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
     };
   } else {
     return {};
   }
 };
 
-const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+/**
+ * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
+ * @param query
+ * @param key
+ */
+export const extractFirstParamValue = (
+  query: querystring.ParsedUrlQuery,
+  key: string
+): string | undefined => {
   const value = query[key];
 
   return Array.isArray(value) ? value[value.length - 1] : value;
@@ -133,17 +139,25 @@ const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
   return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
 };
 
-export const extractListPaginationParams = (
-  query: querystring.ParsedUrlQuery
-): ListPaginationParams => ({
+export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
 });
 
-export const getTrustedAppsListPath = (params?: Partial<ListPaginationParams>): string => {
+export const extractTrustedAppsListPageLocation = (
+  query: querystring.ParsedUrlQuery
+): TrustedAppsListPageLocation => ({
+  ...extractListPaginationParams(query),
+  view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
+  show: extractFirstParamValue(query, 'show') === 'create' ? 'create' : undefined,
+});
+
+export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLocation>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
 
-  return `${path}${appendSearch(querystring.stringify(normalizeListPaginationParams(params)))}`;
+  return `${path}${appendSearch(
+    querystring.stringify(normalizeTrustedAppsPageLocation(location))
+  )}`;
 };

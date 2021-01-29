@@ -3,6 +3,13 @@
     "properties": {
       "signal": {
         "properties": {
+          "_meta": {
+            "properties": {
+              "version": {
+                "type": "long"
+              }
+            }
+          },
           "parent": {
             "properties": {
               "rule": {
@@ -57,6 +64,16 @@
               },
               "depth": {
                 "type": "long"
+              }
+            }
+          },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
               }
             }
           },
@@ -191,6 +208,19 @@
                       },
                       "reference": {
                         "type": "keyword"
+                      },
+                      "subtechnique": {
+                        "properties": {
+                          "id": {
+                            "type": "keyword"
+                          },
+                          "name": {
+                            "type": "keyword"
+                          },
+                          "reference": {
+                            "type": "keyword"
+                          }
+                        }
                       }
                     }
                   }
@@ -246,6 +276,11 @@
           },
           "original_time": {
             "type": "date"
+          },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
           },
           "original_event": {
             "properties": {
@@ -321,6 +356,16 @@
           },
           "threshold_count": {
             "type": "float"
+          },
+          "threshold_result": {
+            "properties": {
+              "count": {
+                "type": "long"
+              },
+              "value": {
+                "type": "keyword"
+              }
+            }
           },
           "depth": {
             "type": "integer"

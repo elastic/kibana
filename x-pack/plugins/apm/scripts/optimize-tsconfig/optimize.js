@@ -11,6 +11,7 @@ const { promisify } = require('util');
 const path = require('path');
 const json5 = require('json5');
 const execa = require('execa');
+const { omit } = require('lodash');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -27,6 +28,7 @@ function prepareParentTsConfigs() {
   return Promise.all(
     [
       path.resolve(xpackRoot, 'tsconfig.json'),
+      path.resolve(kibanaRoot, 'tsconfig.base.json'),
       path.resolve(kibanaRoot, 'tsconfig.json'),
     ].map(async (filename) => {
       const config = json5.parse(await readFile(filename, 'utf-8'));
@@ -35,7 +37,11 @@ function prepareParentTsConfigs() {
         filename,
         JSON.stringify(
           {
-            ...config,
+            ...omit(config, 'references'),
+            compilerOptions: {
+              ...config.compilerOptions,
+              incremental: false,
+            },
             include: [],
           },
           null,

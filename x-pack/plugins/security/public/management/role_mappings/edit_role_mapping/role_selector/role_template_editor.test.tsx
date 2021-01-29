@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { RoleTemplateEditor } from './role_template_editor';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 
 describe('RoleTemplateEditor', () => {
   it('allows inline templates to be edited', () => {

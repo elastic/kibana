@@ -8,7 +8,7 @@ import { ReactWrapper } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
 import { PrivilegeSummaryExpandedRow } from '../privilege_summary_expanded_row';
 import { FeatureTableCell } from '../../feature_table_cell';

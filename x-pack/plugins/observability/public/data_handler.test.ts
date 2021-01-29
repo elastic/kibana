@@ -3,19 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  registerDataHandler,
-  getDataHandler,
-  unregisterDataHandler,
-  fetchHasData,
-} from './data_handler';
+import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
-import {
-  ApmFetchDataResponse,
-  LogsFetchDataResponse,
-  MetricsFetchDataResponse,
-  UptimeFetchDataResponse,
-} from './typings';
 
 const params = {
   absoluteTime: {
@@ -273,6 +262,62 @@ describe('registerDataHandler', () => {
       expect(hasData).toBeTruthy();
     });
   });
+  describe('Ux', () => {
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => {
+        return {
+          title: 'User Experience',
+          appLink: '/ux',
+          coreWebVitals: {
+            cls: 0.01,
+            fid: 5,
+            lcp: 1464.3333333333333,
+            tbt: 232.92166666666665,
+            fcp: 1154.8,
+            coreVitalPages: 100,
+            lcpRanks: [73, 16, 11],
+            fidRanks: [85, 4, 11],
+            clsRanks: [88, 7, 5],
+          },
+        };
+      },
+      hasData: async () => ({ hasData: true, serviceName: 'elastic-co-frontend' }),
+    });
+
+    it('registered data handler', () => {
+      const dataHandler = getDataHandler('ux');
+      expect(dataHandler?.fetchData).toBeDefined();
+      expect(dataHandler?.hasData).toBeDefined();
+    });
+
+    it('returns data when fetchData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const response = await dataHandler?.fetchData(params);
+      expect(response).toEqual({
+        title: 'User Experience',
+        appLink: '/ux',
+        coreWebVitals: {
+          cls: 0.01,
+          fid: 5,
+          lcp: 1464.3333333333333,
+          tbt: 232.92166666666665,
+          fcp: 1154.8,
+          coreVitalPages: 100,
+          lcpRanks: [73, 16, 11],
+          fidRanks: [85, 4, 11],
+          clsRanks: [88, 7, 5],
+        },
+      });
+    });
+
+    it('returns true when hasData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const hasData = await dataHandler?.hasData();
+      expect(hasData).toBeTruthy();
+    });
+  });
+
   describe('Metrics', () => {
     registerDataHandler({
       appName: 'infra_metrics',
@@ -388,165 +433,6 @@ describe('registerDataHandler', () => {
       const dataHandler = getDataHandler('apm');
       const hasData = await dataHandler?.hasData();
       expect(hasData).toBeTruthy();
-    });
-  });
-  describe('fetchHasData', () => {
-    it('returns false when an exception happens', async () => {
-      unregisterDataHandler({ appName: 'apm' });
-      unregisterDataHandler({ appName: 'infra_logs' });
-      unregisterDataHandler({ appName: 'infra_metrics' });
-      unregisterDataHandler({ appName: 'uptime' });
-
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      expect(await fetchHasData()).toEqual({
-        apm: false,
-        uptime: false,
-        infra_logs: false,
-        infra_metrics: false,
-      });
-    });
-    it('returns true when has data and false when an exception happens', async () => {
-      unregisterDataHandler({ appName: 'apm' });
-      unregisterDataHandler({ appName: 'infra_logs' });
-      unregisterDataHandler({ appName: 'infra_metrics' });
-      unregisterDataHandler({ appName: 'uptime' });
-
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
-        hasData: async () => true,
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
-        hasData: async () => true,
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
-        hasData: async () => {
-          throw new Error('BOOM');
-        },
-      });
-      expect(await fetchHasData()).toEqual({
-        apm: true,
-        uptime: false,
-        infra_logs: true,
-        infra_metrics: false,
-      });
-    });
-    it('returns true when has data', async () => {
-      unregisterDataHandler({ appName: 'apm' });
-      unregisterDataHandler({ appName: 'infra_logs' });
-      unregisterDataHandler({ appName: 'infra_metrics' });
-      unregisterDataHandler({ appName: 'uptime' });
-
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
-        hasData: async () => true,
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
-        hasData: async () => true,
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
-        hasData: async () => true,
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
-        hasData: async () => true,
-      });
-      expect(await fetchHasData()).toEqual({
-        apm: true,
-        uptime: true,
-        infra_logs: true,
-        infra_metrics: true,
-      });
-    });
-    it('returns false when has no data', async () => {
-      unregisterDataHandler({ appName: 'apm' });
-      unregisterDataHandler({ appName: 'infra_logs' });
-      unregisterDataHandler({ appName: 'infra_metrics' });
-      unregisterDataHandler({ appName: 'uptime' });
-
-      registerDataHandler({
-        appName: 'apm',
-        fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
-        hasData: async () => false,
-      });
-      registerDataHandler({
-        appName: 'infra_logs',
-        fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
-        hasData: async () => false,
-      });
-      registerDataHandler({
-        appName: 'infra_metrics',
-        fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
-        hasData: async () => false,
-      });
-      registerDataHandler({
-        appName: 'uptime',
-        fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
-        hasData: async () => false,
-      });
-      expect(await fetchHasData()).toEqual({
-        apm: false,
-        uptime: false,
-        infra_logs: false,
-        infra_metrics: false,
-      });
-    });
-    it('returns false when has data was not registered', async () => {
-      unregisterDataHandler({ appName: 'apm' });
-      unregisterDataHandler({ appName: 'infra_logs' });
-      unregisterDataHandler({ appName: 'infra_metrics' });
-      unregisterDataHandler({ appName: 'uptime' });
-
-      expect(await fetchHasData()).toEqual({
-        apm: false,
-        uptime: false,
-        infra_logs: false,
-        infra_metrics: false,
-      });
     });
   });
 });

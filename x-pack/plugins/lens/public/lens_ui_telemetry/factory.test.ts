@@ -83,7 +83,7 @@ describe('Lens UI telemetry', () => {
 
     jest.runOnlyPendingTimers();
 
-    expect(http.post).toHaveBeenCalledWith(`/api/lens/telemetry`, {
+    expect(http.post).toHaveBeenCalledWith(`/api/lens/stats`, {
       body: JSON.stringify({
         events: {
           '2019-10-23': {

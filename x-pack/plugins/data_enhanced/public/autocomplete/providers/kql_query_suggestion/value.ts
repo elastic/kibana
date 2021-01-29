@@ -9,6 +9,8 @@ import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
 import { getAutocompleteService } from '../../../services';
 import {
+  IFieldType,
+  IIndexPattern,
   QuerySuggestion,
   QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
@@ -23,32 +25,31 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
       end,
     }));
 
-export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (core) => {
+export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
   return async (
-    { indexPatterns, boolFilter, signal },
+    { indexPatterns, boolFilter, useTimeRange, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
-    const allFields = flatten(
-      indexPatterns.map((indexPattern) =>
-        indexPattern.fields.map((field) => ({
-          ...field,
-          indexPattern,
-        }))
-      )
-    );
-
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
-    const fields = allFields.filter((field) => field.name === fullFieldName);
+
+    const indexPatternFieldEntries: Array<[IIndexPattern, IFieldType]> = [];
+    indexPatterns.forEach((indexPattern) => {
+      indexPattern.fields
+        .filter((field) => field.name === fullFieldName)
+        .forEach((field) => indexPatternFieldEntries.push([indexPattern, field]));
+    });
+
     const query = `${prefix}${suffix}`.trim();
     const { getValueSuggestions } = getAutocompleteService();
 
     const data = await Promise.all(
-      fields.map((field) =>
+      indexPatternFieldEntries.map(([indexPattern, field]) =>
         getValueSuggestions({
-          indexPattern: field.indexPattern,
+          indexPattern,
           field,
           query,
           boolFilter,
+          useTimeRange,
           signal,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>

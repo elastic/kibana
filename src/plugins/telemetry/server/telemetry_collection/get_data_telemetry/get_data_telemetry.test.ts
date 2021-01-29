@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 describe('get_data_telemetry', () => {
   describe('DATA_DATASETS_INDEX_PATTERNS', () => {
@@ -195,13 +185,15 @@ describe('get_data_telemetry', () => {
 
   describe('getDataTelemetry', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
-      const callCluster = mockCallCluster();
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([]);
+      const esClient = mockEsClient();
+      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
+      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
     });
 
     test('can only see the index mappings, but not the stats', async () => {
-      const callCluster = mockCallCluster(['filebeat-12314']);
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+      const esClient = mockEsClient(['filebeat-12314']);
+      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
           shipper: 'filebeat',
@@ -209,10 +201,12 @@ describe('get_data_telemetry', () => {
           ecs_index_count: 0,
         },
       ]);
+      expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.stats).toHaveBeenCalledTimes(1);
     });
 
     test('can see the mappings and the stats', async () => {
-      const callCluster = mockCallCluster(
+      const esClient = mockEsClient(
         ['filebeat-12314'],
         { isECS: true },
         {
@@ -221,7 +215,7 @@ describe('get_data_telemetry', () => {
           },
         }
       );
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
         {
           pattern_name: 'filebeat',
           shipper: 'filebeat',
@@ -234,7 +228,7 @@ describe('get_data_telemetry', () => {
     });
 
     test('find an index that does not match any index pattern but has mappings metadata', async () => {
-      const callCluster = mockCallCluster(
+      const esClient = mockEsClient(
         ['cannot_match_anything'],
         { isECS: true, dataStreamType: 'traces', shipper: 'my-beat' },
         {
@@ -245,7 +239,7 @@ describe('get_data_telemetry', () => {
           },
         }
       );
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([
+      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([
         {
           data_stream: { dataset: undefined, type: 'traces' },
           shipper: 'my-beat',
@@ -258,45 +252,51 @@ describe('get_data_telemetry', () => {
     });
 
     test('return empty array when there is an error', async () => {
-      const callCluster = jest.fn().mockRejectedValue(new Error('Something went terribly wrong'));
-      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual([]);
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.indices.getMapping.mockRejectedValue(new Error('Something went terribly wrong'));
+      esClient.indices.stats.mockRejectedValue(new Error('Something went terribly wrong'));
+      await expect(getDataTelemetry(esClient)).resolves.toStrictEqual([]);
     });
   });
 });
-
-function mockCallCluster(
-  indicesMappings: string[] = [],
+function mockEsClient(
+  indicesMappings: string[] = [], // an array of `indices` to get mappings from.
   { isECS = false, dataStreamDataset = '', dataStreamType = '', shipper = '' } = {},
   indexStats: any = {}
 ) {
-  return jest.fn().mockImplementation(async (method: string, opts: any) => {
-    if (method === 'indices.getMapping') {
-      return Object.fromEntries(
-        indicesMappings.map((index) => [
-          index,
-          {
-            mappings: {
-              ...(shipper && { _meta: { beat: shipper } }),
-              properties: {
-                ...(isECS && { ecs: { properties: { version: { type: 'keyword' } } } }),
-                ...((dataStreamType || dataStreamDataset) && {
-                  data_stream: {
-                    properties: {
-                      ...(dataStreamDataset && {
-                        dataset: { type: 'constant_keyword', value: dataStreamDataset },
-                      }),
-                      ...(dataStreamType && {
-                        type: { type: 'constant_keyword', value: dataStreamType },
-                      }),
-                    },
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  // @ts-ignore
+  esClient.indices.getMapping.mockImplementationOnce(async () => {
+    const body = Object.fromEntries(
+      indicesMappings.map((index) => [
+        index,
+        {
+          mappings: {
+            ...(shipper && { _meta: { beat: shipper } }),
+            properties: {
+              ...(isECS && { ecs: { properties: { version: { type: 'keyword' } } } }),
+              ...((dataStreamType || dataStreamDataset) && {
+                data_stream: {
+                  properties: {
+                    ...(dataStreamDataset && {
+                      dataset: { type: 'constant_keyword', value: dataStreamDataset },
+                    }),
+                    ...(dataStreamType && {
+                      type: { type: 'constant_keyword', value: dataStreamType },
+                    }),
                   },
-                }),
-              },
+                },
+              }),
             },
           },
-        ])
-      );
-    }
-    return indexStats;
+        },
+      ])
+    );
+    return { body };
   });
+  // @ts-ignore
+  esClient.indices.stats.mockImplementationOnce(async () => {
+    return { body: indexStats };
+  });
+  return esClient;
 }

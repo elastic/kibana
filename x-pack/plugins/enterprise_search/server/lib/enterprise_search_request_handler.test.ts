@@ -5,7 +5,7 @@
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
-import { JSON_HEADER } from '../../common/constants';
+import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
 import { EnterpriseSearchRequestHandler } from './enterprise_search_request_handler';
 
@@ -17,6 +17,9 @@ const { Response } = jest.requireActual('node-fetch');
 const responseMock = {
   custom: jest.fn(),
   customError: jest.fn(),
+};
+const mockExpectedResponseHeaders = {
+  [READ_ONLY_MODE_HEADER]: 'false',
 };
 
 describe('EnterpriseSearchRequestHandler', () => {
@@ -58,6 +61,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       expect(responseMock.custom).toHaveBeenCalledWith({
         body: responseBody,
         statusCode: 200,
+        headers: mockExpectedResponseHeaders,
       });
     });
 
@@ -89,6 +93,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes request params', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { query: { someQuery: false } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/example?someQuery=false'
+        );
+      });
+
       it('passes custom params set by the handler, which override request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',
@@ -99,6 +114,41 @@ describe('EnterpriseSearchRequestHandler', () => {
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
           'http://localhost:3002/api/example?someQuery=true'
         );
+      });
+
+      it('correctly encodes query string parameters', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/example?page%5Bcurrent%5D=1'
+        );
+      });
+
+      describe('encodePathParams', () => {
+        it('correctly replaces :pathVariables with request.params', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example/some/:id',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello', id: 'world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello/some/world'
+          );
+        });
+
+        it('correctly encodes path params as URI components', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello#@/$%^/&[]{}/";world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello%23%40%2F%24%25%5E%2F%26%5B%5D%7B%7D%2F%22%3Bworld'
+          );
+        });
       });
     });
 
@@ -112,11 +162,12 @@ describe('EnterpriseSearchRequestHandler', () => {
         await makeAPICall(requestHandler);
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/example');
-        expect(responseMock.custom).toHaveBeenCalledWith({ body: {}, statusCode: 201 });
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          body: {},
+          statusCode: 201,
+          headers: mockExpectedResponseHeaders,
+        });
       });
-
-      // TODO: It's possible we may also pass back headers at some point
-      // from Enterprise Search, e.g. the x-read-only mode header
     });
   });
 
@@ -140,6 +191,7 @@ describe('EnterpriseSearchRequestHandler', () => {
             message: 'some error message',
             attributes: { errors: ['some error message'] },
           },
+          headers: mockExpectedResponseHeaders,
         });
       });
 
@@ -156,6 +208,7 @@ describe('EnterpriseSearchRequestHandler', () => {
             message: 'one,two,three',
             attributes: { errors: ['one', 'two', 'three'] },
           },
+          headers: mockExpectedResponseHeaders,
         });
       });
 
@@ -171,6 +224,7 @@ describe('EnterpriseSearchRequestHandler', () => {
             message: 'Bad Request',
             attributes: { errors: ['Bad Request'] },
           },
+          headers: mockExpectedResponseHeaders,
         });
       });
 
@@ -186,6 +240,7 @@ describe('EnterpriseSearchRequestHandler', () => {
             message: 'Bad Request',
             attributes: { errors: ['Bad Request'] },
           },
+          headers: mockExpectedResponseHeaders,
         });
       });
 
@@ -201,6 +256,7 @@ describe('EnterpriseSearchRequestHandler', () => {
             message: 'Not Found',
             attributes: { errors: ['Not Found'] },
           },
+          headers: mockExpectedResponseHeaders,
         });
       });
     });
@@ -215,9 +271,30 @@ describe('EnterpriseSearchRequestHandler', () => {
       expect(responseMock.customError).toHaveBeenCalledWith({
         statusCode: 502,
         body: expect.stringContaining('Enterprise Search encountered an internal server error'),
+        headers: mockExpectedResponseHeaders,
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Enterprise Search Server Error 500 at <http://localhost:3002/api/5xx>: "something crashed!"'
+      );
+    });
+
+    it('handleReadOnlyModeError()', async () => {
+      EnterpriseSearchAPI.mockReturn(
+        { errors: ['Read only mode'] },
+        { status: 503, headers: { ...JSON_HEADER, [READ_ONLY_MODE_HEADER]: 'true' } }
+      );
+      const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/503' });
+
+      await makeAPICall(requestHandler);
+      EnterpriseSearchAPI.shouldHaveBeenCalledWith('http://localhost:3002/api/503');
+
+      expect(responseMock.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: expect.stringContaining('Enterprise Search is in read-only mode'),
+        headers: { [READ_ONLY_MODE_HEADER]: 'true' },
+      });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Cannot perform action: Enterprise Search is in read-only mode. Actions that create, update, or delete information are disabled.'
       );
     });
 
@@ -234,6 +311,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       expect(responseMock.customError).toHaveBeenCalledWith({
         statusCode: 502,
         body: 'Invalid data received from Enterprise Search',
+        headers: mockExpectedResponseHeaders,
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Invalid data received from <http://localhost:3002/api/invalid>: {"results":false}'
@@ -250,6 +328,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       expect(responseMock.customError).toHaveBeenCalledWith({
         statusCode: 502,
         body: 'Error connecting to Enterprise Search: Failed',
+        headers: mockExpectedResponseHeaders,
       });
       expect(mockLogger.error).toHaveBeenCalled();
     });
@@ -265,8 +344,13 @@ describe('EnterpriseSearchRequestHandler', () => {
         expect(responseMock.customError).toHaveBeenCalledWith({
           statusCode: 502,
           body: 'Cannot authenticate Enterprise Search user',
+          headers: mockExpectedResponseHeaders,
         });
         expect(mockLogger.error).toHaveBeenCalled();
+      });
+
+      it('errors when receiving a 401 response', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { status: 401 });
       });
 
       it('errors when redirected to /login', async () => {
@@ -276,6 +360,18 @@ describe('EnterpriseSearchRequestHandler', () => {
       it('errors when redirected to /ent/select', async () => {
         EnterpriseSearchAPI.mockReturn({}, { url: 'http://localhost:3002/ent/select' });
       });
+    });
+  });
+
+  it('setResponseHeaders', async () => {
+    EnterpriseSearchAPI.mockReturn('anything' as any, {
+      headers: { [READ_ONLY_MODE_HEADER]: 'true' },
+    });
+    const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/' });
+    await makeAPICall(requestHandler);
+
+    expect(enterpriseSearchRequestHandler.headers).toEqual({
+      [READ_ONLY_MODE_HEADER]: 'true',
     });
   });
 
@@ -304,9 +400,10 @@ const EnterpriseSearchAPI = {
       ...expectedParams,
     });
   },
-  mockReturn(response: object, options?: object) {
+  mockReturn(response: object, options?: any) {
     fetchMock.mockImplementation(() => {
-      return Promise.resolve(new Response(JSON.stringify(response), options));
+      const headers = Object.assign({}, mockExpectedResponseHeaders, options?.headers);
+      return Promise.resolve(new Response(JSON.stringify(response), { ...options, headers }));
     });
   },
   mockReturnError() {

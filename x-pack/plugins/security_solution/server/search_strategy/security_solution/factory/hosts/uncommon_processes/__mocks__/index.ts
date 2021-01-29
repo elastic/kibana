@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SortField, HostsQueries } from '../../../../../../../common/search_strategy';
+import { HostsQueries, SortField } from '../../../../../../../common/search_strategy';
 
 export const mockOptions = {
   defaultIndex: [
@@ -4045,7 +4045,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'ayrMZnQBB-gskcly0w7l',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
@@ -4073,7 +4073,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'M-GvaHQBA6bGZw2uBoYz',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
@@ -4101,7 +4101,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'cinEZnQBB-gskclyvNmU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\devicecensus.exe'],
           name: ['DeviceCensus.exe'],
@@ -4125,7 +4125,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'HNKSZHQBA6bGZw2uCtRk',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
           name: ['DiskSnapshot.exe'],
@@ -4149,7 +4149,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: '2zncaHQBB-gskcly1QaD',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
@@ -4176,7 +4176,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'gdVuZXQBA6bGZw2uFsPP',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\System32\\sihclient.exe', '/cv', '33nfV21X50ie84HvATAt1w.0.1'],
           name: ['SIHClient.exe'],
@@ -4200,7 +4200,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: '6NmKZnQBA6bGZw2uma12',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe'],
           name: ['SpeechModelDownload.exe'],
@@ -4224,7 +4224,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'Pi68Z3QBc39KFIJb3txa',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
           name: ['UsoClient.exe'],
@@ -4248,7 +4248,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'Ziw-Z3QBB-gskcly0vqU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['/etc/cron.daily/apt-compat'],
           name: ['apt-compat'],
@@ -4260,7 +4260,7 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [0],
+          id: ['0'],
           name: ['root'],
         },
       },
@@ -4272,7 +4272,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'aSw-Z3QBB-gskcly0vqU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['/etc/cron.daily/bsdmainutils'],
           name: ['bsdmainutils'],
@@ -4284,7 +4284,7 @@ export const formattedSearchStrategyResponse = {
           },
         ],
         user: {
-          id: [0],
+          id: ['0'],
           name: ['root'],
         },
       },
@@ -4296,7 +4296,131 @@ export const formattedSearchStrategyResponse = {
   ],
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "process_count": {\n        "cardinality": {\n          "field": "process.name"\n        }\n      },\n      "group_by_process": {\n        "terms": {\n          "size": 10,\n          "field": "process.name",\n          "order": [\n            {\n              "host_count": "asc"\n            },\n            {\n              "_count": "asc"\n            },\n            {\n              "_key": "asc"\n            }\n          ]\n        },\n        "aggregations": {\n          "process": {\n            "top_hits": {\n              "size": 1,\n              "sort": [\n                {\n                  "@timestamp": {\n                    "order": "desc"\n                  }\n                }\n              ],\n              "_source": [\n                "process.args",\n                "process.name",\n                "user.id",\n                "user.name"\n              ]\n            }\n          },\n          "host_count": {\n            "cardinality": {\n              "field": "host.name"\n            }\n          },\n          "hosts": {\n            "terms": {\n              "field": "host.name"\n            },\n            "aggregations": {\n              "host": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": []\n                }\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "should": [\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "agent.type": "auditbeat"\n                  }\n                },\n                {\n                  "term": {\n                    "event.module": "auditd"\n                  }\n                },\n                {\n                  "term": {\n                    "event.action": "executed"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "agent.type": "auditbeat"\n                  }\n                },\n                {\n                  "term": {\n                    "event.module": "system"\n                  }\n                },\n                {\n                  "term": {\n                    "event.dataset": "process"\n                  }\n                },\n                {\n                  "term": {\n                    "event.action": "process_started"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "agent.type": "winlogbeat"\n                  }\n                },\n                {\n                  "term": {\n                    "event.code": "4688"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "winlog.event_id": 1\n                  }\n                },\n                {\n                  "term": {\n                    "winlog.channel": "Microsoft-Windows-Sysmon/Operational"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "event.type": "process_start"\n                  }\n                },\n                {\n                  "term": {\n                    "event.category": "process"\n                  }\n                }\n              ]\n            }\n          },\n          {\n            "bool": {\n              "filter": [\n                {\n                  "term": {\n                    "event.category": "process"\n                  }\n                },\n                {\n                  "term": {\n                    "event.type": "start"\n                  }\n                }\n              ]\n            }\n          }\n        ],\n        "minimum_should_match": 1,\n        "filter": [\n          "{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"match_all\\":{}},{\\"match_phrase\\":{\\"host.name\\":{\\"query\\":\\"siem-kibana\\"}}}],\\"should\\":[],\\"must_not\\":[]}}",\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-06T15:23:52.757Z",\n                "lte": "2020-09-07T15:23:52.757Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    }\n  },\n  "size": 0,\n  "track_total_hits": false\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              process_count: { cardinality: { field: 'process.name' } },
+              group_by_process: {
+                terms: {
+                  size: 10,
+                  field: 'process.name',
+                  order: [{ host_count: 'asc' }, { _count: 'asc' }, { _key: 'asc' }],
+                },
+                aggregations: {
+                  process: {
+                    top_hits: {
+                      size: 1,
+                      sort: [{ '@timestamp': { order: 'desc' } }],
+                      _source: ['process.args', 'process.name', 'user.id', 'user.name'],
+                    },
+                  },
+                  host_count: { cardinality: { field: 'host.name' } },
+                  hosts: {
+                    terms: { field: 'host.name' },
+                    aggregations: { host: { top_hits: { size: 1, _source: [] } } },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'agent.type': 'auditbeat' } },
+                        { term: { 'event.module': 'auditd' } },
+                        { term: { 'event.action': 'executed' } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'agent.type': 'auditbeat' } },
+                        { term: { 'event.module': 'system' } },
+                        { term: { 'event.dataset': 'process' } },
+                        { term: { 'event.action': 'process_started' } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'agent.type': 'winlogbeat' } },
+                        { term: { 'event.code': '4688' } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'winlog.event_id': 1 } },
+                        { term: { 'winlog.channel': 'Microsoft-Windows-Sysmon/Operational' } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'event.type': 'process_start' } },
+                        { term: { 'event.category': 'process' } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        { term: { 'event.category': 'process' } },
+                        { term: { 'event.type': 'start' } },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        { match_phrase: { 'host.name': { query: 'siem-kibana' } } },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-06T15:23:52.757Z',
+                        lte: '2020-09-07T15:23:52.757Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
     ],
   },
   pageInfo: {
@@ -4401,7 +4525,17 @@ export const expectedDsl = {
         ],
         minimum_should_match: 1,
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"siem-kibana"}}}],"should":[],"must_not":[]}}',
+          {
+            bool: {
+              must: [],
+              filter: [
+                { match_all: {} },
+                { match_phrase: { 'host.name': { query: 'siem-kibana' } } },
+              ],
+              should: [],
+              must_not: [],
+            },
+          },
           {
             range: {
               '@timestamp': {

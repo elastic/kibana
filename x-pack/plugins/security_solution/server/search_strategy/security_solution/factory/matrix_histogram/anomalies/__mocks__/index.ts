@@ -54,7 +54,21 @@ export const expectedDsl = {
     query: {
       bool: {
         filter: [
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"should":[],"minimum_should_match":1}},{"match_phrase":{"result_type":"record"}},null,{"range":{"record_score":{"gte":50}}}],"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"must_not":[],"minimum_should_match":1}}',
+          {
+            bool: {
+              must: [],
+              filter: [
+                { match_all: {} },
+                { bool: { should: [], minimum_should_match: 1 } },
+                { match_phrase: { result_type: 'record' } },
+                null,
+                { range: { record_score: { gte: 50 } } },
+              ],
+              should: [{ exists: { field: 'source.ip' } }, { exists: { field: 'destination.ip' } }],
+              must_not: [],
+              minimum_should_match: 1,
+            },
+          },
           {
             range: {
               timestamp: {

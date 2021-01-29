@@ -5,14 +5,14 @@
  */
 
 import { ITooltipProperty } from './tooltip_property';
-import { IJoin } from '../joins/join';
+import { InnerJoin } from '../joins/inner_join';
 import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
-  private readonly _leftInnerJoins: IJoin[];
+  private readonly _leftInnerJoins: InnerJoin[];
 
-  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: IJoin[]) {
+  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: InnerJoin[]) {
     this._tooltipProperty = tooltipProperty;
     this._leftInnerJoins = leftInnerJoins;
   }
@@ -40,7 +40,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
   async getESFilters(): Promise<Filter[]> {
     const esFilters = [];
     if (this._tooltipProperty.isFilterable()) {
-      esFilters.push(...(await this._tooltipProperty.getESFilters()));
+      const filters = await this._tooltipProperty.getESFilters();
+      esFilters.push(...filters);
     }
 
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
@@ -51,7 +52,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
           this._tooltipProperty.getRawValue()
         );
         if (esTooltipProperty) {
-          esFilters.push(...(await esTooltipProperty.getESFilters()));
+          const filters = await esTooltipProperty.getESFilters();
+          esFilters.push(...filters);
         }
       } catch (e) {
         // eslint-disable-next-line no-console

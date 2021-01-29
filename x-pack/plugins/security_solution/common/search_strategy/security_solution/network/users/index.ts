@@ -40,9 +40,9 @@ export interface NetworkUsersNode {
 
 export interface NetworkUsersItem {
   name?: Maybe<string>;
-  id?: Maybe<string[] | string>;
-  groupId?: Maybe<string[] | string>;
-  groupName?: Maybe<string[] | string>;
+  id?: Maybe<string[]>;
+  groupId?: Maybe<string[]>;
+  groupName?: Maybe<string[]>;
   count?: Maybe<number>;
 }
 

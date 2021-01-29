@@ -5,9 +5,6 @@ Object {
   "as": "metric_vis",
   "type": "render",
   "value": Object {
-    "params": Object {
-      "listenOnChange": true,
-    },
     "visConfig": Object {
       "dimensions": Object {
         "metrics": undefined,
@@ -43,7 +40,7 @@ Object {
           "col-0-1": 0,
         },
       ],
-      "type": "kibana_datatable",
+      "type": "datatable",
     },
     "visType": "metric",
   },

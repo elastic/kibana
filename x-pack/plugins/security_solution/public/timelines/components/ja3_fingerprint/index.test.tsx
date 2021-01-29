@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -42,9 +43,9 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text()).toEqual(
-      'fff799d91b7c01ae3fe6787cfc895552'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
+    ).toEqual('fff799d91b7c01ae3fe6787cfc895552');
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {

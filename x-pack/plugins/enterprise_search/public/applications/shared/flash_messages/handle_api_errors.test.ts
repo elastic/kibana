@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./', () => ({
-  FlashMessagesLogic: {
-    actions: {
-      setFlashMessages: jest.fn(),
-      setQueuedMessages: jest.fn(),
-    },
-  },
-}));
-import { FlashMessagesLogic } from './';
+import '../../__mocks__/kibana_logic.mock';
 
+import { FlashMessagesLogic } from './flash_messages_logic';
 import { flashAPIErrors } from './handle_api_errors';
 
 describe('flashAPIErrors', () => {
@@ -30,6 +23,9 @@ describe('flashAPIErrors', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    FlashMessagesLogic.mount();
+    jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
+    jest.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');
   });
 
   it('converts API errors into flash messages', () => {
@@ -49,6 +45,20 @@ describe('flashAPIErrors', () => {
       { type: 'error', message: 'Could not find X' },
       { type: 'error', message: 'Could not find Y' },
       { type: 'error', message: 'Something else bad happened' },
+    ]);
+  });
+
+  it('falls back to the basic message for http responses without an errors array', () => {
+    flashAPIErrors({
+      body: {
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      },
+    } as any);
+
+    expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
+      { type: 'error', message: 'Not Found' },
     ]);
   });
 

@@ -86,10 +86,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/anomaly_detectors`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -124,10 +124,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/anomaly_detectors/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -157,10 +157,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/anomaly_detectors/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -209,10 +209,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/anomaly_detectors/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
   });

@@ -2,556 +2,1717 @@
 
 exports[`Providers rendering renders correctly against snapshot 1`] = `
 <div>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={true}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.0"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+      ]
+    }
+    groupIndex={0}
+    isLastGroup={false}
+    key="droppable-0"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.1"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+      ]
+    }
+    groupIndex={1}
+    isLastGroup={false}
+    key="droppable-1"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.2"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+      ]
+    }
+    groupIndex={2}
+    isLastGroup={false}
+    key="droppable-2"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.3"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+      ]
+    }
+    groupIndex={3}
+    isLastGroup={false}
+    key="droppable-3"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.4"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+      ]
+    }
+    groupIndex={4}
+    isLastGroup={false}
+    key="droppable-4"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.5"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+      ]
+    }
+    groupIndex={5}
+    isLastGroup={false}
+    key="droppable-5"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.6"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+      ]
+    }
+    groupIndex={6}
+    isLastGroup={false}
+    key="droppable-6"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.7"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+      ]
+    }
+    groupIndex={7}
+    isLastGroup={false}
+    key="droppable-7"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.8"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+      ]
+    }
+    groupIndex={8}
+    isLastGroup={false}
+    key="droppable-8"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.9"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="xs"
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={
+      Array [
+        Object {
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    groupIndex={9}
+    isLastGroup={false}
+    key="droppable-9"
+    timelineId="test"
   />
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="none"
-  >
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.div
-        hideBadge={false}
-      >
-        <AndOrBadge
-          type="or"
-        />
-      </styled.div>
-    </Styled(EuiFlexItem)>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        (
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <EuiFlexItem
-      grow={false}
-    >
-      <Connect(Droppable)
-        direction="horizontal"
-        droppableId="droppableId.timelineProviders.foo.group.10"
-        getContainerForClone={[Function]}
-        ignoreContainerClipping={false}
-        isCombineEnabled={false}
-        isDropDisabled={false}
-        mode="standard"
-        renderClone={null}
-        type="DEFAULT"
-      >
-        <Component />
-      </Connect(Droppable)>
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)
-      grow={false}
-    >
-      <styled.span>
-        )
-      </styled.span>
-    </Styled(EuiFlexItem)>
-    <AddDataProviderPopover
-      browserFields={Object {}}
-      timelineId="foo"
-    />
-  </EuiFlexGroup>
+  <DataProvidersGroup
+    browserFields={Object {}}
+    dataProviders={
+      Array [
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 1",
+          "kqlQuery": "",
+          "name": "Provider 1",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 1",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 2",
+          "kqlQuery": "",
+          "name": "Provider 2",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 2",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 3",
+          "kqlQuery": "",
+          "name": "Provider 3",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 3",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 4",
+          "kqlQuery": "",
+          "name": "Provider 4",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 4",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 5",
+          "kqlQuery": "",
+          "name": "Provider 5",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 5",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 6",
+          "kqlQuery": "",
+          "name": "Provider 6",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 6",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 7",
+          "kqlQuery": "",
+          "name": "Provider 7",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 7",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 8",
+          "kqlQuery": "",
+          "name": "Provider 8",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 8",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 9",
+          "kqlQuery": "",
+          "name": "Provider 9",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 9",
+          },
+        },
+        Object {
+          "and": Array [],
+          "enabled": true,
+          "excluded": false,
+          "id": "id-Provider 10",
+          "kqlQuery": "",
+          "name": "Provider 10",
+          "queryMatch": Object {
+            "field": "name",
+            "operator": ":",
+            "value": "Provider 10",
+          },
+        },
+      ]
+    }
+    group={Array []}
+    groupIndex={10}
+    isLastGroup={true}
+    key="droppable-10"
+    timelineId="test"
+  />
 </div>
 `;

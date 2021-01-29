@@ -5,7 +5,7 @@
  */
 import { deleteAlertRoute } from './delete';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -22,7 +22,7 @@ beforeEach(() => {
 
 describe('deleteAlertRoute', () => {
   it('deletes an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     deleteAlertRoute(router, licenseState);
@@ -58,7 +58,7 @@ describe('deleteAlertRoute', () => {
   });
 
   it('ensures the license allows deleting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     deleteAlertRoute(router, licenseState);
@@ -80,7 +80,7 @@ describe('deleteAlertRoute', () => {
   });
 
   it('ensures the license check prevents deleting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {

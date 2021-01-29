@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -22,13 +11,15 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHideFor,
   EuiIcon,
+  EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
@@ -40,7 +31,7 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { ChromeBreadcrumbsAppendExtension, ChromeHelpExtension } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -56,6 +47,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
@@ -88,7 +80,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!isVisible) {
-    return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
+    return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
@@ -97,7 +89,6 @@ export function Header({
 
   return (
     <>
-      <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           <EuiHeader
@@ -111,23 +102,32 @@ export function Header({
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
+                    loadingCount$={observables.loadingCount$}
                   />,
                 ],
                 borders: 'none',
               },
               {
                 ...(observables.navControlsCenter$ && {
-                  items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+                  items: [
+                    <EuiShowFor sizes={['m', 'l', 'xl']}>
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </EuiShowFor>,
+                  ],
                 }),
                 borders: 'none',
               },
               {
                 items: [
+                  <EuiHideFor sizes={['m', 'l', 'xl']}>
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHideFor>,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
                     kibanaDocLink={kibanaDocLink}
                     kibanaVersion={kibanaVersion}
+                    navigateToUrl={application.navigateToUrl}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],
@@ -154,14 +154,13 @@ export function Header({
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="right" />
-
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              breadcrumbsAppendExtension$={observables.breadcrumbsAppendExtension$}
             />
 
             <HeaderBadge badge$={observables.badge$} />
@@ -184,6 +183,7 @@ export function Header({
           homeHref={homeHref}
           basePath={basePath}
           navigateToApp={application.navigateToApp}
+          navigateToUrl={application.navigateToUrl}
           onIsLockedUpdate={onIsLockedUpdate}
           closeNav={() => {
             setIsNavOpen(false);

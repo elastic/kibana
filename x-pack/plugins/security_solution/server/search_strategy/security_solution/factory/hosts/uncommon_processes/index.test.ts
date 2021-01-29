@@ -6,7 +6,7 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { HostUncommonProcessesRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import { HostsUncommonProcessesRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './dsl/query.dsl';
 import { uncommonProcesses } from '.';
 import {
@@ -35,7 +35,7 @@ describe('uncommonProcesses search strategy', () => {
           ...mockOptions.pagination,
           querySize: DEFAULT_MAX_TABLE_QUERY_SIZE,
         },
-      } as HostUncommonProcessesRequestOptions;
+      } as HostsUncommonProcessesRequestOptions;
 
       expect(() => {
         uncommonProcesses.buildDsl(overSizeOptions);

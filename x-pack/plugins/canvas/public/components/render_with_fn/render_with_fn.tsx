@@ -6,6 +6,8 @@
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 
+import { isEqual } from 'lodash';
+
 import { useNotifyService } from '../../services';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
@@ -82,8 +84,12 @@ export const RenderWithFn: FC<Props> = ({
   );
 
   const render = useCallback(() => {
+    if (!isEqual(handlers.current, incomingHandlers)) {
+      handlers.current = incomingHandlers;
+    }
+
     renderFn(renderTarget.current!, config, handlers.current);
-  }, [renderTarget, config, renderFn]);
+  }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
     if (!domNode) {

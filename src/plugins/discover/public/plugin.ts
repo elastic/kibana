@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -35,13 +24,12 @@ import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public'
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
-import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
@@ -68,8 +56,11 @@ import {
   DiscoverUrlGeneratorState,
   DISCOVER_APP_URL_GENERATOR,
   DiscoverUrlGenerator,
+  SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -123,7 +114,6 @@ export interface DiscoverSetupPlugins {
   kibanaLegacy: KibanaLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
-  visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
 }
 
@@ -140,7 +130,8 @@ export interface DiscoverStartPlugins {
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
-  visualizations: VisualizationsStart;
+  savedObjects: SavedObjectsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 const innerAngularName = 'app/discover';
@@ -229,6 +220,19 @@ export class DiscoverPlugin
           ),
         },
       ],
+      onBeforeNavLinkSaved: (newNavLink: string) => {
+        // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
+        // that could lead to session restoration failure.
+        // see: https://github.com/elastic/kibana/issues/87149
+        if (newNavLink.includes(SEARCH_SESSION_ID_QUERY_PARAM)) {
+          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
+            delete query[SEARCH_SESSION_ID_QUERY_PARAM];
+            return query;
+          });
+        }
+
+        return newNavLink;
+      },
     });
     setUrlTracker({ setTrackedUrl, restorePreviousUrl });
     this.stopUrlTracking = () => {
@@ -277,6 +281,14 @@ export class DiscoverPlugin
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
+      const urlParts = path.split('/');
+      // take care of urls containing legacy url, those split in the following way
+      // ["", "context", indexPatternId, _type, id + params]
+      if (urlParts[4]) {
+        // remove _type part
+        const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');
+        return `#${newPath}`;
+      }
       return `#${path}`;
     });
     plugins.urlForwarding.forwardApp('discover', 'discover', (path) => {
@@ -327,7 +339,12 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, this.initializerContext);
+      const services = await buildServices(
+        core,
+        plugins,
+        this.initializerContext,
+        this.getEmbeddableInjector
+      );
       setServices(services);
       this.servicesInitialized = true;
 
@@ -338,10 +355,7 @@ export class DiscoverPlugin
       urlGenerator: this.urlGenerator,
       savedSearchLoader: createSavedSearchesLoader({
         savedObjectsClient: core.savedObjects.client,
-        indexPatterns: plugins.data.indexPatterns,
-        search: plugins.data.search,
-        chrome: core.chrome,
-        overlays: core.overlays,
+        savedObjects: plugins.savedObjects,
       }),
     };
   }
@@ -380,12 +394,7 @@ export class DiscoverPlugin
       const { core, plugins } = await this.initializeServices();
       getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
-      getInnerAngularModuleEmbeddable(
-        embeddableAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
     }

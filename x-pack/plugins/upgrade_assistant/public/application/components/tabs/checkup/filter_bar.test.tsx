@@ -6,8 +6,8 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { DeprecationInfo } from '../../../../../common/types';
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { LevelFilterOption } from '../../types';
 import { FilterBar } from './filter_bar';
 

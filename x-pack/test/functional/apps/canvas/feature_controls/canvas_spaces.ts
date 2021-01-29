@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

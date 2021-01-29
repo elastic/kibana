@@ -5,10 +5,10 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
@@ -23,7 +23,8 @@ import {
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -61,35 +62,30 @@ export const useNetworkUsers = ({
   skip,
   startDate,
 }: UseNetworkUsers): [boolean, NetworkUsersArgs] => {
-  const getNetworkUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useSelector(getNetworkUsersSelector, shallowEqual);
+  const getNetworkUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
+  const { activePage, sort, limit } = useDeepEqualSelector(getNetworkUsersSelector);
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.users,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions | null>(
+    null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setNetworkUsersRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setNetworkUsersRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -113,7 +109,11 @@ export const useNetworkUsers = ({
   });
 
   const networkUsersSearch = useCallback(
-    (request: NetworkUsersRequestOptions) => {
+    (request: NetworkUsersRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -126,7 +126,7 @@ export const useNetworkUsers = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkUsersResponse((prevResponse) => ({
@@ -139,7 +139,7 @@ export const useNetworkUsers = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -166,15 +166,18 @@ export const useNetworkUsers = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setNetworkUsersRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
+        ip,
         defaultIndex,
+        factoryQueryType: NetworkQueries.users,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
@@ -183,12 +186,12 @@ export const useNetworkUsers = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, ip, flowTarget]);
 
   useEffect(() => {
     networkUsersSearch(networkUsersRequest);
