@@ -21,7 +21,6 @@ import useSet from 'react-use/lib/useSet';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import {
   AnomalyType,
-  formatAnomalyScore,
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
   isCategoryAnomaly,
@@ -120,7 +119,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         id: anomaly.id,
         dataset: anomaly.dataset,
         datasetName: getFriendlyNameForPartitionId(anomaly.dataset),
-        anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
+        anomalyScore: anomaly.anomalyScore,
         startTime: anomaly.startTime,
         type: anomaly.type,
         typical: anomaly.typical,
