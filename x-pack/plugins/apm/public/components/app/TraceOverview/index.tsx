@@ -49,18 +49,18 @@ export function TraceOverview() {
     <>
       <SearchBar />
       <EuiPage>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <Correlations />
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <EuiPanel>
-              <TraceList
-                items={data.items}
-                isLoading={status === FETCH_STATUS.LOADING}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <Correlations />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiPanel>
+            <TraceList
+              items={data.items}
+              isLoading={status === FETCH_STATUS.LOADING}
+            />
+          </EuiPanel>
         </EuiFlexGroup>
       </EuiPage>
     </>

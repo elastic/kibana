@@ -8,6 +8,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPage,
   EuiPanel,
   EuiSpacer,
@@ -27,6 +28,7 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { SearchBar } from '../../shared/search_bar';
+import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
@@ -62,7 +64,7 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType, transactionTypes } = useApmServiceContext();
+  const { transactionType } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
@@ -86,7 +88,14 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <Correlations />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <TransactionTypeSelect />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Correlations />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           {transactionType === TRANSACTION_PAGE_LOAD && (
             <>

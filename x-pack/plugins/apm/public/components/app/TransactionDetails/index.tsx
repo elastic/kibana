@@ -6,6 +6,7 @@
 
 import {
   EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPage,
   EuiPanel,
@@ -98,7 +99,11 @@ export function TransactionDetails({
       <SearchBar showTimeComparison />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <Correlations />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <Correlations />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <ChartPointerEventContextProvider>
             <TransactionCharts />
