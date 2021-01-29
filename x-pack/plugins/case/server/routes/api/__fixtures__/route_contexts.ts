@@ -5,7 +5,9 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { legacyClientMock } from 'src/core/server/elasticsearch/legacy/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createExternalCaseClient } from '../../../client';
 import {
@@ -22,7 +24,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
-  const esClientMock = elasticsearchServiceMock.createClusterClient();
+  const esLegacyCluster = legacyClientMock.createScopedClusterClient();
 
   const caseService = new CaseService(
     log,
@@ -33,7 +35,6 @@ export const createRouteContext = async (client: any, badAuth = false) => {
 
   const caseConfigureService = await caseConfigureServicePlugin.setup();
   const alertsService = new AlertService();
-  alertsService.initialize(esClientMock);
 
   const context = ({
     core: {
@@ -65,6 +66,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       getUserActions: jest.fn(),
     },
     alertsService,
+    callCluster: esLegacyCluster.callAsCurrentUser,
   });
 
   return context;

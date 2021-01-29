@@ -902,7 +902,7 @@ describe('case connector', () => {
               parent: null,
             },
           },
-          type: CaseType.parent,
+          type: CaseType.individual,
         });
       });
     });

@@ -690,7 +690,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('blah', () => {
+      describe('adding alerts using a connector', () => {
         beforeEach(async () => {
           await esArchiver.load('auditbeat/hosts');
           await createSignalsIndex(supertest);
@@ -702,7 +702,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('auditbeat/hosts');
         });
 
-        it('should fail adding a comment of type alert', async () => {
+        it('should add a comment of type alert', async () => {
           // TODO: don't do all this stuff
           const rule = getRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, rule);
@@ -744,6 +744,25 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(caseConnector.body.status).to.eql('ok');
+
+          const { body } = await supertest
+            .get(`${CASES_URL}/${caseRes.body.id}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+
+          const data = removeServerGeneratedPropertiesFromCase(body);
+          const comments = removeServerGeneratedPropertiesFromComments(data.comments ?? []);
+          expect({ ...data, comments }).to.eql({
+            ...postCaseResp(caseRes.body.id),
+            comments,
+            totalComment: 1,
+            updated_by: {
+              email: null,
+              full_name: null,
+              username: null,
+            },
+          });
         });
       });
 
@@ -830,7 +849,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
             retry: false,
           });
         }

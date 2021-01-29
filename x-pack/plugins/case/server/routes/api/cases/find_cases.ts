@@ -39,13 +39,30 @@ import {
   flattenCaseSavedObject,
 } from '../utils';
 import { RouteDeps } from '../types';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../saved_object_types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 import { countAlerts } from '../../../common';
 
-const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
-  filters?.filter((i) => i !== '').join(` ${operator} `);
+// TODO: write unit tests for these functions
+const combineFilters = (filters: string[] | undefined, operator: 'OR' | 'AND'): string => {
+  const noEmptyStrings = filters?.filter((value) => value !== '');
+  const joinedExp = noEmptyStrings?.join(` ${operator} `);
+  // if undefined or an empty string
+  if (!joinedExp) {
+    return '';
+  } else if ((noEmptyStrings?.length ?? 0) > 1) {
+    // if there were multiple filters, wrap them in ()
+    return `(${joinedExp})`;
+  } else {
+    // return a single value not wrapped in ()
+    return joinedExp;
+  }
+};
 
 const addStatusFilter = ({
   status,
@@ -77,15 +94,19 @@ const buildFilter = ({
   field: string;
   operator: 'OR' | 'AND';
   type?: string;
-}): string =>
-  filters != null && filters.length > 0
-    ? Array.isArray(filters)
-      ? // Be aware of the surrounding parenthesis (as string inside literal) around filters.
-        `(${filters
-          .map((filter) => `${type}.attributes.${field}: ${filter}`)
-          ?.join(` ${operator} `)})`
-      : `${type}.attributes.${field}: ${filters}`
-    : '';
+}): string => {
+  // if it is an empty string, empty array of strings, or undefined just return
+  if (!filters || filters.length <= 0) {
+    return '';
+  }
+
+  const arrayFilters = !Array.isArray(filters) ? [filters] : filters;
+
+  return combineFilters(
+    arrayFilters.map((filter) => `${type}.attributes.${field}: ${filter}`),
+    operator
+  );
+};
 
 interface SubCaseStats {
   commentTotals: Map<string, number>;
@@ -128,7 +149,7 @@ async function getCaseCommentStats({
         id,
         subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
         options: {
-          filter: `(${type}.attributes.type: ${CommentType.alert} OR ${type}.attributes.type: ${CommentType.generatedAlert}) AND ${type}.attributes.associationType: ${associationType}`,
+          filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}) AND ${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${associationType}`,
         },
       })
     )
@@ -256,9 +277,10 @@ function constructQueries({
        * The sub case filter will use the query.status if it exists
        */
       const typeIndividual = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
+      const typeParent = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
+
       const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
-      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
-      const statusAndType = combineFilters([statusFilter, typeFilter], 'OR');
+      const statusAndType = combineFilters([statusFilter, typeParent], 'OR');
       const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
 
       return {
@@ -283,13 +305,11 @@ async function findSubCases({
   subCaseOptions,
   caseService,
   ids,
-  includeCommentsStats,
 }: {
   client: SavedObjectsClientContract;
   subCaseOptions?: SavedObjectFindOptions;
   caseService: CaseServiceSetup;
   ids: string[];
-  includeCommentsStats: boolean;
 }): Promise<Map<string, SubCaseResponse[]>> {
   const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {
     return subCase.references.length > 0 ? subCase.references[0].id : undefined;
@@ -312,21 +332,14 @@ async function findSubCases({
     },
   });
 
-  let subCaseComments: SubCaseStats = {
-    commentTotals: new Map(),
-    alertTotals: new Map(),
-  };
+  const subCaseComments = await getCaseCommentStats({
+    client,
+    caseService,
+    ids: subCases.saved_objects.map((subCase) => subCase.id),
+    type: SUB_CASE_SAVED_OBJECT,
+  });
 
-  if (includeCommentsStats) {
-    subCaseComments = await getCaseCommentStats({
-      client,
-      caseService,
-      ids: subCases.saved_objects.map((subCase) => subCase.id),
-      type: SUB_CASE_SAVED_OBJECT,
-    });
-  }
-
-  return subCases.saved_objects.reduce((accMap, subCase) => {
+  const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {
     const id = getCaseID(subCase);
     if (id) {
       const subCaseFromMap = accMap.get(id);
@@ -352,6 +365,8 @@ async function findSubCases({
     }
     return accMap;
   }, new Map<string, SubCaseResponse[]>());
+
+  return subCasesMap;
 }
 
 interface Collection {
@@ -366,11 +381,7 @@ interface CasesMapWithPageInfo {
 }
 
 /**
- * Returns a map of all cases combined with their sub cases if they are collections and
- * optionally includes the statistics for the cases' comments.
- *
- * @param includeEmptyCollections is a flag for whether to include collections that don't
- *  have any sub cases
+ * Returns a map of all cases combined with their sub cases if they are collections.
  */
 async function findCases({
   client,
@@ -378,29 +389,26 @@ async function findCases({
   subCaseOptions,
   caseService,
   includeEmptyCollections,
-  includeCommentsStats,
 }: {
   client: SavedObjectsClientContract;
   caseOptions: SavedObjectFindOptions;
   subCaseOptions?: SavedObjectFindOptions;
   caseService: CaseServiceSetup;
   includeEmptyCollections: boolean;
-  includeCommentsStats: boolean;
 }): Promise<CasesMapWithPageInfo> {
   const cases = await caseService.findCases({
     client,
     options: caseOptions,
   });
 
-  const subCases = await findSubCases({
+  const subCasesResp = await findSubCases({
     client,
     subCaseOptions,
     caseService,
     ids: cases.saved_objects.map((caseInfo) => caseInfo.id),
-    includeCommentsStats,
   });
   const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
-    const subCasesForCase = subCases.get(caseInfo.id);
+    const subCasesForCase = subCasesResp.get(caseInfo.id);
     /**
      * If we don't have the sub cases for the case and the case is a collection then ignore it
      * unless we're forcing retrieval of empty collections. Otherwise if the case is an individual case
@@ -416,19 +424,12 @@ async function findCases({
     return accMap;
   }, new Map<string, Collection>());
 
-  let totalCommentsForCases: SubCaseStats = {
-    commentTotals: new Map(),
-    alertTotals: new Map(),
-  };
-
-  if (includeCommentsStats) {
-    totalCommentsForCases = await getCaseCommentStats({
-      client,
-      caseService,
-      ids: Array.from(casesMap.keys()),
-      type: CASE_SAVED_OBJECT,
-    });
-  }
+  const totalCommentsForCases = await getCaseCommentStats({
+    client,
+    caseService,
+    ids: Array.from(casesMap.keys()),
+    type: CASE_SAVED_OBJECT,
+  });
 
   const casesWithComments = new Map<string, CaseResponse>();
   for (const [id, caseInfo] of casesMap.entries()) {
@@ -448,6 +449,90 @@ async function findCases({
     page: cases.page,
     perPage: cases.per_page,
   };
+}
+
+// TODO: move to the service layer
+/**
+ *
+ */
+async function findCaseStatusStats({
+  client,
+  caseOptions,
+  caseService,
+  subCaseOptions,
+}: {
+  client: SavedObjectsClientContract;
+  caseOptions: SavedObjectFindOptions;
+  subCaseOptions?: SavedObjectFindOptions;
+  caseService: CaseServiceSetup;
+}): Promise<number> {
+  // TODO: move the double calls to the service layer?
+  const casesStats = await caseService.findCases({
+    client,
+    options: {
+      ...caseOptions,
+      fields: [],
+      page: 1,
+      perPage: 1,
+    },
+  });
+
+  /**
+   * This could be made more performant. What we're doing here is retrieving all cases
+   * that match the API request's filters instead of just counts. This is because we need to grab
+   * the ids for the parent cases that match those filters. Then we use those IDS to count how many
+   * sub cases those parents have to calculate the total amount of cases that are open, closed, or in-progress.
+   *
+   * Another solution would be to store ALL filterable fields on both a case and sub case. That we could do a single
+   * query for each type to calculate the totals using the filters. This has drawbacks though:
+   *
+   * We'd have to sync up the parent case's editable attributes with the sub case any time they were change to avoid
+   * them getting out of sync and causing issues when we do these types of stats aggregations. This would result in a lot
+   * of update requests if the user is editing their case details often. Which could potentially cause conflict failures.
+   *
+   * Another option is to prevent the ability from update the parent case's details all together once it's created. A user
+   * could instead modify the sub case details directly. This could be weird though because individual sub cases for the same
+   * parent would have different titles, tags, etc.
+   *
+   * Another potential issue with this approach is when you push a case and all its sub case information. If the sub cases
+   * don't have the same title and tags, we'd need to account for that as well.
+   */
+  const cases = await caseService.findCases({
+    client,
+    options: {
+      ...caseOptions,
+      // TODO: move this to a variable that the cases spec uses to define the field
+      fields: ['type'],
+      page: 1,
+      perPage: casesStats.total,
+    },
+  });
+
+  const caseIds = cases.saved_objects
+    .filter((caseInfo) => caseInfo.attributes.type === CaseType.parent)
+    .map((caseInfo) => caseInfo.id);
+
+  const subCases = await caseService.findSubCases({
+    client,
+    options: {
+      ...subCaseOptions,
+      page: 1,
+      perPage: 1,
+      fields: [],
+      hasReference: caseIds.map((id) => {
+        return {
+          id,
+          type: SUB_CASE_SAVED_OBJECT,
+        };
+      }),
+    },
+  });
+
+  const total =
+    cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.parent).length +
+    subCases.total;
+
+  return total;
 }
 
 export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
@@ -476,32 +561,22 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
 
         const caseQueries = constructQueries(queryArgs);
 
-        const [cases, openCases, inProgressCases, closedCases] = await Promise.all([
-          findCases({
-            client,
-            caseOptions: { ...queryParams, ...caseQueries.case },
-            subCaseOptions: caseQueries.subCase,
-            caseService,
-            includeEmptyCollections: queryParams.type === CaseType.parent || !queryParams.status,
-            includeCommentsStats: true,
-          }),
+        const cases = await findCases({
+          client,
+          caseOptions: { ...queryParams, ...caseQueries.case },
+          subCaseOptions: caseQueries.subCase,
+          caseService,
+          includeEmptyCollections: queryParams.type === CaseType.parent || !queryParams.status,
+        });
+
+        const [openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {
-            // TODO: maybe clean this up
             const statusQuery = constructQueries({ ...queryArgs, status });
-            return findCases({
+            return findCaseStatusStats({
               client,
-              caseOptions: {
-                ...statusQuery.case,
-                fields: ['attributes.type'],
-                page: 1,
-                perPage: 1,
-              },
+              caseOptions: statusQuery.case,
               subCaseOptions: statusQuery.subCase,
               caseService,
-              includeEmptyCollections: false,
-              // we don't need the comment stats because we're just trying to get the total open, closed, and in-progress
-              // cases
-              includeCommentsStats: false,
             });
           }),
         ]);
@@ -510,9 +585,9 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           body: CasesFindResponseRt.encode(
             transformCases({
               ...cases,
-              countOpenCases: openCases.casesMap.size,
-              countInProgressCases: inProgressCases.casesMap.size,
-              countClosedCases: closedCases.casesMap.size,
+              countOpenCases: openCases,
+              countInProgressCases: inProgressCases,
+              countClosedCases: closedCases,
               total: cases.casesMap.size,
             })
           ),

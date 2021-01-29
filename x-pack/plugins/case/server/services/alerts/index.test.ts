@@ -5,7 +5,6 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService, AlertServiceContract } from '.';
 // TODO: need to fix this
@@ -31,7 +30,6 @@ describe('updateAlertsStatus', () => {
     });
 
     test('it update the status of the alert correctly', async () => {
-      // alertService.initialize(esClientMock);
       await alertService.updateAlertsStatus(args);
 
       expect(esLegacyCluster.callAsCurrentUser).toHaveBeenCalledWith('updateByQuery', {
@@ -46,17 +44,6 @@ describe('updateAlertsStatus', () => {
     });
 
     describe('unhappy path', () => {
-      // test('it throws when service is already initialized', async () => {
-      //   alertService.initialize(esClientMock);
-      //   expect(() => {
-      //     alertService.initialize(esClientMock);
-      //   }).toThrow();
-      // });
-
-      // test('it throws when service is not initialized and try to update the status', async () => {
-      //   await expect(alertService.updateAlertsStatus(args)).rejects.toThrow();
-      // });
-
       it('throws an error if no valid indices are provided', async () => {
         expect(async () => {
           await alertService.updateAlertsStatus({
