@@ -40,7 +40,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
 
   return (
     <Form form={form}>
-      <UseField path="agents" component={AgentsTableField} />
+      <UseField path="agentSelection" component={AgentsTableField} />
       <EuiSpacer />
       <UseField path="query" component={LiveQueryQueryField} />
       <EuiSpacer />
