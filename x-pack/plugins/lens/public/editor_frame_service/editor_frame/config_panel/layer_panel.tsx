@@ -248,6 +248,8 @@ export function LayerPanel(
                           ...layerDatasourceDropProps,
                           columnId: accessor,
                           filterOperations: group.filterOperations,
+                          visualizationGroupConfig: groups,
+                          groupId: group.groupId,
                         });
 
                       const isFromTheSameGroup =
@@ -263,6 +265,8 @@ export function LayerPanel(
                             ...layerDatasourceDropProps,
                             columnId: accessor,
                             filterOperations: group.filterOperations,
+                            visualizationGroupConfig: groups,
+                            groupId: group.groupId,
                           });
 
                       return (
@@ -297,6 +301,8 @@ export function LayerPanel(
                               },
                               columnId: dropTargetId,
                               filterOperations: group.filterOperations,
+                              visualizationGroupConfig: groups,
+                              groupId: group.groupId,
                             });
                           }}
                           onDrop={(droppedItem) => {
@@ -311,6 +317,8 @@ export function LayerPanel(
                               droppedItem,
                               columnId: accessor,
                               filterOperations: group.filterOperations,
+                              visualizationGroupConfig: groups,
+                              groupId: group.groupId,
                             });
                             if (typeof dropResult === 'object') {
                               // When a column is moved, we delete the reference to the old
@@ -349,6 +357,7 @@ export function LayerPanel(
                                     ...layerDatasourceConfigProps,
                                     columnId: accessor,
                                     filterOperations: group.filterOperations,
+                                    groupId: group.groupId,
                                   }}
                                 />
                               </ColorIndicator>
@@ -408,6 +417,8 @@ export function LayerPanel(
                             ...layerDatasourceDropProps,
                             columnId: newId,
                             filterOperations: group.filterOperations,
+                            visualizationGroupConfig: groups,
+                            groupId: group.groupId,
                           })
                         }
                         onDrop={(droppedItem) => {
@@ -416,16 +427,16 @@ export function LayerPanel(
                             droppedItem,
                             columnId: newId,
                             filterOperations: group.filterOperations,
+                            visualizationGroupConfig: groups,
+                            groupId: group.groupId,
                           });
                           if (dropResult) {
-                            props.updateVisualization(
-                              activeVisualization.setDimension({
-                                layerId,
-                                groupId: group.groupId,
-                                columnId: newId,
-                                prevState: props.visualizationState,
-                              })
-                            );
+                            const newVisState = activeVisualization.setDimension({
+                              layerId,
+                              groupId: group.groupId,
+                              columnId: newId,
+                              prevState: props.visualizationState,
+                            });
 
                             if (typeof dropResult === 'object') {
                               // When a column is moved, we delete the reference to the old
@@ -433,9 +444,11 @@ export function LayerPanel(
                                 activeVisualization.removeDimension({
                                   layerId,
                                   columnId: dropResult.deleted,
-                                  prevState: props.visualizationState,
+                                  prevState: newVisState,
                                 })
                               );
+                            } else {
+                              props.updateVisualization(newVisState);
                             }
                           }
                         }}
@@ -509,6 +522,8 @@ export function LayerPanel(
                       columnId: activeId,
                       filterOperations: activeGroup.filterOperations,
                       dimensionGroups: groups,
+                      groupId: activeGroup.groupId,
+                      hideGrouping: activeGroup.hideGrouping,
                       setState: (
                         newState: unknown,
                         {

@@ -23,6 +23,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  isTransposed?: boolean;
 }
 
 export interface SortingState {
@@ -148,16 +149,39 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
-            defaultMessage: 'Break down by',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
+            defaultMessage: 'Split columns',
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
             .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_column',
+          dataTestSubj: 'lnsDatatable_columns',
+          hideGrouping: true,
+        },
+        {
+          groupId: 'rows',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
+            defaultMessage: 'Split rows',
+          }),
+          layerId: state.layerId,
+          accessors: sortedColumns
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                !state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
+            .map((accessor) => ({ columnId: accessor })),
+          supportsMoreColumns: true,
+          filterOperations: (op) => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_rows',
+          hideGrouping: true,
         },
         {
           groupId: 'metrics',
@@ -177,13 +201,21 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  setDimension({ prevState, columnId }) {
+  setDimension({ prevState, columnId, groupId }) {
     if (prevState.columns.some((column) => column.columnId === columnId)) {
-      return prevState;
+      return {
+        ...prevState,
+        columns: prevState.columns.map((column) => {
+          if (column.columnId === columnId) {
+            return { ...column, isTransposed: groupId === 'columns' };
+          }
+          return column;
+        }),
+      };
     }
     return {
       ...prevState,
-      columns: [...prevState.columns, { columnId }],
+      columns: [...prevState.columns, { columnId, isTransposed: groupId === 'columns' }],
     };
   },
   removeDimension({ prevState, columnId }) {

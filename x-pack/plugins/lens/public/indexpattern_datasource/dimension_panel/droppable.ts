@@ -10,7 +10,7 @@ import {
   isDraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn } from '../operations';
+import { insertOrReplaceColumn, reorderByGroups } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -108,6 +108,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       newColumnOrder.splice(oldIndex, 1);
     }
 
+    reorderByGroups(props.visualizationGroupConfig, props.groupId, newColumnOrder, columnId);
+
     // Time to replace
     setState(
       mergeLayer({
@@ -153,6 +155,8 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       ? selectedColumn.operationType
       : operationsForNewField.values().next().value,
     field: droppedItem.field,
+    visualizationGroups: props.visualizationGroupConfig,
+    targetGroup: props.groupId,
   });
 
   trackUiEvent('drop_onto_dimension');

@@ -181,6 +181,7 @@ function getExistingLayerSuggestionsForField(
             field,
             op: usableAsBucketOperation,
             columnId: previousDate,
+            visualizationGroups: [],
           }),
           layerId,
           changeType: 'initial',
@@ -196,6 +197,7 @@ function getExistingLayerSuggestionsForField(
             field,
             op: usableAsBucketOperation,
             columnId: generateId(),
+            visualizationGroups: [],
           }),
           layerId,
           changeType: 'extended',
@@ -213,6 +215,7 @@ function getExistingLayerSuggestionsForField(
         field,
         columnId: generateId(),
         op: metricOperation.type,
+        visualizationGroups: [],
       });
       if (layerWithNewMetric) {
         suggestions.push(
@@ -234,6 +237,7 @@ function getExistingLayerSuggestionsForField(
           field,
           columnId: metrics[0],
           op: metricOperation.type,
+          visualizationGroups: [],
         });
         if (layerWithReplacedMetric) {
           suggestions.push(
@@ -301,10 +305,12 @@ function createNewLayerWithBucketAggregation(
       columnId: generateId(),
       field: documentField,
       indexPattern,
+      visualizationGroups: [],
     }),
     columnId: generateId(),
     field,
     indexPattern,
+    visualizationGroups: [],
   });
 }
 
@@ -326,10 +332,12 @@ function createNewLayerWithMetricAggregation(
       columnId: generateId(),
       field,
       indexPattern,
+      visualizationGroups: [],
     }),
     columnId: generateId(),
     field: dateField,
     indexPattern,
+    visualizationGroups: [],
   });
 }
 
@@ -482,6 +490,7 @@ function createMetricSuggestion(
       op: operation.type,
       field: operation.type === 'count' ? documentField : field,
       indexPattern,
+      visualizationGroups: [],
     }),
   });
 }
@@ -524,6 +533,7 @@ function createAlternativeMetricSuggestions(
         field,
         columnId,
         op: possibleOperations[0].type,
+        visualizationGroups: [],
       });
       if (layerWithNewMetric) {
         suggestions.push(
@@ -557,6 +567,7 @@ function createSuggestionWithDefaultDateHistogram(
       field: timeField,
       op: 'date_histogram',
       columnId: generateId(),
+      visualizationGroups: [],
     }),
     label: i18n.translate('xpack.lens.indexpattern.suggestions.overTimeLabel', {
       defaultMessage: 'Over time',
