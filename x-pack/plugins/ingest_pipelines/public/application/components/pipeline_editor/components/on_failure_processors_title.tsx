@@ -14,7 +14,7 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
   const { services } = useKibana();
 
   return (
-    <div className="pipelineProcessorsEditor__onFailureTitle">
+    <div className="pipelineEditor__onFailureTitle">
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
