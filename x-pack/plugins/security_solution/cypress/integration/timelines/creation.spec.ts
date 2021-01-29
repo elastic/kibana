@@ -47,8 +47,7 @@ import { openTimeline } from '../../tasks/timelines';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-// flaky test in 7.x: https://github.com/elastic/kibana/pull/89434
-describe.skip('Timelines', () => {
+describe('Timelines', () => {
   beforeEach(() => {
     cleanKibana();
   });
