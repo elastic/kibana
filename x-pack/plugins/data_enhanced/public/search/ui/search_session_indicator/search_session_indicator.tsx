@@ -243,21 +243,21 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Restored]: {
     button: {
-      color: 'warning',
-      iconType: 'refresh',
+      color: 'success',
+      iconType: 'checkInCircleFilled',
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.restoredResultsIconAriaLabel',
         {
-          defaultMessage: 'Search session restored',
+          defaultMessage: 'Search session complete',
         }
       ),
       tooltipText: i18n.translate('xpack.data.searchSessionIndicator.restoredResultsTooltipText', {
-        defaultMessage: 'Search session restored',
+        defaultMessage: 'Search session complete',
       }),
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.restoredTitleText', {
-        defaultMessage: 'Search session restored',
+        defaultMessage: 'Search session complete',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.restoredDescriptionText', {
         defaultMessage:
