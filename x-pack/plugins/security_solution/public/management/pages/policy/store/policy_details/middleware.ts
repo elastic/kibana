@@ -41,6 +41,10 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
           policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
         }
+        if (policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.ransomware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.ransomware.message = DefaultMalwareMessage;
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',

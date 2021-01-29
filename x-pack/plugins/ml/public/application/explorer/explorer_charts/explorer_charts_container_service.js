@@ -22,12 +22,14 @@ import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isMappableJob,
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 import { explorerService } from '../explorer_dashboard_service';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { i18n } from '@kbn/i18n';
 import { SWIM_LANE_LABEL_WIDTH } from '../swimlane_container';
 
@@ -77,7 +79,50 @@ export const anomalyDataChange = function (
   // For now just take first 6 (or 8 if 4 charts per row).
   const maxSeriesToPlot = Math.max(chartsPerRow * 2, 6);
   const recordsToPlot = allSeriesRecords.slice(0, maxSeriesToPlot);
+  const hasGeoData = recordsToPlot.find(
+    (record) =>
+      (record.function_description || recordsToPlot.function) === ML_JOB_AGGREGATION.LAT_LONG
+  );
+
   const seriesConfigs = recordsToPlot.map(buildConfig);
+  const seriesConfigsNoGeoData = [];
+
+  // initialize the charts with loading indicators
+  data.seriesToPlot = seriesConfigs.map((config) => ({
+    ...config,
+    loading: true,
+    chartData: null,
+  }));
+
+  const mapData = [];
+
+  if (hasGeoData !== undefined) {
+    for (let i = 0; i < seriesConfigs.length; i++) {
+      const config = seriesConfigs[i];
+      let records;
+      if (config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
+        if (config.entityFields.length) {
+          records = [
+            recordsToPlot.find((record) => {
+              const entityFieldName = config.entityFields[0].fieldName;
+              const entityFieldValue = config.entityFields[0].fieldValue;
+              return (record[entityFieldName] && record[entityFieldName][0]) === entityFieldValue;
+            }),
+          ];
+        } else {
+          records = recordsToPlot;
+        }
+
+        mapData.push({
+          ...config,
+          loading: false,
+          mapData: records,
+        });
+      } else {
+        seriesConfigsNoGeoData.push(config);
+      }
+    }
+  }
 
   // Calculate the time range of the charts, which is a function of the chart width and max job bucket span.
   data.tooManyBuckets = false;
@@ -91,13 +136,6 @@ export const anomalyDataChange = function (
     data.timeFieldName
   );
   data.tooManyBuckets = tooManyBuckets;
-
-  // initialize the charts with loading indicators
-  data.seriesToPlot = seriesConfigs.map((config) => ({
-    ...config,
-    loading: true,
-    chartData: null,
-  }));
 
   data.errorMessages = errorMessages;
 
@@ -269,22 +307,27 @@ export const anomalyDataChange = function (
   // only after that trigger data processing and page render.
   // TODO - if query returns no results e.g. source data has been deleted,
   // display a message saying 'No data between earliest/latest'.
-  const seriesPromises = seriesConfigs.map((seriesConfig) =>
-    Promise.all([
-      getMetricData(seriesConfig, chartRange),
-      getRecordsForCriteria(seriesConfig, chartRange),
-      getScheduledEvents(seriesConfig, chartRange),
-      getEventDistribution(seriesConfig, chartRange),
-    ])
-  );
+  const seriesPromises = [];
+  // Use seriesConfigs list without geo data config so indices match up after seriesPromises are resolved and we map through the responses
+  const seriesCongifsForPromises = hasGeoData ? seriesConfigsNoGeoData : seriesConfigs;
+  seriesCongifsForPromises.forEach((seriesConfig) => {
+    seriesPromises.push(
+      Promise.all([
+        getMetricData(seriesConfig, chartRange),
+        getRecordsForCriteria(seriesConfig, chartRange),
+        getScheduledEvents(seriesConfig, chartRange),
+        getEventDistribution(seriesConfig, chartRange),
+      ])
+    );
+  });
 
   function processChartData(response, seriesIndex) {
     const metricData = response[0].results;
     const records = response[1].records;
-    const jobId = seriesConfigs[seriesIndex].jobId;
+    const jobId = seriesCongifsForPromises[seriesIndex].jobId;
     const scheduledEvents = response[2].events[jobId];
     const eventDistribution = response[3];
-    const chartType = getChartType(seriesConfigs[seriesIndex]);
+    const chartType = getChartType(seriesCongifsForPromises[seriesIndex]);
 
     // Sort records in ascending time order matching up with chart data
     records.sort((recordA, recordB) => {
@@ -409,16 +452,25 @@ export const anomalyDataChange = function (
       );
       const overallChartLimits = chartLimits(allDataPoints);
 
-      data.seriesToPlot = response.map((d, i) => ({
-        ...seriesConfigs[i],
-        loading: false,
-        chartData: processedData[i],
-        plotEarliest: chartRange.min,
-        plotLatest: chartRange.max,
-        selectedEarliest: selectedEarliestMs,
-        selectedLatest: selectedLatestMs,
-        chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i]),
-      }));
+      data.seriesToPlot = response.map((d, i) => {
+        return {
+          ...seriesCongifsForPromises[i],
+          loading: false,
+          chartData: processedData[i],
+          plotEarliest: chartRange.min,
+          plotLatest: chartRange.max,
+          selectedEarliest: selectedEarliestMs,
+          selectedLatest: selectedLatestMs,
+          chartLimits: USE_OVERALL_CHART_LIMITS
+            ? overallChartLimits
+            : chartLimits(processedData[i]),
+        };
+      });
+
+      if (mapData.length) {
+        // push map data in if it's available
+        data.seriesToPlot.push(...mapData);
+      }
       explorerService.setCharts({ ...data });
     })
     .catch((error) => {
@@ -447,7 +499,10 @@ function processRecordsForDisplay(anomalyRecords) {
       return;
     }
 
-    let isChartable = isSourceDataChartableForDetector(job, record.detector_index);
+    let isChartable =
+      isSourceDataChartableForDetector(job, record.detector_index) ||
+      isMappableJob(job, record.detector_index);
+
     if (isChartable === false) {
       if (isModelPlotChartableForDetector(job, record.detector_index)) {
         // Check if model plot is enabled for this job.

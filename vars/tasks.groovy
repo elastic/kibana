@@ -35,6 +35,7 @@ def test() {
 
     kibanaPipeline.scriptTaskDocker('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTaskDocker('API Integration Tests', 'test/scripts/test/api_integration.sh'),
+    kibanaPipeline.scriptTaskDocker('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
   ])
 }
 
