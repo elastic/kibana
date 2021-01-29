@@ -9,7 +9,6 @@ import { SecurityLicense, SecurityLicenseFeatures } from '.';
 
 export const licenseMock = {
   create: (features?: Partial<SecurityLicenseFeatures>): jest.Mocked<SecurityLicense> => ({
-    license$: {} as any,
     isLicenseAvailable: jest.fn().mockReturnValue(true),
     isEnabled: jest.fn().mockReturnValue(true),
     getType: jest.fn().mockReturnValue('basic'),
