@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiButtonEmpty,
-  EuiIcon,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
