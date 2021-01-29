@@ -29,7 +29,7 @@ import {
   loadAlertState,
   loadAlertInstanceSummary,
   loadAlertTypes,
-  health,
+  alertingFrameworkHealth,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -131,7 +131,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        getHealth={async () => health({ http })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };

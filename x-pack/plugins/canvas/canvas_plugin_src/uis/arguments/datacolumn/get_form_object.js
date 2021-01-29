@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'tinymath';
+import { parse } from '@kbn/tinymath';
 import { unquoteString } from '../../../../common/lib/unquote_string';
 
 // break out into separate function, write unit tests first
