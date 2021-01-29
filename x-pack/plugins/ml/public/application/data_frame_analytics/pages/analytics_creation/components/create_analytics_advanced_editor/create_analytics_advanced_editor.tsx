@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useRef } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiCallOut,
@@ -51,22 +51,26 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     setAdvancedEditorRawString(str);
   };
 
-  const debouncedJobIdCheck = debounce(async () => {
-    try {
-      const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
-      setFormState({ jobIdExists: results[jobId] });
-    } catch (e) {
-      toasts.addDanger(
-        i18n.translate(
-          'xpack.ml.dataframe.analytics.create.advancedEditor.errorCheckingJobIdExists',
-          {
-            defaultMessage: 'The following error occurred checking if job id exists: {error}',
-            values: { error: extractErrorMessage(e) },
-          }
-        )
-      );
-    }
-  }, 400);
+  const debouncedJobIdCheck = useMemo(
+    () =>
+      debounce(async () => {
+        try {
+          const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
+          setFormState({ jobIdExists: results[jobId] });
+        } catch (e) {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.dataframe.analytics.create.advancedEditor.errorCheckingJobIdExists',
+              {
+                defaultMessage: 'The following error occurred checking if job id exists: {error}',
+                values: { error: extractErrorMessage(e) },
+              }
+            )
+          );
+        }
+      }, 400),
+    [jobId]
+  );
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
