@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+  describe.skip('Monitoring app', function () {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));

@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('watcher app', function () {
+  describe.skip('watcher app', function () {
     this.tags(['ciGroup1', 'includeFirefox']);
 
     //loadTestFile(require.resolve('./management'));
