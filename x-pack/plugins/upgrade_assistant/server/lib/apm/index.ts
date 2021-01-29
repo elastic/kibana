@@ -7,20 +7,20 @@
 import { get } from 'lodash';
 import minimatch from 'minimatch';
 import { SemVer, valid } from 'semver';
-import { ILegacyScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from 'src/core/server';
 
 import { EnrichedDeprecationInfo } from '../../../common/types';
 import { FlatSettings } from '../reindexing/types';
 
 export async function getDeprecatedApmIndices(
-  clusterClient: ILegacyScopedClusterClient,
+  clusterClient: IScopedClusterClient,
   indexPatterns: string[] = []
 ): Promise<EnrichedDeprecationInfo[]> {
-  const indices = await clusterClient.callAsCurrentUser('indices.getMapping', {
+  const { body: indices } = await clusterClient.asCurrentUser.indices.getMapping({
     index: indexPatterns.join(','),
     // we include @timestamp to prevent filtering mappings without a version
     // since @timestamp is expected to always exist
-    filterPath: '*.mappings._meta.version,*.mappings.properties.@timestamp',
+    filter_path: '*.mappings._meta.version,*.mappings.properties.@timestamp',
   });
 
   return Object.keys(indices).reduce((deprecations: EnrichedDeprecationInfo[], index) => {
