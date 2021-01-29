@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
               direction: Direction.desc,
             },
             fieldRequested: ['@timestamp', 'host.name'],
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
             timerange: {

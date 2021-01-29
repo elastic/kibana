@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
           })
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
           })
@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
           })
@@ -202,7 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
           })
