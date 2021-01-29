@@ -11,15 +11,17 @@ import { Boom } from '@hapi/boom';
 
 import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
+
 import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 
 import { getResponsePayloadBytes } from './get_payload_size';
+
+type Response = Request['response'];
 
 describe('getPayloadSize', () => {
   let logger: MockedLogger;
 
   beforeEach(() => (logger = loggerMock.create()));
-
   afterEach(() => mockFs.restore());
 
   test('handles Boom errors', () => {
@@ -29,58 +31,102 @@ describe('getPayloadSize', () => {
     expect(result).toBe(JSON.stringify(payload).length);
   });
 
-  test('handles Buffers', () => {
-    const payload = 'heya';
-    const result = getResponsePayloadBytes(
-      {
-        variety: 'buffer',
-        source: Buffer.from(payload),
-      } as Request['response'],
-      logger
-    );
-    expect(result).toBe(payload.length);
+  describe('handles Buffers', () => {
+    test('with ascii characters', () => {
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'buffer',
+          source: Buffer.from('heya'),
+        } as Response,
+        logger
+      );
+      expect(result).toBe(4);
+    });
+
+    test('with special characters', () => {
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'buffer',
+          source: Buffer.from('¡hola!'),
+        } as Response,
+        logger
+      );
+      expect(result).toBe(7);
+    });
   });
 
-  test('handles Streams', async () => {
-    mockFs({ 'test.txt': 'heya' });
-    const readStream = createReadStream('test.txt');
+  describe('handles Streams', () => {
+    test('with ascii characters', async () => {
+      mockFs({ 'test.txt': 'heya' });
+      const source = createReadStream('test.txt');
 
-    let data = '';
-    for await (const chunk of readStream) {
-      data += chunk;
-    }
+      let data = '';
+      for await (const chunk of source) {
+        data += chunk;
+      }
 
-    const result = getResponsePayloadBytes(
-      {
-        variety: 'stream',
-        source: readStream,
-      } as Request['response'],
-      logger
-    );
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'stream',
+          source,
+        } as Response,
+        logger
+      );
 
-    expect(result).toBe(data.length);
+      expect(result).toBe(Buffer.byteLength(data));
+    });
+
+    test('with special characters', async () => {
+      mockFs({ 'test.txt': '¡hola!' });
+      const source = createReadStream('test.txt');
+
+      let data = '';
+      for await (const chunk of source) {
+        data += chunk;
+      }
+
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'stream',
+          source,
+        } as Response,
+        logger
+      );
+
+      expect(result).toBe(Buffer.byteLength(data));
+    });
   });
 
   describe('handles plain responses', () => {
     test('when source is text', () => {
-      const payload = 'heya';
       const result = getResponsePayloadBytes(
         {
           variety: 'plain',
-          source: payload,
-        } as Request['response'],
+          source: 'heya',
+        } as Response,
         logger
       );
-      expect(result).toBe(payload.length);
+      expect(result).toBe(4);
     });
 
-    test('when source is string', () => {
+    test('when source has special characters', () => {
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'plain',
+          source: '¡hola!',
+        } as Response,
+        logger
+      );
+      expect(result).toBe(7);
+    });
+
+    test('when source is object', () => {
       const payload = { message: 'heya' };
       const result = getResponsePayloadBytes(
         {
           variety: 'plain',
           source: payload,
-        } as Request['response'],
+        } as Response,
         logger
       );
       expect(result).toBe(JSON.stringify(payload).length);
@@ -88,10 +134,14 @@ describe('getPayloadSize', () => {
   });
 
   describe('handles content-length header', () => {
-    test('falls back to value from content-length header if available', () => {
+    test('always provides content-length header if available', () => {
       const headers = { 'content-length': '123' };
       const result = getResponsePayloadBytes(
-        ({ headers } as unknown) as Request['response'],
+        ({
+          headers,
+          variety: 'plain',
+          source: 'abc',
+        } as unknown) as Response,
         logger
       );
       expect(result).toBe(123);
@@ -99,25 +149,19 @@ describe('getPayloadSize', () => {
 
     test('uses first value when hapi header is an array', () => {
       const headers = { 'content-length': ['123', '456'] };
-      const result = getResponsePayloadBytes(
-        ({ headers } as unknown) as Request['response'],
-        logger
-      );
+      const result = getResponsePayloadBytes(({ headers } as unknown) as Response, logger);
       expect(result).toBe(123);
     });
 
     test('returns undefined if length is NaN', () => {
       const headers = { 'content-length': 'oops' };
-      const result = getResponsePayloadBytes(
-        ({ headers } as unknown) as Request['response'],
-        logger
-      );
+      const result = getResponsePayloadBytes(({ headers } as unknown) as Response, logger);
       expect(result).toBeUndefined();
     });
   });
 
   test('defaults to undefined', () => {
-    const result = getResponsePayloadBytes(({} as unknown) as Request['response'], logger);
+    const result = getResponsePayloadBytes(({} as unknown) as Response, logger);
     expect(result).toBeUndefined();
   });
 
@@ -132,7 +176,7 @@ describe('getPayloadSize', () => {
       ({
         variety: 'plain',
         source: payload.circular,
-      } as unknown) as Request['response'],
+      } as unknown) as Response,
       logger
     );
     expect(result).toBeUndefined();
@@ -149,7 +193,7 @@ describe('getPayloadSize', () => {
       ({
         variety: 'plain',
         source: payload.circular,
-      } as unknown) as Request['response'],
+      } as unknown) as Response,
       logger
     );
     expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

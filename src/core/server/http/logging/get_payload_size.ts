@@ -11,6 +11,29 @@ import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import { Logger } from '../../logging';
 
+type Response = Request['response'];
+
+const isBuffer = (src: unknown, res: Response): src is Buffer => {
+  return !isBoom(res) && res.variety === 'buffer' && res.source === src;
+};
+const isReadStream = (src: unknown, res: Response): src is ReadStream => {
+  return !isBoom(res) && res.variety === 'stream' && res.source === src;
+};
+
+function getContentLength(res: Response): string | string[] | void {
+  const headers = isBoom(res)
+    ? (res.output.headers as Record<string, string | string[]>)
+    : res.headers;
+
+  if (headers) {
+    for (const h of Object.keys(headers)) {
+      if (h.toLowerCase() === 'content-length') {
+        return headers[h];
+      }
+    }
+  }
+}
+
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
  * body based on the payload type. Falls back to `undefined`
@@ -20,37 +43,30 @@ import { Logger } from '../../logging';
  *
  * @internal
  */
-export function getResponsePayloadBytes(
-  response: Request['response'],
-  log: Logger
-): number | undefined {
-  const isReadStream = (obj: any): obj is ReadStream => {
-    return !isBoom(response) && response.variety === 'stream' && response.source === obj;
-  };
-
-  const isBuffer = (obj: any): obj is Buffer => {
-    return !isBoom(response) && response.variety === 'buffer' && response.source === obj;
-  };
-
+export function getResponsePayloadBytes(response: Response, log: Logger): number | undefined {
   try {
-    if (isBoom(response)) {
-      return JSON.stringify(response.output.payload).length;
-    } else if (isBuffer(response.source)) {
-      return response.source.toString().length;
-    } else if (isReadStream(response.source)) {
-      return response.source.bytesRead;
-    } else if (response.variety === 'plain') {
-      return typeof response.source === 'string'
-        ? response.source.length
-        : JSON.stringify(response.source).length;
-    } else if (response.headers['content-length']) {
-      const contentLength = response.headers['content-length'];
+    const contentLength = getContentLength(response);
+    if (contentLength) {
       const val = parseInt(
         // hapi response headers can be `string | string[]`, so we need to handle both cases
         Array.isArray(contentLength) ? String(contentLength) : contentLength,
         10
       );
       return !isNaN(val) ? val : undefined;
+    }
+    if (isBoom(response)) {
+      return Buffer.byteLength(JSON.stringify(response.output.payload));
+    }
+    if (isBuffer(response.source, response)) {
+      return response.source.byteLength;
+    }
+    if (isReadStream(response.source, response)) {
+      return response.source.bytesRead;
+    }
+    if (response.variety === 'plain') {
+      return typeof response.source === 'string'
+        ? Buffer.byteLength(response.source)
+        : Buffer.byteLength(JSON.stringify(response.source));
     }
   } catch (e) {
     // We intentionally swallow any errors as this information is

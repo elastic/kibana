@@ -19,6 +19,7 @@ import { getLogEventData } from './metadata';
 import { LegacyLoggingConfig } from './schema';
 import {
   AnyEvent,
+  ResponseEvent,
   isResponseEvent,
   isOpsEvent,
   isErrorEvent,
@@ -68,6 +69,23 @@ export abstract class BaseLogFormat extends Stream.Transform {
     next();
   }
 
+  getContentLength({ responsePayload, responseHeaders }: ResponseEvent): number | undefined {
+    try {
+      return getResponsePayloadBytes(responsePayload, responseHeaders);
+    } catch (e) {
+      // We intentionally swallow any errors as this information is
+      // only a nicety for logging purposes, and should not cause the
+      // server to crash if it cannot be determined.
+      this.push(
+        this.format({
+          type: 'log',
+          tags: ['warning', 'logging'],
+          message: `Failed to calculate response payload bytes. [${e}]`,
+        }) + '\n'
+      );
+    }
+  }
+
   extractAndFormatTimestamp(data: Record<string, any>, format?: string) {
     const { timezone } = this.config;
     const date = moment(data['@timestamp']);
@@ -101,7 +119,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
       data.res = {
         statusCode: event.statusCode,
         responseTime: event.responseTime,
-        contentLength: getResponsePayloadBytes(event.responseHeaders, event.responsePayload),
+        contentLength: this.getContentLength(event),
       };
 
       const query = queryString.stringify(event.query, { sort: false });
