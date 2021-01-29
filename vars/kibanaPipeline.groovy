@@ -468,7 +468,6 @@ def allCiTasks() {
 }
 
 def pipelineLibraryTests() {
-  return // TODO
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {
