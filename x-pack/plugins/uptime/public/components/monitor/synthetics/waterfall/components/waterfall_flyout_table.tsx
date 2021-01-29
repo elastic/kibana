@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
-import { EuiText, EuiBasicTable, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 
 interface Row {
   name: string;
@@ -16,6 +17,10 @@ interface Props {
   rows: Row[];
   title: string;
 }
+
+const StyledText = styled(EuiText)`
+  width: 100%;
+`;
 
 class TableWithoutHeader extends EuiBasicTable {
   renderTableHead() {
@@ -31,7 +36,7 @@ export const Table = (props: Props) => {
         field: 'name',
         name: '',
         sortable: false,
-        render: (name: string, item: Row) => (
+        render: (_name: string, item: Row) => (
           <EuiText size="xs">
             <strong>{item.name}</strong>
           </EuiText>
@@ -43,11 +48,9 @@ export const Table = (props: Props) => {
         sortable: false,
         render: (_name: string, item: Row) => {
           return (
-            <span>
-              <EuiFlexGroup gutterSize={'xs'} alignItems={'center'} responsive={false}>
-                <EuiFlexItem>{item.value ?? '--'}</EuiFlexItem>
-              </EuiFlexGroup>
-            </span>
+            <StyledText size="xs" textAlign="right">
+              {item.value ?? '--'}
+            </StyledText>
           );
         },
       },
@@ -59,8 +62,8 @@ export const Table = (props: Props) => {
     <>
       <EuiText>
         <h4>{title}</h4>
-        <EuiSpacer size="s" />
       </EuiText>
+      <EuiSpacer size="s" />
       <TableWithoutHeader
         tableLayout={'fixed'}
         compressed

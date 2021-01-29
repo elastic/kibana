@@ -71,22 +71,22 @@ export const WaterfallFlyout = () => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Table rows={details} title={DETAILS} />
-        {!!certificates && (
-          <>
-            <EuiSpacer size="l" />
-            <Table rows={certificates} title={CERTIFICATES} />
-          </>
-        )}
         {!!requestHeaders && (
           <>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
             <Table rows={requestHeaders} title={REQUEST_HEADERS} />
           </>
         )}
         {!!responseHeaders && (
           <>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="m" />
             <Table rows={responseHeaders} title={RESPONSE_HEADERS} />
+          </>
+        )}
+        {!!certificates && (
+          <>
+            <EuiSpacer size="m" />
+            <Table rows={certificates} title={CERTIFICATES} />
           </>
         )}
       </EuiFlyoutBody>
