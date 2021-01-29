@@ -7,16 +7,39 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+import { pluginServices } from './services';
+import { registry } from './services/kibana';
+import {
+  PresentationUtilPluginSetup,
+  PresentationUtilPluginStart,
+  PresentationUtilPluginSetupDeps,
+  PresentationUtilPluginStartDeps,
+} from './types';
 
 export class PresentationUtilPlugin
-  implements Plugin<PresentationUtilPluginSetup, PresentationUtilPluginStart> {
-  public setup(core: CoreSetup): PresentationUtilPluginSetup {
+  implements
+    Plugin<
+      PresentationUtilPluginSetup,
+      PresentationUtilPluginStart,
+      PresentationUtilPluginSetupDeps,
+      PresentationUtilPluginStartDeps
+    > {
+  public setup(
+    _coreSetup: CoreSetup<PresentationUtilPluginSetup>,
+    _setupPlugins: PresentationUtilPluginSetupDeps
+  ): PresentationUtilPluginSetup {
     return {};
   }
 
-  public start(core: CoreStart): PresentationUtilPluginStart {
-    return {};
+  public async start(
+    coreStart: CoreStart,
+    startPlugins: PresentationUtilPluginStartDeps
+  ): Promise<PresentationUtilPluginStart> {
+    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+
+    return {
+      ContextProvider: pluginServices.getContextProvider(),
+    };
   }
 
   public stop() {}
