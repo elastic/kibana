@@ -179,12 +179,15 @@ function help() {
         --debug                 Set log level to debug
         --quiet                 Set log level to error
         --silent                Disable log output
+
+      "run" options:
+        --skip-missing          Ignore packages which don't have the requested script
     ` + '\n');
 }
 
 async function run(argv) {
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].setLogLevel(Object(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__["pickLevelFromFlags"])(getopts__WEBPACK_IMPORTED_MODULE_1___default()(argv, {
-    boolean: ['verbose', 'debug', 'quiet', 'silent']
+    boolean: ['verbose', 'debug', 'quiet', 'silent', 'skip-missing']
   }))); // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
   // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
@@ -52620,7 +52623,8 @@ const RunCommand = {
   name: 'run',
 
   async run(projects, projectGraph, {
-    extraArgs
+    extraArgs,
+    options
   }) {
     const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projects, projectGraph);
 
@@ -52631,13 +52635,19 @@ const RunCommand = {
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
     await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async project => {
-      if (project.hasScript(scriptName)) {
-        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running "${scriptName}" script`);
-        await project.runScriptStreaming(scriptName, {
-          args: scriptArgs
-        });
-        _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${project.name}] complete`);
+      if (!project.hasScript(scriptName)) {
+        if (!!options['skip-missing']) {
+          return;
+        }
+
+        throw new _utils_errors__WEBPACK_IMPORTED_MODULE_0__["CliError"](`[${project.name}] no "${scriptName}" script defined. To skip packages without the "${scriptName}" script pass --skip-missing`);
       }
+
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].info(`[${project.name}] running "${scriptName}" script`);
+      await project.runScriptStreaming(scriptName, {
+        args: scriptArgs
+      });
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`[${project.name}] complete`);
     });
   }
 

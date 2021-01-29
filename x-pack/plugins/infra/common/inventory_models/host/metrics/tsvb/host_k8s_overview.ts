@@ -16,7 +16,7 @@ export const hostK8sOverview: TSVBMetricModelCreator = (
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
-  type: 'gauge',
+  type: 'top_n',
   series: [
     {
       id: 'cpucap',
