@@ -61,11 +61,7 @@ export function A11yProvider({ getService }: FtrProviderContext) {
         exclude: ([] as string[])
           .concat(excludeTestSubj || [])
           .map((ts) => [testSubjectToCss(ts)])
-          .concat([
-            [
-              '.leaflet-vega-container[role="graphics-document"][aria-roledescription="visualization"]',
-            ],
-          ]),
+          .concat([['[role="graphics-document"][aria-roledescription="visualization"]']]),
       };
     }
 

@@ -301,10 +301,15 @@ describe('Policy Details', () => {
         const userNotificationCustomMessageTextArea = policyView.find(
           'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
         );
-        const tooltip = policyView.find('EuiIconTip');
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="malwareTooltip"]');
         expect(userNotificationCheckbox).toHaveLength(1);
         expect(userNotificationCustomMessageTextArea).toHaveLength(1);
         expect(tooltip).toHaveLength(1);
+      });
+
+      it('ransomware card is shown', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(1);
       });
     });
     describe('when the subscription tier is gold or lower', () => {
@@ -324,6 +329,11 @@ describe('Policy Details', () => {
         expect(userNotificationCheckbox).toHaveLength(0);
         expect(userNotificationCustomMessageTextArea).toHaveLength(0);
         expect(tooltip).toHaveLength(0);
+      });
+
+      it('ransomware card is hidden', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(0);
       });
     });
   });
