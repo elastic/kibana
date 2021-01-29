@@ -250,6 +250,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   return {
     ...testBed,
     actions: {
+      saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
+      setPolicyName: createFormSetValueAction('policyNameField'),
       setWaitForSnapshotPolicy,
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),

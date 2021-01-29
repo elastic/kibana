@@ -954,5 +954,23 @@ describe('<EditPolicy />', () => {
       expect(actions.warm.hasErrorIndicator()).toBe(false);
       expect(actions.cold.hasErrorIndicator()).toBe(false);
     });
+
+    test('global error callout should show if there are any form errors', async () => {
+      const { actions } = testBed;
+
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+
+      await actions.saveAsNewPolicy(true);
+      await actions.setPolicyName('');
+      await runTimers();
+
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+    });
   });
 });
