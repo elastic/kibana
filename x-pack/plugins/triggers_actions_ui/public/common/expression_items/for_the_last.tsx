@@ -65,6 +65,7 @@ export const ForLastExpression = ({
               defaultMessage: 'for the last',
             }
           )}
+          data-test-subj="forLastExpression"
           value={`${timeWindowSize} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
             (timeWindowSize ?? '').toString()
