@@ -69,7 +69,7 @@ export const PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE = i18n.translate(
 export const PUSH_DISABLE_BY_LICENSE_TITLE = i18n.translate(
   'xpack.securitySolution.case.caseView.pushToServiceDisableByLicenseTitle',
   {
-    defaultMessage: 'Upgrade to Elastic Platinum',
+    defaultMessage: 'Upgrade to an appropriate license',
   }
 );
 
@@ -77,6 +77,13 @@ export const LINK_CLOUD_DEPLOYMENT = i18n.translate(
   'xpack.securitySolution.case.caseView.cloudDeploymentLink',
   {
     defaultMessage: 'cloud deployment',
+  }
+);
+
+export const LINK_APPROPRIATE_LICENSE = i18n.translate(
+  'xpack.securitySolution.case.caseView.appropiateLicense',
+  {
+    defaultMessage: 'appropriate license',
   }
 );
 
