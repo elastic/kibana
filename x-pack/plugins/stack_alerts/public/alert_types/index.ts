@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAlertType as getGeoThresholdAlertType } from './geo_threshold';
 import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { Config } from '../../common';
@@ -18,7 +17,6 @@ export function registerAlertTypes({
   config: Config;
 }) {
   if (config.enableGeoAlerting) {
-    alertTypeRegistry.register(getGeoThresholdAlertType());
     alertTypeRegistry.register(getGeoContainmentAlertType());
   }
   alertTypeRegistry.register(getThresholdAlertType());
