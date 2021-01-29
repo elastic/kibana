@@ -357,15 +357,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
-      proxySettings:
-        this.actionsConfig && this.actionsConfig.proxyUrl
-          ? {
-              proxyUrl: this.actionsConfig.proxyUrl,
-              proxyHeaders: this.actionsConfig.proxyHeaders,
-              proxyRejectUnauthorizedCertificates: this.actionsConfig
-                .proxyRejectUnauthorizedCertificates,
-            }
-          : undefined,
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
