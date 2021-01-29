@@ -77,6 +77,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           name = "Jest"
 
           buildType(Jest)
+          buildType(XPackJest)
           buildType(JestIntegration)
         }
 
