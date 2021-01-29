@@ -34,7 +34,11 @@ function createJoinTermSource(
     return;
   }
 
-  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE) {
+  if (
+    descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
+    'indexPatternId' in descriptor &&
+    'term' in descriptor
+  ) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);

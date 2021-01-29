@@ -40,7 +40,7 @@ describe('TableSource', () => {
             population: 400,
           },
           {
-            // ignore this row, `US` not a PK
+            // row ignored since it's not first row with key 'US'
             iso: 'US',
             population: -1,
           },
