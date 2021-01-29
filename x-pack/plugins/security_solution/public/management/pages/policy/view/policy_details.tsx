@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiText,
   EuiSpacer,
   EuiOverlayMask,
   EuiConfirmModal,
@@ -34,9 +33,6 @@ import {
 import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
-import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
-import { MalwareProtections } from './policy_forms/protections/malware';
-import { AntivirusRegistrationForm } from './policy_forms/antivirus_registration';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
@@ -48,7 +44,7 @@ import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { WrapperPage } from '../../../../common/components/wrapper_page';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { AdvancedPolicyForms } from './policy_advanced';
+import { PolicyDetailsForm } from './policy_details_form';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -71,7 +67,6 @@ export const PolicyDetails = React.memo(() => {
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
-  const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
@@ -111,9 +106,11 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
 
+  const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
-  }, [hostListRouterPath, routeState?.onCancelNavigateTo]);
+    return routingOnCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
+  }, [hostListRouterPath, routingOnCancelNavigateTo]);
+
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
@@ -130,10 +127,6 @@ export const PolicyDetails = React.memo(() => {
   const handleSaveCancel = useCallback(() => {
     setShowConfirm(false);
   }, []);
-
-  const handleAdvancedPolicyClick = useCallback(() => {
-    setShowAdvancedPolicy(!showAdvancedPolicy);
-  }, [showAdvancedPolicy]);
 
   useEffect(() => {
     if (!routeState && locationRouteState) {
@@ -224,48 +217,7 @@ export const PolicyDetails = React.memo(() => {
           {headerRightContent}
         </HeaderPage>
 
-        <EuiText size="xs" color="subdued">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.protections"
-              defaultMessage="Protections"
-            />
-          </h4>
-        </EuiText>
-
-        <EuiSpacer size="xs" />
-        <MalwareProtections />
-        <EuiSpacer size="l" />
-
-        <EuiText size="xs" color="subdued">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.details.settings"
-              defaultMessage="Settings"
-            />
-          </h4>
-        </EuiText>
-
-        <EuiSpacer size="xs" />
-        <WindowsEvents />
-        <EuiSpacer size="l" />
-        <MacEvents />
-        <EuiSpacer size="l" />
-        <LinuxEvents />
-        <EuiSpacer size="l" />
-        <AntivirusRegistrationForm />
-
-        <EuiSpacer size="l" />
-        <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.advanced.show"
-            defaultMessage="{action} advanced settings"
-            values={{ action: showAdvancedPolicy ? 'Hide' : 'Show' }}
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="l" />
-        {showAdvancedPolicy && <AdvancedPolicyForms />}
+        <PolicyDetailsForm />
       </WrapperPage>
 
       <SpyRoute pageName={SecurityPageName.administration} />

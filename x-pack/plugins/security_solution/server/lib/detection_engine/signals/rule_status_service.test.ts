@@ -13,7 +13,7 @@ import {
 } from './rule_status_service';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from './__mocks__/es_results';
 
-const expectIsoDateString = expect.stringMatching(/Z$/);
+const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 const buildStatuses = (n: number) =>
   Array(n)
     .fill(exampleRuleStatus())
@@ -48,6 +48,21 @@ describe('buildRuleStatusAttributes', () => {
       statusDate: expectIsoDateString,
       lastSuccessAt: expectIsoDateString,
       lastSuccessMessage: 'success message',
+    });
+
+    expect(result.statusDate).toEqual(result.lastSuccessAt);
+  });
+
+  it('returns partial failure fields if "partial failure"', () => {
+    const result = buildRuleStatusAttributes(
+      'partial failure',
+      'some indices missing timestamp override field'
+    );
+    expect(result).toEqual({
+      status: 'partial failure',
+      statusDate: expectIsoDateString,
+      lastSuccessAt: expectIsoDateString,
+      lastSuccessMessage: 'some indices missing timestamp override field',
     });
 
     expect(result.statusDate).toEqual(result.lastSuccessAt);

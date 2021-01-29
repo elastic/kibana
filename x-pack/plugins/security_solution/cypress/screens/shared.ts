@@ -6,4 +6,4 @@
 
 export const NOTIFICATION_TOASTS = '[data-test-subj="globalToastList"]';
 
-export const TOAST_ERROR_CLASS = 'euiToast--danger';
+export const TOAST_ERROR = '.euiToast--danger';

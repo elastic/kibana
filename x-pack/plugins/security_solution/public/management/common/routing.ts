@@ -118,7 +118,10 @@ const normalizeTrustedAppsPageLocation = (
  * @param query
  * @param key
  */
-export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+export const extractFirstParamValue = (
+  query: querystring.ParsedUrlQuery,
+  key: string
+): string | undefined => {
   const value = query[key];
 
   return Array.isArray(value) ? value[value.length - 1] : value;

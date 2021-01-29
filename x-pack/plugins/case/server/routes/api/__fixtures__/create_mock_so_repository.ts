@@ -15,17 +15,20 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
 } from '../../../saved_object_types';
 
 export const createMockSavedObjectsRepository = ({
   caseSavedObject = [],
   caseCommentSavedObject = [],
   caseConfigureSavedObject = [],
+  caseMappingsSavedObject = [],
 }: {
   caseSavedObject?: any[];
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
-}) => {
+  caseMappingsSavedObject?: any[];
+} = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
       return {
@@ -97,11 +100,22 @@ export const createMockSavedObjectsRepository = ({
       }
 
       if (
-        findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
-        caseConfigureSavedObject[0] &&
-        caseConfigureSavedObject[0].id === 'throw-error-find'
+        (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
+          caseConfigureSavedObject[0] &&
+          caseConfigureSavedObject[0].id === 'throw-error-find') ||
+        (findArgs.type === CASE_SAVED_OBJECT &&
+          caseSavedObject[0] &&
+          caseSavedObject[0].id === 'throw-error-find')
       ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError('Error thrown for testing');
+      }
+      if (findArgs.type === CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT && caseMappingsSavedObject[0]) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: 1,
+          saved_objects: caseMappingsSavedObject,
+        };
       }
 
       if (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT) {

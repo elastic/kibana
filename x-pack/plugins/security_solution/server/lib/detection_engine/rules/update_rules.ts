@@ -15,13 +15,14 @@ import { addTags } from './add_tags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { InternalRuleUpdate } from '../schemas/rule_schemas';
+import { RuleTypeParams } from '../types';
 
 export const updateRules = async ({
   alertsClient,
   savedObjectsClient,
   defaultOutputIndex,
   ruleUpdate,
-}: UpdateRulesOptions): Promise<PartialAlert | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
   const existingRule = await readRules({
     alertsClient,
     ruleId: ruleUpdate.rule_id,
@@ -74,12 +75,16 @@ export const updateRules = async ({
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
     throttle: null,
+    notifyWhen: null,
   };
 
-  const update = await alertsClient.update({
+  /**
+   * TODO: Remove this use of `as` by utilizing the proper type
+   */
+  const update = (await alertsClient.update({
     id: existingRule.id,
     data: newInternalRule,
-  });
+  })) as PartialAlert<RuleTypeParams>;
 
   if (existingRule.enabled && enabled === false) {
     await alertsClient.disable({ id: existingRule.id });

@@ -54,20 +54,7 @@ export const useHostsKpiHosts = ({
   const [
     hostsKpiHostsRequest,
     setHostsKpiHostsRequest,
-  ] = useState<HostsKpiHostsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: HostsKpiQueries.kpiHosts,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<HostsKpiHostsRequestOptions | null>(null);
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -83,7 +70,7 @@ export const useHostsKpiHosts = ({
 
   const hostsKpiHostsSearch = useCallback(
     (request: HostsKpiHostsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -138,7 +125,7 @@ export const useHostsKpiHosts = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -154,12 +141,12 @@ export const useHostsKpiHosts = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);

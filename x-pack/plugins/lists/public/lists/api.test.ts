@@ -41,7 +41,11 @@ describe('Value Lists API', () => {
 
     it('DELETEs specifying the id as a query parameter', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<DeleteListParams> = { id: 'list-id' };
+      const payload: ApiPayload<DeleteListParams> = {
+        deleteReferences: false,
+        id: 'list-id',
+        ignoreReferences: true,
+      };
       await deleteList({
         http: httpMock,
         ...payload,
@@ -52,7 +56,7 @@ describe('Value Lists API', () => {
         '/api/lists',
         expect.objectContaining({
           method: 'DELETE',
-          query: { id: 'list-id' },
+          query: { deleteReferences: false, id: 'list-id', ignoreReferences: true },
         })
       );
     });

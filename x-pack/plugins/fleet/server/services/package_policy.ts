@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -25,14 +30,18 @@ import {
   PackagePolicySOAttributes,
   RegistryPackage,
   CallESAsCurrentUser,
+  NewPackagePolicySchema,
+  UpdatePackagePolicySchema,
 } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
-import { createStream } from './epm/agent/agent';
+import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
+import { appContextService } from '.';
+import { ExternalCallback } from '..';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -43,6 +52,7 @@ function getDataset(st: string) {
 class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -92,7 +102,7 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.assignPackageStream(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
     }
 
     const isoDate = new Date().toISOString();
@@ -112,10 +122,16 @@ class PackagePolicyService {
     );
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.policy_id, [newSo.id], {
-      user: options?.user,
-      bumpRevision: options?.bumpRevision ?? true,
-    });
+    await agentPolicyService.assignPackagePolicies(
+      soClient,
+      esClient,
+      packagePolicy.policy_id,
+      [newSo.id],
+      {
+        user: options?.user,
+        bumpRevision: options?.bumpRevision ?? true,
+      }
+    );
 
     return {
       id: newSo.id,
@@ -126,6 +142,7 @@ class PackagePolicyService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
     options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
@@ -163,6 +180,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
       soClient,
+      esClient,
       agentPolicyId,
       newSos.map((newSo) => newSo.id),
       {
@@ -248,6 +266,7 @@ class PackagePolicyService {
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser }
@@ -285,7 +304,7 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      inputs = await this.assignPackageStream(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -304,7 +323,7 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, packagePolicy.policy_id, {
+    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
@@ -313,6 +332,7 @@ class PackagePolicyService {
 
   public async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
   ): Promise<DeletePackagePoliciesResponse> {
@@ -327,6 +347,7 @@ class PackagePolicyService {
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
+            esClient,
             packagePolicy.policy_id,
             [packagePolicy.id],
             {
@@ -374,16 +395,48 @@ class PackagePolicyService {
     }
   }
 
-  public async assignPackageStream(
+  public async compilePackagePolicyInputs(
     pkgInfo: PackageInfo,
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
-    const inputsPromises = inputs.map((input) =>
-      _assignPackageStreamToInput(registryPkgInfo, pkgInfo, input)
-    );
+    const inputsPromises = inputs.map(async (input) => {
+      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, input);
+      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, input);
+      return {
+        ...input,
+        compiled_input: compiledInput,
+        streams: compiledStreams,
+      };
+    });
 
     return Promise.all(inputsPromises);
+  }
+
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy> {
+    let newData = newPackagePolicy;
+
+    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewPackagePolicy = newData;
+
+      for (const callback of externalCallbacks) {
+        const result = await callback(updatedNewData, context, request);
+        if (externalCallbackType === 'packagePolicyCreate') {
+          updatedNewData = NewPackagePolicySchema.validate(result);
+        } else if (externalCallbackType === 'packagePolicyUpdate') {
+          updatedNewData = UpdatePackagePolicySchema.validate(result);
+        }
+      }
+
+      newData = updatedNewData;
+    }
+    return newData;
   }
 }
 
@@ -396,20 +449,53 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
   };
 }
 
-async function _assignPackageStreamToInput(
+async function _compilePackagePolicyInput(
+  registryPkgInfo: RegistryPackage,
+  pkgInfo: PackageInfo,
+  input: PackagePolicyInput
+) {
+  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
+    return undefined;
+  }
+
+  const packageInputs = pkgInfo.policy_templates[0].inputs;
+  const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
+  if (!packageInput) {
+    throw new Error(`Input template not found, unable to find input type ${input.type}`);
+  }
+
+  if (!packageInput.template_path) {
+    return undefined;
+  }
+
+  const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
+    path.endsWith(`/agent/input/${packageInput.template_path!}`)
+  );
+
+  if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
+    throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path!}`);
+  }
+
+  return compileTemplate(
+    // Populate template variables from input vars
+    Object.assign({}, input.vars),
+    pkgInputTemplate.buffer.toString()
+  );
+}
+
+async function _compilePackageStreams(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _assignPackageStreamToStream(registryPkgInfo, pkgInfo, input, stream)
+    _compilePackageStream(registryPkgInfo, pkgInfo, input, stream)
   );
 
-  const streams = await Promise.all(streamsPromises);
-  return { ...input, streams };
+  return await Promise.all(streamsPromises);
 }
 
-async function _assignPackageStreamToStream(
+async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   input: PackagePolicyInput,
@@ -442,22 +528,22 @@ async function _assignPackageStreamToStream(
     throw new Error(`Stream template path not found for dataset ${datasetPath}`);
   }
 
-  const [pkgStream] = await getAssetsData(
+  const [pkgStreamTemplate] = await getAssetsData(
     registryPkgInfo,
     (path: string) => path.endsWith(streamFromPkg.template_path),
     datasetPath
   );
 
-  if (!pkgStream || !pkgStream.buffer) {
+  if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
     throw new Error(
       `Unable to load stream template ${streamFromPkg.template_path} for dataset ${datasetPath}`
     );
   }
 
-  const yaml = createStream(
+  const yaml = compileTemplate(
     // Populate template variables from input vars and stream vars
     Object.assign({}, input.vars, stream.vars),
-    pkgStream.buffer.toString()
+    pkgStreamTemplate.buffer.toString()
   );
 
   stream.compiled_stream = yaml;

@@ -6,6 +6,7 @@
 
 import { createSelector } from 'reselect';
 
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';
@@ -64,21 +65,18 @@ export const timelineQueryByIdSelector = () =>
 
 export const globalSelector = () => createSelector(selectGlobal, (global) => global);
 
+const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
+
 export const globalQuerySelector = () =>
-  createSelector(
-    selectGlobal,
-    (global) =>
-      global.query || {
-        query: '',
-        language: 'kuery',
-      }
-  );
+  createSelector(selectGlobal, (global) => global.query || DEFAULT_QUERY);
 
 export const globalSavedQuerySelector = () =>
   createSelector(selectGlobal, (global) => global.savedQuery || null);
 
+const NO_FILTERS: Filter[] = [];
+
 export const globalFiltersQuerySelector = () =>
-  createSelector(selectGlobal, (global) => global.filters || []);
+  createSelector(selectGlobal, (global) => global.filters || NO_FILTERS);
 
 export const getTimelineSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 

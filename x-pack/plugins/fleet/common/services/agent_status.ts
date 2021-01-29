@@ -41,7 +41,7 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForEnrollingAgents() {
-  return `not ${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*`;
+  return `not (${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*)`;
 }
 
 export function buildKueryForUnenrollingAgents() {
@@ -49,19 +49,27 @@ export function buildKueryForUnenrollingAgents() {
 }
 
 export function buildKueryForOnlineAgents() {
-  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForEnrollingAgents()}) AND not (${buildKueryForUnenrollingAgents()})`;
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForUpdatingAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
-  return `( ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded )`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded`;
 }
 
 export function buildKueryForOfflineAgents() {
   return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s AND not (${buildKueryForErrorAgents()})`;
+  }s AND not (${buildKueryForErrorAgents()}) AND not ( ${buildKueryForUpdatingAgents()} )`;
+}
+
+export function buildKueryForUpgradingAgents() {
+  return `(${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*) and not (${AGENT_SAVED_OBJECT_TYPE}.upgraded_at:*)`;
 }
 
 export function buildKueryForUpdatingAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
+  return `(${buildKueryForUpgradingAgents()}) or (${buildKueryForEnrollingAgents()}) or (${buildKueryForUnenrollingAgents()})`;
+}
+
+export function buildKueryForInactiveAgents() {
+  return `${AGENT_SAVED_OBJECT_TYPE}.active:false`;
 }

@@ -8,10 +8,10 @@
     "winlogbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "UAC Bypass via DiskCleanup Scheduled Task Hijack",
-  "query": "event.category:process and event.type:(start or process_started) and process.args:(/autoclean or /AUTOCLEAN) and process.parent.name:svchost.exe and not process.executable:(\"C:\\Windows\\System32\\cleanmgr.exe\" or \"C:\\Windows\\SysWOW64\\cleanmgr.exe\")",
+  "query": "process where event.type in (\"start\", \"process_started\") and\nprocess.args:\"/autoclean\" and process.args:\"/d\" and\nnot process.executable : (\"C:\\\\Windows\\\\System32\\\\cleanmgr.exe\", \"C:\\\\Windows\\\\SysWOW64\\\\cleanmgr.exe\")\n",
   "risk_score": 47,
   "rule_id": "1dcc51f6-ba26-49e7-9ef4-2655abb2361e",
   "severity": "medium",
@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1088",
-          "name": "Bypass User Account Control",
-          "reference": "https://attack.mitre.org/techniques/T1088/"
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.002",
+              "name": "Bypass User Access Control",
+              "reference": "https://attack.mitre.org/techniques/T1548/002/"
+            }
+          ]
         }
       ]
     }
   ],
-  "type": "query",
-  "version": 1
+  "type": "eql",
+  "version": 2
 }

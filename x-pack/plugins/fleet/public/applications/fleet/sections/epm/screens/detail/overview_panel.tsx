@@ -15,7 +15,7 @@ export function OverviewPanel(props: PackageInfo) {
     <Fragment>
       {readme && <Readme readmePath={readme} packageName={name} version={version} />}
       <EuiSpacer size="xl" />
-      {screenshots && <Screenshots images={screenshots} />}
+      {screenshots && <Screenshots images={screenshots} packageName={name} version={version} />}
     </Fragment>
   );
 }

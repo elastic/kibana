@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
 import { mockAuthenticationProviderOptions } from './base.mock';
 
-import { ILegacyClusterClient, ScopeableRequest } from '../../../../../../src/core/server';
+import { ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BasicAuthenticationProvider } from './basic';
@@ -18,15 +21,14 @@ function generateAuthorizationHeader(username: string, password: string) {
 }
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
   expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
 
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+  expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
 }
 
 describe('BasicAuthenticationProvider', () => {
@@ -34,6 +36,8 @@ describe('BasicAuthenticationProvider', () => {
   let mockOptions: ReturnType<typeof mockAuthenticationProviderOptions>;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions();
+    mockOptions.urls.loggedOut.mockReturnValue('/some-logged-out-page');
+
     provider = new BasicAuthenticationProvider(mockOptions);
   });
 
@@ -43,8 +47,10 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+        securityMock.createApiResponse({ body: user })
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(
@@ -64,9 +70,13 @@ describe('BasicAuthenticationProvider', () => {
       const credentials = { username: 'user', password: 'password' };
       const authorization = generateAuthorizationHeader(credentials.username, credentials.password);
 
-      const authenticationError = new Error('Some error');
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+      const authenticationError = new errors.ResponseError(
+        securityMock.createApiResponse({ body: {} })
+      );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        authenticationError
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
@@ -147,8 +157,10 @@ describe('BasicAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+        securityMock.createApiResponse({ body: user })
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, { authorization })).resolves.toEqual(
@@ -162,9 +174,13 @@ describe('BasicAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
       const authorization = generateAuthorizationHeader('user', 'password');
 
-      const authenticationError = new Error('Forbidden');
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+      const authenticationError = new errors.ResponseError(
+        securityMock.createApiResponse({ body: {} })
+      );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        authenticationError
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, { authorization })).resolves.toEqual(
@@ -184,30 +200,13 @@ describe('BasicAuthenticationProvider', () => {
       );
     });
 
-    it('redirects to login view if state is `null`.', async () => {
-      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
-      );
-    });
-
-    it('always redirects to the login page.', async () => {
+    it('redirects to the logged out URL.', async () => {
       await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
-    });
 
-    it('passes query string parameters to the login page.', async () => {
-      await expect(
-        provider.logout(
-          httpServerMock.createKibanaRequest({
-            query: { next: '/app/ml', msg: 'SESSION_EXPIRED' },
-          }),
-          {}
-        )
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo(
-          '/mock-server-basepath/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
-        )
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
     });
   });

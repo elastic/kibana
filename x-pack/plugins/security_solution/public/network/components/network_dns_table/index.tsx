@@ -16,7 +16,7 @@ import {
   NetworkDnsFields,
 } from '../../../../common/search_strategy';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -59,8 +59,9 @@ const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const { activePage, isPtrIncluded, limit, sort } = useShallowEqualSelector(getNetworkDnsSelector);
+  const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
+  const { activePage, isPtrIncluded, limit, sort } = useDeepEqualSelector(getNetworkDnsSelector);
+
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(

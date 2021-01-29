@@ -1,23 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-
-import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -35,10 +22,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -136,15 +127,23 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
-      await this.expectExistsDashboardLandingPage();
+      await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
-    public async gotoDashboardLandingPage() {
+    public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
         await this.clickDashboardBreadcrumbLink();
+        await retry.try(async () => {
+          const warning = await testSubjects.exists('confirmModalTitleText');
+          if (warning) {
+            await testSubjects.click(
+              ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+            );
+          }
+        });
+        await this.expectExistsDashboardLandingPage();
       }
     }
 
@@ -263,6 +262,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const isMarginsOn = await this.isMarginsOn();
       if (isMarginsOn !== 'on') {
         return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
+    public async isColorSyncOn() {
+      log.debug('isColorSyncOn');
+      await this.openOptions();
+      return await testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
+    }
+
+    public async useColorSync(on = true) {
+      await this.openOptions();
+      const isColorSyncOn = await this.isColorSyncOn();
+      if (isColorSyncOn !== 'on') {
+        return await testSubjects.click('dashboardSyncColorsCheckbox');
       }
     }
 
@@ -544,6 +557,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }
+    }
+
+    public async getPanelChartDebugState(panelIndex: number) {
+      return await elasticChart.getChartDebugData(undefined, panelIndex);
     }
   }
 

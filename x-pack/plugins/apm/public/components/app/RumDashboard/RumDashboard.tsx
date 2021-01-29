@@ -18,9 +18,9 @@ import { UXMetrics } from './UXMetrics';
 import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
-import { useBreakPoints } from './hooks/useBreakPoints';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 import { getPercentileLabel } from './UXMetrics/translations';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 
 export function RumDashboard() {
   const {

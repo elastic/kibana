@@ -19,7 +19,7 @@ import {
   IS_OPERATOR,
   EXISTS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -177,10 +177,9 @@ interface AddNewTimelineParams {
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
@@ -197,7 +196,7 @@ export const addNewTimeline = ({
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
   indexNames,
-  kqlQuery = { filterQuery: null, filterQueryDraft: null },
+  kqlQuery = { filterQuery: null },
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
@@ -581,31 +580,6 @@ export const updateTimelineKqlMode = ({
   };
 };
 
-interface UpdateKqlFilterQueryDraftParams {
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-  timelineById: TimelineById;
-}
-
-export const updateKqlFilterQueryDraft = ({
-  id,
-  filterQueryDraft,
-  timelineById,
-}: UpdateKqlFilterQueryDraftParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      kqlQuery: {
-        ...timeline.kqlQuery,
-        filterQueryDraft,
-      },
-    },
-  };
-};
-
 interface UpdateTimelineColumnsParams {
   id: string;
   columns: ColumnHeaderOptions[];
@@ -628,46 +602,27 @@ export const updateTimelineColumns = ({
   };
 };
 
-interface UpdateTimelineDescriptionParams {
-  id: string;
+interface UpdateTimelineTitleAndDescriptionParams {
   description: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineDescription = ({
-  id,
-  description,
-  timelineById,
-}: UpdateTimelineDescriptionParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      description: description.endsWith(' ') ? `${description.trim()} ` : description.trim(),
-    },
-  };
-};
-
-interface UpdateTimelineTitleParams {
   id: string;
   title: string;
   timelineById: TimelineById;
 }
 
-export const updateTimelineTitle = ({
+export const updateTimelineTitleAndDescription = ({
+  description,
   id,
   title,
   timelineById,
-}: UpdateTimelineTitleParams): TimelineById => {
+}: UpdateTimelineTitleAndDescriptionParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      title: title.endsWith(' ') ? `${title.trim()} ` : title.trim(),
+      description: description.trim(),
+      title: title.trim(),
     },
   };
 };
@@ -788,7 +743,7 @@ export const updateTimelineRange = ({
 
 interface UpdateTimelineSortParams {
   id: string;
-  sort: Sort;
+  sort: Sort[];
   timelineById: TimelineById;
 }
 

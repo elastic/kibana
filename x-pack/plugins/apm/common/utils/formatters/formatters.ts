@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import { Maybe } from '../../../typings/common';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { isFiniteNumber } from '../is_finite_number';
 
-export function asDecimal(value: number) {
+export function asDecimal(value?: number | null) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   return numeral(value).format('0,0.0');
 }
 
-export function asInteger(value: number) {
-  return numeral(value).format('0,0');
-}
+export function asInteger(value?: number | null) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
 
-export function tpmUnit(type?: string) {
-  return type === 'request'
-    ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm',
-      })
-    : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm',
-      });
+  return numeral(value).format('0,0');
 }
 
 export function asPercent(

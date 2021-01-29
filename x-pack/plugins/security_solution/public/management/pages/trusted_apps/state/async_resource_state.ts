@@ -136,8 +136,8 @@ export const getCurrentResourceError = <Data, Error>(
 };
 
 export const isOutdatedResourceState = <Data, Error>(
-  state: AsyncResourceState<Data, Error>,
-  isFresh: (data: Data) => boolean
+  state: Immutable<AsyncResourceState<Data, Error>>,
+  isFresh: (data: Immutable<Data>) => boolean
 ): boolean =>
   isUninitialisedResourceState(state) ||
   (isLoadedResourceState(state) && !isFresh(state.data)) ||

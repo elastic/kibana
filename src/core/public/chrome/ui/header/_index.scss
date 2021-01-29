@@ -1,5 +1,19 @@
 @include euiHeaderAffordForFixed;
 
+.euiDataGrid__restrictBody {
+  .headerGlobalNav,
+  .kbnQueryBar {
+    display: none;
+  }
+}
+
+.euiDataGrid__restrictBody.euiBody--headerIsFixed {
+  .euiFlyout {
+    top: 0;
+    height: 100%;
+  }
+}
+
 .chrHeaderHelpMenu__version {
   text-transform: none;
 }

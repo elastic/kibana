@@ -7,6 +7,7 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '../../../../../common/validate';
 import {
@@ -19,8 +20,7 @@ import {
   importRulesSchema as importRulesResponseSchema,
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { IRouter } from '../../../../../../../../src/core/server';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils/';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -49,7 +49,11 @@ type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  ml: SetupPlugins['ml']
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,

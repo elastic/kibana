@@ -18,6 +18,7 @@ export type StaticPage =
 
 export type DynamicPage =
   | 'integration_details'
+  | 'integration_policy_edit'
   | 'policy_details'
   | 'add_integration_from_policy'
   | 'add_integration_to_policy'
@@ -41,6 +42,7 @@ export const PAGE_ROUTING_PATHS = {
   integrations_all: '/integrations',
   integrations_installed: '/integrations/installed',
   integration_details: '/integrations/detail/:pkgkey/:panel?',
+  integration_policy_edit: '/integrations/edit-integration/:packagePolicyId',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -69,6 +71,8 @@ export const pagePathGetters: {
   integrations_installed: () => '/integrations/installed',
   integration_details: ({ pkgkey, panel }) =>
     `/integrations/detail/${pkgkey}${panel ? `/${panel}` : ''}`,
+  integration_policy_edit: ({ packagePolicyId }) =>
+    `/integrations/edit-integration/${packagePolicyId}`,
   policies: () => '/policies',
   policies_list: () => '/policies',
   policy_details: ({ policyId, tabId }) => `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
@@ -78,8 +82,8 @@ export const pagePathGetters: {
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
   fleet: () => '/fleet',
   fleet_agent_list: ({ kuery }) => `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
-  fleet_agent_details: ({ agentId, tabId }) =>
-    `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}`,
+  fleet_agent_details: ({ agentId, tabId, logQuery }) =>
+    `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}${logQuery ? `?_q=${logQuery}` : ''}`,
   fleet_enrollment_tokens: () => '/fleet/enrollment-tokens',
   data_streams: () => '/data-streams',
 };

@@ -10,6 +10,7 @@ import { uploadLayerWizardConfig } from './file_upload_wizard';
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
 // @ts-ignore
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
+import { geoLineLayerWizardConfig } from '../sources/es_geo_line_source';
 // @ts-ignore
 import { point2PointLayerWizardConfig } from '../sources/es_pew_pew_source';
 // @ts-ignore
@@ -36,8 +37,6 @@ export function registerLayerWizards() {
 
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
-  registerLayerWizard(ObservabilityLayerWizardConfig);
-  registerLayerWizard(SecurityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
@@ -45,6 +44,7 @@ export function registerLayerWizards() {
   registerLayerWizard(clustersLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(heatmapLayerWizardConfig);
+  registerLayerWizard(geoLineLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(point2PointLayerWizardConfig);
   // @ts-ignore
@@ -60,5 +60,7 @@ export function registerLayerWizards() {
   registerLayerWizard(wmsLayerWizardConfig);
 
   registerLayerWizard(mvtVectorSourceWizardConfig);
+  registerLayerWizard(ObservabilityLayerWizardConfig);
+  registerLayerWizard(SecurityLayerWizardConfig);
   registered = true;
 }

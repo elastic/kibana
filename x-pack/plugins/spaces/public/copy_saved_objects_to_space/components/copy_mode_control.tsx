@@ -127,6 +127,15 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
         }}
       >
         <EuiCheckableCard
+          id={createNewCopiesEnabled.id}
+          label={createLabel(createNewCopiesEnabled)}
+          checked={createNewCopies}
+          onChange={() => onChange({ createNewCopies: true })}
+        />
+
+        <EuiSpacer size="s" />
+
+        <EuiCheckableCard
           id={createNewCopiesDisabled.id}
           label={createLabel(createNewCopiesDisabled)}
           checked={!createNewCopies}
@@ -140,15 +149,6 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
             data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
           />
         </EuiCheckableCard>
-
-        <EuiSpacer size="s" />
-
-        <EuiCheckableCard
-          id={createNewCopiesEnabled.id}
-          label={createLabel(createNewCopiesEnabled)}
-          checked={createNewCopies}
-          onChange={() => onChange({ createNewCopies: true })}
-        />
       </EuiFormFieldset>
 
       <EuiSpacer size="m" />

@@ -23,6 +23,12 @@ export const createHandlers = (): RendererHandlers => ({
   getFilter() {
     return '';
   },
+  getRenderMode() {
+    return 'display';
+  },
+  isSyncColorsEnabled() {
+    return false;
+  },
   onComplete(fn: () => void) {
     this.done = fn;
   },

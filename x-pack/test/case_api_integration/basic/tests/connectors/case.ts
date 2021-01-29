@@ -391,6 +391,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -441,6 +444,9 @@ export default ({ getService }: FtrProviderContext): void => {
               name: 'Servicenow',
               type: '.servicenow',
               fields: {},
+            },
+            settings: {
+              syncAlerts: true,
             },
           },
         };
@@ -673,7 +679,53 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
+      // TODO: Remove it when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it('should fail adding a comment of type alert', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+
+        const caseRes = await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(postCaseReq)
+          .expect(200);
+
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: caseRes.body.id,
+            comment: { alertId: 'test-id', index: 'test-index', type: CommentType.alert },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]',
+          retry: false,
+        });
+      });
+
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -754,13 +806,15 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing`,
             retry: false,
           });
         }
       });
 
-      it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -892,7 +946,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should add a comment of type alert', async () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should add a comment of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')

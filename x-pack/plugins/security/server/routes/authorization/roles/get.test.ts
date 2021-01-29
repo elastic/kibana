@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { defineGetRolesRoutes } from './get';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-} from '../../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 const application = 'kibana-.kibana';
@@ -32,11 +29,15 @@ describe('GET role', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementation(
+          (async () => ({ body: await apiResponse() })) as any
+        );
       }
 
       defineGetRolesRoutes(mockRouteDefinitionParams);
@@ -49,22 +50,17 @@ describe('GET role', () => {
         params: { name },
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.getRole', {
-          name,
-        });
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+        expect(
+          mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+        ).toHaveBeenCalledWith({ name });
       }
+
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };

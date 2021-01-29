@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
@@ -24,10 +13,10 @@ import $ from 'jquery';
 
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { tableVisTypeDefinition } from '../table_vis_type';
+import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
 import { Vis } from '../../../visualizations/public';
 import { stubFields } from '../../../data/public/stubs';
-import { tableVisResponseHandler } from '../table_vis_response_handler';
+import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
 import { IAggConfig, search } from '../../../data/public';
 import { getStubIndexPattern } from '../../../data/public/test_utils';
@@ -94,7 +83,7 @@ describe('Table Vis - Controller', () => {
     angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
       $rootScope = _$rootScope_;
       $compile = _$compile_;
-      tableAggResponse = tableVisResponseHandler;
+      tableAggResponse = tableVisLegacyResponseHandler;
     })
   );
 
@@ -110,8 +99,8 @@ describe('Table Vis - Controller', () => {
 
   function getRangeVis(params?: object) {
     return ({
-      type: tableVisTypeDefinition,
-      params: Object.assign({}, tableVisTypeDefinition.visConfig?.defaults, params),
+      type: tableVisLegacyTypeDefinition,
+      params: Object.assign({}, tableVisLegacyTypeDefinition.visConfig?.defaults, params),
       data: {
         aggs: createAggConfigs(stubIndexPattern, [
           { type: 'count', schema: 'metric' },

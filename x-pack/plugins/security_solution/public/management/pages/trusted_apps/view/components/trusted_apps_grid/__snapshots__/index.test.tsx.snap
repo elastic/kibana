@@ -138,7 +138,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -154,7 +154,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -170,7 +170,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -180,7 +180,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -196,7 +196,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -390,7 +390,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -406,7 +406,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -422,7 +422,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -432,7 +432,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -448,7 +448,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -642,7 +642,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -658,7 +658,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -674,7 +674,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -684,7 +684,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -700,7 +700,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -894,7 +894,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -910,7 +910,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -926,7 +926,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -936,7 +936,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -952,7 +952,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1146,7 +1146,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1162,7 +1162,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1178,7 +1178,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -1188,7 +1188,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1204,7 +1204,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1398,7 +1398,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1414,7 +1414,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1430,7 +1430,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -1440,7 +1440,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1456,7 +1456,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1650,7 +1650,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1666,7 +1666,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1682,7 +1682,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -1692,7 +1692,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1708,7 +1708,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1902,7 +1902,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1918,7 +1918,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1934,7 +1934,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -1944,7 +1944,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -1960,7 +1960,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2154,7 +2154,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2170,7 +2170,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2186,7 +2186,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -2196,7 +2196,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2212,7 +2212,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2406,7 +2406,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2422,7 +2422,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2438,7 +2438,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -2448,7 +2448,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2464,7 +2464,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2948,7 +2948,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2964,7 +2964,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -2980,7 +2980,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -2990,7 +2990,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3006,7 +3006,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3200,7 +3200,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3216,7 +3216,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3232,7 +3232,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -3242,7 +3242,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3258,7 +3258,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3452,7 +3452,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3468,7 +3468,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3484,7 +3484,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -3494,7 +3494,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3510,7 +3510,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3704,7 +3704,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3720,7 +3720,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3736,7 +3736,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -3746,7 +3746,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3762,7 +3762,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3956,7 +3956,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3972,7 +3972,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -3988,7 +3988,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -3998,7 +3998,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4014,7 +4014,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4208,7 +4208,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4224,7 +4224,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4240,7 +4240,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -4250,7 +4250,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4266,7 +4266,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4460,7 +4460,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4476,7 +4476,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4492,7 +4492,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -4502,7 +4502,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4518,7 +4518,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4712,7 +4712,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4728,7 +4728,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4744,7 +4744,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -4754,7 +4754,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4770,7 +4770,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4964,7 +4964,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4980,7 +4980,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -4996,7 +4996,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -5006,7 +5006,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5022,7 +5022,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5216,7 +5216,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5232,7 +5232,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5248,7 +5248,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -5258,7 +5258,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5274,7 +5274,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5716,7 +5716,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5732,7 +5732,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5748,7 +5748,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -5758,7 +5758,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5774,7 +5774,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5968,7 +5968,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -5984,7 +5984,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6000,7 +6000,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -6010,7 +6010,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6026,7 +6026,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6220,7 +6220,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6236,7 +6236,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6252,7 +6252,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -6262,7 +6262,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6278,7 +6278,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6472,7 +6472,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6488,7 +6488,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6504,7 +6504,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -6514,7 +6514,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6530,7 +6530,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6724,7 +6724,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6740,7 +6740,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6756,7 +6756,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -6766,7 +6766,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6782,7 +6782,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6976,7 +6976,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -6992,7 +6992,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7008,7 +7008,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -7018,7 +7018,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7034,7 +7034,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7228,7 +7228,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7244,7 +7244,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7260,7 +7260,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -7270,7 +7270,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7286,7 +7286,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7480,7 +7480,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7496,7 +7496,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7512,7 +7512,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -7522,7 +7522,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7538,7 +7538,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7732,7 +7732,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7748,7 +7748,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7764,7 +7764,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -7774,7 +7774,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7790,7 +7790,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -7984,7 +7984,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Name
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8000,7 +8000,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     OS
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8016,7 +8016,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Date Created
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     1 minute ago
                   </dd>
@@ -8026,7 +8026,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Created By
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"
@@ -8042,7 +8042,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                     Description
                   </dt>
                   <dd
-                    class="euiDescriptionList__description c2"
+                    class="euiDescriptionList__description c2 eui-textBreakWord"
                   >
                     <span
                       class="euiToolTipAnchor"

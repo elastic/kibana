@@ -4,27 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { px, truncate, unit } from '../../../../style/variables';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { px, unit } from '../../../../style/variables';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { ServiceOverviewTable } from '../service_overview_table';
-import { TableLinkFlexItem } from '../table_link_flex_item';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 interface Props {
   serviceName: string;
@@ -49,24 +49,12 @@ const DEFAULT_SORT = {
   field: 'occurrences' as const,
 };
 
-const ErrorDetailLinkWrapper = styled.div`
-  width: 100%;
-  .euiToolTipAnchor {
-    width: 100% !important;
-  }
-`;
-
-const StyledErrorDetailLink = styled(ErrorDetailLink)`
-  display: block;
-  ${truncate('100%')}
-`;
-
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
     urlParams: { start, end },
     uiFilters,
   } = useUrlParams();
-
+  const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
     sort: {
@@ -86,16 +74,17 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }),
       render: (_, { name, group_id: errorGroupId }) => {
         return (
-          <ErrorDetailLinkWrapper>
-            <EuiToolTip delay="long" content={name}>
-              <StyledErrorDetailLink
+          <TruncateWithTooltip
+            text={name}
+            content={
+              <ErrorDetailLink
                 serviceName={serviceName}
                 errorGroupId={errorGroupId}
               >
                 {name}
-              </StyledErrorDetailLink>
-            </EuiToolTip>
-          </ErrorDetailLinkWrapper>
+              </ErrorDetailLink>
+            }
+          />
         );
       },
     },
@@ -123,7 +112,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       width: px(unit * 12),
       render: (_, { occurrences }) => {
         return (
-          <SparkPlotWithValueLabel
+          <SparkPlot
             color="euiColorVis7"
             series={occurrences.timeseries ?? undefined}
             valueLabel={i18n.translate(
@@ -152,7 +141,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     },
     status,
   } = useFetcher(() => {
-    if (!start || !end) {
+    if (!start || !end || !transactionType) {
       return;
     }
 
@@ -169,6 +158,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           pageIndex: tableOptions.pageIndex,
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
+          transactionType,
         },
       },
     }).then((response) => {
@@ -192,6 +182,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tableOptions.pageIndex,
     tableOptions.sort.field,
     tableOptions.sort.direction,
+    transactionType,
   ]);
 
   const {
@@ -201,10 +192,10 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   } = data;
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup>
-          <EuiFlexItem>
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
                 {i18n.translate('xpack.apm.serviceOverview.errorsTableTitle', {
@@ -213,52 +204,58 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <TableLinkFlexItem>
+          <EuiFlexItem grow={false}>
             <ErrorOverviewLink serviceName={serviceName}>
               {i18n.translate('xpack.apm.serviceOverview.errorsTableLinkText', {
                 defaultMessage: 'View errors',
               })}
             </ErrorOverviewLink>
-          </TableLinkFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
-          <ServiceOverviewTable
-            columns={columns}
-            items={items}
-            pagination={{
-              pageIndex,
-              pageSize: PAGE_SIZE,
-              totalItemCount,
-              pageSizeOptions: [PAGE_SIZE],
-              hidePerPageOptions: true,
-            }}
-            loading={status === FETCH_STATUS.LOADING}
-            onChange={(newTableOptions: {
-              page?: {
-                index: number;
-              };
-              sort?: { field: string; direction: SortDirection };
-            }) => {
-              setTableOptions({
-                pageIndex: newTableOptions.page?.index ?? 0,
-                sort: newTableOptions.sort
-                  ? {
-                      field: newTableOptions.sort.field as SortField,
-                      direction: newTableOptions.sort.direction,
-                    }
-                  : DEFAULT_SORT,
-              });
-            }}
-            sorting={{
-              enableAllColumns: true,
-              sort: {
-                direction: sort.direction,
-                field: sort.field,
-              },
-            }}
-          />
+          <ServiceOverviewTableContainer
+            isEmptyAndLoading={
+              items.length === 0 && status === FETCH_STATUS.LOADING
+            }
+          >
+            <EuiBasicTable
+              columns={columns}
+              items={items}
+              pagination={{
+                pageIndex,
+                pageSize: PAGE_SIZE,
+                totalItemCount,
+                pageSizeOptions: [PAGE_SIZE],
+                hidePerPageOptions: true,
+              }}
+              loading={status === FETCH_STATUS.LOADING}
+              onChange={(newTableOptions: {
+                page?: {
+                  index: number;
+                };
+                sort?: { field: string; direction: SortDirection };
+              }) => {
+                setTableOptions({
+                  pageIndex: newTableOptions.page?.index ?? 0,
+                  sort: newTableOptions.sort
+                    ? {
+                        field: newTableOptions.sort.field as SortField,
+                        direction: newTableOptions.sort.direction,
+                      }
+                    : DEFAULT_SORT,
+                });
+              }}
+              sorting={{
+                enableAllColumns: true,
+                sort: {
+                  direction: sort.direction,
+                  field: sort.field,
+                },
+              }}
+            />
+          </ServiceOverviewTableContainer>
         </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>

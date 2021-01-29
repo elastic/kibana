@@ -7,16 +7,17 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
+import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
+import { licensingMock } from '../../../../licensing/public/mocks';
 import { App } from '../../../public/application/app';
 import { TestSubjects } from '../helpers';
-import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
 
 const breadcrumbService = createBreadcrumbsMock();
 
 const AppWithContext = (props: any) => {
   return (
-    <KibanaContextProvider services={{ breadcrumbService }}>
+    <KibanaContextProvider services={{ breadcrumbService, license: licensingMock.createLicense() }}>
       <App {...props} />
     </KibanaContextProvider>
   );

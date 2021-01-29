@@ -30,6 +30,17 @@ interface ProviderState {
   peerCertificateFingerprint256: string;
 }
 
+interface CertificateChain {
+  peerCertificate: DetailedPeerCertificate | null;
+  certificateChain: string[];
+  isChainIncomplete: boolean;
+}
+
+/**
+ * List of protocols that can be renegotiated. Notably, TLSv1.3 is absent from this list, because it does not support renegotiation.
+ */
+const RENEGOTIATABLE_PROTOCOLS = ['TLSv1', 'TLSv1.1', 'TLSv1.2'];
+
 /**
  * Checks whether current request can initiate new session.
  * @param request Request instance.
@@ -38,6 +49,39 @@ function canStartNewSession(request: KibanaRequest) {
   // We should try to establish new session only if request requires authentication and it's not an XHR request.
   // Technically we can authenticate XHR requests too, but we don't want these to create a new session unintentionally.
   return canRedirectRequest(request) && request.route.options.authRequired === true;
+}
+
+/**
+ * Returns a stringified version of a certificate, including metadata
+ * @param peerCertificate DetailedPeerCertificate instance.
+ */
+function stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
+  const {
+    subject,
+    issuer,
+    issuerCertificate,
+    subjectaltname,
+    valid_from: validFrom,
+    valid_to: validTo,
+  } = peerCertificate;
+
+  // The issuerCertificate field can be three different values:
+  //  * Object: In this case, the issuer certificate is an object
+  //  * null: In this case, the issuer certificate is a null value; this should not happen according to the type definition but historically there was code in place to account for this
+  //  * undefined: The issuer certificate chain is broken; this should not happen according to the type definition but we have observed this edge case behavior with certain client/server configurations
+  // This distinction can be useful for troubleshooting mutual TLS connection problems, so we include it in the stringified certificate that is printed to the debug logs.
+  // There are situations where a partial client certificate chain is accepted by Node, but we cannot verify the chain in Kibana because an intermediate issuerCertificate is undefined.
+  // If this happens, Kibana will reject the authentication attempt, and the client and/or server need to ensure that the entire CA chain is installed.
+  let issuerCertType: string;
+  if (issuerCertificate === undefined) {
+    issuerCertType = 'undefined';
+  } else if (issuerCertificate === null) {
+    issuerCertType = 'null';
+  } else {
+    issuerCertType = 'object';
+  }
+
+  return JSON.stringify({ subject, issuer, issuerCertType, subjectaltname, validFrom, validTo });
 }
 
 /**
@@ -128,7 +172,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -204,6 +248,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateViaPeerCertificate(request: KibanaRequest) {
     this.logger.debug('Trying to authenticate request via peer certificate chain.');
 
+    // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
+    const { peerCertificate, certificateChain, isChainIncomplete } = await this.getCertificateChain(
+      request
+    );
+
     if (!request.socket.authorized) {
       this.logger.debug(
         `Authentication is not possible since peer certificate was not authorized: ${request.socket.authorizationError}.`
@@ -211,19 +260,27 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    const peerCertificate = request.socket.getPeerCertificate(true);
     if (peerCertificate === null) {
       this.logger.debug('Authentication is not possible due to missing peer certificate chain.');
       return AuthenticationResult.notHandled();
     }
 
-    // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
-    const certificateChain = this.getCertificateChain(peerCertificate);
+    if (isChainIncomplete) {
+      this.logger.debug('Authentication is not possible due to incomplete peer certificate chain.');
+      return AuthenticationResult.notHandled();
+    }
+
     let result: { access_token: string; authentication: AuthenticationInfo };
     try {
-      result = await this.options.client.callAsInternalUser('shield.delegatePKI', {
-        body: { x509_certificate_chain: certificateChain },
-      });
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/delegate_pki',
+          body: { x509_certificate_chain: certificateChain },
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(
         `Failed to exchange peer certificate chain to an access token: ${err.message}`
@@ -247,31 +304,62 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Starts from the leaf peer certificate and iterates up to the top-most available certificate
-   * authority using `issuerCertificate` certificate property. THe iteration is stopped only when
-   * we detect circular reference (root/self-signed certificate) or when `issuerCertificate` isn't
-   * available (null or empty object).
-   * @param peerCertificate Peer leaf certificate instance.
+   * Obtains the peer certificate chain as an ordered array of base64-encoded (Section 4 of RFC4648 - not base64url-encoded)
+   * DER PKIX certificate values. Starts from the leaf peer certificate and iterates up to the top-most available certificate
+   * authority using `issuerCertificate` certificate property. THe iteration is stopped only when we detect circular reference
+   * (root/self-signed certificate) or when `issuerCertificate` isn't available (null or empty object). Automatically attempts to
+   * renegotiate the TLS connection once if the peer certificate chain is incomplete.
+   * @param request Request instance.
    */
-  private getCertificateChain(peerCertificate: DetailedPeerCertificate | null) {
-    const certificateChain = [];
-    let certificate: DetailedPeerCertificate | null = peerCertificate;
-    while (certificate !== null && Object.keys(certificate).length > 0) {
+  private async getCertificateChain(
+    request: KibanaRequest,
+    isRenegotiated = false
+  ): Promise<CertificateChain> {
+    const certificateChain: string[] = [];
+    const certificateStrings: string[] = [];
+    let isChainIncomplete = false;
+    const peerCertificate = request.socket.getPeerCertificate(true);
+    let certificate = peerCertificate;
+
+    while (certificate && Object.keys(certificate).length > 0) {
       certificateChain.push(certificate.raw.toString('base64'));
+      certificateStrings.push(stringifyCertificate(certificate));
 
       // For self-signed certificates, `issuerCertificate` may be a circular reference.
       if (certificate === certificate.issuerCertificate) {
         this.logger.debug('Self-signed certificate is detected in certificate chain');
-        certificate = null;
+        break;
+      } else if (certificate.issuerCertificate === undefined) {
+        const protocol = request.socket.getProtocol();
+        if (!isRenegotiated && protocol && RENEGOTIATABLE_PROTOCOLS.includes(protocol)) {
+          this.logger.debug(
+            `Detected incomplete certificate chain with protocol '${protocol}', attempting to renegotiate connection.`
+          );
+          try {
+            await request.socket.renegotiate({ requestCert: true, rejectUnauthorized: false });
+            return this.getCertificateChain(request, true);
+          } catch (err) {
+            this.logger.debug(`Failed to renegotiate connection: ${err}.`);
+          }
+        } else if (!isRenegotiated) {
+          this.logger.debug(
+            `Detected incomplete certificate chain with protocol '${protocol}', cannot renegotiate connection.`
+          );
+        } else {
+          this.logger.debug(`Detected incomplete certificate chain after renegotiation.`);
+        }
+        // The chain is only considered to be incomplete if one or more issuerCertificate values is undefined;
+        // this is not an expected return value from Node, but it can happen in some edge cases
+        isChainIncomplete = true;
+        break;
       } else {
+        // Repeat the loop
         certificate = certificate.issuerCertificate;
       }
     }
 
-    this.logger.debug(
-      `Peer certificate chain consists of ${certificateChain.length} certificates.`
-    );
+    this.logger.debug(`Peer certificate chain: [${certificateStrings.join(', ')}]`);
 
-    return certificateChain;
+    return { peerCertificate, certificateChain, isChainIncomplete };
   }
 }

@@ -14,7 +14,7 @@ export declare class PainlessError extends EsError
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(err, request)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
+|  [(constructor)(err)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
 
 ## Properties
 

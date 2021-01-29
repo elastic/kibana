@@ -178,7 +178,10 @@ export class MlServerPlugin
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
-    savedObjectsRoutes(routeInit);
+    savedObjectsRoutes(routeInit, {
+      getSpaces,
+      resolveMlCapabilities,
+    });
     systemRoutes(routeInit, {
       getSpaces,
       cloud: plugins.cloud,

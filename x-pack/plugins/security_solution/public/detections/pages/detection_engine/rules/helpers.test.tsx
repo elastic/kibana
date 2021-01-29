@@ -29,6 +29,7 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
   // @ts-ignore
@@ -112,23 +113,7 @@ describe('rule helpers', () => {
         ruleNameOverride: 'message',
         severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'mockFramework',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
         timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };

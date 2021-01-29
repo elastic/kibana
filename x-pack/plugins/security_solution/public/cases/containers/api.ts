@@ -5,35 +5,35 @@
  */
 
 import {
-  CaseResponse,
-  CasesResponse,
-  CasesFindResponse,
+  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
+  CaseResponse,
+  CasesFindResponse,
+  CasesResponse,
   CasesStatusResponse,
-  CommentRequestUserType,
-  User,
+  CaseStatuses,
   CaseUserActionsResponse,
-  CaseExternalServiceRequest,
+  CommentRequest,
+  CommentType,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
-  ActionTypeExecutorResult,
-  CommentType,
+  User,
 } from '../../../../case/common/api';
 
 import {
-  CASE_STATUS_URL,
-  CASES_URL,
-  CASE_TAGS_URL,
-  CASE_REPORTERS_URL,
   ACTION_TYPES_URL,
-  ACTION_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
 } from '../../../../case/common/constants';
 
 import {
+  getCaseCommentsUrl,
+  getCaseConfigurePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
-  getCaseCommentsUrl,
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -60,9 +60,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeServiceConnectorCaseResponse,
 } from './utils';
-
 import * as i18n from './translations';
-
+import { ActionTypeExecutorResult } from '../../../../actions/common';
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
@@ -120,7 +119,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: 'open',
+    status: CaseStatuses.open,
     tags: [],
   },
   queryParams = {
@@ -134,7 +133,7 @@ export const getCases = async ({
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
-    ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
+    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
   };
@@ -157,7 +156,10 @@ export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): P
 
 export const patchCase = async (
   caseId: string,
-  updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
+  updatedCase: Pick<
+    CasePatchRequest,
+    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+  >,
   version: string,
   signal: AbortSignal
 ): Promise<Case[]> => {
@@ -182,7 +184,7 @@ export const patchCasesStatus = async (
 };
 
 export const postComment = async (
-  newComment: CommentRequestUserType,
+  newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<Case> => {
@@ -244,15 +246,17 @@ export const pushCase = async (
 
 export const pushToService = async (
   connectorId: string,
+  connectorType: string,
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<
     ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
-  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
+  >(`${getCaseConfigurePushUrl(connectorId)}`, {
     method: 'POST',
     body: JSON.stringify({
-      params: { subAction: 'pushToService', subActionParams: casePushParams },
+      connector_type: connectorType,
+      params: casePushParams,
     }),
     signal,
   });
@@ -260,7 +264,6 @@ export const pushToService = async (
   if (response.status === 'error') {
     throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
   }
-
   return decodeServiceConnectorCaseResponse(response.data);
 };
 

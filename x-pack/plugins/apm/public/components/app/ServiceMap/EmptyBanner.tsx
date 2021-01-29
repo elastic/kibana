@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
-import { useTheme } from '../../../hooks/useTheme';
+import { useTheme } from '../../../hooks/use_theme';
 
 const EmptyBannerContainer = styled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};

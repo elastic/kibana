@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { partition } from 'lodash';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
@@ -17,8 +17,10 @@ import {
   operationDefinitionMap,
   IndexPatternColumn,
   OperationType,
+  getExistingColumnGroups,
+  isReferenced,
 } from './operations';
-import { hasField, hasInvalidFields } from './utils';
+import { hasField } from './utils';
 import {
   IndexPattern,
   IndexPatternPrivateState,
@@ -27,7 +29,7 @@ import {
 } from './types';
 import { documentField } from './document_field';
 
-type IndexPatternSugestion = DatasourceSuggestion<IndexPatternPrivateState>;
+export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 
 function buildSuggestion({
   state,
@@ -71,10 +73,13 @@ function buildSuggestion({
     },
 
     table: {
-      columns: columnOrder.map((columnId) => ({
-        columnId,
-        operation: columnToOperation(columnMap[columnId]),
-      })),
+      columns: columnOrder
+        // Hide any referenced columns from what visualizations know about
+        .filter((columnId) => !isReferenced(layers[layerId]!, columnId))
+        .map((columnId) => ({
+          columnId,
+          operation: columnToOperation(columnMap[columnId]),
+        })),
       isMultiRow,
       layerId,
       changeType,
@@ -89,8 +94,7 @@ export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   field: IndexPatternField
-): IndexPatternSugestion[] {
-  if (hasInvalidFields(state)) return [];
+): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
 
@@ -123,7 +127,7 @@ export function getDatasourceSuggestionsForVisualizeField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
   fieldName: string
-): IndexPatternSugestion[] {
+): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
   // Identify the field by the indexPatternId and the fieldName
@@ -158,7 +162,7 @@ function getExistingLayerSuggestionsForField(
   const fieldInUse = Object.values(layer.columns).some(
     (column) => hasField(column) && column.sourceField === field.name
   );
-  const suggestions: IndexPatternSugestion[] = [];
+  const suggestions: IndexPatternSuggestion[] = [];
 
   if (usableAsBucketOperation && !fieldInUse) {
     if (
@@ -221,8 +225,9 @@ function getExistingLayerSuggestionsForField(
         );
       }
 
-      const [, metrics] = separateBucketColumns(layer);
-      if (metrics.length === 1) {
+      const [, metrics, references] = getExistingColumnGroups(layer);
+      // TODO: Write test for the case where we have exactly one metric and one reference. We shouldn't switch the inner metric.
+      if (metrics.length === 1 && references.length === 0) {
         const layerWithReplacedMetric = replaceColumn({
           layer,
           indexPattern,
@@ -257,7 +262,7 @@ function getEmptyLayerSuggestionsForField(
   layerId: string,
   indexPatternId: string,
   field: IndexPatternField
-): IndexPatternSugestion[] {
+): IndexPatternSuggestion[] {
   const indexPattern = state.indexPatterns[indexPatternId];
   let newLayer: IndexPatternLayer | undefined;
   const bucketOperation = getBucketOperation(field);
@@ -331,7 +336,6 @@ function createNewLayerWithMetricAggregation(
 export function getDatasourceSuggestionsFromCurrentState(
   state: IndexPatternPrivateState
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  if (hasInvalidFields(state)) return [];
   const layers = Object.entries(state.layers || {});
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
@@ -372,12 +376,13 @@ export function getDatasourceSuggestionsFromCurrentState(
         }),
       ]);
   }
+
   return _.flatten(
     Object.entries(state.layers || {})
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
-        const [buckets, metrics] = separateBucketColumns(layer);
+        const [buckets, metrics, references] = getExistingColumnGroups(layer);
         const timeDimension = layer.columnOrder.find(
           (columnId) =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
@@ -390,29 +395,22 @@ export function getDatasourceSuggestionsFromCurrentState(
           buckets.some((columnId) => layer.columns[columnId].dataType === 'number');
 
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
-        if (metrics.length === 0) {
-          // intermediary chart without metric, don't try to suggest reduced versions
-          suggestions.push(
-            buildSuggestion({
-              state,
-              layerId,
-              changeType: 'unchanged',
-            })
-          );
-        } else if (buckets.length === 0) {
+
+        // Always suggest an unchanged table, including during invalid states
+        suggestions.push(
+          buildSuggestion({
+            state,
+            layerId,
+            changeType: 'unchanged',
+          })
+        );
+
+        if (!references.length && metrics.length && buckets.length === 0) {
           if (timeField) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
           suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
-          // also suggest simple current state
-          suggestions.push(
-            buildSuggestion({
-              state,
-              layerId,
-              changeType: 'unchanged',
-            })
-          );
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
@@ -570,7 +568,11 @@ function createSuggestionWithDefaultDateHistogram(
 function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layerId: string) {
   const layer = state.layers[layerId];
 
-  const [availableBucketedColumns, availableMetricColumns] = separateBucketColumns(layer);
+  const [
+    availableBucketedColumns,
+    availableMetricColumns,
+    availableReferenceColumns,
+  ] = getExistingColumnGroups(layer);
 
   return _.flatten(
     availableBucketedColumns.map((_col, index) => {
@@ -581,29 +583,30 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         columnOrder: [...bucketedColumns, ...availableMetricColumns],
       };
 
-      if (availableMetricColumns.length > 1) {
-        return [
-          allMetricsSuggestion,
-          { ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] },
-        ];
+      if (availableBucketedColumns.length <= 1 || availableReferenceColumns.length) {
+        // Don't simplify when dealing with single-bucket table. Also don't break
+        // reference-based columns by removing buckets.
+        return [];
+      } else if (availableMetricColumns.length > 1) {
+        return [{ ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] }];
       } else {
         return allMetricsSuggestion;
       }
     })
   )
     .concat(
-      availableMetricColumns.map((columnId) => {
-        // build suggestions with only metrics
-        return { ...layer, columnOrder: [columnId] };
-      })
+      availableReferenceColumns.length
+        ? []
+        : availableMetricColumns.map((columnId) => {
+            return { ...layer, columnOrder: [columnId] };
+          })
     )
     .map((updatedLayer) => {
       return buildSuggestion({
         state,
         layerId,
         updatedLayer,
-        changeType:
-          layer.columnOrder.length === updatedLayer.columnOrder.length ? 'unchanged' : 'reduced',
+        changeType: 'reduced',
         label:
           updatedLayer.columnOrder.length === 1
             ? getMetricSuggestionTitle(updatedLayer, availableMetricColumns.length === 1)
@@ -622,8 +625,4 @@ function getMetricSuggestionTitle(layer: IndexPatternLayer, onlyMetric: boolean)
     description:
       'Title of a suggested chart containing only a single numerical metric calculated over all available data',
   });
-}
-
-function separateBucketColumns(layer: IndexPatternLayer) {
-  return partition(layer.columnOrder, (columnId) => layer.columns[columnId].isBucketed);
 }

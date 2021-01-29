@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { navTabs } from '../../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../../app/types';
@@ -70,6 +71,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',
@@ -129,6 +131,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.filters]: [],
       [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
+        activeTab: TimelineTabs.query,
         id: '',
         isOpen: false,
         graphEventId: '',

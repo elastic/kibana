@@ -19,7 +19,6 @@ import { Calendar } from '../../../common/types/calendars';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
-import { InferenceConfigResponse, TrainedModelStat } from '../../../common/types/trained_models';
 import { MLJobNotFound } from './errors';
 import {
   MlClient,
@@ -39,15 +38,19 @@ export function getMlClient(
     const jobIds =
       jobType === 'anomaly-detector' ? getADJobIdsFromRequest(p) : getDFAJobIdsFromRequest(p);
     if (jobIds.length) {
-      const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
-      let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
-      if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
-        // filter out wildcard ids from the error
-        missingIds = missingIds.filter((id) => id.match('\\*') === null);
-      }
-      if (missingIds.length) {
-        throw new MLJobNotFound(`No known job with id '${missingIds.join(',')}'`);
-      }
+      await checkIds(jobType, jobIds, allowWildcards);
+    }
+  }
+
+  async function checkIds(jobType: JobType, jobIds: string[], allowWildcards: boolean = false) {
+    const filteredJobIds = await jobSavedObjectService.filterJobIdsForSpace(jobType, jobIds);
+    let missingIds = jobIds.filter((j) => filteredJobIds.indexOf(j) === -1);
+    if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
+      // filter out wildcard ids from the error
+      missingIds = missingIds.filter((id) => id.match('\\*') === null);
+    }
+    if (missingIds.length) {
+      throw new MLJobNotFound(`No known job with id '${missingIds.join(',')}'`);
     }
   }
 
@@ -59,8 +62,17 @@ export function getMlClient(
     if (ids.length) {
       // find all groups from unfiltered jobs
       const responseGroupIds = [...new Set(allJobs.map((j) => j.groups ?? []).flat())];
-      // work out which ids requested are actually groups
-      const requestedGroupIds = ids.filter((id) => responseGroupIds.includes(id));
+
+      // work out which ids requested are actually groups and which are jobs
+      const requestedGroupIds: string[] = [];
+      const requestedJobIds: string[] = [];
+      ids.forEach((id) => {
+        if (responseGroupIds.includes(id)) {
+          requestedGroupIds.push(id);
+        } else {
+          requestedJobIds.push(id);
+        }
+      });
 
       // find all groups from filtered jobs
       const groupIdsFromFilteredJobs = [
@@ -77,9 +89,14 @@ export function getMlClient(
       );
 
       if (groupsIdsThatDidNotMatch.length) {
-        // is there are group ids which were requested but didn't
+        // if there are group ids which were requested but didn't
         // exist in filtered jobs, list them in an error
         throw new MLJobNotFound(`No known job with id '${groupsIdsThatDidNotMatch.join(',')}'`);
+      }
+
+      // check the remaining jobs ids
+      if (requestedJobIds.length) {
+        await checkIds('anomaly-detector', requestedJobIds, true);
       }
     }
   }
@@ -111,50 +128,6 @@ export function getMlClient(
         throw new MLJobNotFound(`No known datafeed with id '${missingIds.join(',')}'`);
       }
     }
-  }
-
-  async function getFilterTrainedModels(
-    p: Parameters<MlClient['getTrainedModels']>,
-    allowWildcards: boolean = false
-  ) {
-    let configs = [];
-    try {
-      const resp = await mlClient.getTrainedModels<InferenceConfigResponse>(...p);
-      configs = resp.body.trained_model_configs;
-    } catch (error) {
-      if (error.statusCode === 404) {
-        throw new MLJobNotFound(error.body.error.reason);
-      }
-      throw error.body ?? error;
-    }
-
-    const modelIds = getTrainedModelIdsFromRequest(p);
-
-    const modelJobIds: string[] = configs
-      .map((m) => m.metadata?.analytics_config.id)
-      .filter((id) => id !== undefined);
-    const filteredModelJobIds = await jobSavedObjectService.filterJobIdsForSpace(
-      'data-frame-analytics',
-      modelJobIds
-    );
-
-    const filteredConfigs = configs.filter((m) => {
-      const jobId = m.metadata?.analytics_config.id;
-      return jobId === undefined || filteredModelJobIds.includes(jobId);
-    });
-    const filteredConfigsIds = filteredConfigs.map((c) => c.model_id);
-
-    if (modelIds.length > filteredConfigs.length) {
-      let missingIds = modelIds.filter((j) => filteredConfigsIds.indexOf(j) === -1);
-      if (allowWildcards === true && missingIds.join().match('\\*') !== null) {
-        // filter out wildcard ids from the error
-        missingIds = missingIds.filter((id) => id.match('\\*') === null);
-      }
-      if (missingIds.length) {
-        throw new MLJobNotFound(`No known trained model with model_id [${missingIds.join(',')}]`);
-      }
-    }
-    return filteredConfigs;
   }
 
   return {
@@ -210,7 +183,6 @@ export function getMlClient(
       return mlClient.deleteModelSnapshot(...p);
     },
     async deleteTrainedModel(...p: Parameters<MlClient['deleteTrainedModel']>) {
-      await getFilterTrainedModels(p, true);
       return mlClient.deleteTrainedModel(...p);
     },
     async estimateModelMemory(...p: Parameters<MlClient['estimateModelMemory']>) {
@@ -410,20 +382,10 @@ export function getMlClient(
       return mlClient.getRecords(...p);
     },
     async getTrainedModels(...p: Parameters<MlClient['getTrainedModels']>) {
-      const models = await getFilterTrainedModels(p, true);
-      return { body: { trained_model_configs: models } };
+      return mlClient.getTrainedModels(...p);
     },
     async getTrainedModelsStats(...p: Parameters<MlClient['getTrainedModelsStats']>) {
-      await getFilterTrainedModels(p, true);
-      const models = await getFilterTrainedModels(p);
-      const filteredModelIds = models.map((m) => m.model_id);
-      const { body: allModelStats } = await mlClient.getTrainedModelsStats<{
-        trained_model_stats: TrainedModelStat[];
-      }>(...p);
-      const modelStats = allModelStats.trained_model_stats.filter((m) =>
-        filteredModelIds.includes(m.model_id)
-      );
-      return { body: { trained_model_stats: modelStats } };
+      return mlClient.getTrainedModelsStats(...p);
     },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);
@@ -552,10 +514,4 @@ function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[] {
 function getJobIdFromBody(p: any): string | undefined {
   const [params] = p;
   return params?.body?.job_id;
-}
-
-function getTrainedModelIdsFromRequest(p: any): string[] {
-  const [params] = p;
-  const ids = params?.model_id?.split(',');
-  return ids || [];
 }

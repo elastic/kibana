@@ -20,8 +20,8 @@ import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
@@ -69,7 +69,7 @@ export function CsmAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable },
+  corePlugins: { embeddable, maps },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -79,7 +79,7 @@ export function CsmAppRoot({
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
+  const plugins = { ...deps, maps };
   const apmPluginContextValue = {
     appMountParameters,
     config,

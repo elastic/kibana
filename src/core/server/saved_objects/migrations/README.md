@@ -206,9 +206,13 @@ There are three core entry points.
 
 ## Testing
 
-Run jest tests:
+Run Jest tests:
 
-`node scripts/jest --testPathPattern=migrations --watch`
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+```
+yarn test:jest src/core/server/saved_objects/migrations --watch
+```
 
 Run integration tests:
 

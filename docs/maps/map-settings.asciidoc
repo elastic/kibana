@@ -6,6 +6,12 @@ Maps offers settings that let you configure how a map is displayed.
 To access these settings, click *Map settings* in the application toolbar.
 
 [float]
+[[maps-settings-display]]
+=== Display
+*Background color*::
+Set the map background color.
+
+[float]
 [[maps-settings-navigation]]
 === Navigation
 

@@ -27,7 +27,7 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(2);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(4);
 
       const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
       const testedIndexThresholdArgs = {
@@ -40,7 +40,7 @@ describe('AlertingBuiltins Plugin', () => {
           "actionGroups": Array [
             Object {
               "id": "threshold met",
-              "name": "Threshold Met",
+              "name": "Threshold met",
             },
           ],
           "id": ".index-threshold",
@@ -63,7 +63,26 @@ describe('AlertingBuiltins Plugin', () => {
             },
           ],
           "id": ".geo-threshold",
-          "name": "Geo tracking threshold",
+          "name": "Tracking threshold",
+        }
+      `);
+
+      const esQueryArgs = alertingSetup.registerType.mock.calls[3][0];
+      const testedEsQueryArgs = {
+        id: esQueryArgs.id,
+        name: esQueryArgs.name,
+        actionGroups: esQueryArgs.actionGroups,
+      };
+      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "query matched",
+              "name": "Query matched",
+            },
+          ],
+          "id": ".es-query",
+          "name": "ES query",
         }
       `);
 

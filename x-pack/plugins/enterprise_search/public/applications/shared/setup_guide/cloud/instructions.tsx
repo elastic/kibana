@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
 
-import { CLOUD_DOCS_PREFIX, ENT_SEARCH_DOCS_PREFIX } from '../../constants';
+import { docLinks } from '../../doc_links';
 
 interface Props {
   productName: string;
@@ -23,18 +23,18 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
       steps={[
         {
           title: i18n.translate('xpack.enterpriseSearch.setupGuide.cloud.step1.title', {
-            defaultMessage: 'Edit your Elastic Cloud deployment’s configuration',
+            defaultMessage: 'Edit your deployment’s configuration',
           }),
           children: (
             <EuiText>
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1"
-                  defaultMessage="{visitCloudLink} and select your deployment. Within your deployment, select “Edit” from the sidebar to manage your deployment’s configuration."
+                  defaultMessage="Visit the Elastic Cloud console to {editDeploymentLink}."
                   values={{
-                    visitCloudLink: cloudDeploymentLink ? (
-                      <EuiLink href={cloudDeploymentLink} target="_blank">
-                        Visit the Elastic Cloud console
+                    editDeploymentLink: cloudDeploymentLink ? (
+                      <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
+                        edit your deployment
                       </EuiLink>
                     ) : (
                       'Visit the Elastic Cloud console'
@@ -73,7 +73,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     optionsLink: (
                       <EuiLink
-                        href={`${ENT_SEARCH_DOCS_PREFIX}/configuration.html`}
+                        href={`${docLinks.enterpriseSearchBase}/configuration.html`}
                         target="_blank"
                       >
                         configurable options
@@ -115,7 +115,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                     productName,
                     configurePolicyLink: (
                       <EuiLink
-                        href={`${CLOUD_DOCS_PREFIX}/ec-configure-index-management.html`}
+                        href={`${docLinks.cloudBase}/ec-configure-index-management.html`}
                         target="_blank"
                       >
                         configure an index lifecycle policy

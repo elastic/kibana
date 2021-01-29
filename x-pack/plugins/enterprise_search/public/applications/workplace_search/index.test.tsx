@@ -5,7 +5,6 @@
  */
 
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
 import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__';
 
 import React from 'react';
@@ -57,7 +56,7 @@ describe('WorkplaceSearchConfigured', () => {
   it('renders layout and header actions', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(Overview)).toHaveLength(1);
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
   });
@@ -90,6 +89,6 @@ describe('WorkplaceSearchConfigured', () => {
 
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 });

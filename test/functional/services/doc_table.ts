@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -25,8 +15,8 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
   const PageObjects = getPageObjects(['common', 'header']);
 
   interface SelectOptions {
-    isAnchorRow: boolean;
-    rowIndex: number;
+    isAnchorRow?: boolean;
+    rowIndex?: number;
   }
 
   class DocTable {
@@ -52,10 +42,11 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await table.findByTestSubject('~docTableAnchorRow');
     }
 
-    public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
-      return options.isAnchorRow
-        ? await this.getAnchorRow()
-        : (await this.getBodyRows())[options.rowIndex];
+    public async getRow({
+      isAnchorRow = false,
+      rowIndex = 0,
+    }: SelectOptions = {}): Promise<WebElementWrapper> {
+      return isAnchorRow ? await this.getAnchorRow() : (await this.getBodyRows())[rowIndex];
     }
 
     public async getDetailsRow(): Promise<WebElementWrapper> {
@@ -85,12 +76,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       );
     }
 
-    public async getRowActions(
-      options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
-    ): Promise<WebElementWrapper[]> {
-      const detailsRow = options.isAnchorRow
+    public async getRowActions({ isAnchorRow = false, rowIndex = 0 }: SelectOptions = {}): Promise<
+      WebElementWrapper[]
+    > {
+      const detailsRow = isAnchorRow
         ? await this.getAnchorDetailsRow()
-        : (await this.getDetailsRows())[options.rowIndex];
+        : (await this.getDetailsRows())[rowIndex];
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
@@ -117,7 +108,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async getTableDocViewRow(
       detailsRow: WebElementWrapper,
-      fieldName: WebElementWrapper
+      fieldName: string
     ): Promise<WebElementWrapper> {
       return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
     }
@@ -130,7 +121,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async addInclusiveFilter(
       detailsRow: WebElementWrapper,
-      fieldName: WebElementWrapper
+      fieldName: string
     ): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
@@ -146,7 +137,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async removeInclusiveFilter(
       detailsRow: WebElementWrapper,
-      fieldName: WebElementWrapper
+      fieldName: string
     ): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
@@ -160,25 +151,21 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await tableDocViewRow.findByTestSubject(`~addExistsFilterButton`);
     }
 
-    public async addExistsFilter(
-      detailsRow: WebElementWrapper,
-      fieldName: WebElementWrapper
-    ): Promise<void> {
+    public async addExistsFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddExistsFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    public async toggleRowExpanded(
-      options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
-    ): Promise<WebElementWrapper> {
-      await this.clickRowToggle(options);
+    public async toggleRowExpanded({
+      isAnchorRow = false,
+      rowIndex = 0,
+    }: SelectOptions = {}): Promise<WebElementWrapper> {
+      await this.clickRowToggle({ isAnchorRow, rowIndex });
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       return await retry.try(async () => {
-        const row = options.isAnchorRow
-          ? await this.getAnchorRow()
-          : (await this.getBodyRows())[options.rowIndex];
+        const row = isAnchorRow ? await this.getAnchorRow() : (await this.getBodyRows())[rowIndex];
         const detailsRow = await row.findByXpath(
           './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
         );

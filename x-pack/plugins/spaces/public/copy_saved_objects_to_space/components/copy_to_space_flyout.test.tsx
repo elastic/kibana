@@ -9,9 +9,10 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import { CopyModeControl } from './copy_mode_control';
 import { act } from '@testing-library/react';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
@@ -176,6 +177,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -194,6 +196,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -258,10 +261,12 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
     });
 
@@ -289,7 +294,7 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       ['space-1', 'space-2'],
       true,
-      false,
+      true, // `createNewCopies` is enabled by default
       true
     );
 
@@ -318,6 +323,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 5,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -358,6 +364,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -365,6 +372,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-2': {
         success: true,
         successCount: 2,
+        warnings: [],
       },
     });
 
@@ -376,13 +384,24 @@ describe('CopyToSpaceFlyout', () => {
       spaceSelector.props().onChange(['space-1', 'space-2']);
     });
 
-    const startButton = findTestSubject(wrapper, 'cts-initiate-button');
+    // Change copy mode to check for conflicts
+    const copyModeControl = wrapper.find(CopyModeControl);
+    copyModeControl.find('input[id="createNewCopiesDisabled"]').simulate('change');
 
     await act(async () => {
+      const startButton = findTestSubject(wrapper, 'cts-initiate-button');
       startButton.simulate('click');
       await nextTick();
       wrapper.update();
     });
+
+    expect(mockSpacesManager.copySavedObjects).toHaveBeenCalledWith(
+      [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
+      ['space-1', 'space-2'],
+      true,
+      false, // `createNewCopies` is disabled
+      true
+    );
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
@@ -429,7 +448,7 @@ describe('CopyToSpaceFlyout', () => {
         ],
       },
       true,
-      false
+      false // `createNewCopies` is disabled
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -478,6 +497,7 @@ describe('CopyToSpaceFlyout', () => {
           },
         ],
         successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+        warnings: [],
       },
     });
 
@@ -545,7 +565,7 @@ describe('CopyToSpaceFlyout', () => {
         ],
       },
       true,
-      false
+      true // `createNewCopies` is enabled by default
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -559,6 +579,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -571,6 +592,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 

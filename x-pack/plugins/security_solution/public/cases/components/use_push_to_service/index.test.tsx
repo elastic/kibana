@@ -11,6 +11,7 @@ import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -41,6 +42,7 @@ describe('usePushToService', () => {
     isLoading: false,
     postPushToService,
   };
+
   const mockConnector = connectorsMock[0];
   const actionLicense = actionLicenses[0];
   const caseServices = {
@@ -52,6 +54,7 @@ describe('usePushToService', () => {
       hasDataToPush: true,
     },
   };
+
   const defaultArgs = {
     connector: {
       id: mockConnector.id,
@@ -61,11 +64,24 @@ describe('usePushToService', () => {
     },
     caseId,
     caseServices,
-    caseStatus: 'open',
+    caseStatus: CaseStatuses.open,
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
     isValidConnector: true,
+    alerts: {
+      'alert-id-1': {
+        _id: 'alert-id-1',
+        _index: 'alert-index-1',
+        '@timestamp': '2020-11-20T15:35:28.373Z',
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+          from: 'now-360s',
+          to: 'now',
+        },
+      },
+    },
   };
 
   beforeEach(() => {
@@ -97,6 +113,19 @@ describe('usePushToService', () => {
           type: ConnectorTypes.servicenow,
         },
         updateCase,
+        alerts: {
+          'alert-id-1': {
+            _id: 'alert-id-1',
+            _index: 'alert-index-1',
+            '@timestamp': '2020-11-20T15:35:28.373Z',
+            rule: {
+              id: 'rule-id-1',
+              name: 'Awesome rule',
+              from: 'now-360s',
+              to: 'now',
+            },
+          },
+        },
       });
       expect(result.current.pushCallouts).toBeNull();
     });
@@ -252,7 +281,7 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseStatus: 'closed',
+            caseStatus: CaseStatuses.closed,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,

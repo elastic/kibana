@@ -100,10 +100,10 @@ describe('NewTemplateTimeline', () => {
       );
     });
 
-    test('no render', () => {
+    test('render', () => {
       expect(
         wrapper.find('[data-test-subj="template-timeline-new-with-border"]').exists()
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 });

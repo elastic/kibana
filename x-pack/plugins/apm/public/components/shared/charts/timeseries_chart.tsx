@@ -5,30 +5,39 @@
  */
 
 import {
+  AnnotationDomainTypes,
   AreaSeries,
   Axis,
   Chart,
   CurveType,
   LegendItemListener,
+  LineAnnotation,
   LineSeries,
   niceTimeFormatter,
   Placement,
   Position,
+  RectAnnotation,
   ScaleType,
   Settings,
+  YDomainRange,
 } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
-import { TimeSeries } from '../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useChartsSync } from '../../../hooks/use_charts_sync';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
+import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../style/variables';
-import { Annotations } from './annotations';
 import { ChartContainer } from './chart_container';
-import { onBrushEnd } from './helper/helper';
+import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 
 interface Props {
   id: string;
@@ -45,6 +54,10 @@ interface Props {
    */
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
+  yDomain?: YDomainRange;
+  anomalyTimeseries?: ReturnType<
+    typeof getLatencyChartSelector
+  >['anomalyTimeseries'];
 }
 
 export function TimeseriesChart({
@@ -56,44 +69,43 @@ export function TimeseriesChart({
   yLabelFormat,
   yTickFormat,
   showAnnotations = true,
+  yDomain,
+  anomalyTimeseries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
+  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { event, setEvent } = useChartsSync();
+  const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const theme = useTheme();
 
-  useEffect(() => {
-    if (event.chartId !== id && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(event);
-    }
-  }, [event, chartRef, id]);
+  const { start, end } = urlParams;
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const isEmpty = timeseries
-    .map((serie) => serie.data)
-    .flat()
-    .every(
-      ({ y }: { x?: number | null; y?: number | null }) =>
-        y === null || y === undefined
-    );
+  const isEmpty = isTimeseriesEmpty(timeseries);
+
+  const annotationColor = theme.eui.euiColorSecondary;
+
+  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={chartTheme}
-          onPointerUpdate={(currEvent: any) => {
-            setEvent(currEvent);
+          theme={{
+            ...chartTheme,
+            areaSeriesStyle: {
+              line: { visible: false },
+            },
           }}
+          onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: { visible: true, placement: Placement.Right },
           }}
           showLegend
           showLegendExtra
@@ -110,19 +122,37 @@ export function TimeseriesChart({
           position={Position.Bottom}
           showOverlappingTicks
           tickFormat={xFormatter}
+          gridLine={{ visible: false }}
         />
         <Axis
+          domain={yDomain}
           id="y-axis"
           ticks={3}
           position={Position.Left}
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
-          showGridLines
         />
 
-        {showAnnotations && <Annotations />}
+        {showAnnotations && (
+          <LineAnnotation
+            id="annotations"
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={annotations.map((annotation) => ({
+              dataValue: annotation['@timestamp'],
+              header: asAbsoluteDateTime(annotation['@timestamp']),
+              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
+                defaultMessage: 'Version',
+              })} ${annotation.text}`,
+            }))}
+            style={{
+              line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+            }}
+            marker={<EuiIcon type="dot" color={annotationColor} />}
+            markerPosition={Position.Top}
+          />
+        )}
 
-        {timeseries.map((serie) => {
+        {allSeries.map((serie) => {
           const Series = serie.type === 'area' ? AreaSeries : LineSeries;
 
           return (
@@ -136,9 +166,30 @@ export function TimeseriesChart({
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
+              hideInLegend={serie.hideLegend}
+              fit={serie.fit ?? undefined}
+              filterSeriesInTooltip={
+                serie.hideTooltipValue ? () => false : undefined
+              }
+              stackAccessors={serie.stackAccessors ?? undefined}
+              areaSeriesStyle={serie.areaSeriesStyle}
+              lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
+
+        {anomalyTimeseries?.scores && (
+          <RectAnnotation
+            key={anomalyTimeseries.scores.title}
+            id="score_anomalies"
+            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
+              ({ x0, x: x1 }) => ({
+                coordinates: { x0, x1 },
+              })
+            )}
+            style={{ fill: anomalyTimeseries.scores.color }}
+          />
+        )}
       </Chart>
     </ChartContainer>
   );

@@ -142,7 +142,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
   ].filter(Boolean) as SelectOptions[];
 
 export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
-  const { phase, hasNodeAttributes, disableDataTierOption } = props;
+  const { phase, hasNodeAttributes, disableDataTierOption, isLoading } = props;
 
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
 
@@ -170,6 +170,7 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
             <SuperSelectField
               field={field}
               euiFieldProps={{
+                isLoading,
                 hasDividers: true,
                 'data-test-subj': 'dataTierSelect',
                 options: getSelectOptions(phase, disableDataTierOption),

@@ -68,7 +68,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"
-            disabled={!item.isEditable}
+            disabled={!item.isEditable || !item.enabledInLicense}
             compressed
             checked={!item.enabled}
             data-test-subj="disableSwitch"
@@ -99,7 +99,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiSwitch
             name="mute"
             checked={item.muteAll}
-            disabled={!(item.isEditable && item.enabled)}
+            disabled={!(item.isEditable && item.enabled) || !item.enabledInLicense}
             compressed
             data-test-subj="muteSwitch"
             onChange={async () => {

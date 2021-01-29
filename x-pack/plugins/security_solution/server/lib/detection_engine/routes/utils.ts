@@ -6,6 +6,7 @@
 
 import Boom from '@hapi/boom';
 import Joi from 'joi';
+import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
 import { SanitizedAlert } from '../../../../../alerts/common';
 
@@ -24,7 +25,7 @@ export interface OutputError {
   statusCode: number;
 }
 
-export const transformError = (err: Error & { statusCode?: number }): OutputError => {
+export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
   if (Boom.isBoom(err)) {
     return {
       message: err.output.payload.message,
@@ -32,10 +33,17 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
     };
   } else {
     if (err.statusCode != null) {
-      return {
-        message: err.message,
-        statusCode: err.statusCode,
-      };
+      if (err.body?.error != null) {
+        return {
+          statusCode: err.statusCode,
+          message: `${err.body.error.type}: ${err.body.error.reason}`,
+        };
+      } else {
+        return {
+          statusCode: err.statusCode,
+          message: err.message,
+        };
+      }
     } else if (err instanceof BadRequestError) {
       // allows us to throw request validation errors in the absence of Boom
       return {

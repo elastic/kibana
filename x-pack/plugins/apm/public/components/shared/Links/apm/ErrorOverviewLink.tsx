@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams } from '../url_helpers';
 import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
 
@@ -17,7 +17,10 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useErrorOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/errors`, persistedFilters);
+  return useAPMHref({
+    path: `/services/${serviceName}/errors`,
+    persistedFilters,
+  });
 }
 
 interface Props extends APMLinkExtendProps {

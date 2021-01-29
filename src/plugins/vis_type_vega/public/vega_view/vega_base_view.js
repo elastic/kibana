@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import $ from 'jquery';
@@ -27,7 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
-import { getEnableExternalUrls } from '../services';
+import { getEnableExternalUrls, getData } from '../services';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -65,7 +55,6 @@ export class VegaBaseView {
     this._filterManager = opts.filterManager;
     this._fireEvent = opts.fireEvent;
     this._timefilter = opts.timefilter;
-    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -127,10 +116,50 @@ export class VegaBaseView {
     }
   }
 
+  /**
+   * Find index pattern by its title, if not given, gets it from spec or a defaults one
+   * @param {string} [index]
+   * @returns {Promise<string>} index id
+   */
+  async findIndex(index) {
+    const { indexPatterns } = getData();
+    let idxObj;
+
+    if (index) {
+      [idxObj] = await indexPatterns.find(index);
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          })
+        );
+      }
+    } else {
+      [idxObj] = await extractIndexPatternsFromSpec(
+        this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec
+      );
+
+      if (!idxObj) {
+        const defaultIdx = await indexPatterns.getDefault();
+
+        if (defaultIdx) {
+          idxObj = defaultIdx;
+        } else {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
+              defaultMessage: 'Unable to find default index',
+            })
+          );
+        }
+      }
+    }
+
+    return idxObj.id;
+  }
+
   createViewConfig() {
     const config = {
-      // eslint-disable-next-line import/namespace
-      logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
     };
 
@@ -157,6 +186,13 @@ export class VegaBaseView {
       return originalSanitize(uri, options);
     };
     config.loader = loader;
+
+    const logger = vega.logger(vega.Warn);
+
+    logger.warn = this.onWarn.bind(this);
+    logger.error = this.onError.bind(this);
+
+    config.logger = logger;
 
     return config;
   }
@@ -261,7 +297,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
@@ -272,7 +308,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();

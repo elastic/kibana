@@ -16,6 +16,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
     palettes={
       Array [
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#ecf1f7",
             "#d9e3ef",
@@ -30,6 +31,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Blues",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#e6f1ee",
             "#cce4de",
@@ -44,6 +46,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Greens",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#e0e4eb",
             "#c2c9d5",
@@ -58,6 +61,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Greys",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#fdeae5",
             "#f9d5cc",
@@ -72,6 +76,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Reds",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#f9eac5",
             "#f6d9af",
@@ -86,6 +91,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Yellow to Red",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#209280",
             "#3aa38d",
@@ -100,6 +106,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Green to Red",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "#6092c0",
             "#84a9cd",
@@ -114,6 +121,7 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
           "value": "Blue to Red",
         },
         Object {
+          "getPalette": [Function],
           "palette": Array [
             "rgb(65, 105, 225)",
             "rgb(0, 256, 256)",

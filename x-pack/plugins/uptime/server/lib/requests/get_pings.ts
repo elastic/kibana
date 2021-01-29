@@ -59,7 +59,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   status,
   sort,
   size: sizeParam,
-  location,
+  locations,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -77,26 +77,16 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
-    aggs: {
-      locations: {
-        terms: {
-          field: 'observer.geo.name',
-          missing: 'N/A',
-          size: 1000,
-        },
-      },
-    },
-    ...(location ? { post_filter: { term: { 'observer.geo.name': location } } } : {}),
+    ...((locations ?? []).length > 0
+      ? { post_filter: { terms: { 'observer.geo.name': locations } } }
+      : {}),
   };
 
   const {
     body: {
       hits: { hits, total },
-      aggregations: aggs,
     },
   } = await uptimeEsClient.search({ body: searchBody });
-
-  const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;
@@ -113,7 +103,6 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
 
   return {
     total: total.value,
-    locations: locations.buckets.map((bucket) => bucket.key as string),
     pings,
   };
 };

@@ -17,6 +17,7 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
+  rejectUnauthorized?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -39,7 +40,12 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const {
+    license = 'trial',
+    disabledPlugins = [],
+    ssl = false,
+    rejectUnauthorized = true,
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -90,10 +96,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          '--server.publicBaseUrl=https://localhost:5601',
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerts.invalidateApiKeysTask.interval="15s"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           ...actionsProxyUrl,
 
           '--xpack.eventLog.logEntries=true',
@@ -143,7 +151,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

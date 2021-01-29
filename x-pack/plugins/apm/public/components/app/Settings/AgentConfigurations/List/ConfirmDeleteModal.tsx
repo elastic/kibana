@@ -13,7 +13,7 @@ import {
   APIReturnType,
   callApmApi,
 } from '../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
 

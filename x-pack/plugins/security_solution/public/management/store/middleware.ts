@@ -13,10 +13,8 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
-  MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
   MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
 } from '../common/constants';
-import { policyListMiddlewareFactory } from '../pages/policy/store/policy_list';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import { endpointMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
 import { trustedAppsPageMiddlewareFactory } from '../pages/trusted_apps/store/middleware';
@@ -31,10 +29,6 @@ export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
   depsStart
 ) => {
   return [
-    substateMiddlewareFactory(
-      createSubStateSelector(MANAGEMENT_STORE_POLICY_LIST_NAMESPACE),
-      policyListMiddlewareFactory(coreStart, depsStart)
-    ),
     substateMiddlewareFactory(
       createSubStateSelector(MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE),
       policyDetailsMiddlewareFactory(coreStart, depsStart)

@@ -1,44 +1,51 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
   Logger,
-  LegacyAPICaller,
   ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
 
-export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
+export type AllowedSchemaNumberTypes =
+  | 'long'
+  | 'integer'
+  | 'short'
+  | 'byte'
+  | 'double'
+  | 'float'
+  | 'date';
+export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
+export type AllowedSchemaBooleanTypes = 'boolean';
 
-export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
-
-export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
+export type AllowedSchemaTypes =
+  | AllowedSchemaNumberTypes
+  | AllowedSchemaStringTypes
+  | AllowedSchemaBooleanTypes;
 
 export interface SchemaField {
   type: string;
 }
 
+export type PossibleSchemaTypes<U> = U extends string
+  ? AllowedSchemaStringTypes
+  : U extends number
+  ? AllowedSchemaNumberTypes
+  : U extends boolean
+  ? AllowedSchemaBooleanTypes
+  : // allow any schema type from the union if typescript is unable to resolve the exact U type
+    AllowedSchemaTypes;
+
 export type RecursiveMakeSchemaFrom<U> = U extends object
   ? MakeSchemaFrom<U>
-  : { type: AllowedSchemaTypes };
+  : { type: PossibleSchemaTypes<U> };
 
 // Using Required to enforce all optional keys in the object
 export type MakeSchemaFrom<Base> = {
@@ -56,10 +63,6 @@ export type MakeSchemaFrom<Base> = {
  * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster.
  */
 export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined = false> = {
-  /**
-   * @deprecated Scoped Legacy Elasticsearch client: use esClient instead
-   */
-  callCluster: LegacyAPICaller;
   /**
    * Request-scoped Elasticsearch client
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})
@@ -87,7 +90,7 @@ export type CollectorFetchMethod<
   TReturn,
   ExtraOptions extends object = {}
 > = (
-  this: Collector<TReturn, unknown> & ExtraOptions, // Specify the context of `this` for this.log and others to become available
+  this: Collector<TReturn> & ExtraOptions, // Specify the context of `this` for this.log and others to become available
   context: CollectorFetchContext<WithKibanaRequest>
 ) => Promise<TReturn> | TReturn;
 
@@ -108,7 +111,6 @@ export type CollectorOptionsFetchExtendedContext<
 
 export type CollectorOptions<
   TFetchReturn = unknown,
-  UFormatBulkUploadPayload = TFetchReturn, // TODO: Once we remove bulk_uploader's dependency on usageCollection, we'll be able to remove this type
   WithKibanaRequest extends boolean = boolean,
   ExtraOptions extends object = {}
 > = {
@@ -130,13 +132,6 @@ export type CollectorOptions<
    * @param collectorFetchContext {@link CollectorFetchContext}
    */
   fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>;
-  /**
-   * A hook for allowing the fetched data payload to be organized into a typed
-   * data model for internal bulk upload. See defaultFormatterForBulkUpload for
-   * a generic example.
-   * @deprecated Used only by the Legacy Monitoring collection (to be removed in 8.0)
-   */
-  formatForBulkUpload?: CollectorFormatForBulkUpload<TFetchReturn, UFormatBulkUploadPayload>;
 } & ExtraOptions &
   (WithKibanaRequest extends true // If enforced to true via Types, the config must be enforced
     ? {
@@ -146,28 +141,16 @@ export type CollectorOptions<
         extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
       });
 
-export class Collector<
-  TFetchReturn,
-  UFormatBulkUploadPayload = TFetchReturn,
-  ExtraOptions extends object = {}
-> {
+export class Collector<TFetchReturn, ExtraOptions extends object = {}> {
   public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<any>;
-  public readonly type: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['type'];
-  public readonly init?: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['init'];
+  public readonly type: CollectorOptions<TFetchReturn, any>['type'];
+  public readonly init?: CollectorOptions<TFetchReturn, any>['init'];
   public readonly fetch: CollectorFetchMethod<any, TFetchReturn, ExtraOptions>;
-  public readonly isReady: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['isReady'];
-  private readonly _formatForBulkUpload?: CollectorFormatForBulkUpload<
-    TFetchReturn,
-    UFormatBulkUploadPayload
-  >;
-  /*
-   * @param {Object} logger - logger object
-   * @param {String} options.type - property name as the key for the data
-   * @param {Function} options.init (optional) - initialization function
-   * @param {Function} options.fetch - function to query data
-   * @param {Function} options.formatForBulkUpload - optional
-   * @param {Function} options.isReady - method that returns a boolean or Promise of a boolean to indicate the collector is ready to report data
-   * @param {Function} options.rest - optional other properties
+  public readonly isReady: CollectorOptions<TFetchReturn, any>['isReady'];
+  /**
+   * @private Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
+   * @param log {@link Logger}
+   * @param collectorDefinition {@link CollectorOptions}
    */
   constructor(
     public readonly log: Logger,
@@ -175,11 +158,10 @@ export class Collector<
       type,
       init,
       fetch,
-      formatForBulkUpload,
       isReady,
       extendFetchContext = {},
       ...options
-    }: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any, ExtraOptions>
+    }: CollectorOptions<TFetchReturn, any, ExtraOptions>
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
@@ -200,21 +182,5 @@ export class Collector<
     this.fetch = fetch;
     this.isReady = typeof isReady === 'function' ? isReady : () => true;
     this.extendFetchContext = extendFetchContext;
-    this._formatForBulkUpload = formatForBulkUpload;
-  }
-
-  public formatForBulkUpload(result: TFetchReturn) {
-    if (this._formatForBulkUpload) {
-      return this._formatForBulkUpload(result);
-    } else {
-      return this.defaultFormatterForBulkUpload(result);
-    }
-  }
-
-  protected defaultFormatterForBulkUpload(result: TFetchReturn) {
-    return {
-      type: this.type,
-      payload: (result as unknown) as UFormatBulkUploadPayload,
-    };
   }
 }

@@ -34,5 +34,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./transforms_preview'));
     loadTestFile(require.resolve('./transforms_stats'));
     loadTestFile(require.resolve('./transforms_update'));
+    loadTestFile(require.resolve('./transforms_create'));
   });
 }

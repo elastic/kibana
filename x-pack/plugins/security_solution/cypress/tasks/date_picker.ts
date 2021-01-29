@@ -62,15 +62,11 @@ export const setTimelineStartDate = (date: string) => {
 };
 
 export const updateDates = () => {
-  cy.get(DATE_PICKER_APPLY_BUTTON)
-    .click({ force: true })
-    .invoke('text')
-    .should('not.equal', 'Updating');
+  cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
 };
 
 export const updateTimelineDates = () => {
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE)
     .click({ force: true })
-    .invoke('text')
-    .should('not.equal', 'Updating');
+    .should('not.have.text', 'Updating');
 };

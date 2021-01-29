@@ -395,13 +395,7 @@ class TimeseriesChartIntl extends Component {
 
   contextChartInitialized = false;
   drawContextChartSelection() {
-    const {
-      contextChartData,
-      contextChartSelected,
-      contextForecastData,
-      zoomFrom,
-      zoomTo,
-    } = this.props;
+    const { contextChartData, contextForecastData, zoomFrom, zoomTo } = this.props;
 
     if (contextChartData === undefined) {
       return;
@@ -455,10 +449,6 @@ class TimeseriesChartIntl extends Component {
           new Date(contextXScaleDomain[0]),
           new Date(contextXScaleDomain[1])
         );
-        if (this.contextChartInitialized === false) {
-          this.contextChartInitialized = true;
-          contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
-        }
       }
     }
   }
@@ -699,7 +689,7 @@ class TimeseriesChartIntl extends Component {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization
-        yMax = yMax * (1 + (maxLevel + 1) / 5);
+        yMax += Math.abs(yMax - yMin) * ((maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
     } else {

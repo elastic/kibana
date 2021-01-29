@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await tagManagementPage.selectTagByName('tag-1');
         await tagManagementPage.selectTagByName('tag-3');
 
-        await tagManagementPage.clickOnAction('delete');
+        await tagManagementPage.clickOnBulkAction('delete');
 
         await PageObjects.common.clickConfirmOnModal();
         await tagManagementPage.waitUntilTableIsLoaded();
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await tagManagementPage.selectTagByName('tag-1');
         await tagManagementPage.selectTagByName('tag-3');
 
-        await tagManagementPage.clickOnAction('clear_selection');
+        await tagManagementPage.clickOnBulkAction('clear_selection');
 
         await tagManagementPage.waitUntilTableIsLoaded();
 

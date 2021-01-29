@@ -1,30 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { EditorController } from './application';
+import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
-import { INDEXES_SEPARATOR } from '../common/constants';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -71,7 +59,9 @@ export const metricsVisDefinition = {
       tooltip_mode: 'show_all',
     },
   },
-  editor: EditorController,
+  editorConfig: {
+    editor: TSVB_EDITOR_NAME,
+  },
   options: {
     showQueryBar: false,
     showFilterBar: false,
@@ -84,18 +74,7 @@ export const metricsVisDefinition = {
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
-    const indexes: string = params.index_pattern;
 
-    if (indexes) {
-      const cachedIndexes = await indexPatterns.getIdsWithTitle();
-      const ids = indexes
-        .split(INDEXES_SEPARATOR)
-        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
-        .filter((id) => id);
-
-      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
-    }
-
-    return [];
+    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
   },
 };

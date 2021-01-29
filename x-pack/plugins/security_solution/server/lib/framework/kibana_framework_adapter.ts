@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import {
+import type {
   CoreSetup,
-  IRouter,
   KibanaResponseFactory,
-  RequestHandlerContext,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { SetupPlugins } from '../../plugin';
+import type {
+  SecuritySolutionRequestHandlerContext,
+  SecuritySolutionPluginRouter,
+} from '../../types';
 
 import {
   FrameworkAdapter,
@@ -28,10 +29,10 @@ import {
 import { buildSiemResponse } from '../detection_engine/routes/utils';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
-  private router: IRouter;
+  private router: SecuritySolutionPluginRouter;
   private security: SetupPlugins['security'];
 
-  constructor(core: CoreSetup, plugins: SetupPlugins, private isProductionMode: boolean) {
+  constructor(core: CoreSetup, plugins: SetupPlugins) {
     this.router = core.http.createRouter();
     this.security = plugins.security;
   }
@@ -90,35 +91,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         }
       }
     );
-
-    if (!this.isProductionMode) {
-      this.router.get(
-        {
-          path: `${routePath}/graphiql`,
-          validate: false,
-          options: {
-            tags: ['access:securitySolution'],
-          },
-        },
-        async (context, request, response) => {
-          const graphiqlString = await GraphiQL.resolveGraphiQLString(
-            request.query,
-            {
-              endpointURL: routePath,
-              passHeader: "'kbn-xsrf': 'graphiql'",
-            },
-            request
-          );
-
-          return response.ok({
-            body: graphiqlString,
-            headers: {
-              'content-type': 'text/html',
-            },
-          });
-        }
-      );
-    }
   }
 
   private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {
@@ -155,7 +127,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
 export function wrapRequest(
   request: KibanaRequest,
-  context: RequestHandlerContext,
+  context: SecuritySolutionRequestHandlerContext,
   user: AuthenticatedUser | null
 ): FrameworkRequest {
   return {

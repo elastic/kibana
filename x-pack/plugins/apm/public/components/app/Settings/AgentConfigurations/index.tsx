@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,8 +17,8 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../../observability/public';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 
@@ -73,15 +74,35 @@ function CreateConfigurationButton() {
   const { basePath } = core.http;
   const { search } = useLocation();
   const href = createAgentConfigurationHref(search, basePath);
+  const canSave = core.application.capabilities.apm.save;
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
-            {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
-              defaultMessage: 'Create configuration',
-            })}
-          </EuiButton>
+          <EuiToolTip
+            content={
+              !canSave &&
+              i18n.translate(
+                'xpack.apm.agentConfig.configurationsPanelTitle.noPermissionTooltipLabel',
+                {
+                  defaultMessage:
+                    "Your user role doesn't have permissions to create agent configurations",
+                }
+              )
+            }
+          >
+            <EuiButton
+              color="primary"
+              fill
+              iconType="plusInCircle"
+              href={href}
+              isDisabled={!canSave}
+            >
+              {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
+                defaultMessage: 'Create configuration',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

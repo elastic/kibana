@@ -4,7 +4,7 @@
 
 ## SavedObjectMigrationMap interface
 
-A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.
+A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions, and they cannot exceed the current Kibana version.
 
 For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one.
 
@@ -18,7 +18,7 @@ export interface SavedObjectMigrationMap
 
 
 ```typescript
-const migrations: SavedObjectMigrationMap = {
+const migrationsMap: SavedObjectMigrationMap = {
   '1.0.0': migrateToV1,
   '2.1.0': migrateToV21
 }

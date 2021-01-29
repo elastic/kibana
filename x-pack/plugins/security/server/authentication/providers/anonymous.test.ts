@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
 import { mockAuthenticationProviderOptions } from './base.mock';
 
-import { ILegacyClusterClient, ScopeableRequest } from '../../../../../../src/core/server';
+import { ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import {
@@ -18,15 +21,20 @@ import {
 import { AnonymousAuthenticationProvider } from './anonymous';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
   expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
 
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+  expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
+}
+
+enum CredentialsType {
+  Basic = 'Basic',
+  ApiKey = 'ApiKey',
+  None = 'ES native anonymous',
 }
 
 describe('AnonymousAuthenticationProvider', () => {
@@ -34,33 +42,45 @@ describe('AnonymousAuthenticationProvider', () => {
     authentication_provider: { type: 'anonymous', name: 'anonymous1' },
   });
 
-  for (const useBasicCredentials of [true, false]) {
-    describe(`with ${useBasicCredentials ? '`Basic`' : '`ApiKey`'} credentials`, () => {
+  for (const credentialsType of [
+    CredentialsType.Basic,
+    CredentialsType.ApiKey,
+    CredentialsType.None,
+  ]) {
+    describe(`with ${credentialsType} credentials`, () => {
       let provider: AnonymousAuthenticationProvider;
       let mockOptions: ReturnType<typeof mockAuthenticationProviderOptions>;
       let authorization: string;
       beforeEach(() => {
         mockOptions = mockAuthenticationProviderOptions({ name: 'anonymous1' });
 
-        provider = useBasicCredentials
-          ? new AnonymousAuthenticationProvider(mockOptions, {
-              credentials: { username: 'user', password: 'pass' },
-            })
-          : new AnonymousAuthenticationProvider(mockOptions, {
-              credentials: { apiKey: 'some-apiKey' },
-            });
-        authorization = useBasicCredentials
-          ? new HTTPAuthorizationHeader(
+        let credentials;
+        switch (credentialsType) {
+          case CredentialsType.Basic:
+            credentials = { username: 'user', password: 'pass' };
+            authorization = new HTTPAuthorizationHeader(
               'Basic',
               new BasicHTTPAuthorizationHeaderCredentials('user', 'pass').toString()
-            ).toString()
-          : new HTTPAuthorizationHeader('ApiKey', 'some-apiKey').toString();
+            ).toString();
+            break;
+          case CredentialsType.ApiKey:
+            credentials = { apiKey: 'some-apiKey' };
+            authorization = new HTTPAuthorizationHeader('ApiKey', 'some-apiKey').toString();
+            break;
+          default:
+            credentials = 'elasticsearch_anonymous_user' as 'elasticsearch_anonymous_user';
+            break;
+        }
+
+        provider = new AnonymousAuthenticationProvider(mockOptions, { credentials });
       });
 
       describe('`login` method', () => {
         it('succeeds if credentials are valid, and creates session and authHeaders', async () => {
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+            securityMock.createApiResponse({ body: user })
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(
@@ -76,10 +96,13 @@ describe('AnonymousAuthenticationProvider', () => {
 
         it('fails if user cannot be retrieved during login attempt', async () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
-
-          const authenticationError = new Error('Some error');
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+          const authenticationError = new errors.ResponseError(
+            securityMock.createApiResponse({ body: {} })
+          );
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+            authenticationError
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.login(request)).resolves.toEqual(
@@ -111,30 +134,38 @@ describe('AnonymousAuthenticationProvider', () => {
         });
 
         it('does not handle authentication via `authorization` header.', async () => {
-          const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+          const originalAuthorizationHeader = 'Basic credentials';
+          const request = httpServerMock.createKibanaRequest({
+            headers: { authorization: originalAuthorizationHeader },
+          });
           await expect(provider.authenticate(request)).resolves.toEqual(
             AuthenticationResult.notHandled()
           );
 
           expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-          expect(request.headers.authorization).toBe(authorization);
+          expect(request.headers.authorization).toBe(originalAuthorizationHeader);
         });
 
         it('does not handle authentication via `authorization` header even if state exists.', async () => {
-          const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+          const originalAuthorizationHeader = 'Basic credentials';
+          const request = httpServerMock.createKibanaRequest({
+            headers: { authorization: originalAuthorizationHeader },
+          });
           await expect(provider.authenticate(request, {})).resolves.toEqual(
             AuthenticationResult.notHandled()
           );
 
           expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-          expect(request.headers.authorization).toBe(authorization);
+          expect(request.headers.authorization).toBe(originalAuthorizationHeader);
         });
 
         it('succeeds for non-AJAX requests if state is available.', async () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+            securityMock.createApiResponse({ body: user })
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request, {})).resolves.toEqual(
@@ -147,8 +178,10 @@ describe('AnonymousAuthenticationProvider', () => {
         it('succeeds for AJAX requests if state is available.', async () => {
           const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+            securityMock.createApiResponse({ body: user })
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request, {})).resolves.toEqual(
@@ -163,8 +196,10 @@ describe('AnonymousAuthenticationProvider', () => {
         it('non-AJAX requests can start a new session.', async () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+            securityMock.createApiResponse({ body: user })
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request)).resolves.toEqual(
@@ -177,9 +212,13 @@ describe('AnonymousAuthenticationProvider', () => {
         it('fails if credentials are not valid.', async () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-          const authenticationError = new Error('Forbidden');
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+          const authenticationError = new errors.ResponseError(
+            securityMock.createApiResponse({ body: {} })
+          );
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+            authenticationError
+          );
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request)).resolves.toEqual(
@@ -191,7 +230,7 @@ describe('AnonymousAuthenticationProvider', () => {
           expect(request.headers).not.toHaveProperty('authorization');
         });
 
-        if (!useBasicCredentials) {
+        if (credentialsType === CredentialsType.ApiKey) {
           it('properly handles extended format for the ApiKey credentials', async () => {
             provider = new AnonymousAuthenticationProvider(mockOptions, {
               credentials: { apiKey: { id: 'some-id', key: 'some-key' } },
@@ -203,8 +242,10 @@ describe('AnonymousAuthenticationProvider', () => {
 
             const request = httpServerMock.createKibanaRequest({ headers: {} });
 
-            const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-            mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+            const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+            mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+              securityMock.createApiResponse({ body: user })
+            );
             mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
             await expect(provider.authenticate(request, {})).resolves.toEqual(
@@ -237,9 +278,19 @@ describe('AnonymousAuthenticationProvider', () => {
       });
 
       it('`getHTTPAuthenticationScheme` method', () => {
-        expect(provider.getHTTPAuthenticationScheme()).toBe(
-          useBasicCredentials ? 'basic' : 'apikey'
-        );
+        let expectedAuthenticationScheme;
+        switch (credentialsType) {
+          case CredentialsType.Basic:
+            expectedAuthenticationScheme = 'basic';
+            break;
+          case CredentialsType.ApiKey:
+            expectedAuthenticationScheme = 'apikey';
+            break;
+          default:
+            expectedAuthenticationScheme = null;
+            break;
+        }
+        expect(provider.getHTTPAuthenticationScheme()).toBe(expectedAuthenticationScheme);
       });
     });
   }

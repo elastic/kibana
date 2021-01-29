@@ -23,7 +23,7 @@ export function useSavedSearch() {
 
     if (currentSavedSearch !== null) {
       const { query } = getQueryFromSavedSearch(currentSavedSearch);
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+      const queryLanguage = query.language;
       qryString = query.query;
 
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {

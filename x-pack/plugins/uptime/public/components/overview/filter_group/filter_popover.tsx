@@ -54,6 +54,7 @@ export const FilterPopover = ({
     const mItems = selectedItems.concat(allItems ?? []);
     const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
     setItems(newItems);
+    setTempSelectedItems(selectedItems);
   }, [allItems, selectedItems]);
 
   useEffect(() => {
@@ -73,10 +74,13 @@ export const FilterPopover = ({
             isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
-            numActiveFilters={tempSelectedItems.length}
+            numActiveFilters={isOpen ? tempSelectedItems.length : selectedItems.length}
             onClick={() => {
+              if (isOpen) {
+                // only update these values on close
+                onFilterFieldChange(fieldName, tempSelectedItems);
+              }
               setIsOpen(!isOpen);
-              onFilterFieldChange(fieldName, tempSelectedItems);
             }}
             title={title}
           />
@@ -123,6 +127,10 @@ export const FilterPopover = ({
       {!loading &&
         itemsToDisplay.map((item) => (
           <EuiFilterSelectItem
+            aria-label={i18n.translate('xpack.uptime.filterPopover.filterItem.label', {
+              defaultMessage: 'Filter by {title} {item}.',
+              values: { item, title },
+            })}
             checked={isItemSelected(tempSelectedItems, item)}
             data-test-subj={`filter-popover-item_${item}`}
             key={item}

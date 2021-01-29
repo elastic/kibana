@@ -9,7 +9,7 @@ import type { Duration } from 'moment';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger, config as coreConfig } from '../../../../src/core/server';
-import type { AuthenticationProvider } from '../common/types';
+import type { AuthenticationProvider } from '../common/model';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 type RawConfigType = TypeOf<typeof ConfigSchema>;
@@ -150,6 +150,7 @@ const providersConfigSchema = schema.object(
       },
       {
         credentials: schema.oneOf([
+          schema.literal('elasticsearch_anonymous_user'),
           schema.object({
             username: schema.string(),
             password: schema.string(),

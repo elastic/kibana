@@ -105,7 +105,7 @@ export interface TimelineInput {
 
   savedQueryId?: Maybe<string>;
 
-  sort?: Maybe<SortTimelineInput>;
+  sort?: Maybe<SortTimelineInput[]>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -634,7 +634,7 @@ export interface TimelineResult {
 
   savedObjectId: string;
 
-  sort?: Maybe<SortTimelineResult>;
+  sort?: Maybe<ToAny>;
 
   status?: Maybe<TimelineStatus>;
 
@@ -775,12 +775,6 @@ export interface KueryFilterQueryResult {
   kind?: Maybe<string>;
 
   expression?: Maybe<string>;
-}
-
-export interface SortTimelineResult {
-  columnId?: Maybe<string>;
-
-  sortDirection?: Maybe<string>;
 }
 
 export interface ResponseTimelines {
@@ -2336,7 +2330,6 @@ export namespace AgentFieldsResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-
 export namespace CloudFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudFields> {
     instance?: InstanceResolver<Maybe<CloudInstance>, TypeParent, TContext>;
@@ -2665,7 +2658,7 @@ export namespace TimelineResultResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
-    sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
+    sort?: SortResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     status?: StatusResolver<Maybe<TimelineStatus>, TypeParent, TContext>;
 
@@ -2785,7 +2778,7 @@ export namespace TimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type SortResolver<
-    R = Maybe<SortTimelineResult>,
+    R = Maybe<ToAny>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3241,25 +3234,6 @@ export namespace KueryFilterQueryResultResolvers {
   export type ExpressionResolver<
     R = Maybe<string>,
     Parent = KueryFilterQueryResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace SortTimelineResultResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = SortTimelineResult> {
-    columnId?: ColumnIdResolver<Maybe<string>, TypeParent, TContext>;
-
-    sortDirection?: SortDirectionResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type ColumnIdResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SortDirectionResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -6091,7 +6065,6 @@ export type IResolvers<TContext = SiemContext> = {
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers.Resolvers<TContext>;
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers.Resolvers<TContext>;
   KueryFilterQueryResult?: KueryFilterQueryResultResolvers.Resolvers<TContext>;
-  SortTimelineResult?: SortTimelineResultResolvers.Resolvers<TContext>;
   ResponseTimelines?: ResponseTimelinesResolvers.Resolvers<TContext>;
   Mutation?: MutationResolvers.Resolvers<TContext>;
   ResponseNote?: ResponseNoteResolvers.Resolvers<TContext>;

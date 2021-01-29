@@ -8,19 +8,20 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
-  asDecimal,
   asMillisecondDuration,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 
-type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>['items'][0];
+type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups'>['items'][0];
 
 // Truncate both the link and the child span (the tooltip anchor.) The link so
 // it doesn't overflow, and the anchor so we get the ellipsis.
@@ -40,6 +41,9 @@ interface Props {
 }
 
 export function TransactionList({ items, isLoading }: Props) {
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
   const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {
@@ -58,6 +62,7 @@ export function TransactionList({ items, isLoading }: Props) {
               serviceName={serviceName}
               transactionName={transactionName}
               transactionType={transactionType}
+              latencyAggregationType={latencyAggregationType}
             >
               <EuiToolTip
                 id="transaction-name-link-tooltip"
@@ -96,20 +101,12 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'transactionsPerMinute',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
-          {
-            defaultMessage: 'Trans. per minute',
-          }
+          'xpack.apm.transactionsTable.throughputColumnLabel',
+          { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) =>
-          `${asDecimal(value)} ${i18n.translate(
-            'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
-            {
-              defaultMessage: 'tpm',
-            }
-          )}`,
+        render: (value: number) => asTransactionRate(value),
       },
       {
         field: 'impact',
@@ -129,7 +126,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+                    'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
                 }
               )}
             />
@@ -140,7 +137,7 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />,
       },
     ],
-    []
+    [latencyAggregationType]
   );
 
   const noItemsMessage = (

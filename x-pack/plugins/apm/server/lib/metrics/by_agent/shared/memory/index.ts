@@ -68,11 +68,15 @@ export const percentCgroupMemoryUsedScript = {
     `,
 };
 
-export async function getMemoryChartData(
-  setup: Setup & SetupTimeRange,
-  serviceName: string,
-  serviceNodeName?: string
-) {
+export async function getMemoryChartData({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   const cgroupResponse = await fetchAndTransformMetrics({
     setup,
     serviceName,

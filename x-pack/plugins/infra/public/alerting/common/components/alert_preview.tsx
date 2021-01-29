@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FORMATTERS } from '../../../../common/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
@@ -35,7 +35,6 @@ interface Props {
   alertInterval: string;
   alertThrottle: string;
   alertType: PreviewableAlertTypes;
-  fetch: HttpSetup['fetch'];
   alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
   validate: (params: any) => ValidationResult;
   showNoDataResults?: boolean;
@@ -47,12 +46,13 @@ export const AlertPreview: React.FC<Props> = (props) => {
     alertParams,
     alertInterval,
     alertThrottle,
-    fetch,
     alertType,
     validate,
     showNoDataResults,
     groupByDisplayName,
   } = props;
+  const { http } = useKibana().services;
+
   const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
   const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
   const [previewError, setPreviewError] = useState<any | false>(false);
@@ -70,7 +70,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
     setPreviewError(false);
     try {
       const result = await getAlertPreview({
-        fetch,
+        fetch: http!.fetch,
         params: {
           ...alertParams,
           lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
@@ -89,12 +89,12 @@ export const AlertPreview: React.FC<Props> = (props) => {
   }, [
     alertParams,
     alertInterval,
-    fetch,
     alertType,
     groupByDisplayName,
     previewLookbackInterval,
     alertThrottle,
     showNoDataResults,
+    http,
   ]);
 
   const previewIntervalError = useMemo(() => {

@@ -27,7 +27,7 @@ describe('CloudSetupInstructions', () => {
     );
     const cloudDeploymentLink = wrapper.find(EuiLink).first();
     expect(cloudDeploymentLink.prop('href')).toEqual(
-      'https://cloud.elastic.co/deployments/some-id'
+      'https://cloud.elastic.co/deployments/some-id/edit'
     );
   });
 });

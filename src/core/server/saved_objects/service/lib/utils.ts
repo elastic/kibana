@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsFindResponse } from '..';
 
@@ -24,6 +14,7 @@ export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
 export const FIND_DEFAULT_PAGE = 1;
 export const FIND_DEFAULT_PER_PAGE = 20;
+const UUID_REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 
 /**
  * @public
@@ -69,4 +60,21 @@ export class SavedObjectsUtils {
     total: 0,
     saved_objects: [],
   });
+
+  /**
+   * Generates a random ID for a saved objects.
+   */
+  public static generateId() {
+    return uuid.v1();
+  }
+
+  /**
+   * Validates that a saved object ID has been randomly generated.
+   *
+   * @param {string} id The ID of a saved object.
+   * @todo Use `uuid.validate` once upgraded to v5.3+
+   */
+  public static isRandomId(id: string | undefined) {
+    return typeof id === 'string' && UUID_REGEX.test(id);
+  }
 }

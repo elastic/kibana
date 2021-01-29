@@ -73,9 +73,12 @@ export function getIndexPatternIdFromName(name: string) {
   }
   return null;
 }
-
+export interface IndexPatternAndSavedSearch {
+  savedSearch: SavedSearchSavedObject | null;
+  indexPattern: IIndexPattern | null;
+}
 export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
-  const resp: { savedSearch: SavedSearchSavedObject | null; indexPattern: IIndexPattern | null } = {
+  const resp: IndexPatternAndSavedSearch = {
     savedSearch: null,
     indexPattern: null,
   };

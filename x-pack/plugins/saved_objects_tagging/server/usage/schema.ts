@@ -18,6 +18,7 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
 
   types: {
     dashboard: perTypeSchema,
+    lens: perTypeSchema,
     visualization: perTypeSchema,
     map: perTypeSchema,
   },

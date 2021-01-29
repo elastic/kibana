@@ -35,41 +35,32 @@ import { LinkButton } from '../../../common/components/links';
 
 const ID = 'alertsByCategoryOverview';
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  filters?: Filter[];
+  filters: Filter[];
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   indexNames: string[];
-  query?: Query;
+  query: Query;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   from,
   hideHeaderChildren = false,
   indexPattern,
   indexNames,
-  query = DEFAULT_QUERY,
+  query,
   setQuery,
   to,
 }) => {
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const kibana = useKibana();
+  const {
+    uiSettings,
+    application: { navigateToApp },
+  } = useKibana().services;
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const goToHostAlerts = useCallback(
@@ -108,15 +99,29 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  return (
-    <MatrixHistogram
-      endDate={to}
-      filterQuery={convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+  const filterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
-      })}
+      }),
+    [filters, indexPattern, uiSettings, query]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, [deleteQuery]);
+
+  return (
+    <MatrixHistogram
+      endDate={to}
+      filterQuery={filterQuery}
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
       id={ID}
       indexNames={indexNames}

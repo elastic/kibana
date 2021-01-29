@@ -17,7 +17,7 @@ import {
   getWebHookAction,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   createRule,
 } from '../../utils';
 
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const rule = await createRule(supertest, getRuleWithWebHookAction(hookAction.id, true));
-        await waitForRuleSuccess(supertest, rule.id);
+        await waitForRuleSuccessOrStatus(supertest, rule.id);
 
         // expected result for status should be 'succeeded'
         const { body } = await supertest
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule = await createRule(supertest, ruleWithAction);
-        await waitForRuleSuccess(supertest, rule.id);
+        await waitForRuleSuccessOrStatus(supertest, rule.id);
 
         // expected result for status should be 'succeeded'
         const { body } = await supertest

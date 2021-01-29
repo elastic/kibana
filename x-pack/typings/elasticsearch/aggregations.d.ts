@@ -5,8 +5,9 @@
  */
 
 import { Unionize, UnionToIntersection } from 'utility-types';
+import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
-type SortOrder = 'asc' | 'desc';
+export type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
 export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 
@@ -20,8 +21,6 @@ type Script =
     };
 
 type BucketsPath = string | Record<string, string>;
-
-type SourceOptions = string | string[];
 
 type AggregationSourceOptions =
   | {
@@ -100,11 +99,14 @@ export interface AggregationOptionsByType {
   extended_stats: {
     field: string;
   };
+  string_stats: { field: string };
   top_hits: {
     from?: number;
     size?: number;
     sort?: SortOptions;
-    _source?: SourceOptions;
+    _source?: ESSourceOptions;
+    fields?: MaybeReadonlyArray<string>;
+    docvalue_fields?: MaybeReadonlyArray<string>;
   };
   filter: Record<string, any>;
   filters: {
@@ -177,6 +179,15 @@ export interface AggregationOptionsByType {
       [x: string]: string;
     };
     script: string;
+  };
+  top_metrics: {
+    metrics: { field: string } | MaybeReadonlyArray<{ field: string }>;
+    sort: SortOptions;
+  };
+  avg_bucket: {
+    buckets_path: string;
+    gap_policy?: 'skip' | 'insert_zeros';
+    format?: string;
   };
 }
 
@@ -264,6 +275,13 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       lower: number | null;
     };
   };
+  string_stats: {
+    count: number;
+    min_length: number;
+    max_length: number;
+    avg_length: number;
+    entropy: number;
+  };
   top_hits: {
     hits: {
       total: {
@@ -271,9 +289,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
         relation: 'eq' | 'gte';
       };
       max_score: number | null;
-      hits: Array<{
-        _source: TDocument;
-      }>;
+      hits: TAggregationOptionsMap extends { top_hits: AggregationOptionsByType['top_hits'] }
+        ? ESHitsOf<TAggregationOptionsMap['top_hits'], TDocument>
+        : ESSearchHit[];
     };
   };
   filter: {
@@ -369,7 +387,32 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   };
   bucket_sort: undefined;
   bucket_selector: undefined;
+  top_metrics: {
+    top: [
+      {
+        sort: [string | number];
+        metrics: UnionToIntersection<
+          TAggregationOptionsMap extends {
+            top_metrics: { metrics: { field: infer TFieldName } };
+          }
+            ? TopMetricsMap<TFieldName>
+            : TAggregationOptionsMap extends {
+                top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
+              }
+            ? TopMetricsMap<TFieldName>
+            : TopMetricsMap<string>
+        >;
+      }
+    ];
+  };
+  avg_bucket: {
+    value: number | null;
+  };
 }
+
+type TopMetricsMap<TFieldName> = TFieldName extends string
+  ? Record<TFieldName, string | number | null>
+  : Record<string, string | number>;
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap
 // similar to "cannot be used to index type", uncomment the type below and hover

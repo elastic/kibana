@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
 import { EvaluatePanel } from './evaluate_panel';
 import { FeatureImportanceSummaryPanel } from '../total_feature_importance_summary/feature_importance_summary';
+
 interface Props {
   jobId: string;
-  defaultIsTraining?: boolean;
 }
 
-export const ClassificationExploration: FC<Props> = ({ jobId, defaultIsTraining }) => (
+export const ClassificationExploration: FC<Props> = ({ jobId }) => (
   <div className="mlDataFrameAnalyticsClassification">
     <ExplorationPageWrapper
       jobId={jobId}
@@ -29,7 +29,6 @@ export const ClassificationExploration: FC<Props> = ({ jobId, defaultIsTraining 
       )}
       EvaluatePanel={EvaluatePanel}
       FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
-      defaultIsTraining={defaultIsTraining}
     />
   </div>
 );

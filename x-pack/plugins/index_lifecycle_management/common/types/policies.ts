@@ -20,6 +20,8 @@ export interface Phases {
   delete?: SerializedDeletePhase;
 }
 
+export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
+
 export interface PolicyFromES {
   modified_date: string;
   name: string;
@@ -48,27 +50,44 @@ export interface SerializedActionWithAllocation {
   migrate?: MigrateAction;
 }
 
+export interface SearchableSnapshotAction {
+  snapshot_repository: string;
+  /**
+   * We do not configure this value in the UI as it is an advanced setting that will
+   * not suit the vast majority of cases.
+   */
+  force_merge_index?: boolean;
+}
+
+export interface RolloverAction {
+  max_size?: string;
+  max_age?: string;
+  max_docs?: number;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
-    rollover?: {
-      max_size?: string;
-      max_age?: string;
-      max_docs?: number;
-    };
+    rollover?: RolloverAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
+    shrink?: ShrinkAction;
+
     set_priority?: {
       priority: number | null;
     };
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
 export interface SerializedWarmPhase extends SerializedPhase {
   actions: {
     allocate?: AllocateAction;
-    shrink?: {
-      number_of_shards: number;
-    };
+    shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
+    readonly?: {};
     set_priority?: {
       priority: number | null;
     };
@@ -84,6 +103,10 @@ export interface SerializedColdPhase extends SerializedPhase {
       priority: number | null;
     };
     migrate?: MigrateAction;
+    /**
+     * Only available on enterprise license
+     */
+    searchable_snapshot?: SearchableSnapshotAction;
   };
 }
 
@@ -93,7 +116,7 @@ export interface SerializedDeletePhase extends SerializedPhase {
       policy: string;
     };
     delete?: {
-      delete_searchable_snapshot: boolean;
+      delete_searchable_snapshot?: boolean;
     };
   };
 }
@@ -105,6 +128,10 @@ export interface AllocateAction {
   require?: {
     [attribute: string]: string;
   };
+}
+
+export interface ShrinkAction {
+  number_of_shards: number;
 }
 
 export interface ForcemergeAction {
@@ -127,25 +154,6 @@ export interface CommonPhaseSettings {
 export interface PhaseWithMinAge {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
-}
-
-/**
- * Different types of allocation markers we use in deserialized policies.
- *
- * default - use data tier based data allocation based on node roles -- this is ES best practice mode.
- * custom - use node_attrs to allocate data to specific nodes
- * none - do not move data anywhere when entering a phase
- */
-export type DataTierAllocationType = 'default' | 'custom' | 'none';
-
-export interface PhaseWithAllocationAction {
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
-  /**
-   * A string value indicating allocation type. If unspecified we assume the user
-   * wants to use default allocation.
-   */
-  dataTierAllocationType: DataTierAllocationType;
 }
 
 export interface PhaseWithIndexPriority {

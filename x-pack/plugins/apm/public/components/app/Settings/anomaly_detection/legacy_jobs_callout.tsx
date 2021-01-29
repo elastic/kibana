@@ -7,7 +7,7 @@
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useMlHref } from '../../../../../../ml/public';
 
 export function LegacyJobsCallout() {

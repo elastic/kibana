@@ -24,15 +24,16 @@ export function getSafeForExternalLink(
 
   let newGlobalState = globalStateExecResult[1];
   Object.keys(globalState).forEach((globalStateKey) => {
+    let value = globalState[globalStateKey];
+    if (globalStateKey === 'cluster_uuid') {
+      value = `'${value}'`;
+    }
     const keyRegExp = new RegExp(`${globalStateKey}:([^,]+)`);
     const execResult = keyRegExp.exec(newGlobalState);
     if (execResult && execResult.length) {
-      newGlobalState = newGlobalState.replace(
-        execResult[0],
-        `${globalStateKey}:${globalState[globalStateKey]}`
-      );
+      newGlobalState = newGlobalState.replace(execResult[0], `${globalStateKey}:${value}`);
     } else {
-      newGlobalState += `,${globalStateKey}:${globalState[globalStateKey]}`;
+      newGlobalState += `,${globalStateKey}:${value}`;
     }
   });
 

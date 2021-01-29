@@ -1,17 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`kibana_usage_collection Runs the setup method without issues 1`] = `false`;
+exports[`kibana_usage_collection Runs the setup method without issues 1`] = `true`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 2`] = `true`;
+exports[`kibana_usage_collection Runs the setup method without issues 2`] = `false`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 3`] = `false`;
+exports[`kibana_usage_collection Runs the setup method without issues 3`] = `true`;
 
 exports[`kibana_usage_collection Runs the setup method without issues 4`] = `false`;
 
 exports[`kibana_usage_collection Runs the setup method without issues 5`] = `false`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 6`] = `true`;
+exports[`kibana_usage_collection Runs the setup method without issues 6`] = `false`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 7`] = `false`;
+exports[`kibana_usage_collection Runs the setup method without issues 7`] = `true`;
 
-exports[`kibana_usage_collection Runs the setup method without issues 8`] = `true`;
+exports[`kibana_usage_collection Runs the setup method without issues 8`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 9`] = `true`;

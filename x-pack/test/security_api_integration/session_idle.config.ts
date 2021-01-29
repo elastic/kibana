@@ -6,13 +6,11 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
-  );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
@@ -20,15 +18,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [resolve(__dirname, './tests/session_idle')],
-
-    services: {
-      randomness: kibanaAPITestsConfig.get('services.randomness'),
-      legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
-    },
-
+    services,
     servers: xPackAPITestsConfig.get('servers'),
-
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),
       serverArgs: [

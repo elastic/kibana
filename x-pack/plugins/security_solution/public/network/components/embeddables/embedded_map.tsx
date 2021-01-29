@@ -10,7 +10,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { useSelector } from 'react-redux';
 import {
   ErrorEmbeddable,
   isErrorEmbeddable,
@@ -30,6 +29,7 @@ import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getDefaultSourcererSelector } from './selector';
 import { getLayerList } from './map_config';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -95,9 +95,8 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
   const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
-  const { kibanaIndexPatterns, sourcererScope } = useSelector(
-    defaultSourcererScopeSelector,
-    deepEqual
+  const { kibanaIndexPatterns, sourcererScope } = useDeepEqualSelector(
+    defaultSourcererScopeSelector
   );
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(

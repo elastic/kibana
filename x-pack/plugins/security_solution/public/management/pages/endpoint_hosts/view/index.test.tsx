@@ -25,7 +25,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
-import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
+import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -39,8 +39,8 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/policy_list/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+jest.mock('../../policy/store/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/services/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
@@ -220,6 +220,7 @@ describe('when on the list page', () => {
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']
       > = [];
       let firstPolicyID: string;
+      let firstPolicyRev: number;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 4 });
@@ -227,6 +228,7 @@ describe('when on the list page', () => {
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
+          firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
 
           // add ability to change (immutable) policy
           type DeepMutable<T> = { -readonly [P in keyof T]: DeepMutable<T[P]> };
@@ -401,6 +403,16 @@ describe('when on the list page', () => {
             expect(flyout).not.toBeNull();
           });
         });
+      });
+
+      it('should show revision number', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        expect(firstPolicyRevElement).not.toBeNull();
+        expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
     });
   });
@@ -583,6 +595,15 @@ describe('when on the list page', () => {
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+      );
+    });
+
+    it('should display policy revision number', async () => {
+      const renderResult = await renderAndWaitForData();
+      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      expect(policyDetailsRevElement).not.toBeNull();
+      expect(policyDetailsRevElement.textContent).toEqual(
+        `rev. ${hostDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`
       );
     });
 

@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "main": "./target/index.js",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "scripts": {
     "build": "node ./scripts/build.js",
-    "kbn:bootstrap": "yarn build --dev"
+    "kbn:bootstrap": "yarn build --dev",
+    "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js"
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",
     "@kbn/dev-utils": "link:../kbn-dev-utils"
+  },
+  "dependencies": {
+    "@kbn/i18n": "link:../kbn-i18n"
   }
 }

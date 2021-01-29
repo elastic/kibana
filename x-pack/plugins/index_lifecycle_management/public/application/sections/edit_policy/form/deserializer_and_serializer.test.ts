@@ -7,6 +7,7 @@
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
+import { defaultRolloverAction } from '../../../constants';
 import { deserializer } from './deserializer';
 import { createSerializer } from './serializer';
 import { FormInternal } from '../types';
@@ -44,6 +45,7 @@ const originalPolicy: SerializedPolicy = {
           index_codec: 'best_compression',
           max_num_segments: 22,
         },
+        readonly: {},
         set_priority: {
           priority: 1,
         },
@@ -56,11 +58,18 @@ const originalPolicy: SerializedPolicy = {
         shrink: { number_of_shards: 12 },
         allocate: {
           number_of_replicas: 3,
+          include: {
+            some: 'value',
+          },
+          exclude: {
+            some: 'value',
+          },
         },
+        readonly: {},
         set_priority: {
           priority: 10,
         },
-        migrate: { enabled: false },
+        migrate: { enabled: true },
       },
     },
     cold: {
@@ -76,6 +85,10 @@ const originalPolicy: SerializedPolicy = {
         set_priority: {
           priority: 12,
         },
+        searchable_snapshot: {
+          snapshot_repository: 'my repo!',
+          force_merge_index: false,
+        },
       },
     },
     delete: {
@@ -89,6 +102,16 @@ const originalPolicy: SerializedPolicy = {
         },
       },
     },
+  },
+};
+
+const originalMinimalPolicy: SerializedPolicy = {
+  name: 'minimalPolicy',
+  phases: {
+    hot: { min_age: '0ms', actions: {} },
+    warm: { min_age: '1d', actions: {} },
+    cold: { min_age: '2d', actions: {} },
+    delete: { min_age: '3d', actions: {} },
   },
 };
 
@@ -119,7 +142,8 @@ describe('deserializer and serializer', () => {
 
     const copyOfThisTestPolicy = cloneDeep(thisTestPolicy);
 
-    expect(serializer(deserializer(thisTestPolicy))).toEqual(thisTestPolicy);
+    const _formInternal = deserializer(thisTestPolicy);
+    expect(serializer(_formInternal)).toEqual(thisTestPolicy);
 
     // Assert that the policy we passed in is unaltered after deserialization and serialization
     expect(thisTestPolicy).not.toBe(copyOfThisTestPolicy);
@@ -147,6 +171,48 @@ describe('deserializer and serializer', () => {
 
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
     expect(result.phases.warm!.actions.forcemerge).toBeUndefined();
+  });
+
+  it('removes the index_codec option in the forcemerge action if it is disabled in the form', () => {
+    formInternal.phases.warm!.actions.forcemerge = {
+      max_num_segments: 22,
+      index_codec: 'best_compression',
+    };
+    formInternal._meta.hot.bestCompression = false;
+    formInternal._meta.warm.bestCompression = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.forcemerge!.index_codec).toBeUndefined();
+    expect(result.phases.warm!.actions.forcemerge!.index_codec).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in hot', () => {
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+  });
+
+  it('removes the readonly action if it is disabled in warm', () => {
+    formInternal._meta.warm.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.readonly).toBeUndefined();
+  });
+
+  it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+    formInternal._meta.hot.bestCompression = false;
+    formInternal.phases.hot!.actions.forcemerge = undefined;
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+    expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
   });
 
   it('removes set priority if it is disabled in the form', () => {
@@ -181,21 +247,118 @@ describe('deserializer and serializer', () => {
     expect(result.phases.cold!.actions.allocate!.exclude).toBeUndefined();
   });
 
-  it('removes forcemerge and rollover config when rollover is disabled in hot phase', () => {
-    formInternal._meta.hot.useRollover = false;
+  it('removes forcemerge, readonly, and rollover config when rollover is disabled in hot phase', () => {
+    // These two toggles jointly control whether rollover is enabled since the default is
+    // for rollover to be enabled.
+    formInternal._meta.hot.isUsingDefaultRollover = false;
+    formInternal._meta.hot.customRollover.enabled = false;
 
     const result = serializer(formInternal);
 
     expect(result.phases.hot!.actions.rollover).toBeUndefined();
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
   });
 
-  it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.useRollover = true;
-    formInternal._meta.warm.warmPhaseOnRollover = true;
+  it('adds default rollover configuration when enabled, but previously not configured', () => {
+    delete formInternal.phases.hot!.actions.rollover;
+    formInternal._meta.hot.isUsingDefaultRollover = true;
 
     const result = serializer(formInternal);
 
-    expect(result.phases.warm!.min_age).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover).toEqual(defaultRolloverAction);
+  });
+
+  it('removes snapshot_repository when it is unset', () => {
+    delete formInternal.phases.hot!.actions.searchable_snapshot;
+    delete formInternal.phases.cold!.actions.searchable_snapshot;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.searchable_snapshot).toBeUndefined();
+    expect(result.phases.cold!.actions.searchable_snapshot).toBeUndefined();
+  });
+
+  it('correctly serializes a minimal policy', () => {
+    policy = cloneDeep(originalMinimalPolicy);
+    const formInternalPolicy = cloneDeep(originalMinimalPolicy);
+    serializer = createSerializer(policy);
+    formInternal = deserializer(formInternalPolicy);
+
+    // Simulate no action fields being configured in the UI. _Note_, we are not disabling these phases.
+    // We are not setting any action field values in them so the action object will not be present.
+    delete (formInternal.phases.hot as any).actions;
+    delete (formInternal.phases.warm as any).actions;
+    delete (formInternal.phases.cold as any).actions;
+    delete (formInternal.phases.delete as any).actions;
+
+    expect(serializer(formInternal)).toEqual({
+      name: 'minimalPolicy',
+      phases: {
+        // Age is a required value for warm, cold and delete.
+        hot: { min_age: '0ms', actions: {} },
+        warm: { min_age: '1d', actions: {} },
+        cold: { min_age: '2d', actions: {} },
+        delete: { min_age: '3d', actions: { delete: {} } },
+      },
+    });
+  });
+
+  it('sets all known allocate options correctly', () => {
+    formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
+    formInternal._meta.warm.dataTierAllocationType = 'node_attrs';
+    formInternal._meta.warm.allocationNodeAttribute = 'some:value';
+
+    expect(serializer(formInternal).phases.warm!.actions.allocate).toEqual({
+      number_of_replicas: 0,
+      require: {
+        some: 'value',
+      },
+      include: {
+        some: 'value',
+      },
+      exclude: {
+        some: 'value',
+      },
+    });
+  });
+
+  it('sets allocate and migrate actions when defined together', () => {
+    formInternal.phases.warm!.actions.allocate!.number_of_replicas = 0;
+    formInternal._meta.warm.dataTierAllocationType = 'none';
+    // This should not be set...
+    formInternal._meta.warm.allocationNodeAttribute = 'some:value';
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.actions.allocate).toEqual({
+      number_of_replicas: 0,
+    });
+
+    expect(result.phases.warm!.actions.migrate).toEqual({
+      enabled: false,
+    });
+  });
+
+  it('removes shrink from hot and warm when unset', () => {
+    delete formInternal.phases.hot!.actions!.shrink;
+    delete formInternal.phases.warm!.actions!.shrink;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.shrink).toBeUndefined();
+    expect(result.phases.warm!.actions.shrink).toBeUndefined();
+  });
+
+  it('removes rollover action fields', () => {
+    formInternal.phases.hot!.actions.rollover!.max_size = '';
+    formInternal.phases.hot!.actions.rollover!.max_age = '';
+    formInternal.phases.hot!.actions.rollover!.max_docs = '' as any;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.rollover!.max_age).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_docs).toBeUndefined();
+    expect(result.phases.hot!.actions.rollover!.max_size).toBeUndefined();
   });
 });

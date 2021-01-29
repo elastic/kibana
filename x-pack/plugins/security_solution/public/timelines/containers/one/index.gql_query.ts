@@ -138,10 +138,7 @@ export const oneTimelineQuery = gql`
       templateTimelineId
       templateTimelineVersion
       savedQueryId
-      sort {
-        columnId
-        sortDirection
-      }
+      sort
       created
       createdBy
       updated

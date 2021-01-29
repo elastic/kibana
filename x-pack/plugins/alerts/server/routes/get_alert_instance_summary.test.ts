@@ -6,7 +6,7 @@
 
 import { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -40,7 +40,7 @@ describe('getAlertInstanceSummaryRoute', () => {
   };
 
   it('gets alert instance summary', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertInstanceSummaryRoute(router, licenseState);
@@ -78,7 +78,7 @@ describe('getAlertInstanceSummaryRoute', () => {
   });
 
   it('returns NOT-FOUND when alert is not found', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertInstanceSummaryRoute(router, licenseState);

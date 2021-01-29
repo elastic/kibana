@@ -9,7 +9,7 @@ import {
   TrustedAppsListPageLocation,
   TrustedAppsListPageState,
 } from '../state';
-import { initialTrustedAppsPageState } from './reducer';
+import { initialTrustedAppsPageState } from './builders';
 import {
   getListResourceState,
   getLastLoadedListResourceState,

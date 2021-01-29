@@ -58,10 +58,9 @@ describe('utils', () => {
   });
 
   describe('getTypeLabelFromField()', () => {
-    test('returns an unprocessed label for non-runtime fields', () => {
+    test('returns label for fields', () => {
       expect(
         getTypeLabelFromField({
-          name: 'testField',
           type: 'keyword',
         })
       ).toBe('Keyword');
@@ -75,27 +74,6 @@ describe('utils', () => {
           type: 'hyperdrive',
         })
       ).toBe('Other: hyperdrive');
-    });
-
-    test("returns a label prepended with 'Runtime' for runtime fields", () => {
-      expect(
-        getTypeLabelFromField({
-          name: 'testField',
-          type: 'runtime',
-          runtime_type: 'keyword',
-        })
-      ).toBe('Runtime Keyword');
-    });
-
-    test("returns a label prepended with 'Runtime Other' for unrecognized runtime fields", () => {
-      expect(
-        getTypeLabelFromField({
-          name: 'testField',
-          type: 'runtime',
-          // @ts-ignore
-          runtime_type: 'hyperdrive',
-        })
-      ).toBe('Runtime Other: hyperdrive');
     });
   });
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
@@ -14,7 +14,21 @@ import { PackagePolicyCreateExtensionComponentProps } from '../../../../../../..
  * for use in the Ingest app create / edit package policy
  */
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
-  () => {
+  ({ newPolicy, onChange }) => {
+    // Fleet will initialize the create form with a default name for the integratin policy, however,
+    // for endpoint security, we want the user to explicitely type in a name, so we blank it out
+    // only during 1st component render (thus why the eslint disabled rule below).
+    useEffect(() => {
+      onChange({
+        isValid: false,
+        updatedPolicy: {
+          ...newPolicy,
+          name: '',
+        },
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
       <>
         <EuiSpacer size="m" />

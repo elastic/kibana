@@ -4,213 +4,255 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import {
   EuiButton,
   EuiFlexGroup,
-  EuiFormRow,
   EuiFlexItem,
+  EuiOverlayMask,
+  EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiSpacer,
   EuiProgress,
   EuiCallOut,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { TimelineType } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import usePrevious from 'react-use/lib/usePrevious';
+
+import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
-import { TimelineInput } from '../../../store/timeline/actions';
-import { Description, Name, UpdateTitle, UpdateDescription } from '../properties/helpers';
-import { TIMELINE_TITLE, DESCRIPTION, OPTIONAL } from '../properties/translations';
-import { useCreateTimelineButton } from '../properties/use_create_timeline';
+import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
+import { useCreateTimeline } from '../properties/use_create_timeline';
+import * as commonI18n from '../properties/translations';
 import * as i18n from './translations';
+import { formSchema } from './schema';
 
+const CommonUseField = getUseField({ component: Field });
 interface TimelineTitleAndDescriptionProps {
-  showWarning?: boolean;
+  closeSaveTimeline: () => void;
+  initialFocus: 'title' | 'description';
   timelineId: string;
-  toggleSaveTimeline: () => void;
-  updateTitle: UpdateTitle;
-  updateDescription: UpdateDescription;
+  showWarning?: boolean;
 }
-
-const Wrapper = styled(EuiModalBody)`
-  .euiFormRow {
-    max-width: none;
-  }
-
-  .euiFormControlLayout {
-    max-width: none;
-  }
-
-  .euiFieldText {
-    max-width: none;
-  }
-`;
-
-Wrapper.displayName = 'Wrapper';
-
-const usePrevious = (value: unknown) => {
-  const ref = useRef<unknown>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-};
 
 // when showWarning equals to true,
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ timelineId, toggleSaveTimeline, updateTitle, updateDescription, showWarning }) => {
-    const timeline = useShallowEqualSelector((state) =>
-      timelineSelectors.selectTimeline(state, timelineId)
+  ({ closeSaveTimeline, initialFocus, timelineId, showWarning }) => {
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const {
+      isSaving,
+      description = '',
+      status,
+      title = '',
+      timelineType,
+    } = useDeepEqualSelector((state) =>
+      pick(
+        ['isSaving', 'description', 'status', 'title', 'timelineType'],
+        getTimeline(state, timelineId)
+      )
     );
-
-    const { description, isSaving, savedObjectId, title, timelineType } = timeline;
-
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
-    const onSaveTimeline = useCallback(
-      (args: TimelineInput) => dispatch(timelineActions.saveTimeline(args)),
-      [dispatch]
+    const handleCreateNewTimeline = useCreateTimeline({
+      timelineId: TimelineId.active,
+      timelineType: TimelineType.default,
+    });
+
+    const handleSubmit = useCallback(
+      (titleAndDescription, isValid) => {
+        if (isValid) {
+          dispatch(
+            timelineActions.updateTitleAndDescription({
+              id: timelineId,
+              ...titleAndDescription,
+            })
+          );
+        }
+
+        return Promise.resolve();
+      },
+      [dispatch, timelineId]
     );
 
-    const handleClick = useCallback(() => {
-      onSaveTimeline({
-        ...timeline,
-        id: timelineId,
-      });
-    }, [onSaveTimeline, timeline, timelineId]);
-
-    const { getButton } = useCreateTimelineButton({ timelineId, timelineType });
-
-    const discardTimelineButton = useMemo(
-      () =>
-        getButton({
-          title:
-            timelineType === TimelineType.template
-              ? i18n.DISCARD_TIMELINE_TEMPLATE
-              : i18n.DISCARD_TIMELINE,
-          outline: true,
-          iconType: '',
-          fill: false,
-        }),
-      [getButton, timelineType]
+    const initialState = useMemo(
+      () => ({
+        title,
+        description,
+      }),
+      [title, description]
     );
 
-    useEffect(() => {
-      if (!isSaving && prevIsSaving) {
-        toggleSaveTimeline();
+    const { form } = useForm({
+      id: 'timelineTitleAndDescriptionForm',
+      schema: formSchema,
+      onSubmit: handleSubmit,
+      options: {
+        stripEmptyFields: false,
+      },
+      defaultValue: initialState,
+    });
+    const { isSubmitted, isSubmitting, submit } = form;
+
+    const handleCancel = useCallback(() => {
+      if (showWarning) {
+        handleCreateNewTimeline();
       }
-    }, [isSaving, prevIsSaving, toggleSaveTimeline]);
+      closeSaveTimeline();
+    }, [closeSaveTimeline, handleCreateNewTimeline, showWarning]);
 
-    const modalHeader =
-      savedObjectId == null
-        ? timelineType === TimelineType.template
-          ? i18n.SAVE_TIMELINE_TEMPLATE
-          : i18n.SAVE_TIMELINE
-        : timelineType === TimelineType.template
-        ? i18n.NAME_TIMELINE_TEMPLATE
-        : i18n.NAME_TIMELINE;
+    const closeModalText = useMemo(() => {
+      if (status === TimelineStatus.draft && showWarning) {
+        return timelineType === TimelineType.template
+          ? i18n.DISCARD_TIMELINE_TEMPLATE
+          : i18n.DISCARD_TIMELINE;
+      }
+      return i18n.CLOSE_MODAL;
+    }, [showWarning, status, timelineType]);
 
-    const saveButtonTitle =
-      savedObjectId == null && showWarning
-        ? timelineType === TimelineType.template
-          ? i18n.SAVE_TIMELINE_TEMPLATE
-          : i18n.SAVE_TIMELINE
-        : i18n.SAVE;
+    const modalHeader = useMemo(
+      () =>
+        status === TimelineStatus.draft
+          ? timelineType === TimelineType.template
+            ? i18n.SAVE_TIMELINE_TEMPLATE
+            : i18n.SAVE_TIMELINE
+          : timelineType === TimelineType.template
+          ? i18n.NAME_TIMELINE_TEMPLATE
+          : i18n.NAME_TIMELINE,
+      [status, timelineType]
+    );
+
+    const saveButtonTitle = useMemo(
+      () =>
+        status === TimelineStatus.draft && showWarning
+          ? timelineType === TimelineType.template
+            ? i18n.SAVE_TIMELINE_TEMPLATE
+            : i18n.SAVE_TIMELINE
+          : i18n.SAVE,
+      [showWarning, status, timelineType]
+    );
 
     const calloutMessage = useMemo(() => i18n.UNSAVED_TIMELINE_WARNING(timelineType), [
       timelineType,
     ]);
 
-    const descriptionLabel = savedObjectId == null ? `${DESCRIPTION} (${OPTIONAL})` : DESCRIPTION;
+    const descriptionLabel = useMemo(() => `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`, []);
+
+    const titleFieldProps = useMemo(
+      () => ({
+        'aria-label': i18n.TIMELINE_TITLE,
+        autoFocus: initialFocus === 'title',
+        'data-test-subj': 'save-timeline-title',
+        disabled: isSaving,
+        spellCheck: true,
+        placeholder:
+          timelineType === TimelineType.template
+            ? commonI18n.UNTITLED_TEMPLATE
+            : commonI18n.UNTITLED_TIMELINE,
+      }),
+      [initialFocus, isSaving, timelineType]
+    );
+
+    const descriptionFieldProps = useMemo(
+      () => ({
+        'aria-label': i18n.TIMELINE_DESCRIPTION,
+        autoFocus: initialFocus === 'description',
+        'data-test-subj': 'save-timeline-description',
+        disabled: isSaving,
+        placeholder: commonI18n.DESCRIPTION,
+      }),
+      [initialFocus, isSaving]
+    );
+
+    useEffect(() => {
+      if (isSubmitted && !isSaving && prevIsSaving) {
+        closeSaveTimeline();
+      }
+    }, [isSubmitted, isSaving, prevIsSaving, closeSaveTimeline]);
 
     return (
-      <>
-        {isSaving && (
-          <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
-        )}
-        <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
-
-        <Wrapper>
-          {showWarning && (
-            <EuiFlexItem grow={true}>
-              <EuiCallOut
-                title={calloutMessage}
-                color="danger"
-                iconType="alert"
-                data-test-subj="save-timeline-callout"
-              />
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
+      <EuiOverlayMask>
+        <EuiModal
+          data-test-subj="save-timeline-modal"
+          maxWidth={NOTES_PANEL_WIDTH}
+          onClose={closeSaveTimeline}
+        >
+          {isSaving && (
+            <EuiProgress
+              size="s"
+              color="primary"
+              position="absolute"
+              data-test-subj="progress-bar"
+            />
           )}
-          <EuiFlexItem grow={true}>
-            <EuiFormRow label={TIMELINE_TITLE}>
-              <Name
-                autoFocus={true}
-                disableTooltip={true}
-                disableAutoSave={true}
-                disabled={isSaving}
-                data-test-subj="save-timeline-name"
-                timelineId={timelineId}
-                timelineType={timelineType}
-                title={title}
-                updateTitle={updateTitle}
-                width="100%"
-                marginRight={10}
-              />
-            </EuiFormRow>
-            <EuiSpacer />
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiFormRow label={descriptionLabel}>
-              <Description
-                data-test-subj="save-timeline-description"
-                description={description}
-                disableTooltip={true}
-                disableAutoSave={true}
-                disabled={isSaving}
-                timelineId={timelineId}
-                updateDescription={updateDescription}
-                isTextArea={true}
-                marginRight={0}
-              />
-            </EuiFormRow>
-            <EuiSpacer />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false} component="span">
-                {savedObjectId == null && showWarning ? (
-                  discardTimelineButton
-                ) : (
-                  <EuiButton
-                    fill={false}
-                    onClick={toggleSaveTimeline}
-                    isDisabled={isSaving}
-                    data-test-subj="close-button"
-                  >
-                    {i18n.CLOSE_MODAL}
-                  </EuiButton>
-                )}
+          <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
+
+          <EuiModalBody>
+            {showWarning && (
+              <EuiFlexItem grow={true}>
+                <EuiCallOut
+                  title={calloutMessage}
+                  color="danger"
+                  iconType="alert"
+                  data-test-subj="save-timeline-callout"
+                />
+                <EuiSpacer size="m" />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} component="span">
-                <EuiButton
-                  isDisabled={title.trim().length === 0 || isSaving}
-                  fill={true}
-                  onClick={handleClick}
-                  data-test-subj="save-button"
-                >
-                  {saveButtonTitle}
-                </EuiButton>
+            )}
+            <Form form={form}>
+              <EuiFlexItem grow={true}>
+                <CommonUseField
+                  path="title"
+                  fullWidth
+                  label={i18n.TITLE}
+                  euiFieldProps={titleFieldProps}
+                />
+                <EuiSpacer />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </Wrapper>
-      </>
+              <EuiFlexItem grow={true}>
+                <CommonUseField
+                  label={descriptionLabel}
+                  path="description"
+                  fullWidth
+                  euiFieldProps={descriptionFieldProps}
+                />
+                <EuiSpacer />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false} component="span">
+                    <EuiButton
+                      size="s"
+                      fill={false}
+                      onClick={handleCancel}
+                      isDisabled={isSaving}
+                      data-test-subj="close-button"
+                    >
+                      {closeModalText}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} component="span">
+                    <EuiButton
+                      size="s"
+                      isDisabled={isSaving || isSubmitting}
+                      fill={true}
+                      onClick={submit}
+                      data-test-subj="save-button"
+                    >
+                      {saveButtonTitle}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </Form>
+          </EuiModalBody>
+        </EuiModal>
+      </EuiOverlayMask>
     );
   }
 );

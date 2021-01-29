@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
@@ -13,17 +13,17 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../e
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
 export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<typeof EDIT_SWIMLANE_PANEL_ACTION>({
+  return createAction<EditSwimlanePanelContext>({
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
-    getIconType(context: ActionContextMapping[typeof EDIT_SWIMLANE_PANEL_ACTION]): string {
+    getIconType(context): string {
       return 'pencil';
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.editSwimlaneTitle', {
         defaultMessage: 'Edit swim lane',
       }),
-    async execute({ embeddable }: EditSwimlanePanelContext) {
+    async execute({ embeddable }) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
@@ -41,7 +41,7 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
         return Promise.reject();
       }
     },
-    async isCompatible({ embeddable }: EditSwimlanePanelContext) {
+    async isCompatible({ embeddable }) {
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT

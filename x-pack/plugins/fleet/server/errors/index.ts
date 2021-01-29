@@ -5,7 +5,12 @@
  */
 
 /* eslint-disable max-classes-per-file */
-export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
+export {
+  defaultIngestErrorHandler,
+  ingestErrorToResponseOptions,
+  isLegacyESClientError,
+  isESClientError,
+} from './handlers';
 
 export class IngestManagerError extends Error {
   constructor(message?: string) {
@@ -24,3 +29,5 @@ export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
 export class PackageInvalidArchiveError extends IngestManagerError {}
 export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
+export class FleetAdminUserInvalidError extends IngestManagerError {}
+export class ConcurrentInstallOperationError extends IngestManagerError {}

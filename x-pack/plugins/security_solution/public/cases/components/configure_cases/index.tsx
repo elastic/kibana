@@ -18,7 +18,7 @@ import { ClosureType } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { connectorsConfiguration } from '../connectors';
 
 import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -69,21 +69,22 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     connector,
     closureType,
     loading: loadingCaseConfigure,
+    mappings,
     persistLoading,
     persistCaseConfigure,
+    refetchCaseConfigure,
     setConnector,
     setClosureType,
   } = useCaseConfigure();
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
-  // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
-  // TODO: Fix it if reloadConnectors type change.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
+  const onConnectorUpdate = useCallback(async () => {
+    refetchConnectors();
+    refetchCaseConfigure();
+  }, [refetchCaseConfigure, refetchConnectors]);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connector.id === 'none';
-
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
   }, []);
@@ -92,9 +93,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setAddFlyoutVisibility,
   ]);
 
-  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
-    setEditFlyoutVisibility,
-  ]);
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -156,7 +155,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         consumer: 'case',
         onClose: onCloseAddFlyout,
         actionTypes,
-        reloadConnectors,
+        reloadConnectors: onConnectorUpdate,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -169,7 +168,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
             initialConnector: editedConnectorItem,
             consumer: 'case',
             onClose: onCloseEditFlyout,
-            reloadConnectors,
+            reloadConnectors: onConnectorUpdate,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,11 +200,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         <Connectors
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-          isLoading={isLoadingConnectors}
-          onChangeConnector={onChangeConnector}
-          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
-          selectedConnector={connector.id}
+          isLoading={isLoadingAny}
+          mappings={mappings}
+          onChangeConnector={onChangeConnector}
+          selectedConnector={connector}
+          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
         />
       </SectionWrapper>
       {addFlyoutVisible && ConnectorAddFlyout}

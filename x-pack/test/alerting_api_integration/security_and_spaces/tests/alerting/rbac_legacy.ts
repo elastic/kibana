@@ -16,8 +16,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const securityService = getService('security');
-  const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -39,7 +37,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esArchiver.load('alerts_legacy');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
-      await setupSpacesAndUsers(spacesService, securityService);
+      await setupSpacesAndUsers(getService);
     });
 
     after(async () => {

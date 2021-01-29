@@ -35,6 +35,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
   },
 
+  getStatsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
+  },
+
   getFilePath: (filePath: string) => {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
@@ -140,6 +144,8 @@ export const agentRouteService = {
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
+  getCreateActionPath: (agentId: string) =>
+    AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {

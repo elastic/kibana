@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
@@ -102,7 +91,7 @@ const createPlugin = (
   });
 };
 
-async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
+async function testSetup(options: { isDevCliParent?: boolean } = {}) {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -116,7 +105,7 @@ async function testSetup(options: { isDevClusterMaster?: boolean } = {}) {
   coreId = Symbol('core');
   env = Env.createDefault(REPO_ROOT, {
     ...getEnvOptions(),
-    isDevClusterMaster: options.isDevClusterMaster ?? false,
+    isDevCliParent: options.isDevCliParent ?? false,
   });
 
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
@@ -638,10 +627,10 @@ describe('PluginsService', () => {
   });
 });
 
-describe('PluginService when isDevClusterMaster is true', () => {
+describe('PluginService when isDevCliParent is true', () => {
   beforeEach(async () => {
     await testSetup({
-      isDevClusterMaster: true,
+      isDevCliParent: true,
     });
   });
 

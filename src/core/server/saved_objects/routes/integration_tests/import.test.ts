@@ -1,36 +1,29 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { mockUuidv4 } from '../../import/__mocks__';
+import { mockUuidv4 } from '../../import/lib/__mocks__';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
-import { SavedObjectsErrorHelpers } from '../..';
+import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
+let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 const URL = '/internal/saved_objects/_import';
 
 describe(`POST ${URL}`, () => {
@@ -70,8 +63,20 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
+    const importer = new SavedObjectsImporter({
+      savedObjectsClient,
+      typeRegistry: handlerContext.savedObjects.typeRegistry,
+      importSizeLimit: 10000,
+    });
+    handlerContext.savedObjects.importer.import.mockImplementation((options) =>
+      importer.import(options)
+    );
+
     const router = httpSetup.createRouter('/internal/saved_objects/');
-    registerImportRoute(router, config);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsImport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerImportRoute(router, { config, coreUsageData });
 
     await server.start();
   });
@@ -80,7 +85,7 @@ describe(`POST ${URL}`, () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
@@ -96,8 +101,13 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 0 });
+    expect(result.body).toEqual({ success: true, successCount: 0, warnings: [] });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
+    expect(coreUsageStatsClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
+      request: expect.anything(),
+      createNewCopies: false,
+      overwrite: false,
+    });
   });
 
   it('defaults migrationVersion to empty object', async () => {
@@ -128,6 +138,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: 'my-pattern-*', icon: 'index-pattern-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -177,6 +188,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
   });
@@ -225,6 +237,7 @@ describe(`POST ${URL}`, () => {
           error: { type: 'conflict' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // successResults objects were not created because resolvable errors are present
   });
@@ -273,6 +286,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
   });
@@ -326,6 +340,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
@@ -396,6 +411,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
@@ -460,6 +476,7 @@ describe(`POST ${URL}`, () => {
           meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
+      warnings: [],
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
@@ -524,6 +541,7 @@ describe(`POST ${URL}`, () => {
             destinationId: obj2.id,
           },
         ],
+        warnings: [],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(

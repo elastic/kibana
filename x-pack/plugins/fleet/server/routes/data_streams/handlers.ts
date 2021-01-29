@@ -9,7 +9,7 @@ import { GetDataStreamsResponse, KibanaAssetType, KibanaSavedObjectType } from '
 import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
+const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*';
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;

@@ -18,9 +18,9 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../../hooks/use_theme';
 import { px, units } from '../../../../../style/variables';
 import {
   createAgentConfigurationHref,
@@ -41,6 +41,7 @@ interface Props {
 
 export function AgentConfigurationList({ status, data, refetch }: Props) {
   const { core } = useApmPluginContext();
+  const canSave = core.application.capabilities.apm.save;
   const { basePath } = core.http;
   const { search } = useLocation();
   const theme = useTheme();
@@ -60,29 +61,38 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         </h2>
       }
       body={
-        <>
-          <p>
-            {i18n.translate(
-              'xpack.apm.agentConfig.configTable.emptyPromptText',
-              {
-                defaultMessage:
-                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
-              }
-            )}
-          </p>
-        </>
+        <p>
+          {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptText', {
+            defaultMessage:
+              "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
+          })}
+        </p>
       }
       actions={
-        <EuiButton
-          color="primary"
-          fill
-          href={createAgentConfigurationHref(search, basePath)}
+        <EuiToolTip
+          content={
+            !canSave &&
+            i18n.translate(
+              'xpack.apm.settings.agentConfig.createConfigButton.tooltip',
+              {
+                defaultMessage:
+                  "You don't have permissions to create agent configurations",
+              }
+            )
+          }
         >
-          {i18n.translate(
-            'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
-            { defaultMessage: 'Create configuration' }
-          )}
-        </EuiButton>
+          <EuiButton
+            color="primary"
+            fill
+            href={createAgentConfigurationHref(search, basePath)}
+            isDisabled={!canSave}
+          >
+            {i18n.translate(
+              'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
+              { defaultMessage: 'Create configuration' }
+            )}
+          </EuiButton>
+        </EuiToolTip>
       }
     />
   );
@@ -180,28 +190,36 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         <TimestampTooltip time={value} timeUnit="minutes" />
       ),
     },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Edit"
-          iconType="pencil"
-          href={editAgentConfigurationHref(config.service, search, basePath)}
-        />
-      ),
-    },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Delete"
-          iconType="trash"
-          onClick={() => setConfigToBeDeleted(config)}
-        />
-      ),
-    },
+    ...(canSave
+      ? [
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="pencil"
+                href={editAgentConfigurationHref(
+                  config.service,
+                  search,
+                  basePath
+                )}
+              />
+            ),
+          },
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Delete"
+                iconType="trash"
+                onClick={() => setConfigToBeDeleted(config)}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

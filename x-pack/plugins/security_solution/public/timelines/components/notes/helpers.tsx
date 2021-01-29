@@ -8,6 +8,7 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import uuid from 'uuid';
 
 import { Note } from '../../../common/lib/note';
 
@@ -24,8 +25,6 @@ export type GetNewNoteId = () => string;
 export type UpdateInternalNewNote = (newNote: string) => void;
 /** Closes the notes popover */
 export type OnClosePopover = () => void;
-/** Performs IO to associate a note with an event */
-export type AddNoteToEvent = ({ eventId, noteId }: { eventId: string; noteId: string }) => void;
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -75,15 +74,9 @@ export const NotesCount = React.memo<{
 NotesCount.displayName = 'NotesCount';
 
 /** Creates a new instance of a `note` */
-export const createNote = ({
-  newNote,
-  getNewNoteId,
-}: {
-  newNote: string;
-  getNewNoteId: GetNewNoteId;
-}): Note => ({
+export const createNote = ({ newNote }: { newNote: string }): Note => ({
   created: moment.utc().toDate(),
-  id: getNewNoteId(),
+  id: uuid.v4(),
   lastEdit: null,
   note: newNote.trim(),
   saveObjectId: null,
@@ -93,7 +86,6 @@ export const createNote = ({
 
 interface UpdateAndAssociateNodeParams {
   associateNote: AssociateNote;
-  getNewNoteId: GetNewNoteId;
   newNote: string;
   updateNewNote: UpdateInternalNewNote;
   updateNote: UpdateNote;
@@ -101,12 +93,11 @@ interface UpdateAndAssociateNodeParams {
 
 export const updateAndAssociateNode = ({
   associateNote,
-  getNewNoteId,
   newNote,
   updateNewNote,
   updateNote,
 }: UpdateAndAssociateNodeParams) => {
-  const note = createNote({ newNote, getNewNoteId });
+  const note = createNote({ newNote });
   updateNote(note); // perform IO to store the newly-created note
   associateNote(note.id); // associate the note with the (opaque) thing
   updateNewNote(''); // clear the input

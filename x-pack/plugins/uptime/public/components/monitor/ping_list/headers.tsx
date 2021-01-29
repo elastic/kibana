@@ -7,9 +7,10 @@
 import React from 'react';
 import { EuiAccordion, EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PingHeaders as HeadersProp } from '../../../../common/runtime_types';
 
 interface Props {
-  headers: Record<string, string>;
+  headers: HeadersProp;
 }
 
 export const PingHeaders = ({ headers }: Props) => {

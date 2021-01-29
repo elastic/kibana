@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
-  MalwareFields,
+  ProtectionFields,
   PolicyData,
   UIPolicyConfig,
 } from '../../../../common/endpoint/types';
@@ -60,12 +61,14 @@ export interface PolicyDetailsState {
   /** current location of the application */
   location?: Immutable<AppLocation>;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+  agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
   updateStatus?: {
     success: boolean;
     error?: ServerApiError;
   };
+  /** current license */
+  license?: ILicense;
 }
 
 /**
@@ -105,7 +108,16 @@ export type KeysByValueCriteria<O, Criteria> = {
 }[keyof O];
 
 /** Returns an array of the policy OSes that have a malware protection field */
-export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
+export type MalwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { malware: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a ransomware protection field */
+export type RansomwareProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ransomware: ProtectionFields }
+>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

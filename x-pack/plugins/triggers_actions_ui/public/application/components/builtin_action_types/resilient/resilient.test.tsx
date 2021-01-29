@@ -44,11 +44,17 @@ describe('resilient connector validation', () => {
     } as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        apiKeyId: [],
-        apiKeySecret: [],
-        orgId: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          orgId: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: [],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -65,11 +71,17 @@ describe('resilient connector validation', () => {
     } as unknown) as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        apiKeyId: [],
-        apiKeySecret: ['Secret is required'],
-        orgId: ['Organization ID is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          orgId: ['Organization ID is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: ['Secret is required'],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -78,22 +90,22 @@ describe('resilient connector validation', () => {
 describe('resilient action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { name: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { 'subActionParams.incident.name': [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { name: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        'subActionParams.incident.name': ['Name is required.'],
       },
     });
   });

@@ -6,10 +6,10 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../server/lib/traces/get_trace';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { WaterfallContainer } from './index';
 import { getWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 import {

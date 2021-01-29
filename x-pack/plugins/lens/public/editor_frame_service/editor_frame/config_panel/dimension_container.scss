@@ -13,7 +13,39 @@
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
 
-.lnsDimensionContainer__footer,
-.lnsDimensionContainer__header {
+.lnsDimensionContainer__footer {
   padding: $euiSizeS;
+}
+
+.lnsDimensionContainer__header {
+  padding: $euiSizeS $euiSizeXS;
+}
+
+.lnsDimensionContainer__headerTitle {
+  padding: $euiSizeS $euiSizeXS;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.lnsDimensionContainer__headerLink {
+  &:focus-within {
+    background-color: transparentize($euiColorVis1, .9);
+
+    .lnsDimensionContainer__headerTitle {
+      text-decoration: underline;
+    }
+  }
+}
+
+.lnsDimensionContainer__backIcon {
+  &:hover {
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus {
+    background-color: transparent;
+  }
 }

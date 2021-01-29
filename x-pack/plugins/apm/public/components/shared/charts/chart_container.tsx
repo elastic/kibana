@@ -7,7 +7,7 @@
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 interface Props {
   hasData: boolean;
@@ -17,10 +17,7 @@ interface Props {
 }
 
 export function ChartContainer({ children, height, status, hasData }: Props) {
-  if (
-    !hasData &&
-    (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING)
-  ) {
+  if (!hasData && status === FETCH_STATUS.LOADING) {
     return <LoadingChartPlaceholder height={height} />;
   }
 

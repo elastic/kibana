@@ -104,7 +104,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find('.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
 
   test('it filters-out null savedObjectIds', () => {
@@ -135,7 +135,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
 
   test('it filters-out undefined savedObjectIds', () => {
@@ -165,6 +165,6 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
 });

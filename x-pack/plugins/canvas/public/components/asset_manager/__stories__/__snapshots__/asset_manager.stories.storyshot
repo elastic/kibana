@@ -17,6 +17,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -163,6 +164,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         </div>
         <button
           className="euiButton euiButton--primary euiButton--small"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -204,6 +206,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -302,7 +305,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
@@ -354,6 +357,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -387,6 +391,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -418,6 +423,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -442,6 +448,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -469,7 +476,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
@@ -521,6 +528,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -554,6 +562,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -585,6 +594,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -609,6 +619,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -660,6 +671,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         </div>
         <button
           className="euiButton euiButton--primary euiButton--small"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {

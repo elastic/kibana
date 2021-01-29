@@ -17,8 +17,6 @@ import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
 import { getFieldByNameFactory } from '../pure_helpers';
 
-jest.mock('../operations');
-
 const fields = [
   {
     name: 'timestamp',
@@ -106,6 +104,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             col1: {
               label: 'Date histogram of timestamp',
+              customLabel: true,
               dataType: 'date',
               isBucketed: true,
 
@@ -117,6 +116,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               sourceField: 'timestamp',
             },
           },
+          incompleteColumns: {},
         },
       },
     };

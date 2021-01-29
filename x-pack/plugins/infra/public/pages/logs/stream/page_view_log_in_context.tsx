@@ -16,10 +16,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
@@ -84,6 +84,7 @@ const LogInContextWrapper = euiStyled.div<{ width: number | string; height: numb
   padding: 16px;
   width: ${(props) => (typeof props.width === 'number' ? `${props.width}px` : props.width)};
   height: ${(props) => (typeof props.height === 'number' ? `${props.height}px` : props.height)};
+  max-height: 75vh; // Same as EuiModal
 `;
 
 const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {

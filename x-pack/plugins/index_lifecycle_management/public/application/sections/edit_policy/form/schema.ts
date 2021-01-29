@@ -7,9 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { defaultIndexPriority } from '../../../constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { FormInternal } from '../types';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import {
   ifExistsNumberGreaterThanZero,
@@ -29,21 +32,32 @@ const serializers = {
 export const schema: FormSchema<FormInternal> = {
   _meta: {
     hot: {
-      useRollover: {
+      isUsingDefaultRollover: {
         defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-          defaultMessage: 'Enable rollover',
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
+          defaultMessage: 'Use recommended defaults',
         }),
       },
-      maxStorageSizeUnit: {
-        defaultValue: 'gb',
-      },
-      maxAgeUnit: {
-        defaultValue: 'd',
+      customRollover: {
+        enabled: {
+          defaultValue: true,
+          label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
+            defaultMessage: 'Enable rollover',
+          }),
+        },
+        maxStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        maxAgeUnit: {
+          defaultValue: 'd',
+        },
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     warm: {
@@ -54,24 +68,21 @@ export const schema: FormSchema<FormInternal> = {
           { defaultMessage: 'Activate warm phase' }
         ),
       },
-      warmPhaseOnRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
-          defaultMessage: 'Move to warm phase on rollover',
-        }),
-      },
       minAgeUnit: {
         defaultValue: 'ms',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     cold: {
@@ -127,6 +138,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_docs: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
@@ -141,6 +153,7 @@ export const schema: FormSchema<FormInternal> = {
               },
             ],
             serializer: serializers.stringToNumber,
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
             label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
@@ -154,6 +167,7 @@ export const schema: FormSchema<FormInternal> = {
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
           },
         },
         forcemerge: {
@@ -175,11 +189,35 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+        shrink: {
+          number_of_shards: {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+              defaultMessage: 'Number of primary shards',
+            }),
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: numberGreaterThanField({
+                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+                  than: 0,
+                }),
+              },
+            ],
+            serializer: serializers.stringToNumber,
+          },
+        },
         set_priority: {
           priority: {
-            defaultValue: defaultSetPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.hot as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
           },
         },
@@ -198,11 +236,14 @@ export const schema: FormSchema<FormInternal> = {
         allocate: {
           number_of_replicas: {
             label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
+              defaultMessage: 'Number of replicas',
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -210,7 +251,7 @@ export const schema: FormSchema<FormInternal> = {
         },
         shrink: {
           number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel', {
+            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
               defaultMessage: 'Number of primary shards',
             }),
             validations: [
@@ -248,9 +289,14 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: defaultPhaseIndexPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.warm as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
           },
         },
@@ -269,11 +315,14 @@ export const schema: FormSchema<FormInternal> = {
         allocate: {
           number_of_replicas: {
             label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
+              defaultMessage: 'Number of replicas',
             }),
             validations: [
               {
-                validator: ifExistsNumberGreaterThanZero,
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              {
+                validator: ifExistsNumberNonNegative,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -281,10 +330,23 @@ export const schema: FormSchema<FormInternal> = {
         },
         set_priority: {
           priority: {
-            defaultValue: '0' as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
+            defaultValue: defaultIndexPriority.cold as any,
+            label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+            validations: [
+              {
+                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+              },
+              { validator: ifExistsNumberNonNegative },
+            ],
             serializer: serializers.stringToNumber,
+          },
+        },
+        searchable_snapshot: {
+          snapshot_repository: {
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
           },
         },
       },

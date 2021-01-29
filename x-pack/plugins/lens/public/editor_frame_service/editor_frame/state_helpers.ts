@@ -10,6 +10,7 @@ import {
   Datasource,
   DatasourcePublicAPI,
   FramePublicAPI,
+  InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -21,14 +22,20 @@ export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext
+  initialContext?: VisualizeFieldContext,
+  options?: InitializationOptions
 ) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
         return datasource
-          .initialize(datasourceStates[datasourceId].state || undefined, references, initialContext)
+          .initialize(
+            datasourceStates[datasourceId].state || undefined,
+            references,
+            initialContext,
+            options
+          )
           .then((datasourceState) => {
             states[datasourceId] = { isLoading: false, state: datasourceState };
           });
@@ -82,7 +89,9 @@ export async function persistedStateToExpression(
         { isLoading: false, state },
       ])
     ),
-    references
+    references,
+    undefined,
+    { isFullEditor: false }
   );
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
@@ -110,21 +119,21 @@ export const validateDatasourceAndVisualization = (
       longMessage: string;
     }>
   | undefined => {
-  const layersGroups =
-    currentVisualizationState &&
-    currentVisualization
-      ?.getLayerIds(currentVisualizationState)
-      .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-        const groups = currentVisualization?.getConfiguration({
-          frame: frameAPI,
-          layerId,
-          state: currentVisualizationState,
-        }).groups;
-        if (groups) {
-          memo[layerId] = groups;
-        }
-        return memo;
-      }, {});
+  const layersGroups = currentVisualizationState
+    ? currentVisualization
+        ?.getLayerIds(currentVisualizationState)
+        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
+          const groups = currentVisualization?.getConfiguration({
+            frame: frameAPI,
+            layerId,
+            state: currentVisualizationState,
+          }).groups;
+          if (groups) {
+            memo[layerId] = groups;
+          }
+          return memo;
+        }, {})
+    : undefined;
 
   const datasourceValidationErrors = currentDatasourceState
     ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)

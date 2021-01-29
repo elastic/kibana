@@ -5,14 +5,9 @@
  */
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
-
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
-
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
-
 import { TransactionGroupWithoutTimeseriesData } from './get_transaction_groups_for_page';
 
 export function mergeTransactionGroupData({
@@ -20,11 +15,15 @@ export function mergeTransactionGroupData({
   end,
   transactionGroups,
   timeseriesData,
+  latencyAggregationType,
+  transactionType,
 }: {
   start: number;
   end: number;
   transactionGroups: TransactionGroupWithoutTimeseriesData[];
   timeseriesData: TransactionGroupTimeseriesData;
+  latencyAggregationType: LatencyAggregationType;
+  transactionType: string;
 }) {
   const deltaAsMinutes = (end - start) / 1000 / 60;
 
@@ -33,39 +32,32 @@ export function mergeTransactionGroupData({
       ({ key }) => key === transactionGroup.name
     );
 
-    const transactionTypes =
-      groupBucket?.transaction_types.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [];
-
-    const transactionType =
-      transactionTypes.find(
-        (type) => type === TRANSACTION_PAGE_LOAD || type === TRANSACTION_REQUEST
-      ) ?? transactionTypes[0];
-
     const timeseriesBuckets = groupBucket?.timeseries.buckets ?? [];
 
     return timeseriesBuckets.reduce(
-      (prev, point) => {
+      (acc, point) => {
         return {
-          ...prev,
+          ...acc,
           latency: {
-            ...prev.latency,
-            timeseries: prev.latency.timeseries.concat({
+            ...acc.latency,
+            timeseries: acc.latency.timeseries.concat({
               x: point.key,
-              y: point.avg_latency.value,
+              y: getLatencyValue({
+                latencyAggregationType,
+                aggregation: point.latency,
+              }),
             }),
           },
           throughput: {
-            ...prev.throughput,
-            timeseries: prev.throughput.timeseries.concat({
+            ...acc.throughput,
+            timeseries: acc.throughput.timeseries.concat({
               x: point.key,
               y: point.transaction_count.value / deltaAsMinutes,
             }),
           },
           errorRate: {
-            ...prev.errorRate,
-            timeseries: prev.errorRate.timeseries.concat({
+            ...acc.errorRate,
+            timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
               y:
                 point.transaction_count.value > 0

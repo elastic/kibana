@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/discover/tsconfig.json" },
+    { "path": "../../../src/plugins/share/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/visualizations/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions/tsconfig.json" }
+  ]
+}

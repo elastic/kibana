@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import {
   SignalSourceHit,
   SignalSearchResponse,
@@ -11,12 +12,9 @@ import {
   BulkItem,
   RuleAlertAttributes,
   SignalHit,
+  WrappedSignalHit,
 } from '../types';
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusSOAttributes } from '../../rules/types';
@@ -149,8 +147,8 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  ip?: string,
-  destIp?: string
+  ip?: string | string[],
+  destIp?: string | string[]
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -189,9 +187,25 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
-export const sampleDocSeverity = (
-  severity?: Array<string | number | null> | string | number | null
-): SignalSourceHit => ({
+export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
+  const doc = {
+    _index: 'myFakeSignalIndex',
+    _type: 'doc',
+    _score: 100,
+    _version: 1,
+    _id: sampleIdGuid,
+    _source: {
+      someKey: 'someValue',
+      '@timestamp': '2020-04-20T21:27:45+0000',
+    },
+    sort: [],
+  };
+
+  set(doc._source, fieldName ?? 'event.severity', severity);
+  return doc;
+};
+
+export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
   _score: 100,
@@ -201,7 +215,7 @@ export const sampleDocSeverity = (
     someKey: 'someValue',
     '@timestamp': '2020-04-20T21:27:45+0000',
     event: {
-      severity: severity ?? 100,
+      risk: riskScore,
     },
   },
   sort: [],
@@ -222,6 +236,14 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     hits: [],
   },
 });
+
+export const sampleWrappedSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleSignalHit(),
+  };
+};
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
@@ -485,8 +507,8 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[],
-  destIps?: string[]
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -589,7 +611,7 @@ export const exampleFindRuleStatusResponse: (
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingSystemMock.createLogger();
+export const mockLogger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

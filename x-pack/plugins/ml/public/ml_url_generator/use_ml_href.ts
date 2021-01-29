@@ -7,12 +7,19 @@
 import { useEffect, useState } from 'react';
 import { MlPluginStart } from '../index';
 import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
+
+/**
+ * Provides a URL to ML plugin page
+ * TODO remove basePath parameter
+ */
 export const useMlHref = (
   ml: MlPluginStart | undefined,
-  basePath: string,
+  basePath: string | undefined,
   params: MlUrlGeneratorState
 ) => {
-  const [mlLink, setMlLink] = useState(`${basePath}/app/ml/${params.page}`);
+  const [mlLink, setMlLink] = useState<string | undefined>(
+    basePath !== undefined ? `${basePath}/app/ml/${params.page}` : undefined
+  );
 
   useEffect(() => {
     let isCancelled = false;

@@ -5,12 +5,12 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -63,8 +63,8 @@ export const useNetworkTopNFlow = ({
   startDate,
   type,
 }: UseNetworkTopNFlow): [boolean, NetworkTopNFlowArgs] => {
-  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
@@ -75,24 +75,7 @@ export const useNetworkTopNFlow = ({
   const [
     networkTopNFlowRequest,
     setTopNFlowRequest,
-  ] = useState<NetworkTopNFlowRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.topNFlow,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkTopNFlowRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -130,7 +113,7 @@ export const useNetworkTopNFlow = ({
 
   const networkTopNFlowSearch = useCallback(
     (request: NetworkTopNFlowRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -186,7 +169,7 @@ export const useNetworkTopNFlow = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -206,12 +189,12 @@ export const useNetworkTopNFlow = ({
         },
         sort,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, skip, flowTarget]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

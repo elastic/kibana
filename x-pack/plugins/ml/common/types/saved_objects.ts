@@ -11,11 +11,18 @@ export interface SavedObjectResult {
   [jobId: string]: { success: boolean; error?: any };
 }
 
-export interface RepairSavedObjectResponse {
+export interface SyncSavedObjectResponse {
   savedObjectsCreated: SavedObjectResult;
   savedObjectsDeleted: SavedObjectResult;
   datafeedsAdded: SavedObjectResult;
   datafeedsRemoved: SavedObjectResult;
+}
+
+export interface CanDeleteJobResponse {
+  [jobId: string]: {
+    canDelete: boolean;
+    canRemoveFromSpace: boolean;
+  };
 }
 
 export type JobsSpacesResponse = {
@@ -23,7 +30,16 @@ export type JobsSpacesResponse = {
 };
 
 export interface InitializeSavedObjectResponse {
-  jobs: Array<{ id: string; type: string }>;
+  jobs: Array<{ id: string; type: JobType }>;
   success: boolean;
   error?: any;
+}
+
+export interface DeleteJobCheckResponse {
+  [jobId: string]: DeleteJobPermission;
+}
+
+export interface DeleteJobPermission {
+  canDelete: boolean;
+  canRemoveFromSpace: boolean;
 }

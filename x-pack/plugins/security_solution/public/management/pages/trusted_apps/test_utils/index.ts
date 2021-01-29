@@ -5,7 +5,7 @@
  */
 
 import { combineReducers, createStore } from 'redux';
-import { TrustedApp } from '../../../../../common/endpoint/types';
+import { TrustedApp, OperatingSystem } from '../../../../../common/endpoint/types';
 import { RoutingAction } from '../../../../common/store/routing';
 
 import {
@@ -31,7 +31,11 @@ import {
 import { trustedAppsPageReducer } from '../store/reducer';
 import { TrustedAppsListResourceStateChanged } from '../store/action';
 
-const OS_LIST: Array<TrustedApp['os']> = ['windows', 'macos', 'linux'];
+const OPERATING_SYSTEMS: OperatingSystem[] = [
+  OperatingSystem.WINDOWS,
+  OperatingSystem.MAC,
+  OperatingSystem.LINUX,
+];
 
 const generate = <T>(count: number, generator: (i: number) => T) =>
   [...new Array(count).keys()].map(generator);
@@ -43,7 +47,7 @@ export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedA
     description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
-    os: OS_LIST[i % 3],
+    os: OPERATING_SYSTEMS[i % 3],
     entries: [],
   };
 };

@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
+import type { MlJobFieldType } from '../../../../common/types/field_types';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: ML_JOB_FIELD_TYPES;
+  type: MlJobFieldType;
   fieldName?: string;
   needsAria: boolean;
 }

@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { isActivePlatinumLicense } from '../../../common/service_map';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createRoute } from '../create_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
@@ -19,7 +19,7 @@ import { notifyFeatureUsage } from '../../feature';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute({
-  endpoint: 'GET /api/apm/settings/anomaly-detection',
+  endpoint: 'GET /api/apm/settings/anomaly-detection/jobs',
   options: {
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },

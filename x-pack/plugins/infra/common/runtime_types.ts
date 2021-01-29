@@ -7,16 +7,41 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Errors, Type } from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
-import { RouteValidationFunction } from 'kibana/server';
+import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
+import type { RouteValidationFunction } from 'kibana/server';
 
 type ErrorFactory = (message: string) => Error;
+
+const getErrorPath = ([first, ...rest]: Context): string[] => {
+  if (typeof first === 'undefined') {
+    return [];
+  } else if (first.type instanceof IntersectionType) {
+    const [, ...next] = rest;
+    return getErrorPath(next);
+  } else if (first.type instanceof UnionType) {
+    const [, ...next] = rest;
+    return [first.key, ...getErrorPath(next)];
+  }
+
+  return [first.key, ...getErrorPath(rest)];
+};
+
+const getErrorType = ({ context }: ValidationError) =>
+  context[context.length - 1]?.type?.name ?? 'unknown';
+
+const formatError = (error: ValidationError) =>
+  error.message ??
+  `in ${getErrorPath(error.context).join('/')}: ${JSON.stringify(
+    error.value
+  )} does not match expected type ${getErrorType(error)}`;
+
+const formatErrors = (errors: ValidationError[]) =>
+  `Failed to validate: \n${errors.map((error) => `  ${formatError(error)}`).join('\n')}`;
 
 export const createPlainError = (message: string) => new Error(message);
 
 export const throwErrors = (createError: ErrorFactory) => (errors: Errors) => {
-  throw createError(failure(errors).join('\n'));
+  throw createError(formatErrors(errors));
 };
 
 export const decodeOrThrow = <DecodedValue, EncodedValue, InputValue>(
@@ -33,7 +58,7 @@ export const createValidationFunction = <DecodedValue, EncodedValue, InputValue>
   pipe(
     runtimeType.decode(inputValue),
     fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
-      (errors: Errors) => badRequest(failure(errors).join('\n')),
+      (errors: Errors) => badRequest(formatErrors(errors)),
       (result: DecodedValue) => ok(result)
     )
   );

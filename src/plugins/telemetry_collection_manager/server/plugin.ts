@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -26,14 +15,14 @@ import {
   Logger,
   IClusterClient,
   SavedObjectsServiceStart,
-} from '../../../core/server';
+} from 'src/core/server';
 
 import {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
   BasicStatsPayload,
-  CollectionConfig,
-  Collection,
+  CollectionStrategyConfig,
+  CollectionStrategy,
   StatsGetterConfig,
   StatsCollectionConfig,
   UsageStatsPayload,
@@ -49,9 +38,11 @@ interface TelemetryCollectionPluginsDepsSetup {
 export class TelemetryCollectionManagerPlugin
   implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart> {
   private readonly logger: Logger;
-  private readonly collections: Array<Collection<any>> = [];
+  private collectionStrategy: CollectionStrategy<any> | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
+  private elasticsearchClient?: IClusterClient;
+  private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
   private readonly version: string;
 
@@ -65,7 +56,7 @@ export class TelemetryCollectionManagerPlugin
     this.usageCollection = usageCollection;
 
     return {
-      setCollection: this.setCollection.bind(this),
+      setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
       areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
@@ -73,8 +64,10 @@ export class TelemetryCollectionManagerPlugin
   }
 
   public start(core: CoreStart) {
+    this.elasticsearchClient = core.elasticsearch.client;
+    this.savedObjectsService = core.savedObjects;
+
     return {
-      setCollection: this.setCollection.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
       areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
@@ -83,19 +76,10 @@ export class TelemetryCollectionManagerPlugin
 
   public stop() {}
 
-  private setCollection<CustomContext extends Record<string, any>, T extends BasicStatsPayload>(
-    collectionConfig: CollectionConfig<CustomContext, T>
+  private setCollectionStrategy<T extends BasicStatsPayload>(
+    collectionConfig: CollectionStrategyConfig<T>
   ) {
-    const {
-      title,
-      priority,
-      esCluster,
-      esClientGetter,
-      soServiceGetter,
-      statsGetter,
-      clusterDetailsGetter,
-      licenseGetter,
-    } = collectionConfig;
+    const { title, priority, statsGetter, clusterDetailsGetter } = collectionConfig;
 
     if (typeof priority !== 'number') {
       throw new Error('priority must be set.');
@@ -108,78 +92,55 @@ export class TelemetryCollectionManagerPlugin
       if (!statsGetter) {
         throw Error('Stats getter method not set.');
       }
-      if (!esCluster) {
-        throw Error('esCluster name must be set for the getCluster method.');
-      }
-      if (!esClientGetter) {
-        throw Error('esClientGetter method not set.');
-      }
-      if (!soServiceGetter) {
-        throw Error('soServiceGetter method not set.');
-      }
       if (!clusterDetailsGetter) {
         throw Error('Cluster UUIds method is not set.');
       }
-      if (!licenseGetter) {
-        throw Error('License getter method not set.');
-      }
 
-      this.collections.unshift({
-        licenseGetter,
-        statsGetter,
-        clusterDetailsGetter,
-        esCluster,
-        title,
-        esClientGetter,
-        soServiceGetter,
-      });
+      this.logger.debug(`Setting ${title} as the telemetry collection strategy`);
+
+      // Overwrite the collection strategy
+      this.collectionStrategy = collectionConfig;
       this.usageGetterMethodPriority = priority;
     }
   }
 
+  /**
+   * Returns the context to provide to the Collection Strategies.
+   * It may return undefined if the ES and SO clients are not initialised yet.
+   * @param config {@link StatsGetterConfig}
+   * @param usageCollection {@link UsageCollectionSetup}
+   * @private
+   */
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
-    collection: Collection,
-    collectionEsClient: IClusterClient,
-    collectionSoService: SavedObjectsServiceStart,
     usageCollection: UsageCollectionSetup
-  ): StatsCollectionConfig {
-    const { request } = config;
-
-    const callCluster = config.unencrypted
-      ? collection.esCluster.asScoped(request).callAsCurrentUser
-      : collection.esCluster.callAsInternalUser;
+  ): StatsCollectionConfig | undefined {
     // Scope the new elasticsearch Client appropriately and pass to the stats collection config
     const esClient = config.unencrypted
-      ? collectionEsClient.asScoped(config.request).asCurrentUser
-      : collectionEsClient.asInternalUser;
+      ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
+      : this.elasticsearchClient?.asInternalUser;
     // Scope the saved objects client appropriately and pass to the stats collection config
     const soClient = config.unencrypted
-      ? collectionSoService.getScopedClient(config.request)
-      : collectionSoService.createInternalRepository();
+      ? this.savedObjectsService?.getScopedClient(config.request)
+      : this.savedObjectsService?.createInternalRepository();
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
-    const kibanaRequest = config.unencrypted ? request : void 0;
+    const kibanaRequest = config.unencrypted ? config.request : void 0;
 
-    return { callCluster, usageCollection, esClient, soClient, kibanaRequest };
+    if (esClient && soClient) {
+      return { usageCollection, esClient, soClient, kibanaRequest };
+    }
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
     if (!this.usageCollection) {
       return [];
     }
-    for (const collection of this.collections) {
-      // first fetch the client and make sure it's not undefined.
-      const collectionEsClient = collection.esClientGetter();
-      const collectionSoService = collection.soServiceGetter();
-      if (collectionEsClient !== undefined && collectionSoService !== undefined) {
-        const statsCollectionConfig = this.getStatsCollectionConfig(
-          config,
-          collection,
-          collectionEsClient,
-          collectionSoService,
-          this.usageCollection
-        );
 
+    const collection = this.collectionStrategy;
+    if (collection) {
+      // Build the context (clients and others) to send to the CollectionStrategies
+      const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
+      if (statsCollectionConfig) {
         try {
           const optInStats = await this.getOptInStatsForCollection(
             collection,
@@ -194,8 +155,9 @@ export class TelemetryCollectionManagerPlugin
             return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
           }
         } catch (err) {
-          this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
-          // swallow error to try next collection;
+          this.logger.debug(
+            `Failed to collect any opt in stats with collection ${collection.title}.`
+          );
         }
       }
     }
@@ -203,19 +165,18 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
-  private areAllCollectorsReady = async () => {
+  private async areAllCollectorsReady() {
     return await this.usageCollection?.areAllCollectorsReady();
-  };
+  }
 
   private getOptInStatsForCollection = async (
-    collection: Collection,
+    collection: CollectionStrategy,
     optInStatus: boolean,
     statsCollectionConfig: StatsCollectionConfig
   ) => {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
-      ...collection.customContext,
     };
 
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
@@ -229,17 +190,11 @@ export class TelemetryCollectionManagerPlugin
     if (!this.usageCollection) {
       return [];
     }
-    for (const collection of this.collections) {
-      const collectionEsClient = collection.esClientGetter();
-      const collectionSavedObjectsService = collection.soServiceGetter();
-      if (collectionEsClient !== undefined && collectionSavedObjectsService !== undefined) {
-        const statsCollectionConfig = this.getStatsCollectionConfig(
-          config,
-          collection,
-          collectionEsClient,
-          collectionSavedObjectsService,
-          this.usageCollection
-        );
+    const collection = this.collectionStrategy;
+    if (collection) {
+      // Build the context (clients and others) to send to the CollectionStrategies
+      const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
+      if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
           if (usageData.length) {
@@ -256,7 +211,6 @@ export class TelemetryCollectionManagerPlugin
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`
           );
-          // swallow error to try next collection;
         }
       }
     }
@@ -265,34 +219,24 @@ export class TelemetryCollectionManagerPlugin
   }
 
   private async getUsageForCollection(
-    collection: Collection,
+    collection: CollectionStrategy,
     statsCollectionConfig: StatsCollectionConfig
   ): Promise<UsageStatsPayload[]> {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
       version: this.version,
-      ...collection.customContext,
     };
 
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
 
     if (clustersDetails.length === 0) {
-      // don't bother doing a further lookup, try next collection.
+      // don't bother doing a further lookup.
       return [];
     }
 
-    const [stats, licenses] = await Promise.all([
-      collection.statsGetter(clustersDetails, statsCollectionConfig, context),
-      collection.licenseGetter(clustersDetails, statsCollectionConfig, context),
-    ]);
+    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
 
-    return stats.map((stat) => {
-      const license = licenses[stat.cluster_uuid];
-      return {
-        collectionSource: collection.title,
-        ...(license ? { license } : {}),
-        ...stat,
-      };
-    });
+    // Add the `collectionSource` to the resulting payload
+    return stats.map((stat) => ({ collectionSource: collection.title, ...stat }));
   }
 }

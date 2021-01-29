@@ -29,11 +29,6 @@ exports[`Storyshots arguments/ContainerStyle simple 1`] = `
       <div
         className="euiPopover euiPopover--anchorLeftCenter"
         id="color-picker-popover"
-        onKeyDown={[Function]}
-        onMouseDown={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
       >
         <div
           className="euiPopover__anchor"
@@ -41,6 +36,7 @@ exports[`Storyshots arguments/ContainerStyle simple 1`] = `
           <button
             aria-label="Container style white"
             className="euiLink euiLink--primary"
+            disabled={false}
             onClick={[Function]}
             style={
               Object {
@@ -101,11 +97,6 @@ exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
       <div
         className="euiPopover euiPopover--anchorLeftCenter"
         id="color-picker-popover"
-        onKeyDown={[Function]}
-        onMouseDown={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
       >
         <div
           className="euiPopover__anchor"
@@ -113,6 +104,7 @@ exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
           <button
             aria-label="Container style white"
             className="euiLink euiLink--primary"
+            disabled={false}
             onClick={[Function]}
             style={
               Object {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
@@ -25,6 +14,7 @@ import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
 import { ContextErrorMessage } from '../context_error_message';
+import { TopNavMenuMock } from './__mocks__/top_nav_menu';
 
 describe('ContextAppLegacy test', () => {
   const hit = {
@@ -64,6 +54,17 @@ describe('ContextAppLegacy test', () => {
     onChangeSuccessorCount: jest.fn(),
     predecessorStatus: 'loaded',
     successorStatus: 'loaded',
+    topNavMenu: TopNavMenuMock,
+  };
+  const topNavProps = {
+    appName: 'context',
+    showSearchBar: true,
+    showQueryBar: false,
+    showFilterBar: true,
+    showSaveQuery: false,
+    showDatePicker: false,
+    indexPatterns: [indexPattern],
+    useDefaultBehaviors: true,
   };
 
   it('renders correctly', () => {
@@ -72,6 +73,9 @@ describe('ContextAppLegacy test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(0);
     expect(component.find(ActionBar).length).toBe(2);
+    const topNavMenu = component.find(TopNavMenuMock);
+    expect(topNavMenu.length).toBe(1);
+    expect(topNavMenu.props()).toStrictEqual(topNavProps);
   });
 
   it('renders loading indicator', () => {
@@ -82,6 +86,7 @@ describe('ContextAppLegacy test', () => {
     const loadingIndicator = findTestSubject(component, 'contextApp_loadingIndicator');
     expect(loadingIndicator.length).toBe(1);
     expect(component.find(ActionBar).length).toBe(2);
+    expect(component.find(TopNavMenuMock).length).toBe(1);
   });
 
   it('renders error message', () => {
@@ -90,6 +95,7 @@ describe('ContextAppLegacy test', () => {
     props.reason = 'something went wrong';
     const component = mountWithIntl(<ContextAppLegacy {...props} />);
     expect(component.find(DocTableLegacy).length).toBe(0);
+    expect(component.find(TopNavMenuMock).length).toBe(0);
     const errorMessage = component.find(ContextErrorMessage);
     expect(errorMessage.length).toBe(1);
   });

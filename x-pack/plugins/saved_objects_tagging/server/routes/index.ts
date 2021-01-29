@@ -4,21 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
-import { registerCreateTagRoute } from './create_tag';
-import { registerDeleteTagRoute } from './delete_tag';
-import { registerGetAllTagsRoute } from './get_all_tags';
-import { registerGetTagRoute } from './get_tag';
-import { registerUpdateTagRoute } from './update_tag';
+import {
+  registerUpdateTagRoute,
+  registerGetAllTagsRoute,
+  registerGetTagRoute,
+  registerDeleteTagRoute,
+  registerCreateTagRoute,
+} from './tags';
+import {
+  registerFindAssignableObjectsRoute,
+  registerUpdateTagsAssignmentsRoute,
+  registerGetAssignableTypesRoute,
+} from './assignments';
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
+import { TagsPluginRouter } from '../types';
 
-export const registerRoutes = ({ router }: { router: IRouter }) => {
-  // public API
+export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
+  // tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);
   registerDeleteTagRoute(router);
   registerGetAllTagsRoute(router);
   registerGetTagRoute(router);
+  // assignment API
+  registerFindAssignableObjectsRoute(router);
+  registerUpdateTagsAssignmentsRoute(router);
+  registerGetAssignableTypesRoute(router);
   // internal API
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);

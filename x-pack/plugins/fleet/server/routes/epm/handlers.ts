@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
+import mime from 'mime-types';
+import path from 'path';
 import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 import {
   GetInfoResponse,
@@ -15,6 +17,7 @@ import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
+  GetStatsResponse,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -25,6 +28,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
+  GetStatsRequestSchema,
 } from '../../types';
 import {
   BulkInstallResponse,
@@ -39,10 +43,14 @@ import {
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
+  getInstallation,
 } from '../../services/epm/packages';
 import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
 import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
+import { getArchiveEntry } from '../../services/epm/archive/cache';
+import { getAsset } from '../../services/epm/archive/storage';
+import { getPackageUsageStats } from '../../services/epm/packages/get';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -102,22 +110,70 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
 ) => {
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
-    const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
+    const savedObjectsClient = context.core.savedObjects.client;
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const useLocalFile = pkgVersion === installation?.version;
 
-    const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
-    const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-      const value = registryResponse.headers.get(knownHeader);
-      if (value !== null) {
-        headers[knownHeader] = value;
+    if (useLocalFile) {
+      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
+      const fileBuffer = getArchiveEntry(assetPath);
+      // only pull local installation if we don't have it cached
+      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+
+      // error, if neither is available
+      if (!fileBuffer && !storedAsset) {
+        return response.custom({
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
+        });
       }
-      return headers;
-    }, {} as ResponseHeaders);
 
-    return response.custom({
-      body: registryResponse.body,
-      statusCode: registryResponse.status,
-      headers: proxiedHeaders,
-    });
+      // if storedAsset is not available, fileBuffer *must* be
+      // b/c we error if we don't have at least one, and storedAsset is the least likely
+      const { buffer, contentType } = storedAsset
+        ? {
+            contentType: storedAsset.media_type,
+            buffer: storedAsset.data_utf8
+              ? Buffer.from(storedAsset.data_utf8, 'utf8')
+              : Buffer.from(storedAsset.data_base64, 'base64'),
+          }
+        : {
+            contentType: mime.contentType(path.extname(assetPath)),
+            buffer: fileBuffer,
+          };
+
+      if (!contentType) {
+        return response.custom({
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
+        });
+      }
+
+      return response.custom({
+        body: buffer,
+        statusCode: 200,
+        headers: {
+          'cache-control': 'max-age=10, public',
+          'content-type': contentType,
+        },
+      });
+    } else {
+      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
+      const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+        const value = registryResponse.headers.get(knownHeader);
+        if (value !== null) {
+          headers[knownHeader] = value;
+        }
+        return headers;
+      }, {} as ResponseHeaders);
+
+      return response.custom({
+        body: registryResponse.body,
+        statusCode: registryResponse.status,
+        headers: proxiedHeaders,
+      });
+    }
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -136,6 +192,23 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getStatsHandler: RequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const { pkgName } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const body: GetStatsResponse = {
+      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
     };
     return response.ok({ body });
   } catch (error) {

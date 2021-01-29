@@ -5,14 +5,25 @@
  */
 
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
-import { checksFactory, repairFactory } from '../saved_objects';
-import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
+import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
+import {
+  jobsAndSpaces,
+  jobsAndCurrentSpace,
+  syncJobObjects,
+  jobTypeSchema,
+  canDeleteJobSchema,
+} from './schemas/saved_objects';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
  */
-export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) {
+export function savedObjectsRoutes(
+  { router, routeGuard }: RouteInitialization,
+  { getSpaces, resolveMlCapabilities }: SavedObjectsRouteDeps
+) {
   /**
    * @apiGroup JobSavedObjects
    *
@@ -46,8 +57,8 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {get} /api/ml/saved_objects/repair Repair job saved objects
-   * @apiName RepairJobSavedObjects
+   * @api {get} /api/ml/saved_objects/sync Sync job saved objects
+   * @apiName SyncJobSavedObjects
    * @apiDescription Create saved objects for jobs which are missing them.
    *                 Delete saved objects for jobs which no longer exist.
    *                 Update missing datafeed ids in saved objects for datafeeds which exist.
@@ -56,9 +67,9 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
    */
   router.get(
     {
-      path: '/api/ml/saved_objects/repair',
+      path: '/api/ml/saved_objects/sync',
       validate: {
-        query: repairJobObjects,
+        query: syncJobObjects,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -67,8 +78,8 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { repairJobs } = repairFactory(client, jobSavedObjectService);
-        const savedObjects = await repairJobs(simulate);
+        const { syncSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
+        const savedObjects = await syncSavedObjects(simulate);
 
         return response.ok({
           body: savedObjects,
@@ -91,7 +102,7 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
     {
       path: '/api/ml/saved_objects/initialize',
       validate: {
-        query: repairJobObjects,
+        query: syncJobObjects,
       },
       options: {
         tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
@@ -100,7 +111,7 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
+        const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
         const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({
@@ -183,6 +194,55 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
   /**
    * @apiGroup JobSavedObjects
    *
+   * @api {post} /api/ml/saved_objects/remove_job_from_current_space Remove jobs from the current space
+   * @apiName RemoveJobsFromCurrentSpace
+   * @apiDescription Remove a list of jobs from the current space
+   *
+   * @apiSchema (body) jobsAndCurrentSpace
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/remove_job_from_current_space',
+      validate: {
+        body: jobsAndCurrentSpace,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
+      try {
+        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
+
+        const currentSpaceId = await getCurrentSpaceId();
+        if (currentSpaceId === null) {
+          return response.ok({
+            body: jobIds.map((id) => ({
+              [id]: {
+                success: false,
+                error: 'Cannot remove current space. Spaces plugin is disabled.',
+              },
+            })),
+          });
+        }
+
+        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, [
+          currentSpaceId,
+        ]);
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
    * @api {get} /api/ml/saved_objects/jobs_spaces All spaces in all jobs
    * @apiName JobsSpaces
    * @apiDescription List all jobs and their spaces
@@ -211,6 +271,62 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
             acc[type][cur.jobId] = cur.namespaces;
             return acc;
           }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {post} /api/ml/saved_objects/can_delete_job Check whether user can delete a job
+   * @apiName CanDeleteJob
+   * @apiDescription Check the user's ability to delete jobs. Returns whether they are able
+   *                 to fully delete the job and whether they are able to remove it from
+   *                 the current space.
+   *                 Note, this is only for enabling UI controls. A user calling endpoints
+   *                 directly will still be able to delete or remove the job from a space.
+   *
+   * @apiSchema (params) jobTypeSchema
+   * @apiSchema (body) jobIdsSchema
+   * @apiSuccessExample {json} Error-Response:
+   * {
+   *   "my_job": {
+   *     "canDelete": false,
+   *     "canRemoveFromSpace": true
+   *   }
+   * }
+   *
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/can_delete_job/{jobType}',
+      validate: {
+        params: jobTypeSchema,
+        body: canDeleteJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
+      try {
+        const { jobType } = request.params;
+        const { jobIds }: { jobIds: string[] } = request.body;
+
+        const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
+        const body = await canDeleteJobs(
+          request,
+          jobType,
+          jobIds,
+          getSpaces !== undefined,
+          resolveMlCapabilities
+        );
 
         return response.ok({
           body,

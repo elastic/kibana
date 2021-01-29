@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -27,8 +17,8 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { LibraryNotificationActionContext, UnlinkFromLibraryAction } from '.';
+import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export interface LibraryNotificationProps {
   context: LibraryNotificationActionContext;
@@ -50,16 +40,13 @@ export function LibraryNotificationPopover({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <EuiButtonIcon
-          data-test-subj={`embeddablePanelNotification-${id}`}
-          iconType={icon}
-          aria-label={i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
-            defaultMessage: 'View library information and unlink this panel',
-          })}
           color="text"
+          iconType={icon}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj={`embeddablePanelNotification-${id}`}
+          aria-label={dashboardLibraryNotification.getPopoverAriaLabel()}
         />
       }
       isOpen={isPopoverOpen}
@@ -69,12 +56,7 @@ export function LibraryNotificationPopover({
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
-          <p>
-            {i18n.translate('dashboard.panel.libraryNotification.toolTip', {
-              defaultMessage:
-                'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
-            })}
-          </p>
+          <p>{dashboardLibraryNotification.getTooltip()}</p>
         </EuiText>
       </div>
       <EuiPopoverFooter>

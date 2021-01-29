@@ -11,6 +11,7 @@ export {
   useForm,
   useFormData,
   Form,
+  FormHook,
   UseField,
   FieldConfig,
   OnFormUpdateArg,
@@ -30,6 +31,7 @@ export {
   SuperSelectField,
   ComboBoxField,
   TextField,
+  CheckBoxField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';

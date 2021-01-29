@@ -23,12 +23,9 @@ import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
-import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
-import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useTransactionType } from '../../../hooks/use_transaction_type';
+import { IUrlParams } from '../../../context/url_params_context/types';
+import { useTransactionListFetcher } from './use_transaction_list';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -39,6 +36,7 @@ import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 function getRedirectLocation({
   location,
@@ -69,28 +67,23 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const transactionType = useTransactionType();
-  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
+  const { transactionType, transactionTypes } = useApmServiceContext();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
-  const {
-    data: transactionCharts,
-    status: transactionChartsStatus,
-  } = useTransactionCharts();
-
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
   const {
-    data: transactionListData,
-    status: transactionListStatus,
-  } = useTransactionList(urlParams);
+    transactionListData,
+    transactionListStatus,
+  } = useTransactionListFetcher();
 
   const localFiltersConfig: React.ComponentProps<
     typeof LocalUIFilters
   > = useMemo(
     () => ({
+      shouldFetch: !!transactionType,
       filterNames: [
         'transactionResult',
         'host',
@@ -109,22 +102,20 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName || !transactionType) {
+  if (!serviceName) {
     return null;
   }
 
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
 
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <Correlations />
             <LocalUIFilters {...localFiltersConfig}>
-              <TransactionTypeFilter
-                transactionTypes={serviceTransactionTypes}
-              />
+              <TransactionTypeFilter transactionTypes={transactionTypes} />
               <EuiSpacer size="m" />
               <EuiHorizontalRule margin="none" />
             </LocalUIFilters>
@@ -132,15 +123,11 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           <EuiFlexItem grow={7}>
             {transactionType === TRANSACTION_PAGE_LOAD && (
               <>
-                <UserExperienceCallout />
+                <UserExperienceCallout serviceName={serviceName} />
                 <EuiSpacer size="s" />
               </>
             )}
-            <TransactionCharts
-              fetchStatus={transactionChartsStatus}
-              charts={transactionCharts}
-              urlParams={urlParams}
-            />
+            <TransactionCharts />
             <EuiSpacer size="s" />
             <EuiPanel>
               <EuiTitle size="xs">

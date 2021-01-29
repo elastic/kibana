@@ -15,6 +15,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
 import { Anomalies } from '../types';
 import { useMountAppended } from '../../../utils/use_mount_appended';
+import { waitFor } from '@testing-library/dom';
 
 const startDate: string = '2020-07-07T08:20:18.966Z';
 const endDate: string = '3000-01-01T00:00:00.000Z';
@@ -121,7 +122,7 @@ describe('anomaly_scores', () => {
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(false);
   });
 
-  test('showing a popover on a mouse click', () => {
+  test('showing a popover on a mouse click', async () => {
     const wrapper = mount(
       <TestProviders>
         <AnomalyScoresComponent
@@ -134,7 +135,7 @@ describe('anomaly_scores', () => {
       </TestProviders>
     );
     wrapper.find('[data-test-subj="anomaly-score-popover"]').first().simulate('click');
-    wrapper.update();
+    await waitFor(() => wrapper.update());
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(true);
   });
 });

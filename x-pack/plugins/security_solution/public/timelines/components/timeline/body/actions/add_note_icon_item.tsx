@@ -6,50 +6,34 @@
 
 import React from 'react';
 
-import { TimelineType, TimelineStatus } from '../../../../../../common/types/timeline';
-import { AssociateNote, UpdateNote } from '../../../notes/helpers';
+import { TimelineType } from '../../../../../../common/types/timeline';
 import * as i18n from '../translations';
 import { NotesButton } from '../../properties/helpers';
-import { Note } from '../../../../../common/lib/note';
 import { ActionIconItem } from './action_icon_item';
 
 interface AddEventNoteActionProps {
-  associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  noteIds: string[];
+  ariaLabel?: string;
   showNotes: boolean;
-  status: TimelineStatus;
   timelineType: TimelineType;
   toggleShowNotes: () => void;
-  updateNote: UpdateNote;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
-  associateNote,
-  getNotesByIds,
-  noteIds,
+  ariaLabel,
   showNotes,
-  status,
   timelineType,
   toggleShowNotes,
-  updateNote,
 }) => (
-  <ActionIconItem id="add-note">
+  <ActionIconItem>
     <NotesButton
-      animate={false}
-      associateNote={associateNote}
+      ariaLabel={ariaLabel}
       data-test-subj="add-note"
-      getNotesByIds={getNotesByIds}
-      noteIds={noteIds}
       showNotes={showNotes}
-      size="s"
-      status={status}
       timelineType={timelineType}
       toggleShowNotes={toggleShowNotes}
       toolTip={
         timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
       }
-      updateNote={updateNote}
     />
   </ActionIconItem>
 );

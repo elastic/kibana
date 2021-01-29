@@ -6,13 +6,12 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
-import { gutterTimeline } from '../../lib/helpers';
 import { navTabs } from '../../../app/home/home_navigations';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { SecurityPageName } from '../../../app/types';
 import { getAppOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
@@ -54,7 +53,7 @@ const FlexGroup = styled(EuiFlexGroup)<{ $hasSibling: boolean }>`
     margin-bottom: 1px;
     padding-bottom: 4px;
     padding-left: ${theme.eui.paddingSizes.l};
-    padding-right: ${gutterTimeline};
+    padding-right: ${theme.eui.paddingSizes.l};
     ${$hasSibling ? `border-bottom: ${theme.eui.euiBorderThin};` : 'border-bottom-width: 0px;'}
   `}
 `;
@@ -64,14 +63,25 @@ interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
   isFixed?: boolean;
 }
+
 export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(
     ({ hideDetectionEngine = false, isFixed = true }, ref) => {
       const { globalHeaderPortalNode } = useGlobalHeaderPortal();
-      const { globalFullScreen } = useFullScreen();
+      const { globalFullScreen } = useGlobalFullScreen();
+      const { timelineFullScreen } = useTimelineFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
-      const { navigateToApp } = application;
+      const { navigateToApp, getUrlForApp } = application;
+      const overviewPath = useMemo(
+        () => getUrlForApp(APP_ID, { path: SecurityPageName.overview }),
+        [getUrlForApp]
+      );
+      const overviewHref = useMemo(() => getAppOverviewUrl(overviewPath, search), [
+        overviewPath,
+        search,
+      ]);
+
       const basePath = http.basePath.get();
       const goToOverview = useCallback(
         (ev) => {
@@ -82,7 +92,7 @@ export const HeaderGlobal = React.memo(
       );
       return (
         <Wrapper ref={ref} $isFixed={isFixed}>
-          <WrapperContent $globalFullScreen={globalFullScreen}>
+          <WrapperContent $globalFullScreen={globalFullScreen ?? timelineFullScreen}>
             <FlexGroup
               alignItems="center"
               $hasSibling={globalHeaderPortalNode.hasChildNodes()}
@@ -92,7 +102,7 @@ export const HeaderGlobal = React.memo(
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
+                    <LinkAnchor onClick={goToOverview} href={overviewHref}>
                       <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                     </LinkAnchor>
                   </FlexItem>
@@ -129,8 +139,8 @@ export const HeaderGlobal = React.memo(
                 </EuiFlexGroup>
               </FlexItem>
             </FlexGroup>
-            <OutPortal node={globalHeaderPortalNode} />
           </WrapperContent>
+          <OutPortal node={globalHeaderPortalNode} />
         </Wrapper>
       );
     }

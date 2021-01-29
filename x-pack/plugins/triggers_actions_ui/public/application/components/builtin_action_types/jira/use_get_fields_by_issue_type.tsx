@@ -23,7 +23,7 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  issueType: string;
+  issueType: string | undefined;
   actionConnector?: ActionConnector;
 }
 

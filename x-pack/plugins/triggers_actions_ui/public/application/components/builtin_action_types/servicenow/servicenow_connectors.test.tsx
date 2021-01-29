@@ -69,7 +69,6 @@ describe('ServiceNowActionConnectorFields renders', () => {
         consumer={'case'}
       />
     );
-    expect(wrapper.find('[data-test-subj="case-servicenow-mappings"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').length > 0

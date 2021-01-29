@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
@@ -82,14 +71,41 @@ describe('core deprecations', () => {
 
   describe('xsrfDeprecation', () => {
     it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { messages } = applyCoreDeprecations({
+      const { migrated, messages } = applyCoreDeprecations({
         server: { xsrf: { whitelist: ['/path'] } },
+      });
+      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
+        ]
+      `);
+    });
+  });
+
+  describe('server.cors', () => {
+    it('renames server.cors to server.cors.enabled', () => {
+      const { migrated } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+    });
+    it('logs a warning message about server.cors renaming', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { cors: true },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+          "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
         ]
       `);
+    });
+    it('does not log deprecation message when server.cors.enabled set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { cors: { enabled: true } },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+      expect(messages.length).toBe(0);
     });
   });
 
@@ -218,6 +234,26 @@ describe('core deprecations', () => {
       expect(
         applyCoreDeprecations({ csp: { rules: [`worker-src blob:`] } }).migrated.csp.rules
       ).toEqual([`worker-src blob:`]);
+    });
+  });
+
+  describe('logging.events.ops', () => {
+    it('warns when ops events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { ops: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration.",
+        ]
+      `);
+    });
+
+    it('does not warn when other events are configured', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: '*' } },
+      });
+      expect(messages).toEqual([]);
     });
   });
 });

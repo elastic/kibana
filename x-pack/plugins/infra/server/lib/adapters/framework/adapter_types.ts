@@ -8,6 +8,10 @@ import { GenericParams, SearchResponse } from 'elasticsearch';
 import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../../../../src/plugins/data/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginSetup } from '../../../../../../plugins/apm/server';
@@ -15,9 +19,10 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../pl
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../common/typed_json';
+import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 
-export interface InfraServerPluginDeps {
+export interface InfraServerPluginSetupDeps {
+  data: DataPluginSetup;
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
@@ -26,6 +31,10 @@ export interface InfraServerPluginDeps {
   apm: APMPluginSetup;
   alerts: AlertingPluginContract;
   ml?: MlPluginSetup;
+}
+
+export interface InfraServerPluginStartDeps {
+  data: DataPluginStart;
 }
 
 export interface CallWithRequestParams extends GenericParams {

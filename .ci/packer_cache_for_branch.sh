@@ -5,6 +5,17 @@ set -e
 branch="$1"
 checkoutDir="$(pwd)"
 
+function cleanup()
+{
+  if [[ "$branch" != "master" ]]; then
+    rm --preserve-root -rf "$checkoutDir"
+  fi
+
+  exit 0
+}
+
+trap 'cleanup' 0
+
 if [[ "$branch" != "master" ]]; then
   checkoutDir="/tmp/kibana-$branch"
   git clone https://github.com/elastic/kibana.git --branch "$branch" --depth 1 "$checkoutDir"
@@ -49,12 +60,10 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .chromium \
   .es \
   .chromedriver \
-  .geckodriver;
+  .geckodriver \
+  .yarn-local-mirror;
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
 .ci/build_docker.sh
 
-if [[ "$branch" != "master" ]]; then
-  rm --preserve-root -rf "$checkoutDir"
-fi

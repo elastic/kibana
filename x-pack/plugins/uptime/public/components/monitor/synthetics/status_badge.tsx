@@ -19,7 +19,7 @@ export function colorFromStatus(color: UptimeAppColors, status?: string) {
     case 'succeeded':
       return color.success;
     case 'failed':
-      return color.danger;
+      return color.dangerBehindText;
     default:
       return 'default';
   }

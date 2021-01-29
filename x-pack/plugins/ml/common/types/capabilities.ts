@@ -123,7 +123,7 @@ export function getPluginPrivileges() {
       catalogue: [],
       savedObject: {
         all: [],
-        read: ['ml-job'],
+        read: [ML_SAVED_OBJECT_TYPE],
       },
       api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,

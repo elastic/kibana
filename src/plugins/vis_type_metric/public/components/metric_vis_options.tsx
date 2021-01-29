@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { useCallback } from 'react';
@@ -29,16 +18,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import {
-  ColorModes,
   ColorRanges,
-  ColorSchemaOptions,
-  SwitchOption,
-  RangeOption,
-  SetColorSchemaOptionsValue,
   SetColorRangeValue,
-} from '../../../charts/public';
+  SwitchOption,
+  SetColorSchemaOptionsValue,
+  ColorSchemaOptions,
+  RangeOption,
+} from '../../../vis_default_editor/public';
+import { ColorMode } from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
 
 function MetricVisOptions({
@@ -48,7 +37,7 @@ function MetricVisOptions({
   setTouched,
   vis,
   uiState,
-}: VisOptionsProps<VisParams>) {
+}: VisEditorOptionsProps<VisParams>) {
   const setMetricValue: <T extends keyof MetricVisParam>(
     paramName: T,
     value: MetricVisParam[T]
@@ -86,7 +75,7 @@ function MetricVisOptions({
   );
 
   const setColorMode: EuiButtonGroupProps['onChange'] = useCallback(
-    (id: string) => setMetricValue('metricColorMode', id as ColorModes),
+    (id: string) => setMetricValue('metricColorMode', id as ColorMode),
     [setMetricValue]
   );
 
@@ -158,7 +147,7 @@ function MetricVisOptions({
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
           disabled={
             stateParams.metric.colorsRange.length === 1 ||
-            stateParams.metric.metricColorMode === ColorModes.NONE
+            stateParams.metric.metricColorMode === ColorMode.None
           }
           invertColors={stateParams.metric.invertColors}
           setValue={setMetricValue as SetColorSchemaOptionsValue}

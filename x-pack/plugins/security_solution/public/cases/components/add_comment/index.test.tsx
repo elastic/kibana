@@ -6,42 +6,25 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor, act } from '@testing-library/react';
+import { noop } from 'lodash/fp';
 
-import { AddComment, AddCommentRefObject } from '.';
 import { TestProviders } from '../../../common/mock';
-import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType } from '../../../../../case/common/api';
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
+import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
-import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+import { AddComment, AddCommentRefObject } from '.';
 
-import { waitFor } from '@testing-library/react';
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
-);
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
-);
-
-jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_comment');
+jest.mock('../use_insert_timeline');
 
-const useFormMock = useForm as jest.Mock;
-const useFormDataMock = useFormData as jest.Mock;
-
-const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const usePostCommentMock = usePostComment as jest.Mock;
-
+const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 const postComment = jest.fn();
-const handleCursorChange = jest.fn();
-const handleOnTimelineChange = jest.fn();
 
 const addCommentProps = {
   caseId: '1234',
@@ -52,16 +35,7 @@ const addCommentProps = {
   showLoading: false,
 };
 
-const defaultInsertTimeline = {
-  cursorPosition: {
-    start: 0,
-    end: 0,
-  },
-  handleCursorChange,
-  handleOnTimelineChange,
-};
-
-const defaultPostCommment = {
+const defaultPostComment = {
   isLoading: false,
   isError: false,
   postComment,
@@ -73,14 +47,9 @@ const sampleData: CommentRequest = {
 };
 
 describe('AddComment ', () => {
-  const formHookMock = getFormMock(sampleData);
-
   beforeEach(() => {
     jest.resetAllMocks();
-    useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
-    usePostCommentMock.mockImplementation(() => defaultPostCommment);
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ comment: sampleData.comment }]);
+    usePostCommentMock.mockImplementation(() => defaultPostComment);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
@@ -92,19 +61,30 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper
+        .find(`[data-test-subj="add-comment"] textarea`)
+        .first()
+        .simulate('change', { target: { value: sampleData.comment } });
+    });
+
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    await act(async () => {
+      wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    });
+
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
-      expect(formHookMock.reset).toBeCalled();
+      expect(postComment).toBeCalledWith(addCommentProps.caseId, sampleData, onCommentPosted);
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });
 
   it('should render spinner and disable submit when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -112,6 +92,7 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeTruthy();
     expect(
       wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
@@ -119,7 +100,7 @@ describe('AddComment ', () => {
   });
 
   it('should disable submit button when disabled prop passed', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -127,15 +108,16 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
     expect(
       wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 
-  it('should insert a quote', () => {
+  it('should insert a quote', async () => {
     const sampleQuote = 'what a cool quote';
     const ref = React.createRef<AddCommentRefObject>();
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
           <AddComment {...{ ...addCommentProps }} ref={ref} />
@@ -143,10 +125,42 @@ describe('AddComment ', () => {
       </TestProviders>
     );
 
-    ref.current!.addQuote(sampleQuote);
-    expect(formHookMock.setFieldValue).toBeCalledWith(
-      'comment',
+    await act(async () => {
+      wrapper
+        .find(`[data-test-subj="add-comment"] textarea`)
+        .first()
+        .simulate('change', { target: { value: sampleData.comment } });
+    });
+
+    await act(async () => {
+      ref.current!.addQuote(sampleQuote);
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(
       `${sampleData.comment}\n\n${sampleQuote}`
     );
+  });
+
+  it('it should insert a timeline', async () => {
+    let attachTimeline = noop;
+    useInsertTimelineMock.mockImplementation((comment, onTimelineAttached) => {
+      attachTimeline = onTimelineAttached;
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <AddComment {...{ ...addCommentProps }} />
+        </Router>
+      </TestProviders>
+    );
+
+    act(() => {
+      attachTimeline('[title](url)');
+    });
+
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');
+    });
   });
 });

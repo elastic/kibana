@@ -13,11 +13,14 @@ import {
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../src/plugins/data/public';
+import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export type ExploreDataChartActionContext = ApplyGlobalFilterActionContext;
+export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
+  embeddable?: IEmbeddable;
+}
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 

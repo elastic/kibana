@@ -6,6 +6,13 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
+import {
+  elementOrChildrenHasFocus,
+  getFocusedDataColindexCell,
+  getTableSkipFocus,
+  handleSkipFocus,
+  stopPropagationAndPreventDefault,
+} from '../accessibility/helpers';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import {
@@ -111,5 +118,55 @@ export const getIconFromType = (type: string | null) => {
       return 'number';
     default:
       return 'questionInCircle';
+  }
+};
+
+export const EVENT_FIELDS_TABLE_CLASS_NAME = 'event-fields-table';
+
+/**
+ * Returns `true` if the Event Details "event fields" table, or it's children,
+ * has focus
+ */
+export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${EVENT_FIELDS_TABLE_CLASS_NAME}`)
+  );
+
+/**
+ * This function has a side effect. It will skip focus "after" or "before"
+ * the Event Details table, with exceptions as noted below.
+ *
+ * If the currently-focused table cell has additional focusable children,
+ * i.e. draggables or always-open popover content, the browser's "natural"
+ * focus management will determine which element is focused next.
+ */
+export const onEventDetailsTabKeyPressed = ({
+  containerElement,
+  keyboardEvent,
+  onSkipFocusBeforeEventsTable,
+  onSkipFocusAfterEventsTable,
+}: {
+  containerElement: HTMLElement | null;
+  keyboardEvent: React.KeyboardEvent;
+  onSkipFocusBeforeEventsTable: () => void;
+  onSkipFocusAfterEventsTable: () => void;
+}) => {
+  const { shiftKey } = keyboardEvent;
+
+  const eventFieldsTableSkipFocus = getTableSkipFocus({
+    containerElement,
+    getFocusedCell: getFocusedDataColindexCell,
+    shiftKey,
+    tableHasFocus,
+    tableClassName: EVENT_FIELDS_TABLE_CLASS_NAME,
+  });
+
+  if (eventFieldsTableSkipFocus !== 'SKIP_FOCUS_NOOP') {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    handleSkipFocus({
+      onSkipFocusBackwards: onSkipFocusBeforeEventsTable,
+      onSkipFocusForward: onSkipFocusAfterEventsTable,
+      skipFocus: eventFieldsTableSkipFocus,
+    });
   }
 };

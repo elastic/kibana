@@ -19,10 +19,9 @@
     "triggersActionsUi",
     "alerts",
     "actions",
-    "encryptedSavedObjects",
     "encryptedSavedObjects"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement", "triggersActionsUi"]
+  "requiredBundles": ["kibanaUtils", "home", "alerts", "kibanaReact", "licenseManagement"]
 }

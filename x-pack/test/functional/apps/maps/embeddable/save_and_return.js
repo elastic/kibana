@@ -12,8 +12,26 @@ export default function ({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('save and return work flow', () => {
+    before(async () => {
+      await security.testUser.setRoles(
+        [
+          'test_logstash_reader',
+          'global_maps_all',
+          'geoshape_data_reader',
+          'global_dashboard_all',
+          'meta_for_geoshape_data_reader',
+        ],
+        false
+      );
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     describe('new map', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
@@ -38,7 +56,7 @@ export default function ({ getPageObjects, getService }) {
         it('should cut the originator and stay in maps application', async () => {
           await PageObjects.maps.saveMap(
             'map created from dashboard save and return with originator app cut',
-            true
+            false
           );
           await PageObjects.maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
@@ -77,7 +95,7 @@ export default function ({ getPageObjects, getService }) {
 
       describe('save as and uncheck return to origin switch', () => {
         it('should cut the originator and stay in maps application', async () => {
-          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', true);
+          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', false);
           await PageObjects.maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
           await testSubjects.existOrFail('mapSaveButton');

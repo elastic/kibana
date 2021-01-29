@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { createRoute } from './create_route';
 import { getErrorDistribution } from '../lib/errors/distribution/get_distribution';
-import { getErrorGroup } from '../lib/errors/get_error_group';
+import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
@@ -56,7 +56,7 @@ export const errorGroupsRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, groupId } = context.params.path;
-    return getErrorGroup({ serviceName, groupId, setup });
+    return getErrorGroupSample({ serviceName, groupId, setup });
   },
 });
 

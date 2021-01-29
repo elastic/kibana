@@ -29,7 +29,7 @@ import {
   loadAlertState,
   loadAlertInstanceSummary,
   loadAlertTypes,
-  health,
+  alertingFrameworkHealth,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -70,9 +70,6 @@ export function withBulkAlertOperations<T>(
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
     const { http } = useKibana().services;
-    if (!http) {
-      throw new Error('KibanaContext has not been initalized correctly.');
-    }
     return (
       <WrappedComponent
         {...(props as T)}
@@ -134,7 +131,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        getHealth={async () => health({ http })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };

@@ -8,8 +8,9 @@ import {
   AssetReference,
   CategorySummaryList,
   Installable,
-  RegistryPackage,
+  RegistrySearchResult,
   PackageInfo,
+  PackageUsageStats,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -30,14 +31,7 @@ export interface GetPackagesRequest {
 }
 
 export interface GetPackagesResponse {
-  response: Array<
-    Installable<
-      Pick<
-        RegistryPackage,
-        'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'download' | 'path'
-      >
-    >
-  >;
+  response: Array<Installable<RegistrySearchResult>>;
 }
 
 export interface GetLimitedPackagesResponse {
@@ -59,6 +53,16 @@ export interface GetInfoRequest {
 
 export interface GetInfoResponse {
   response: PackageInfo;
+}
+
+export interface GetStatsRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface GetStatsResponse {
+  response: PackageUsageStats;
 }
 
 export interface InstallPackageRequest {

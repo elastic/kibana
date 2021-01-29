@@ -1,27 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsUtils } from './utils';
 
+jest.mock('uuid', () => ({
+  v1: jest.fn().mockReturnValue('mock-uuid'),
+}));
+
 describe('SavedObjectsUtils', () => {
-  const { namespaceIdToString, namespaceStringToId, createEmptyFindResponse } = SavedObjectsUtils;
+  const {
+    namespaceIdToString,
+    namespaceStringToId,
+    createEmptyFindResponse,
+    generateId,
+    isRandomId,
+  } = SavedObjectsUtils;
 
   describe('#namespaceIdToString', () => {
     it('converts `undefined` to default namespace string', () => {
@@ -75,6 +75,22 @@ describe('SavedObjectsUtils', () => {
     it('handles `perPage` field', () => {
       const options = { perPage: 42 } as SavedObjectsFindOptions;
       expect(createEmptyFindResponse(options).per_page).toEqual(42);
+    });
+  });
+
+  describe('#generateId', () => {
+    it('returns a valid uuid', () => {
+      expect(generateId()).toBe('mock-uuid');
+      expect(uuid.v1).toHaveBeenCalled();
+    });
+  });
+
+  describe('#isRandomId', () => {
+    it('validates uuid correctly', () => {
+      expect(isRandomId('c4d82f66-3046-11eb-adc1-0242ac120002')).toBe(true);
+      expect(isRandomId('invalid')).toBe(false);
+      expect(isRandomId('')).toBe(false);
+      expect(isRandomId(undefined)).toBe(false);
     });
   });
 });
