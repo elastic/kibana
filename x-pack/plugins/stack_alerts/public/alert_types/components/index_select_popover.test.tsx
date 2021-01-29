@@ -9,51 +9,52 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { IndexSelectPopover } from './index_select_popover';
 
-jest.mock('../../../../triggers_actions_ui/public', () => ({
-  getIndexPatterns: () => {
-    return ['index1', 'index2'];
-  },
-  firstFieldOption: () => {
-    return { text: 'Select a field', value: '' };
-  },
-  getTimeFieldOptions: () => {
-    return [
-      {
-        text: '@timestamp',
-        value: '@timestamp',
-      },
-    ];
-  },
-  getFields: () => {
-    return Promise.resolve([
-      {
-        name: '@timestamp',
-        type: 'date',
-      },
-      {
-        name: 'field',
-        type: 'text',
-      },
-    ]);
-  },
-  getIndexOptions: () => {
-    return Promise.resolve([
-      {
-        label: 'indexOption',
-        options: [
-          {
-            label: 'index1',
-            value: 'index1',
-          },
-          {
-            label: 'index2',
-            value: 'index2',
-          },
-        ],
-      },
-    ]);
-  },
-}));
+jest.mock('../../../../triggers_actions_ui/public', () => {
+  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+  return {
+    ...original,
+    getIndexPatterns: () => {
+      return ['index1', 'index2'];
+    },
+    getTimeFieldOptions: () => {
+      return [
+        {
+          text: '@timestamp',
+          value: '@timestamp',
+        },
+      ];
+    },
+    getFields: () => {
+      return Promise.resolve([
+        {
+          name: '@timestamp',
+          type: 'date',
+        },
+        {
+          name: 'field',
+          type: 'text',
+        },
+      ]);
+    },
+    getIndexOptions: () => {
+      return Promise.resolve([
+        {
+          label: 'indexOption',
+          options: [
+            {
+              label: 'index1',
+              value: 'index1',
+            },
+            {
+              label: 'index2',
+              value: 'index2',
+            },
+          ],
+        },
+      ]);
+    },
+  };
+});
 
 describe('IndexSelectPopover', () => {
   const props = {
@@ -105,8 +106,13 @@ describe('IndexSelectPopover', () => {
 
     const indexComboBox = wrapper.find('#indexSelectSearchBox');
     indexComboBox.first().simulate('click');
-    const event = { target: { value: 'indexPattern1' } };
-    indexComboBox.find('input').first().simulate('change', event);
+
+    await act(async () => {
+      const event = { target: { value: 'indexPattern1' } };
+      indexComboBox.find('input').first().simulate('change', event);
+      await nextTick();
+      wrapper.update();
+    });
 
     const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
     expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
