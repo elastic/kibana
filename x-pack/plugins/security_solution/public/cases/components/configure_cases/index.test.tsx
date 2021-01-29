@@ -22,20 +22,29 @@ import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/publi
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useActionTypes } from '../../containers/configure/use_action_types';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
-import { connectors, searchURL, useCaseConfigureResponse, useConnectorsResponse } from './__mock__';
+import {
+  connectors,
+  searchURL,
+  useCaseConfigureResponse,
+  useConnectorsResponse,
+  useActionTypesResponse,
+} from './__mock__';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_action_types');
 jest.mock('../../../common/components/navigation/use_get_url_search');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
+const useActionTypesMock = useActionTypes as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeEach(() => {
@@ -83,6 +92,8 @@ describe('ConfigureCases', () => {
           />
         )),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
+
+    useActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
 
   describe('rendering', () => {
@@ -265,10 +276,12 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
         },
       }));
+
       useConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
         loading: true,
       }));
+
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
     });
@@ -293,6 +306,18 @@ describe('ConfigureCases', () => {
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
           .prop('disabled')
       ).toBe(true);
+    });
+
+    test('it shows isLoading when loading action types', () => {
+      useConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        loading: false,
+      }));
+
+      useActionTypesMock.mockImplementation(() => ({ ...useActionTypesResponse, loading: true }));
+
+      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
     });
   });
 
