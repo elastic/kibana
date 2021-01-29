@@ -260,15 +260,6 @@ describe('deserializer and serializer', () => {
     expect(result.phases.hot!.actions.readonly).toBeUndefined();
   });
 
-  it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.customRollover.enabled = true;
-    formInternal._meta.warm.warmPhaseOnRollover = true;
-
-    const result = serializer(formInternal);
-
-    expect(result.phases.warm!.min_age).toBeUndefined();
-  });
-
   it('adds default rollover configuration when enabled, but previously not configured', () => {
     delete formInternal.phases.hot!.actions.rollover;
     formInternal._meta.hot.isUsingDefaultRollover = true;

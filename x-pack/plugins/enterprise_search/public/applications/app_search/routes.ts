@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CURRENT_MAJOR_VERSION } from '../../../common/version';
+import { docLinks } from '../shared/doc_links';
 
-export const DOCS_PREFIX = `https://www.elastic.co/guide/en/app-search/${CURRENT_MAJOR_VERSION}`;
+export const DOCS_PREFIX = docLinks.appSearchBase;
 
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';

@@ -7,14 +7,15 @@
  */
 
 import React from 'react';
-import { History } from 'history';
 import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { ApplicationStart } from 'kibana/public';
+import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
 import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
+import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -72,7 +73,7 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
 
 export const getTableColumns = (
   application: ApplicationStart,
-  history: History,
+  kbnUrlStateStorage: IKbnUrlStateStorage,
   taggingApi?: SavedObjectsTaggingApi
 ) => [
   {
@@ -84,18 +85,14 @@ export const getTableColumns = (
     render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
-        <EuiLink
-          onClick={() => {
-            if (editApp) {
-              application.navigateToApp(editApp, { path: editUrl });
-            } else if (editUrl) {
-              history.push(editUrl);
-            }
-          }}
-          data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
-        >
-          {field}
-        </EuiLink>
+        <RedirectAppLinks application={application}>
+          <EuiLink
+            href={getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl)}
+            data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
+          >
+            {field}
+          </EuiLink>
+        </RedirectAppLinks>
       ) : (
         field
       ),
