@@ -106,10 +106,7 @@ export const samplePieVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'vislib_slices',
     hierarchicalData: true,
-    useCustomNoDataScreen: false,
   },
   title: '[Flights] Airline Carrier',
   description: '',
@@ -126,7 +123,6 @@ export const samplePieVis = {
       truncate: 100,
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',
@@ -1622,10 +1618,7 @@ export const sampleAreaVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'none',
     hierarchicalData: false,
-    useCustomNoDataScreen: false,
   },
   title: '[eCommerce] Sales by Category',
   description: '',
@@ -1762,7 +1755,6 @@ export const sampleAreaVis = {
       ],
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

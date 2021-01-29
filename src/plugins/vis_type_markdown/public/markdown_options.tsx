@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { MarkdownVisParams } from './types';
 
-function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
+function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => setValue('markdown', value),
     [setValue]

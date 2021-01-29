@@ -25,7 +25,6 @@ pageLoadAssetSize:
   esUiShared: 326798
   expressions: 224120
   features: 31211
-  fileUpload: 24717
   globalSearch: 43548
   globalSearchBar: 62888
   globalSearchProviders: 25554
@@ -45,8 +44,7 @@ pageLoadAssetSize:
   kibanaReact: 162353
   kibanaUtils: 198829
   lens: 96624
-  licenseManagement: 41961
-  lensOss: 19341
+  licenseManagement: 41817
   licensing: 39008
   lists: 202261
   logstash: 53548
@@ -54,7 +52,6 @@ pageLoadAssetSize:
   maps: 183754
   mapsLegacy: 116961
   mapsLegacyLicensing: 20214
-  mapsOss: 19284
   ml: 82187
   monitoring: 50000
   navigation: 37413
@@ -106,3 +103,5 @@ pageLoadAssetSize:
   stackAlerts: 29684
   presentationUtil: 28545
   spacesOss: 18817
+  osquery: 107090
+  mapsFileUpload: 23775
