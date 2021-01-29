@@ -20,6 +20,7 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { getCasesColumns } from './columns';
 import { AllCases } from '.';
 
@@ -27,12 +28,14 @@ jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/use_get_action_license');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
+const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 jest.mock('../../../common/components/link_to');
 
@@ -86,6 +89,12 @@ describe('AllCases', () => {
     updateBulkStatus,
   };
 
+  const defaultActionLicense = {
+    actionLicense: null,
+    isLoading: false,
+    isError: false,
+  };
+
   let navigateToApp: jest.Mock;
 
   beforeEach(() => {
@@ -96,6 +105,7 @@ describe('AllCases', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
+    useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     moment.tz.setDefault('UTC');
   });
 
@@ -398,6 +408,7 @@ describe('AllCases', () => {
       expect(dispatchResetIsDeleted).toBeCalled();
     });
   });
+
   it('isUpdated is true, refetch', async () => {
     useUpdateCasesMock.mockReturnValue({
       ...defaultUpdateCases,
@@ -625,6 +636,58 @@ describe('AllCases', () => {
       expect(wrapper.find('button[data-test-subj="case-status-filter-closed"]').text()).toBe(
         'Closed (130)'
       );
+    });
+  });
+
+  it('should not allow the user to enter configuration page with basic license', async () => {
+    useGetActionLicenseMock.mockReturnValue({
+      ...defaultActionLicense,
+      actionLicense: {
+        id: '.jira',
+        name: 'Jira',
+        minimumLicenseRequired: 'gold',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: false,
+      },
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
+      ).toBeTruthy();
+    });
+  });
+
+  it('should allow the user to enter configuration page with gold license and above', async () => {
+    useGetActionLicenseMock.mockReturnValue({
+      ...defaultActionLicense,
+      actionLicense: {
+        id: '.jira',
+        name: 'Jira',
+        minimumLicenseRequired: 'gold',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+      },
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
+      ).toBeFalsy();
     });
   });
 });
