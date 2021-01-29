@@ -11,7 +11,6 @@ import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
-  FieldDescriptor,
   ValidatePatternListActive,
 } from '../../common/index_patterns';
 import { IndexPatternsFetcher } from './fetcher';
@@ -35,31 +34,16 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     type,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
-    if (formatFields) {
-      // need to know which pattern the field is from in order to properly
-      // document the field [required for Security Solution Timeline]
-      // so we split up the requests for each pattern in the patternList
-      const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
-        patternList
-          .map((pattern) =>
-            indexPatterns.getFieldsForWildcard({
-              metaFields,
-              pattern,
-              rollupIndex,
-              type,
-            })
-          )
-          .map((p) => p.catch(() => false))
-      );
-      const responsesIndexFields = fieldsArr.filter((rif) => rif !== false) as FieldDescriptor[][];
-      return formatIndexFields(responsesIndexFields, patternList);
-    }
-    return indexPatterns.getFieldsForWildcard({
+    let fields = await indexPatterns.getFieldsForWildcard({
       metaFields,
       pattern: patternList.join(','),
       rollupIndex,
       type,
     });
+    if (formatFields) {
+      fields = await formatIndexFields(fields);
+    }
+    return fields;
   }
   async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient);

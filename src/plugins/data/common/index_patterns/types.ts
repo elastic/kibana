@@ -298,8 +298,6 @@ export interface IndexField extends FieldDescriptor {
   category: string;
   /** Example of field's value */
   example?: Maybe<string | number>;
-  /** whether the field's belong to an alias index */
-  indexes: Array<Maybe<string>>;
   /** Description of the field */
   description?: Maybe<string>;
   format?: Maybe<string>;

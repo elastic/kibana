@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
-import { FieldDescriptor, IndexPatternsFetcher } from './fetcher';
+import { IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
@@ -92,38 +92,7 @@ export function registerRoutes(
       }
 
       try {
-        if (formatFields) {
-          // need to know which pattern the field is from in order to properly
-          // document the field [required for Security Solution Timeline]
-          // so we split up the requests for each pattern in the patternList
-          const fieldsArr: Array<FieldDescriptor[] | boolean> = await Promise.all(
-            patternList
-              .map((pattern) =>
-                indexPatterns.getFieldsForWildcard({
-                  fieldCapsOptions: {
-                    allow_no_indices: allowNoIndex || false,
-                  },
-                  metaFields: parsedFields,
-                  pattern,
-                  rollupIndex,
-                  type,
-                })
-              )
-              .map((p) => p.catch(() => false))
-          );
-          const responsesIndexFields = fieldsArr.filter(
-            (rif) => rif !== false
-          ) as FieldDescriptor[][];
-          const fields = await formatIndexFields(responsesIndexFields, patternList);
-          return response.ok({
-            body: { fields },
-            headers: {
-              'content-type': 'application/json',
-            },
-          });
-        }
-
-        const fields = await indexPatterns.getFieldsForWildcard({
+        let fields = await indexPatterns.getFieldsForWildcard({
           pattern: patternList.join(','),
           metaFields: parsedFields,
           type,
@@ -132,6 +101,9 @@ export function registerRoutes(
             allow_no_indices: allowNoIndex || false,
           },
         });
+        if (formatFields) {
+          fields = await formatIndexFields(fields);
+        }
         return response.ok({
           body: { fields },
           headers: {
