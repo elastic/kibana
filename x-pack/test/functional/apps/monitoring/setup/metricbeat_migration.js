@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'console']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/74327
-  describe.skip('Setup mode metricbeat migration', function () {
+  describe('Setup mode metricbeat migration', function () {
     describe('setup mode btn', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
