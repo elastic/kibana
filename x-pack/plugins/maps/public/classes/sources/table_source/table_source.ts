@@ -11,7 +11,6 @@ import {
   MapFilters,
   MapQuery,
   TableSourceDescriptor,
-  TableSourceValue,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -45,9 +44,9 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   readonly _descriptor: TableSourceDescriptor;
 
-  constructor(descriptor: TableSourceDescriptor, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<TableSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = TableSource.createDescriptor(descriptor);
-    super(descriptor, inspectorAdapters);
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -103,7 +102,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return new InlineField<TableSource>({
       fieldName: column.name,
       source: this,
-      origin: FIELD_ORIGIN.SOURCE,
+      origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
     });
   }
@@ -125,7 +124,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       return new InlineField<TableSource>({
         fieldName: column.name,
         source: this,
-        origin: FIELD_ORIGIN.SOURCE,
+        origin: FIELD_ORIGIN.JOIN,
         dataType: column.type,
       });
     });
@@ -168,7 +167,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return new InlineField<TableSource>({
       fieldName: column.name,
       source: this,
-      origin: FIELD_ORIGIN.SOURCE,
+      origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
     });
   }

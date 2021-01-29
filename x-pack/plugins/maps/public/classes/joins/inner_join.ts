@@ -34,7 +34,7 @@ function createJoinTermSource(
     return;
   }
 
-  if (typeof descriptor.type === 'undefined' || descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE) {
+  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
   } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
