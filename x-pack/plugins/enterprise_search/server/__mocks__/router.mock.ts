@@ -68,10 +68,10 @@ export class MockRouter {
   public validateRoute = (request: MockRouterRequest) => {
     if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
 
+    // Ignoring a TS error here because it's tricky to resolve and unimportant to fix
     // @ts-ignore
     const configForMethodAndPath = this.router[this.method].mock.calls.find(
-      // @ts-ignore
-      ([config]) => config.path === this.path
+      ([config]: Array<{ path: string }>) => config.path === this.path
     );
     if (!configForMethodAndPath)
       throw new Error(`No route registered for ${this.method} & ${this.path}`);
