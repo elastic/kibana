@@ -12,7 +12,7 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { DatatableRow } from 'src/plugins/expressions';
 import { FormattedColumns } from '../types';
 
-export const createTableVisCell = (rows: DatatableRow, formattedColumns: FormattedColumns) => ({
+export const createTableVisCell = (rows: DatatableRow[], formattedColumns: FormattedColumns) => ({
   rowIndex,
   columnId,
 }: EuiDataGridCellValueElementProps) => {

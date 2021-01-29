@@ -8,7 +8,7 @@
 
 import { findIndex } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from 'src/plugins/expressions';
 import { getFormatService } from '../services';
 import { FormattedColumns, TableContext } from '../types';
 
@@ -19,11 +19,7 @@ function insertColumn(arr: DatatableColumn[], index: number, col: DatatableColum
 }
 
 /**
- * @param columns - the formatted columns that will be displayed
- * @param title - the title of the column to add to
- * @param rows - the row data for the columns
- * @param insertAtIndex - the index to insert the percentage column at
- * @returns cols and rows for the table to render now included percentage column(s)
+ * Adds a brand new column with percentages of selected column to existing data table
  */
 export function addPercentageColumn(table: TableContext, name: string) {
   const { columns, rows, formattedColumns } = table;

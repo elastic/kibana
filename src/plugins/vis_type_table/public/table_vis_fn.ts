@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
-import { tableVisResponseHandler } from './utils/table_vis_response_handler';
+import { tableVisResponseHandler } from './utils';
 
 export type Input = Datatable;
 

@@ -7,3 +7,4 @@
  */
 
 export * from './use';
+export * from './table_vis_response_handler';

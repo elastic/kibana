@@ -27,7 +27,7 @@ interface FilterCellData {
 
 export const createGridColumns = (
   columns: DatatableColumn[],
-  rows: DatatableRow,
+  rows: DatatableRow[],
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
   fireEvent: IInterpreterRenderHandlers['event']

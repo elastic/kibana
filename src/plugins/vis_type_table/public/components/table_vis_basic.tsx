@@ -34,7 +34,6 @@ export const TableVisBasic = memo(
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
   }: TableVisBasicProps) => {
-    // const { columns, rows } = useFormattedColumnsAndRows(table, visConfig);
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
