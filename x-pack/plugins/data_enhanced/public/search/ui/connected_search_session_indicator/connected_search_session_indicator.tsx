@@ -6,7 +6,7 @@
 
 import React, { useRef } from 'react';
 import { debounce, distinctUntilChanged, map } from 'rxjs/operators';
-import { EMPTY, timer } from 'rxjs';
+import { timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
