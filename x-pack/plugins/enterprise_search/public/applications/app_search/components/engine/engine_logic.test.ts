@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter, mockHttpValues, expectedAsyncError } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { EngineLogic } from './';
 
@@ -172,11 +174,10 @@ describe('EngineLogic', () => {
       it('fetches and sets engine data', async () => {
         mount({ engineName: 'some-engine' });
         jest.spyOn(EngineLogic.actions, 'setEngineData');
-        const promise = Promise.resolve(mockEngineData);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(mockEngineData));
 
         EngineLogic.actions.initializeEngine();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine');
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
@@ -185,11 +186,10 @@ describe('EngineLogic', () => {
       it('handles errors', async () => {
         mount();
         jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
-        const promise = Promise.reject('An error occured');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
         EngineLogic.actions.initializeEngine();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
