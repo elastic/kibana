@@ -39,6 +39,7 @@
     "plugins/global_search_bar/**/*",
     "plugins/license_management/**/*",
     "plugins/snapshot_restore/**/*",
+    "plugins/watcher/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -111,5 +112,6 @@
     { "path": "./plugins/stack_alerts/tsconfig.json"},
     { "path": "./plugins/license_management/tsconfig.json" },
     { "path": "./plugins/snapshot_restore/tsconfig.json" },
+    { "path": "./plugins/watcher/tsconfig.json" },
   ]
 }

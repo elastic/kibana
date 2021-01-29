@@ -18,4 +18,5 @@ export const storybookAliases = {
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/.storybook',
   observability: 'x-pack/plugins/observability/.storybook',
+  presentation: 'src/plugins/presentation_util/storybook',
 };
