@@ -113,6 +113,17 @@ const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, log) =
   return settings;
 };
 
+const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.ops')) {
+    log(
+      '"logging.events.ops" has been deprecated and will be removed ' +
+        'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
+        '"metrics.ops" context in your logging configuration.'
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
@@ -159,4 +170,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
   serverHostZeroDeprecation,
+  opsLoggingEventDeprecation,
 ];

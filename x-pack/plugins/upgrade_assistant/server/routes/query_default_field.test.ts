@@ -48,7 +48,7 @@ describe('add query default field API', () => {
     );
 
     expect(mockAddDefaultField).toHaveBeenCalledWith(
-      routeHandlerContextMock.core.elasticsearch.legacy.client,
+      routeHandlerContextMock.core.elasticsearch.client,
       'myIndex',
       new Set(['text', 'boolean']),
       new Set(['myCustomField'])
@@ -74,7 +74,7 @@ describe('add query default field API', () => {
     );
 
     expect(mockAddDefaultField).toHaveBeenCalledWith(
-      routeHandlerContextMock.core.elasticsearch.legacy.client,
+      routeHandlerContextMock.core.elasticsearch.client,
       'myIndex',
       new Set(['text', 'boolean']),
       undefined
