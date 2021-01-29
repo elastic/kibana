@@ -34,13 +34,15 @@ export function TransactionTypeSelect() {
   const options = transactionTypes.map((t) => ({ text: t, value: t }));
 
   return (
-    <EuiSelect
-      onChange={handleChange}
-      options={options}
-      prepend={i18n.translate('xpack.apm.transactionTypeSelectLabel', {
-        defaultMessage: 'Type',
-      })}
-      value={transactionType}
-    />
+    <>
+      <EuiSelect
+        onChange={handleChange}
+        options={options}
+        prepend={i18n.translate('xpack.apm.transactionTypeSelectLabel', {
+          defaultMessage: 'Type',
+        })}
+        value={transactionType}
+      />
+    </>
   );
 }

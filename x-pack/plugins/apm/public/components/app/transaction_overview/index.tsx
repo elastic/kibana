@@ -88,9 +88,28 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <TransactionTypeSelect />
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h2>
+                      {i18n.translate('xpack.apm.transactionOverviewTitle', {
+                        defaultMessage: 'Transactions',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={2}>
+                  <TransactionTypeSelect />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Correlations />
