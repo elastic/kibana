@@ -11,6 +11,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '
 import { i18n } from '@kbn/i18n';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
+import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
 import { useWaterfallContext } from '../context/waterfall_chart';
 
@@ -45,14 +46,17 @@ const FlyoutContainer = styled(EuiFlyout)`
 
 export const WaterfallFlyout = () => {
   const { flyoutData, isFlyoutVisible, setIsFlyoutVisible } = useWaterfallContext();
+  const trackMetric = useUiTracker({ app: 'uptime' });
 
-  if (!flyoutData) {
+  if (!flyoutData || !isFlyoutVisible) {
     return null;
   }
 
   const { url, details, certificates, requestHeaders, responseHeaders } = flyoutData;
 
-  return isFlyoutVisible ? (
+  trackMetric({ metric: 'waterfall_flyout', metricType: METRIC_TYPE.CLICK });
+
+  return (
     <FlyoutContainer
       size="s"
       onClose={() => setIsFlyoutVisible(false)}
@@ -87,5 +91,5 @@ export const WaterfallFlyout = () => {
         )}
       </EuiFlyoutBody>
     </FlyoutContainer>
-  ) : null;
+  );
 };
