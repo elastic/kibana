@@ -12,13 +12,13 @@ import { getFormatService } from '../services';
 import { FormattedColumn, FormattedColumns, TableVisConfig, TableContext } from '../types';
 import { AggTypes } from '../../common';
 
-export const createFormattedColumns = (
+export const createFormattedTable = (
   table: Datatable | TableContext,
   visConfig: TableVisConfig
 ) => {
   const { buckets, metrics } = visConfig.dimensions;
 
-  return table.columns.reduce<FormattedColumns>((acc, col, i) => {
+  const formattedColumns = table.columns.reduce<FormattedColumns>((acc, col, i) => {
     const isBucket = buckets.find(({ accessor }) => accessor === i);
     const dimension = isBucket || metrics.find(({ accessor }) => accessor === i);
 
@@ -87,4 +87,11 @@ export const createFormattedColumns = (
 
     return acc;
   }, {});
+
+  return {
+    // filter out columns which are not dimensions
+    columns: table.columns.filter((col) => formattedColumns[col.id]),
+    rows: table.rows,
+    formattedColumns,
+  };
 };

@@ -10,7 +10,7 @@ import { Datatable } from 'src/plugins/expressions';
 import { getFormatService } from '../services';
 import { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
 import { addPercentageColumn } from './add_percentage_column';
-import { createFormattedColumns } from './create_formatted_columns';
+import { createFormattedTable } from './create_formatted_table';
 
 /**
  * Converts datatable input from response into appropriate format for consuming renderer
@@ -53,18 +53,14 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
     });
 
     tables.forEach((tg) => {
-      tg.table.formattedColumns = createFormattedColumns(
-        { ...tg.table, columns: input.columns },
-        visConfig
-      );
-      tg.table = addPercentageColumn(tg.table, visConfig.percentageCol);
+      tg.table = createFormattedTable({ ...tg.table, columns: input.columns }, visConfig);
+
+      if (visConfig.percentageCol) {
+        tg.table = addPercentageColumn(tg.table, visConfig.percentageCol);
+      }
     });
   } else {
-    const formattedColumns = createFormattedColumns(input, visConfig);
-    table = {
-      ...input,
-      formattedColumns,
-    };
+    table = createFormattedTable(input, visConfig);
 
     if (visConfig.percentageCol) {
       table = addPercentageColumn(table, visConfig.percentageCol);
