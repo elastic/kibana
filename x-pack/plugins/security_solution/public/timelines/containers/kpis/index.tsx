@@ -114,10 +114,7 @@ export const useTimelineKpis = ({
   }, [docValueFields, defaultIndex, timerange, filterQuery]);
 
   useEffect(() => {
-    if (isBlankTimeline) {
-      setLoading(false);
-      setTimelineKpiResponse(null);
-    } else {
+    if (!isBlankTimeline) {
       timelineKpiSearch(timelineKpiRequest);
     }
     return () => {
