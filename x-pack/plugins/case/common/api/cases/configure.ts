@@ -6,12 +6,14 @@
 
 import * as rt from 'io-ts';
 
-import { ActionResult } from '../../../../actions/common';
+import { ActionResult, ActionType as ActionTypeConnector } from '../../../../actions/common';
 import { UserRT } from '../user';
 import { JiraCaseFieldsRt } from '../connectors/jira';
 import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
 import { ResilientCaseFieldsRT } from '../connectors/resilient';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+
+export { ActionTypeConnector };
 
 /*
  * This types below are related to the service now configuration

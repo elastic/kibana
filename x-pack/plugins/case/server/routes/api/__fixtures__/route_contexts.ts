@@ -6,11 +6,12 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
-import { getActions } from '../__mocks__/request_responses';
+import { getActions, getActionTypes } from '../__mocks__/request_responses';
 
 export const createRouteContext = (client: any) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
 
   return ({
     core: {

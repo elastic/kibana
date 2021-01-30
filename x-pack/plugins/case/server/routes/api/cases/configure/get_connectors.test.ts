@@ -100,6 +100,85 @@ describe('GET connectors', () => {
     ]);
   });
 
+  it('filters out connectors that are not enabled in license', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+      method: 'get',
+    });
+
+    const context = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const actionsClient = context.actions!.getActionsClient();
+    (actionsClient.listTypes as jest.Mock).mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: '.servicenow',
+          name: 'ServiceNow',
+          minimumLicenseRequired: 'platinum',
+          enabled: false,
+          enabledInConfig: true,
+          // User does not have a platinum license
+          enabledInLicense: false,
+        },
+        {
+          id: '.jira',
+          name: 'Jira',
+          minimumLicenseRequired: 'gold',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+        },
+        {
+          id: '.resilient',
+          name: 'IBM Resilient',
+          minimumLicenseRequired: 'platinum',
+          enabled: false,
+          enabledInConfig: true,
+          // User does not have a platinum license
+          enabledInLicense: false,
+        },
+      ])
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(200);
+    expect(res.payload).toEqual([
+      {
+        id: '456',
+        actionTypeId: '.jira',
+        name: 'Connector without isCaseOwned',
+        config: {
+          apiUrl: 'https://elastic.jira.com',
+          incidentConfiguration: {
+            mapping: [
+              {
+                actionType: 'overwrite',
+                source: 'title',
+                target: 'short_description',
+              },
+              {
+                actionType: 'overwrite',
+                source: 'description',
+                target: 'description',
+              },
+              {
+                actionType: 'append',
+                source: 'comments',
+                target: 'comments',
+              },
+            ],
+          },
+        },
+        isPreconfigured: false,
+        referencedByCount: 0,
+      },
+    ]);
+  });
+
   it('it throws an error when actions client is null', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,

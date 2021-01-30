@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { ActionType } from '../../../../../../actions/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../../actions/server/types';
 
@@ -31,13 +32,16 @@ interface CaseAction extends FindActionResult {
   };
 }
 
-const isCaseOwned = (action: CaseAction): boolean => {
+const isCaseOwned = (action: CaseAction, actionTypes: Record<string, ActionType>): boolean => {
   if (
     [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
       action.actionTypeId
     )
   ) {
-    if (action.config?.isCaseOwned === true || action.config?.incidentConfiguration?.mapping) {
+    if (
+      (action.config?.isCaseOwned === true || action.config?.incidentConfiguration?.mapping) &&
+      actionTypes[action.actionTypeId]?.enabledInLicense
+    ) {
       return true;
     }
   }
@@ -63,7 +67,14 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter(isCaseOwned);
+        const actionTypes = (await actionsClient.listTypes()).reduce(
+          (types, type) => ({ ...types, [type.id]: type }),
+          {}
+        );
+
+        const results = (await actionsClient.getAll()).filter((action) =>
+          isCaseOwned(action, actionTypes)
+        );
         return response.ok({ body: results });
       } catch (error) {
         return response.customError(wrapError(error));
