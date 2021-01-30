@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { EngineOverviewLogic } from './';
-
+import { FlashMessages } from '../../../shared/flash_messages';
 import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
@@ -28,6 +28,7 @@ export const EngineOverviewMetrics: React.FC = () => {
           </h1>
         </EuiTitle>
       </EuiPageHeader>
+      <FlashMessages />
       {apiLogsUnavailable ? (
         <UnavailablePrompt />
       ) : (

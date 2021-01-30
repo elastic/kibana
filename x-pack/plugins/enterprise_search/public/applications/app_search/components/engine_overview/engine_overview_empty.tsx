@@ -15,6 +15,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCS_PREFIX } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
@@ -40,6 +41,7 @@ export const EmptyEngineOverview: React.FC = () => {
           </EuiButton>
         </EuiPageHeaderSection>
       </EuiPageHeader>
+      <FlashMessages />
       <EuiPageContentBody>
         <DocumentCreationButtons />
         <DocumentCreationFlyout />
