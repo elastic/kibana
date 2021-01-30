@@ -67,3 +67,70 @@ export const CREATE_ENGINE_SUCCESS_MESSAGE = i18n.translate(
     defaultMessage: 'Successfully created engine.',
   }
 );
+
+export const SUPPORTED_LANGUAGES = [
+  {
+    value: 'Universal',
+    text: 'Universal',
+  },
+  {
+    text: '—',
+    disabled: true,
+  },
+  {
+    value: 'zh',
+    text: 'Chinese',
+  },
+  {
+    value: 'da',
+    text: 'Danish',
+  },
+  {
+    value: 'nl',
+    text: 'Dutch',
+  },
+  {
+    value: 'en',
+    text: 'English',
+  },
+  {
+    value: 'fr',
+    text: 'French',
+  },
+  {
+    value: 'de',
+    text: 'German',
+  },
+  {
+    value: 'it',
+    text: 'Italian',
+  },
+  {
+    value: 'ja',
+    text: 'Japanese',
+  },
+  {
+    value: 'ko',
+    text: 'Korean',
+  },
+  {
+    value: 'pt',
+    text: 'Portuguese',
+  },
+  {
+    value: 'pt-br',
+    text: 'Portuguese (Brazil)',
+  },
+  {
+    value: 'ru',
+    text: 'Russian',
+  },
+  {
+    value: 'es',
+    text: 'Spanish',
+  },
+  {
+    value: 'th',
+    text: 'Thai',
+  },
+];

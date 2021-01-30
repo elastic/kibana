@@ -20,13 +20,11 @@ import {
   EuiTitle,
   EuiButton,
   EuiPanel,
-  EuiSelectOption,
 } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
-
 import {
   ALLOWED_CHARS_NOTE,
   CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL,
@@ -36,18 +34,13 @@ import {
   CREATE_ENGINE_FORM_TITLE,
   CREATE_ENGINE_TITLE,
   SANITIZED_NAME_NOTE,
+  SUPPORTED_LANGUAGES,
 } from './constants';
 import { CreateEngineLogic } from './create_engine_logic';
 
 export const CreateEngine: React.FC = () => {
   const { name, rawName, language } = useValues(CreateEngineLogic);
   const { setLanguage, setRawName, submitEngine } = useActions(CreateEngineLogic);
-
-  // TODO these need to come from AppLogic and/or the Enterprise Search server
-  const supportedLanguages: EuiSelectOption[] = [
-    { text: 'Universal', value: 'Universal' },
-    { text: 'English', value: 'English' },
-  ];
 
   return (
     <div data-test-subj="CreateEngine">
@@ -105,7 +98,7 @@ export const CreateEngine: React.FC = () => {
                   <EuiSelect
                     name="engine-language"
                     value={language}
-                    options={supportedLanguages}
+                    options={SUPPORTED_LANGUAGES}
                     data-test-subj="CreateEngineLanguageInput"
                     onChange={(event) => setLanguage(event.target.value)}
                   />
