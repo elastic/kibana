@@ -33,9 +33,7 @@ export function registerQueryDefaultFieldRoutes({ router }: RouteDependencies) {
       async (
         {
           core: {
-            elasticsearch: {
-              legacy: { client },
-            },
+            elasticsearch: { client },
           },
         },
         request,
