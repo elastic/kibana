@@ -13,6 +13,7 @@ import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { CreateEngine } from './components/create_engine';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EnginesOverview } from './components/engines';
@@ -96,8 +97,21 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('ability checks', () => {
-    // TODO: Use this section for routes wrapped in canViewX conditionals
-    // e.g., it('renders settings if a user can view settings')
+    describe('canManageEngines', () => {
+      it('renders CreateEngine when user canManageEngines is true', () => {
+        setMockValues({ myRole: { canManageEngines: true } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(CreateEngine)).toHaveLength(1);
+      });
+
+      it('does not render CreateEngine when user canManageEngines is false', () => {
+        setMockValues({ myRole: { canManageEngines: false } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(CreateEngine)).toHaveLength(0);
+      });
+    });
   });
 });
 
