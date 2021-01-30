@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return correct data stream information', async function () {
       await seedDataStreams();
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         const { body } = await getDataStreams();
         return expect(
           body.data_streams.map((dataStream: any) => {
@@ -127,7 +127,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should return correct number of data streams regardless of number of backing indices', async function () {
       await seedDataStreams();
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         const { body } = await getDataStreams();
         return expect(body.data_streams.length).to.eql(2);
       });
@@ -144,7 +144,7 @@ export default function (providerContext: FtrProviderContext) {
       await seedDataStreams();
 
       // Wait until backing indices are created
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         const { body } = await es.transport.request({
           method: 'GET',
           path: `/${logsTemplateName}-default,${metricsTemplateName}-default/_search`,
