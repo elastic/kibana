@@ -20,7 +20,14 @@ interface ESDataStreamInfoResponse {
     };
     indices: Array<{ index_name: string; index_uuid: string }>;
     generation: number;
-    _meta: { [key: string]: any };
+    _meta?: {
+      package?: {
+        name: string;
+      };
+      managed_by?: string;
+      managed?: boolean;
+      [key: string]: any;
+    };
     status: string;
     template: string;
     ilm_policy: string;
@@ -75,7 +82,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataset: '',
         namespace: '',
         type: '',
-        package: '',
+        package: dataStream._meta?.package?.name || '',
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp,
         size_in_bytes: dataStream.store_size_bytes,
@@ -133,12 +140,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
       dataStreamResponse.type = type.buckets[0]?.key || '';
 
-      // We don't have a reliable way to associate index with package ID, so
-      // this is a hack to extract the package ID from the first part of the dataset value
-      // with fallback to extraction from data stream name
-      const pkgName = dataStreamResponse.dataset
-        ? dataStreamResponse.dataset.split('.')[0]
-        : dataStreamName.split('-')[1].split('.')[0];
+      // Find package saved object
+      const pkgName = dataStreamResponse.package;
       const pkgSavedObject = pkgName ? packageSavedObjectsByName[pkgName] : null;
 
       if (pkgSavedObject) {
