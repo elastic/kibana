@@ -133,6 +133,10 @@ export class Project {
     return (this.json.kibana && this.json.kibana.clean) || {};
   }
 
+  public isBazelPackage() {
+    return !!(this.json.kibana && this.json.kibana.bazelPackage);
+  }
+
   public isFlaggedAsDevOnly() {
     return !!(this.json.kibana && this.json.kibana.devOnly);
   }
