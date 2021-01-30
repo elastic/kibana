@@ -35,7 +35,7 @@ import {
   CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL,
   CREATE_ENGINE_FORM_TITLE,
   CREATE_ENGINE_TITLE,
-  getSanitizedNameNote,
+  SANITIZED_NAME_NOTE,
 } from './constants';
 import { CreateEngineLogic } from './create_engine_logic';
 
@@ -77,7 +77,15 @@ export const CreateEngine: React.FC = () => {
               <EuiFlexItem>
                 <EuiFormRow
                   label={CREATE_ENGINE_FORM_ENGINE_NAME_LABEL}
-                  helpText={rawName !== name ? getSanitizedNameNote(name) : ALLOWED_CHARS_NOTE}
+                  helpText={
+                    name.length > 0 && rawName !== name ? (
+                      <>
+                        {SANITIZED_NAME_NOTE} <strong>{name}</strong>
+                      </>
+                    ) : (
+                      ALLOWED_CHARS_NOTE
+                    )
+                  }
                   fullWidth={true}
                 >
                   <EuiFieldText

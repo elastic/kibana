@@ -33,17 +33,12 @@ export const ALLOWED_CHARS_NOTE = i18n.translate(
   }
 );
 
-export const getSanitizedNameNote = (name: string): string => {
-  return i18n.translate(
-    'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.sanitizedNameNote',
-    {
-      defaultMessage: 'Your engine will be named <strong>{name}</strong>',
-      values: {
-        name,
-      },
-    }
-  );
-};
+export const SANITIZED_NAME_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.sanitizedNameNote',
+  {
+    defaultMessage: 'Your engine will be named',
+  }
+);
 
 export const CREATE_ENGINE_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.placeholder',
