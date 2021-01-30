@@ -106,7 +106,13 @@ export const CreateEngine: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
-            <EuiButton type="submit" data-test-subj="NewEngineSubmitButton" fill color="secondary">
+            <EuiButton
+              disabled={name.length === 0}
+              type="submit"
+              data-test-subj="NewEngineSubmitButton"
+              fill
+              color="secondary"
+            >
               {CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL}
             </EuiButton>
           </form>
