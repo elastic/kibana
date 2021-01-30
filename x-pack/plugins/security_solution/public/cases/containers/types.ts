@@ -13,11 +13,14 @@ import {
   CaseStatuses,
   CaseAttributes,
   CasePatchRequest,
+  CaseType,
+  AssociationType,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
 export type Comment = CommentRequest & {
+  associationType: AssociationType;
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
@@ -54,6 +57,7 @@ export interface Case {
   closedBy: ElasticUser | null;
   comments: Comment[];
   connector: CaseConnector;
+  convertedBy: ElasticUser | null;
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
@@ -61,7 +65,9 @@ export interface Case {
   status: CaseStatuses;
   tags: string[];
   title: string;
+  totalAlerts: number;
   totalComment: number;
+  type: CaseType;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;

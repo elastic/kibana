@@ -55,24 +55,30 @@ async function deleteSubCases({
   client: SavedObjectsClientContract;
   caseIds: string[];
 }) {
-  const subCasesForCaseIds = await Promise.all(
-    caseIds.map((id) => caseService.findSubCasesByCaseId(client, id))
-  );
+  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
 
-  const commentsForSubCases = await Promise.all(
-    caseIds.map((id) => caseService.getAllCaseComments({ client, id, subCaseID: id }))
+  const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
+  const commentsForSubCases = await caseService.getAllCaseComments({
+    client,
+    id: subCaseIDs,
+    subCaseID: subCaseIDs,
+    options: {
+      fields: [],
+    },
+  });
+
+  // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
+  // per case ID
+  await Promise.all(
+    commentsForSubCases.saved_objects.map((commentSO) =>
+      caseService.deleteComment({ client, commentId: commentSO.id })
+    )
   );
 
   await Promise.all(
-    commentsForSubCases
-      .flatMap((comment) => comment.saved_objects)
-      .map((commentSO) => caseService.deleteComment({ client, commentId: commentSO.id }))
-  );
-
-  await Promise.all(
-    subCasesForCaseIds
-      .flatMap((subCase) => subCase.saved_objects)
-      .map((subCaseSO) => caseService.deleteSubCase(client, subCaseSO.id))
+    subCasesForCaseIds.saved_objects.map((subCaseSO) =>
+      caseService.deleteSubCase(client, subCaseSO.id)
+    )
   );
 }
 

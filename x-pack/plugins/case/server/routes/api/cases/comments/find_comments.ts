@@ -20,6 +20,9 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
+const defaultPage = 1;
+const defaultPerPage = 20;
+
 export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
@@ -44,6 +47,11 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
               client,
               id: request.params.case_id,
               options: {
+                // We need this because the default behavior of getAllCaseComments is to return all the comments
+                // unless the page and/or perPage is specified. Since we're spreading the query after the request can
+                // still override this behavior.
+                page: defaultPage,
+                perPage: defaultPerPage,
                 ...query,
                 sortField: 'created_at',
               },

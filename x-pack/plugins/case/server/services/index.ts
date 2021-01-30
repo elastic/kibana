@@ -27,6 +27,7 @@ import {
   CommentPatchAttributes,
   SubCaseAttributes,
 } from '../../common/api';
+import { SUB_CASES_URL } from '../../common/constants';
 import { transformNewSubCase } from '../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,
@@ -58,14 +59,25 @@ interface GetCasesArgs extends ClientArgs {
   caseIds: string[];
 }
 
-interface FindCommentsArgs extends GetCaseArgs {
+interface GetSubCasesArgs extends ClientArgs {
+  ids: string[];
+}
+
+interface FindCommentsArgs {
+  client: SavedObjectsClientContract;
+  id: string | string[];
   options?: SavedObjectFindOptions;
-  subCaseID?: string;
+  subCaseID?: string | string[];
 }
 
 interface FindCasesArgs extends ClientArgs {
   options?: SavedObjectFindOptions;
 }
+
+interface FindSubCasesByIDArgs extends FindCasesArgs {
+  ids: string[];
+}
+
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
 }
@@ -109,6 +121,11 @@ interface PatchSubCase {
   version?: string;
 }
 
+interface PatchSubCases {
+  client: SavedObjectsClientContract;
+  subCases: Array<Omit<PatchSubCase, 'client'>>;
+}
+
 interface GetUserArgs {
   request: KibanaRequest;
   response?: KibanaResponseFactory;
@@ -122,12 +139,12 @@ export interface CaseServiceSetup {
   findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
   findSubCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
   findSubCasesByCaseId(
-    client: SavedObjectsClientContract,
-    caseId: string
+    args: FindSubCasesByIDArgs
   ): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
   getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   getSubCase(args: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
+  getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
@@ -149,6 +166,7 @@ export interface CaseServiceSetup {
     caseId: string
   ): Promise<SavedObject<SubCaseAttributes>>;
   patchSubCase(args: PatchSubCase): Promise<SavedObjectsUpdateResponse<SubCaseAttributes>>;
+  patchSubCases(args: PatchSubCases): Promise<SavedObjectsBulkUpdateResponse<SubCaseAttributes>>;
 }
 
 export class CaseService implements CaseServiceSetup {
@@ -249,6 +267,20 @@ export class CaseService implements CaseServiceSetup {
       throw error;
     }
   }
+
+  public async getSubCases({
+    client,
+    ids,
+  }: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>> {
+    try {
+      this.log.debug(`Attempting to GET sub cases ${ids.join(', ')}`);
+      return await client.bulkGet(ids.map((id) => ({ type: CASE_SAVED_OBJECT, id })));
+    } catch (error) {
+      this.log.debug(`Error on GET cases ${ids.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
   public async getCases({
     client,
     caseIds,
@@ -327,28 +359,40 @@ export class CaseService implements CaseServiceSetup {
    * Find sub cases using a collection's ID. This would try to retrieve the maximum amount of sub cases
    * by default.
    *
-   * @param caseId the saved object ID of the parent collection to find sub cases for.
+   * @param id the saved object ID of the parent collection to find sub cases for.
    */
-  public async findSubCasesByCaseId(
-    client: SavedObjectsClientContract,
-    caseId: string
-  ): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
+  public async findSubCasesByCaseId({
+    client,
+    ids,
+    options,
+  }: FindSubCasesByIDArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
     try {
-      this.log.debug(`Attempting to GET sub cases for case collection id ${caseId}`);
+      this.log.debug(`Attempting to GET sub cases for case collection id ${ids.join(', ')}`);
       return this.findSubCases({
         client,
         options: {
-          hasReference: [
-            {
-              type: CASE_SAVED_OBJECT,
-              id: caseId,
-            },
-          ],
+          ...options,
+          hasReference: ids.map((id) => ({
+            type: CASE_SAVED_OBJECT,
+            id,
+          })),
         },
       });
     } catch (error) {
-      this.log.debug(`Error on GET all sub cases for case collection id ${caseId}: ${error}`);
+      this.log.debug(
+        `Error on GET all sub cases for case collection id ${ids.join(', ')}: ${error}`
+      );
       throw error;
+    }
+  }
+
+  private asArray(id: string | string[] | undefined): string[] {
+    if (id === undefined) {
+      return [];
+    } else if (Array.isArray(id)) {
+      return id;
+    } else {
+      return [id];
     }
   }
 
@@ -363,16 +407,19 @@ export class CaseService implements CaseServiceSetup {
     subCaseID,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
-      const ref =
+      const refs =
         subCaseID == null
-          ? { type: CASE_SAVED_OBJECT, id }
-          : { type: SUB_CASE_SAVED_OBJECT, id: subCaseID };
+          ? this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }))
+          : this.asArray(subCaseID).map((idObj) => ({
+              type: SUB_CASE_SAVED_OBJECT,
+              id: idObj,
+            }));
       this.log.debug(`Attempting to GET all comments for case caseID ${id} subCaseID ${subCaseID}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
           hasReferenceOperator: 'OR',
-          hasReference: [ref],
+          hasReference: refs,
           ...options,
         });
       }
@@ -380,7 +427,7 @@ export class CaseService implements CaseServiceSetup {
       const stats = await client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReferenceOperator: 'OR',
-        hasReference: [ref],
+        hasReference: refs,
         fields: [],
         page: 1,
         perPage: 1,
@@ -391,7 +438,7 @@ export class CaseService implements CaseServiceSetup {
       return client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReferenceOperator: 'OR',
-        hasReference: [ref],
+        hasReference: refs,
         page: 1,
         perPage: stats.total,
         ...options,
@@ -526,13 +573,34 @@ export class CaseService implements CaseServiceSetup {
     try {
       this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
       return await client.update(
-        CASE_SAVED_OBJECT,
+        SUB_CASE_SAVED_OBJECT,
         subCaseId,
         { ...updatedAttributes },
         { version }
       );
     } catch (error) {
       this.log.debug(`Error on UPDATE sub case ${subCaseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async patchSubCases({ client, subCases }: PatchSubCases) {
+    try {
+      this.log.debug(
+        `Attempting to UPDATE sub case ${subCases.map((c) => c.subCaseId).join(', ')}`
+      );
+      return await client.bulkUpdate(
+        subCases.map((c) => ({
+          type: SUB_CASE_SAVED_OBJECT,
+          id: c.subCaseId,
+          attributes: c.updatedAttributes,
+          version: c.version,
+        }))
+      );
+    } catch (error) {
+      this.log.debug(
+        `Error on UPDATE sub case ${subCases.map((c) => c.subCaseId).join(', ')}: ${error}`
+      );
       throw error;
     }
   }

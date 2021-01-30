@@ -7,7 +7,11 @@
 import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
-import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+} from 'kibana/server';
 import {
   CaseConnector,
   ESCaseConnector,
@@ -18,11 +22,20 @@ import {
   CaseStatuses,
   CaseType,
   SavedObjectFindOptions,
+  AssociationType,
+  CommentType,
+  SubCaseResponse,
+  SubCaseAttributes,
 } from '../../../../common/api';
 import { ESConnectorFields, ConnectorTypeFields } from '../../../../common/api/connectors';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../saved_object_types';
-import { sortToSnake } from '../utils';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../saved_object_types';
+import { flattenSubCaseSavedObject, sortToSnake } from '../utils';
 import { CaseServiceSetup } from '../../../services';
+import { countAlerts } from '../../../common';
 
 // TODO: write unit tests for these functions
 export const combineFilters = (filters: string[] | undefined, operator: 'OR' | 'AND'): string => {
@@ -82,6 +95,39 @@ export const buildFilter = ({
     arrayFilters.map((filter) => `${type}.attributes.${field}: ${filter}`),
     operator
   );
+};
+
+/**
+ * Calculates the number of sub cases for a given set of options for a set of case IDs.
+ */
+export const findSubCaseStatusStats = async ({
+  client,
+  options,
+  caseService,
+  ids,
+}: {
+  client: SavedObjectsClientContract;
+  options: SavedObjectFindOptions;
+  caseService: CaseServiceSetup;
+  ids: string[];
+}): Promise<number> => {
+  const subCases = await caseService.findSubCases({
+    client,
+    options: {
+      ...options,
+      page: 1,
+      perPage: 1,
+      fields: [],
+      hasReference: ids.map((id) => {
+        return {
+          id,
+          type: SUB_CASE_SAVED_OBJECT,
+        };
+      }),
+    },
+  });
+
+  return subCases.total;
 };
 
 // TODO: move to the service layer
@@ -145,14 +191,133 @@ export const findCaseStatusStats = async ({
     .filter((caseInfo) => caseInfo.attributes.type === CaseType.parent)
     .map((caseInfo) => caseInfo.id);
 
+  let subCasesTotal = 0;
+
+  if (subCaseOptions) {
+    subCasesTotal = await findSubCaseStatusStats({
+      client,
+      options: subCaseOptions,
+      caseService,
+      ids: caseIds,
+    });
+  }
+
+  const total =
+    cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.parent).length +
+    subCasesTotal;
+
+  return total;
+};
+
+interface SubCaseStats {
+  commentTotals: Map<string, number>;
+  alertTotals: Map<string, number>;
+}
+
+export const getCaseCommentStats = async ({
+  client,
+  caseService,
+  ids,
+  type,
+}: {
+  client: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  ids: string[];
+  type: typeof SUB_CASE_SAVED_OBJECT | typeof CASE_SAVED_OBJECT;
+}): Promise<SubCaseStats> => {
+  const allComments = await Promise.all(
+    ids.map((id) =>
+      caseService.getAllCaseComments({
+        client,
+        id,
+        subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
+        options: {
+          fields: [],
+          page: 1,
+          perPage: 1,
+        },
+      })
+    )
+  );
+
+  const associationType =
+    type === SUB_CASE_SAVED_OBJECT ? AssociationType.subCase : AssociationType.case;
+
+  const alerts = await caseService.getAllCaseComments({
+    client,
+    id: ids,
+    subCaseID: type === SUB_CASE_SAVED_OBJECT ? ids : undefined,
+    options: {
+      filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}) AND ${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${associationType}`,
+    },
+  });
+
+  const getID = (comments: SavedObjectsFindResponse<unknown>) => {
+    return comments.saved_objects.length > 0
+      ? comments.saved_objects[0].references.find((ref) => ref.type === type)?.id
+      : undefined;
+  };
+
+  const groupedComments = allComments.reduce((acc, comments) => {
+    const id = getID(comments);
+    if (id) {
+      acc.set(id, comments.total);
+    }
+    return acc;
+  }, new Map<string, number>());
+
+  const getFindResultID = (comment: SavedObjectsFindResult<unknown>) => {
+    const refs = comment.references;
+    return refs.length > 0 ? refs.find((ref) => ref.type === type)?.id : undefined;
+  };
+
+  const groupedAlerts = alerts.saved_objects.reduce((acc, alertsInfo) => {
+    const id = getFindResultID(alertsInfo);
+    if (id) {
+      const totalAlerts = acc.get(id);
+      if (totalAlerts !== undefined) {
+        acc.set(id, totalAlerts + countAlerts(alertsInfo));
+      }
+      acc.set(id, countAlerts(alertsInfo));
+    }
+    return acc;
+  }, new Map<string, number>());
+  return { commentTotals: groupedComments, alertTotals: groupedAlerts };
+};
+
+interface SubCasesMapWithPageInfo {
+  subCasesMap: Map<string, SubCaseResponse[]>;
+  page: number;
+  perPage: number;
+}
+
+/**
+ * Returns all the sub cases for a set of case IDs. Comment statistics are also returned.
+ */
+export const findSubCases = async ({
+  client,
+  options,
+  caseService,
+  ids,
+}: {
+  client: SavedObjectsClientContract;
+  options?: SavedObjectFindOptions;
+  caseService: CaseServiceSetup;
+  ids: string[];
+}): Promise<SubCasesMapWithPageInfo> => {
+  const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {
+    return subCase.references.length > 0 ? subCase.references[0].id : undefined;
+  };
+
+  if (!options) {
+    return { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
+  }
+
   const subCases = await caseService.findSubCases({
     client,
     options: {
-      ...subCaseOptions,
-      page: 1,
-      perPage: 1,
-      fields: [],
-      hasReference: caseIds.map((id) => {
+      ...options,
+      hasReference: ids.map((id) => {
         return {
           id,
           type: SUB_CASE_SAVED_OBJECT,
@@ -161,11 +326,41 @@ export const findCaseStatusStats = async ({
     },
   });
 
-  const total =
-    cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.parent).length +
-    subCases.total;
+  const subCaseComments = await getCaseCommentStats({
+    client,
+    caseService,
+    ids: subCases.saved_objects.map((subCase) => subCase.id),
+    type: SUB_CASE_SAVED_OBJECT,
+  });
 
-  return total;
+  const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {
+    const id = getCaseID(subCase);
+    if (id) {
+      const subCaseFromMap = accMap.get(id);
+
+      if (subCaseFromMap === undefined) {
+        const subCasesForID = [
+          flattenSubCaseSavedObject({
+            savedObject: subCase,
+            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+          }),
+        ];
+        accMap.set(id, subCasesForID);
+      } else {
+        subCaseFromMap.push(
+          flattenSubCaseSavedObject({
+            savedObject: subCase,
+            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+          })
+        );
+      }
+    }
+    return accMap;
+  }, new Map<string, SubCaseResponse[]>());
+
+  return { subCasesMap, page: subCases.page, perPage: subCases.per_page };
 };
 
 /**
@@ -329,10 +524,14 @@ export const isTwoArraysDifference = (
   return null;
 };
 
-export const getCaseToUpdate = (
-  currentCase: ESCaseAttributes,
-  queryCase: ESCasePatchRequest
-): ESCasePatchRequest =>
+// TODO: rename
+interface Versioned {
+  id: string;
+  version: string;
+  [key: string]: unknown;
+}
+
+export const getCaseToUpdate = (currentCase: unknown, queryCase: Versioned): Versioned =>
   Object.entries(queryCase).reduce(
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);

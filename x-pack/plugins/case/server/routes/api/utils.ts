@@ -40,6 +40,8 @@ import {
   CommentRequestGeneratedAlertType,
   ContextTypeGeneratedAlertRt,
   CollectionWithSubCaseResponse,
+  SubCasesFindResponse,
+  AttributesTypeAlerts,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -197,6 +199,33 @@ export const transformCases = ({
   count_closed_cases: countClosedCases,
 });
 
+export const transformSubCases = ({
+  subCasesMap,
+  open,
+  inProgress,
+  closed,
+  page,
+  perPage,
+  total,
+}: {
+  subCasesMap: Map<string, SubCaseResponse[]>;
+  open: number;
+  inProgress: number;
+  closed: number;
+  page: number;
+  perPage: number;
+  total: number;
+}): SubCasesFindResponse => ({
+  page,
+  per_page: perPage,
+  total,
+  // Squish all the entries in the map together as one array
+  subCases: Array.from(subCasesMap.values()).flat(),
+  count_open_cases: open,
+  count_in_progress_cases: inProgress,
+  count_closed_cases: closed,
+});
+
 // TODO: remove because it is no longer used
 export const flattenCaseSavedObjects = (
   savedObjects: Array<SavedObject<ESCaseAttributes>>,
@@ -319,6 +348,15 @@ export const isGeneratedAlertContext = (
   context: CommentRequest
 ): context is CommentRequestGeneratedAlertType => {
   return context.type === CommentType.generatedAlert;
+};
+
+export const isAlertCommentSO = (
+  comment: SavedObject<CommentAttributes>
+): comment is SavedObject<AttributesTypeAlerts> => {
+  return (
+    comment.attributes.type === CommentType.generatedAlert ||
+    comment.attributes.type === CommentType.alert
+  );
 };
 
 export const decodeComment = (comment: CommentRequest) => {

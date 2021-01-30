@@ -55,7 +55,7 @@ export const SubCaseResponseRt = rt.intersection([
 
 export const SubCasesFindResponseRt = rt.intersection([
   rt.type({
-    cases: rt.array(SubCaseResponseRt),
+    subCases: rt.array(SubCaseResponseRt),
     page: rt.number,
     per_page: rt.number,
     total: rt.number,
@@ -68,10 +68,8 @@ export const SubCasePatchRequestRt = rt.intersection([
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
-export const SubCasesPatchRequestRt = rt.type({ cases: rt.array(SubCasePatchRequestRt) });
+export const SubCasesPatchRequestRt = rt.type({ subCases: rt.array(SubCasePatchRequestRt) });
 export const SubCasesResponseRt = rt.array(SubCaseResponseRt);
-
-// TODO: extract these to their own file and rename the types
 
 export type SubCaseAttributes = rt.TypeOf<typeof SubCaseAttributesRt>;
 export type SubCaseResponse = rt.TypeOf<typeof SubCaseResponseRt>;

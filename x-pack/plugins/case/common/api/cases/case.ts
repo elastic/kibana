@@ -80,8 +80,8 @@ export const CasePostRequestRt = rt.type({
 });
 
 export const CaseClientPostRequestRt = rt.type({
-  type: CaseTypeRt,
   ...CasePostRequestRt.props,
+  type: CaseTypeRt,
 });
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;

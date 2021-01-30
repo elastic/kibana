@@ -32,6 +32,8 @@ import { initPostPushToService } from './cases/configure/post_push_to_service';
 
 import { RouteDeps } from './types';
 import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
+import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
+import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -45,7 +47,8 @@ export function initCaseApi(deps: RouteDeps) {
   initConvertCaseToCollectionApi(deps);
   // Sub cases
   initGetSubCaseApi(deps);
-
+  initPatchSubCasesApi(deps);
+  initFindSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

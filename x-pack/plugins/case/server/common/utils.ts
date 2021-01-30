@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
 import { CommentAttributes, CommentType } from '../../common/api';
 
-export const countAlerts = (comments: SavedObjectsFindResponse<CommentAttributes>) => {
+export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;
-  for (const comment of comments.saved_objects) {
-    if (
-      comment.attributes.type === CommentType.alert ||
-      comment.attributes.type === CommentType.generatedAlert
-    ) {
-      if (Array.isArray(comment.attributes.alertId)) {
-        totalAlerts += comment.attributes.alertId.length;
-      } else {
-        totalAlerts++;
-      }
+  if (
+    comment.attributes.type === CommentType.alert ||
+    comment.attributes.type === CommentType.generatedAlert
+  ) {
+    if (Array.isArray(comment.attributes.alertId)) {
+      totalAlerts += comment.attributes.alertId.length;
+    } else {
+      totalAlerts++;
     }
   }
   return totalAlerts;
+};
+
+export const countAlertsFindResponse = (comments: SavedObjectsFindResponse<CommentAttributes>) => {
+  return comments.saved_objects.reduce((total, comment) => {
+    total += countAlerts(comment);
+    return total;
+  }, 0);
 };
