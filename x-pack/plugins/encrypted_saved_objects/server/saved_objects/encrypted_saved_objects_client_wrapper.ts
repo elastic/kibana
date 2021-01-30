@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from '@hapi/boom';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -323,7 +324,7 @@ function getValidId(
     // and not being used to get around the specified ID limitation
     const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
     if (!canSpecifyID) {
-      throw new Error(
+      throw Boom.badRequest(
         'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
       );
     }
