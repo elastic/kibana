@@ -9,11 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorSchemas, colorSchemas, ColorMode } from '../../charts/public';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 import { AggGroupNames } from '../../data/public';
 import { toExpressionAst } from './to_ast';
+import { VisParams } from './types';
 
-export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
+export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
@@ -110,4 +111,5 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
       },
     ],
   },
+  requiresSearch: true,
 });
