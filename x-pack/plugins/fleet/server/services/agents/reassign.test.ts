@@ -51,7 +51,12 @@ describe('reassignAgent (singular)', () => {
     const soClient = createClientMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     await expect(
-      reassignAgent(soClient, esClient, agentInUnmanagedSO.id, agentInManagedSO.id)
+      reassignAgent(
+        soClient,
+        esClient,
+        agentInUnmanagedSO.id,
+        agentInManagedSO.attributes.policy_id!
+      )
     ).rejects.toThrow('to managed');
 
     // does not call ES update
