@@ -60,7 +60,7 @@ describe('GET connectors', () => {
       })
     );
 
-    const actionsClient = context.actions.getActionsClient();
+    const actionsClient = context.actions!.getActionsClient();
     (actionsClient.listTypes as jest.Mock).mockImplementation(() =>
       Promise.resolve([
         {
