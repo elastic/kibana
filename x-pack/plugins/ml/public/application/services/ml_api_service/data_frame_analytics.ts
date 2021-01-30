@@ -45,6 +45,11 @@ interface DeleteDataFrameAnalyticsWithIndexResponse {
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
+interface JobsExistsResponse {
+  results: {
+    [jobId: string]: boolean;
+  };
+}
 
 export const dataFrameAnalytics = {
   getDataFrameAnalytics(analyticsId?: string) {
@@ -96,6 +101,14 @@ export const dataFrameAnalytics = {
       path: `${basePath()}/data_frame/analytics/map${idString}`,
       method: 'GET',
       query: { treatAsRoot, type },
+    });
+  },
+  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ analyticsIds, allSpaces });
+    return http<JobsExistsResponse>({
+      path: `${basePath()}/data_frame/analytics/jobs_exist`,
+      method: 'POST',
+      body,
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
