@@ -22,8 +22,3 @@ export const deserializeField = (field?: IndexPatternField): Field | undefined =
     format: undefined, // TODO: set correct value
   };
 };
-
-export const serializeField = (field: Field): IndexPatternField => {
-  // TODO: Put here the logic to serialize a field to the index pattern field
-  return {} as any;
-};

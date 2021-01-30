@@ -297,7 +297,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
     ];
 
     return (
-      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={{ sort: { field: 'displayName', direction: 'asc' } }}
+      />
     );
   }
 }

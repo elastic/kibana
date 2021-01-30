@@ -9,9 +9,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
-import { IndexPatternField, IndexPattern, DataPublicPluginStart } from '../shared_imports';
+import {
+  IndexPatternField,
+  IndexPattern,
+  DataPublicPluginStart,
+  RuntimeType,
+} from '../shared_imports';
 import { Field } from '../types';
-import { deserializeField, serializeField } from '../lib';
+import { deserializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
@@ -66,12 +71,33 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const saveField = useCallback(
     async (updatedField: Field) => {
-      const indexPatternField = serializeField(updatedField);
+      const script = updatedField.script?.source
+        ? { source: updatedField.script?.source }
+        : undefined;
+
+      if (script) {
+        indexPattern.addRuntimeField(updatedField.name, {
+          type: updatedField.type as RuntimeType,
+          // script editor needs to return script object
+          script,
+        });
+      }
+
+      const editedField = field || indexPattern.getFieldByName(updatedField.name);
+
+      if (!editedField) {
+        // todo display error
+        throw new Error(`Unable to find field named '${updatedField.name}'`);
+      }
+
+      editedField.customLabel = updatedField.customLabel;
+      editedField.count = updatedField.popularity || 0;
+
       indexPatternService.updateSavedObject(indexPattern).then(() => {
-        onSave(indexPatternField);
+        onSave(editedField);
       });
     },
-    [onSave, indexPattern, indexPatternService]
+    [onSave, indexPattern, indexPatternService, field]
   );
 
   const loadEditor = useCallback(async () => {

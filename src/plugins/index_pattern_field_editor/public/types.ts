@@ -33,8 +33,9 @@ export interface StartPlugins {
 export interface Field {
   name: string;
   type: RuntimeType | string;
+  // todo import
   script?: {
-    source: string;
+    source?: string;
   };
   customLabel?: string;
   popularity?: number;
