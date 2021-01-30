@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
@@ -88,10 +88,9 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean, esDocBasePath: string) => (
   ),
 });
 
-export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps> = ({
+export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
   checkupData,
   setSelectedTabIndex,
-  intl,
 }) => {
   const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
   const countByType = Object.keys(checkupDataTyped).reduce((counts, checkupType) => {
@@ -114,15 +113,18 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
       steps={[
         {
           title: countByType.cluster
-            ? intl.formatMessage({
-                id: 'xpack.upgradeAssistant.overviewTab.steps.clusterStep.issuesRemainingStepTitle',
-                defaultMessage: 'Check for issues with your cluster',
-              })
-            : intl.formatMessage({
-                id:
-                  'xpack.upgradeAssistant.overviewTab.steps.clusterStep.noIssuesRemainingStepTitle',
-                defaultMessage: 'Your cluster settings are ready',
-              }),
+            ? i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.clusterStep.issuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Check for issues with your cluster',
+                }
+              )
+            : i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.clusterStep.noIssuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Your cluster settings are ready',
+                }
+              ),
           status: countByType.cluster ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -169,15 +171,18 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
         },
         {
           title: countByType.indices
-            ? intl.formatMessage({
-                id: 'xpack.upgradeAssistant.overviewTab.steps.indicesStep.issuesRemainingStepTitle',
-                defaultMessage: 'Check for issues with your indices',
-              })
-            : intl.formatMessage({
-                id:
-                  'xpack.upgradeAssistant.overviewTab.steps.indicesStep.noIssuesRemainingStepTitle',
-                defaultMessage: 'Your index settings are ready',
-              }),
+            ? i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.indicesStep.issuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Check for issues with your indices',
+                }
+              )
+            : i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.indicesStep.noIssuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Your index settings are ready',
+                }
+              ),
           status: countByType.indices ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -223,10 +228,12 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
           ),
         },
         {
-          title: intl.formatMessage({
-            id: 'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.stepTitle',
-            defaultMessage: 'Review the Elasticsearch deprecation logs',
-          }),
+          title: i18n.translate(
+            'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.stepTitle',
+            {
+              defaultMessage: 'Review the Elasticsearch deprecation logs',
+            }
+          ),
           children: (
             <Fragment>
               <EuiText grow={false}>
@@ -257,11 +264,12 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
               <EuiSpacer />
 
               <EuiFormRow
-                label={intl.formatMessage({
-                  id:
-                    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
-                  defaultMessage: 'Enable deprecation logging?',
-                })}
+                label={i18n.translate(
+                  'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
+                  {
+                    defaultMessage: 'Enable deprecation logging?',
+                  }
+                )}
                 describedByIds={['deprecation-logging']}
               >
                 <DeprecationLoggingToggle http={http} />
@@ -277,5 +285,3 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
     />
   );
 };
-
-export const Steps = injectI18n(StepsUI);
