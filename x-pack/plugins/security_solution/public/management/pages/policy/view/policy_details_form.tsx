@@ -12,6 +12,7 @@ import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
 import { Ransomware } from './policy_forms/protections/ransomware';
+import { LockedPolicyCard } from './policy_forms/locked_card';
 import { useLicense } from '../../../../common/hooks/use_license';
 
 export const PolicyDetailsForm = memo(() => {
@@ -36,6 +37,8 @@ export const PolicyDetailsForm = memo(() => {
       <MalwareProtections />
       <EuiSpacer size="m" />
       {isPlatinumPlus && <Ransomware />}
+      <EuiSpacer size="m" />
+      <LockedPolicyCard />
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">
