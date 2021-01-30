@@ -26,10 +26,10 @@ describe('EmptyEngineOverview', () => {
 
   it('renders a documentation link', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(`${docLinks.appSearchBase}/index.html`);
+  });
 
-    it('contains FlashMessages', () => {
-      expect(wrapper.find(FlashMessages)).toHaveLength(1);
-    });
+  it('contains FlashMessages', () => {
+    expect(wrapper.find(FlashMessages)).toHaveLength(1);
   });
 
   it('renders document creation components', () => {
