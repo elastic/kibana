@@ -48,6 +48,7 @@ export interface AgentService {
    */
   authenticateAgentWithAccessToken(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
