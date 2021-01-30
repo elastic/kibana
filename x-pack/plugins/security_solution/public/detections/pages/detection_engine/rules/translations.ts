@@ -353,7 +353,7 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
 export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
-    defaultMessage: 'Gap (if any)',
+    defaultMessage: 'Last Gap (if any)',
   }
 );
 
