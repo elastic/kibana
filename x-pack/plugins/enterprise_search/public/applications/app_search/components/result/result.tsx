@@ -139,7 +139,7 @@ export const Result: React.FC<Props> = ({
                 { defaultMessage: 'Visit document details' }
               )}
             >
-              <EuiIcon type="popout" />
+              <EuiIcon type="eye" />
             </a>
           </ReactRouterHelper>
         )}
