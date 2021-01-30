@@ -5,7 +5,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { newThreatIndicatorRule } from '../../objects/rule';
+import { indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -24,7 +24,6 @@ import {
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
-import { DEFAULT_INDEX } from '../../screens/create_new_rule';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -127,7 +126,7 @@ describe('Detection rules, Indicator Match', () => {
   describe('Creating new indicator match rules', () => {
     describe('Index patterns', () => {
       it('Contains a predefined index pattern', () => {
-        getIndicatorIndex().should('have.text', DEFAULT_INDEX.join(''));
+        getIndicatorIndex().should('have.text', indexPatterns.join(''));
       });
 
       it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {

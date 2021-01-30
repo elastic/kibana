@@ -99,7 +99,7 @@ export const getEntryOnFieldChange = (
       field: newField != null ? newField.name : '',
       type: 'mapping',
       value: item.value != null ? item.value.name : '',
-    } as Entry, // Cast to Entry on purpose to be able to add the id for ReactJS rendering purposes.
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };
@@ -122,7 +122,7 @@ export const getEntryOnThreatFieldChange = (
       field: item.field != null ? item.field.name : '',
       type: 'mapping',
       value: newField != null ? newField.name : '',
-    } as Entry, // Cast to Entry on purpose to be able to add the id for ReactJS rendering purposes.
+    } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
 };

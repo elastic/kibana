@@ -261,14 +261,14 @@ describe('Helpers', () => {
       const payloadItem = getMockEntry();
       const payloadIFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: Entry; index: number } = {
+      const expected: { updatedEntry: Entry & { id: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
           field: 'ip',
           type: 'mapping',
           value: 'ip',
-        } as Entry,
+        },
       };
       expect(output).toEqual(expected);
     });
