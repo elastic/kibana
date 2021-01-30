@@ -6,7 +6,7 @@
 
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
-import { getProxyAgents } from './get_proxy_agents';
+import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const request = async <T = unknown>({
@@ -29,7 +29,7 @@ export const request = async <T = unknown>({
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, logger);
+  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
 
   return await axios(url, {
     ...rest,

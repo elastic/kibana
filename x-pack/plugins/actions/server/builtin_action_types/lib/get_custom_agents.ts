@@ -11,17 +11,17 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 
-interface GetProxyAgentsResponse {
+interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
   httpsAgent: HttpsAgent | undefined;
 }
 
-export function getProxyAgents(
+export function getCustomAgents(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger
-): GetProxyAgentsResponse {
+): GetCustomAgentsResponse {
   const proxySettings = configurationUtilities.getProxySettings();
-  const defaultResponse = {
+  const defaultAgents = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({
       rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
@@ -29,7 +29,7 @@ export function getProxyAgents(
   };
 
   if (!proxySettings) {
-    return defaultResponse;
+    return defaultAgents;
   }
 
   logger.debug(`Creating proxy agents for proxy: ${proxySettings.proxyUrl}`);
@@ -38,7 +38,7 @@ export function getProxyAgents(
     proxyUrl = new URL(proxySettings.proxyUrl);
   } catch (err) {
     logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored`);
-    return defaultResponse;
+    return defaultAgents;
   }
 
   const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
