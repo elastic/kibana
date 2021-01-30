@@ -121,14 +121,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        field: 'last_activity',
+        field: 'last_activity_ms',
         sortable: true,
         width: '25%',
         dataType: 'date',
         name: i18n.translate('xpack.fleet.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
         }),
-        render: (date: DataStream['last_activity']) => {
+        render: (date: DataStream['last_activity_ms']) => {
           try {
             const formatter = fieldFormats.getInstance('date');
             return formatter.convert(date);

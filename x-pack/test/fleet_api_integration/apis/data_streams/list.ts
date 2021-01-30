@@ -109,7 +109,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'logs',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity: '2015-01-01T00:00:00.000Z',
+            last_activity_ms: 1420070400000,
             dashboards: [],
           },
           {
@@ -118,7 +118,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'metrics',
             package: 'datastreams',
             package_version: '0.1.0',
-            last_activity: '2015-01-01T00:00:00.000Z',
+            last_activity_ms: 1420070400000,
             dashboards: [],
           },
         ]);
