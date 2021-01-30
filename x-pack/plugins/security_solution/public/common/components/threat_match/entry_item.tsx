@@ -75,7 +75,11 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="entryItemFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   }, [handleFieldChange, indexPattern, entry, showLabel]);
 
@@ -101,7 +105,11 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         </EuiFormRow>
       );
     } else {
-      return comboBox;
+      return (
+        <EuiFormRow label={''} data-test-subj="threatFieldInputFormRow">
+          {comboBox}
+        </EuiFormRow>
+      );
     }
   }, [handleThreatFieldChange, threatIndexPatterns, entry, showLabel]);
 
