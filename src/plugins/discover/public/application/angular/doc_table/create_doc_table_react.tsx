@@ -68,7 +68,7 @@ function getRenderFn(domNode: Element, props: any) {
                 columns="renderProps.columns"
                 data-description="{{renderProps.searchDescription}}"
                 data-shared-item
-                data-test-subj="renderProps.discoverDocTable"
+                data-test-subj="discoverDocTable"
                 data-title="{{renderProps.searchTitle}}"
                 filter="renderProps.onFilter"
                 hits="renderProps.rows"
