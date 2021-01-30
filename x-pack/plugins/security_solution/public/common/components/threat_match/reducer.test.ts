@@ -9,6 +9,10 @@ import { State, reducer } from './reducer';
 import { getDefaultEmptyEntry } from './helpers';
 import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
+
 const initialState: State = {
   andLogicIncluded: false,
   entries: [],
@@ -22,6 +26,10 @@ const getEntry = (): ThreatMapEntry => ({
 });
 
 describe('reducer', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('#setEntries', () => {
     test('should return "andLogicIncluded" ', () => {
       const update = reducer()(initialState, {
