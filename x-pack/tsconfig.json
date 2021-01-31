@@ -41,11 +41,8 @@
     "plugins/saved_objects_tagging/**/*",
     "plugins/global_search_bar/**/*",
     "plugins/license_management/**/*",
-<<<<<<< HEAD
     "plugins/snapshot_restore/**/*",
-=======
     "plugins/painless_lab/**/*",
->>>>>>> master
     "plugins/watcher/**/*",
     "test/**/*"
   ],
