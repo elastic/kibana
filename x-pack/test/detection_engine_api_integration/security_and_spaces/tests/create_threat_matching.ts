@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('tests with auditbeat data', () => {
+    describe.only('tests with auditbeat data', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
@@ -250,6 +250,58 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
+      });
+
+      describe.only('indicator enrichment', () => {
+        beforeEach(async () => {
+          await esArchiver.load('filebeat/threat_intel');
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload('filebeat/threat_intel');
+        });
+
+        it('enriches signals with the single indicator that matched', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_query: 'threat.indicator.domain: *', // narrow things down to indicators with a domain
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.domain',
+                    field: 'destination.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(2);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat);
+          expect(threats).to.eql([{}, {}]);
+        });
+
+        it('enriches signals with multiple indicators if several matched');
+        it('enriches signals with all fields that the indicator matched');
       });
     });
   });
