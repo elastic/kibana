@@ -87,6 +87,10 @@ export class FormatSelectEditor extends PureComponent<
       fieldAttrs: { name, type, esTypes },
     } = props;
 
+    /* todo we're getting this twice, once at the form level. I'm not sure if we need to. */
+    /* also to do - dealing with kbn type and es type */
+    /* changing type should change formatter options */
+    /* also, just review work so far */
     const format = indexPattern.getFormatterForField({
       name,
       type,

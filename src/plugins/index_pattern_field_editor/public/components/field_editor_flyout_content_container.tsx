@@ -78,7 +78,7 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
-  const fieldToEdit = deserializeField(field);
+  const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
   const saveField = useCallback(

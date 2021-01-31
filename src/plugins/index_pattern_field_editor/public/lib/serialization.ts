@@ -5,10 +5,13 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import { IndexPatternField } from '../shared_imports';
+import { IndexPatternField, IndexPattern } from '../shared_imports';
 import { Field } from '../types';
 
-export const deserializeField = (field?: IndexPatternField): Field | undefined => {
+export const deserializeField = (
+  indexPattern: IndexPattern,
+  field?: IndexPatternField
+): Field | undefined => {
   if (field === undefined) {
     return field;
   }
@@ -19,6 +22,6 @@ export const deserializeField = (field?: IndexPatternField): Field | undefined =
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
-    format: undefined, // TODO: set correct value
+    format: indexPattern.getFormatterForFieldNoDefault(field.name),
   };
 };
