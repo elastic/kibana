@@ -1,6 +1,9 @@
 .kbnQueryBar__wrap {
   max-width: 100%;
   z-index: $euiZContentMenu;
+  @include kbnThemeStyle('v8') {
+    padding: 0;
+  }
 }
 
 // Uses the append style, but no bordering
@@ -16,6 +19,15 @@
 }
 
 .kbnQueryBar__textarea {
+  @include kbnThemeStyle('v7') {
+    box-shadow: 0 0 0 1px $euiFormBorderColor;
+    &:not(:focus):not(:invalid) {
+      @include euiYScrollWithShadows;
+    }
+  }
+  @include kbnThemeStyle('v8') {
+    border-radius: 0;
+  }
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
   height: $euiFormControlHeight;
@@ -24,11 +36,6 @@
   // shadow to line up correctly.
   padding: $euiSizeS;
   padding-top: $euiSizeS + 3px;
-  box-shadow: 0 0 0 1px $euiFormBorderColor;
-
-  &:not(:focus):not(:invalid) {
-    @include euiYScrollWithShadows;
-  }
 
   &:not(:focus) {
     white-space: nowrap;
@@ -41,7 +48,9 @@
     overflow-x: auto;
     overflow-y: auto;
     white-space: normal;
-    box-shadow: 0 0 0 1px $euiFormBorderColor;
+    @include kbnThemeStyle('v7') {
+      box-shadow: 0 0 0 1px $euiFormBorderColor;
+    }
   }
 
   @include euiFormControlWithIcon($isIconOptional: true);
