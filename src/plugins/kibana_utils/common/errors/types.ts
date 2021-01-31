@@ -5,13 +5,8 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('search', () => {
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./bsearch'));
-    loadTestFile(require.resolve('./msearch'));
-  });
+export interface KibanaServerError<T = unknown> {
+  statusCode: number;
+  message: string;
+  attributes?: T;
 }
