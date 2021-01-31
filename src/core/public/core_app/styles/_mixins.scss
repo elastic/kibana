@@ -112,3 +112,23 @@
     }
   }
 }
+
+@mixin kbnThemeStyle($theme, $type: 'both') {
+  @if ($type == 'both') {
+    $themeLight: $theme + 'light';
+    $themeDark: $theme + 'dark';
+    @if ($kbnThemeVersion == $themeLight or $kbnThemeVersion == $themeDark) {
+      @content;
+    }
+  } @else if ($type == 'light') {
+    $themeLight: $theme + 'light';
+    @if ($kbnThemeVersion == $themeLight) {
+      @content;
+    }
+  } @else if ($type == 'dark') {
+    $themeDark: $theme + 'dark';
+    @if ($kbnThemeVersion == $themeDark) {
+      @content;
+    }
+  }
+}

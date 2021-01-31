@@ -1,11 +1,6 @@
 .kbnQueryBar__wrap {
   max-width: 100%;
   z-index: $euiZContentMenu;
-  @if ($kbnThemeVersion == 'v7light') {
-    background-color: purple;
-  } @else  if ($kbnThemeVersion == 'v8light') {
-    background-color: pink;
-  }
 }
 
 // Uses the append style, but no bordering
