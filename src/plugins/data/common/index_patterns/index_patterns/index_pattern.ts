@@ -337,7 +337,15 @@ export class IndexPattern implements IIndexPattern {
    * @param field
    */
   getFormatterForField(
-    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+    field:
+      | {
+          name: string;
+          type: KBN_FIELD_TYPES;
+          esTypes: ES_FIELD_TYPES[];
+        }
+      | IndexPatternField
+      | IndexPatternField['spec']
+      | IFieldType
   ): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {

@@ -33,7 +33,12 @@ export class IndexPatternFieldEditorPlugin
 
     return {
       fieldFormatEditors,
-      openEditor: getFieldEditorOpener(core, data.indexPatterns),
+      openEditor: getFieldEditorOpener(
+        core,
+        data.indexPatterns,
+        data.fieldFormats,
+        fieldFormatEditors
+      ),
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;

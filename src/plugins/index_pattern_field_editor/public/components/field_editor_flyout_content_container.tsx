@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { DocLinksStart, NotificationsStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,7 +16,7 @@ import {
   DataPublicPluginStart,
   RuntimeType,
 } from '../shared_imports';
-import { Field } from '../types';
+import { Field, PluginStart } from '../types';
 import { deserializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
@@ -54,6 +54,9 @@ export interface Props {
    * Notification service
    */
   notifications: NotificationsStart;
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
@@ -71,6 +74,9 @@ export const FieldEditorFlyoutContentContainer = ({
   indexPatternService,
   ctx: { indexPattern },
   notifications,
+  fieldFormatEditors,
+  fieldFormats,
+  uiSettings,
 }: Props) => {
   const fieldToEdit = deserializeField(field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
@@ -99,6 +105,11 @@ export const FieldEditorFlyoutContentContainer = ({
 
         editedField.customLabel = updatedField.customLabel;
         editedField.count = updatedField.popularity || 0;
+        if (updatedField.format) {
+          indexPattern.setFieldFormat(updatedField.name, updatedField.format);
+        } else {
+          indexPattern.deleteFieldFormat(updatedField.name);
+        }
 
         indexPatternService.updateSavedObject(indexPattern).then(() => {
           onSave(editedField);
@@ -131,6 +142,10 @@ export const FieldEditorFlyoutContentContainer = ({
       docLinks={docLinks}
       field={fieldToEdit}
       FieldEditor={Editor}
+      fieldFormatEditors={fieldFormatEditors}
+      fieldFormats={fieldFormats}
+      uiSettings={uiSettings}
+      indexPattern={indexPattern}
     />
   );
 };

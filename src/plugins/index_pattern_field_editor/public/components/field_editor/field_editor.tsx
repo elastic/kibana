@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { CoreStart } from 'src/core/public';
 
 import {
   Form,
@@ -17,8 +18,12 @@ import {
   TextField,
   useFormData,
   RuntimeType,
+  IndexPattern,
+  DataPublicPluginStart,
+  KBN_FIELD_TYPES,
+  ES_FIELD_TYPES,
 } from '../../shared_imports';
-import { Field } from '../../types';
+import { Field, PluginStart } from '../../types';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
@@ -59,6 +64,10 @@ export interface Props {
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
+  indexPattern: IndexPattern;
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  uiSettings: CoreStart['uiSettings'];
   /** Optional context object */
   ctx?: {
     /**
@@ -145,6 +154,10 @@ const FieldEditorComponent = ({
   field,
   onChange,
   links,
+  indexPattern,
+  fieldFormatEditors,
+  fieldFormats,
+  uiSettings,
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
   const { form } = useForm<Field, FieldFormInternal>({
@@ -228,7 +241,21 @@ const FieldEditorComponent = ({
         formFieldPath="__meta__.isFormatVisible"
         withDividerRule
       >
-        <FormatField />
+        {/** TODO types, onChange, onError */}
+        {/** is type es or kbn? */}
+        <FormatField
+          fieldAttrs={{
+            name,
+            type: 'string' as KBN_FIELD_TYPES,
+            esTypes: ['keyword'] as ES_FIELD_TYPES[],
+          }}
+          indexPattern={indexPattern}
+          fieldFormatEditors={fieldFormatEditors}
+          fieldFormats={fieldFormats}
+          uiSettings={uiSettings}
+          onChange={() => {}}
+          onError={() => {}}
+        />
       </FormRow>
 
       {/* Advanced settings */}

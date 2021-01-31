@@ -21,11 +21,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart, CoreStart } from 'src/core/public';
 
-import { Field } from '../types';
+import { Field, PluginStart } from '../types';
 import { getLinks } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
+import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 
 const geti18nTexts = (field?: Field) => {
   return {
@@ -72,6 +73,11 @@ export interface Props {
    * Optional field to edit
    */
   field?: Field;
+
+  indexPattern: IndexPattern;
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 const FieldEditorFlyoutContentComponent = ({
@@ -80,6 +86,10 @@ const FieldEditorFlyoutContentComponent = ({
   onCancel,
   FieldEditor,
   docLinks,
+  indexPattern,
+  fieldFormatEditors,
+  fieldFormats,
+  uiSettings,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
@@ -110,7 +120,15 @@ const FieldEditorFlyoutContentComponent = ({
 
       <EuiFlyoutBody>
         {FieldEditor && (
-          <FieldEditor links={getLinks(docLinks)} field={field} onChange={setFormState} />
+          <FieldEditor
+            indexPattern={indexPattern}
+            fieldFormatEditors={fieldFormatEditors}
+            fieldFormats={fieldFormats}
+            uiSettings={uiSettings}
+            links={getLinks(docLinks)}
+            field={field}
+            onChange={setFormState}
+          />
         )}
       </EuiFlyoutBody>
 

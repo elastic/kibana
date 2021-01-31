@@ -21,6 +21,8 @@ import {
   Props as FieldEditorFlyoutContentContainerProps,
 } from './components/field_editor_flyout_content_container';
 
+import { PluginStart } from './types';
+
 export interface OpenFieldEditorOptions {
   ctx: FieldEditorFlyoutContentContainerProps['ctx'];
   onSave?: (field: IndexPatternField) => void;
@@ -31,7 +33,9 @@ type CloseEditor = () => void;
 
 export const getFieldEditorOpener = (
   coreStart: CoreStart,
-  indexPatternService: DataPublicPluginStart['indexPatterns']
+  indexPatternService: DataPublicPluginStart['indexPatterns'],
+  fieldFormats: DataPublicPluginStart['fieldFormats'],
+  fieldFormatEditors: PluginStart['fieldFormatEditors']
 ) => (options: OpenFieldEditorOptions): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
@@ -81,6 +85,9 @@ export const getFieldEditorOpener = (
             ctx={ctx}
             indexPatternService={indexPatternService}
             notifications={notifications}
+            fieldFormatEditors={fieldFormatEditors}
+            fieldFormats={fieldFormats}
+            uiSettings={uiSettings}
           />
         </KibanaReactContextProvider>
       )
