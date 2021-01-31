@@ -10,7 +10,7 @@ import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
 import { CanvasPage } from '../../../types';
 
-interface Props {
+export interface Props {
   isWriteable: boolean;
   page: Pick<CanvasPage, 'id' | 'style'>;
   height: number;
