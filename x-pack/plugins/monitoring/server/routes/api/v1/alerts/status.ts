@@ -33,7 +33,7 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
       try {
         const { clusterUuid } = request.params;
         const { alertTypeIds, filters } = request.body;
-        const alertsClient = context.alerting?.getAlertsClient();
+        const alertsClient = await context.alerting?.getAlertsClient();
         if (!alertsClient) {
           return response.ok({ body: undefined });
         }

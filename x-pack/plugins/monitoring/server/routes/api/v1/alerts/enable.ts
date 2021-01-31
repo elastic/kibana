@@ -42,7 +42,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           }
         }
 
-        const alertsClient = context.alerting?.getAlertsClient();
+        const alertsClient = await context.alerting?.getAlertsClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
         if (!alertsClient || !actionsClient || !types) {

@@ -118,7 +118,7 @@ export async function getClustersFromRequest(
 
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const alertsClient = req.getAlertsClient();
+      const alertsClient = await req.getAlertsClient();
       for (const cluster of clusters) {
         const verification = verifyMonitoringLicense(req.server);
         if (!verification.enabled) {

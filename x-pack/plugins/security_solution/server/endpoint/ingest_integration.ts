@@ -129,7 +129,7 @@ export const getPackagePolicyCreateCallback = (
         // @ts-expect-error
         context,
         appClient,
-        alerts.getAlertsClientWithRequest(request),
+        await alerts.getAlertsClientWithRequest(request),
         frameworkRequest,
         maxTimelineImportExportSize,
         exceptionsClient

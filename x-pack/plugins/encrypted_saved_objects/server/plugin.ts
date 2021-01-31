@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, map } from 'rxjs/operators';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 import nodeCrypto from '@elastic/node-crypto';
-import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { combineLatest, interval, Observable, of } from 'rxjs';
+import {
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { createConfig, ConfigSchema } from './config';
 import {
@@ -96,6 +103,37 @@ export class Plugin {
       ),
       config,
     });
+
+    const externalStatus$ = interval(1000).pipe(
+      switchMap(async () => {
+        const resp = Promise.resolve({ ok: false });
+        const body = await resp;
+        if (body.ok) {
+          return { level: ServiceStatusLevels.available, summary: 'External Service is up' };
+        } else {
+          return {
+            level: ServiceStatusLevels.degraded,
+            summary: 'External Service is unavailable',
+          };
+        }
+      }),
+      catchError(async (error) => ({
+        level: ServiceStatusLevels.unavailable,
+        meta: { error },
+      }))
+    );
+
+    core.status.set(
+      combineLatest([core.status.derivedStatus$, externalStatus$]).pipe(
+        map(([derivedStatus, healthStatus]) => {
+          if (healthStatus.level > derivedStatus.level) {
+            return healthStatus as ServiceStatus;
+          } else {
+            return derivedStatus;
+          }
+        })
+      )
+    );
 
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>

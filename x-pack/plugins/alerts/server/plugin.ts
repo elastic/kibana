@@ -5,7 +5,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
@@ -33,6 +33,8 @@ import {
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
+  ServiceStatusLevels,
+  ServiceStatusLevel,
 } from '../../../../src/core/server';
 import type { AlertingRequestHandlerContext } from './types';
 
@@ -120,7 +122,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
-  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getAlertsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<AlertsClient>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
@@ -145,13 +147,24 @@ export interface AlertingPluginsStart {
   security?: SecurityPluginStart;
 }
 
+interface MonitoredStat<T> {
+  timestamp: string;
+  value: T;
+}
+
+interface DependenciesStats {
+  last_update: string;
+  stats: {
+    isESOAvailable?: MonitoredStat<{ statusLevel: ServiceStatusLevel }>;
+  };
+}
+
 export class AlertingPlugin {
   private readonly config: Promise<AlertsConfig>;
   private readonly logger: Logger;
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -159,6 +172,7 @@ export class AlertingPlugin {
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+  private dependenciesStats$ = new Subject<DependenciesStats>();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -187,14 +201,20 @@ export class AlertingPlugin {
       };
     });
 
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
-
-    if (this.isESOUsingEphemeralEncryptionKey) {
-      this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
-      );
-    }
+    /* this.isESOAvailable$
+      .pipe(first())
+      .toPromise()
+      .then((isESOAvailable) => {
+        if (isESOAvailable) {
+          this.logger.warn(
+            'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+          );
+        }
+      });
+*/
+    this.dependenciesStats$.subscribe({
+      next: (v) => console.log(`observerA: ${v}`),
+    });
 
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -251,6 +271,18 @@ export class AlertingPlugin {
           })
         )
       );
+
+      core.status.dependencies$.subscribe({
+        next: (deps) => {
+          if (
+            deps.encryptedSavedObjects &&
+            deps.encryptedSavedObjects.level === ServiceStatusLevels.available
+          ) {
+            this.dependenciesStats$.next(1);
+          }
+          console.log(`observerB: ${deps}`);
+        },
+      });
     });
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
@@ -309,7 +341,7 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      isESOUsingEphemeralEncryptionKey,
+      isESOAvailable$,
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
@@ -350,8 +382,9 @@ export class AlertingPlugin {
       kibanaVersion: this.kibanaVersion,
     });
 
-    const getAlertsClientWithRequest = (request: KibanaRequest) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+    const getAlertsClientWithRequest = async (request: KibanaRequest) => {
+      const isESOAvailable = await this.isESOAvailable$.pipe(first()).toPromise();
+      if (isESOAvailable === true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
@@ -376,7 +409,9 @@ export class AlertingPlugin {
       const client = getAlertsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          ? Promise.all(
+              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+            )
           : Promise.resolve([]);
     });
 

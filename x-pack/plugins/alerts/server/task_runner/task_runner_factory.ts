@@ -30,7 +30,7 @@ import { NormalizedAlertType } from '../alert_type_registry';
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
-  getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getAlertsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<AlertsClient>>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;

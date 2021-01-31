@@ -144,12 +144,15 @@ export class TaskRunner<
     return fakeRequest;
   }
 
-  private getServicesWithSpaceLevelPermissions(
+  private async getServicesWithSpaceLevelPermissions(
     spaceId: string,
     apiKey: RawAlert['apiKey']
-  ): [Services, PublicMethodsOf<AlertsClient>] {
+  ): Promise<[Services, PublicMethodsOf<AlertsClient>]> {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
-    return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
+    return [
+      this.context.getServices(request),
+      await this.context.getAlertsClientWithRequest(request),
+    ];
   }
 
   private getExecutionHandler(
@@ -408,7 +411,10 @@ export class TaskRunner<
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
-    const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const [services, alertsClient] = await this.getServicesWithSpaceLevelPermissions(
+      spaceId,
+      apiKey
+    );
 
     let alert: SanitizedAlert<Params>;
 
