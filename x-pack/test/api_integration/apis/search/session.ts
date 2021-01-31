@@ -275,8 +275,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const { id: id1 } = searchRes1.body;
-
       // it might take the session a moment to be created
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
