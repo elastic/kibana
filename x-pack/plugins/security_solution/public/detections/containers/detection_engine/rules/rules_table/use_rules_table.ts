@@ -8,11 +8,14 @@ import { Dispatch, useMemo, useReducer, useEffect, useRef } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 
 import { errorToToaster, useStateToaster } from '../../../../../common/components/toasters';
-import { fetchRules } from '../api';
 import * as i18n from '../translations';
 
+import { fetchRules } from '../api';
 import { createRulesTableReducer, RulesTableState, RulesTableAction } from './rules_table_reducer';
 import { createRulesTableFacade, RulesTableFacade } from './rules_table_facade';
+import { useFilteredRules } from './projections/filtering';
+import { useSortedRules } from './projections/sorting';
+import { usePaginatedRules, useDisplayedPaginationOptions } from './projections/pagination';
 
 // Why these values?
 // If we request more rules than 10000, we'll get an error from Elasticsearch (most likely).
@@ -80,9 +83,8 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
   const reFetchRules = useRef<() => Promise<void>>(() => Promise.resolve());
   const [, dispatchToaster] = useStateToaster();
 
-  const { pagination, filterOptions } = state;
-  const filterTags = filterOptions.tags.sort().join();
-
+  // Fetch all rules at once (and only once) after mount. Filtering, sorting,
+  // searching and pagination are implemented in memory on the client side.
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -90,16 +92,19 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
     const fetchData = async () => {
       try {
         facade.current.actionStarted('load', []);
+
         const fetchRulesResult = await fetchRules({
-          filterOptions,
-          pagination,
+          filterOptions: initialStateDefaults.filterOptions,
+          pagination: {
+            page: 1,
+            perPage: NUM_RULES_TO_LOAD,
+            total: -1,
+          },
           signal: abortCtrl.signal,
         });
 
         if (isSubscribed) {
           facade.current.setRules(fetchRulesResult.data, {
-            page: fetchRulesResult.page,
-            perPage: fetchRulesResult.perPage,
             total: fetchRulesResult.total,
           });
         }
@@ -122,21 +127,28 @@ export const useRulesTable = (params: UseRulesTableParams): UseRulesTableReturn 
       abortCtrl.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    pagination.page,
-    pagination.perPage,
-    filterOptions.filter,
-    filterOptions.sortField,
-    filterOptions.sortOrder,
-    filterTags,
-    filterOptions.showCustomRules,
-    filterOptions.showElasticRules,
-  ]);
+  }, []);
+
+  const projections = useProjectedState(state);
 
   return {
-    state,
+    state: { ...state, ...projections },
     dispatch,
     ...facade.current,
     reFetchRules: reFetchRules.current,
+  };
+};
+
+const useProjectedState = (state: RulesTableState): Partial<RulesTableState> => {
+  const { rules, filterOptions, pagination } = state;
+
+  const filteredRules = useFilteredRules(rules, filterOptions);
+  const sortedRules = useSortedRules(filteredRules, filterOptions);
+  const displayedPagination = useDisplayedPaginationOptions(sortedRules, pagination);
+  const displayedRules = usePaginatedRules(sortedRules, displayedPagination);
+
+  return {
+    rules: displayedRules,
+    pagination: displayedPagination,
   };
 };
