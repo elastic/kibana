@@ -6,9 +6,8 @@
  * Public License, v 1.
  */
 
-import { DataPublicPluginStart } from './shared_imports';
+import { DataPublicPluginStart, RuntimeField } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
-import { RuntimeType } from './shared_imports';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 
 export interface PluginSetup {
@@ -32,11 +31,8 @@ export interface StartPlugins {
 
 export interface Field {
   name: string;
-  type: RuntimeType | string;
-  // todo import
-  script?: {
-    source?: string;
-  };
+  type: RuntimeField['type'] | string;
+  script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;
   format?: Record<string, any>; // TODO set correct interface

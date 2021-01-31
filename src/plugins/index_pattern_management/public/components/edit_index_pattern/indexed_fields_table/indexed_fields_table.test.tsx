@@ -26,7 +26,7 @@ jest.mock('./components/table', () => ({
 }));
 
 const helpers = {
-  editField: (obj: any) => {},
+  editField: (fieldName: string) => {},
   getFieldInfo: () => [],
 };
 

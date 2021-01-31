@@ -220,11 +220,6 @@ export function Tabs({
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
                 indexedFieldTypeFilter={indexedFieldTypeFilter}
                 helpers={{
-                  /*
-                  redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field, indexPattern));
-                  },
-                  */
                   editField: openFieldEditor,
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}

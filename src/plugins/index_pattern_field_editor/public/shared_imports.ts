@@ -8,7 +8,7 @@
 
 export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
 
-export { RuntimeType } from '../../data/common';
+export { RuntimeType, RuntimeField } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
