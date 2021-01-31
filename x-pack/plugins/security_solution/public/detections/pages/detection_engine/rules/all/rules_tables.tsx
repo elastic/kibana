@@ -19,7 +19,6 @@ import { History } from 'history';
 
 import {
   useRulesTable,
-  useRules,
   useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
