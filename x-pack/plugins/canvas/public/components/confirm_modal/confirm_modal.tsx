@@ -8,7 +8,7 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
-interface Props {
+export interface Props {
   isOpen: boolean;
   title?: string;
   message: string;

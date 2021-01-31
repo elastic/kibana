@@ -8,18 +8,19 @@ from build_util import runcmd, mkdir, md5_file, configure_environment
 # call this once the platform-specific initialization has completed.
 
 # Set to "arm" to build for ARM on Linux
-arch_name = sys.argv[1] if len(sys.argv) >= 2 else 'x64'
+arch_name = sys.argv[1] if len(sys.argv) >= 2 else 'undefined'
 build_path = path.abspath(os.curdir)
 src_path = path.abspath(path.join(build_path, 'chromium', 'src'))
 
 if arch_name != 'x64' and arch_name != 'arm64':
-  raise Exception('Unexpected architecture: ' + arch_name)
+  raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 # Configure git
 print('Configuring git globals...')
 runcmd('git config --global core.autocrlf false')
 runcmd('git config --global core.filemode false')
 runcmd('git config --global branch.autosetuprebase always')
+runcmd('git config --global core.compression 0')
 
 # Grab Chromium's custom build tools, if they aren't already installed
 # (On Windows, they are installed before this Python script is run)
@@ -35,13 +36,14 @@ else:
   runcmd('git pull origin master')
   os.chdir(original_dir)
 
-configure_environment(arch_name, build_path, src_path)
-
 # Fetch the Chromium source code
 chromium_dir = path.join(build_path, 'chromium')
 if not path.isdir(chromium_dir):
   mkdir(chromium_dir)
   os.chdir(chromium_dir)
-  runcmd('fetch chromium')
+  runcmd('fetch chromium --nohooks=1 --no-history=1')
 else:
   print('Directory exists: ' + chromium_dir + '. Skipping chromium fetch.')
+
+# This depends on having the chromium/src directory with the complete checkout
+configure_environment(arch_name, build_path, src_path)
