@@ -7,26 +7,20 @@
  */
 
 import copy from 'cpy';
-import del from 'del';
 import { join, relative, resolve } from 'path';
 
-import { getProjectPaths } from '../config';
-import { isDirectory, isFile } from '../utils/fs';
+import { buildProject, getProductionProjects } from './build_non_bazel_production_projects';
+import { isFile } from '../utils/fs';
 import { log } from '../utils/log';
 import {
   createProductionPackageJson,
   readPackageJson,
   writePackageJson,
 } from '../utils/package_json';
-import {
-  buildProjectGraph,
-  getProjects,
-  includeTransitiveProjects,
-  topologicallyBatchProjects,
-} from '../utils/projects';
+import { getBazelProjectsOnly } from '../utils/projects';
 import { Project } from '..';
 
-export async function buildProductionProjects({
+export async function buildBazelProductionProjects({
   kibanaRoot,
   buildRoot,
   onlyOSS,
@@ -35,67 +29,14 @@ export async function buildProductionProjects({
   buildRoot: string;
   onlyOSS?: boolean;
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
-  const projectGraph = buildProjectGraph(projects);
-  const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
+  const projects = await getBazelProjectsOnly(await getProductionProjects(kibanaRoot, onlyOSS));
 
   const projectNames = [...projects.values()].map((project) => project.name);
-  log.info(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
-  for (const batch of batchedProjects) {
-    for (const project of batch) {
-      await deleteTarget(project);
-      await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
-    }
-  }
-}
-
-/**
- * Returns the subset of projects that should be built into the production
- * bundle. As we copy these into Kibana's `node_modules` during the build step,
- * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies. If onlyOSS
- * is supplied, we omit projects with build.oss in their package.json set to false.
- */
-async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
-  const projectPaths = getProjectPaths({ rootPath });
-  const projects = await getProjects(rootPath, projectPaths);
-  const projectsSubset = [projects.get('kibana')!];
-
-  if (projects.has('x-pack')) {
-    projectsSubset.push(projects.get('x-pack')!);
-  }
-
-  const productionProjects = includeTransitiveProjects(projectsSubset, projects, {
-    onlyProductionDependencies: true,
-  });
-
-  // We remove Kibana, as we're already building Kibana
-  productionProjects.delete('kibana');
-
-  if (onlyOSS) {
-    productionProjects.forEach((project) => {
-      if (project.getBuildConfig().oss === false) {
-        productionProjects.delete(project.json.name);
-      }
-    });
-  }
-
-  return productionProjects;
-}
-
-async function deleteTarget(project: Project) {
-  const targetDir = project.targetLocation;
-
-  if (await isDirectory(targetDir)) {
-    await del(targetDir, { force: true });
-  }
-}
-
-async function buildProject(project: Project) {
-  if (project.hasScript('build')) {
-    await project.runScript('build');
+  for (const project of projects.values()) {
+    await buildProject(project);
+    await copyToBuild(project, kibanaRoot, buildRoot);
   }
 }
 

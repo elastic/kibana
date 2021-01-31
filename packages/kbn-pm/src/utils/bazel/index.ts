@@ -6,4 +6,5 @@
  * Public License, v 1.
  */
 
+export * from './run';
 export * from './install_tools';

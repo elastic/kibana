@@ -1,0 +1,5 @@
+# Call each package final target
+filegroup(
+  name = "build",
+  srcs = [],
+)
