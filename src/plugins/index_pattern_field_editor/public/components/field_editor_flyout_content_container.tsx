@@ -7,7 +7,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 
 import {
   IndexPatternField,
@@ -49,6 +50,10 @@ export interface Props {
    * Index pattern service
    */
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  /**
+   * Notification service
+   */
+  notifications: NotificationsStart;
 }
 
 /**
@@ -65,39 +70,47 @@ export const FieldEditorFlyoutContentContainer = ({
   docLinks,
   indexPatternService,
   ctx: { indexPattern },
+  notifications,
 }: Props) => {
   const fieldToEdit = deserializeField(field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
   const saveField = useCallback(
     async (updatedField: Field) => {
-      const script = updatedField.script?.source
-        ? { source: updatedField.script?.source }
-        : undefined;
+      const script = updatedField.script?.source ? updatedField.script : undefined;
 
       if (script) {
         indexPattern.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
-          // script editor needs to return script object
           script,
         });
+      } else {
+        indexPattern.removeRuntimeField(updatedField.name);
       }
 
       const editedField = field || indexPattern.getFieldByName(updatedField.name);
 
-      if (!editedField) {
-        // todo display error
-        throw new Error(`Unable to find field named '${updatedField.name}'`);
+      try {
+        if (!editedField) {
+          throw new Error(
+            `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
+          );
+        }
+
+        editedField.customLabel = updatedField.customLabel;
+        editedField.count = updatedField.popularity || 0;
+
+        indexPatternService.updateSavedObject(indexPattern).then(() => {
+          onSave(editedField);
+        });
+      } catch (e) {
+        const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
+          defaultMessage: 'Failed to save field changes',
+        });
+        notifications.toasts.addError(e, { title });
       }
-
-      editedField.customLabel = updatedField.customLabel;
-      editedField.count = updatedField.popularity || 0;
-
-      indexPatternService.updateSavedObject(indexPattern).then(() => {
-        onSave(editedField);
-      });
     },
-    [onSave, indexPattern, indexPatternService, field]
+    [onSave, indexPattern, indexPatternService, field, notifications]
   );
 
   const loadEditor = useCallback(async () => {

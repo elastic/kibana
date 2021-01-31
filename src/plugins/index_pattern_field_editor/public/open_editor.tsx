@@ -80,6 +80,7 @@ export const getFieldEditorOpener = (
             field={field}
             ctx={ctx}
             indexPatternService={indexPatternService}
+            notifications={notifications}
           />
         </KibanaReactContextProvider>
       )
