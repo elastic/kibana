@@ -34,12 +34,13 @@ function isSessionStale(
   logger: Logger
 ) {
   const curTime = moment();
-  // Delete if a running session wasn't polled for in the last notTouchedTimeout OR if a completed session wasn't saved for within onScreenTimeout
+  // Delete if a running session wasn't polled for in the last notTouchedTimeout OR if a completed session wasn't saved for within onScreenTicompletedTimeoutmeout
   return (
     (session.attributes.status === SearchSessionStatus.IN_PROGRESS &&
       curTime.diff(moment(session.attributes.touched), 'ms') >
         config.notTouchedTimeout.asMilliseconds()) ||
-    curTime.diff(moment(session.attributes.created), 'ms') > config.onScreenTimeout.asMilliseconds()
+    curTime.diff(moment(session.attributes.created), 'ms') >
+      config.completedTimeout.asMilliseconds()
   );
 }
 

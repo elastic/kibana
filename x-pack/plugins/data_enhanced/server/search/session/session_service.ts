@@ -32,6 +32,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import {
+  SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   SEARCH_SESSION_TYPE,
@@ -266,14 +267,18 @@ export class SearchSessionService implements ISessionService {
   ) => {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
-    const requestHash = createRequestHash(searchRequest.params);
-    const searchInfo = {
-      id: searchId,
-      strategy: strategy!,
-      status: SearchStatus.IN_PROGRESS,
-    };
 
-    const idMapping = { [requestHash]: searchInfo };
+    let idMapping: Record<string, SearchSessionRequestInfo> = {};
+
+    if (searchRequest.params) {
+      const requestHash = createRequestHash(searchRequest.params);
+      const searchInfo = {
+        id: searchId,
+        strategy: strategy!,
+        status: SearchStatus.IN_PROGRESS,
+      };
+      idMapping = { [requestHash]: searchInfo };
+    }
 
     return this.updateOrCreate(sessionId, { idMapping }, deps);
   };

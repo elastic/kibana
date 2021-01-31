@@ -18,7 +18,7 @@ describe('getSearchStatus', () => {
     enabled: true,
     pageSize: 10000,
     notTouchedTimeout: moment.duration(1, 'm'),
-    onScreenTimeout: moment.duration(5, 'm'),
+    completedTimeout: moment.duration(5, 'm'),
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
