@@ -10,7 +10,7 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
+import { esKuery, ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import { nodeBuilder } from '../../../../../../../src/plugins/data/common';
 import { SearchSessionStatus, SEARCH_SESSION_TYPE } from '../../../../common/search';
 import { ACTION } from '../components/actions';
@@ -110,7 +110,8 @@ export class SearchSessionsMgmtAPI {
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
-        filter: nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'true'),
+        searchFields: ['persisted'],
+        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(

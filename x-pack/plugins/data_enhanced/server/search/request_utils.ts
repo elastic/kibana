@@ -33,7 +33,6 @@ export async function getDefaultAsyncSubmitParams(
 ): Promise<
   Pick<
     AsyncSearchSubmit,
-    | 'keep_alive'
     | 'batched_reduce_size'
     | 'keep_alive'
     | 'wait_for_completion_timeout'

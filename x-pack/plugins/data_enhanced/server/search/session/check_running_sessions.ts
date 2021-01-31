@@ -28,7 +28,7 @@ export interface CheckRunningSessionsDeps {
   logger: Logger;
 }
 
-function checkNotPersistedSession(
+function isSessionStale(
   session: SavedObjectsFindResult<SearchSessionSavedObjectAttributes>,
   config: SearchSessionsConfig,
   logger: Logger
@@ -129,7 +129,7 @@ export async function checkRunningSessions(
         let deleted = false;
 
         if (!session.attributes.persisted) {
-          if (checkNotPersistedSession(session, config, logger)) {
+          if (isSessionStale(session, config, logger)) {
             deleted = true;
             // delete saved object to free up memory
             // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
