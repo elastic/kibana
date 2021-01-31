@@ -5,7 +5,12 @@
  */
 
 import { checkRunningSessions } from './check_running_sessions';
-import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
+import {
+  SearchSessionStatus,
+  SearchSessionSavedObjectAttributes,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import type { SavedObjectsClientContract } from 'kibana/server';
 import { SearchSessionsConfig, SearchStatus } from './types';
@@ -35,6 +40,11 @@ describe('getSearchStatus', () => {
     mockClient = {
       asyncSearch: {
         status: jest.fn(),
+        delete: jest.fn(),
+      },
+      eql: {
+        status: jest.fn(),
+        delete: jest.fn(),
       },
     };
   });
@@ -162,7 +172,12 @@ describe('getSearchStatus', () => {
               status: SearchSessionStatus.IN_PROGRESS,
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(2, 'm')),
-              idMapping: {},
+              idMapping: {
+                'map-key': {
+                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                  id: 'async-id',
+                },
+              },
             },
           },
         ],
@@ -180,9 +195,16 @@ describe('getSearchStatus', () => {
 
       expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
       expect(savedObjectsClient.delete).toBeCalled();
+
+      expect(mockClient.asyncSearch.delete).toBeCalled();
+
+      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
+      expect(id).toBe('async-id');
     });
 
     test('deletes a completed, not persisted session', async () => {
+      mockClient.asyncSearch.delete = jest.fn().mockResolvedValue(true);
+
       savedObjectsClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -192,7 +214,16 @@ describe('getSearchStatus', () => {
               status: SearchSessionStatus.COMPLETE,
               created: moment().subtract(moment.duration(30, 'm')),
               touched: moment().subtract(moment.duration(5, 'm')),
-              idMapping: {},
+              idMapping: {
+                'map-key': {
+                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                  id: 'async-id',
+                },
+                'eql-map-key': {
+                  strategy: EQL_SEARCH_STRATEGY,
+                  id: 'eql-async-id',
+                },
+              },
             },
           },
         ],
@@ -210,6 +241,54 @@ describe('getSearchStatus', () => {
 
       expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
       expect(savedObjectsClient.delete).toBeCalled();
+
+      expect(mockClient.asyncSearch.delete).toBeCalled();
+      expect(mockClient.eql.delete).not.toBeCalled();
+
+      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
+      expect(id).toBe('async-id');
+    });
+
+    test('ignores errors thrown while deleting async searches', async () => {
+      mockClient.asyncSearch.delete = jest.fn().mockRejectedValueOnce(false);
+
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '123',
+            attributes: {
+              persisted: false,
+              status: SearchSessionStatus.COMPLETE,
+              created: moment().subtract(moment.duration(30, 'm')),
+              touched: moment().subtract(moment.duration(5, 'm')),
+              idMapping: {
+                'map-key': {
+                  strategy: ENHANCED_ES_SEARCH_STRATEGY,
+                  id: 'async-id',
+                },
+              },
+            },
+          },
+        ],
+        total: 1,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
+      expect(savedObjectsClient.delete).toBeCalled();
+
+      expect(mockClient.asyncSearch.delete).toBeCalled();
+
+      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
+      expect(id).toBe('async-id');
     });
   });
 

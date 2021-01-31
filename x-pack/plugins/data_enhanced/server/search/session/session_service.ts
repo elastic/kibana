@@ -255,8 +255,7 @@ export class SearchSessionService implements ISessionService {
   };
 
   /**
-   * Tracks the given search request/search ID in the saved session (if it exists). Otherwise, just
-   * store it in memory until a saved session exists.
+   * Tracks the given search request/search ID in the saved session.
    * @internal
    */
   public trackId = async (

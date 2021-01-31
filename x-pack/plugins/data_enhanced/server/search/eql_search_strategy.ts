@@ -22,7 +22,8 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    await esClient.asCurrentUser.asyncSearch.delete({ id });
+    const client = esClient.asCurrentUser.eql;
+    await client.delete({ id });
   }
 
   return {

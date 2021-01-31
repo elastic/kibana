@@ -17,6 +17,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionRequestInfo,
   SEARCH_SESSION_TYPE,
+  ENHANCED_ES_SEARCH_STRATEGY,
 } from '../../../common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
@@ -138,7 +139,19 @@ export async function checkRunningSessions(
             logger.debug(`Deleting stale session | ${session.id}`);
             await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id);
 
-            // TODO cancel running search requests
+            // Send a delete request for each async search to ES
+            Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
+              const searchInfo = session.attributes.idMapping[searchKey];
+              if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
+                try {
+                  await client.asyncSearch.delete({ id: searchInfo.id });
+                } catch (e) {
+                  logger.debug(
+                    `Error ignored while deleting async_search ${searchInfo.id}: ${e.message}`
+                  );
+                }
+              }
+            });
           }
         }
 
