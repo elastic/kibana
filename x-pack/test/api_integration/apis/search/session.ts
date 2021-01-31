@@ -257,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
-      const searchRes1 = await supertest
+      await supertest
         .post(`/internal/search/ese`)
         .set('kbn-xsrf', 'foo')
         .send({
