@@ -616,6 +616,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery,
       isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
+      searchSessionId: dataFilters.searchSessionId,
     } as VectorStyleRequestMeta;
     const prevDataRequest = this.getDataRequest(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
@@ -635,6 +636,7 @@ export class VectorLayer extends AbstractLayer {
         registerCancelCallback: registerCancelCallback.bind(null, requestToken),
         sourceQuery: nextMeta.sourceQuery,
         timeFilters: nextMeta.timeFilters,
+        searchSessionId: dataFilters.searchSessionId,
       });
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {

@@ -52,7 +52,7 @@ type ExpressionType =
   | Style
   | Range;
 
-interface ExpressionRenderable {
+export interface ExpressionRenderable {
   state: 'ready' | 'pending';
   value: Render<ExpressionType> | null;
   error: null;
