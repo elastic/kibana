@@ -8,7 +8,7 @@ import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
-export interface IndexPatternSavedObject {
+export interface IndexPatternSavedObjectDeprecatedCSV {
   title: string;
   timeFieldName: string;
   fields?: any[];
@@ -18,25 +18,25 @@ export interface IndexPatternSavedObject {
   };
 }
 
-interface BaseParamsCSV {
-  searchRequest: SearchRequest;
+interface BaseParamsDeprecatedCSV {
+  searchRequest: SearchRequestDeprecatedCSV;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];
 }
 
-export type JobParamsCSV = BaseParamsCSV &
+export type JobParamsDeprecatedCSV = BaseParamsDeprecatedCSV &
   BaseParams & {
     indexPatternId: string;
   };
 
 // CSV create job method converts indexPatternID to indexPatternSavedObject
-export type TaskPayloadCSV = BaseParamsCSV &
+export type TaskPayloadDeprecatedCSV = BaseParamsDeprecatedCSV &
   BasePayload & {
-    indexPatternSavedObject: IndexPatternSavedObject;
+    indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   };
 
-export interface SearchRequest {
+export interface SearchRequestDeprecatedCSV {
   index: string;
   body:
     | {
@@ -66,7 +66,7 @@ export interface SearchRequest {
     | any;
 }
 
-type FormatsMap = Map<
+type FormatsMapDeprecatedCSV = Map<
   string,
   {
     id: string;
