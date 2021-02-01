@@ -83,7 +83,7 @@ export interface SavedObjectsFindOptions {
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
   /**
-   * Use the sort values from the previous page or a Point In Time (PIT) ID to retrieve the next page of results.
+   * Use the sort values from the previous page to retrieve the next page of results.
    */
   searchAfter?: Array<string | number>;
   /**
@@ -117,6 +117,20 @@ export interface SavedObjectsFindOptions {
    */
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
+  preference?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeOptions {
+  /**
+   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   */
+  keepAlive?: string;
+  /**
+   * An optional ES preference value to be used for the query.
+   */
   preference?: string;
 }
 

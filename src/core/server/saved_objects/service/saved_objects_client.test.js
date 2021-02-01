@@ -115,6 +115,21 @@ test(`#get`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#openPointInTimeForType`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    openPointInTimeForType: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const options = Symbol();
+  const result = await client.openPointInTimeForType(type, options);
+
+  expect(mockRepository.openPointInTimeForType).toHaveBeenCalledWith(type, options);
+  expect(result).toBe(returnValue);
+});
+
 test(`#resolve`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

@@ -15,6 +15,7 @@ import {
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
@@ -503,5 +504,16 @@ export class SavedObjectsClient {
     options?: SavedObjectsRemoveReferencesToOptions
   ) {
     return await this._repository.removeReferencesTo(type, id, options);
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions
+  ) {
+    return await this._repository.openPointInTimeForType(type, options);
   }
 }

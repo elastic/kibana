@@ -277,6 +277,7 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,

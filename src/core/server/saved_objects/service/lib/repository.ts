@@ -54,6 +54,7 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  SavedObjectsOpenPointInTimeOptions,
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
@@ -1764,6 +1765,68 @@ export class SavedObjectsRepository {
       // @ts-expect-error
       version: encodeHitVersion(body),
       attributes: body.get._source[type],
+    };
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * const { id } = await repository.openPointInTimeForType(
+   *   type: 'index-pattern',
+   *   { keepAlive: '1m' },
+   * );
+   *
+   * const response = await repository.find({
+   *   type: 'index-pattern',
+   *   search: 'foo*',
+   *   sortField: 'name',
+   *   sortOrder: 'desc',
+   *   pit: {
+   *     id: 'abc123',
+   *     keepAlive: '1m',
+   *   },
+   *   searchAfter: [1234, 'abcd'],
+   * });
+   * ```
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    { keepAlive, preference }: SavedObjectsOpenPointInTimeOptions = {}
+  ): Promise<{ id: string }> {
+    const defaultKeepAlive = '5m';
+
+    const types = Array.isArray(type) ? type : [type];
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
+    if (allowedTypes.length === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    const esOptions = {
+      index: this.getIndicesForTypes(allowedTypes),
+      keep_alive: keepAlive || defaultKeepAlive,
+      ...(preference ? { preference } : {}),
+    };
+
+    const { body, statusCode } = await this.client.openPointInTime<{ id: string }>(esOptions, {
+      ignore: [404],
+    });
+    if (statusCode === 404) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    return {
+      id: body.id,
     };
   }
 

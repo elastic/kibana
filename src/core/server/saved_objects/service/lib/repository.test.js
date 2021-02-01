@@ -4406,4 +4406,94 @@ describe('SavedObjectsRepository', () => {
       });
     });
   });
+
+  describe('#openPointInTimeForType', () => {
+    const type = 'index-pattern';
+
+    const generateResults = (id) => ({ id: id || null });
+    const successResponse = async (type, options) => {
+      client.openPointInTime.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
+      );
+      const result = await savedObjectsRepository.openPointInTimeForType(type, options);
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the ES search action`, async () => {
+        await successResponse(type);
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`accepts preference`, async () => {
+        await successResponse(type, { preference: 'pref' });
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            preference: 'pref',
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`accepts keepAlive`, async () => {
+        await successResponse(type, { keepAlive: '1m' });
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            keep_alive: '1m',
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`defaults keepAlive to 5m`, async () => {
+        await successResponse(type);
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            keep_alive: '5m',
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (types) => {
+        await expect(savedObjectsRepository.openPointInTimeForType(types)).rejects.toThrowError(
+          createGenericNotFoundError()
+        );
+      };
+
+      it(`throws when ES is unable to find the index`, async () => {
+        client.openPointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        await expectNotFoundError(type);
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should return generic not found error when attempting to find only invalid or hidden types`, async () => {
+        const test = async (types) => {
+          await expectNotFoundError(types);
+          expect(client.openPointInTime).not.toHaveBeenCalled();
+        };
+
+        await test('unknownType');
+        await test(HIDDEN_TYPE);
+        await test(['unknownType', HIDDEN_TYPE]);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns id in the expected format`, async () => {
+        const id = 'abc123';
+        const results = generateResults(id);
+        client.openPointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(results)
+        );
+        const response = await savedObjectsRepository.openPointInTimeForType(type);
+        expect(response).toEqual({ id });
+      });
+    });
+  });
 });

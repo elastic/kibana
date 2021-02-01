@@ -487,4 +487,77 @@ describe('SavedObjectsClient', () => {
       `);
     });
   });
+
+  describe('#openPointInTimeForType', () => {
+    const type = 'index-pattern';
+
+    beforeEach(() => {
+      http.fetch.mockResolvedValue({ id: 'abc123' });
+    });
+
+    test('resolves with value returned from _pit route', async () => {
+      const resultP = savedObjectsClient.openPointInTimeForType(type);
+      await expect(resultP).resolves.toHaveProperty('id');
+
+      const result = await resultP;
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(result.id).toBe('abc123');
+    });
+
+    test('makes HTTP call correctly without options', () => {
+      savedObjectsClient.openPointInTimeForType(type);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/index-pattern/_pit",
+          Object {
+            "body": "{}",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('makes HTTP call correctly mapping options into snake case query parameters', () => {
+      const options = {
+        keepAlive: '1m',
+        preference: 'foo',
+      };
+      savedObjectsClient.openPointInTimeForType(type, options);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/index-pattern/_pit",
+          Object {
+            "body": "{\\"keep_alive\\":\\"1m\\",\\"preference\\":\\"foo\\"}",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('ignores invalid options', () => {
+      savedObjectsClient.openPointInTimeForType(type, {
+        // @ts-expect-error
+        invalid: true,
+        keepAlive: '1m',
+        preference: 'foo',
+      });
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/index-pattern/_pit",
+          Object {
+            "body": "{\\"keep_alive\\":\\"1m\\",\\"preference\\":\\"foo\\"}",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('concatenates multiple types in the path', () => {
+      savedObjectsClient.openPointInTimeForType(['a', 'b', 'c']);
+      expect(http.fetch.mock.calls[0][0]).toBe('/api/saved_objects/a%2Cb%2Cc/_pit');
+    });
+  });
 });

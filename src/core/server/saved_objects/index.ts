@@ -85,6 +85,7 @@ export {
 
 export {
   SavedObjectsNamespaceType,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectStatusMeta,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
