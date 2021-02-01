@@ -50,7 +50,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
     const abortCtrl = new AbortController();
     setLoading(true);
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const privilege = await getUserPrivilege({
           signal: abortCtrl.signal,
@@ -89,15 +89,14 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatchToaster]);
 
   return { loading, ...privilegeUser };
 };

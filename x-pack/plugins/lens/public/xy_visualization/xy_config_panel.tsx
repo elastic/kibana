@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -179,8 +179,7 @@ function getValueLabelDisableReason({
     defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
   });
 }
-
-export function XyToolbar(props: VisualizationToolbarProps<State>) {
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
@@ -485,7 +484,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
+
 const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
@@ -653,7 +653,7 @@ const ColorPicker = ({
     }
   };
 
-  const updateColorInState: EuiColorPickerProps['onChange'] = React.useMemo(
+  const updateColorInState: EuiColorPickerProps['onChange'] = useMemo(
     () =>
       debounce((text, output) => {
         const newYConfigs = [...(layer.yConfig || [])];

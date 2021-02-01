@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import { ArgumentHandlers } from '../../types/arguments';
 
-interface Props {
+export interface Props {
   renderError: Function;
 }
 
