@@ -60,7 +60,15 @@ export const language: monaco.languages.IMonarchLanguage = {
   ],
 
   tokenizer: {
-    root: [{ include: '@maybeHandlebars' }, { include: '@whitespace' }, { include: '@text' }],
+    root: [
+      { include: '@maybeHandlebars' },
+      { include: '@whitespace' },
+      { include: '@urlScheme' },
+      { include: '@urlAuthority' },
+      { include: '@urlParamKey' },
+      { include: '@urlParamValue' },
+      { include: '@text' },
+    ],
 
     maybeHandlebars: [
       [
@@ -76,7 +84,7 @@ export const language: monaco.languages.IMonarchLanguage = {
 
     text: [
       [
-        /[^<{]+/,
+        /[^<{\?\&]+/,
         {
           token: 'text',
           next: '@popall',
@@ -91,6 +99,63 @@ export const language: monaco.languages.IMonarchLanguage = {
           token: '@rematch',
           switchTo: '@root',
         },
+      ],
+    ],
+
+    urlScheme: [
+      [
+        /([a-zA-Z0-9\+\.\-]{1,10})(:)/,
+        [
+          {
+            token: 'keyword.scheme.url',
+          },
+          {
+            token: 'delimiter.scheme.url',
+          },
+        ],
+      ],
+    ],
+
+    urlAuthority: [
+      [
+        /(\/\/)([a-zA-Z0-9\.\-_]+)/,
+        [
+          {
+            token: 'delimiter.authority.url',
+          },
+          {
+            token: 'keyword.authority.url',
+            // next: '@urlPath',
+          },
+        ],
+      ],
+    ],
+
+    urlParamKey: [
+      [
+        /([\?\&])([a-zA-Z0-9_\-]+)/,
+        [
+          {
+            token: 'delimiter.key.query.url',
+          },
+          {
+            token: 'label.key.query.url',
+          },
+        ],
+      ],
+    ],
+
+    urlParamValue: [
+      [
+        /(\=)([^\?\&\{}]+)/,
+        [
+          {
+            token: 'delimiter.value.query.url',
+          },
+          {
+            token: 'variable.value.query.url',
+          },
+        ],
       ],
     ],
 
