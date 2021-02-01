@@ -7,7 +7,7 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State, SeriesType, LayerConfig } from './types';
+import { State, SeriesType, XYLayerConfig } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -422,7 +422,7 @@ describe('xy_visualization', () => {
     });
 
     describe('color assignment', () => {
-      function callConfig(layerConfigOverride: Partial<LayerConfig>) {
+      function callConfig(layerConfigOverride: Partial<XYLayerConfig>) {
         const baseState = exampleState();
         const options = xyVisualization.getConfiguration({
           state: {
@@ -441,16 +441,16 @@ describe('xy_visualization', () => {
         return options;
       }
 
-      function callConfigForYConfigs(layerConfigOverride: Partial<LayerConfig>) {
+      function callConfigForYConfigs(layerConfigOverride: Partial<XYLayerConfig>) {
         return callConfig(layerConfigOverride).find(({ groupId }) => groupId === 'y');
       }
 
-      function callConfigForBreakdownConfigs(layerConfigOverride: Partial<LayerConfig>) {
+      function callConfigForBreakdownConfigs(layerConfigOverride: Partial<XYLayerConfig>) {
         return callConfig(layerConfigOverride).find(({ groupId }) => groupId === 'breakdown');
       }
 
       function callConfigAndFindYConfig(
-        layerConfigOverride: Partial<LayerConfig>,
+        layerConfigOverride: Partial<XYLayerConfig>,
         assertionAccessor: string
       ) {
         const accessorConfig = callConfigForYConfigs(layerConfigOverride)?.accessors.find(
