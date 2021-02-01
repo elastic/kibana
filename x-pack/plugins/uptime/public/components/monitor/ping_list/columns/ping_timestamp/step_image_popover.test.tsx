@@ -21,7 +21,7 @@ describe('StepImagePopover', () => {
     };
   });
 
-  it('opens popover when click on img caption, and hides when popover is closed', async () => {
+  it('opens displays full-size image on click, hides after close is closed', async () => {
     const { getByAltText, getByLabelText, queryByLabelText } = render(
       <StepImagePopover {...defaultProps} />
     );
