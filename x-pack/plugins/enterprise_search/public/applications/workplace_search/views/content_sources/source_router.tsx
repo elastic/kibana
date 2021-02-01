@@ -18,6 +18,12 @@ import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/t
 import { NAV } from '../../constants';
 
 import {
+  SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
+} from './constants';
+
+import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
   REINDEX_JOB_PATH,
   SOURCE_DETAILS_PATH,
@@ -80,14 +86,10 @@ export const SourceRouter: React.FC = () => {
 
   const callout = (
     <>
-      <EuiCallOut title="Content source is disabled" color="warning" iconType="alert">
-        <p>
-          Your organization’s license level has changed. Your data is safe, but document-level
-          permissions are no longer supported and searching of this source has been disabled.
-          Upgrade to a Platinum license to re-enable this source.
-        </p>
+      <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
+        <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
         <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          Explore Platinum license
+          {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer />
