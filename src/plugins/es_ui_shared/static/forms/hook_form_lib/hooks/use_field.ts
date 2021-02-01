@@ -27,7 +27,8 @@ export const useField = <T, FormType = FormData, I = T>(
   form: FormHook<FormType>,
   path: string,
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
-  valueChangeListener?: (value: I) => void
+  valueChangeListener?: (value: I) => void,
+  errorChangeListener?: (errors: string[] | null) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
@@ -595,6 +596,15 @@ export const useField = <T, FormType = FormData, I = T>(
       }
     };
   }, [onValueChange]);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+    if (errorChangeListener) {
+      errorChangeListener(errors.length ? errors.map((error) => error.message) : null);
+    }
+  }, [errors, errorChangeListener]);
 
   useEffect(() => {
     isMounted.current = true;
