@@ -142,10 +142,10 @@ export const language: monaco.languages.IMonarchLanguage = {
 
     urlParamKey: [
       [
-        /([\?\&])([a-zA-Z0-9_\-]+)/,
+        /([\?\&\#])([a-zA-Z0-9_\-]+)/,
         [
           {
-            token: 'delimiter',
+            token: 'delimiter.key.query.url',
           },
           {
             token: 'label.label.key.query.url',
@@ -159,7 +159,7 @@ export const language: monaco.languages.IMonarchLanguage = {
         /(\=)([^\?\&\{}]+)/,
         [
           {
-            token: 'delimiter',
+            token: 'text.separator.value.query.url',
           },
           {
             token: 'metatag.value.query.url',
