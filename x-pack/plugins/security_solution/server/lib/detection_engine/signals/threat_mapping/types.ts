@@ -31,7 +31,7 @@ import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -76,6 +76,7 @@ export interface CreateThreatSignalsOptions {
 
 export interface CreateThreatSignalOptions {
   threatMapping: ThreatMapping;
+  threatEnrichment: SignalsEnrichment;
   query: string;
   inputIndex: string[];
   type: Type;

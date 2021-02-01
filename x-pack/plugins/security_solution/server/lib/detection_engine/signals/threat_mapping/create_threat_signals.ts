@@ -8,10 +8,11 @@
 import chunk from 'lodash/fp/chunk';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 
-import { CreateThreatSignalsOptions } from './types';
+import { CreateThreatSignalsOptions, GetMatchedThreats } from './types';
 import { createThreatSignal } from './create_threat_signal';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { SearchAfterAndBulkCreateReturnType, SignalSearchResponse } from '../types';
 import { combineConcurrentResults } from './utils';
+import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
 
 export const createThreatSignals = async ({
   threatMapping,
@@ -90,12 +91,46 @@ export const createThreatSignals = async ({
     perPage,
   });
 
+  const getMatchedThreats: GetMatchedThreats = async (ids) => {
+    // TODO should _id be a configurable field?
+    const matchedThreatsFilter = {
+      query: {
+        bool: {
+          filter: {
+            ids: { values: ids },
+          },
+        },
+      },
+    };
+    const threatResponse = await getThreatList({
+      callCluster: services.callCluster,
+      exceptionItems: exceptionItems ?? [],
+      threatFilters: [...(threatFilters ?? []), matchedThreatsFilter],
+      query: threatQuery,
+      language: threatLanguage,
+      index: threatIndex,
+      listClient,
+      searchAfter: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
+      logger,
+      buildRuleMessage,
+      perPage: undefined,
+    });
+
+    return threatResponse.hits.hits ?? [];
+  };
+
+  const threatEnrichment = (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
+    enrichSignalThreatMatches(signals, getMatchedThreats);
+
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
+          threatEnrichment,
           threatMapping,
           query,
           inputIndex,
