@@ -1,4 +1,4 @@
 .euiPanel.ilmDeletePhase {
-  border: none;
-  background-color: tintOrShade($euiColorDanger, 90%, 70%);
+  // border is only shown in v7 to compensate for panels not having background color
+  border-color: $euiColorDanger;
 }

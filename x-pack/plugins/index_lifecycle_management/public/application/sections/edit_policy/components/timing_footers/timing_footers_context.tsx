@@ -7,9 +7,29 @@
 import React, { createContext, FunctionComponent, ReactNode, useContext, useMemo } from 'react';
 import { UseField, useFormData } from '../../../../../shared_imports';
 import { FormInternal } from '../../types';
-import { calculateRelativeTimingMs, normalizeTimingsToHumanReadable } from '../../lib';
+import {
+  calculateRelativeFromAbsoluteMilliseconds,
+  formDataToAbsoluteTimings,
+  normalizeTimingsToHumanReadable,
+  PhaseAgeInMilliseconds,
+} from '../../lib';
 import { TimingFooter } from './timing_footer';
 
+type Phase = 'hot' | 'warm' | 'cold';
+
+const isLastActivePhase = (phaseTimings: PhaseAgeInMilliseconds, phase: Phase) => {
+  // cold is always last phase
+  if (phase === 'cold') return true;
+  // warm is last only if infinity timing or set timing without cold phase
+  if (phase === 'warm') {
+    return phaseTimings.phases[phase] === Infinity || phaseTimings.phases.cold === undefined;
+  }
+  // hot is last only if infinity timing or set timing without warm and cold phase
+  return (
+    phaseTimings.phases[phase] === Infinity ||
+    (phaseTimings.phases.warm === undefined && phaseTimings.phases.cold === undefined)
+  );
+};
 export interface TimingFooters {
   hot: ReactNode;
   warm: ReactNode;
@@ -22,21 +42,20 @@ const TimingFootersContext = createContext<TimingFooters>(null as any);
 export const TimingFootersProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData<FormInternal>();
 
-  const phaseTimings = useMemo(() => {
-    return calculateRelativeTimingMs(formData);
+  const absoluteTimings = useMemo(() => {
+    return formDataToAbsoluteTimings(formData);
   }, [formData]);
 
+  const phaseTimings = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
   const humanReadableTimings = useMemo(() => normalizeTimingsToHumanReadable(phaseTimings), [
     phaseTimings,
   ]);
 
-  const createPhaseTimingFooter = (
-    phase: 'hot' | 'warm' | 'cold',
-    setValue: (value: boolean) => void
-  ) => (
+  const createPhaseTimingFooter = (phase: Phase, setValue: (value: boolean) => void) => (
     <TimingFooter
       timingInMs={phaseTimings.phases[phase]}
       timingLabel={humanReadableTimings[phase]}
+      isLastActivePhase={isLastActivePhase(phaseTimings, phase)}
       setValue={setValue}
     />
   );

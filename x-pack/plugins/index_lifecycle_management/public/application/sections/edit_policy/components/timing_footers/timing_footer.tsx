@@ -17,9 +17,15 @@ import './timing_footer.scss';
 interface Props {
   timingInMs?: number;
   timingLabel?: string;
+  isLastActivePhase: boolean;
   setValue: (value: boolean) => void;
 }
-export const TimingFooter: FunctionComponent<Props> = ({ timingInMs, timingLabel, setValue }) => {
+export const TimingFooter: FunctionComponent<Props> = ({
+  timingInMs,
+  timingLabel,
+  isLastActivePhase,
+  setValue,
+}) => {
   if (timingInMs === undefined) {
     return null;
   }
@@ -36,7 +42,7 @@ export const TimingFooter: FunctionComponent<Props> = ({ timingInMs, timingLabel
           <EuiLink onClick={() => setValue(true)} data-test-subj={'enableDeletePhaseLink'}>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.enablePhaseButtonLabel"
-              defaultMessage="Set delete age"
+              defaultMessage="Enable data deletion"
             />
           </EuiLink>
         </EuiText>
@@ -50,11 +56,22 @@ export const TimingFooter: FunctionComponent<Props> = ({ timingInMs, timingLabel
       <EuiText size={'s'} grow={false} className={'eui-displayInlineBlock'}>
         <FormattedMessage
           id="xpack.indexLifecycleMgmt.editPolicy.phaseTiming.daysTimingDescription"
-          defaultMessage="Data remains in this phase for {timingLabel}"
+          defaultMessage="Data remains in this phase for {timingLabel}."
           values={{
             timingLabel,
           }}
         />
+        {isLastActivePhase && (
+          <>
+            {' '}
+            <EuiLink onClick={() => setValue(false)} data-test-subj={'disableDeletePhaseLink'}>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.disablePhaseButtonLabel"
+                defaultMessage="Disable data deletion"
+              />
+            </EuiLink>
+          </>
+        )}
       </EuiText>
     </EuiPanel>
   );

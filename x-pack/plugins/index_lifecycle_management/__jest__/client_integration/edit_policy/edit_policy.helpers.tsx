@@ -245,7 +245,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
-  const createDeletePhaseEnableActions = () => {
+  const createToggleDeletePhaseActions = () => {
     const enablePhase = async () => {
       await act(async () => {
         find('enableDeletePhaseLink').simulate('click');
@@ -315,7 +315,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
-        ...createDeletePhaseEnableActions(),
+        ...createToggleDeletePhaseActions(),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },

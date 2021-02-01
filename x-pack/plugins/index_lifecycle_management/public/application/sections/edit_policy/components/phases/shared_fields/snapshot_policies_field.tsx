@@ -12,17 +12,12 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
   EuiComboBoxOptionOption,
+  EuiDescribedFormGroup,
   EuiLink,
   EuiSpacer,
-  EuiFormRow,
-  EuiComboBox,
 } from '@elastic/eui';
 
-import {
-  getFieldValidityAndErrorMessage,
-  UseField,
-  useFormData,
-} from '../../../../../../shared_imports';
+import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -145,63 +140,78 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
   }
 
   return (
-    <>
-      <UseField<string> path={waitForSnapshotFormField}>
-        {(field) => {
-          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-          const singleSelectionArray: EuiComboBoxOptionOption[] = field.value
-            ? [{ label: field.value }]
-            : [];
+    <EuiDescribedFormGroup
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
+            defaultMessage="Wait for snapshot policy"
+          />
+        </h3>
+      }
+      description={
+        <>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
+            defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
+          />{' '}
+          <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
+        </>
+      }
+      titleSize="xs"
+      fullWidth
+    >
+      <>
+        <UseField<string>
+          path={waitForSnapshotFormField}
+          componentProps={{
+            label: (
+              <>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotLabel"
+                  defaultMessage="Snapshot policy name"
+                />
+                <OptionalLabel />
+              </>
+            ),
+          }}
+        >
+          {(field) => {
+            const singleSelectionArray: [selectedSnapshot?: string] = field.value
+              ? [field.value]
+              : [];
 
-          return (
-            <EuiFormRow
-              label={
-                <>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
-                    defaultMessage="Wait for snapshot policy"
-                  />
-                  <OptionalLabel />
-                </>
-              }
-              helpText={
-                <>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
-                    defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
-                  />{' '}
-                  <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
-                </>
-              }
-              error={errorMessage}
-              isInvalid={isInvalid}
-            >
-              <EuiComboBox
-                selectedOptions={singleSelectionArray}
-                data-test-subj={'snapshotPolicyCombobox'}
-                options={policies}
-                singleSelection={{ asPlainText: true }}
-                isLoading={isLoading}
-                noSuggestions={!!(error || data.length === 0)}
-                onCreateOption={(newOption: string) => {
-                  field.setValue(newOption);
+            return (
+              <ComboBoxField
+                field={
+                  {
+                    ...field,
+                    value: singleSelectionArray,
+                  } as any
+                }
+                euiFieldProps={{
+                  'data-test-subj': 'snapshotPolicyCombobox',
+                  options: policies,
+                  singleSelection: { asPlainText: true },
+                  isLoading,
+                  noSuggestions: !!(error || data.length === 0),
+                  onCreateOption: (newOption: string) => {
+                    field.setValue(newOption);
+                  },
+                  onChange: (options: EuiComboBoxOptionOption[]) => {
+                    if (options.length > 0) {
+                      field.setValue(options[0].label);
+                    } else {
+                      field.setValue('');
+                    }
+                  },
                 }}
-                onChange={(options: EuiComboBoxOptionOption[]) => {
-                  if (options.length > 0) {
-                    field.setValue(options[0].label);
-                  } else {
-                    field.setValue('');
-                  }
-                }}
-                placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
-                  defaultMessage: 'Type and then hit "ENTER"',
-                })}
               />
-            </EuiFormRow>
-          );
-        }}
-      </UseField>
-      {calloutContent}
-    </>
+            );
+          }}
+        </UseField>
+        {calloutContent}
+      </>
+    </EuiDescribedFormGroup>
   );
 };

@@ -117,6 +117,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
               <div
                 style={isShowingSettings ? {} : { display: 'none' }}
                 id={`${phase}-phaseContent`}
+                aria-live="polite"
               >
                 <EuiSpacer />
                 {children}

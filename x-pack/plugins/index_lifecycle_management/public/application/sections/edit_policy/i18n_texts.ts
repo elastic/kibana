@@ -187,12 +187,9 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
-      delete: i18n.translate(
-        'xpack.indexLifecycleMgmt.editPolicy.deletePhasePhase.deletePhaseTitle',
-        {
-          defaultMessage: 'Delete Data',
-        }
-      ),
+      delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
+        defaultMessage: 'Delete Data',
+      }),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
@@ -207,6 +204,13 @@ export const i18nTexts = {
         defaultMessage:
           'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
       }),
+      delete: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
+        {
+          defaultMessage:
+            'You no longer need your index.  You can define when it is safe to delete it.',
+        }
+      ),
     },
   },
 };

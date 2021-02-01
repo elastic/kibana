@@ -11,9 +11,9 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
-  EuiCallOut,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -59,7 +59,7 @@ export const DeletePhase: FunctionComponent = () => {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => setDeletePhaseEnabled(false)}
-                iconType={'trash'}
+                iconType={'cross'}
                 color={'danger'}
                 size="xs"
                 iconSide="left"
@@ -67,27 +67,19 @@ export const DeletePhase: FunctionComponent = () => {
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.removeDeletePhaseButtonLabel"
-                  defaultMessage="Remove"
+                  defaultMessage="Disable"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size={'xl'} />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiCallOut color={'warning'}>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
-              defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
-            />
-          </EuiCallOut>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SnapshotPoliciesField />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+        {i18nTexts.editPolicy.descriptions.delete}
+      </EuiText>
+      <EuiSpacer />
+      <SnapshotPoliciesField />
     </EuiPanel>
   );
 };
