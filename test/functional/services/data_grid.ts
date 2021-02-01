@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import { chunk } from 'lodash';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
@@ -31,14 +32,11 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const columns = $('.euiDataGridHeaderCell__content')
         .toArray()
         .map((cell) => $(cell).text());
-      const rows = $.findTestSubjects('dataGridRow')
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text())
-        );
+        .map((cell) => $(cell).text());
+
+      const rows = chunk(cells, columns.length);
 
       return {
         columns,
@@ -56,20 +54,18 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       cellDataTestSubj: string
     ): Promise<string[][]> {
       const $ = await element.parseDomContent();
-      return $('[data-test-subj="dataGridRow"]')
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      const cells = $.findTestSubjects('dataGridRowCell')
         .toArray()
-        .map((row) =>
-          $(row)
-            .findTestSubjects('dataGridRowCell')
-            .toArray()
-            .map((cell) =>
-              $(cell)
-                .findTestSubject(cellDataTestSubj)
-                .text()
-                .replace(/&nbsp;/g, '')
-                .trim()
-            )
+        .map((cell) =>
+          $(cell)
+            .findTestSubject(cellDataTestSubj)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
         );
+
+      return chunk(cells, columnNumber);
     }
 
     /**
@@ -90,11 +86,13 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
      * @param columnIndex column index starting from 1 (1 means 1st column)
      */
     public async getCellElement(rowIndex: number, columnIndex: number) {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRow"]:nth-of-type(${
-          rowIndex + 1
-        })
-        [data-test-subj="dataGridRowCell"]:nth-of-type(${columnIndex})`
+        `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
+          columnNumber * rowIndex + columnIndex + 2
+        })`
       );
     }
     public async getFields() {
