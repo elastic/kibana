@@ -61,7 +61,7 @@ export interface Pie {
   options: PieOptions;
 }
 
-interface Arguments {
+export interface Arguments {
   palette: PaletteOutput;
   seriesStyle: SeriesStyle[];
   radius: number | 'auto';

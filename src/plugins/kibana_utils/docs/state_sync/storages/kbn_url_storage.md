@@ -96,11 +96,11 @@ setTimeout(() => {
 }, 0);
 ```
 
-For cases, where granular control over URL updates is needed, `kbnUrlStateStorage` provides these advanced apis:
+For cases, where granular control over URL updates is needed, `kbnUrlStateStorage` exposes `kbnUrlStateStorage.kbnUrlControls` that exposes these advanced apis:
 
-- `kbnUrlStateStorage.flush({replace: boolean})` - allows to synchronously apply any pending updates.
-  `replace` option allows to use `history.replace()` instead of `history.push()`. Returned boolean indicates if any update happened
-- `kbnUrlStateStorage.cancel()` - cancels any pending updates
+- `kbnUrlStateStorage.kbnUrlControls.flush({replace: boolean})` - allows to synchronously apply any pending updates.
+  `replace` option allows using `history.replace()` instead of `history.push()`.
+- `kbnUrlStateStorage.kbnUrlControls.cancel()` - cancels any pending updates.
 
 ### Sharing one `kbnUrlStateStorage` instance
 

@@ -223,7 +223,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -237,7 +237,7 @@ format: {property: "features"}
 [[vega-with-a-map]]
 ==== Vega with a Map
 
-To enable *Maps*, the graph must specify `type=map` in the host configuration:
+experimental[] To enable *Maps*, the graph must specify `type=map` in the host configuration:
 
 [source,yaml]
 ----
@@ -289,7 +289,7 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -335,7 +335,7 @@ Use the contextual *Inspect* tool to gain insights into different elements.
 
 [float]
 [[inspect-elasticsearch-requests]]
-======= Inspect {es} requests
+====== Inspect {es} requests
 
 *Vega* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation
 results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests.

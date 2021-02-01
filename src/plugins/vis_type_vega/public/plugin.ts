@@ -17,17 +17,18 @@ import {
   setData,
   setInjectedVars,
   setUISettings,
-  setMapsLegacyConfig,
   setInjectedMetadata,
+  setMapServiceSettings,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IServiceSettings } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
+import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -44,7 +45,7 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsLegacy: any;
+  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 /** @internal */
@@ -68,8 +69,12 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
+
     setUISettings(core.uiSettings);
-    setMapsLegacyConfig(mapsLegacy.config);
+
+    setMapServiceSettings(
+      new MapServiceSettings(mapsLegacy.config, this.initializerContext.env.packageInfo.version)
+    );
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -84,7 +89,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
-    visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
+    visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
   public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
