@@ -15,13 +15,20 @@ import type { SearchUsage } from '../collectors';
 import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../collectors/usage';
-import { KbnServerError } from '../../../../kibana_utils/server';
+import { getKbnServerError, KbnServerError } from '../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => ({
+  /**
+   * @param request
+   * @param options
+   * @param deps
+   * @throws `KbnServerError`
+   * @returns `Observable<IEsSearchResponse<any>>`
+   */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See data_enhanced for other type support.
@@ -30,16 +37,20 @@ export const esSearchStrategyProvider = (
     }
 
     const search = async () => {
-      const config = await config$.pipe(first()).toPromise();
-      const params = {
-        ...(await getDefaultSearchParams(uiSettingsClient)),
-        ...getShardTimeout(config),
-        ...request.params,
-      };
-      const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
-      const { body } = await shimAbortSignal(promise, abortSignal);
-      const response = shimHitsTotal(body, options);
-      return toKibanaSearchResponse(response);
+      try {
+        const config = await config$.pipe(first()).toPromise();
+        const params = {
+          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...getShardTimeout(config),
+          ...request.params,
+        };
+        const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+        const { body } = await shimAbortSignal(promise, abortSignal);
+        const response = shimHitsTotal(body, options);
+        return toKibanaSearchResponse(response);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     };
 
     return from(search()).pipe(tap(searchUsageObserver(logger, usage)));
