@@ -14,8 +14,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiComboBox,
-  EuiFormHelpText,
-  EuiLink,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
@@ -46,6 +44,7 @@ interface OfExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  helpText?: string;
 }
 
 export const OfExpression = ({
@@ -57,6 +56,7 @@ export const OfExpression = ({
   display = 'inline',
   customAggTypesOptions,
   popupPosition,
+  helpText,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -121,6 +121,8 @@ export const OfExpression = ({
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
+              data-test-subj="availablefieldsOptionsFormRow"
+              helpText={helpText}
             >
               <EuiComboBox
                 fullWidth
@@ -141,25 +143,6 @@ export const OfExpression = ({
                 }}
               />
             </EuiFormRow>
-            <EuiFormHelpText>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
-                defaultMessage="Can't find a metric? {documentationLink}"
-                values={{
-                  documentationLink: (
-                    <EuiLink
-                      href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
-                      target="BLANK"
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
-                        defaultMessage="Learn how to add more data"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiFormHelpText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
