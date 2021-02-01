@@ -10,19 +10,11 @@ import type { ReadStream } from 'fs';
 import type { ResponseObject } from '@hapi/hapi';
 
 const isBuffer = (obj: unknown): obj is Buffer => Buffer.isBuffer(obj);
-const isObject = (obj: unknown): obj is Record<string, any> =>
+const isObject = (obj: unknown): obj is Record<string, unknown> =>
   typeof obj === 'object' && obj !== null;
-const isReadStream = (obj: unknown): obj is ReadStream =>
+const isFsReadStream = (obj: unknown): obj is ReadStream =>
   typeof obj === 'object' && obj !== null && 'bytesRead' in obj;
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
-
-function getContentLength(headers: Record<string, any>): string | string[] | void {
-  for (const h of Object.keys(headers)) {
-    if (h.toLowerCase() === 'content-length') {
-      return headers[h];
-    }
-  }
-}
 
 /**
  * Attempts to determine the size (in bytes) of a hapi/good
@@ -42,8 +34,7 @@ export function getResponsePayloadBytes(
   payload: ResponseObject['source'],
   headers: Record<string, any> = {}
 ): number | undefined {
-  const contentLength = getContentLength(headers);
-
+  const contentLength = headers['content-length'];
   if (contentLength) {
     const val = parseInt(
       // hapi response headers can be `string | string[]`, so we need to handle both cases
@@ -52,15 +43,19 @@ export function getResponsePayloadBytes(
     );
     return !isNaN(val) ? val : undefined;
   }
+
   if (isBuffer(payload)) {
     return payload.byteLength;
   }
-  if (isReadStream(payload)) {
+
+  if (isFsReadStream(payload)) {
     return payload.bytesRead;
   }
+
   if (isString(payload)) {
     return Buffer.byteLength(payload);
   }
+
   if (isObject(payload)) {
     return Buffer.byteLength(JSON.stringify(payload));
   }

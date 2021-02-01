@@ -12,8 +12,6 @@ import { createReadStream } from 'fs';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 describe('getPayloadSize', () => {
-  afterEach(() => mockFs.restore());
-
   describe('handles Buffers', () => {
     test('with ascii characters', () => {
       const payload = 'heya';
@@ -28,7 +26,9 @@ describe('getPayloadSize', () => {
     });
   });
 
-  describe('handles Streams', () => {
+  describe('handles fs streams', () => {
+    afterEach(() => mockFs.restore());
+
     test('with ascii characters', async () => {
       mockFs({ 'test.txt': 'heya' });
       const readStream = createReadStream('test.txt');

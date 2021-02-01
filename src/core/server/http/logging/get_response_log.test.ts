@@ -7,7 +7,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import { Boom } from '@hapi/boom';
+import Boom from '@hapi/boom';
 import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { getEcsResponseLog } from './get_response_log';
 
@@ -26,7 +26,7 @@ interface RequestFixtureOptions {
   mime?: string;
   path?: string;
   query?: Record<string, any>;
-  response?: Record<string, any> | Boom;
+  response?: Record<string, any> | Boom.Boom;
 }
 
 function createMockHapiRequest({
@@ -142,10 +142,10 @@ describe('getEcsResponseLog', () => {
 
   test('handles Boom errors in the response', () => {
     const req = createMockHapiRequest({
-      response: new Boom('oops'),
+      response: Boom.badRequest(),
     });
     const result = getEcsResponseLog(req, logger);
-    expect(result.http.response.status_code).toBe(500);
+    expect(result.http.response.status_code).toBe(400);
   });
 
   describe('filters sensitive headers', () => {
@@ -168,17 +168,6 @@ describe('getEcsResponseLog', () => {
           "set-cookie": "[REDACTED]",
         }
       `);
-    });
-
-    test('is case-insensitive when filtering headers', () => {
-      const req = createMockHapiRequest({
-        headers: { Authorization: 'a', COOKIE: 'b', 'user-agent': 'hi' },
-        response: { headers: { 'content-length': 123, 'Set-Cookie': 'c' } },
-      });
-      const result = getEcsResponseLog(req, logger);
-      expect(result.http.request.headers.Authorization).toBe('[REDACTED]');
-      expect(result.http.request.headers.COOKIE).toBe('[REDACTED]');
-      expect(result.http.response.headers['Set-Cookie']).toBe('[REDACTED]');
     });
   });
 

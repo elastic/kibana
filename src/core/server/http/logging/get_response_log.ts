@@ -19,14 +19,20 @@ const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
-function redactSensitiveHeaders(headers: Record<string, unknown>): Record<string, unknown> {
-  Object.keys(headers).forEach((key) => {
-    if (FORBIDDEN_HEADERS.includes(key.toLowerCase())) {
-      headers[key] = REDACTED_HEADER_TEXT;
-    }
-  });
-
-  return headers;
+function redactSensitiveHeaders(
+  headers: Record<string, string | string[]>
+): Record<string, string | string[]> {
+  return (
+    headers &&
+    Object.keys(headers).reduce(
+      (acc, key) => ({
+        // Create a shallow copy to prevent mutating the original headers
+        ...acc,
+        [key]: FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key],
+      }),
+      {} as Record<string, string | string[]>
+    )
+  );
 }
 
 /**

@@ -7,7 +7,7 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import { Boom } from '@hapi/boom';
+import Boom from '@hapi/boom';
 
 import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
@@ -22,10 +22,9 @@ describe('getPayloadSize', () => {
   let logger: MockedLogger;
 
   beforeEach(() => (logger = loggerMock.create()));
-  afterEach(() => mockFs.restore());
 
   test('handles Boom errors', () => {
-    const boomError = new Boom('oops');
+    const boomError = Boom.badRequest();
     const payload = boomError.output.payload;
     const result = getResponsePayloadBytes(boomError, logger);
     expect(result).toBe(JSON.stringify(payload).length);
@@ -55,7 +54,9 @@ describe('getPayloadSize', () => {
     });
   });
 
-  describe('handles Streams', () => {
+  describe('handles fs streams', () => {
+    afterEach(() => mockFs.restore());
+
     test('with ascii characters', async () => {
       mockFs({ 'test.txt': 'heya' });
       const source = createReadStream('test.txt');

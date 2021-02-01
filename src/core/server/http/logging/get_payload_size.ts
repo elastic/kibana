@@ -16,23 +16,9 @@ type Response = Request['response'];
 const isBuffer = (src: unknown, res: Response): src is Buffer => {
   return !isBoom(res) && res.variety === 'buffer' && res.source === src;
 };
-const isReadStream = (src: unknown, res: Response): src is ReadStream => {
+const isFsReadStream = (src: unknown, res: Response): src is ReadStream => {
   return !isBoom(res) && res.variety === 'stream' && res.source === src;
 };
-
-function getContentLength(res: Response): string | string[] | void {
-  const headers = isBoom(res)
-    ? (res.output.headers as Record<string, string | string[]>)
-    : res.headers;
-
-  if (headers) {
-    for (const h of Object.keys(headers)) {
-      if (h.toLowerCase() === 'content-length') {
-        return headers[h];
-      }
-    }
-  }
-}
 
 /**
  * Attempts to determine the size (in bytes) of a Hapi response
@@ -45,7 +31,11 @@ function getContentLength(res: Response): string | string[] | void {
  */
 export function getResponsePayloadBytes(response: Response, log: Logger): number | undefined {
   try {
-    const contentLength = getContentLength(response);
+    const headers = isBoom(response)
+      ? (response.output.headers as Record<string, string | string[]>)
+      : response.headers;
+
+    const contentLength = headers && headers['content-length'];
     if (contentLength) {
       const val = parseInt(
         // hapi response headers can be `string | string[]`, so we need to handle both cases
@@ -54,15 +44,19 @@ export function getResponsePayloadBytes(response: Response, log: Logger): number
       );
       return !isNaN(val) ? val : undefined;
     }
+
     if (isBoom(response)) {
       return Buffer.byteLength(JSON.stringify(response.output.payload));
     }
+
     if (isBuffer(response.source, response)) {
       return response.source.byteLength;
     }
-    if (isReadStream(response.source, response)) {
+
+    if (isFsReadStream(response.source, response)) {
       return response.source.bytesRead;
     }
+
     if (response.variety === 'plain') {
       return typeof response.source === 'string'
         ? Buffer.byteLength(response.source)
