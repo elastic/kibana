@@ -1,0 +1,161 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
+import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
+
+const FEATURE = 'Feature';
+const POINT = 'Point';
+const SEVERITY_COLOR_RAMP = [
+  {
+    stop: ANOMALY_THRESHOLD.LOW,
+    color: SEVERITY_COLORS.WARNING,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.MINOR,
+    color: SEVERITY_COLORS.MINOR,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.MAJOR,
+    color: SEVERITY_COLORS.MAJOR,
+  },
+  {
+    stop: ANOMALY_THRESHOLD.CRITICAL,
+    color: SEVERITY_COLORS.CRITICAL,
+  },
+];
+
+function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_point') {
+  const anomalyFeatures = [];
+  for (let i = 0; i < anomalies.length; i++) {
+    const anomaly = anomalies[i];
+    const geoResults = anomaly.geo_results || (anomaly?.causes && anomaly?.causes[0]?.geo_results);
+    const coordinateStr = geoResults && geoResults[type];
+    if (coordinateStr !== undefined) {
+      // Must reverse coordinates here. Map expects [lon, lat] - anomalies are stored as [lat, lon] for lat_lon jobs
+      const coordinates = coordinateStr
+        .split(',')
+        .map((point: string) => Number(point))
+        .reverse();
+
+      anomalyFeatures.push({
+        type: FEATURE,
+        geometry: {
+          type: POINT,
+          coordinates,
+        },
+        properties: {
+          record_score: Math.floor(anomaly.record_score),
+          [type]: coordinates.map((point: number) => point.toFixed(2)),
+        },
+      });
+    }
+  }
+  return anomalyFeatures;
+}
+
+export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
+  return {
+    id: 'anomalies_typical_layer',
+    label: 'Typical',
+    sourceDescriptor: {
+      id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854e',
+      type: 'GEOJSON_FILE',
+      __featureCollection: {
+        features: getAnomalyFeatures(anomalies, 'typical_point'),
+        type: 'FeatureCollection',
+      },
+    },
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: {
+            color: '#98A2B2',
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 2,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    },
+    type: 'VECTOR',
+  };
+};
+
+export const getMLAnomaliesActualLayer = (anomalies: any) => {
+  return {
+    id: 'anomalies_actual_layer',
+    label: 'Actual',
+    sourceDescriptor: {
+      id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854d',
+      type: 'GEOJSON_FILE',
+      __fields: [
+        {
+          name: 'record_score',
+          type: 'number',
+        },
+      ],
+      __featureCollection: {
+        features: getAnomalyFeatures(anomalies, 'actual_point'),
+        type: 'FeatureCollection',
+      },
+    },
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: STYLE_TYPE.DYNAMIC,
+          options: {
+            customColorRamp: SEVERITY_COLOR_RAMP,
+            field: {
+              name: 'record_score',
+              origin: FIELD_ORIGIN.SOURCE,
+            },
+            useCustomColorRamp: true,
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 2,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    },
+    type: 'VECTOR',
+  };
+};
