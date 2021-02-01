@@ -103,7 +103,6 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
-    const filename = embeddable.getSavedSearch().title;
     const timezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to, { roundUp: true });
@@ -140,7 +139,7 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
       .then((rawResponse: string) => {
         this.isDownloading = false;
 
-        const download = `${filename}.csv`;
+        const download = `${embeddable.getSavedSearch().title}.csv`;
         const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support

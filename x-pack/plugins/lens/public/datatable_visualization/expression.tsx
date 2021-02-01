@@ -4,62 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './expression.scss';
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiToolTip,
-  Direction,
-  EuiScreenReaderOnly,
-  EuiIcon,
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType,
-} from '@elastic/eui';
 
-import { IAggType } from 'src/plugins/data/public';
-import { Datatable, DatatableColumnMeta, RenderMode } from 'src/plugins/expressions';
-import {
-  FormatFactory,
-  ILensInterpreterRenderHandlers,
-  LensEditEvent,
-  LensFilterEvent,
-  LensMultiTable,
-  LensTableRowContextMenuEvent,
-} from '../types';
-import {
+import type { IAggType } from 'src/plugins/data/public';
+import type {
+  DatatableColumnMeta,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
-} from '../../../../../src/plugins/expressions/public';
-import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder } from '../shared_components';
-import { desanitizeFilterContext } from '../utils';
-import { LensIconChartDatatable } from '../assets/chart_datatable';
+} from 'src/plugins/expressions';
 import { getSortingCriteria } from './sorting';
 
-export const LENS_EDIT_SORT_ACTION = 'sort';
+import { DatatableComponent } from './components/table_basic';
 
-export interface LensSortActionData {
-  columnId: string | undefined;
-  direction: 'asc' | 'desc' | 'none';
-}
-
-type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
-
-// This is a way to circumvent the explicit "any" forbidden type
-type TableRowField = Datatable['rows'][number] & { rowIndex: number };
-
-export interface DatatableColumns {
-  columnIds: string[];
-  sortBy: string;
-  sortDirection: string;
-}
+import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
+import type {
+  DatatableRender,
+  DatatableColumns,
+  DatatableColumnWidth,
+  DatatableColumnWidthResult,
+} from './components/types';
 
 interface Args {
   title: string;
@@ -70,27 +36,6 @@ interface Args {
 export interface DatatableProps {
   data: LensMultiTable;
   args: Args;
-}
-
-type DatatableRenderProps = DatatableProps & {
-  formatFactory: FormatFactory;
-  onClickValue: (data: LensFilterEvent['data']) => void;
-  onEditAction?: (data: LensSortAction['data']) => void;
-  getType: (name: string) => IAggType;
-  renderMode: RenderMode;
-  onRowContextMenuClick?: (data: LensTableRowContextMenuEvent['data']) => void;
-
-  /**
-   * A boolean for each table row, which is true if the row active
-   * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
-   */
-  rowHasRowClickTriggerActions?: boolean[];
-};
-
-export interface DatatableRender {
-  type: 'render';
-  as: 'lens_datatable_renderer';
-  value: DatatableProps;
 }
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
@@ -191,10 +136,44 @@ export const datatableColumns: ExpressionFunctionDefinition<
       multi: true,
       help: '',
     },
+    columnWidth: {
+      types: ['lens_datatable_column_width'],
+      multi: true,
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: DatatableColumns) {
     return {
       type: 'lens_datatable_columns',
+      ...args,
+    };
+  },
+};
+
+export const datatableColumnWidth: ExpressionFunctionDefinition<
+  'lens_datatable_column_width',
+  null,
+  DatatableColumnWidth,
+  DatatableColumnWidthResult
+> = {
+  name: 'lens_datatable_column_width',
+  aliases: [],
+  type: 'lens_datatable_column_width',
+  help: '',
+  inputTypes: ['null'],
+  args: {
+    columnId: {
+      types: ['string'],
+      help: '',
+    },
+    width: {
+      types: ['number'],
+      help: '',
+    },
+  },
+  fn: function fn(input: unknown, args: DatatableColumnWidth) {
+    return {
+      type: 'lens_datatable_column_width',
       ...args,
     };
   },
@@ -217,18 +196,6 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const onClickValue = (data: LensFilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
-    };
-
-    const onEditAction = (data: LensSortAction['data']) => {
-      if (handlers.getRenderMode() === 'edit') {
-        handlers.event({ name: 'edit', data });
-      }
-    };
-    const onRowContextMenuClick = (data: LensTableRowContextMenuEvent['data']) => {
-      handlers.event({ name: 'tableRowContextMenuClick', data });
-    };
     const { hasCompatibleActions } = handlers;
 
     // An entry for each table row, whether it has any actions attached to
@@ -263,10 +230,8 @@ export const getDatatableRenderer = (dependencies: {
         <DatatableComponent
           {...config}
           formatFactory={dependencies.formatFactory}
-          onClickValue={onClickValue}
-          onEditAction={onEditAction}
+          dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
-          onRowContextMenuClick={onRowContextMenuClick}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
         />
@@ -279,281 +244,3 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });
-
-function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
-  const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
-  const newStateIndex = (1 + states.findIndex((state) => state === currentValue)) % states.length;
-  return states[newStateIndex];
-}
-
-function getDirectionLongLabel(sortDirection: LensSortAction['data']['direction']) {
-  if (sortDirection === 'none') {
-    return sortDirection;
-  }
-  return sortDirection === 'asc' ? 'ascending' : 'descending';
-}
-
-function getHeaderSortingCell(
-  name: string,
-  columnId: string,
-  sorting: Omit<LensSortAction['data'], 'action'>,
-  sortingLabel: string
-) {
-  if (columnId !== sorting.columnId || sorting.direction === 'none') {
-    return name || '';
-  }
-  // This is a workaround to hijack the title value of the header cell
-  return (
-    <span aria-sort={getDirectionLongLabel(sorting.direction)}>
-      {name || ''}
-      <EuiScreenReaderOnly>
-        <span>{sortingLabel}</span>
-      </EuiScreenReaderOnly>
-      <EuiIcon
-        className="euiTableSortIcon"
-        type={sorting.direction === 'asc' ? 'sortUp' : 'sortDown'}
-        size="m"
-        aria-label={sortingLabel}
-      />
-    </span>
-  );
-}
-
-export function DatatableComponent(props: DatatableRenderProps) {
-  const [firstTable] = Object.values(props.data.tables);
-  const formatters: Record<string, ReturnType<FormatFactory>> = {};
-
-  firstTable.columns.forEach((column) => {
-    formatters[column.id] = props.formatFactory(column.meta?.params);
-  });
-
-  const { onClickValue, onEditAction, onRowContextMenuClick } = props;
-  const handleFilterClick = useMemo(
-    () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
-      const col = firstTable.columns[colIndex];
-      const isDate = col.meta?.type === 'date';
-      const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
-      const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
-
-      const data: LensFilterEvent['data'] = {
-        negate,
-        data: [
-          {
-            row: rowIndex,
-            column: colIndex,
-            value,
-            table: firstTable,
-          },
-        ],
-        timeFieldName,
-      };
-      onClickValue(desanitizeFilterContext(data));
-    },
-    [firstTable, onClickValue]
-  );
-
-  const bucketColumns = firstTable.columns
-    .filter((col) => {
-      return (
-        col?.meta?.sourceParams?.type &&
-        props.getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-      );
-    })
-    .map((col) => col.id);
-
-  const isEmpty =
-    firstTable.rows.length === 0 ||
-    (bucketColumns.length &&
-      firstTable.rows.every((row) =>
-        bucketColumns.every((col) => typeof row[col] === 'undefined')
-      ));
-
-  if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
-  }
-
-  const visibleColumns = props.args.columns.columnIds.filter((field) => !!field);
-  const columnsReverseLookup = firstTable.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
-    return memo;
-  }, {});
-
-  const { sortBy, sortDirection } = props.args.columns;
-
-  const sortedRows: TableRowField[] =
-    firstTable?.rows.map((row, rowIndex) => ({ ...row, rowIndex })) || [];
-  const isReadOnlySorted = props.renderMode !== 'edit';
-
-  const sortedInLabel = i18n.translate('xpack.lens.datatableSortedInReadOnlyMode', {
-    defaultMessage: 'Sorted in {sortValue} order',
-    values: {
-      sortValue: sortDirection === 'asc' ? 'ascending' : 'descending',
-    },
-  });
-
-  const tableColumns: Array<EuiBasicTableColumn<TableRowField>> = visibleColumns.map((field) => {
-    const filterable = bucketColumns.includes(field);
-    const { name, index: colIndex, meta } = columnsReverseLookup[field];
-    const fieldName = meta?.field;
-    const nameContent = !isReadOnlySorted
-      ? name
-      : getHeaderSortingCell(
-          name,
-          field,
-          {
-            columnId: sortBy,
-            direction: sortDirection as LensSortAction['data']['direction'],
-          },
-          sortedInLabel
-        );
-    return {
-      field,
-      name: nameContent,
-      sortable: !isReadOnlySorted,
-      render: (value: unknown) => {
-        const formattedValue = formatters[field]?.convert(value);
-
-        if (filterable) {
-          return (
-            <EuiFlexGroup
-              className="lnsDataTable__cell"
-              data-test-subj="lnsDataTableCellValueFilterable"
-              gutterSize="xs"
-            >
-              <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  responsive={false}
-                  gutterSize="none"
-                  alignItems="center"
-                  className="lnsDataTable__filter"
-                >
-                  <EuiToolTip
-                    position="bottom"
-                    content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
-                      defaultMessage: 'Include value',
-                    })}
-                  >
-                    <EuiButtonIcon
-                      iconType="plusInCircle"
-                      color="text"
-                      aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
-                        defaultMessage: `Include {value}`,
-                        values: {
-                          value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
-                        },
-                      })}
-                      data-test-subj="lensDatatableFilterFor"
-                      onClick={() => handleFilterClick(field, value, colIndex)}
-                    />
-                  </EuiToolTip>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="bottom"
-                      content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
-                        defaultMessage: 'Exclude value',
-                      })}
-                    >
-                      <EuiButtonIcon
-                        iconType="minusInCircle"
-                        color="text"
-                        aria-label={i18n.translate('xpack.lens.excludeValueButtonAriaLabel', {
-                          defaultMessage: `Exclude {value}`,
-                          values: {
-                            value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
-                          },
-                        })}
-                        data-test-subj="lensDatatableFilterOut"
-                        onClick={() => handleFilterClick(field, value, colIndex, true)}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }
-        return <span data-test-subj="lnsDataTableCellValue">{formattedValue}</span>;
-      },
-    };
-  });
-
-  if (!!props.rowHasRowClickTriggerActions && !!onRowContextMenuClick) {
-    const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
-    if (hasAtLeastOneRowClickAction) {
-      const actions: EuiTableActionsColumnType<TableRowField> = {
-        name: i18n.translate('xpack.lens.datatable.actionsColumnName', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            name: i18n.translate('xpack.lens.tableRowMore', {
-              defaultMessage: 'More',
-            }),
-            description: i18n.translate('xpack.lens.tableRowMoreDescription', {
-              defaultMessage: 'Table row context menu',
-            }),
-            type: 'icon',
-            icon: ({ rowIndex }: { rowIndex: number }) => {
-              if (
-                !!props.rowHasRowClickTriggerActions &&
-                !props.rowHasRowClickTriggerActions[rowIndex]
-              )
-                return 'empty';
-              return 'boxesVertical';
-            },
-            onClick: ({ rowIndex }) => {
-              onRowContextMenuClick({
-                rowIndex,
-                table: firstTable,
-                columns: props.args.columns.columnIds,
-              });
-            },
-          },
-        ],
-      };
-      tableColumns.push(actions);
-    }
-  }
-
-  return (
-    <VisualizationContainer
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
-      <EuiBasicTable
-        className="lnsDataTable"
-        data-test-subj="lnsDataTable"
-        tableLayout="auto"
-        sorting={{
-          sort:
-            !sortBy || sortDirection === 'none' || isReadOnlySorted
-              ? undefined
-              : {
-                  field: sortBy,
-                  direction: sortDirection as Direction,
-                },
-          allowNeutralSort: true, // this flag enables the 3rd Neutral state on the column header
-        }}
-        onChange={(event: { sort?: { field: string } }) => {
-          if (event.sort && onEditAction) {
-            const isNewColumn = sortBy !== event.sort.field;
-            // unfortunately the neutral state is not propagated and we need to manually handle it
-            const nextDirection = getNextOrderValue(
-              (isNewColumn ? 'none' : sortDirection) as LensSortAction['data']['direction']
-            );
-            return onEditAction({
-              action: 'sort',
-              columnId: nextDirection !== 'none' || isNewColumn ? event.sort.field : undefined,
-              direction: nextDirection,
-            });
-          }
-        }}
-        columns={tableColumns}
-        items={sortedRows}
-      />
-    </VisualizationContainer>
-  );
-}
