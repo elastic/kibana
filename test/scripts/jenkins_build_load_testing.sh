@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+while getopts s: flag
+do
+    case "${flag}" in
+        s) simulations=${OPTARG};;
+    esac
+done
+echo "Simulation classes: $simulations";
+
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
@@ -25,6 +33,7 @@ echo " -> test setup"
 source test/scripts/jenkins_test_setup_xpack.sh
 
 echo " -> run gatling load testing"
+export GATLING_SIMULATIONS="$simulations"
 node scripts/functional_tests \
-    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --config test/load/config.ts
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+  --config test/load/config.ts
