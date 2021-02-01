@@ -8,12 +8,12 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { shimHitsTotal } from './shim_hits_total';
+import { getKbnServerError } from '../../../../kibana_utils/server';
 import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
 
 /** @internal */
@@ -48,6 +48,9 @@ interface CallMsearchDependencies {
  * @internal
  */
 export function getCallMsearch(dependencies: CallMsearchDependencies) {
+  /**
+   * @throws KbnServerError
+   */
   return async (params: {
     body: MsearchRequestBody;
     signal?: AbortSignal;
@@ -61,28 +64,29 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     // trackTotalHits is not supported by msearch
     const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(uiSettings);
 
-    const body = convertRequestBody(params.body, timeout);
-
-    const promise = shimAbortSignal(
-      esClient.asCurrentUser.msearch(
+    try {
+      const promise = esClient.asCurrentUser.msearch(
         {
-          body,
+          body: convertRequestBody(params.body, timeout),
         },
         {
           querystring: defaultParams,
         }
-      ),
-      params.signal
-    );
-    const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
+      );
+      const response = await shimAbortSignal(promise, params.signal);
 
-    return {
-      body: {
-        ...response,
+      return {
         body: {
-          responses: response.body.responses?.map((r: SearchResponse<any>) => shimHitsTotal(r)),
+          ...response,
+          body: {
+            responses: response.body.responses?.map((r: SearchResponse<unknown>) =>
+              shimHitsTotal(r)
+            ),
+          },
         },
-      },
-    };
+      };
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
   };
 }
