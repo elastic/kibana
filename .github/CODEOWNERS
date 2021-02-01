@@ -66,6 +66,7 @@
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
+/x-pack/test/apm_api_integration/ @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
@@ -80,6 +81,7 @@
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
+/x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Beats
 /x-pack/plugins/beats_management/  @elastic/beats

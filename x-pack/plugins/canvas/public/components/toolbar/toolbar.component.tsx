@@ -31,7 +31,7 @@ const { Toolbar: strings } = ComponentStrings;
 
 type TrayType = 'pageManager' | 'expression';
 
-interface Props {
+export interface Props {
   isWriteable: boolean;
   selectedElement?: CanvasElement;
   selectedPageNumber: number;
