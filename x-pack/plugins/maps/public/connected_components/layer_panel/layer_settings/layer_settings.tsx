@@ -21,7 +21,7 @@ import { AlphaSlider } from '../../../components/alpha_slider';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 import { ILayer } from '../../../classes/layers/layer';
 
-interface Props {
+export interface Props {
   layer: ILayer;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;

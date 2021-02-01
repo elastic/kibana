@@ -18,6 +18,7 @@ export type MapFilters = {
   filters: Filter[];
   query?: MapQuery;
   refreshTimerLastTriggeredAt?: string;
+  searchSessionId?: string;
   timeFilters: TimeRange;
   zoom: number;
 };
