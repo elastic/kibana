@@ -37,7 +37,7 @@ export async function buildBazelProductionProjects({
   for (const project of projects.values()) {
     await buildProject(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
-    // chmod 644
+    // chmod -R 644
   }
 }
 

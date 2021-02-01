@@ -59584,7 +59584,7 @@ async function buildBazelProductionProjects({
 
   for (const project of projects.values()) {
     await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_2__["buildProject"])(project);
-    await copyToBuild(project, kibanaRoot, buildRoot); // chmod 644
+    await copyToBuild(project, kibanaRoot, buildRoot); // chmod -R 644
   }
 }
 /**
