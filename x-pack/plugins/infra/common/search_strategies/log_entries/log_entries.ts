@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { DslQuery } from '../../../../../../src/plugins/data/common';
 import { logSourceColumnConfigurationRT } from '../../http_api/log_sources';
 import {
   logEntryAfterCursorRT,
@@ -12,7 +13,7 @@ import {
   logEntryCursorRT,
   logEntryRT,
 } from '../../log_entry';
-import { jsonObjectRT } from '../../typed_json';
+import { JsonObject, jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
@@ -48,6 +49,8 @@ export const logEntriesSearchRequestParamsRT = rt.union([
 ]);
 
 export type LogEntriesSearchRequestParams = rt.TypeOf<typeof logEntriesSearchRequestParamsRT>;
+
+export type LogEntriesSearchRequestQuery = JsonObject | DslQuery;
 
 export const logEntriesSearchResponsePayloadRT = rt.intersection([
   rt.type({

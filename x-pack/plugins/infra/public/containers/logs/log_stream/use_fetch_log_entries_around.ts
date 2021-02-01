@@ -9,7 +9,7 @@ import { combineLatest, Observable, Subject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
-import { JsonObject } from '../../../../common/typed_json';
+import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
 import { useObservable, useObservableState } from '../../../utils/use_observable';
 import { useLogEntriesAfterRequest } from './use_fetch_log_entries_after';
@@ -26,7 +26,7 @@ export const useFetchLogEntriesAround = ({
   columnOverrides?: LogSourceColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
-  query?: JsonObject;
+  query?: LogEntriesSearchRequestQuery;
   sourceId: string;
   startTimestamp: number;
 }) => {

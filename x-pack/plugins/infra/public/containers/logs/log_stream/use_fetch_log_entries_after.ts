@@ -13,11 +13,11 @@ import { LogEntryAfterCursor } from '../../../../common/log_entry';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
+  LogEntriesSearchRequestQuery,
   LogEntriesSearchResponsePayload,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
-import { JsonObject } from '../../../../common/typed_json';
 import {
   flattenDataSearchResponseDescriptor,
   normalizeDataSearchResponses,
@@ -38,7 +38,7 @@ export const useLogEntriesAfterRequest = ({
   columnOverrides?: LogSourceColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
-  query?: JsonObject;
+  query?: LogEntriesSearchRequestQuery;
   sourceId: string;
   startTimestamp: number;
 }) => {
@@ -116,7 +116,7 @@ export const useFetchLogEntriesAfter = ({
   columnOverrides?: LogSourceColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
-  query?: JsonObject;
+  query?: LogEntriesSearchRequestQuery;
   sourceId: string;
   startTimestamp: number;
 }) => {
