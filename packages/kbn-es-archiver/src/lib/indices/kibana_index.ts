@@ -76,7 +76,9 @@ export async function migrateKibanaIndex({
  */
 async function fetchKibanaIndices(client: Client) {
   const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
+  const isKibanaIndex = (index: string) =>
+    /^\.kibana(:?_\d*)?$/.test(index) ||
+    /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index);
   return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
@@ -103,7 +105,7 @@ export async function cleanKibanaIndices({
 
   while (true) {
     const resp = await client.deleteByQuery({
-      index: `.kibana`,
+      index: `.kibana,.kibana_task_manager`,
       body: {
         query: {
           bool: {
@@ -115,7 +117,7 @@ export async function cleanKibanaIndices({
           },
         },
       },
-      ignore: [409],
+      ignore: [404, 409],
     });
 
     if (resp.total !== resp.deleted) {
