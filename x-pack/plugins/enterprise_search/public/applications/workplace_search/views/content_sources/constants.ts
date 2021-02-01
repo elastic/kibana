@@ -451,3 +451,17 @@ export const SOURCE_DISABLED_CALLOUT_BUTTON = i18n.translate(
     defaultMessage: 'Explore Platinum license',
   }
 );
+
+export const DOCUMENT_PERMISSIONS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.documentPermissionsLink',
+  {
+    defaultMessage: 'Learn more about document-level permission configuration',
+  }
+);
+
+export const UNDERSTAND_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.understandButton',
+  {
+    defaultMessage: 'I understand',
+  }
+);
