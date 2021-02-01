@@ -84,18 +84,10 @@ export const ALERT_ERROR_LICENSE_REASON = i18n.translate(
   }
 );
 
-export enum AlertErrorReasons {
-  READ = 'read',
-  DECRYPT = 'decrypt',
-  EXECUTE = 'execute',
-  UNKNOWN = 'unknown',
-  LICENSE = 'license',
-}
-
 export const alertsErrorReasonTranslationsMapping = {
-  [AlertErrorReasons.READ]: ALERT_ERROR_READING_REASON,
-  [AlertErrorReasons.DECRYPT]: ALERT_ERROR_DECRYPTING_REASON,
-  [AlertErrorReasons.EXECUTE]: ALERT_ERROR_EXECUTION_REASON,
-  [AlertErrorReasons.UNKNOWN]: ALERT_ERROR_UNKNOWN_REASON,
-  [AlertErrorReasons.LICENSE]: ALERT_ERROR_LICENSE_REASON,
+  read: ALERT_ERROR_READING_REASON,
+  decrypt: ALERT_ERROR_DECRYPTING_REASON,
+  execute: ALERT_ERROR_EXECUTION_REASON,
+  unknown: ALERT_ERROR_UNKNOWN_REASON,
+  license: ALERT_ERROR_LICENSE_REASON,
 };

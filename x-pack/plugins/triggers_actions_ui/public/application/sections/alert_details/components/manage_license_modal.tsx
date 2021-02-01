@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 
 interface Props {
-  message: string;
+  message?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }

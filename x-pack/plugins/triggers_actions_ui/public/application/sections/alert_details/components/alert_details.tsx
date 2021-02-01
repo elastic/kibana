@@ -39,10 +39,7 @@ import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { AlertEdit } from '../../alert_form';
 import { routeToAlertDetails } from '../../../constants';
-import {
-  alertsErrorReasonTranslationsMapping,
-  AlertErrorReasons,
-} from '../../alerts_list/translations';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
 import { ManageLicenseModal } from './manage_license_modal';
@@ -127,9 +124,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   useEffect(() => {
     setIsManageLicenseModalOpen(
-      alert.executionStatus.error &&
+      !!(
+        alert.executionStatus.error &&
         alert.executionStatus.error.reason &&
-        alert.executionStatus.error.reason === AlertErrorReasons.LICENSE
+        alert.executionStatus.error.reason === AlertExecutionStatusErrorReasons.License
+      )
     );
   }, [alert.executionStatus.error]);
 
