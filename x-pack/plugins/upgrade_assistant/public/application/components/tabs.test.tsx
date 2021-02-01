@@ -17,6 +17,19 @@ const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 const mockHttp = httpServiceMock.createSetupContract();
 
+jest.mock('../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+      };
+    },
+  };
+});
+
 describe('UpgradeAssistantTabs', () => {
   test('renders loading state', async () => {
     mockHttp.get.mockReturnValue(
