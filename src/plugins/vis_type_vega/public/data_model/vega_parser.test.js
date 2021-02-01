@@ -316,31 +316,6 @@ describe('VegaParser._parseMapConfig', () => {
       0
     )
   );
-
-  test(
-    'warnings',
-    check(
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        zoom: 'abc', // ignored
-        mapStyle: 'abc',
-        zoomControl: 'abc',
-        scrollWheelZoom: 'abc',
-        maxBounds: [2, 3, 4],
-      },
-      {
-        delayRepaint: true,
-        latitude: 0,
-        longitude: 0,
-        mapStyle: 'default',
-        zoomControl: true,
-        scrollWheelZoom: false,
-      },
-      5
-    )
-  );
 });
 
 describe('VegaParser._parseConfig', () => {

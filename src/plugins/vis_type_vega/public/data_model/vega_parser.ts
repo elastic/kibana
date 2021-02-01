@@ -466,20 +466,6 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
     // `false` is a valid value
     res.mapStyle = this._config?.mapStyle === undefined ? `default` : this._config.mapStyle;
-    if (res.mapStyle !== `default` && res.mapStyle !== false) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.mapStyleValueTypeWarningMessage', {
-          defaultMessage:
-            '{mapStyleConfigName} may either be {mapStyleConfigFirstAllowedValue} or {mapStyleConfigSecondAllowedValue}',
-          values: {
-            mapStyleConfigName: 'config.kibana.mapStyle',
-            mapStyleConfigFirstAllowedValue: 'false',
-            mapStyleConfigSecondAllowedValue: '"default"',
-          },
-        })
-      );
-      res.mapStyle = `default`;
-    }
 
     this._parseBool('zoomControl', res, true);
     this._parseBool('scrollWheelZoom', res, false);

@@ -251,7 +251,11 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       "longitude": -74,   // default 0
       "zoom": 7,          // default 2
 
-      // defaults to "default". Use false to disable base layer.
+      // Use "mapStyle" to configure a base map layer for your vega map. 
+      // Can be set to one of the following:
+      // - set to false to disable base layer;
+      // - set "mapStyle" to any Elastic Maps Service (EMS) tile layer id. 
+      //   May either be: "road_map", "road_map_desaturated", "dark_map"  
       "mapStyle": false,
 
       // default 0
