@@ -16,6 +16,7 @@ import {
   getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
+  getPresentationUtilContext,
 } from '../../kibana_services';
 import {
   checkForDuplicateTitle,
@@ -185,7 +186,7 @@ export function getTopNavConfig({
             defaultMessage: 'map',
           }),
         };
-
+        const PresentationUtilContext = getPresentationUtilContext();
         const saveModal =
           savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables() ? (
             <SavedObjectSaveModalOrigin
@@ -195,14 +196,10 @@ export function getTopNavConfig({
               options={tagSelector}
             />
           ) : (
-            <SavedObjectSaveModalDashboard
-              {...saveModalProps}
-              savedObjectsClient={getSavedObjectsClient()}
-              tagOptions={tagSelector}
-            />
+            <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
           );
 
-        showSaveModal(saveModal, getCoreI18n().Context);
+        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },
     });
 

@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
@@ -27,6 +27,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
   getParent: jest.fn().mockReturnThis(),
+  fetch$: jest.fn().mockReturnValue(of({})),
   fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
