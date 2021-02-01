@@ -37,7 +37,7 @@ interface IndexDocumentResponse {
   result: string;
 }
 
-interface GetResponse {
+export interface GetResponse {
   _id: string;
   _index: string;
   _source: Annotation;
