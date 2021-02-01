@@ -23,7 +23,6 @@ import {
   ViewMode,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { useMlKibana } from '../../contexts/kibana';
-import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
 
 export function MlEmbeddedMapComponent({
   layerList,
