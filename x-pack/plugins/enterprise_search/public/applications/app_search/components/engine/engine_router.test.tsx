@@ -16,6 +16,7 @@ import { Switch, Redirect, useParams } from 'react-router-dom';
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineRouter } from './engine_router';
 
@@ -92,5 +93,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders an relevance tuning view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(RelevanceTuning)).toHaveLength(1);
   });
 });

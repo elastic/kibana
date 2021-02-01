@@ -45,13 +45,13 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
+      canManageEngineRelevanceTuning,
       // canViewEngineDocuments,
       // canViewEngineSchema,
       // canViewEngineCrawler,
       // canViewMetaEngineSourceEngines,
       // canManageEngineSynonyms,
       // canManageEngineCurations,
-      // canManageEngineRelevanceTuning,
       // canManageEngineResultSettings,
       // canManageEngineSearchUi,
       // canViewEngineApiLogs,
@@ -96,9 +96,11 @@ export const EngineRouter: React.FC = () => {
       <Route path={ENGINE_DOCUMENTS_PATH}>
         <Documents engineBreadcrumb={engineBreadcrumb} />
       </Route>
-      <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
-        <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />
-      </Route>
+      {canManageEngineRelevanceTuning && (
+        <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
+          <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />
+        </Route>
+      )}
       <Route>
         <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
         <EngineOverview />
