@@ -289,13 +289,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           }
 
           const origin = document.querySelector(arguments[0]);
-          const target = document.querySelector(arguments[1]);
 
           const dragStartEvent = createEvent('dragstart');
           dispatchEvent(origin, dragStartEvent);
 
           setTimeout(() => {
             const dropEvent = createEvent('drop');
+            const target = document.querySelector(arguments[1]);
             dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
             const dragEndEvent = createEvent('dragend');
             dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
