@@ -32,11 +32,19 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
+
+    if (response.isRunning) {
+      return {
+        ...response,
+        data: [],
+        inspect,
+      };
+    }
+
     const sourceData = getDataFromSourceHits(_source);
     const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
 
     const data = unionBy('field', fieldsData, sourceData);
-
     return {
       ...response,
       data,
