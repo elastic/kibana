@@ -52,7 +52,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     },
 
     async getResultTableRows() {
-      return await testSubjects.findAll('mlExplorationDataGrid loaded > dataGridRow');
+      return await testSubjects.findAll('mlExplorationDataGrid loaded > dataGridRowCell');
     },
 
     async assertResultsTableNotEmpty() {
