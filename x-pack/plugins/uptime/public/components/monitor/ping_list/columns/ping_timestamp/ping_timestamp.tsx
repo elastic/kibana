@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
@@ -16,6 +15,7 @@ import { NavButtons } from './nav_buttons';
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
 import { StepImagePopover } from './step_image_popover';
+import { formatCaptionContent } from './translations';
 
 const StepDiv = styled.div`
   figure.euiImage {
@@ -76,13 +76,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const imgSrc = stepImages[stepNumber] || data?.src;
 
-  const captionContent = i18n.translate('xpack.uptime.synthetics.pingTimestamp.captionContent', {
-    defaultMessage: 'Step: {stepNumber} {stepName}',
-    values: {
-      stepNumber,
-      stepName: data?.stepName,
-    },
-  });
+  const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
 
   const ImageCaption = (
     <StepImageCaption

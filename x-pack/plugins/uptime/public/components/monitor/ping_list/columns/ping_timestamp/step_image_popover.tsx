@@ -5,9 +5,9 @@
  */
 
 import { EuiImage, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { fullSizeImageAlt } from './translations';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
@@ -53,9 +53,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
     isOpen={isImagePopoverOpen}
   >
     <EuiImage
-      alt={i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
-        defaultMessage: `A larger version of the screenshot for this journey step's thumbnail.`,
-      })}
+      alt={fullSizeImageAlt}
       url={imgSrc}
       style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
     />

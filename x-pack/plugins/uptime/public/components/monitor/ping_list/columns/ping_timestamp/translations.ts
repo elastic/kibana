@@ -20,3 +20,16 @@ export const imageLoadingSpinnerAriaLabel = i18n.translate(
     defaultMessage: 'An animated spinner indicating the image is loading',
   }
 );
+
+export const fullSizeImageAlt = i18n.translate('xpack.uptime.synthetics.thumbnail.fullSize.alt', {
+  defaultMessage: `A larger version of the screenshot for this journey step's thumbnail.`,
+});
+
+export const formatCaptionContent = (stepNumber: number, stepName?: number) =>
+  i18n.translate('xpack.uptime.synthetics.pingTimestamp.captionContent', {
+    defaultMessage: 'Step: {stepNumber} {stepName}',
+    values: {
+      stepNumber,
+      stepName,
+    },
+  });
