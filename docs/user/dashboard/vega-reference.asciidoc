@@ -255,7 +255,7 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       // Can be set to one of the following:
       // - set to false to disable base layer;
       // - set "mapStyle" to any Elastic Maps Service (EMS) tile layer id. 
-      //   May either be: "road_map", "road_map_desaturated", "dark_map"  
+      //   May either be: "road_map", "road_map_desaturated", "dark_map".  
       "mapStyle": false,
 
       // default 0
