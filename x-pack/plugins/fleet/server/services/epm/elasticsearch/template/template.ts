@@ -41,6 +41,7 @@ const DEFAULT_IGNORE_ABOVE = 1024;
 export function getTemplate({
   type,
   templateName,
+  indexPatternName,
   mappings,
   pipelineName,
   packageName,
@@ -50,6 +51,7 @@ export function getTemplate({
 }: {
   type: string;
   templateName: string;
+  indexPatternName: string;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
@@ -60,6 +62,7 @@ export function getTemplate({
   const template = getBaseTemplate(
     type,
     templateName,
+    indexPatternName,
     mappings,
     packageName,
     composedOfTemplates,
@@ -242,6 +245,16 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
   return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
+export function generateIndexPatternName(dataStream: RegistryDataStream): string {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return getRegistryDataStreamAssetBaseName(dataStream) + '-*';
+  } else {
+    return getRegistryDataStreamAssetBaseName(dataStream) + '.*-*';
+  }
+}
+
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
@@ -255,7 +268,7 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateName(dataStream) + '-*';
+    patterns[dataStream.path] = generateIndexPatternName(dataStream);
   }
   return patterns;
 }
@@ -263,6 +276,7 @@ export function generateESIndexPatterns(
 function getBaseTemplate(
   type: string,
   templateName: string,
+  indexPatternName: string,
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
@@ -285,7 +299,7 @@ function getBaseTemplate(
     // default and the one the ingest manager uses.
     priority: 200,
     // To be completed with the correct index patterns
-    index_patterns: [`${templateName}-*`],
+    index_patterns: [indexPatternName],
     template: {
       settings: {
         index: {
