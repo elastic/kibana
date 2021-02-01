@@ -325,7 +325,7 @@ function getValidId(
     const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
     if (!canSpecifyID) {
       throw Boom.badRequest(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
+        'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
       );
     }
     return id;
