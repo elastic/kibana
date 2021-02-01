@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
-      it('should modify the time range when a bar is clicked', async function () {
+      it('gugu1 should modify the time range when a bar is clicked', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.clickHistogramBar();
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
+      it('gugu1 should modify the time range when the histogram is brushed', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.brushHistogram();
@@ -108,7 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor('timepicker to show the right amount of hours', async () => {
           const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-          return newDurationHours === 26;
+          log.debug(`Number of hours: ${newDurationHours}`);
+          return Math.round(newDurationHours) === 26;
         });
 
         await retry.waitFor('doc table to contain the right search result', async () => {
