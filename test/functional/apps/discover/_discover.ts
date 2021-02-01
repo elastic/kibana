@@ -106,8 +106,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        expect(Math.round(newDurationHours)).to.be(26);
+        await retry.waitFor('timepicker to show the right amount of hours', async () => {
+          const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+          return newDurationHours === 26;
+        });
 
         await retry.waitFor('doc table to contain the right search result', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
