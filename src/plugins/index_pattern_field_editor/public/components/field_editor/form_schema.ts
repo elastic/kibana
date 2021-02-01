@@ -12,7 +12,7 @@ import { FormSchema, fieldValidators } from '../../shared_imports';
 import type { FieldFormInternal } from './field_editor';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
-const { emptyField } = fieldValidators;
+const { emptyField, numberGreaterThanField } = fieldValidators;
 
 export const schema: FormSchema<FieldFormInternal> = {
   name: {
@@ -43,17 +43,64 @@ export const schema: FormSchema<FieldFormInternal> = {
       label: i18n.translate('indexPatternFieldEditor.editor.form.defineFieldLabel', {
         defaultMessage: 'Define script',
       }),
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'indexPatternFieldEditor.editor.form.validations.scriptIsRequiredErrorMessage',
+              {
+                defaultMessage: 'A script is required to set the field value.',
+              }
+            )
+          ),
+        },
+      ],
     },
   },
   customLabel: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.customLabelLabel', {
       defaultMessage: 'Custom label',
     }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.customLabelIsRequiredErrorMessage',
+            {
+              defaultMessage: 'Give a label to the field.',
+            }
+          )
+        ),
+      },
+    ],
   },
   popularity: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.popularityLabel', {
       defaultMessage: 'Popularity',
     }),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.popularityIsRequiredErrorMessage',
+            {
+              defaultMessage: 'Give a popularity to the field.',
+            }
+          )
+        ),
+      },
+      {
+        validator: numberGreaterThanField({
+          than: 0,
+          message: i18n.translate(
+            'indexPatternFieldEditor.editor.form.validations.popularityGreaterThan0ErrorMessage',
+            {
+              defaultMessage: 'The popularity must be greater than zero.',
+            }
+          ),
+        }),
+      },
+    ],
   },
   __meta__: {
     isCustomLabelVisible: {
