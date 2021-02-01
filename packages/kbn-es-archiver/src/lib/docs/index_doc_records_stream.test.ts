@@ -10,7 +10,6 @@ import {
   createListStream,
   createPromiseFromStreams,
   ToolingLog,
-  createAbsolutePathSerializer,
   createRecursiveSerializer,
 } from '@kbn/dev-utils';
 
