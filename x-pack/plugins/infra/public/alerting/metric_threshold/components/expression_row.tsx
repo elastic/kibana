@@ -5,7 +5,16 @@
  */
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiText,
+  useEuiI18n,
+  EuiLink,
+} from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
@@ -121,6 +130,24 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     return threshold;
   }, [threshold, isMetricPct]);
 
+  const ofExpressionHelpText = useEuiI18n(
+    'xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail',
+    "Can't find a metric? {documentationLink}",
+    {
+      documentationLink: (
+        <EuiLink
+          href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+          target="BLANK"
+        >
+          <FormattedMessage
+            id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+            defaultMessage="Learn how to add more data"
+          />
+        </EuiLink>
+      ),
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
@@ -154,6 +181,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
+                  helpText={ofExpressionHelpText}
                 />
               </StyledExpression>
             )}
