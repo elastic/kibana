@@ -29,7 +29,8 @@ const StyledButton = styled(EuiButtonEmpty)`
   }
 `;
 
-export const renderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick) => {
+export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick) => {
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null | HTMLAnchorElement>();
   const { status } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
@@ -39,16 +40,30 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
     return is400 || is500 || isSpecific300;
   };
 
+  const handleSidebarClick = () => {
+    if (onClick) {
+      onClick({ buttonRef, networkItemIndex: index });
+    }
+  };
+
   return (
     <>
       {!status || !isErrorStatusCode(status) ? (
-        <StyledButton onClick={onClick}>
+        <StyledButton
+          onClick={handleSidebarClick}
+          buttonRef={(ref) => setButtonRef(ref)}
+          data-testSubj={`sidebarItem${index}`}
+        >
           <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
         </StyledButton>
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <StyledButton onClick={onClick}>
+            <StyledButton
+              onClick={handleSidebarClick}
+              buttonRef={(ref) => setButtonRef(ref)}
+              data-testSubj={`sidebarItem${index}`}
+            >
               <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
             </StyledButton>
           </EuiFlexItem>
@@ -89,7 +104,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     onProjectionClick,
     onSidebarClick,
     isFlyoutVisible,
-    setIsFlyoutVisible,
+    onFlyoutClose,
   } = useFlyout(metaData);
 
   return (
@@ -98,9 +113,9 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       fetchedNetworkRequests={networkData.length}
       data={series}
       flyoutData={flyoutData}
+      onFlyoutClose={onFlyoutClose}
       onSidebarClick={onSidebarClick}
       isFlyoutVisible={isFlyoutVisible}
-      setIsFlyoutVisible={setIsFlyoutVisible}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       metaData={metaData}
@@ -114,7 +129,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         barStyleAccessor={(datum) => {
           return datum.datum.config.colour;
         }}
-        renderSidebarItem={renderSidebarItem}
+        renderSidebarItem={RenderSidebarItem}
         renderLegendItem={renderLegendItem}
         fullHeight={true}
         onBarClick={onBarClick}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useState } from 'react';
+import { RefObject, useCallback, useState } from 'react';
 
 import {
   ElementClickListener,
@@ -15,9 +15,21 @@ import {
 
 import { WaterfallMetaData, WaterfallMetaDataEntry } from '../types';
 
+interface OnSidebarClickParams {
+  buttonRef: ButtonRef;
+  networkItemIndex: number;
+}
+
+export type ButtonRef = RefObject<HTMLButtonElement | null>;
+export type OnSidebarClick = (params: OnSidebarClickParams) => void;
+export type OnFlyoutClose = () => void;
+
 export const useFlyout = (metaData: WaterfallMetaData) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutData, setFlyoutData] = useState<WaterfallMetaDataEntry | undefined>(undefined);
+  const [currentSidebarItemRef, setCurrentSidebarItemRef] = useState<
+    RefObject<HTMLButtonElement | null>
+  >();
 
   const handleFlyout = useCallback(
     (flyoutEntry: WaterfallMetaDataEntry) => {
@@ -26,6 +38,11 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
     },
     [setIsFlyoutVisible, setFlyoutData]
   );
+
+  const onFlyoutClose = useCallback(() => {
+    setIsFlyoutVisible(false);
+    currentSidebarItemRef?.current?.focus();
+  }, [currentSidebarItemRef, setIsFlyoutVisible]);
 
   const onBarClick: ElementClickListener = useCallback(
     ([elementData]) => {
@@ -49,9 +66,10 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
     [metaData, handleFlyout]
   );
 
-  const onSidebarClick = useCallback(
-    ({ networkItemIndex }: { networkItemIndex: number }) => {
+  const onSidebarClick: OnSidebarClick = useCallback(
+    ({ buttonRef, networkItemIndex }) => {
       const metaDataEntry = metaData[networkItemIndex];
+      setCurrentSidebarItemRef(buttonRef);
       handleFlyout(metaDataEntry);
     },
     [metaData, handleFlyout]
@@ -63,6 +81,6 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
     onProjectionClick,
     onSidebarClick,
     isFlyoutVisible,
-    setIsFlyoutVisible,
+    onFlyoutClose,
   };
 };

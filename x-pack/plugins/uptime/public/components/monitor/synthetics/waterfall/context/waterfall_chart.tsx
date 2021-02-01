@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
+import React, { createContext, useContext, Context } from 'react';
 import {
   WaterfallData,
   WaterfallDataEntry,
   WaterfallMetaData,
   WaterfallMetaDataEntry,
 } from '../types';
+import { OnFlyoutClose, OnSidebarClick } from '../components/use_flyout';
 
 export interface IWaterfallContext {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: WaterfallData;
   flyoutData?: WaterfallMetaDataEntry;
-  onSidebarClick?: ({ networkItemIndex }: { networkItemIndex: number }) => void;
+  onFlyoutClose: OnFlyoutClose;
+  onSidebarClick?: OnSidebarClick;
   isFlyoutVisible?: boolean;
-  setIsFlyoutVisible: Dispatch<SetStateAction<boolean>>;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
   metaData: WaterfallMetaData;
@@ -35,10 +36,10 @@ interface ProviderProps {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
-  flyoutData: IWaterfallContext['flyoutData'];
-  onSidebarClick: IWaterfallContext['onSidebarClick'];
-  isFlyoutVisible: IWaterfallContext['isFlyoutVisible'];
-  setIsFlyoutVisible: IWaterfallContext['setIsFlyoutVisible'];
+  flyoutData?: IWaterfallContext['flyoutData'];
+  onFlyoutClose?: IWaterfallContext['onFlyoutClose'];
+  onSidebarClick?: IWaterfallContext['onSidebarClick'];
+  isFlyoutVisible?: IWaterfallContext['isFlyoutVisible'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
   metaData: IWaterfallContext['metaData'];
@@ -49,9 +50,9 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
   flyoutData,
+  onFlyoutClose,
   onSidebarClick,
   isFlyoutVisible,
-  setIsFlyoutVisible,
   sidebarItems,
   legendItems,
   metaData,
@@ -67,8 +68,8 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         legendItems,
         metaData,
         isFlyoutVisible,
+        onFlyoutClose,
         onSidebarClick,
-        setIsFlyoutVisible,
         flyoutData,
         renderTooltipItem,
         totalNetworkRequests,

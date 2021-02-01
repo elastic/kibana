@@ -36,11 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
             {items.map((item, index) => {
               return (
                 <WaterfallChartSidebarFlexItem key={index}>
-                  {render(
-                    item,
-                    index,
-                    onSidebarClick ? () => onSidebarClick({ networkItemIndex: index }) : undefined
-                  )}
+                  {render(item, index, onSidebarClick)}
                 </WaterfallChartSidebarFlexItem>
               );
             })}

@@ -35,7 +35,7 @@ describe('useFlyoutHook', () => {
     expect(result.current.isFlyoutVisible).toBe(false);
 
     act(() => {
-      result.current.onSidebarClick({ networkItemIndex: index });
+      result.current.onSidebarClick({ buttonRef: { current: null }, networkItemIndex: index });
     });
 
     expect(result.current.isFlyoutVisible).toBe(true);
