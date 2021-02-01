@@ -35,6 +35,8 @@ export const getColorSpec = (
   color?: string,
   legendType?: LegendType
 ) => {
+  // For outlier detection result pages coloring is done based on a threshold.
+  // This returns a Vega spec using a conditional to return the color.
   if (outliers) {
     return {
       condition: {
@@ -45,6 +47,8 @@ export const getColorSpec = (
     };
   }
 
+  // Based on the type of the color field,
+  // this returns either a continuous or categorical color spec.
   if (color !== undefined && legendType !== undefined) {
     return {
       field: color,
@@ -79,6 +83,8 @@ export const getScatterplotMatrixVegaLiteSpec = (
       as: OUTLIER_SCORE_FIELD,
     });
   }
+
+  const colorSpec = getColorSpec(euiTheme, outliers, color, legendType);
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',
@@ -115,10 +121,10 @@ export const getScatterplotMatrixVegaLiteSpec = (
           : { type: 'circle', opacity: 0.75, size: 8 }),
       },
       encoding: {
-        color: getColorSpec(euiTheme, outliers, color, legendType),
+        color: colorSpec,
         ...(dynamicSize
           ? {
-              stroke: getColorSpec(euiTheme, outliers, color, legendType),
+              stroke: colorSpec,
               opacity: {
                 condition: {
                   value: 1,
@@ -163,6 +169,7 @@ export const getScatterplotMatrixVegaLiteSpec = (
           scale: { zero: false },
         },
         tooltip: [
+          ...(color !== undefined ? [{ type: colorSpec.type, field: color }] : []),
           ...columns.map((d) => ({ type: LEGEND_TYPES.QUANTITATIVE, field: d })),
           ...(outliers
             ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: OUTLIER_SCORE_FIELD, format: '.3f' }]
