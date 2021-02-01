@@ -6,8 +6,8 @@
 
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { isLegacyApmIndex } from '../apm';
+import { versionService } from '../version';
 import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 export const DEFAULT_TYPE_NAME = '_doc';
@@ -47,7 +47,10 @@ export const sourceNameForIndex = (indexName: string): string => {
 
   // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
   // avoid conflicts with index patterns/templates/etc
-  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+  const reindexedMatcher = new RegExp(
+    `(-reindexed-v5$|reindexed-v${versionService.getPrevMajorVersion()}-)`,
+    'g'
+  );
 
   const cleanBaseName = baseName.replace(reindexedMatcher, '');
   return `${internal}${cleanBaseName}`;
@@ -61,7 +64,7 @@ export const sourceNameForIndex = (indexName: string): string => {
  */
 export const generateNewIndexName = (indexName: string): string => {
   const sourceName = sourceNameForIndex(indexName);
-  const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
+  const currentVersion = `reindexed-v${versionService.getMajorVersion()}`;
 
   return indexName.startsWith('.')
     ? `.${currentVersion}-${sourceName.substr(1)}`
