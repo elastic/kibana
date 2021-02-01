@@ -257,7 +257,6 @@ export class SearchSessionService implements ISessionService {
     );
   }
 
-  // TODO: Generate the `userId` from the realm type/realm name/username
   public save = async (
     user: AuthenticatedUser | null,
     sessionId: string,
@@ -307,7 +306,6 @@ export class SearchSessionService implements ISessionService {
     return session;
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
   public get = async (
     user: AuthenticatedUser | null,
     sessionId: string,
@@ -322,7 +320,6 @@ export class SearchSessionService implements ISessionService {
     return session;
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
   public find = (
     user: AuthenticatedUser | null,
     options: Omit<SavedObjectsFindOptions, 'type'>,
@@ -344,7 +341,6 @@ export class SearchSessionService implements ISessionService {
     });
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
   public update = async (
     user: AuthenticatedUser | null,
     sessionId: string,
@@ -361,7 +357,6 @@ export class SearchSessionService implements ISessionService {
     );
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
   public delete = async (
     user: AuthenticatedUser | null,
     sessionId: string,
