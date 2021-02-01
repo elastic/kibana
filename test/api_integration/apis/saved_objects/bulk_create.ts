@@ -97,10 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
+          await es.indices.delete({ index: '.kibana*' }, { ignore: [404] })
       );
 
-      it('should return 200 with individual responses', async () =>
+      it('should return 200 with errors', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         await supertest
           .post('/api/saved_objects/_bulk_create')
           .send(BULK_REQUESTS)
@@ -109,38 +110,27 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
-                  type: 'visualization',
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  updated_at: resp.body.saved_objects[0].updated_at,
-                  version: resp.body.saved_objects[0].version,
-                  attributes: {
-                    title: 'An existing visualization',
+                  id: BULK_REQUESTS[0].id,
+                  type: BULK_REQUESTS[0].type,
+                  error: {
+                    error: 'Internal Server Error',
+                    message: 'An internal server error occurred',
+                    statusCode: 500,
                   },
-                  references: [],
-                  namespaces: ['default'],
-                  migrationVersion: {
-                    visualization: resp.body.saved_objects[0].migrationVersion.visualization,
-                  },
-                  coreMigrationVersion: KIBANA_VERSION, // updated from 1.2.3 to the latest kibana version
                 },
                 {
-                  type: 'dashboard',
-                  id: 'a01b2f57-fcfd-4864-b735-09e28f0d815e',
-                  updated_at: resp.body.saved_objects[1].updated_at,
-                  version: resp.body.saved_objects[1].version,
-                  attributes: {
-                    title: 'A great new dashboard',
+                  id: BULK_REQUESTS[1].id,
+                  type: BULK_REQUESTS[1].type,
+                  error: {
+                    error: 'Internal Server Error',
+                    message: 'An internal server error occurred',
+                    statusCode: 500,
                   },
-                  references: [],
-                  namespaces: ['default'],
-                  migrationVersion: {
-                    dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
-                  },
-                  coreMigrationVersion: KIBANA_VERSION,
                 },
               ],
             });
-          }));
+          });
+      });
     });
   });
 }

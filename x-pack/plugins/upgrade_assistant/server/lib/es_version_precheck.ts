@@ -13,7 +13,7 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { CURRENT_VERSION } from '../../common/version';
+import { versionService } from './version';
 
 interface Nodes {
   nodes: {
@@ -39,14 +39,14 @@ export const getAllNodeVersions = async (adminClient: IScopedClusterClient) => {
     .map((version) => new SemVer(version));
 };
 
-export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[]) => {
+export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[], majorVersion: number) => {
   // Determine if all nodes in the cluster are running the same major version as Kibana.
   const numDifferentVersion = allNodeVersions.filter(
-    (esNodeVersion) => esNodeVersion.major !== CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major !== majorVersion
   ).length;
 
   const numSameVersion = allNodeVersions.filter(
-    (esNodeVersion) => esNodeVersion.major === CURRENT_VERSION.major
+    (esNodeVersion) => esNodeVersion.major === majorVersion
   ).length;
 
   if (numDifferentVersion) {
@@ -83,7 +83,9 @@ export const esVersionCheck = async (
     throw e;
   }
 
-  const result = verifyAllMatchKibanaVersion(allNodeVersions);
+  const majorVersion = versionService.getMajorVersion();
+
+  const result = verifyAllMatchKibanaVersion(allNodeVersions, majorVersion);
   if (!result.allNodesMatch) {
     return response.customError({
       // 426 means "Upgrade Required" and is used when semver compatibility is not met.
