@@ -108,7 +108,7 @@ export const language: monaco.languages.IMonarchLanguage = {
         /([a-zA-Z0-9\+\.\-]{1,10})(:)/,
         [
           {
-            token: 'metatag.keyword.scheme.url',
+            token: 'text.keyword.scheme.url',
           },
           {
             token: 'delimiter',
