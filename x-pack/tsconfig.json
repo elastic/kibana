@@ -45,6 +45,7 @@
     "plugins/snapshot_restore/**/*",
     "plugins/painless_lab/**/*",
     "plugins/watcher/**/*",
+    "plugins/grokdebugger/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -121,6 +122,7 @@
     { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
     { "path": "./plugins/stack_alerts/tsconfig.json"},
     { "path": "./plugins/snapshot_restore/tsconfig.json" },
+    { "path": "./plugins/grokdebugger/tsconfig.json" },
     { "path": "./plugins/ingest_pipelines/tsconfig.json"},
     { "path": "./plugins/license_management/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },
