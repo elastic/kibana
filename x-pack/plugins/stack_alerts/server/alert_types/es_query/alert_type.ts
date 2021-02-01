@@ -175,7 +175,17 @@ export function getAlertType(
               {
                 bool: {
                   must_not: [
-                    { bool: { filter: [{ range: { [params.timeField]: { lte: timestamp } } }] } },
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   ],
                 },
               },
