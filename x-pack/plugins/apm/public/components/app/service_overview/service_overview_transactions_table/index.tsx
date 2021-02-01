@@ -11,7 +11,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { orderBy } from 'lodash';
+import { isEmpty, orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';

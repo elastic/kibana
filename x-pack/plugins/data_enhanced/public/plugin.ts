@@ -66,8 +66,8 @@ export class DataEnhancedPlugin
 
     this.config = this.initializerContext.config.get<ConfigSchema>();
     if (this.config.search.sessions.enabled) {
-      const { management: sessionsMgmtConfig } = this.config.search.sessions;
-      registerSearchSessionsMgmt(core, sessionsMgmtConfig, { management });
+      const sessionsConfig = this.config.search.sessions;
+      registerSearchSessionsMgmt(core, sessionsConfig, { management });
     }
   }
 

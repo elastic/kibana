@@ -10,17 +10,17 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   LogEntryCategory,
   LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
-} from '../../../../../../common/http_api/log_analysis';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+} from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
 import { CategoryDetailsRow } from './category_details_row';
-import { RegularExpressionRepresentation } from './category_expression';
+import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';

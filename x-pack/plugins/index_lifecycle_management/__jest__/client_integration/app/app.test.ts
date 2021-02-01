@@ -21,7 +21,19 @@ const PERCENT_SIGN_NAME = 'test%';
 const PERCENT_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
 const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
+const createPolicyTitle = 'Create Policy';
+const editPolicyTitle = 'Edit Policy';
+
 window.scrollTo = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
+  };
+});
 
 describe('<App />', () => {
   let testBed: AppTestBed;
@@ -43,7 +55,7 @@ describe('<App />', () => {
       await actions.clickCreatePolicyButton();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(`Create an index lifecycle policy`);
+      expect(testBed.find('policyTitle').text()).toBe(createPolicyTitle);
       expect(testBed.find('policyNameField').props().value).toBe('');
     });
 
@@ -59,7 +71,7 @@ describe('<App />', () => {
       await actions.clickCreatePolicyButton();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(`Create an index lifecycle policy`);
+      expect(testBed.find('policyTitle').text()).toBe(createPolicyTitle);
       expect(testBed.find('policyNameField').props().value).toBe('');
     });
   });
@@ -80,9 +92,7 @@ describe('<App />', () => {
       await actions.clickPolicyNameLink();
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${SPECIAL_CHARS_NAME}`
-      );
+      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${SPECIAL_CHARS_NAME}`);
     });
 
     test('loading edit policy page url works', async () => {
@@ -93,9 +103,7 @@ describe('<App />', () => {
       const { component } = testBed;
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${SPECIAL_CHARS_NAME}`
-      );
+      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${SPECIAL_CHARS_NAME}`);
     });
 
     // using double encoding to counteract react-router's v5 internal decodeURI call
@@ -108,9 +116,7 @@ describe('<App />', () => {
       const { component } = testBed;
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${SPECIAL_CHARS_NAME}`
-      );
+      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${SPECIAL_CHARS_NAME}`);
     });
   });
 
@@ -127,9 +133,7 @@ describe('<App />', () => {
       const { component } = testBed;
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_NAME}`
-      );
+      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${PERCENT_SIGN_NAME}`);
     });
 
     test('loading edit policy page url with double encoding works', async () => {
@@ -140,9 +144,7 @@ describe('<App />', () => {
       const { component } = testBed;
       component.update();
 
-      expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_NAME}`
-      );
+      expect(testBed.find('policyTitle').text()).toBe(`${editPolicyTitle} ${PERCENT_SIGN_NAME}`);
     });
   });
 
@@ -165,7 +167,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
+        `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
 
@@ -179,7 +181,7 @@ describe('<App />', () => {
 
       // known issue https://github.com/elastic/kibana/issues/82440
       expect(testBed.find('policyTitle').text()).not.toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
+        `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
 
@@ -194,7 +196,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
+        `${editPolicyTitle} ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
   });
@@ -216,7 +218,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
+        `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
 
@@ -230,7 +232,7 @@ describe('<App />', () => {
 
       // known issue https://github.com/elastic/kibana/issues/82440
       expect(testBed.find('policyTitle').text()).not.toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
+        `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
 
@@ -245,7 +247,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
+        `${editPolicyTitle} ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
   });
