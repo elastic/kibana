@@ -9,7 +9,7 @@ import { orderBy } from 'lodash';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../typings/elasticsearch';
 
 export interface TopSigTerm {
   bgCount: number;

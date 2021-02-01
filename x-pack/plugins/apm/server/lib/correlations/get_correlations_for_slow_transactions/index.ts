@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
@@ -59,6 +59,10 @@ export async function getCorrelationsForSlowTransactions({
     backgroundFilters,
     setup,
   });
+
+  if (durationForPercentile === null) {
+    return {};
+  }
 
   const params = {
     apm: { events: [ProcessorEvent.transaction] },

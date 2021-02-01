@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
@@ -43,10 +44,10 @@ export async function getErrorGroupSample({
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
       },
-      sort: [
+      sort: asMutableArray([
         { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
-      ],
+      ] as const),
     },
   };
 

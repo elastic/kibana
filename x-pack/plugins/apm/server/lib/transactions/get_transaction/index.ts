@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -32,11 +33,11 @@ export async function getTransaction({
       size: 1,
       query: {
         bool: {
-          filter: [
+          filter: asMutableArray([
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
             { range: rangeFilter(start, end) },
-          ],
+          ] as const),
         },
       },
     },

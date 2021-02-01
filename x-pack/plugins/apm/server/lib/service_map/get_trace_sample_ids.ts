@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
@@ -74,7 +75,7 @@ export async function getTraceSampleIds({
       aggs: {
         connections: {
           composite: {
-            sources: [
+            sources: asMutableArray([
               {
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
@@ -97,7 +98,7 @@ export async function getTraceSampleIds({
                   },
                 },
               },
-            ],
+            ] as const),
             size: fingerprintBucketSize,
           },
           aggs: {

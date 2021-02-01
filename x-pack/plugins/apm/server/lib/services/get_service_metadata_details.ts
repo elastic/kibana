@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,
@@ -94,7 +93,7 @@ export async function getServiceMetadataDetails({
           terms: {
             field: SERVICE_VERSION,
             size: 10,
-            order: { _key: 'desc' } as SortOptions,
+            order: { _key: 'desc' as const },
           },
         },
         availabilityZones: {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
@@ -30,7 +31,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               'synthetics.type': 'journey/end',
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
     _source: ['@timestamp', 'monitor.id'],
@@ -56,7 +57,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
                 'synthetics.type': 'journey/end',
               },
             },
-          ],
+          ] as QueryContainer[],
         },
       },
       _source: ['@timestamp', 'monitor.check_group'],
@@ -79,7 +80,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           ],
         },
       },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
     };
 
     const nextParams = {
@@ -98,7 +99,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           ],
         },
       },
-      sort: [{ '@timestamp': { order: 'asc' } }],
+      sort: [{ '@timestamp': { order: 'asc' as const } }],
     };
 
     const { body: previousJourneyResult } = await uptimeEsClient.search({ body: previousParams });

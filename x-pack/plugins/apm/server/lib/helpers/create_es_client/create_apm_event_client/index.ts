@@ -15,7 +15,7 @@ import {
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
-  ESSearchResponse,
+  InferSearchResponseOf,
 } from '../../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
@@ -52,7 +52,7 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
 
 type TypedSearchResponse<
   TParams extends APMEventESSearchRequest
-> = ESSearchResponse<
+> = InferSearchResponseOf<
   TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
   ESSearchRequestOf<TParams>
 >;

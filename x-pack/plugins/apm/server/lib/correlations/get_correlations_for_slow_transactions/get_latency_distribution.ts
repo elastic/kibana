@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';

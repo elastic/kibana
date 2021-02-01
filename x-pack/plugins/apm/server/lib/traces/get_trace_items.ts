@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -17,7 +19,6 @@ import {
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { PromiseValueType } from '../../../typings/common';
 
 interface ErrorsPerTransaction {
   [transactionId: string]: number;
@@ -70,26 +71,25 @@ export async function getTraceItems(
           filter: [
             { term: { [TRACE_ID]: traceId } },
             { range: rangeFilter(start, end) },
-          ],
+          ] as QueryContainer[],
           should: {
             exists: { field: PARENT_ID },
           },
         },
       },
-      sort: [
-        { _score: { order: 'asc' as const } },
-        { [TRANSACTION_DURATION]: { order: 'desc' as const } },
-        { [SPAN_DURATION]: { order: 'desc' as const } },
-      ],
+      sort: asMutableArray([
+        { _score: { order: 'asc' } },
+        { [TRANSACTION_DURATION]: { order: 'desc' } },
+        { [SPAN_DURATION]: { order: 'desc' } },
+      ] as const),
       track_total_hits: true,
     },
   });
 
-  const [errorResponse, traceResponse]: [
-    // explicit intermediary types to avoid TS "excessively deep" error
-    PromiseValueType<typeof errorResponsePromise>,
-    PromiseValueType<typeof traceResponsePromise>
-  ] = (await Promise.all([errorResponsePromise, traceResponsePromise])) as any;
+  const [errorResponse, traceResponse] = await Promise.all([
+    errorResponsePromise,
+    traceResponsePromise,
+  ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
 

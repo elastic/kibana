@@ -10,7 +10,8 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../typings/elasticsearch/aggregations';
+} from '../../../../../typings/elasticsearch';
+import { getTransactionDurationFieldForAggregatedTransactions } from './aggregated_transactions';
 
 export const getOutcomeAggregation = () => ({
   terms: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { asMutableArray } from '../../../../apm/common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';
 
@@ -35,10 +37,13 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<GetJourneyStepsParams
               'monitor.check_group': checkGroups,
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
-    sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
+    sort: asMutableArray([
+      { 'synthetics.step.index': { order: 'asc' } },
+      { '@timestamp': { order: 'asc' } },
+    ] as const),
     _source: {
       excludes: ['synthetics.blob'],
     },

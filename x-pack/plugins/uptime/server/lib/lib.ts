@@ -16,7 +16,7 @@ import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchRequest, ESSearchResponse } from '../../../../typings/elasticsearch';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;
@@ -54,7 +54,9 @@ export function createUptimeESClient({
 
   return {
     baseESClient: esClient,
-    async search<TParams>(params: TParams): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
+    async search<TParams extends ESSearchRequest>(
+      params: TParams
+    ): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
       let res: any;
       let esError: any;
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
