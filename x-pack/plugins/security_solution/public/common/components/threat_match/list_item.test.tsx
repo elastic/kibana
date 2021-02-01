@@ -68,7 +68,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={0}
             indexPattern={
               {
@@ -102,7 +101,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={doublePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -134,7 +132,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -168,7 +165,6 @@ describe('ListItemComponent', () => {
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ListItemComponent
             listItem={singlePayload()}
-            listId={'123'}
             listItemIndex={1}
             indexPattern={
               {
@@ -210,7 +206,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={item}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -242,7 +237,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -274,7 +268,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={singlePayload()}
-          listId={'123'}
           listItemIndex={1}
           indexPattern={
             {
@@ -308,7 +301,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {
@@ -341,7 +333,6 @@ describe('ListItemComponent', () => {
       const wrapper = mount(
         <ListItemComponent
           listItem={doublePayload()}
-          listId={'123'}
           listItemIndex={0}
           indexPattern={
             {

@@ -19,3 +19,12 @@ export * from './settings';
 // for the actual setting to differ from the default. Can we retrieve the real
 // setting in the future?
 export const SO_SEARCH_LIMIT = 10000;
+
+export const FLEET_SERVER_INDICES = [
+  '.fleet-actions',
+  '.fleet-agents',
+  '.fleet-enrollment-api-keys',
+  '.fleet-policies',
+  '.fleet-policies-leader',
+  '.fleet-servers',
+];

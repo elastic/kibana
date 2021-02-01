@@ -30,7 +30,7 @@ import { ComponentStrings } from '../../../i18n';
 
 const { WorkpadConfig: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   size: {
     height: number;
     width: number;
