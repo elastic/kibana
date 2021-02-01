@@ -16,7 +16,7 @@ export async function fetchJourneySteps(
 ): Promise<SyntheticsJourneyApiResponse> {
   return (await apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
-    undefined,
+    { stepTypes: params.stepTypes },
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
 }
