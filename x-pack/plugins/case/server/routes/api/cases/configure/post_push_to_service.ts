@@ -14,11 +14,14 @@ import { escapeHatch, wrapError } from '../../utils';
 
 import { CASE_CONFIGURE_PUSH_URL } from '../../../../../common/constants';
 import {
+  ActionConnector,
   ConnectorRequestParamsRt,
+  CommentResponseAlertsType,
   PostPushRequestRt,
   throwErrors,
+  CommentType,
 } from '../../../../../common/api';
-import { mapIncident } from './utils';
+import { createIncident } from './utils';
 
 export function initPostPushToService({ router }: RouteDeps) {
   router.post(
@@ -34,34 +37,49 @@ export function initPostPushToService({ router }: RouteDeps) {
         if (!context.case) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
+
         const caseClient = context.case.getCaseClient();
         const actionsClient = await context.actions?.getActionsClient();
+
         if (actionsClient == null) {
           throw Boom.notFound('Action client have not been found');
         }
+
         const params = pipe(
           ConnectorRequestParamsRt.decode(request.params),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
         const body = pipe(
           PostPushRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const myConnectorMappings = await caseClient.getMappings({
-          actionsClient,
-          caseClient,
-          connectorId: params.connector_id,
-          connectorType: body.connector_type,
+        const connector = await actionsClient.get({ id: params.connector_id });
+        const theCase = await caseClient.get({ id: body.case_id, includeComments: true });
+        const userActions = await caseClient.getUserActions({ caseId: body.case_id });
+        const alerts = await caseClient.getAlerts({
+          ids:
+            theCase.comments
+              ?.filter<CommentResponseAlertsType>((comment) => comment.type === CommentType.alert)
+              .map((comment) => comment.alertId) ?? [],
         });
 
-        const res = await mapIncident(
+        const connectorMappings = await caseClient.getMappings({
           actionsClient,
-          params.connector_id,
-          body.connector_type,
-          myConnectorMappings,
-          body.params
-        );
+          caseClient,
+          connectorId: connector.id,
+          connectorType: connector.actionTypeId,
+        });
+
+        const res = await createIncident({
+          actionsClient,
+          theCase,
+          userActions,
+          connector: connector as ActionConnector,
+          mappings: connectorMappings,
+          alerts,
+        });
 
         const pushRes = await actionsClient.execute({
           actionId: params.connector_id,

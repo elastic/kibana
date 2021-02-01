@@ -15,8 +15,6 @@ import {
   CaseConnector,
   CommentType,
 } from '../../../../case/common/api';
-import { SecurityPageName } from '../../app/types';
-import { useFormatUrl, FormatUrl, getRuleDetailsUrl } from '../../common/components/link_to';
 import {
   errorToToaster,
   useStateToaster,
@@ -24,7 +22,7 @@ import {
 } from '../../common/components/toasters';
 import { Alert } from '../components/case_view';
 
-import { getCase, pushToService, pushCase } from './api';
+import { pushToService, pushCase } from './api';
 import * as i18n from './translations';
 import { Case, Comment } from './types';
 import { CaseServices } from './use_get_case_user_actions';
@@ -100,7 +98,6 @@ export const usePostPushToService = (): UsePostPushToService => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const postPushToService = useCallback(
     async ({ caseId, caseServices, connector, alerts, updateCase }: PushToServiceRequest) => {
@@ -108,19 +105,7 @@ export const usePostPushToService = (): UsePostPushToService => {
       const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const casePushData = await getCase(caseId, true, abortCtrl.signal);
-        const responseService = await pushToService(
-          connector.id,
-          connector.type,
-          formatServiceRequestData({
-            myCase: casePushData,
-            connector,
-            caseServices,
-            alerts,
-            formatUrl,
-          }),
-          abortCtrl.signal
-        );
+        const responseService = await pushToService(connector.id, caseId, abortCtrl.signal);
         const responseCase = await pushCase(
           caseId,
           {

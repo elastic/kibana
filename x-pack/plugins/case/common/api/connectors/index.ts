@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 
+import { ActionResult, ActionType } from '../../../../actions/common';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
@@ -17,6 +18,9 @@ export * from './servicenow_itsm';
 export * from './servicenow_sir';
 export * from './resilient';
 export * from './mappings';
+
+export type ActionConnector = ActionResult;
+export type ActionTypeConnector = ActionType;
 
 export const ConnectorFieldsRt = rt.union([
   JiraFieldsRT,

@@ -104,7 +104,7 @@ export interface PipedField {
 export interface PrepareFieldsForTransformArgs {
   defaultPipes: string[];
   mappings: ConnectorMappingsAttributes[];
-  params: ServiceConnectorCaseParams;
+  params: { title: string; description: string };
 }
 export interface EntityInformation {
   createdAt: string;
@@ -182,14 +182,14 @@ export const ServiceConnectorCaseResponseRt = rt.intersection([
     ),
   }),
 ]);
+
 export type ServiceConnectorBasicCaseParams = rt.TypeOf<typeof ServiceConnectorBasicCaseParamsRt>;
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
 
 export const PostPushRequestRt = rt.type({
-  connector_type: rt.string,
-  params: ServiceConnectorCaseParamsRt,
+  case_id: rt.string,
 });
 
 export type PostPushRequest = rt.TypeOf<typeof PostPushRequestRt>;

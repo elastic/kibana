@@ -247,8 +247,7 @@ export const pushCase = async (
 
 export const pushToService = async (
   connectorId: string,
-  connectorType: string,
-  casePushParams: ServiceConnectorCaseParams,
+  caseId: string,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<
@@ -256,8 +255,7 @@ export const pushToService = async (
   >(`${getCaseConfigurePushUrl(connectorId)}`, {
     method: 'POST',
     body: JSON.stringify({
-      connector_type: connectorType,
-      params: casePushParams,
+      case_id: caseId,
     }),
     signal,
   });

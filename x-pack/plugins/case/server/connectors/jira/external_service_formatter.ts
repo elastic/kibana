@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseResponse, JiraFieldsType } from '../../../common/api';
+import { JiraFieldsType } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
 interface ExternalServiceParams extends JiraFieldsType {
   labels: string[];
 }
 
-const format = async (theCase: CaseResponse) => {
+const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (theCase) => {
   const { priority, issueType, parent } = theCase.connector.fields as JiraFieldsType;
   return { priority, labels: theCase.tags, issueType, parent };
 };

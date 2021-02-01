@@ -8,50 +8,99 @@
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
-  ServiceConnectorCaseParams,
-  ServiceConnectorCommentParams,
+  ActionConnector,
+  CaseResponse,
+  CaseFullExternalService,
+  CaseUserActionsResponse,
   ConnectorMappingsAttributes,
   ConnectorTypes,
   EntityInformation,
   ExternalServiceParams,
   Incident,
-  JiraPushToServiceApiParams,
   MapIncident,
   PipedField,
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
-  ResilientPushToServiceApiParams,
-  ServiceNowITSMPushToServiceApiParams,
-  ServiceNowSIRFieldsType,
   SimpleComment,
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
 } from '../../../../../common/api';
 import { ActionsClient } from '../../../../../../actions/server';
-export const mapIncident = async (
-  actionsClient: ActionsClient,
-  connectorId: string,
-  connectorType: string,
-  mappings: ConnectorMappingsAttributes[],
-  params: ServiceConnectorCaseParams
-): Promise<MapIncident> => {
-  const { comments: caseComments, externalId } = params;
-  const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
-  const service = serviceFormatter(connectorType, params);
+import { externalServiceFormatters, FormatterConnectorTypes } from '../../../../connectors';
+import { CaseClientGetAlertsResponse } from '../../../../client/alerts/types';
 
-  if (service == null) {
-    throw new Error(`Invalid service`);
+export const getLatestPushInfo = (
+  connectorId: string,
+  userActions: CaseUserActionsResponse
+): { index: number; pushedInfo: CaseFullExternalService } | null => {
+  for (const [index, action] of [...userActions.reverse()].entries()) {
+    if (action.action === 'push-to-service' && action.new_value)
+      try {
+        const pushedInfo = JSON.parse(action.new_value);
+        if (pushedInfo.connector_id === connectorId) {
+          // We returned the index of the element in the userActions array.
+          // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
+          return { index: userActions.length - index - 1, pushedInfo };
+        }
+      } catch (e) {
+        // Silence JSON parse errors
+      }
   }
 
-  const thirdPartyName = service.thirdPartyName;
-  let incident: Partial<PushToServiceApiParams['incident']> = service.incident;
+  return null;
+};
+
+const isConnectorSupported = (connectorId: string): connectorId is FormatterConnectorTypes =>
+  Object.values(ConnectorTypes).includes(connectorId as ConnectorTypes);
+
+interface CreateIncidentArgs {
+  actionsClient: ActionsClient;
+  theCase: CaseResponse;
+  userActions: CaseUserActionsResponse;
+  connector: ActionConnector;
+  mappings: ConnectorMappingsAttributes[];
+  alerts: CaseClientGetAlertsResponse;
+}
+
+export const createIncident = async ({
+  actionsClient,
+  theCase,
+  userActions,
+  connector,
+  mappings,
+  alerts,
+}: CreateIncidentArgs): Promise<MapIncident> => {
+  const {
+    comments: caseComments,
+    title,
+    description,
+    created_at: createdAt,
+    created_by: createdBy,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+  } = theCase;
+
+  const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
+  const latestPushInfo = getLatestPushInfo(connector.id, userActions);
+  const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
+  const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
+  let currentIncident: ExternalServiceParams | undefined;
+
+  if (!isConnectorSupported(connector.actionTypeId)) {
+    throw new Error(`Invalid external service`);
+  }
+
+  const externalServiceFields = await externalServiceFormatters[connector.actionTypeId].format(
+    theCase,
+    alerts
+  );
+  let incident: Partial<PushToServiceApiParams['incident']> = { ...externalServiceFields };
 
   if (externalId) {
     try {
       currentIncident = ((await actionsClient.execute({
-        actionId: connectorId,
+        actionId: connector.id,
         params: {
           subAction: 'getIncident',
           subActionParams: { externalId },
@@ -59,7 +108,7 @@ export const mapIncident = async (
       })) as unknown) as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
-        `Retrieving Incident by id ${externalId} from ${thirdPartyName} failed with exception: ${ex}`
+        `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`
       );
     }
   }
@@ -70,84 +119,33 @@ export const mapIncident = async (
     params,
   });
 
-  const transformedFields = transformFields<
-    ServiceConnectorCaseParams,
-    ExternalServiceParams,
-    Incident
-  >({
+  const transformedFields = transformFields<typeof params, ExternalServiceParams, Incident>({
     params,
     fields,
     currentIncident,
   });
 
   incident = { ...incident, ...transformedFields, externalId };
+
+  const commentsIdsToBeUpdated = new Set(
+    userActions
+      .filter(
+        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
+      )
+      .map((action) => action.comment_id)
+  );
+  const commentsToBeUpdated = caseComments?.filter((comment, index) =>
+    commentsIdsToBeUpdated.has(comment.id)
+  );
+
   let comments: SimpleComment[] = [];
-  if (caseComments && Array.isArray(caseComments) && caseComments.length > 0) {
+  if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
-      comments = transformComments(caseComments, ['informationAdded']);
+      comments = transformComments(commentsToBeUpdated, ['informationAdded']);
     }
   }
   return { incident, comments };
-};
-
-export const serviceFormatter = (
-  connectorType: string,
-  params: unknown
-): { thirdPartyName: string; incident: Partial<PushToServiceApiParams['incident']> } | null => {
-  switch (connectorType) {
-    case ConnectorTypes.jira:
-      const {
-        priority,
-        labels,
-        issueType,
-        parent,
-      } = params as JiraPushToServiceApiParams['incident'];
-      return {
-        incident: { priority, labels, issueType, parent },
-        thirdPartyName: 'Jira',
-      };
-    case ConnectorTypes.resilient:
-      const { incidentTypes, severityCode } = params as ResilientPushToServiceApiParams['incident'];
-      return {
-        incident: { incidentTypes, severityCode },
-        thirdPartyName: 'Resilient',
-      };
-    case ConnectorTypes.serviceNowITSM:
-      const {
-        severity,
-        urgency,
-        impact,
-      } = params as ServiceNowITSMPushToServiceApiParams['incident'];
-      return {
-        incident: { severity, urgency, impact },
-        thirdPartyName: 'ServiceNow',
-      };
-    case ConnectorTypes.serviceNowSIR:
-      const {
-        destIp,
-        sourceIp,
-        category,
-        subcategory,
-        malwareHash,
-        malwareUrl,
-        priority: sirPriority,
-      } = params as ServiceNowSIRFieldsType;
-      return {
-        incident: {
-          dest_ip: destIp,
-          source_ip: sourceIp,
-          category,
-          subcategory,
-          malware_hash: malwareHash,
-          malware_url: malwareUrl,
-          priority: sirPriority,
-        },
-        thirdPartyName: 'ServiceNow',
-      };
-    default:
-      return null;
-  }
 };
 
 export const getEntity = (entity: EntityInformation): string =>
@@ -257,14 +255,19 @@ export const transformFields = <
 };
 
 export const transformComments = (
-  comments: ServiceConnectorCommentParams[],
+  comments: CaseResponse['comments'] = [],
   pipes: string[]
 ): SimpleComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
-      value: c.comment,
-      date: c.updatedAt ?? c.createdAt,
-      user: getEntity(c),
+      value: c.type === 'user' ? c.comment : '',
+      date: c.updated_at ?? c.created_at,
+      user: getEntity({
+        createdAt: c.created_at,
+        createdBy: c.created_by,
+        updatedAt: c.updated_at,
+        updatedBy: c.updated_by,
+      }),
     }).value,
-    commentId: c.commentId,
+    commentId: c.id,
   }));
