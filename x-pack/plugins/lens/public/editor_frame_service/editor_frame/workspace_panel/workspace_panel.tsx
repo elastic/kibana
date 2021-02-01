@@ -83,7 +83,14 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
-const workspaceDropValue = { id: 'lnsWorkspace' };
+const workspaceDropValue = {
+  id: 'lnsWorkspace',
+  humanData: {
+    label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
+      defaultMessage: 'Workspace',
+    }),
+  },
+};
 
 // Exported for testing purposes only.
 export const WorkspacePanel = React.memo(function WorkspacePanel({
@@ -219,6 +226,8 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
     }
   }
 
+  const order = useMemo(() => [1, 0, 0, 0], []);
+
   function renderEmptyWorkspace() {
     return (
       <EuiText
@@ -304,6 +313,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
         value={workspaceDropValue}
+        order={order}
       >
         <div>
           {renderVisualization()}

@@ -31,6 +31,7 @@ import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
   canHandleDrop,
+  getDropTypes,
   onDrop,
 } from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
@@ -315,6 +316,7 @@ export function getIndexPatternDatasource({
     },
 
     canHandleDrop,
+    getDropTypes,
     onDrop,
 
     // Reset the temporary invalid state when closing the editor, but don't

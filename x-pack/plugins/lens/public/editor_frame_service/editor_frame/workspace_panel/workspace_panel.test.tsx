@@ -774,7 +774,7 @@ describe('workspace_panel', () => {
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField = { id: 'field' };
+    const draggedField = { id: 'field', humanData: { label: 'Label' } };
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
@@ -792,6 +792,7 @@ describe('workspace_panel', () => {
           keyboardMode={false}
           setKeyboardMode={() => {}}
           setA11yMessage={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <WorkspacePanel
             activeDatasourceId={'mock'}
@@ -830,7 +831,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
+      instance.find(DragDrop).prop('onDrop')!(draggedField);
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',

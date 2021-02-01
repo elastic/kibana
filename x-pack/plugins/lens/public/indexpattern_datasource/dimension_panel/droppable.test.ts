@@ -65,6 +65,23 @@ const expectedIndexPatterns = {
   },
 };
 
+const defaultDragging = {
+  columnId: 'col2',
+  groupId: 'a',
+  layerId: 'first',
+  id: 'col2',
+  humanData: {
+    label: 'Column 2',
+  },
+};
+
+const draggingField = {
+  field: { type: 'number', name: 'bytes', aggregatable: true },
+  indexPatternId: 'foo',
+  id: 'bar',
+  humanData: { label: 'Label' },
+};
+
 /**
  * The datasource exposes four main pieces of code which are tested at
  * an integration test level. The main reason for this fairly high level
@@ -166,7 +183,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: { name: 'bar', id: 'bar' },
+          dragging: { name: 'bar', id: 'bar', humanData: { label: 'Label' } },
         },
       })
     ).toBe(false);
@@ -182,6 +199,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             indexPatternId: 'foo',
             field: { type: 'string', name: 'mystring', aggregatable: true },
             id: 'mystring',
+            humanData: { label: 'Label' },
           },
         },
         filterOperations: () => false,
@@ -195,11 +213,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: {
-            field: { type: 'number', name: 'bytes', aggregatable: true },
-            indexPatternId: 'foo',
-            id: 'bar',
-          },
+          dragging: draggingField,
         },
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       })
@@ -216,6 +230,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             field: { type: 'number', name: 'bar', aggregatable: true },
             indexPatternId: 'foo2',
             id: 'bar',
+            humanData: { label: 'Label' },
           },
         },
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
@@ -240,6 +255,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
             indexPatternId: 'foo',
             id: 'bar',
+            humanData: { label: 'Label' },
           },
         },
       })
@@ -257,6 +273,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             groupId: 'a',
             layerId: 'first',
             id: 'col1',
+            humanData: { label: 'Label' },
           },
         },
         columnId: 'col2',
@@ -270,50 +287,34 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: {
-            columnId: 'col1',
-            groupId: 'a',
-            layerId: 'first',
-            id: 'bar',
-          },
+          dragging: defaultDragging,
         },
       })
     ).toBe(false);
   });
 
-  it('is not droppable if the dragged column is incompatible', () => {
+  it('is droppable if the dragged column is incompatible', () => {
     expect(
       canHandleDrop({
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: {
-            columnId: 'col1',
-            groupId: 'a',
-            layerId: 'first',
-            id: 'bar',
-          },
+          dragging: defaultDragging,
         },
         columnId: 'col2',
         filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('appends the dropped column when a field is dropped', () => {
-    const dragging = {
-      field: { type: 'number', name: 'bytes', aggregatable: true },
-      indexPatternId: 'foo',
-      id: 'bar',
-    };
-
     onDrop({
       ...defaultProps,
       dragDropContext: {
         ...dragDropContext,
-        dragging,
+        dragging: draggingField,
       },
-      droppedItem: dragging,
+      droppedItem: draggingField,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       groupId: '1',
@@ -339,18 +340,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('selects the specific operation that was valid on drop', () => {
-    const dragging = {
-      field: { type: 'string', name: 'source', aggregatable: true },
-      indexPatternId: 'foo',
-      id: 'bar',
-    };
     onDrop({
       ...defaultProps,
       dragDropContext: {
         ...dragDropContext,
-        dragging,
+        dragging: draggingField,
       },
-      droppedItem: dragging,
+      droppedItem: draggingField,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.isBucketed,
       groupId: '1',
@@ -376,18 +372,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('updates a column when a field is dropped', () => {
-    const dragging = {
-      field: { type: 'number', name: 'bytes', aggregatable: true },
-      indexPatternId: 'foo',
-      id: 'bar',
-    };
     onDrop({
       ...defaultProps,
       dragDropContext: {
         ...dragDropContext,
-        dragging,
+        dragging: draggingField,
       },
-      droppedItem: dragging,
+      droppedItem: draggingField,
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
       groupId: '1',
     });
@@ -413,6 +404,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       field: { name: 'memory', type: 'number', aggregatable: true },
       indexPatternId: 'foo',
       id: '1',
+      humanData: { label: 'Label' },
     };
     onDrop({
       ...defaultProps,
@@ -420,7 +412,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...dragDropContext,
         dragging,
       },
-      droppedItem: dragging,
+      droppedItem: {
+        field: { name: 'memory', type: 'number', aggregatable: true },
+        indexPatternId: 'foo',
+        id: '1',
+      },
       state: {
         ...state,
         layers: {
@@ -467,6 +463,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       groupId: 'a',
       layerId: 'first',
       id: 'bar',
+      humanData: { label: 'Label' },
     };
 
     onDrop({
@@ -496,12 +493,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('replaces an operation when moving to a populated dimension', () => {
-    const dragging = {
-      columnId: 'col2',
-      groupId: 'a',
-      layerId: 'first',
-      id: 'col2',
-    };
     const testState = { ...state };
     testState.layers.first = {
       indexPatternId: 'foo',
@@ -539,9 +530,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
       ...defaultProps,
       dragDropContext: {
         ...dragDropContext,
-        dragging,
+        dragging: defaultDragging,
       },
-      droppedItem: dragging,
+      droppedItem: defaultDragging,
       state: testState,
       groupId: '1',
     });
@@ -562,12 +553,124 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
   });
 
+  it('copies a dimension if group is the same an isNew is set, respecting bucket metric order', () => {
+    const testState = { ...state };
+    testState.layers.first = {
+      indexPatternId: 'foo',
+      columnOrder: ['col1', 'col2', 'col3'],
+      columns: {
+        col1: testState.layers.first.columns.col1,
+
+        col2: {
+          label: 'Top values of src',
+          dataType: 'string',
+          isBucketed: true,
+
+          // Private
+          operationType: 'terms',
+          params: {
+            orderBy: { type: 'column', columnId: 'col3' },
+            orderDirection: 'desc',
+            size: 10,
+          },
+          sourceField: 'src',
+        },
+        col3: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+
+          // Private
+          operationType: 'count',
+          sourceField: 'Records',
+        },
+      },
+    };
+
+    const metricDragging = {
+      columnId: 'col3',
+      groupId: 'a',
+      layerId: 'first',
+      id: 'col3',
+      humanData: { label: 'Label' },
+    };
+
+    onDrop({
+      ...defaultProps,
+      dragDropContext: {
+        ...dragDropContext,
+        dragging: metricDragging,
+      },
+      droppedItem: metricDragging,
+      state: testState,
+      groupId: 'a',
+      isNew: true,
+      columnId: 'newCol',
+    });
+
+    // metric is appended
+    expect(setState).toHaveBeenCalledWith({
+      ...testState,
+      layers: {
+        first: {
+          ...testState.layers.first,
+          columnOrder: ['col1', 'col2', 'col3', 'newCol'],
+          columns: {
+            col1: testState.layers.first.columns.col1,
+            col2: testState.layers.first.columns.col2,
+            col3: testState.layers.first.columns.col3,
+            newCol: testState.layers.first.columns.col3,
+          },
+        },
+      },
+    });
+
+    const bucketDragging = {
+      columnId: 'col2',
+      groupId: 'a',
+      layerId: 'first',
+      id: 'col2',
+      humanData: { label: 'Label' },
+    };
+
+    onDrop({
+      ...defaultProps,
+      dragDropContext: {
+        ...dragDropContext,
+        dragging: bucketDragging,
+      },
+      droppedItem: bucketDragging,
+      state: testState,
+      groupId: 'a',
+      isNew: true,
+      columnId: 'newCol',
+    });
+
+    // bucket is placed after the last existing bucket
+    expect(setState).toHaveBeenCalledWith({
+      ...testState,
+      layers: {
+        first: {
+          ...testState.layers.first,
+          columnOrder: ['col1', 'col2', 'newCol', 'col3'],
+          columns: {
+            col1: testState.layers.first.columns.col1,
+            col2: testState.layers.first.columns.col2,
+            newCol: testState.layers.first.columns.col2,
+            col3: testState.layers.first.columns.col3,
+          },
+        },
+      },
+    });
+  });
+
   it('if dnd is reorder, it correctly reorders columns', () => {
     const dragging = {
       columnId: 'col1',
       groupId: 'a',
       layerId: 'first',
       id: 'col1',
+      humanData: { label: 'Label' },
     };
     const testState = {
       ...state,

@@ -1338,14 +1338,11 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
-          {
-            indexPatternId: '1',
-            field: {},
-            id: '1',
-          },
-          { id: 'lnsWorkspace' }
-        );
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!({
+          indexPatternId: '1',
+          field: {},
+          id: '1',
+        });
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1439,14 +1436,11 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
-          {
-            indexPatternId: '1',
-            field: {},
-            id: '1',
-          },
-          { id: 'lnsWorkspace' }
-        );
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!({
+          indexPatternId: '1',
+          field: {},
+          id: '1',
+        });
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

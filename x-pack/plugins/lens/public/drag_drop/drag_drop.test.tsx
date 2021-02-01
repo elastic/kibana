@@ -26,6 +26,7 @@ const defaultContext = {
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
+  registerDropTarget: jest.fn(),
 };
 
 const dataTransfer = {
@@ -37,7 +38,7 @@ describe('DragDrop', () => {
   const value = { id: '1', label: 'hello' };
   test('renders if nothing is being dragged', () => {
     const component = render(
-      <DragDrop value={value} draggable label="dragging">
+      <DragDrop value={value} draggable humanData={{ label: 'dragging' }}>
         <button>Hello!</button>
       </DragDrop>
     );
@@ -115,7 +116,7 @@ describe('DragDrop', () => {
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
     expect(setDragging).toBeCalledWith(undefined);
-    expect(onDrop).toBeCalledWith({ id: '2', label: 'hi' }, { id: '1', label: 'hello' });
+    expect(onDrop).toBeCalledWith({ id: '2', label: 'hi' });
   });
 
   test('drop function is not called on droppable=false', async () => {
@@ -175,7 +176,8 @@ describe('DragDrop', () => {
 
   test('additional styles are reflected in the className until drop', () => {
     let dragging: { id: '1' } | undefined;
-    const getAdditionalClasses = jest.fn().mockReturnValue('additional');
+    const getAdditionalClassesOnEnter = jest.fn().mockReturnValue('additional');
+    const getAdditionalClassesOnDroppable = jest.fn().mockReturnValue('droppable');
     let activeDropTarget;
 
     const component = mount(
@@ -197,7 +199,8 @@ describe('DragDrop', () => {
           value={value}
           onDrop={(x: unknown) => {}}
           droppable
-          getAdditionalClassesOnEnter={getAdditionalClasses}
+          getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
+          getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
           <button>Hello!</button>
         </DragDrop>
@@ -218,6 +221,7 @@ describe('DragDrop', () => {
   test('additional enter styles are reflected in the className until dragleave', () => {
     let dragging: { id: '1' } | undefined;
     const getAdditionalClasses = jest.fn().mockReturnValue('additional');
+    const getAdditionalClassesOnDroppable = jest.fn().mockReturnValue('droppable');
     const setActiveDropTarget = jest.fn();
 
     const component = mount(
@@ -233,6 +237,7 @@ describe('DragDrop', () => {
         }
         keyboardMode={false}
         setKeyboardMode={(keyboardMode) => true}
+        registerDropTarget={jest.fn()}
       >
         <DragDrop value={{ label: 'ignored', id: '3' }} draggable={true} label="a">
           <button>Hello!</button>
@@ -242,6 +247,7 @@ describe('DragDrop', () => {
           onDrop={(x: unknown) => {}}
           droppable
           getAdditionalClassesOnEnter={getAdditionalClasses}
+          getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
           <button>Hello!</button>
         </DragDrop>
@@ -283,15 +289,16 @@ describe('DragDrop', () => {
         },
         activeDropTarget,
         setA11yMessage: jest.fn(),
+        registerDropTarget: jest.fn(),
       };
       return mount(
         <ChildDragDropProvider {...baseContext} {...dragContext}>
           <ReorderProvider id="groupId">
             <DragDrop
-              label="1"
+              humanData={{ label: '1' }}
               draggable
               droppable={false}
-              dragType="reorder"
+              dragType="move"
               dropType="reorder"
               reorderableGroup={[{ id: '1' }, { id: '2' }, { id: '3' }]}
               value={{ id: '1' }}
@@ -300,10 +307,11 @@ describe('DragDrop', () => {
               <span>1</span>
             </DragDrop>
             <DragDrop
+              humanData={{ label: '2' }}
               label="2"
               draggable
               droppable
-              dragType="reorder"
+              dragType="move"
               dropType="reorder"
               reorderableGroup={[{ id: '1' }, { id: '2' }, { id: '3' }]}
               value={{
@@ -314,10 +322,10 @@ describe('DragDrop', () => {
               <span>2</span>
             </DragDrop>
             <DragDrop
-              label="3"
+              humanData={{ label: '3' }}
               draggable
               droppable
-              dragType="reorder"
+              dragType="move"
               dropType="reorder"
               reorderableGroup={[{ id: '1' }, { id: '2' }, { id: '3' }]}
               value={{

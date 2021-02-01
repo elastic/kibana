@@ -15,6 +15,29 @@
   }
 }
 
+.lnsFieldItem {
+  width: 100%;
+
+  &:focus,
+  &:focus-within,
+  &.kbnFieldButton-isActive  {
+    animation: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .kbnFieldButton__name span,
+  &:focus-within .kbnFieldButton__name span,
+  &.kbnFieldButton-isActive .kbnFieldButton__name span {
+    background-color: transparentize($euiColorVis1, .9) !important;
+    text-decoration: underline !important;
+  }
+}
+
+
+
+.kbnFieldButton__name {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
 .lnsFieldItem--missing {
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
   color: $euiColorDarkShade;

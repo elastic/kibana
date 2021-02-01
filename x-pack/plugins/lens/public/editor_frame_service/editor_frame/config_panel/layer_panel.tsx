@@ -113,7 +113,7 @@ export function LayerPanel(
   const layerDatasourceOnDrop = layerDatasource.onDrop;
 
   const onDrop = useMemo(() => {
-    return (droppedItem: DragDropIdentifier, targetItem: DragDropIdentifier) => {
+    return (droppedItem: DragDropIdentifier, targetItem: DragDropIdentifier, dropType: string) => {
       const { columnId, groupId, layerId: targetLayerId, isNew } = (targetItem as unknown) as {
         groupId: string;
         columnId: string;
@@ -133,6 +133,7 @@ export function LayerPanel(
         layerId: targetLayerId,
         isNew,
         filterOperations,
+        dropType,
       });
       if (dropResult) {
         updateVisualization(

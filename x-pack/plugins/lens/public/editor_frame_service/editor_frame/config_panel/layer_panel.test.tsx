@@ -30,6 +30,7 @@ const defaultContext = {
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
+  registerDropTarget: jest.fn(),
 };
 
 describe('LayerPanel', () => {
@@ -440,7 +441,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockReturnValue(true);
 
-      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1', humanData: {label: 'Label'} };
 
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
@@ -483,7 +484,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockImplementation(({ columnId }) => columnId !== 'a');
 
-      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1', humanData: {label: 'Label'} };
 
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
@@ -534,7 +535,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.canHandleDrop.mockReturnValue(true);
 
-      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a', humanData: {label: 'Label'} };
 
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
@@ -587,7 +588,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a', humanData: {label: 'Label'} };
 
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
@@ -595,12 +596,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, {
-        layerId: 'first',
-        columnId: 'b',
-        groupId: 'a',
-        id: 'b',
-      });
+      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation);
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           groupId: 'a',
@@ -623,7 +619,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a', humanData: {label: 'Label'} };
 
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>

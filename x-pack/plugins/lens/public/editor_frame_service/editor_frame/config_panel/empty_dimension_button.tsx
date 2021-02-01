@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../id_generator';
-import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig, isDraggedOperation } from '../../../types';
+import { DragDrop, DragDropIdentifier } from '../../../drag_drop';
+import { Datasource, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
+const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
+  defaultMessage: 'Empty dimension',
+});
+
 export function EmptyDimensionButton({
-  dragDropContext,
   group,
   layerDatasource,
   layerDatasourceDropProps,
@@ -24,48 +27,64 @@ export function EmptyDimensionButton({
   onClick,
   onDrop,
 }: {
-  dragDropContext: DragContextState;
   layerId: string;
   groupIndex: number;
   layerIndex: number;
   onClick: (id: string) => void;
   onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
   group: VisualizationDimensionGroupConfig;
-
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
-  const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value);
+  const itemIndex = group.accessors.length;
+
+  const [newColumnId, setNewColumnId] = useState<string>(generateId());
+  useEffect(() => {
+    setNewColumnId(generateId());
+  }, [itemIndex]);
+
+  const dropType = layerDatasource.getDropTypes({
+    ...layerDatasourceDropProps,
+    columnId: newColumnId,
+    filterOperations: group.filterOperations,
+    groupId: group.groupId,
+  });
 
   const value = useMemo(() => {
-    const newId = generateId();
     return {
-      columnId: newId,
+      columnId: newColumnId,
       groupId: group.groupId,
       layerId,
       isNew: true,
-      id: newId,
+      id: newColumnId,
+      dropType,
+      humanData: {
+        label,
+        groupLabel: group.groupLabel,
+        position: itemIndex + 1,
+      },
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [group.accessors.length, group.groupId, layerId]);
+  }, [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]);
+
+  const getAdditionalClassesOnDroppable = React.useCallback((currentDropType?: string) => {
+    if (currentDropType === 'convert_add' || currentDropType === 'remove_convert_move') {
+      return 'lnsDragDrop-notCompatible';
+    }
+  }, []);
+
+  const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value, dropType);
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
+        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
+        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
+        order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleDrop}
-        droppable={
-          Boolean(dragDropContext.dragging) &&
-          // Verify that the dragged item is not coming from the same group
-          // since this would be a duplicate
-          (!isDraggedOperation(dragDropContext.dragging) ||
-            dragDropContext.dragging.groupId !== group.groupId) &&
-          layerDatasource.canHandleDrop({
-            ...layerDatasourceDropProps,
-            columnId: value.columnId,
-            filterOperations: group.filterOperations,
-          })
-        }
+        label={label}
+        dropType={dropType}
+        droppable={!!dropType}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty

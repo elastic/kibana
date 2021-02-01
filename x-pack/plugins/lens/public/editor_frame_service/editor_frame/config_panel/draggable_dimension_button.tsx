@@ -42,66 +42,90 @@ export function DraggableDimensionButton({
   accessorIndex: number;
   columnId: string;
 }) {
-  const value = useMemo(() => {
-    return {
+  const dropType = layerDatasource.getDropTypes({
+    ...layerDatasourceDropProps,
+    columnId,
+    filterOperations: group.filterOperations,
+    groupId: group.groupId,
+  });
+
+
+  const value = useMemo(
+    () => ({
       columnId,
       groupId: group.groupId,
       layerId,
       id: columnId,
-    };
-  }, [columnId, group.groupId, layerId]);
+      dropType,
+      humanData: {
+        label,
+        groupLabel: group.groupLabel,
+        position: accessorIndex + 1,
+      },
+    }),
+    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel]
+  );
 
-  const { dragging } = dragDropContext;
-
-  const isCurrentGroup = group.groupId === dragging?.groupId;
-  const isOperationDragged = isDraggedOperation(dragging);
-  const canHandleDrop =
-    Boolean(dragDropContext.dragging) &&
-    layerDatasource.canHandleDrop({
-      ...layerDatasourceDropProps,
-      columnId,
-      filterOperations: group.filterOperations,
-    });
-
-  const dragType = isSelf(value, dragging)
-    ? 'move'
-    : isOperationDragged && isCurrentGroup
-    ? 'reorder'
-    : 'copy';
-
-  const dropType = isOperationDragged ? (!isCurrentGroup ? 'replace' : 'reorder') : 'add';
-
-  const isCompatibleFromOtherGroup = !isCurrentGroup && canHandleDrop;
-
-  const isDroppable = isOperationDragged
-    ? dragType === 'reorder'
-      ? isFromTheSameGroup(value, dragging)
-      : isCompatibleFromOtherGroup
-    : canHandleDrop;
-
+  // todo: simplify by id?
   const reorderableGroup = useMemo(
     () =>
-      group.accessors.map((a) => ({
-        columnId: a.columnId,
-        id: a.columnId,
+      group.accessors.map((g, index) => ({
+        columnId: g.columnId,
+        id: g.columnId,
         groupId: group.groupId,
+        dropType: 'reorder',
+        humanData: {
+          label: `item ${index + 1}`,
+          groupLabel: group.groupLabel,
+          position: index + 1,
+        },
         layerId,
       })),
     [group, layerId]
   );
 
+  const { dragging } = dragDropContext;
+
+  const dragType = isSelf(value, dragging) ? 'move' : 'copy';
+
+  const filterSameGroup = useMemo(
+    () => (el?: DragDropIdentifier) => {
+      return !!(!el || !isFromTheSameGroup(value, el) || el.isNew);
+    },
+    [value]
+  );
+
+  const getAdditionalClassesOnEnter = React.useCallback((chosenDropType?: string) => {
+    if (
+      chosenDropType === 'remove_add' ||
+      chosenDropType === 'remove_move' ||
+      chosenDropType === 'remove_convert_move'
+    ) {
+      return 'lnsDragDrop-isReplacing';
+    }
+  }, []);
+
+  const getAdditionalClassesOnDroppable = React.useCallback((chosenDropType?: string) => {
+    if (chosenDropType === 'convert_add' || chosenDropType === 'remove_convert_move') {
+      return 'lnsDragDrop-notCompatible';
+    }
+  }, []);
+
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
-        noKeyboardSupportYet={reorderableGroup.length < 2} // to be removed when navigating outside of groups is added
+        getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
+        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
+        order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
         dragType={dragType}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
+        dropTargetsFilter={filterSameGroup}
         value={value}
         label={label}
-        droppable={dragging && isDroppable}
-        onDrop={onDrop}
+        droppable={!!(dragging && dropType)}
+        onDrop={(drag) => onDrop(drag, value, dropType)}
       >
         {children}
       </DragDrop>
