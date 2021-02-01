@@ -84,7 +84,8 @@ const getTransformedHits = (
     return [
       {
         _index: inputIndex,
-        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
+        // FIXME
+        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field as string[]),
         _source: source,
       },
     ];
@@ -112,7 +113,8 @@ const getTransformedHits = (
 
         return {
           _index: inputIndex,
-          _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field, key),
+          // FIXME
+          _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field as string[], key),
           _source: source,
         };
       }

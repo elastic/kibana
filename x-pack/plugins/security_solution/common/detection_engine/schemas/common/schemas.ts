@@ -461,11 +461,13 @@ export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 export const threshold = t.exact(
   t.type({
     field: t.union([t.string, t.array(t.string)]),
+    // field: t.array(t.string),
     value: PositiveIntegerGreaterThanZero,
     cardinality_field: t.union([t.string, t.undefined]),
     cardinality_value: t.union([PositiveInteger, t.undefined]),
   })
 );
+// TODO: codec to transform threshold field string to string[]
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);

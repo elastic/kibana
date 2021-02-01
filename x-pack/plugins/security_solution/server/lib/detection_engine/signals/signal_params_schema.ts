@@ -39,7 +39,12 @@ export const signalSchema = schema.object({
   severityMapping: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threshold: schema.maybe(
-    schema.object({ field: schema.nullable(schema.string()), value: schema.number() })
+    schema.object({
+      field: schema.nullable(schema.arrayOf(schema.string())),
+      value: schema.number(),
+      cardinality_field: schema.nullable(schema.string()), // TODO: depends on `field` being defined?
+      cardinality_value: schema.number(),
+    })
   ),
   timestampOverride: schema.nullable(schema.string()),
   to: schema.string(),
