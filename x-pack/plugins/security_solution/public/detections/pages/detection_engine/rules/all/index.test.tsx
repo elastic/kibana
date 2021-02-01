@@ -13,7 +13,7 @@ import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
 import { AllRules } from './index';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useRules, useRulesStatuses } from '../../../../containers/detection_engine/rules';
+import { useRulesTable, useRulesStatuses } from '../../../../containers/detection_engine/rules';
 import { TestProviders } from '../../../../../common/mock';
 import { createUseUiSetting$Mock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import {
@@ -40,6 +40,7 @@ jest.mock('../../../../containers/detection_engine/rules');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+const mockUseRulesTable = useRulesTable as jest.Mock;
 
 describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
@@ -62,13 +63,9 @@ describe('AllRules', () => {
         : useUiSetting$Mock(key, defaultValue);
     });
 
-    (useRules as jest.Mock).mockReturnValue([
-      false,
-      {
-        page: 1,
-        perPage: 20,
-        total: 1,
-        data: [
+    mockUseRulesTable.mockImplementation(({ initialStateOverride }) => {
+      const initialState = {
+        rules: [
           {
             actions: [],
             created_at: '2020-02-14T19:49:28.178Z',
@@ -101,9 +98,42 @@ describe('AllRules', () => {
             version: 1,
           },
         ],
-      },
-      mockRefetchRulesData,
-    ]);
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 1,
+        },
+        filterOptions: {
+          filter: '',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          tags: [],
+          showCustomRules: false,
+          showElasticRules: false,
+        },
+        loadingRulesAction: null,
+        loadingRuleIds: [],
+        selectedRuleIds: [],
+        exportRuleIds: [],
+        lastUpdated: 0,
+        isRefreshOn: true,
+        showIdleModal: false,
+      };
+
+      return {
+        state: { ...initialState, ...initialStateOverride },
+        dispatch: jest.fn(),
+        reFetchRules: mockRefetchRulesData,
+        setRules: jest.fn(),
+        updateRules: jest.fn(),
+        updateOptions: jest.fn(),
+        actionStarted: jest.fn(),
+        actionStopped: jest.fn(),
+        setShowIdleModal: jest.fn(),
+        setLastRefreshDate: jest.fn(),
+        setAutoRefreshOn: jest.fn(),
+      };
+    });
 
     (useRulesStatuses as jest.Mock).mockReturnValue({
       loading: false,
