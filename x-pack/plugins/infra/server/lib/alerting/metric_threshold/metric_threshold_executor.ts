@@ -140,7 +140,14 @@ export const createMetricThresholdExecutor = (
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
-    defaultMessage: 'Fired',
+    defaultMessage: 'Alert',
+  }),
+};
+
+export const WARNING_ACTIONS = {
+  id: 'metrics.threshold.warning',
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
+    defaultMessage: 'Warning',
   }),
 };
 

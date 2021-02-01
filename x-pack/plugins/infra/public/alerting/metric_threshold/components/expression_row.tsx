@@ -245,7 +245,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <StyledHealth color="danger">
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.criticalThreshold"
-                    defaultMessage="Critical"
+                    defaultMessage="Alert"
                   />
                 </StyledHealth>
               </StyledExpressionRow>

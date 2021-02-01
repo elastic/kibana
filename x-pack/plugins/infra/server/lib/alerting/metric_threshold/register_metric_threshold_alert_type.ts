@@ -13,7 +13,11 @@ import {
   ActionGroupIdsOf,
 } from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
-import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import {
+  createMetricThresholdExecutor,
+  FIRED_ACTIONS,
+  WARNING_ACTIONS,
+} from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
@@ -54,6 +58,8 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
+    warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
+    warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))),
   };
 
   const nonCountCriterion = schema.object({
@@ -90,7 +96,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS],
+    actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     minimumLicenseRequired: 'basic',
     executor: createMetricThresholdExecutor(libs),
     actionVariables: {

@@ -66,17 +66,19 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
 
             const numberOfGroups = previewResult.length;
             const resultTotals = previewResult.reduce(
-              (totals, [firedResult, noDataResult, errorResult, notifications]) => {
+              (totals, { fired, warning, noData, error, notifications }) => {
                 return {
                   ...totals,
-                  fired: totals.fired + firedResult,
-                  noData: totals.noData + noDataResult,
-                  error: totals.error + errorResult,
+                  fired: totals.fired + fired,
+                  warning: totals.warning + warning,
+                  noData: totals.noData + noData,
+                  error: totals.error + error,
                   notifications: totals.notifications + notifications,
                 };
               },
               {
                 fired: 0,
+                warning: 0,
                 noData: 0,
                 error: 0,
                 notifications: 0,
