@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../../../saved_objects/public';
 import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
-import { SavedObjectsClientContract } from '../../../../../core/public';
 
 import {
   VisualizeServices,
@@ -29,6 +29,14 @@ import {
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+
+interface VisualizeCapabilities {
+  createShortUrl: boolean;
+  delete: boolean;
+  save: boolean;
+  saveQuery: boolean;
+  show: boolean;
+}
 
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
@@ -41,9 +49,16 @@ interface TopNavConfigParams {
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
-  savedObjectsClient: SavedObjectsClientContract;
   embeddableId?: string;
 }
+
+export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
+  if (!anonymousUserCapabilities.visualize) return false;
+
+  const visualize = (anonymousUserCapabilities.visualize as unknown) as VisualizeCapabilities;
+
+  return !!visualize.show;
+};
 
 export const getTopNavConfig = (
   {
@@ -55,7 +70,6 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
-    savedObjectsClient,
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
@@ -71,6 +85,7 @@ export const getTopNavConfig = (
     i18n: { Context: I18nContext },
     dashboard,
     savedObjectsTagging,
+    presentationUtil,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -243,6 +258,7 @@ export const getTopNavConfig = (
               title: savedVis?.title,
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
+            showPublicUrlSwitch,
           });
         }
       },
@@ -379,39 +395,43 @@ export const getTopNavConfig = (
                 );
               }
 
-              const saveModal =
-                !!originatingApp ||
-                !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables ? (
-                  <SavedObjectSaveModalOrigin
-                    documentInfo={savedVis || { title: '' }}
-                    onSave={onSave}
-                    options={tagOptions}
-                    getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
-                    onClose={() => {}}
-                    originatingApp={originatingApp}
-                    returnToOriginSwitchLabel={
-                      originatingApp && embeddableId
-                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
-                            defaultMessage: 'Update panel on {originatingAppName}',
-                            values: {
-                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
-                            },
-                          })
-                        : undefined
-                    }
-                  />
-                ) : (
-                  <SavedObjectSaveModalDashboard
-                    documentInfo={savedVis || { title: '' }}
-                    onSave={onSave}
-                    tagOptions={tagOptions}
-                    objectType={'visualization'}
-                    onClose={() => {}}
-                    savedObjectsClient={savedObjectsClient}
-                  />
-                );
-              showSaveModal(saveModal, I18nContext);
+              const useByRefFlow =
+                !!originatingApp || !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
+              const saveModal = useByRefFlow ? (
+                <SavedObjectSaveModalOrigin
+                  documentInfo={savedVis || { title: '' }}
+                  onSave={onSave}
+                  options={tagOptions}
+                  getAppNameFromId={stateTransfer.getAppNameFromId}
+                  objectType={'visualization'}
+                  onClose={() => {}}
+                  originatingApp={originatingApp}
+                  returnToOriginSwitchLabel={
+                    originatingApp && embeddableId
+                      ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                          defaultMessage: 'Update panel on {originatingAppName}',
+                          values: {
+                            originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                          },
+                        })
+                      : undefined
+                  }
+                />
+              ) : (
+                <SavedObjectSaveModalDashboard
+                  documentInfo={savedVis || { title: '' }}
+                  onSave={onSave}
+                  tagOptions={tagOptions}
+                  objectType={'visualization'}
+                  onClose={() => {}}
+                />
+              );
+              showSaveModal(
+                saveModal,
+                I18nContext,
+                !useByRefFlow ? presentationUtil.ContextProvider : React.Fragment
+              );
             },
           },
         ]
