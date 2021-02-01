@@ -8,8 +8,8 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiThemeProvider } from '../../../../observability/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
