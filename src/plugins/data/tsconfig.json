@@ -7,7 +7,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", "common/**/*.json"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../bfetch/tsconfig.json" },

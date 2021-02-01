@@ -6,7 +6,7 @@
 
 import './field_item.scss';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
@@ -48,7 +48,7 @@ import {
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
-import { DragDrop, Dragging } from '../drag_drop';
+import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
@@ -69,6 +69,8 @@ export interface FieldItemProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
   hideDetails?: boolean;
+  itemIndex: number;
+  groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
@@ -106,7 +108,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
   const dropOntoWorkspaceAndClose = useCallback(
-    (droppedField: Dragging) => {
+    (droppedField: DragDropIdentifier) => {
       dropOntoWorkspace(droppedField);
       setOpen(false);
     },
@@ -163,10 +165,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     }
   }
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
     [field, indexPattern.id]
   );
+
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
     <EuiIconTip
@@ -200,10 +203,11 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
+            noKeyboardSupportYet
+            draggable
             label={field.displayName}
             value={value}
-            data-test-subj={`lnsFieldListPanelField-${field.name}`}
-            draggable
+            dataTestSubj={`lnsFieldListPanelField-${field.name}`}
           >
             <FieldButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
@@ -215,7 +219,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                 ['aria-label']: i18n.translate(
                   'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
                   {
-                    defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+                    defaultMessage: 'Preview {fieldName}: {fieldType}',
                     values: {
                       fieldName: field.displayName,
                       fieldType: field.type,
