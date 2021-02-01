@@ -66,13 +66,6 @@ export async function getCounts({
   searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
-    count: {
-      value_count: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      },
-    },
     transaction_type: {
       top_hits: {
         size: 1,
@@ -92,7 +85,7 @@ export async function getCounts({
 
     return {
       key: bucket.key as BucketKey,
-      count: bucket.count.value,
+      count: bucket.doc_count,
       transactionType: source.transaction.type,
     };
   });
