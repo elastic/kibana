@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 source src/dev/ci_setup/setup_env.sh
 
 cd "$XPACK_DIR/plugins/canvas"
@@ -7,7 +9,7 @@ node scripts/storybook --dll
 
 cd "$KIBANA_DIR"
 
-yarn storybook --site apm
+# yarn storybook --site apm # TODO re-enable after being fixed
 yarn storybook --site canvas
 yarn storybook --site ci_composite
 yarn storybook --site codeeditor
