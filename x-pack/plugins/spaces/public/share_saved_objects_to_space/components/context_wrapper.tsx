@@ -30,10 +30,11 @@ export const ContextWrapper = (props: PropsWithChildren<Props>) => {
     return null;
   }
 
-  const { application, docLinks } = coreStart;
+  const { application, docLinks, notifications } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     application,
     docLinks,
+    notifications,
   });
 
   return <KibanaReactContextProvider>{children}</KibanaReactContextProvider>;

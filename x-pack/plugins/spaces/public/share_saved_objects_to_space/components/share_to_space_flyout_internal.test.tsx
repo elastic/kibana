@@ -18,7 +18,6 @@ import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-import { ToastsApi } from 'src/core/public';
 import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { NoSpacesAvailable } from './no_spaces_available';
@@ -70,10 +69,6 @@ const setup = async (opts: SetupOpts = {}) => {
 
   mockSpacesManager.getShareSavedObjectPermissions.mockResolvedValue({ shareToAllSpaces: true });
 
-  const mockToastNotifications = {
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-  };
   const savedObjectToShare = {
     type: 'dashboard',
     id: 'my-dash',
@@ -94,6 +89,7 @@ const setup = async (opts: SetupOpts = {}) => {
     ...startServices.application.capabilities,
     spaces: { manage: true },
   };
+  const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
   // the flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
@@ -103,7 +99,6 @@ const setup = async (opts: SetupOpts = {}) => {
       <ShareToSpaceFlyoutInternal
         savedObject={savedObjectToShare}
         spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-        toastNotifications={(mockToastNotifications as unknown) as ToastsApi}
         onClose={onClose}
         onObjectUpdated={onObjectUpdated}
       />

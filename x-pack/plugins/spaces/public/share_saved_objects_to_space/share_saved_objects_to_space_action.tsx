@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
@@ -45,7 +45,6 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
 
   constructor(
     private readonly spacesManager: SpacesManager,
-    private readonly notifications: NotificationsStart,
     private readonly getStartServices: StartServicesAccessor<PluginsStart>
   ) {
     super();
@@ -63,7 +62,6 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
           onObjectUpdated={() => (this.isDataChanged = true)}
           savedObject={this.record}
           spacesManager={this.spacesManager}
-          toastNotifications={this.notifications.toasts}
         />
       </ContextWrapper>
     );

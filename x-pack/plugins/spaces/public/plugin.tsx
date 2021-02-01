@@ -70,7 +70,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       const shareSavedObjectsToSpaceService = new ShareSavedObjectsToSpaceService();
       shareSavedObjectsToSpaceService.setup({
         spacesManager: this.spacesManager,
-        notificationsSetup: core.notifications,
         savedObjectsManagementSetup: plugins.savedObjectsManagement,
         getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
       });

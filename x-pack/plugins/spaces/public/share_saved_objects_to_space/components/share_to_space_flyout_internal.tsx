@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastsStart } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { GetSpaceResult } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
@@ -37,14 +37,17 @@ interface Props {
   onObjectUpdated: () => void;
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
-  toastNotifications: ToastsStart;
 }
 
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
 export const ShareToSpaceFlyoutInternal = (props: Props) => {
-  const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
+  const { services } = useKibana();
+  const { notifications } = services;
+  const toastNotifications = notifications!.toasts;
+
+  const { onClose, onObjectUpdated, savedObject, spacesManager } = props;
   const { namespaces: currentNamespaces = [] } = savedObject;
   const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
