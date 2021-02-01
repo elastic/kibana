@@ -10,6 +10,8 @@ import classNames from 'classnames';
 
 import { Result } from '../../../../types';
 
+import { TITLE_LABEL } from './constants';
+
 interface TitleFieldProps {
   result: Result;
   titleField: string | null;
@@ -32,7 +34,7 @@ export const TitleField: React.FC<TitleFieldProps> = ({ result, titleField, titl
         </div>
       ) : (
         <span className="example-result-content-placeholder" data-test-subj="DefaultTitleLabel">
-          Title
+          {TITLE_LABEL}
         </span>
       )}
     </div>
