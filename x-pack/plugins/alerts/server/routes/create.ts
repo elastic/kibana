@@ -45,8 +45,13 @@ export const bodySchema = schema.object({
 export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: `${BASE_ALERT_API_PATH}/alert`,
+      path: `${BASE_ALERT_API_PATH}/alert/{id?}`,
       validate: {
+        params: schema.maybe(
+          schema.object({
+            id: schema.maybe(schema.string()),
+          })
+        ),
         body: bodySchema,
       },
     },
@@ -59,10 +64,12 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         }
         const alertsClient = context.alerting.getAlertsClient();
         const alert = req.body;
+        const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
         try {
           const alertRes: Alert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>({
             data: { ...alert, notifyWhen },
+            options: { id: params?.id },
           });
           return res.ok({
             body: alertRes,
