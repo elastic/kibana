@@ -6,9 +6,6 @@
  * Public License, v 1.
  */
 
-import { ViewMode } from './services/embeddable';
-import { setStateToKbnUrl } from './services/kibana_utils';
-
 const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
 export const DashboardConstants = {
@@ -26,17 +23,8 @@ export function createDashboardEditUrl(id?: string, editMode?: boolean) {
   if (!id) {
     return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
   }
-  const viewUrl = `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
-  if (editMode) {
-    const editUrl = setStateToKbnUrl(
-      DASHBOARD_STATE_STORAGE_KEY,
-      { viewMode: ViewMode.EDIT },
-      { useHash: false, storeInHashQuery: false },
-      viewUrl
-    );
-    return editUrl;
-  }
-  return viewUrl;
+  const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
+  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {
