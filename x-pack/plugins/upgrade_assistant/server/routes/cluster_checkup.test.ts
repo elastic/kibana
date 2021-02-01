@@ -80,7 +80,7 @@ describe('cluster checkup API', () => {
 
     it('returns an 403 error if it throws forbidden', async () => {
       const e: any = new Error(`you can't go here!`);
-      e.status = 403;
+      e.statusCode = 403;
 
       MigrationApis.getUpgradeAssistantStatus.mockRejectedValue(e);
       const resp = await routeDependencies.router.getHandler({

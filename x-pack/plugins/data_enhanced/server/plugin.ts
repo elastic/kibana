@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -20,13 +21,20 @@ import {
   eqlSearchStrategyProvider,
 } from './search';
 import { getUiSettings } from './ui_settings';
+import type { DataEnhancedRequestHandlerContext } from './type';
 
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
+}
+export interface StartDependencies {
+  data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
-export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
+export class EnhancedDataServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
 
@@ -54,7 +62,10 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new SearchSessionService(this.logger);
+    this.sessionService = new SearchSessionService(
+      this.logger,
+      this.initializerContext.config.create()
+    );
 
     deps.data.__enhance({
       search: {
@@ -63,12 +74,18 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       },
     });
 
-    const router = core.http.createRouter();
-    registerSessionRoutes(router);
+    const router = core.http.createRouter<DataEnhancedRequestHandlerContext>();
+    registerSessionRoutes(router, this.logger);
+
+    this.sessionService.setup(core, {
+      taskManager: deps.taskManager,
+    });
   }
 
-  public start(core: CoreStart) {
-    this.sessionService.start(core, this.initializerContext.config.create());
+  public start(core: CoreStart, { taskManager }: StartDependencies) {
+    this.sessionService.start(core, {
+      taskManager,
+    });
   }
 
   public stop() {

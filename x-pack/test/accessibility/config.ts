@@ -27,6 +27,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/roles'),
       require.resolve('./apps/kibana_overview'),
       require.resolve('./apps/ingest_node_pipelines'),
+      require.resolve('./apps/index_lifecycle_management'),
+      require.resolve('./apps/ml'),
+      require.resolve('./apps/lens'),
     ],
 
     pageObjects,

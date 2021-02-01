@@ -64,8 +64,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, dispatchToaster]);
 
   return [loading, ruleStatus, fetchRuleStatus.current];
 };
@@ -113,15 +112,16 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
         setLoading(false);
       }
     };
-    if (rules != null && rules.length > 0) {
+
+    if (rules.length > 0) {
       fetchData(rules.map((r) => r.id));
     }
+
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rules]);
+  }, [rules, dispatchToaster]);
 
   return { loading, rulesStatuses };
 };

@@ -33,16 +33,20 @@ import {
   WaterfallChartTooltip,
 } from './styles';
 import { WaterfallData } from '../types';
-import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE, FIXED_AXIS_HEIGHT } from './constants';
+import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
+import { useBarCharts } from './use_bar_charts';
+import { NetworkRequestsTotal } from './network_requests_total';
 
-const Tooltip = ({ header }: TooltipInfo) => {
+const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
   const relevantItems = data.filter((item) => {
-    return item.x === header?.value;
+    return (
+      item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
+    );
   });
-  return (
+  return relevantItems.length ? (
     <WaterfallChartTooltip>
       <EuiFlexGroup direction="column" gutterSize="none">
         {relevantItems.map((item, index) => {
@@ -52,7 +56,7 @@ const Tooltip = ({ header }: TooltipInfo) => {
         })}
       </EuiFlexGroup>
     </WaterfallChartTooltip>
-  );
+  ) : null;
 };
 
 export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;
@@ -67,19 +71,10 @@ export interface WaterfallChartProps {
   fullHeight?: boolean;
 }
 
-const getUniqueBars = (data: WaterfallData) => {
-  return (data ?? []).reduce<Set<number>>((acc, item) => {
-    if (!acc.has(item.x)) {
-      acc.add(item.x);
-      return acc;
-    } else {
-      return acc;
-    }
-  }, new Set());
+const getChartHeight = (data: WaterfallData, ind: number): number => {
+  // We get the last item x(number of bars) and adds 1 to cater for 0 index
+  return (data[data.length - 1]?.x + 1 - ind * CANVAS_MAX_ITEMS) * BAR_HEIGHT;
 };
-
-const getChartHeight = (data: WaterfallData): number =>
-  getUniqueBars(data).size * BAR_HEIGHT + FIXED_AXIS_HEIGHT;
 
 export const WaterfallChart = ({
   tickFormat,
@@ -90,11 +85,13 @@ export const WaterfallChart = ({
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
-  const { data, sidebarItems, legendItems } = useWaterfallContext();
-
-  const generatedHeight = useMemo(() => {
-    return getChartHeight(data);
-  }, [data]);
+  const {
+    data,
+    sidebarItems,
+    legendItems,
+    totalNetworkRequests,
+    fetchedNetworkRequests,
+  } = useWaterfallContext();
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -106,10 +103,8 @@ export const WaterfallChart = ({
 
   const [height, setHeight] = useState<string>(maxHeight);
 
-  const shouldRenderSidebar =
-    sidebarItems && sidebarItems.length > 0 && renderSidebarItem ? true : false;
-  const shouldRenderLegend =
-    legendItems && legendItems.length > 0 && renderLegendItem ? true : false;
+  const shouldRenderSidebar = !!(sidebarItems && sidebarItems.length > 0 && renderSidebarItem);
+  const shouldRenderLegend = !!(legendItems && legendItems.length > 0 && renderLegendItem);
 
   useEffect(() => {
     if (fullHeight && chartWrapperDivRef.current) {
@@ -118,6 +113,8 @@ export const WaterfallChart = ({
     }
   }, [chartWrapperDivRef, fullHeight]);
 
+  const chartsToDisplay = useBarCharts({ data });
+
   return (
     <WaterfallChartOuterContainer height={height}>
       <>
@@ -125,7 +122,12 @@ export const WaterfallChart = ({
           <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
               <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
+                <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
+                  <NetworkRequestsTotal
+                    totalNetworkRequests={totalNetworkRequests}
+                    fetchedNetworkRequests={fetchedNetworkRequests}
+                  />
+                </WaterfallChartFixedTopContainerSidebarCover>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
@@ -172,44 +174,48 @@ export const WaterfallChart = ({
           style={{ paddingTop: '10px' }}
           ref={chartWrapperDivRef}
         >
-          {shouldRenderSidebar && (
-            <Sidebar items={sidebarItems!} height={generatedHeight} render={renderSidebarItem!} />
-          )}
+          {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
           <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
-            <WaterfallChartChartContainer height={generatedHeight}>
-              <Chart className="data-chart">
-                <Settings
-                  showLegend={false}
-                  rotation={90}
-                  tooltip={{ customTooltip: Tooltip }}
-                  theme={theme}
-                />
+            {chartsToDisplay.map((chartData, ind) => (
+              <WaterfallChartChartContainer
+                height={getChartHeight(chartData, ind)}
+                chartIndex={ind}
+                key={ind}
+              >
+                <Chart className="data-chart">
+                  <Settings
+                    showLegend={false}
+                    rotation={90}
+                    tooltip={{ customTooltip: Tooltip }}
+                    theme={theme}
+                  />
 
-                <Axis
-                  id="time"
-                  position={Position.Top}
-                  tickFormat={tickFormat}
-                  domain={domain}
-                  showGridLines={true}
-                  style={{
-                    axisLine: {
-                      visible: false,
-                    },
-                  }}
-                />
+                  <Axis
+                    id="time"
+                    position={Position.Top}
+                    tickFormat={tickFormat}
+                    domain={domain}
+                    showGridLines={true}
+                    style={{
+                      axisLine: {
+                        visible: false,
+                      },
+                    }}
+                  />
 
-                <BarSeries
-                  id="waterfallItems"
-                  xScaleType={ScaleType.Linear}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['y']}
-                  y0Accessors={['y0']}
-                  styleAccessor={barStyleAccessor}
-                  data={data}
-                />
-              </Chart>
-            </WaterfallChartChartContainer>
+                  <BarSeries
+                    id="waterfallItems"
+                    xScaleType={ScaleType.Linear}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['y']}
+                    y0Accessors={['y0']}
+                    styleAccessor={barStyleAccessor}
+                    data={chartData}
+                  />
+                </Chart>
+              </WaterfallChartChartContainer>
+            ))}
           </EuiFlexItem>
         </EuiFlexGroup>
         {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}

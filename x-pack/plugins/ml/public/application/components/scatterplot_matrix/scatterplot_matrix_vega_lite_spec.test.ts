@@ -163,6 +163,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       type: 'nominal',
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
+      { field: 'the-color-field', type: 'nominal' },
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
     ]);

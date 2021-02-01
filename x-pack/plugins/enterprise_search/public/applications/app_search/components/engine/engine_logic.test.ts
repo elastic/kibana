@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
+import { nextTick } from '@kbn/test/jest';
 
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
+  const { mount } = new LogicMounter(EngineLogic);
+  const { http } = mockHttpValues;
+
   const mockEngineData = {
     name: 'some-engine',
     type: 'default',
@@ -45,8 +44,6 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
   };
-
-  const { mount } = new LogicMounter(EngineLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -94,7 +91,7 @@ describe('EngineLogic', () => {
           const mockReindexJob = {
             percentageComplete: 50,
             numDocumentsWithErrors: 2,
-            activeReindexJobId: 123,
+            activeReindexJobId: '123',
           };
           EngineLogic.actions.setIndexingStatus(mockReindexJob);
 
@@ -177,11 +174,10 @@ describe('EngineLogic', () => {
       it('fetches and sets engine data', async () => {
         mount({ engineName: 'some-engine' });
         jest.spyOn(EngineLogic.actions, 'setEngineData');
-        const promise = Promise.resolve(mockEngineData);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(mockEngineData));
 
         EngineLogic.actions.initializeEngine();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine');
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
@@ -190,15 +186,11 @@ describe('EngineLogic', () => {
       it('handles errors', async () => {
         mount();
         jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
-        const promise = Promise.reject('An error occured');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
-        try {
-          EngineLogic.actions.initializeEngine();
-          await promise;
-        } catch {
-          // Do nothing
-        }
+        EngineLogic.actions.initializeEngine();
+        await nextTick();
+
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
     });

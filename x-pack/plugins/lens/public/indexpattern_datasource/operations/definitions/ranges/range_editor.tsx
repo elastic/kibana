@@ -4,23 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiRange,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
   EuiToolTip,
-  EuiIconTip,
 } from '@elastic/eui';
-import { IFieldFormat } from 'src/plugins/data/public';
+import type { IFieldFormat } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../helpers';
+import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
+
+const GranularityHelpPopover = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <HelpPopover
+      anchorPosition="upCenter"
+      button={
+        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
+            defaultMessage: 'How it works',
+          })}
+        </HelpPopoverButton>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
+      title={i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
+        defaultMessage: 'How granularity interval works',
+      })}
+    >
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverBasicExplanation', {
+          defaultMessage:
+            'Interval granularity divides the field into evenly spaced intervals based on the minimum and maximum values for the field.',
+        })}
+      </p>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
+          defaultMessage='The size of the interval is chosen to be a "nice" value. It is possible for the chosen
+            interval to stay the same when changing the granularity slider if the "nice" interval is
+            the same. The minimum granularity is 1, and the maximum is 
+            {setting}. To change the maximum granularity setting, go to Advanced settings.'
+          values={{
+            setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+          }}
+        />
+      </p>
+
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverAdvancedExplanation', {
+          defaultMessage:
+            'Intervals are incremented by 10, 5 or 2: for example an interval can be 100 or 0.2 .',
+        })}
+      </p>
+    </HelpPopover>
+  );
+};
 
 const BaseRangeEditor = ({
   maxBars,
@@ -49,12 +101,7 @@ const BaseRangeEditor = ({
   const granularityLabel = i18n.translate('xpack.lens.indexPattern.ranges.granularity', {
     defaultMessage: 'Intervals granularity',
   });
-  const granularityLabelDescription = i18n.translate(
-    'xpack.lens.indexPattern.ranges.granularityDescription',
-    {
-      defaultMessage: 'Divides the field into evenly spaced intervals.',
-    }
-  );
+
   const decreaseButtonLabel = i18n.translate('xpack.lens.indexPattern.ranges.decreaseButtonLabel', {
     defaultMessage: 'Decrease granularity',
   });
@@ -65,21 +112,12 @@ const BaseRangeEditor = ({
   return (
     <>
       <EuiFormRow
-        label={
-          <>
-            {granularityLabel}{' '}
-            <EuiIconTip
-              position="right"
-              content={granularityLabelDescription}
-              type="questionInCircle"
-              color="subdued"
-            />
-          </>
-        }
+        label={granularityLabel}
         data-test-subj="indexPattern-ranges-section-label"
         labelType="legend"
         fullWidth
         display="rowCompressed"
+        labelAppend={<GranularityHelpPopover />}
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -151,15 +189,6 @@ export const RangeEditor = ({
   rangeFormatter: IFieldFormat;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
-
-  // if the maxBars in the params is set to auto refresh it with the default value only on bootstrap
-  useEffect(() => {
-    if (!isAdvancedEditor) {
-      if (params.maxBars !== maxBars) {
-        setParam('maxBars', maxBars);
-      }
-    }
-  }, [maxBars, params.maxBars, setParam, isAdvancedEditor]);
 
   if (isAdvancedEditor) {
     return (

@@ -24,6 +24,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./async_search'));
+    loadTestFile(require.resolve('./send_to_background'));
+    loadTestFile(require.resolve('./send_to_background_relative_time'));
     loadTestFile(require.resolve('./sessions_in_space'));
   });
 }

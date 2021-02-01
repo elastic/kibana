@@ -7,6 +7,7 @@ import builds.oss.*
 import builds.test.*
 import CloudProfile
 import co.elastic.teamcity.common.googleCloudProfile
+import isHourlyOnlyBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.slackConnection
 import templates.KibanaTemplate
@@ -32,7 +33,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
       param("teamcity.ui.settings.readOnly", "true")
 
       // https://github.com/JetBrains/teamcity-webhooks
-      param("teamcity.internal.webhooks.enable", "false")
+      param("teamcity.internal.webhooks.enable", "true")
       param("teamcity.internal.webhooks.events", "BUILD_STARTED;BUILD_FINISHED;BUILD_INTERRUPTED;CHANGES_LOADED;BUILD_TYPE_ADDED_TO_QUEUE;BUILD_PROBLEMS_CHANGED")
       param("teamcity.internal.webhooks.url", "https://ci-stats.kibana.dev/_teamcity_webhook")
       param("teamcity.internal.webhooks.username", "automation")
@@ -136,7 +137,16 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
 
       buildType(FullCi)
       buildType(BaselineCi)
-      buildType(HourlyCi)
+
+      // master and 7.x get committed to so often, we only want to run full CI for them hourly
+      // but for other branches, we can run daily and on merge
+      if (isHourlyOnlyBranch()) {
+        buildType(HourlyCi)
+      } else {
+        buildType(DailyCi)
+        buildType(OnMergeCi)
+      }
+
       buildType(PullRequestCi)
     }
 

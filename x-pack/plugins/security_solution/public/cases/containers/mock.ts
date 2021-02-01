@@ -54,6 +54,20 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
+export const alertComment: Comment = {
+  alertId: 'alert-id-1',
+  index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 export const basicCase: Case = {
   closedAt: null,
   closedBy: null,
@@ -185,6 +199,13 @@ export const actionLicenses: ActionLicense[] = [
     enabledInConfig: true,
     enabledInLicense: true,
   },
+  {
+    id: '.jira',
+    name: 'Jira',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
 ];
 
 // Snake case for mock api responses
@@ -309,6 +330,15 @@ export const getUserAction = (af: UserActionField, a: UserAction) => ({
     a === 'push-to-service' && af[0] === 'pushed'
       ? JSON.stringify(basicPushSnake)
       : basicAction.newValue,
+});
+
+export const getAlertUserAction = () => ({
+  ...basicAction,
+  actionId: 'alert-action-id',
+  actionField: ['comment'],
+  action: 'create',
+  commentId: 'alert-comment-id',
+  newValue: '{"type":"alert","alertId":"alert-id-1","index":"index-id-1"}',
 });
 
 export const caseUserActions: CaseUserActions[] = [

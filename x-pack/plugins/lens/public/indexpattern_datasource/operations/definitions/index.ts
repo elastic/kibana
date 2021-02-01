@@ -126,6 +126,12 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
 }
 
+export interface HelpProps<C> {
+  currentColumn: C;
+  uiSettings: IUiSettingsClient;
+  data: DataPublicPluginStart;
+}
+
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
@@ -191,7 +197,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getErrorMessage?: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern?: IndexPattern
+    indexPattern: IndexPattern
   ) => string[] | undefined;
 
   /*
@@ -201,6 +207,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If set to optional, time scaling won't be enabled by default and can be removed.
    */
   timeScalingMode?: TimeScalingMode;
+
+  getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
 }
 
 interface BaseBuildColumnArgs {
@@ -231,7 +239,8 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
     column: C,
     columnId: string,
     indexPattern: IndexPattern,
-    layer: IndexPatternLayer
+    layer: IndexPatternLayer,
+    uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
 }
 
@@ -275,7 +284,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     column: C,
     columnId: string,
     indexPattern: IndexPattern,
-    layer: IndexPatternLayer
+    layer: IndexPatternLayer,
+    uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
   /**
    * Optional function to return the suffix used for ES bucket paths and esaggs column id.
@@ -293,7 +303,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   getErrorMessage: (
     layer: IndexPatternLayer,
     columnId: string,
-    indexPattern?: IndexPattern
+    indexPattern: IndexPattern
   ) => string[] | undefined;
 }
 

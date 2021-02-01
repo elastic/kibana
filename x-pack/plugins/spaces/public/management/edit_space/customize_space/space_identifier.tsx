@@ -7,7 +7,7 @@
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { Space } from '../../../../common/model/space';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { SpaceValidator, toSpaceIdentifier } from '../../lib';
 
 interface Props {

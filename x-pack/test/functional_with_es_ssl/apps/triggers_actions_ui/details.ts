@@ -228,7 +228,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             timeWindowUnit: 'm',
             groupBy: 'all',
             threshold: [1000, 5000],
-            index: ['.kibana_1'],
+            index: '.kibana_1',
             timeField: 'alert',
           },
           actions: [
@@ -298,6 +298,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await testSubjects.click('cancelSaveEditedAlertButton');
+        await testSubjects.existOrFail('confirmAlertCloseModal');
+        await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
 
         await editButton.click();

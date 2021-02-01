@@ -6,7 +6,7 @@
 
 import { HttpResponse } from 'src/core/public';
 
-import { FlashMessagesLogic, IFlashMessage } from './';
+import { FlashMessagesLogic, IFlashMessage } from './flash_messages_logic';
 
 /**
  * The API errors we are handling can come from one of two ways:

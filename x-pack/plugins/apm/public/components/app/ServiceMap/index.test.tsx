@@ -8,10 +8,9 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
-import { EuiThemeProvider } from '../../../../../observability/public';
-import { FETCH_STATUS } from '../../../../../observability/public/hooks/use_fetcher';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
@@ -92,7 +91,7 @@ describe('ServiceMap', () => {
         jest.spyOn(useFetcherModule, 'useFetcher').mockReturnValueOnce({
           data: { elements: [] },
           refetch: () => {},
-          status: FETCH_STATUS.SUCCESS,
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
         });
 
         expect(

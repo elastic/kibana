@@ -10,7 +10,6 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useFetcher } from '../../../../../observability/public';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../typings/timeseries';
@@ -203,7 +202,6 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   return (
     <ServiceAlertTrigger
-      alertTypeName={ALERT_TYPES_CONFIG['apm.transaction_duration'].name}
       chartPreview={chartPreview}
       defaults={defaults}
       fields={fields}
