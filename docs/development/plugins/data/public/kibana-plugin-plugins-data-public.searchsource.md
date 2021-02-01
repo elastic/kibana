@@ -33,6 +33,7 @@ export declare class SearchSource
 |  [createCopy()](./kibana-plugin-plugins-data-public.searchsource.createcopy.md) |  | creates a copy of this search source (without its children) |
 |  [destroy()](./kibana-plugin-plugins-data-public.searchsource.destroy.md) |  | Completely destroy the SearchSource.  {<!-- -->undefined<!-- -->} |
 |  [fetch(options)](./kibana-plugin-plugins-data-public.searchsource.fetch.md) |  | Fetch this source and reject the returned Promise on error |
+|  [fetch$(options)](./kibana-plugin-plugins-data-public.searchsource.fetch_.md) |  | Fetch this source from Elasticsearch, returning an observable over the response(s) |
 |  [getField(field, recurse)](./kibana-plugin-plugins-data-public.searchsource.getfield.md) |  | Gets a single field from the fields |
 |  [getFields()](./kibana-plugin-plugins-data-public.searchsource.getfields.md) |  | returns all search source fields |
 |  [getId()](./kibana-plugin-plugins-data-public.searchsource.getid.md) |  | returns search source id |
