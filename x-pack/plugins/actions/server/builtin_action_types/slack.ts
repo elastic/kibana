@@ -6,7 +6,6 @@
 
 import { URL } from 'url';
 import { curry } from 'lodash';
-import { Agent } from 'http';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -56,7 +55,7 @@ export const ActionTypeId = '.slack';
 export function getActionType({
   logger,
   configurationUtilities,
-  executor = curry(slackExecutor)({ logger }),
+  executor = curry(slackExecutor)({ logger, configurationUtilities }),
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -116,7 +115,10 @@ function validateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: SlackActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -126,15 +128,15 @@ async function slackExecutor(
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
   const { message } = params;
+  const proxySettings = configurationUtilities.getProxySettings();
 
-  let httpProxyAgent: Agent | undefined;
-  if (execOptions.proxySettings) {
-    const httpProxyAgents = getProxyAgents(execOptions.proxySettings, logger);
-    httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
-      ? httpProxyAgents.httpsAgent
-      : httpProxyAgents.httpAgent;
+  const proxyAgents = getProxyAgents(configurationUtilities, logger);
+  const httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
+    ? proxyAgents.httpsAgent
+    : proxyAgents.httpAgent;
 
-    logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
+  if (proxySettings) {
+    logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
   }
 
   try {
