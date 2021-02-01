@@ -18,6 +18,7 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(30);
@@ -33,6 +34,7 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '3m',
         alertThrottle: '3m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(10);
@@ -47,6 +49,7 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '30s',
         alertThrottle: '30s',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(60);
@@ -61,12 +64,37 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '3m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(30);
       expect(noDataResults).toBe(0);
       expect(errorResults).toBe(0);
       expect(notifications).toBe(15);
+    });
+    test('returns the expected results using a notify setting of Only on Status Change', async () => {
+      const [ungroupedResult] = await previewMetricThresholdAlert({
+        ...baseParams,
+        params: {
+          ...baseParams.params,
+          criteria: [
+            {
+              ...baseCriterion,
+              metric: 'test.metric.3',
+            } as MetricExpressionParams,
+          ],
+        },
+        lookback: 'h',
+        alertInterval: '1m',
+        alertThrottle: '1m',
+        alertOnNoData: true,
+        alertNotifyWhen: 'onActionGroupChange',
+      });
+      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
+      expect(firedResults).toBe(30);
+      expect(noDataResults).toBe(0);
+      expect(errorResults).toBe(0);
+      expect(notifications).toBe(20);
     });
   });
   describe('querying with a groupBy parameter', () => {
@@ -81,6 +109,7 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResultsA, noDataResultsA, errorResultsA, notificationsA] = resultA;
       expect(firedResultsA).toBe(30);
@@ -111,6 +140,7 @@ describe('Previewing the metric threshold alert type', () => {
         alertInterval: '1m',
         alertThrottle: '1m',
         alertOnNoData: true,
+        alertNotifyWhen: 'onThrottleInterval',
       });
       const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
       expect(firedResults).toBe(25);
@@ -132,6 +162,9 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   }
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricPreviewResponse;
+  }
+  if (metric === 'test.metric.3') {
+    return mocks.repeatingMetricPreviewResponse;
   }
   return mocks.basicMetricPreviewResponse;
 });

@@ -54,6 +54,7 @@ const baseAlertRequestParamsRT = rt.intersection([
     alertInterval: rt.string,
     alertThrottle: rt.string,
     alertOnNoData: rt.boolean,
+    alertNotifyWhen: rt.string,
   }),
 ]);
 

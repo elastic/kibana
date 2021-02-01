@@ -196,6 +196,7 @@ export interface AlertTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,

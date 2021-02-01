@@ -44,6 +44,7 @@ const previewBucketsWithNulls = [
   ...Array.from(Array(10), (_, i) => ({ aggregatedValue: { value: null } })),
   ...previewBucketsA.slice(10),
 ];
+const previewBucketsRepeat = Array.from(Array(60), (_, i) => bucketsA[Math.max(0, (i % 3) - 1)]);
 
 export const basicMetricResponse = {
   aggregations: {
@@ -170,6 +171,14 @@ export const alternateMetricPreviewResponse = {
   aggregations: {
     aggregatedIntervals: {
       buckets: previewBucketsWithNulls,
+    },
+  },
+};
+
+export const repeatingMetricPreviewResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: previewBucketsRepeat,
     },
   },
 };
