@@ -60,6 +60,7 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field.spec,
+            type: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
