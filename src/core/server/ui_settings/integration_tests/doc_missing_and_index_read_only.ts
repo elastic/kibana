@@ -8,7 +8,7 @@
 
 import { getServices, chance } from './lib';
 
-export function docMissingAndIndexReadOnlySuite() {
+export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents
   beforeEach(async () => {
     const { kbnServer, callCluster } = getServices();
@@ -22,7 +22,7 @@ export function docMissingAndIndexReadOnlySuite() {
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
-      index: kbnServer.config.get('kibana.index'),
+      index: savedObjectsIndex,
       body: {
         query: { match_all: {} },
       },
@@ -30,7 +30,7 @@ export function docMissingAndIndexReadOnlySuite() {
 
     // set the index to read only
     await callCluster('indices.putSettings', {
-      index: kbnServer.config.get('kibana.index'),
+      index: savedObjectsIndex,
       body: {
         index: {
           blocks: {
@@ -42,11 +42,11 @@ export function docMissingAndIndexReadOnlySuite() {
   });
 
   afterEach(async () => {
-    const { kbnServer, callCluster } = getServices();
+    const { callCluster } = getServices();
 
     // disable the read only block
     await callCluster('indices.putSettings', {
-      index: kbnServer.config.get('kibana.index'),
+      index: savedObjectsIndex,
       body: {
         index: {
           blocks: {
@@ -142,4 +142,4 @@ export function docMissingAndIndexReadOnlySuite() {
       });
     });
   });
-}
+};
