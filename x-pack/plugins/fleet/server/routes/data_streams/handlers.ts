@@ -51,26 +51,30 @@ export const getListHandler: RequestHandler = async (context, request, response)
   };
 
   try {
-    // Get matching data streams
-    const { data_streams: dataStreamsInfo } = (await callCluster('transport.request', {
-      method: 'GET',
-      path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}`,
-    })) as ESDataStreamInfoResponse;
+    // Get matching data streams, their stats, and package SOs
+    const [
+      { data_streams: dataStreamsInfo },
+      { data_streams: dataStreamStats },
+      packageSavedObjects,
+    ] = await Promise.all([
+      callCluster('transport.request', {
+        method: 'GET',
+        path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}`,
+      }) as Promise<ESDataStreamInfoResponse>,
+      callCluster('transport.request', {
+        method: 'GET',
+        path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}/_stats`,
+      }) as Promise<ESDataStreamStatsResponse>,
+      getPackageSavedObjects(context.core.savedObjects.client),
+    ]);
     const dataStreamsInfoByName = keyBy(dataStreamsInfo, 'name');
-
-    // Get data stream stats
-    const { data_streams: dataStreamStats } = (await callCluster('transport.request', {
-      method: 'GET',
-      path: `/_data_stream/${DATA_STREAM_INDEX_PATTERN}/_stats`,
-    })) as ESDataStreamStatsResponse;
     const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
     const dataStreamNames = keys(dataStreams);
 
-    // Get all package SOs
-    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
+    // Map package SOs
     const packageSavedObjectsByName = keyBy(packageSavedObjects.saved_objects, 'id');
     const packageMetadata: any = {};
 
