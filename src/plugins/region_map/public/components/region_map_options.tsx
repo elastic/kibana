@@ -30,7 +30,7 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 
 const tmsLayers = getTmsLayers();
 const vectorLayers = getVectorLayers();
-const vectorLayerOptions = getVectorLayers().map(mapLayerForOption);
+const vectorLayerOptions = vectorLayers.map(mapLayerForOption);
 
 export type RegionMapOptionsProps = {
   getServiceSettings: () => Promise<IServiceSettings>;

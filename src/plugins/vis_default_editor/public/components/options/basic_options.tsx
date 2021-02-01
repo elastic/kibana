@@ -19,11 +19,19 @@ interface BasicOptionsParams {
   legendPosition: string;
 }
 
+interface Collections {
+  legendPositions: Array<{
+    value: string;
+    text: string;
+  }>;
+  [key: string]: any;
+}
+
 function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
   collections,
-}: VisEditorOptionsProps<VisParams>) {
+}: VisEditorOptionsProps<VisParams> & { collections: Collections }) {
   return (
     <>
       <SelectOption

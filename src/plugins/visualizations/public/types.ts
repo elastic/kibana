@@ -20,14 +20,6 @@ import { PersistedState } from './persisted_state';
 import { VisParams } from '../common';
 
 export { Vis, SerializedVis, VisParams };
-
-interface Collections {
-  legendPositions: Array<{
-    value: string;
-    text: string;
-  }>;
-  [key: string]: any;
-}
 export interface SavedVisState {
   title: string;
   type: string;
@@ -66,7 +58,6 @@ export interface VisEditorOptionsProps<VisParamType = unknown> {
   stateParams: VisParamType;
   vis: Vis;
   uiState: PersistedState;
-  collections: Collections;
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;
