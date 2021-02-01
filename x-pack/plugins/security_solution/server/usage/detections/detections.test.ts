@@ -11,6 +11,7 @@ import {
   getMockJobSummaryResponse,
   getMockListModulesResponse,
   getMockRulesResponse,
+  getMockMlJobDetailsResponse,
 } from './detections.mocks';
 import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
 
@@ -118,11 +119,31 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns an empty array if there is no data', async () => {
+      const mockJobSummary = jest.fn().mockResolvedValue(getMockJobSummaryResponse());
+      const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
+      mlMock.modulesProvider.mockReturnValue(({
+        listModules: mockListModules,
+      } as unknown) as ReturnType<typeof mlMock.modulesProvider>);
+      mlMock.jobServiceProvider.mockReturnValue({
+        jobsSummary: mockJobSummary,
+      });
+
+      const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
+      mlMock.anomalyDetectorsProvider.mockReturnValue(({
+        jobs: mockJobsResponse,
+      } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
+
       const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
         expect.objectContaining({
-          ml_jobs: [],
+          ml_jobs: [
+            {
+              job_id: 'high_distinct_count_error_message',
+              time_finish: 1611739871669,
+              time_start: 1603838214983,
+            },
+          ],
         })
       );
     });
