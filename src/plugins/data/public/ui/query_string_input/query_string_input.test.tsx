@@ -28,6 +28,8 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { DataPublicPluginStart } from '../..';
 
 const startMock = coreMock.createStart();
 
@@ -62,38 +64,46 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryStringInputInContext(testProps: any, storage?: any) {
-  const defaultOptions = {
-    screenTitle: 'Another Screen',
-    intl: null as any,
-  };
+describe('QueryStringInput', () => {
+  let dataStart: jest.Mocked<DataPublicPluginStart>;
 
-  const services = {
-    ...startMock,
-    data: dataPluginMock.createStartContract(),
-    appName: testProps.appName || 'test',
-    storage: storage || createMockStorage(),
-  };
+  function wrapQueryStringInputInContext(testProps: any, storage?: any) {
+    const defaultOptions = {
+      screenTitle: 'Another Screen',
+      intl: null as any,
+    };
 
-  return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryStringInput {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
-}
+    const services = {
+      ...startMock,
+      data: dataStart,
+      appName: testProps.appName || 'test',
+      storage: storage || createMockStorage(),
+    };
 
-// FAILING: https://github.com/elastic/kibana/issues/85715
-// FAILING: https://github.com/elastic/kibana/issues/89603
-// FAILING: https://github.com/elastic/kibana/issues/89641
-describe.skip('QueryStringInput', () => {
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryStringInput {...defaultOptions} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  }
+
   beforeEach(() => {
+    dataStart = dataPluginMock.createStartContract();
     jest.clearAllMocks();
   });
 
-  it.skip('Should render the given query', async () => {
-    const { getByText } = render(
+  it('Should render even if fetchIndexPatterns throws', async () => {
+    const errResponse = new ResponseError({
+      body: {},
+      statusCode: 404,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+    mockFetchIndexPatterns.mockRejectedValue(errResponse);
+    const rendered = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
@@ -101,186 +111,205 @@ describe.skip('QueryStringInput', () => {
       })
     );
 
-    await waitFor(() => getByText(kqlQuery.query));
-    await waitFor(() => getByText('KQL'));
+    await waitFor(() => rendered.getByText(kqlQuery.query));
+    await waitFor(() => rendered.getByText('KQL'));
   });
 
-  it('Should pass the query language to the language switcher', () => {
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: luceneQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-      })
-    );
-    expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
-  });
+  describe('with stubbed pattern', () => {
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockResolvedValue([stubIndexPatternWithFields]);
+    });
 
-  it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-      })
-    );
-    expect(component.find(EuiTextArea).prop('autoFocus')).toBeFalsy();
-  });
+    it('Should render the given query', async () => {
+      const rendered = render(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+        })
+      );
 
-  it('Should create a unique PersistedLog based on the appName and query language', () => {
-    mockPersistedLogFactory.mockClear();
+      await waitFor(() => rendered.getByText(kqlQuery.query));
+      await waitFor(() => rendered.getByText('KQL'));
+    });
 
-    mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-        appName: 'discover',
-      })
-    );
-    expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
-  });
+    it('Should pass the query language to the language switcher', () => {
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: luceneQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+        })
+      );
+      expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
+    });
 
-  it("On language selection, should store the user's preference in localstorage and reset the query", () => {
-    const mockStorage = createMockStorage();
-    const mockCallback = jest.fn();
-    const component = mount(
-      wrapQueryStringInputInContext(
-        {
+    it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
+      expect(component.find(EuiTextArea).prop('autoFocus')).toBeFalsy();
+    });
+
+    it('Should create a unique PersistedLog based on the appName and query language', () => {
+      mockPersistedLogFactory.mockClear();
+
+      mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+          appName: 'discover',
+        })
+      );
+      expect(mockPersistedLogFactory.mock.calls[0][0]).toBe('typeahead:discover-kuery');
+    });
+
+    it("On language selection, should store the user's preference in localstorage and reset the query", () => {
+      const mockStorage = createMockStorage();
+      const mockCallback = jest.fn();
+      const component = mount(
+        wrapQueryStringInputInContext(
+          {
+            query: kqlQuery,
+            onSubmit: mockCallback,
+            indexPatterns: [stubIndexPatternWithFields],
+            disableAutoFocus: true,
+            appName: 'discover',
+          },
+          mockStorage
+        )
+      );
+
+      component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
+      expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
+      expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
+    });
+
+    it('Should not show the language switcher when disabled', () => {
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: luceneQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableLanguageSwitcher: true,
+        })
+      );
+      expect(component.find(QueryLanguageSwitcher).exists()).toBeFalsy();
+    });
+
+    it('Should show an icon when an iconType is specified', () => {
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: luceneQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          iconType: 'search',
+        })
+      );
+      expect(component.find(EuiIcon).exists()).toBeTruthy();
+    });
+
+    it('Should call onSubmit when the user hits enter inside the query bar', () => {
+      const mockCallback = jest.fn();
+
+      const component = mount(
+        wrapQueryStringInputInContext({
           query: kqlQuery,
           onSubmit: mockCallback,
           indexPatterns: [stubIndexPatternWithFields],
           disableAutoFocus: true,
-          appName: 'discover',
-        },
-        mockStorage
-      )
-    );
+        })
+      );
 
-    component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
-    expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
-    expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
-  });
+      const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+      const input = instance.inputRef;
+      const inputWrapper = component.find(EuiTextArea).find('textarea');
+      inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
 
-  it('Should not show the language switcher when disabled', () => {
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: luceneQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableLanguageSwitcher: true,
-      })
-    );
-    expect(component.find(QueryLanguageSwitcher).exists()).toBeFalsy();
-  });
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledWith({ query: 'response:200', language: 'kuery' });
+    });
 
-  it('Should show an icon when an iconType is specified', () => {
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: luceneQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-        iconType: 'search',
-      })
-    );
-    expect(component.find(EuiIcon).exists()).toBeTruthy();
-  });
+    it('Should fire onBlur callback on input blur', () => {
+      const mockCallback = jest.fn();
 
-  it('Should call onSubmit when the user hits enter inside the query bar', () => {
-    const mockCallback = jest.fn();
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onBlur: mockCallback,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
 
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onSubmit: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-      })
-    );
+      const inputWrapper = component.find(EuiTextArea).find('textarea');
+      inputWrapper.simulate('blur');
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
-    const input = instance.inputRef;
-    const inputWrapper = component.find(EuiTextArea).find('textarea');
-    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledWith();
+    });
 
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith({ query: 'response:200', language: 'kuery' });
-  });
+    it('Should fire onChangeQueryInputFocus callback on input blur', () => {
+      const mockCallback = jest.fn();
 
-  it('Should fire onBlur callback on input blur', () => {
-    const mockCallback = jest.fn();
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onChangeQueryInputFocus: mockCallback,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+        })
+      );
 
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onBlur: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-      })
-    );
+      const inputWrapper = component.find(EuiTextArea).find('textarea');
+      inputWrapper.simulate('blur');
 
-    const inputWrapper = component.find(EuiTextArea).find('textarea');
-    inputWrapper.simulate('blur');
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledWith(false);
+    });
 
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith();
-  });
+    it('Should use PersistedLog for recent search suggestions', async () => {
+      const component = mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPatternWithFields],
+          disableAutoFocus: true,
+          persistedLog: mockPersistedLog,
+        })
+      );
 
-  it('Should fire onChangeQueryInputFocus callback on input blur', () => {
-    const mockCallback = jest.fn();
+      const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+      const input = instance.inputRef;
+      const inputWrapper = component.find(EuiTextArea).find('textarea');
+      inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
 
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onChangeQueryInputFocus: mockCallback,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-      })
-    );
+      expect(mockPersistedLog.add).toHaveBeenCalledWith('response:200');
 
-    const inputWrapper = component.find(EuiTextArea).find('textarea');
-    inputWrapper.simulate('blur');
+      mockPersistedLog.get.mockClear();
+      inputWrapper.simulate('change', { target: { value: 'extensi' } });
+      expect(mockPersistedLog.get).toHaveBeenCalled();
+    });
 
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(false);
-  });
-
-  it('Should use PersistedLog for recent search suggestions', async () => {
-    const component = mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onSubmit: noop,
-        indexPatterns: [stubIndexPatternWithFields],
-        disableAutoFocus: true,
-        persistedLog: mockPersistedLog,
-      })
-    );
-
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
-    const input = instance.inputRef;
-    const inputWrapper = component.find(EuiTextArea).find('textarea');
-    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
-
-    expect(mockPersistedLog.add).toHaveBeenCalledWith('response:200');
-
-    mockPersistedLog.get.mockClear();
-    inputWrapper.simulate('change', { target: { value: 'extensi' } });
-    expect(mockPersistedLog.get).toHaveBeenCalled();
-  });
-
-  it('Should accept index pattern strings and fetch the full object', () => {
-    const patternStrings = ['logstash-*'];
-    mockFetchIndexPatterns.mockClear();
-    mount(
-      wrapQueryStringInputInContext({
-        query: kqlQuery,
-        onSubmit: noop,
-        indexPatterns: patternStrings,
-        disableAutoFocus: true,
-      })
-    );
-    expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
+    it('Should accept index pattern strings and fetch the full object', () => {
+      const patternStrings = ['logstash-*'];
+      mockFetchIndexPatterns.mockClear();
+      mount(
+        wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: patternStrings,
+          disableAutoFocus: true,
+        })
+      );
+      expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
+    });
   });
 });
