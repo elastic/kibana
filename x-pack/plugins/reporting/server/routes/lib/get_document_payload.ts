@@ -13,7 +13,7 @@ import { ReportDocument } from '../../lib/store';
 import { TaskRunResult } from '../../lib/tasks';
 import { ExportTypeDefinition } from '../../types';
 
-interface ErrorFromPayload {
+export interface ErrorFromPayload {
   message: string;
 }
 
