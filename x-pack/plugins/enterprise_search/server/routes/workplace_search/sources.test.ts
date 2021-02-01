@@ -18,6 +18,10 @@ import {
   registerAccountPreSourceRoute,
   registerAccountPrepareSourcesRoute,
   registerAccountSourceSearchableRoute,
+  registerAccountSourceDisplaySettingsConfig,
+  registerAccountSourceSchemasRoute,
+  registerAccountSourceReindexJobRoute,
+  registerAccountSourceReindexJobStatusRoute,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -29,6 +33,10 @@ import {
   registerOrgPreSourceRoute,
   registerOrgPrepareSourcesRoute,
   registerOrgSourceSearchableRoute,
+  registerOrgSourceDisplaySettingsConfig,
+  registerOrgSourceSchemasRoute,
+  registerOrgSourceReindexJobRoute,
+  registerOrgSourceReindexJobStatusRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
 } from './sources';
@@ -290,10 +298,8 @@ describe('sources routes', () => {
       it('correctly', () => {
         const request = {
           body: {
-            query: {
-              content_source: {
-                name: 'foo',
-              },
+            content_source: {
+              name: 'foo',
             },
           },
         };
@@ -343,19 +349,19 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/pre_content_sources/:serviceType',
+        path: '/ws/sources/:serviceType/prepare',
       });
     });
   });
 
-  describe('PUT /api/workplace_search/sources/{id}/searchable', () => {
+  describe('PUT /api/workplace_search/account/sources/{id}/searchable', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/sources/{id}/searchable',
+        path: '/api/workplace_search/account/sources/{id}/searchable',
         payload: 'body',
       });
 
@@ -379,6 +385,182 @@ describe('sources routes', () => {
           },
         };
         mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      });
+
+      registerAccountSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/display_settings/config',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/account/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+        payload: 'body',
+      });
+
+      registerAccountSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/display_settings/config',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            titleField: 'foo',
+            subtitleField: 'bar',
+            descriptionField: 'this is a thing',
+            urlField: 'http://youknowfor.search',
+            urlFieldIsLinkable: true,
+            color: '#aaa',
+            detailFields: {
+              fieldName: 'myField',
+              label: 'My Field',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/account/sources/{id}/schemas', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{id}/schemas',
+      });
+
+      registerAccountSourceSchemasRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/schemas',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/account/sources/{id}/schemas', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/account/sources/{id}/schemas',
+        payload: 'body',
+      });
+
+      registerAccountSourceSchemasRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/schemas',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { someSchemaKey: 'text' } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
+      });
+
+      registerAccountSourceReindexJobRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      const mockRequest = {
+        params: {
+          sourceId: '123',
+          jobId: '345',
+        },
+      };
+
+      mockRouter.callRoute(mockRequest);
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:sourceId/reindex_job/:jobId',
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
+      });
+
+      registerAccountSourceReindexJobStatusRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
       });
     });
   });
@@ -629,10 +811,8 @@ describe('sources routes', () => {
       it('correctly', () => {
         const request = {
           body: {
-            query: {
-              content_source: {
-                name: 'foo',
-              },
+            content_source: {
+              name: 'foo',
             },
           },
         };
@@ -682,7 +862,7 @@ describe('sources routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/pre_content_sources/:serviceType',
+        path: '/ws/org/sources/:serviceType/prepare',
       });
     });
   });
@@ -718,6 +898,173 @@ describe('sources routes', () => {
           },
         };
         mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      });
+
+      registerOrgSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/display_settings/config',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/sources/{id}/display_settings/config', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+        payload: 'body',
+      });
+
+      registerOrgSourceDisplaySettingsConfig({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/display_settings/config',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            titleField: 'foo',
+            subtitleField: 'bar',
+            descriptionField: 'this is a thing',
+            urlField: 'http://youknowfor.search',
+            urlFieldIsLinkable: true,
+            color: '#aaa',
+            detailFields: {
+              fieldName: 'myField',
+              label: 'My Field',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/org/sources/{id}/schemas', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{id}/schemas',
+      });
+
+      registerOrgSourceSchemasRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/schemas',
+      });
+    });
+  });
+
+  describe('POST /api/workplace_search/org/sources/{id}/schemas', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/sources/{id}/schemas',
+        payload: 'body',
+      });
+
+      registerOrgSourceSchemasRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:id/schemas',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { someSchemaKey: 'number' } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
+      });
+
+      registerOrgSourceReindexJobRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:sourceId/reindex_job/:jobId',
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
+      });
+
+      registerOrgSourceReindexJobStatusRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
       });
     });
   });
