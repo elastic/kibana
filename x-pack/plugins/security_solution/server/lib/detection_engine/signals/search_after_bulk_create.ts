@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 
+import { identity } from 'lodash';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
@@ -49,6 +50,7 @@ export const searchAfterAndBulkCreate = async ({
   tags,
   throttle,
   buildRuleMessage,
+  enrichment = identity,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   let toReturn = createSearchAfterReturnType();
 
@@ -223,6 +225,8 @@ export const searchAfterAndBulkCreate = async ({
               tuple.maxSignals - signalsCreatedCount
             );
           }
+          const enrichedEvents = await enrichment(filteredEvents);
+
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
@@ -231,7 +235,7 @@ export const searchAfterAndBulkCreate = async ({
             errors: bulkErrors,
           } = await singleBulkCreate({
             buildRuleMessage,
-            filteredEvents,
+            filteredEvents: enrichedEvents,
             ruleParams,
             services,
             logger,
