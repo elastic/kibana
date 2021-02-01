@@ -56,7 +56,51 @@ describe('Utils', () => {
 
       const res = transformNewCase(myCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Array [
+              Object {
+                "key": "issueType",
+                "value": "Task",
+              },
+              Object {
+                "key": "priority",
+                "value": "High",
+              },
+              Object {
+                "key": "parent",
+                "value": null,
+              },
+            ],
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "description": "A description",
+          "external_service": null,
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
 
     it('transform correctly without optional fields', () => {
@@ -68,7 +112,51 @@ describe('Utils', () => {
 
       const res = transformNewCase(myCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Array [
+              Object {
+                "key": "issueType",
+                "value": "Task",
+              },
+              Object {
+                "key": "priority",
+                "value": "High",
+              },
+              Object {
+                "key": "parent",
+                "value": null,
+              },
+            ],
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": undefined,
+            "full_name": undefined,
+            "username": undefined,
+          },
+          "description": "A description",
+          "external_service": null,
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
 
     it('transform correctly with optional fields as null', () => {
@@ -83,7 +171,51 @@ describe('Utils', () => {
 
       const res = transformNewCase(myCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Array [
+              Object {
+                "key": "issueType",
+                "value": "Task",
+              },
+              Object {
+                "key": "priority",
+                "value": "High",
+              },
+              Object {
+                "key": "parent",
+                "value": null,
+              },
+            ],
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": null,
+            "full_name": null,
+            "username": null,
+          },
+          "description": "A description",
+          "external_service": null,
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
   });
 
@@ -100,7 +232,23 @@ describe('Utils', () => {
       };
 
       const res = transformNewComment(comment);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "associationType": "case",
+          "comment": "A comment",
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "pushed_at": null,
+          "pushed_by": null,
+          "type": "user",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
 
     it('transform correctly without optional fields', () => {
@@ -113,7 +261,23 @@ describe('Utils', () => {
 
       const res = transformNewComment(comment);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "associationType": "case",
+          "comment": "A comment",
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": undefined,
+            "full_name": undefined,
+            "username": undefined,
+          },
+          "pushed_at": null,
+          "pushed_by": null,
+          "type": "user",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
 
     it('transform correctly with optional fields as null', () => {
@@ -129,7 +293,23 @@ describe('Utils', () => {
 
       const res = transformNewComment(comment);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "associationType": "case",
+          "comment": "A comment",
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": null,
+            "full_name": null,
+            "username": null,
+          },
+          "pushed_at": null,
+          "pushed_by": null,
+          "type": "user",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
     });
   });
 
@@ -195,7 +375,186 @@ describe('Utils', () => {
         perPage: 10,
         total: casesMap.size,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "cases": Array [
+            Object {
+              "closed_at": null,
+              "closed_by": null,
+              "comments": Array [],
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "external_service": null,
+              "id": "mock-id-1",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "status": "open",
+              "subCases": undefined,
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "totalAlerts": 0,
+              "totalComment": 2,
+              "type": "individual",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzAsMV0=",
+            },
+            Object {
+              "closed_at": null,
+              "closed_by": null,
+              "comments": Array [],
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T22:32:00.900Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "Oh no, a bad meanie destroying data!",
+              "external_service": null,
+              "id": "mock-id-2",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "status": "open",
+              "subCases": undefined,
+              "tags": Array [
+                "Data Destruction",
+              ],
+              "title": "Damaging Data Destruction Detected",
+              "totalAlerts": 0,
+              "totalComment": 2,
+              "type": "individual",
+              "updated_at": "2019-11-25T22:32:00.900Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzQsMV0=",
+            },
+            Object {
+              "closed_at": null,
+              "closed_by": null,
+              "comments": Array [],
+              "connector": Object {
+                "fields": Object {
+                  "issueType": "Task",
+                  "parent": null,
+                  "priority": "High",
+                },
+                "id": "123",
+                "name": "My connector",
+                "type": ".jira",
+              },
+              "created_at": "2019-11-25T22:32:17.947Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "external_service": null,
+              "id": "mock-id-3",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "status": "open",
+              "subCases": undefined,
+              "tags": Array [
+                "LOLBins",
+              ],
+              "title": "Another bad one",
+              "totalAlerts": 0,
+              "totalComment": 2,
+              "type": "individual",
+              "updated_at": "2019-11-25T22:32:17.947Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzUsMV0=",
+            },
+            Object {
+              "closed_at": "2019-11-25T22:32:17.947Z",
+              "closed_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "comments": Array [],
+              "connector": Object {
+                "fields": Object {
+                  "issueType": "Task",
+                  "parent": null,
+                  "priority": "High",
+                },
+                "id": "123",
+                "name": "My connector",
+                "type": ".jira",
+              },
+              "created_at": "2019-11-25T22:32:17.947Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "description": "Oh no, a bad meanie going LOLBins all over the place!",
+              "external_service": null,
+              "id": "mock-id-4",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "status": "closed",
+              "subCases": undefined,
+              "tags": Array [
+                "LOLBins",
+              ],
+              "title": "Another bad one",
+              "totalAlerts": 0,
+              "totalComment": 2,
+              "type": "individual",
+              "updated_at": "2019-11-25T22:32:17.947Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzUsMV0=",
+            },
+          ],
+          "count_closed_cases": 2,
+          "count_in_progress_cases": 2,
+          "count_open_cases": 2,
+          "page": 1,
+          "per_page": 10,
+          "total": 4,
+        }
+      `);
     });
   });
 
@@ -206,14 +565,98 @@ describe('Utils', () => {
 
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "external_service": null,
+            "id": "mock-id-1",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "status": "open",
+            "subCases": undefined,
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "totalAlerts": 0,
+            "totalComment": 2,
+            "type": "individual",
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzAsMV0=",
+          },
+        ]
+      `);
     });
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
       const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 0 }];
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "external_service": null,
+            "id": "mock-id-1",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "status": "open",
+            "subCases": undefined,
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "totalAlerts": 0,
+            "totalComment": 0,
+            "type": "individual",
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzAsMV0=",
+          },
+        ]
+      `);
     });
 
     it('inserts missing connector', () => {
@@ -227,7 +670,48 @@ describe('Utils', () => {
       // @ts-ignore this is to update old case saved objects to include connector
       const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "external_service": null,
+            "id": "mock-no-connector_id",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "status": "open",
+            "subCases": undefined,
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "totalAlerts": 0,
+            "totalComment": 0,
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzAsMV0=",
+          },
+        ]
+      `);
     });
   });
 
@@ -239,7 +723,51 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2019-11-25T22:32:17.947Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "external_service": null,
+          "id": "mock-id-3",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "LOLBins",
+          ],
+          "title": "Another bad one",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "type": "individual",
+          "updated_at": "2019-11-25T22:32:17.947Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "WzUsMV0=",
+        }
+      `);
     });
 
     it('flattens correctly without version', () => {
@@ -250,7 +778,51 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2019-11-25T22:32:17.947Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "external_service": null,
+          "id": "mock-id-3",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "LOLBins",
+          ],
+          "title": "Another bad one",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "type": "individual",
+          "updated_at": "2019-11-25T22:32:17.947Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "0",
+        }
+      `);
     });
 
     it('flattens correctly with comments', () => {
@@ -262,7 +834,73 @@ describe('Utils', () => {
         totalComment: 2,
       });
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [
+            Object {
+              "associationType": "case",
+              "comment": "Wow, good luck catching that bad meanie!",
+              "created_at": "2019-11-25T21:55:00.177Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "id": "mock-comment-1",
+              "pushed_at": null,
+              "pushed_by": null,
+              "type": "user",
+              "updated_at": "2019-11-25T21:55:00.177Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "version": "WzEsMV0=",
+            },
+          ],
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2019-11-25T22:32:17.947Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "external_service": null,
+          "id": "mock-id-3",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "LOLBins",
+          ],
+          "title": "Another bad one",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "type": "individual",
+          "updated_at": "2019-11-25T22:32:17.947Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "WzUsMV0=",
+        }
+      `);
     });
 
     it('inserts missing connector', () => {
@@ -276,7 +914,46 @@ describe('Utils', () => {
         ...extraCaseData,
       });
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-no-connector_id",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 2,
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "version": "WzAsMV0=",
+        }
+      `);
     });
   });
 

@@ -79,7 +79,6 @@ export const transformNewCase = ({
   ...newCase,
   closed_at: null,
   closed_by: null,
-  converted_by: null,
   connector,
   created_at: createdDate,
   created_by: { email, full_name, username },

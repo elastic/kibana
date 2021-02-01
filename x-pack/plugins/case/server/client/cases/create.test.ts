@@ -62,7 +62,6 @@ describe('create', () => {
             "name": "Jira",
             "type": ".jira",
           },
-          "converted_by": null,
           "created_at": "2019-11-25T21:54:48.952Z",
           "created_by": Object {
             "email": "d00d@awesome.com",
@@ -93,7 +92,38 @@ describe('create', () => {
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
         // using a snapshot here so we don't have to update the text field manually each time it changes
-      ).toMatchSnapshot();
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attributes": Object {
+              "action": "create",
+              "action_at": "2019-11-25T21:54:48.952Z",
+              "action_by": Object {
+                "email": "d00d@awesome.com",
+                "full_name": "Awesome D00d",
+                "username": "awesome",
+              },
+              "action_field": Array [
+                "description",
+                "status",
+                "tags",
+                "title",
+                "connector",
+                "settings",
+              ],
+              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true}}",
+              "old_value": null,
+            },
+            "references": Array [
+              Object {
+                "id": "mock-it",
+                "name": "associated-cases",
+                "type": "cases",
+              },
+            ],
+          },
+        ]
+      `);
     });
 
     test('it creates the case without connector in the configuration', async () => {
@@ -119,7 +149,43 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.create(postCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-it",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
     });
 
     test('Allow user to create case without authentication', async () => {
@@ -148,7 +214,43 @@ describe('create', () => {
       });
       const res = await caseClient.client.create(postCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": null,
+            "full_name": null,
+            "username": null,
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-it",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
     });
   });
 

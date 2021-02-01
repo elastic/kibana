@@ -298,6 +298,24 @@ describe('POST comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.comments[response.payload.comments.length - 1]).toMatchSnapshot();
+    expect(response.payload.comments[response.payload.comments.length - 1]).toMatchInlineSnapshot(`
+      Object {
+        "associationType": "case",
+        "comment": "Wow, good luck catching that bad meanie!",
+        "created_at": "2019-11-25T21:54:48.952Z",
+        "created_by": Object {
+          "email": null,
+          "full_name": null,
+          "username": null,
+        },
+        "id": "mock-comment",
+        "pushed_at": null,
+        "pushed_by": null,
+        "type": "user",
+        "updated_at": null,
+        "updated_by": null,
+        "version": "WzksMV0=",
+      }
+    `);
   });
 });

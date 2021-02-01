@@ -57,7 +57,6 @@ export interface Case {
   closedBy: ElasticUser | null;
   comments: Comment[];
   connector: CaseConnector;
-  convertedBy: ElasticUser | null;
   createdAt: string;
   createdBy: ElasticUser;
   description: string;

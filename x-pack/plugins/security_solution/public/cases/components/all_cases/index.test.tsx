@@ -515,8 +515,6 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalledWith({
-        // TODO: remove
-        converted_by: null,
         closedAt: null,
         closedBy: null,
         comments: [],

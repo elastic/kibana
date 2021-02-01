@@ -51,7 +51,53 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toMatchSnapshot();
+    expect(response.payload).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "closed_at": "2019-11-25T21:54:48.952Z",
+          "closed_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-id-1",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "closed",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "version": "WzE3LDFd",
+        },
+      ]
+    `);
   });
 
   it(`Open a case`, async () => {
@@ -78,7 +124,53 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toMatchSnapshot();
+    expect(response.payload).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2019-11-25T22:32:17.947Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "Oh no, a bad meanie going LOLBins all over the place!",
+          "external_service": null,
+          "id": "mock-id-4",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "LOLBins",
+          ],
+          "title": "Another bad one",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "version": "WzE3LDFd",
+        },
+      ]
+    `);
   });
 
   it(`Change case to in-progress`, async () => {
@@ -104,7 +196,49 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toMatchSnapshot();
+    expect(response.payload).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": null,
+            "id": "none",
+            "name": "none",
+            "type": ".none",
+          },
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-id-1",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "in-progress",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": "2019-11-25T21:54:48.952Z",
+          "updated_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "version": "WzE3LDFd",
+        },
+      ]
+    `);
   });
 
   it(`Patches a case without a connector.id`, async () => {

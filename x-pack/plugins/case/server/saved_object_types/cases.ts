@@ -31,19 +31,6 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      converted_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-        },
-      },
       created_at: {
         type: 'date',
       },

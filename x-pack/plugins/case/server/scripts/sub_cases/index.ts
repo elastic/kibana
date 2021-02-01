@@ -142,14 +142,9 @@ async function handleGenGroupAlerts(argv: any) {
 
 async function main() {
   // TODO: this isn't waiting for some reason
-  const argv = await yargs(process.argv.slice(2))
+  await yargs(process.argv.slice(2))
     .help()
     .options({
-      seed: {
-        alias: 's',
-        describe: 'random seed to use for document generator',
-        type: 'string',
-      },
       kibana: {
         alias: 'k',
         describe: 'kibana url',
@@ -158,7 +153,7 @@ async function main() {
       },
     })
     .command({
-      command: ['generate', 'gen', 'genAlerts'],
+      command: ['alerts', 'gen', 'genAlerts'],
       aliases: ['$0'],
       describe: 'generate a group of alerts',
       builder: (args) => {

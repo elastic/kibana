@@ -48,13 +48,8 @@ interface SanitizedCaseSettings {
   };
 }
 
-interface SanitizedConvertedByCaseType {
+interface SanitizedCaseType {
   type: string;
-  converted_by: {
-    username: string;
-    full_name: string;
-    email: string;
-  } | null;
 }
 
 export const caseMigrations = {
@@ -93,13 +88,12 @@ export const caseMigrations = {
   },
   '7.12.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedConvertedByCaseType> => {
+  ): SavedObjectSanitizedDoc<SanitizedCaseType> => {
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
         type: CaseType.individual,
-        converted_by: null,
       },
       references: doc.references || [],
     };
