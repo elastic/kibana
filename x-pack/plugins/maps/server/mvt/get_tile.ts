@@ -37,6 +37,7 @@ export async function getGridTile({
   requestBody = {},
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
+  searchSessionId,
 }: {
   x: number;
   y: number;
@@ -48,6 +49,7 @@ export async function getGridTile({
   requestBody: any;
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
   const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
@@ -87,7 +89,9 @@ export async function getGridTile({
             body: requestBody,
           },
         },
-        {}
+        {
+          sessionId: searchSessionId,
+        }
       )
       .toPromise();
     const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
@@ -113,6 +117,7 @@ export async function getTile({
   z,
   requestBody = {},
   geoFieldType,
+  searchSessionId,
 }: {
   x: number;
   y: number;
@@ -123,6 +128,7 @@ export async function getTile({
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
   let features: Feature[];
   try {
@@ -135,6 +141,10 @@ export async function getTile({
       },
     });
 
+    const searchOptions = {
+      sessionId: searchSessionId,
+    };
+
     const countResponse = await context
       .search!.search(
         {
@@ -146,12 +156,11 @@ export async function getTile({
             },
           },
         },
-        {}
+        searchOptions
       )
       .toPromise();
 
     const totalMeta = countResponse.rawResponse.hits.total as { value: number; relation: string };
-    // @ts-expect-error
     if (
       totalMeta.value > requestBody.size ||
       (totalMeta.value === requestBody.size && totalMeta.relation === 'gte')
@@ -175,7 +184,7 @@ export async function getTile({
               },
             },
           },
-          {}
+          searchOptions
         )
         .toPromise();
 
@@ -200,7 +209,7 @@ export async function getTile({
               body: requestBody,
             },
           },
-          {}
+          searchOptions
         )
         .toPromise();
 

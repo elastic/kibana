@@ -37,6 +37,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           requestBody: schema.string(),
           index: schema.string(),
           geoFieldType: schema.string(),
+          searchSessionId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -58,6 +59,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
+        searchSessionId: query.searchSessionId,
       });
 
       return sendResponse(response, tile);
@@ -77,6 +79,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
           index: schema.string(),
           requestType: schema.string(),
           geoFieldType: schema.string(),
+          searchSessionId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -99,6 +102,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
+        searchSessionId: query.searchSessionId,
       });
 
       return sendResponse(response, tile);
