@@ -97,7 +97,7 @@ export class DynamicStyleProperty<T>
     }
 
     const join = this._layer.getValidJoins().find((validJoin: InnerJoin) => {
-      return validJoin.getRightJoinSource().hasMatchingMetricField(fieldName);
+      return !!validJoin.getRightJoinSource().getFieldByName(fieldName);
     });
     return join ? join.getSourceMetaDataRequestId() : null;
   }
