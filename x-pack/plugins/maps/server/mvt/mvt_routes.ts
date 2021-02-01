@@ -50,7 +50,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
 
       const tile = await getTile({
         logger,
-        callElasticsearch: makeCallElasticsearch(context),
+        context,
         geometryFieldName: query.geometryFieldName as string,
         x: query.x as number,
         y: query.y as number,
@@ -90,7 +90,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
 
       const tile = await getGridTile({
         logger,
-        callElasticsearch: makeCallElasticsearch(context),
+        context,
         geometryFieldName: query.geometryFieldName as string,
         x: query.x as number,
         y: query.y as number,
@@ -124,10 +124,4 @@ function sendResponse(response: KibanaResponseFactory, tile: any) {
       headers,
     });
   }
-}
-
-function makeCallElasticsearch(context: RequestHandlerContext) {
-  return async (type: string, ...args: any[]): Promise<unknown> => {
-    return context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
-  };
 }

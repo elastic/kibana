@@ -8,7 +8,7 @@
 import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
-import { Logger } from 'src/core/server';
+import { Logger, RequestHandlerContext } from 'src/core/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
@@ -28,7 +28,7 @@ import { getCentroidFeatures } from '../../common/get_centroid_features';
 
 export async function getGridTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -43,7 +43,7 @@ export async function getGridTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: RequestHandlerContext;
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
@@ -79,13 +79,18 @@ export async function getGridTile({
     );
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
 
-    const esGeotileGridQuery = {
-      index,
-      body: requestBody,
-    };
-
-    const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
-    const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
+    const response = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: requestBody,
+          },
+        },
+        {}
+      )
+      .toPromise();
+    const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
     const featureCollection: FeatureCollection = {
       features,
       type: 'FeatureCollection',
@@ -100,7 +105,7 @@ export async function getGridTile({
 
 export async function getTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -114,106 +119,116 @@ export async function getTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: RequestHandlerContext;
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
-  const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
-
-  let resultFeatures: Feature[];
+  let features: Feature[];
   try {
-    let result;
-    try {
-      const geoShapeFilter = {
-        geo_shape: {
-          [geometryFieldName]: {
-            shape: geojsonBbox,
-            relation: 'INTERSECTS',
+    requestBody.query.bool.filter.push({
+      geo_shape: {
+        [geometryFieldName]: {
+          shape: tileToGeoJsonPolygon(x, y, z),
+          relation: 'INTERSECTS',
+        },
+      },
+    });
+
+    const countResponse = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: {
+              size: 0,
+              query: requestBody.query,
+            },
           },
         },
-      };
-      requestBody.query.bool.filter.push(geoShapeFilter);
+        {}
+      )
+      .toPromise();
 
-      const esSearchQuery = {
-        index,
-        body: requestBody,
-      };
-
-      const esCountQuery = {
-        index,
-        body: {
-          query: requestBody.query,
-        },
-      };
-
-      const countResult = await callElasticsearch('count', esCountQuery);
-
-      // @ts-expect-error
-      if (countResult.count > requestBody.size) {
-        // Generate "too many features"-bounds
-        const bboxAggName = 'data_bounds';
-        const bboxQuery = {
-          index,
-          body: {
-            size: 0,
-            query: requestBody.query,
-            aggs: {
-              [bboxAggName]: {
-                geo_bounds: {
-                  field: geometryFieldName,
+    const totalMeta = countResponse.rawResponse.hits.total as { value: number; relation: string };
+    // @ts-expect-error
+    if (
+      totalMeta.value > requestBody.size ||
+      (totalMeta.value === requestBody.size && totalMeta.relation === 'gte')
+    ) {
+      // Generate "too many features"-bounds
+      const bboxResponse = await context
+        .search!.search(
+          {
+            params: {
+              index,
+              body: {
+                size: 0,
+                query: requestBody.query,
+                aggs: {
+                  data_bounds: {
+                    geo_bounds: {
+                      field: geometryFieldName,
+                    },
+                  },
                 },
               },
             },
           },
-        };
+          {}
+        )
+        .toPromise();
 
-        const bboxResult = await callElasticsearch('search', bboxQuery);
-
-        // @ts-expect-error
-        const bboxForData = esBboxToGeoJsonPolygon(bboxResult.aggregations[bboxAggName].bounds);
-
-        resultFeatures = [
-          {
-            type: 'Feature',
-            properties: {
-              [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
-            },
-            geometry: bboxForData,
+      features = [
+        {
+          type: 'Feature',
+          properties: {
+            [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
-        ];
-      } else {
-        result = await callElasticsearch('search', esSearchQuery);
-
-        // Todo: pass in epochMillies-fields
-        const featureCollection = hitsToGeoJson(
           // @ts-expect-error
-          result.hits.hits,
-          (hit: Record<string, unknown>) => {
-            return flattenHit(geometryFieldName, hit);
+          geometry: esBboxToGeoJsonPolygon(
+            bboxResponse.rawResponse.aggregations.data_bounds.bounds
+          ),
+        },
+      ];
+    } else {
+      const documentsResponse = await context
+        .search!.search(
+          {
+            params: {
+              index,
+              body: requestBody,
+            },
           },
-          geometryFieldName,
-          geoFieldType,
-          []
-        );
+          {}
+        )
+        .toPromise();
 
-        resultFeatures = featureCollection.features;
+      // Todo: pass in epochMillies-fields
+      const featureCollection = hitsToGeoJson(
+        // @ts-expect-error
+        documentsResponse.rawResponse.hits.hits,
+        (hit: Record<string, unknown>) => {
+          return flattenHit(geometryFieldName, hit);
+        },
+        geometryFieldName,
+        geoFieldType,
+        []
+      );
 
-        // Correct system-fields.
-        for (let i = 0; i < resultFeatures.length; i++) {
-          const props = resultFeatures[i].properties;
-          if (props !== null) {
-            props[FEATURE_ID_PROPERTY_NAME] = resultFeatures[i].id;
-          }
+      features = featureCollection.features;
+
+      // Correct system-fields.
+      for (let i = 0; i < features.length; i++) {
+        const props = features[i].properties;
+        if (props !== null) {
+          props[FEATURE_ID_PROPERTY_NAME] = features[i].id;
         }
       }
-    } catch (e) {
-      logger.warn(e.message);
-      throw e;
     }
 
     const featureCollection: FeatureCollection = {
-      features: resultFeatures,
+      features,
       type: 'FeatureCollection',
     };
 
