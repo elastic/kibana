@@ -147,7 +147,7 @@ function convertBoomToKibanaResponse(
   error: Boom.Boom,
   response: KibanaResponseFactory
 ) {
-  const opts = { body: error.message };
+  const opts = { body: { message: error.message } };
   switch (error.output.statusCode) {
     case 404:
       return response.notFound(opts);
@@ -159,9 +159,6 @@ function convertBoomToKibanaResponse(
       return response.forbidden(opts);
 
     default:
-      return response.custom({
-        statusCode: error.output.statusCode,
-        ...opts,
-      });
+      throw error;
   }
 }
