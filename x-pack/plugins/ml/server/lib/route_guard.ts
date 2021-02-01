@@ -37,7 +37,7 @@ export class RouteGuard {
   private _getMlSavedObjectClient: GetMlSavedObjectClient;
   private _getInternalSavedObjectClient: GetInternalSavedObjectClient;
   private _spacesPlugin: SpacesPluginSetup | undefined;
-  private _authorization: SecurityPluginSetup | undefined;
+  private _authorization: SecurityPluginSetup['authz'] | undefined;
   private _isMlReady: () => Promise<void>;
 
   constructor(
@@ -45,7 +45,7 @@ export class RouteGuard {
     getSavedObject: GetMlSavedObjectClient,
     getInternalSavedObject: GetInternalSavedObjectClient,
     spacesPlugin: SpacesPluginSetup | undefined,
-    authorization: SecurityPluginSetup | undefined,
+    authorization: SecurityPluginSetup['authz'] | undefined,
     isMlReady: () => Promise<void>
   ) {
     this._mlLicense = mlLicense;

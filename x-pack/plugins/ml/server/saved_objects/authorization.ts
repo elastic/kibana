@@ -8,16 +8,16 @@ import { KibanaRequest } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
-export function authorizationProvider(securityPlugin: SecurityPluginSetup) {
+export function authorizationProvider(authorization: SecurityPluginSetup['authz']) {
   async function authorizationCheck(request: KibanaRequest) {
-    if (securityPlugin.license.isEnabled() === false) {
+    const shouldAuthorizeRequest = authorization?.mode.useRbacForRequest(request) ?? false;
+
+    if (shouldAuthorizeRequest === false) {
       return {
         canCreateGlobally: true,
         canCreateAtSpace: true,
       };
     }
-
-    const authorization = securityPlugin.authz;
 
     const checkPrivilegesWithRequest = authorization.checkPrivilegesWithRequest(request);
     // Checking privileges "dynamically" will check against the current space, if spaces are enabled.

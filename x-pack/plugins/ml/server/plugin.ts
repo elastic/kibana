@@ -144,7 +144,7 @@ export class MlServerPlugin
         getMlSavedObjectsClient,
         getInternalSavedObjectsClient,
         plugins.spaces,
-        plugins.security,
+        plugins.security?.authz,
         () => this.isMlReady
       ),
       mlLicense: this.mlLicense,
@@ -197,7 +197,7 @@ export class MlServerPlugin
         this.mlLicense,
         getSpaces,
         plugins.cloud,
-        plugins.security,
+        plugins.security?.authz,
         resolveMlCapabilities,
         () => this.clusterClient,
         () => getInternalSavedObjectsClient(),

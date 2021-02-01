@@ -60,7 +60,7 @@ export function createSharedServices(
   mlLicense: MlLicense,
   getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup,
-  securityPlugin: SecurityPluginSetup | undefined,
+  authorization: SecurityPluginSetup['authz'] | undefined,
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
@@ -80,7 +80,7 @@ export function createSharedServices(
       getClusterClient,
       savedObjectsClient,
       internalSavedObjectsClient,
-      securityPlugin,
+      authorization,
       getSpaces !== undefined,
       isMlReady
     );
@@ -125,7 +125,7 @@ function getRequestItemsProvider(
   getClusterClient: () => IClusterClient | null,
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
-  securityPlugin: SecurityPluginSetup | undefined,
+  authorization: SecurityPluginSetup['authz'] | undefined,
   spaceEnabled: boolean,
   isMlReady: () => Promise<void>
 ) {
@@ -142,7 +142,7 @@ function getRequestItemsProvider(
       savedObjectsClient,
       internalSavedObjectsClient,
       spaceEnabled,
-      securityPlugin,
+      authorization,
       isMlReady
     );
 
