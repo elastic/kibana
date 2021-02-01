@@ -17,6 +17,7 @@ import {
   FilterThreatMappingOptions,
   SplitShouldClausesOptions,
 } from './types';
+import { encodeThreatMatchNamedQuery } from './utils';
 
 export const MAX_CHUNK_SIZE = 1024;
 
@@ -78,7 +79,14 @@ export const createInnerAndClauses = ({
           should: [
             {
               match: {
-                [threatMappingEntry.field]: value,
+                [threatMappingEntry.field]: {
+                  query: value,
+                  _name: encodeThreatMatchNamedQuery({
+                    id: threatListItem._id,
+                    field: threatMappingEntry.field,
+                    value: threatMappingEntry.value,
+                  }),
+                },
               },
             },
           ],
