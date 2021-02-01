@@ -41,23 +41,24 @@ export async function buildBazelProductionProjects({
 }
 
 /**
- * Copy all the project's files from its "intermediate build directory" and
- * into the build. The intermediate directory can either be the root of the
- * project or some other location defined in the project's `package.json`.
+ * Copy all the project's files from its Bazel dist directory into the
+ * project build folder.
  *
  * When copying all the files into the build, we exclude `node_modules` because
  * we want the Kibana build to be responsible for actually installing all
  * dependencies. The primary reason for allowing the Kibana build process to
  * manage dependencies is that it will "dedupe" them, so we don't include
- * unnecessary copies of dependencies.
+ * unnecessary copies of dependencies. We also exclude every related Bazel build
+ * files in order to get the most cleaner package module we can in the final distributable.
  */
 async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: string) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
-  await copy(['**/*', '!node_modules/**'], buildProjectPath, {
-    cwd: project.getIntermediateBuildDirectory(),
+  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
+  await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
+    cwd: join(kibanaRoot, 'bazel-dist', 'kibana', 'packages', project.name),
     dot: true,
     onlyFiles: true,
     parents: true,

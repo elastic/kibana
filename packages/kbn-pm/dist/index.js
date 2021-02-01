@@ -95,7 +95,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "run", function() { return _cli__WEBPACK_IMPORTED_MODULE_0__["run"]; });
 
 /* harmony import */ var _production__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(516);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildProductionProjects"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildBazelProductionProjects"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(248);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getProjects", function() { return _utils_projects__WEBPACK_IMPORTED_MODULE_2__["getProjects"]; });
@@ -59511,8 +59513,11 @@ function getProjectPaths({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(517);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
+/* harmony import */ var _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(517);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildBazelProductionProjects"]; });
+
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(732);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -59521,6 +59526,7 @@ __webpack_require__.r(__webpack_exports__);
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+
 
 
 /***/ }),
@@ -59529,18 +59535,16 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return buildProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return buildBazelProductionProjects; });
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(518);
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
-/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(515);
-/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
-/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
-/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(248);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(732);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(131);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(246);
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(251);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(248);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59555,96 +59559,39 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-async function buildProductionProjects({
+async function buildBazelProductionProjects({
   kibanaRoot,
   buildRoot,
   onlyOSS
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
-  const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
-  const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_6__["getBazelProjectsOnly"])(await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_2__["getProductionProjects"])(kibanaRoot, onlyOSS));
   const projectNames = [...projects.values()].map(project => project.name);
-  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing production build for [${projectNames.join(', ')}]`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
-  for (const batch of batchedProjects) {
-    for (const project of batch) {
-      await deleteTarget(project);
-      await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
-    }
+  for (const project of projects.values()) {
+    await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_2__["buildProject"])(project);
+    await copyToBuild(project, kibanaRoot, buildRoot);
   }
 }
 /**
- * Returns the subset of projects that should be built into the production
- * bundle. As we copy these into Kibana's `node_modules` during the build step,
- * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies. If onlyOSS
- * is supplied, we omit projects with build.oss in their package.json set to false.
- */
-
-async function getProductionProjects(rootPath, onlyOSS) {
-  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])({
-    rootPath
-  });
-  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
-  const projectsSubset = [projects.get('kibana')];
-
-  if (projects.has('x-pack')) {
-    projectsSubset.push(projects.get('x-pack'));
-  }
-
-  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
-    onlyProductionDependencies: true
-  }); // We remove Kibana, as we're already building Kibana
-
-  productionProjects.delete('kibana');
-
-  if (onlyOSS) {
-    productionProjects.forEach(project => {
-      if (project.getBuildConfig().oss === false) {
-        productionProjects.delete(project.json.name);
-      }
-    });
-  }
-
-  return productionProjects;
-}
-
-async function deleteTarget(project) {
-  const targetDir = project.targetLocation;
-
-  if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(targetDir)) {
-    await del__WEBPACK_IMPORTED_MODULE_1___default()(targetDir, {
-      force: true
-    });
-  }
-}
-
-async function buildProject(project) {
-  if (project.hasScript('build')) {
-    await project.runScript('build');
-  }
-}
-/**
- * Copy all the project's files from its "intermediate build directory" and
- * into the build. The intermediate directory can either be the root of the
- * project or some other location defined in the project's `package.json`.
+ * Copy all the project's files from its Bazel dist directory into the
+ * project build folder.
  *
  * When copying all the files into the build, we exclude `node_modules` because
  * we want the Kibana build to be responsible for actually installing all
  * dependencies. The primary reason for allowing the Kibana build process to
  * manage dependencies is that it will "dedupe" them, so we don't include
- * unnecessary copies of dependencies.
+ * unnecessary copies of dependencies. We also exclude every related Bazel build
+ * files in order to get the most cleaner package module we can in the final distributable.
  */
-
 
 async function copyToBuild(project, kibanaRoot, buildRoot) {
   // We want the package to have the same relative location within the build
-  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
-  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
-  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
-    cwd: project.getIntermediateBuildDirectory(),
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_1__["relative"])(kibanaRoot, project.path);
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(buildRoot, relativeProjectPath);
+  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_1__["join"])(kibanaRoot, 'bazel-dist', 'kibana', 'packages', project.name),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -59656,9 +59603,9 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   // the intermediate build, we fall back to using the project's already defined
   // `package.json`.
 
-  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
-  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["createProductionPackageJson"])(packageJson);
-  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, preparedPackageJson);
+  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_3__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_1__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(buildProjectPath) : project.json;
+  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_5__["createProductionPackageJson"])(packageJson);
+  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_5__["writePackageJson"])(buildProjectPath, preparedPackageJson);
 }
 
 /***/ }),
@@ -87073,6 +87020,145 @@ class CpyError extends NestedError {
 
 module.exports = CpyError;
 
+
+/***/ }),
+/* 732 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return buildNonBazelProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getProductionProjects", function() { return getProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProject", function() { return buildProject; });
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(518);
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(515);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(248);
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
+ */
+
+
+
+
+
+
+
+
+async function buildNonBazelProductionProjects({
+  kibanaRoot,
+  buildRoot,
+  onlyOSS
+}) {
+  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
+  const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
+  const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
+  const projectNames = [...projects.values()].map(project => project.name);
+  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing non Bazel production build for [${projectNames.join(', ')}]`);
+
+  for (const batch of batchedProjects) {
+    for (const project of batch) {
+      await deleteTarget(project);
+      await buildProject(project);
+      await copyToBuild(project, kibanaRoot, buildRoot);
+    }
+  }
+}
+/**
+ * Returns the subset of projects that should be built into the production
+ * bundle. As we copy these into Kibana's `node_modules` during the build step,
+ * and let Kibana's build process be responsible for installing dependencies,
+ * we only include Kibana's transitive _production_ dependencies. If onlyOSS
+ * is supplied, we omit projects with build.oss in their package.json set to false.
+ */
+
+async function getProductionProjects(rootPath, onlyOSS) {
+  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])({
+    rootPath
+  });
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
+  const projectsSubset = [projects.get('kibana')];
+
+  if (projects.has('x-pack')) {
+    projectsSubset.push(projects.get('x-pack'));
+  }
+
+  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
+    onlyProductionDependencies: true
+  }); // We remove Kibana, as we're already building Kibana
+
+  productionProjects.delete('kibana');
+
+  if (onlyOSS) {
+    productionProjects.forEach(project => {
+      if (project.getBuildConfig().oss === false) {
+        productionProjects.delete(project.json.name);
+      }
+    });
+  }
+
+  return productionProjects;
+}
+
+async function deleteTarget(project) {
+  const targetDir = project.targetLocation;
+
+  if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(targetDir)) {
+    await del__WEBPACK_IMPORTED_MODULE_1___default()(targetDir, {
+      force: true
+    });
+  }
+}
+
+async function buildProject(project) {
+  if (project.hasScript('build')) {
+    await project.runScript('build');
+  }
+}
+/**
+ * Copy all the project's files from its "intermediate build directory" and
+ * into the build. The intermediate directory can either be the root of the
+ * project or some other location defined in the project's `package.json`.
+ *
+ * When copying all the files into the build, we exclude `node_modules` because
+ * we want the Kibana build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the Kibana build process to
+ * manage dependencies is that it will "dedupe" them, so we don't include
+ * unnecessary copies of dependencies.
+ */
+
+async function copyToBuild(project, kibanaRoot, buildRoot) {
+  // We want the package to have the same relative location within the build
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getIntermediateBuildDirectory(),
+    dot: true,
+    onlyFiles: true,
+    parents: true
+  }); // If a project is using an intermediate build directory, we special-case our
+  // handling of `package.json`, as the project build process might have copied
+  // (a potentially modified) `package.json` into the intermediate build
+  // directory already. If so, we want to use that `package.json` as the basis
+  // for creating the production-ready `package.json`. If it's not present in
+  // the intermediate build, we fall back to using the project's already defined
+  // `package.json`.
+
+  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
+  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["createProductionPackageJson"])(packageJson);
+  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, preparedPackageJson);
+}
 
 /***/ })
 /******/ ]);
