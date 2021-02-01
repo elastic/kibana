@@ -23,7 +23,7 @@ export function checkMatchingSchemasTask({ roots }: TaskContext, throwOnDiff: bo
         root.esMappingDiffs = Object.keys(differences);
         if (root.esMappingDiffs.length && throwOnDiff) {
           throw Error(
-            `The following changes must be persisted in ${fullPath} file. Use '--fix' to update.\n${JSON.stringify(
+            `The following changes must be persisted in ${fullPath} file. Run 'node scripts/telemetry_check --fix' to update.\n${JSON.stringify(
               differences,
               null,
               2
