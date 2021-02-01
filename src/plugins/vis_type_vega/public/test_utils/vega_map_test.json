@@ -1,7 +1,7 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "config": {
-    "kibana": { "renderer": "svg", "type": "map", "mapStyle": false}
+    "kibana": { "type": "map", "mapStyle": "default", "latitude": 25, "longitude": -70, "zoom": 3}
   },
   "width": 512,
   "height": 512,

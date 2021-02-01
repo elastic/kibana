@@ -483,6 +483,11 @@ export interface DocLinksStart {
         readonly metricbeat: {
             readonly base: string;
         };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
+        };
         readonly heartbeat: {
             readonly base: string;
         };
@@ -1502,6 +1507,7 @@ export interface UiSettingsParams<T = unknown> {
     requiresPageReload?: boolean;
     // (undocumented)
     schema: Type<T>;
+    sensitive?: boolean;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
