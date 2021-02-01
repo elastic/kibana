@@ -161,7 +161,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         statusCode: 400,
         error: 'Bad Request',
         message:
-          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.',
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request',
       });
     });
 
