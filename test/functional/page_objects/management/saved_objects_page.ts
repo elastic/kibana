@@ -257,6 +257,22 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       });
     }
 
+    async getInvalidRelations() {
+      const rows = await testSubjects.findAll('invalidRelationshipsTableRow');
+      return mapAsync(rows, async (row) => {
+        const objectType = await row.findByTestSubject('relationshipsObjectType');
+        const objectId = await row.findByTestSubject('relationshipsObjectId');
+        const relationship = await row.findByTestSubject('directRelationship');
+        const error = await row.findByTestSubject('relationshipsError');
+        return {
+          type: await objectType.getVisibleText(),
+          id: await objectId.getVisibleText(),
+          relationship: await relationship.getVisibleText(),
+          error: await error.getVisibleText(),
+        };
+      });
+    }
+
     async getTableSummary() {
       const table = await testSubjects.find('savedObjectsTable');
       const $ = await table.parseDomContent();
