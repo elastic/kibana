@@ -30,7 +30,7 @@ In your child application, place a `ChildDragDropProvider` at the root of that, 
 
 This enables your child application to share the same drag / drop context as the root application.
 
-## Dragging
+## DragDropIdentifier
 
 An item can be both draggable and droppable at the same time, but for simplicity's sake, we'll treat these two cases separately.
 
@@ -88,7 +88,7 @@ The children `DragDrop` components must have props defined as in the example:
         droppable
         dragType="reorder"
         dropType="reorder"
-        itemsInGroup={fields.map((f) => f.id)} // consists ids of all reorderable elements in the group, eg. ['3', '5', '1']
+        reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
           id: f.id,
         }}

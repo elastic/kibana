@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flow } from 'fp-ts/function';
 import { deserializer } from '../form';
 
 import {
+  formDataToAbsoluteTimings,
+  calculateRelativeFromAbsoluteMilliseconds,
   absoluteTimingToRelativeTiming,
-  calculateRelativeTimingMs,
 } from './absolute_timing_to_relative_timing';
+
+export const calculateRelativeTimingMs = flow(
+  formDataToAbsoluteTimings,
+  calculateRelativeFromAbsoluteMilliseconds
+);
 
 describe('Conversion of absolute policy timing to relative timing', () => {
   describe('calculateRelativeTimingMs', () => {
