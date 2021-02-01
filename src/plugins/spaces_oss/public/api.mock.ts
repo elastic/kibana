@@ -7,12 +7,35 @@
  */
 
 import { of } from 'rxjs';
-import { SpacesApi } from './api';
+import { SpacesApi, SpacesApiUi, SpacesApiUiComponent } from './api';
 
 const createApiMock = (): jest.Mocked<SpacesApi> => ({
   activeSpace$: of(),
   getActiveSpace: jest.fn(),
+  ui: createApiUiMock(),
 });
+
+type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {
+  components: SpacesApiUiComponentMock;
+};
+
+const createApiUiMock = () => {
+  const mock: SpacesApiUiMock = {
+    components: createApiUiComponentsMock(),
+  };
+
+  return mock;
+};
+
+type SpacesApiUiComponentMock = jest.Mocked<SpacesApiUiComponent>;
+
+const createApiUiComponentsMock = () => {
+  const mock: SpacesApiUiComponentMock = {
+    ShareToSpaceFlyout: jest.fn(),
+  };
+
+  return mock;
+};
 
 export const spacesApiMock = {
   create: createApiMock,

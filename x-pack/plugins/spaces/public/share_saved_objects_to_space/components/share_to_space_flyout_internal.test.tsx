@@ -8,7 +8,6 @@
 import React from 'react';
 import Boom from '@hapi/boom';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
@@ -16,23 +15,23 @@ import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { SpacesManager } from '../../spaces_manager';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { NoSpacesAvailable } from './no_spaces_available';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import { ContextWrapper } from '.';
+import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
 
 interface SetupOpts {
   mockSpaces?: Space[];
   namespaces?: string[];
   returnBeforeSpacesLoad?: boolean;
+  enableCreateCopyCallout?: boolean;
+  enableCreateNewSpaceLink?: boolean;
 }
 
 const setup = async (opts: SetupOpts = {}) => {
   const onClose = jest.fn();
-  const onObjectUpdated = jest.fn();
+  const onUpdate = jest.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
 
@@ -72,16 +71,10 @@ const setup = async (opts: SetupOpts = {}) => {
   const savedObjectToShare = {
     type: 'dashboard',
     id: 'my-dash',
-    references: [
-      {
-        type: 'visualization',
-        id: 'my-viz',
-        name: 'My Viz',
-      },
-    ],
-    meta: { icon: 'dashboard', title: 'foo' },
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
-  } as SavedObjectsManagementRecord;
+    icon: 'dashboard',
+    title: 'foo',
+  };
 
   const { getStartServices } = coreMock.createSetup();
   const startServices = coreMock.createStart();
@@ -92,17 +85,21 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
-  // the flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
+  const ShareToSpaceFlyout = getShareToSpaceFlyoutComponent({
+    getStartServices,
+    spacesManager: mockSpacesManager,
+  });
+  // the internal flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
+  // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper
   const wrapper = mountWithIntl(
-    <ContextWrapper getStartServices={getStartServices}>
-      <ShareToSpaceFlyoutInternal
-        savedObject={savedObjectToShare}
-        spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-        onClose={onClose}
-        onObjectUpdated={onObjectUpdated}
-      />
-    </ContextWrapper>
+    <ShareToSpaceFlyout
+      savedObjectTarget={savedObjectToShare}
+      onUpdate={onUpdate}
+      onClose={onClose}
+      enableCreateCopyCallout={opts.enableCreateCopyCallout}
+      enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
+    />
   );
 
   // wait for context wrapper to rerender
@@ -144,72 +141,128 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
   });
 
-  it('shows a message within a NoSpacesAvailable when no spaces are available', async () => {
-    const { wrapper, onClose } = await setup({
-      mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+  describe('without enableCreateCopyCallout', () => {
+    it('does not show a warning callout when the saved object only has one namespace', async () => {
+      const { wrapper, onClose } = await setup({
+        namespaces: ['my-active-space'],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('with enableCreateCopyCallout', () => {
+    const enableCreateCopyCallout = true;
+
+    it('does not show a warning callout when the saved object has multiple namespaces', async () => {
+      const { wrapper, onClose } = await setup({ enableCreateCopyCallout });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiCallOut)).toHaveLength(0);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
-    expect(onClose).toHaveBeenCalledTimes(0);
-  });
+    it('shows a warning callout when the saved object only has one namespace', async () => {
+      const { wrapper, onClose } = await setup({
+        enableCreateCopyCallout,
+        namespaces: ['my-active-space'],
+      });
 
-  it('shows a message within a NoSpacesAvailable when only the active space is available', async () => {
-    const { wrapper, onClose } = await setup({
-      mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
     });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
-    expect(onClose).toHaveBeenCalledTimes(0);
-  });
+    it('does not show the Copy flyout by default', async () => {
+      const { wrapper, onClose } = await setup({
+        enableCreateCopyCallout,
+        namespaces: ['my-active-space'],
+      });
 
-  it('does not show a warning callout when the saved object has multiple namespaces', async () => {
-    const { wrapper, onClose } = await setup();
-
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiCallOut)).toHaveLength(0);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(onClose).toHaveBeenCalledTimes(0);
-  });
-
-  it('shows a warning callout when the saved object only has one namespace', async () => {
-    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
-
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(onClose).toHaveBeenCalledTimes(0);
-  });
-
-  it('does not show the Copy flyout by default', async () => {
-    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
-
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(0);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(onClose).toHaveBeenCalledTimes(0);
-  });
-
-  it('shows the Copy flyout if the the "Make a copy" button is clicked', async () => {
-    const { wrapper, onClose } = await setup({ namespaces: ['my-active-space'] });
-
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
-
-    const copyButton = findTestSubject(wrapper, 'sts-copy-link'); // this link is only present in the warning callout
-
-    await act(async () => {
-      copyButton.simulate('click');
-      await nextTick();
-      wrapper.update();
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(0);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
     });
 
-    expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(1);
-    expect(onClose).toHaveBeenCalledTimes(0);
+    it('shows the Copy flyout if the the "Make a copy" button is clicked', async () => {
+      const { wrapper, onClose } = await setup({
+        enableCreateCopyCallout,
+        namespaces: ['my-active-space'],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+
+      const copyButton = findTestSubject(wrapper, 'sts-copy-link'); // this link is only present in the warning callout
+
+      await act(async () => {
+        copyButton.simulate('click');
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(CopySavedObjectsToSpaceFlyout)).toHaveLength(1);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('without enableCreateNewSpaceLink', () => {
+    it('does not render a NoSpacesAvailable component when no spaces are available', async () => {
+      const { wrapper, onClose } = await setup({
+        mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not render a NoSpacesAvailable component when only the active space is available', async () => {
+      const { wrapper, onClose } = await setup({
+        mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('with enableCreateNewSpaceLink', () => {
+    const enableCreateNewSpaceLink = true;
+
+    it('renders a NoSpacesAvailable component when no spaces are available', async () => {
+      const { wrapper, onClose } = await setup({
+        enableCreateNewSpaceLink,
+        mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
+
+    it('renders a NoSpacesAvailable component when only the active space is available', async () => {
+      const { wrapper, onClose } = await setup({
+        enableCreateNewSpaceLink,
+        mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
+      });
+
+      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
+      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
+      expect(onClose).toHaveBeenCalledTimes(0);
+    });
   });
 
   it('handles errors thrown from shareSavedObjectsAdd API call', async () => {

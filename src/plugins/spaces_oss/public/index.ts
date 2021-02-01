@@ -10,6 +10,12 @@ import { SpacesOssPlugin } from './plugin';
 
 export { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 
-export { SpacesApi } from './api';
+export {
+  SpacesApi,
+  SpacesApiUi,
+  SpacesApiUiComponent,
+  ShareToSpaceFlyoutProps,
+  ShareToSpaceSavedObjectTarget,
+} from './api';
 
 export const plugin = () => new SpacesOssPlugin();

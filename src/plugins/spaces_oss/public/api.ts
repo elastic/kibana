@@ -7,6 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { FunctionComponent } from 'react';
 import { Space } from '../common';
 
 /**
@@ -15,4 +16,116 @@ import { Space } from '../common';
 export interface SpacesApi {
   readonly activeSpace$: Observable<Space>;
   getActiveSpace(): Promise<Space>;
+  /**
+   * UI API to use to add spaces capabilities to an application
+   */
+  ui: SpacesApiUi;
+}
+
+/**
+ * @public
+ */
+export interface SpacesApiUi {
+  /**
+   * {@link SpacesApiUiComponent | React components} to support the spaces feature.
+   */
+  components: SpacesApiUiComponent;
+}
+
+/**
+ * React UI components to be used to display the spaces feature in any application.
+ *
+ * @public
+ */
+export interface SpacesApiUiComponent {
+  /**
+   * Displays the tags for given saved object.
+   */
+  ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;
+}
+
+/**
+ * @public
+ */
+export interface ShareToSpaceFlyoutProps {
+  /**
+   * The object to render the flyout for.
+   */
+  savedObjectTarget: ShareToSpaceSavedObjectTarget;
+  /**
+   * The EUI icon that is rendered in the flyout's title.
+   *
+   * Default is 'share'.
+   */
+  flyoutIcon?: string;
+  /**
+   * The string that is rendered in the flyout's title.
+   *
+   * Default is 'Edit spaces for object'.
+   */
+  flyoutTitle?: string;
+  /**
+   * When enabled, if the object is not yet shared to multiple spaces, a callout will be displayed that suggests the user might want to
+   * create a copy instead.
+   *
+   * Default value is false.
+   */
+  enableCreateCopyCallout?: boolean;
+  /**
+   * When enabled, if no other spaces exist _and_ the user has the appropriate privileges, a sentence will be displayed that suggests the
+   * user might want to create a space.
+   *
+   * Default value is false.
+   */
+  enableCreateNewSpaceLink?: boolean;
+  /**
+   * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
+   * this is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or
+   * `/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred.
+   */
+  changeSpacesHandler?: (spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>;
+  /**
+   * Optional callback when the target object is updated.
+   */
+  onUpdate?: () => void;
+  /**
+   * Optional callback when the flyout is closed.
+   */
+  onClose?: () => void;
+}
+
+/**
+ * @public
+ */
+export interface ShareToSpaceSavedObjectTarget {
+  /**
+   * The object's type.
+   */
+  type: string;
+  /**
+   * The object's ID.
+   */
+  id: string;
+  /**
+   * The namespaces that the object currently exists in.
+   */
+  namespaces: string[];
+  /**
+   * The EUI icon that is rendered in the flyout's subtitle.
+   *
+   * Default is 'empty'.
+   */
+  icon?: string;
+  /**
+   * The string that is rendered in the flyout's subtitle.
+   *
+   * Default is `${type} [id=${id}]`.
+   */
+  title?: string;
+  /**
+   * The string that is used to describe the object in several places, e.g., _Make **object** available in selected spaces only_.
+   *
+   * Default value is 'object'.
+   */
+  noun?: string;
 }

@@ -11,12 +11,10 @@ import {
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormFieldset,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -25,10 +23,11 @@ import { SpaceTarget } from '../types';
 
 interface Props {
   spaces: SpaceTarget[];
+  objectNoun: string;
   canShareToAllSpaces: boolean;
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
-  disabled?: boolean;
+  enableCreateNewSpaceLink: boolean;
 }
 
 function createLabel({
@@ -63,7 +62,14 @@ function createLabel({
 }
 
 export const ShareModeControl = (props: Props) => {
-  const { spaces, canShareToAllSpaces, selectedSpaceIds, onChange } = props;
+  const {
+    spaces,
+    objectNoun,
+    canShareToAllSpaces,
+    selectedSpaceIds,
+    onChange,
+    enableCreateNewSpaceLink,
+  } = props;
 
   if (spaces.length === 0) {
     return <EuiLoadingSpinner />;
@@ -78,7 +84,10 @@ export const ShareModeControl = (props: Props) => {
     ),
     text: i18n.translate(
       'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.text',
-      { defaultMessage: 'Make object available in all current and future spaces.' }
+      {
+        defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
+        values: { objectNoun },
+      }
     ),
     ...(!canShareToAllSpaces && {
       tooltip: isGlobalControlChecked
@@ -101,14 +110,13 @@ export const ShareModeControl = (props: Props) => {
     ),
     text: i18n.translate(
       'xpack.spaces.management.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
-      { defaultMessage: 'Make object available in selected spaces only.' }
+      {
+        defaultMessage: 'Make {objectNoun} available in selected spaces only.',
+        values: { objectNoun },
+      }
     ),
     disabled: !canShareToAllSpaces && isGlobalControlChecked,
   };
-  const shareOptionsTitle = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.shareOptionsTitle',
-    { defaultMessage: 'Share options' }
-  );
 
   const toggleShareOption = (allSpaces: boolean) => {
     const updatedSpaceIds = allSpaces
@@ -119,33 +127,28 @@ export const ShareModeControl = (props: Props) => {
 
   return (
     <>
-      <EuiFormFieldset
-        legend={{
-          children: (
-            <EuiTitle size="xs">
-              <span>{shareOptionsTitle}</span>
-            </EuiTitle>
-          ),
-        }}
+      <EuiCheckableCard
+        id={shareToExplicitSpaces.id}
+        label={createLabel(shareToExplicitSpaces)}
+        checked={!isGlobalControlChecked}
+        onChange={() => toggleShareOption(false)}
+        disabled={shareToExplicitSpaces.disabled}
       >
-        <EuiCheckableCard
-          id={shareToExplicitSpaces.id}
-          label={createLabel(shareToExplicitSpaces)}
-          checked={!isGlobalControlChecked}
-          onChange={() => toggleShareOption(false)}
-          disabled={shareToExplicitSpaces.disabled}
-        >
-          <SelectableSpacesControl {...props} />
-        </EuiCheckableCard>
-        <EuiSpacer size="s" />
-        <EuiCheckableCard
-          id={shareToAllSpaces.id}
-          label={createLabel(shareToAllSpaces)}
-          checked={isGlobalControlChecked}
-          onChange={() => toggleShareOption(true)}
-          disabled={shareToAllSpaces.disabled}
+        <SelectableSpacesControl
+          spaces={spaces}
+          selectedSpaceIds={selectedSpaceIds}
+          onChange={onChange}
+          enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         />
-      </EuiFormFieldset>
+      </EuiCheckableCard>
+      <EuiSpacer size="s" />
+      <EuiCheckableCard
+        id={shareToAllSpaces.id}
+        label={createLabel(shareToAllSpaces)}
+        checked={isGlobalControlChecked}
+        onChange={() => toggleShareOption(true)}
+        disabled={shareToAllSpaces.disabled}
+      />
     </>
   );
 };

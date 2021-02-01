@@ -7,22 +7,33 @@
 
 import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
-import { EuiHorizontalRule, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ShareOptions, SpaceTarget } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
   spaces: SpaceTarget[];
+  objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
   showShareWarning: boolean;
   canShareToAllSpaces: boolean;
   makeCopy: () => void;
+  enableCreateNewSpaceLink: boolean;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
-  const { spaces, onUpdate, shareOptions, showShareWarning, canShareToAllSpaces, makeCopy } = props;
+  const {
+    spaces,
+    objectNoun,
+    onUpdate,
+    shareOptions,
+    showShareWarning,
+    canShareToAllSpaces,
+    makeCopy,
+    enableCreateNewSpaceLink,
+  } = props;
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     onUpdate({ ...shareOptions, selectedSpaceIds });
@@ -39,15 +50,16 @@ export const ShareToSpaceForm = (props: Props) => {
           title={
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningTitle"
-              defaultMessage="Editing a shared object applies the changes in every space"
+              defaultMessage="Changes will be synchronized across spaces"
             />
           }
           color="warning"
         >
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.shareWarningBody"
-            defaultMessage="To edit in only one space, {makeACopyLink} instead."
+            defaultMessage="If you choose multiple spaces for this {objectNoun}, any changes will affect it in each space. If you don't want this to happen, {makeACopyLink} instead."
             values={{
+              objectNoun,
               makeACopyLink: (
                 <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
                   <FormattedMessage
@@ -60,7 +72,7 @@ export const ShareToSpaceForm = (props: Props) => {
           />
         </EuiCallOut>
 
-        <EuiHorizontalRule margin="m" />
+        <EuiSpacer size="m" />
       </Fragment>
     );
   };
@@ -71,9 +83,11 @@ export const ShareToSpaceForm = (props: Props) => {
 
       <ShareModeControl
         spaces={spaces}
+        objectNoun={objectNoun}
         canShareToAllSpaces={canShareToAllSpaces}
         selectedSpaceIds={shareOptions.selectedSpaceIds}
         onChange={(selection) => setSelectedSpaceIds(selection)}
+        enableCreateNewSpaceLink={enableCreateNewSpaceLink}
       />
     </div>
   );

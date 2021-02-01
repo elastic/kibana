@@ -32,6 +32,7 @@ interface Props {
   spaces: SpaceTarget[];
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
+  enableCreateNewSpaceLink: boolean;
 }
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
@@ -64,7 +65,7 @@ const activeSpaceProps = {
 };
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { spaces, selectedSpaceIds, onChange } = props;
+  const { spaces, selectedSpaceIds, onChange, enableCreateNewSpaceLink } = props;
   const { services } = useKibana();
   const { application, docLinks } = services;
 
@@ -130,7 +131,7 @@ export const SelectableSpacesControl = (props: Props) => {
     );
   };
   const getNoSpacesAvailable = () => {
-    if (spaces.length < 2) {
+    if (enableCreateNewSpaceLink && spaces.length < 2) {
       return <NoSpacesAvailable application={application!} />;
     }
     return null;
