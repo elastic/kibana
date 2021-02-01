@@ -297,11 +297,111 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { hits } = signalsOpen.hits;
           const threats = hits.map((hit) => hit._source.threat);
-          expect(threats).to.eql([{}, {}]);
+          expect(threats).to.eql([
+            {
+              indicator: [
+                {
+                  domain: '159.89.119.67',
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    field: 'threat.indicator.domain',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+            {
+              indicator: [
+                {
+                  domain: '159.89.119.67',
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    field: 'threat.indicator.domain',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+          ]);
         });
 
-        it('enriches signals with multiple indicators if several matched');
-        it('enriches signals with all fields that the indicator matched');
+        it('enriches signals with multiple indicators if several matched', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_query: 'threat.indicator: *', // narrow things down to indicators with a domain
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.port',
+                    field: 'source.port',
+                    type: 'mapping',
+                  },
+                  // {
+                  //   value: 'threat.indicator.ip',
+                  //   field: 'source.ip',
+                  //   type: 'mapping',
+                  // },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(1);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat);
+          expect(threats).to.eql([
+            {
+              indicator: [
+                {
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  matched: {
+                    atomic: 57324,
+                    field: 'threat.indicator.port',
+                    type: 'url',
+                  },
+                  port: 57324,
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://193.70.81.238:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
       });
     });
   });
