@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { pick, sortBy } from 'lodash';
+import { pick } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
@@ -36,10 +36,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({
-          transactionGroups: [],
-          isAggregationAccurate: true,
-        });
+        expect(response.body.transactionGroups).to.empty();
+        expect(response.body.isAggregationAccurate).to.be(true);
+        expect(response.body.requestId).to.not.empty();
       });
     }
   );
@@ -112,48 +111,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "throughput": 0.533333333333333,
           }
         `);
-      });
-
-      it('sorts items in the correct order', async () => {
-        const descendingResponse = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-              transactionType: 'request',
-              latencyAggregationType: 'avg',
-            },
-          })
-        );
-
-        expect(descendingResponse.status).to.be(200);
-
-        const descendingOccurrences = descendingResponse.body.transactionGroups.map(
-          (item: any) => item.impact
-        );
-
-        expect(descendingOccurrences).to.eql(sortBy(descendingOccurrences.concat()).reverse());
-
-        const ascendingResponse = await supertest.get(
-          url.format({
-            pathname: `/api/apm/services/opbeans-java/transactions/groups/overview`,
-            query: {
-              start,
-              end,
-              uiFilters: '{}',
-              transactionType: 'request',
-              latencyAggregationType: 'avg',
-            },
-          })
-        );
-
-        const ascendingOccurrences = ascendingResponse.body.transactionGroups.map(
-          (item: any) => item.impact
-        );
-
-        expect(ascendingOccurrences).to.eql(sortBy(ascendingOccurrences.concat()).reverse());
       });
     }
   );

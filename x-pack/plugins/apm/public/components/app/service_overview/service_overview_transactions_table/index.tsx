@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, orderBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -94,23 +94,22 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   ]);
 
   const { transactionGroups, requestId } = data;
-  const sortedSlicedItems = orderBy(
+  const currentPageTransactionGroups = orderBy(
     transactionGroups,
     sort.field,
     sort.direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const transactionNames = useMemo(
-    () => sortedSlicedItems.map(({ name }) => name).join(),
-    [sortedSlicedItems]
-  );
+  const transactionNames = currentPageTransactionGroups
+    .map(({ name }) => name)
+    .join();
 
   const {
-    data: transactionsMetricsData,
-    status: transactionsMetricsStatus,
+    data: transactionGroupsAggResults,
+    status: transactionGroupsAggResultsStatus,
   } = useFetcher(
     () => {
-      async function fetchMetrics() {
+      async function fetchAggResults() {
         if (
           !isEmpty(requestId) &&
           transactionNames &&
@@ -120,7 +119,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         ) {
           const metrics = await callApmApi({
             endpoint:
-              'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
+              'GET /api/apm/services/{serviceName}/transactions/groups/agg_results',
             params: {
               path: { serviceName },
               query: {
@@ -138,7 +137,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           return { [requestId]: metrics };
         }
       }
-      return fetchMetrics();
+      return fetchAggResults();
     },
     // only fetches metrics when requestId changes or transaction names changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,14 +147,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionsMetricsData: transactionsMetricsData
-      ? transactionsMetricsData[requestId]
+    transactionGroupsAggResults: transactionGroupsAggResults
+      ? transactionGroupsAggResults[requestId]
       : undefined,
   });
 
   const isLoading =
     status === FETCH_STATUS.LOADING ||
-    transactionsMetricsStatus === FETCH_STATUS.LOADING;
+    transactionGroupsAggResultsStatus === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,
@@ -210,7 +209,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             >
               <EuiBasicTable
                 loading={isLoading}
-                items={sortedSlicedItems}
+                items={currentPageTransactionGroups}
                 columns={columns}
                 pagination={pagination}
                 sorting={sorting}

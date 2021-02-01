@@ -11,19 +11,19 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../../common/event_outcome';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+} from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
+} from '../helpers/aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
-} from '../../helpers/latency_aggregation_type';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+} from '../helpers/latency_aggregation_type';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceTransactionGroups({
   serviceName,

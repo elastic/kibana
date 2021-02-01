@@ -23,7 +23,7 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
-import { getServiceTransactionGroupsMetrics } from '../lib/services/get_service_transaction_groups_metrics';
+import { getServiceTransactionGroupsAggResults } from '../lib/services/get_service_transaction_groups_agg_results';
 
 /**
  * Returns a list of transactions grouped by name
@@ -101,8 +101,9 @@ export const transactionGroupsOverviewRoute = createRoute({
   },
 });
 
-export const transactionGroupsMetricsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/metrics',
+export const transactionGroupsAggResultsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/groups/agg_results',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -136,7 +137,7 @@ export const transactionGroupsMetricsRoute = createRoute({
       },
     } = context.params;
 
-    return getServiceTransactionGroupsMetrics({
+    return getServiceTransactionGroupsAggResults({
       setup,
       serviceName,
       transactionNames: transactionNames.split(','),

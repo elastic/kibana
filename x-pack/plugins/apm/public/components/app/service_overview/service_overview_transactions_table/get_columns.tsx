@@ -23,7 +23,7 @@ import { TransactionGroupsOverview } from './';
 export type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupsOverview['transactionGroups']
 >;
-type TransactionGroupMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/metrics'>;
+type TransactionGroupMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/agg_results'>;
 
 function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
@@ -50,11 +50,11 @@ function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
 export function getColumns({
   serviceName,
   latencyAggregationType,
-  transactionsMetricsData,
+  transactionGroupsAggResults,
 }: {
   serviceName: string;
   latencyAggregationType?: string;
-  transactionsMetricsData?: TransactionGroupMetrics;
+  transactionGroupsAggResults?: TransactionGroupMetrics;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -88,8 +88,8 @@ export function getColumns({
       name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.latency
+        const timeseries = transactionGroupsAggResults
+          ? transactionGroupsAggResults[name]?.latency
           : undefined;
         return (
           <SparkPlot
@@ -110,8 +110,8 @@ export function getColumns({
       ),
       width: px(unit * 10),
       render: (_, { throughput, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.throughput
+        const timeseries = transactionGroupsAggResults
+          ? transactionGroupsAggResults[name]?.throughput
           : undefined;
         return (
           <SparkPlot
@@ -132,8 +132,8 @@ export function getColumns({
       ),
       width: px(unit * 8),
       render: (_, { errorRate, name }) => {
-        const timeseries = transactionsMetricsData
-          ? transactionsMetricsData[name]?.errorRate
+        const timeseries = transactionGroupsAggResults
+          ? transactionGroupsAggResults[name]?.errorRate
           : undefined;
         return (
           <SparkPlot
@@ -153,8 +153,11 @@ export function getColumns({
         { defaultMessage: 'Impact' }
       ),
       width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar value={impact ?? 0} size="m" />;
+      render: (_, { name }) => {
+        const impact = transactionGroupsAggResults
+          ? transactionGroupsAggResults[name]?.impact
+          : 0;
+        return <ImpactBar value={impact} size="m" />;
       },
     },
   ];

@@ -62,7 +62,7 @@ import {
   transactionGroupsOverviewRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
-  transactionGroupsMetricsRoute,
+  transactionGroupsAggResultsRoute,
 } from './transactions';
 import {
   errorGroupsLocalFiltersRoute,
@@ -173,7 +173,7 @@ const createApmApi = () => {
     .add(transactionGroupsOverviewRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
-    .add(transactionGroupsMetricsRoute)
+    .add(transactionGroupsAggResultsRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
