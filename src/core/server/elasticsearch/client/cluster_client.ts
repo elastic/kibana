@@ -60,10 +60,11 @@ export class ClusterClient implements ICustomClusterClient {
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
+    type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.asInternalUser = configureClient(config, { logger });
-    this.rootScopedClient = configureClient(config, { logger, scoped: true });
+    this.asInternalUser = configureClient(config, { logger, type });
+    this.rootScopedClient = configureClient(config, { logger, type, scoped: true });
   }
 
   asScoped(request: ScopeableRequest) {
