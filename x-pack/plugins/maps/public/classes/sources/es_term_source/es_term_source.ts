@@ -147,6 +147,7 @@ export class ESTermSource extends AbstractESAggSource {
           rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
         },
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
