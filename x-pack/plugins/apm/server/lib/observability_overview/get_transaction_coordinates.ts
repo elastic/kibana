@@ -12,6 +12,7 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export async function getTransactionCoordinates({
   setup,
@@ -51,12 +52,10 @@ export async function getTransactionCoordinates({
     },
   });
 
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count / deltaAsMinutes,
+      y: calculateThroughput({ start, end, value: bucket.doc_count }),
     })) || []
   );
 }
