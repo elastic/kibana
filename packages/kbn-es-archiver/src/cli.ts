@@ -19,7 +19,7 @@ import Fs from 'fs';
 
 import { RunWithCommands, createFlagError, KbnClient, CA_CERT_PATH } from '@kbn/dev-utils';
 import { readConfigFile } from '@kbn/test';
-import legacyElasticsearch from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 
@@ -115,10 +115,9 @@ export function runCli() {
         throw createFlagError('--dir or --config must be defined');
       }
 
-      const client = new legacyElasticsearch.Client({
-        host: esUrl,
+      const client = new Client({
+        node: esUrl,
         ssl: esCa ? { ca: esCa } : undefined,
-        log: flags.verbose ? 'trace' : [],
       });
       addCleanupTask(() => client.close());
 
