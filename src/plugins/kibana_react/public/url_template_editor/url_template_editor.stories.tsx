@@ -14,7 +14,7 @@ import { UrlTemplateEditor } from './url_template_editor';
 storiesOf('UrlTemplateEditor', module)
   .add('default', () => (
     <UrlTemplateEditor
-      initialValue={'http://elastic.co/{{event.value}}'}
+      initialValue={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
       onChange={action('onChange')}
     />
   ))

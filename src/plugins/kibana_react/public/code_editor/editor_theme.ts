@@ -81,6 +81,8 @@ export function createTheme(
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },
       { token: 'operator.swift', foreground: euiTheme.euiColorMediumShade },
       { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
+
+      { token: 'text', foreground: euiTheme.euiColorInk },
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,

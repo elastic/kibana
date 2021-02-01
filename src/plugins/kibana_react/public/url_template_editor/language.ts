@@ -48,12 +48,12 @@ export const language: monaco.languages.IMonarchLanguage = {
   tokenPostfix: '',
   brackets: [
     {
-      token: 'delimiter.double',
+      token: 'constant.delimiter.double',
       open: '{{',
       close: '}}',
     },
     {
-      token: 'delimiter.triple',
+      token: 'constant.delimiter.triple',
       open: '{{{',
       close: '}}}',
     },
@@ -107,10 +107,10 @@ export const language: monaco.languages.IMonarchLanguage = {
         /([a-zA-Z0-9\+\.\-]{1,10})(:)/,
         [
           {
-            token: 'keyword.scheme.url',
+            token: 'metatag.keyword.scheme.url',
           },
           {
-            token: 'delimiter.scheme.url',
+            token: 'delimiter',
           },
         ],
       ],
@@ -121,11 +121,10 @@ export const language: monaco.languages.IMonarchLanguage = {
         /(\/\/)([a-zA-Z0-9\.\-_]+)/,
         [
           {
-            token: 'delimiter.authority.url',
+            token: 'delimiter',
           },
           {
-            token: 'keyword.authority.url',
-            // next: '@urlPath',
+            token: 'metatag.keyword.authority.url',
           },
         ],
       ],
@@ -136,10 +135,10 @@ export const language: monaco.languages.IMonarchLanguage = {
         /([\?\&])([a-zA-Z0-9_\-]+)/,
         [
           {
-            token: 'delimiter.key.query.url',
+            token: 'delimiter',
           },
           {
-            token: 'label.key.query.url',
+            token: 'separator.label.key.query.url',
           },
         ],
       ],
@@ -150,7 +149,7 @@ export const language: monaco.languages.IMonarchLanguage = {
         /(\=)([^\?\&\{}]+)/,
         [
           {
-            token: 'delimiter.value.query.url',
+            token: 'delimiter',
           },
           {
             token: 'variable.value.query.url',
