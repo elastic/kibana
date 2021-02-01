@@ -59,7 +59,10 @@ export const duplicateRulesAction = async (
   }
 };
 
-export const exportRulesAction = (exportRuleId: string[], dispatch: React.Dispatch<RulesTableAction>) => {
+export const exportRulesAction = (
+  exportRuleId: string[],
+  dispatch: React.Dispatch<RulesTableAction>
+) => {
   dispatch({ type: 'exportRuleIds', ids: exportRuleId });
 };
 
