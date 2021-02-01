@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiCheckbox,
   EuiFormRow,
@@ -59,12 +59,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   }) => {
     const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
-    const [, setIsFirstRender] = useState<boolean>(true);
-    const [selectionState, setSelectionState] = useState<EffectedPolicySelection>({
-      isGlobal,
-      selected,
-    });
-
     const getTestId = useCallback(
       (suffix): string | undefined => {
         if (dataTestSubj) {
@@ -111,18 +105,24 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
-    >((currentOptions) => {
-      setSelectionState((prevState) => ({
-        ...prevState,
-        selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
-      }));
-    }, [])!;
+    >(
+      (currentOptions) => {
+        onChange({
+          isGlobal,
+          selected: currentOptions.filter((opt) => opt.checked).map((opt) => opt.policy),
+        });
+      },
+      [isGlobal, onChange]
+    )!;
 
     const handleGlobalSwitchChange: EuiSwitchProps['onChange'] = useCallback(
       ({ target: { checked } }) => {
-        setSelectionState((prevState) => ({ ...prevState, isGlobal: checked }));
+        onChange({
+          isGlobal: checked,
+          selected,
+        });
       },
-      []
+      [onChange, selected]
     );
 
     const listBuilderCallback: EuiSelectableProps['children'] = useCallback((list, search) => {
@@ -133,17 +133,6 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         </>
       );
     }, []);
-
-    // Anytime selection state is updated, call `onChange`, but not on first render
-    useEffect(() => {
-      setIsFirstRender((isFirstRender) => {
-        if (isFirstRender) {
-          return false;
-        }
-        onChange(selectionState);
-        return false;
-      });
-    }, [onChange, selectionState]);
 
     return (
       <>
@@ -163,7 +152,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 defaultMessage: 'Apply trusted application globally',
               }
             )}
-            checked={selectionState.isGlobal}
+            checked={isGlobal}
             onChange={handleGlobalSwitchChange}
             data-test-subj={getTestId('globalSwitch')}
           />
