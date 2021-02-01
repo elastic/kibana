@@ -30,18 +30,17 @@ export async function getServiceInstanceTransactionStats({
 }: ServiceInstanceParams) {
   const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString, bucketSize } = getBucketSize({
+    start,
+    end,
+    numBuckets,
+  });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
 
   const subAggs = {
-    count: {
-      value_count: {
-        field,
-      },
-    },
     avg_transaction_duration: {
       avg: {
         field,
@@ -51,13 +50,6 @@ export async function getServiceInstanceTransactionStats({
       filter: {
         term: {
           [EVENT_OUTCOME]: EventOutcome.failure,
-        },
-      },
-      aggs: {
-        count: {
-          value_count: {
-            field,
-          },
         },
       },
     },
@@ -113,12 +105,13 @@ export async function getServiceInstanceTransactionStats({
   });
 
   const deltaAsMinutes = (end - start) / 60 / 1000;
+  const bucketSizeInMinutes = bucketSize / 60;
 
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
         const {
-          count,
+          doc_count: count,
           avg_transaction_duration: avgTransactionDuration,
           key,
           failures,
@@ -128,17 +121,17 @@ export async function getServiceInstanceTransactionStats({
         return {
           serviceNodeName: String(key),
           errorRate: {
-            value: failures.count.value / count.value,
+            value: failures.doc_count / count,
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.failures.count.value / dateBucket.count.value,
+              y: dateBucket.failures.doc_count / dateBucket.doc_count,
             })),
           },
           throughput: {
-            value: count.value / deltaAsMinutes,
+            value: count / deltaAsMinutes,
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.count.value / deltaAsMinutes,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
             })),
           },
           latency: {
