@@ -11,6 +11,8 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import moment from 'moment';
+import { EMPTY, from } from 'rxjs';
+import { expand, mergeMap } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
   SearchSessionStatus,
@@ -95,80 +97,108 @@ async function updateSessionStatus(
   return sessionUpdated;
 }
 
+function getSavedSearchSessionsPage$(
+  { savedObjectsClient, logger }: CheckRunningSessionsDeps,
+  config: SearchSessionsConfig,
+  page: number
+) {
+  logger.debug(`Fetching saved search sessions page ${page}`);
+  return from(
+    savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
+      page,
+      perPage: config.pageSize,
+      type: SEARCH_SESSION_TYPE,
+      namespaces: ['*'],
+      filter: nodeBuilder.or([
+        nodeBuilder.and([
+          nodeBuilder.is(
+            `${SEARCH_SESSION_TYPE}.attributes.status`,
+            SearchSessionStatus.IN_PROGRESS.toString()
+          ),
+          nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'true'),
+        ]),
+        nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'false'),
+      ]),
+    })
+  );
+}
+
+function getAllSavedSearchSessions$(deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) {
+  return getSavedSearchSessionsPage$(deps, config, 1).pipe(
+    expand((result) => {
+      if (!result || !result.saved_objects || result.saved_objects.length < config.pageSize)
+        return EMPTY;
+      else {
+        return getSavedSearchSessionsPage$(deps, config, result.page + 1);
+      }
+    })
+  );
+}
+
 export async function checkRunningSessions(
-  { savedObjectsClient, client, logger }: CheckRunningSessionsDeps,
+  deps: CheckRunningSessionsDeps,
   config: SearchSessionsConfig
 ): Promise<void> {
+  const { logger, client, savedObjectsClient } = deps;
   try {
-    // TODO: take care of pagination
-    const runningSearchSessionsResponse = await savedObjectsClient.find<SearchSessionSavedObjectAttributes>(
-      {
-        perPage: config.pageSize,
-        type: SEARCH_SESSION_TYPE,
-        namespaces: ['*'],
-        filter: nodeBuilder.or([
-          nodeBuilder.and([
-            nodeBuilder.is(
-              `${SEARCH_SESSION_TYPE}.attributes.status`,
-              SearchSessionStatus.IN_PROGRESS.toString()
-            ),
-            nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'true'),
-          ]),
-          nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.persisted`, 'false'),
-        ]),
-      }
-    );
+    await getAllSavedSearchSessions$(deps, config)
+      .pipe(
+        mergeMap(async (runningSearchSessionsResponse) => {
+          if (!runningSearchSessionsResponse.total) return;
 
-    if (!runningSearchSessionsResponse.total) return;
+          logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
-    logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
+          const updatedSessions = new Array<
+            SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
+          >();
 
-    const updatedSessions = new Array<SavedObjectsFindResult<SearchSessionSavedObjectAttributes>>();
+          await Promise.all(
+            runningSearchSessionsResponse.saved_objects.map(async (session) => {
+              const updated = await updateSessionStatus(session, client, logger);
+              let deleted = false;
 
-    await Promise.all(
-      runningSearchSessionsResponse.saved_objects.map(async (session) => {
-        const updated = await updateSessionStatus(session, client, logger);
-        let deleted = false;
+              if (!session.attributes.persisted) {
+                if (isSessionStale(session, config, logger)) {
+                  deleted = true;
+                  // delete saved object to free up memory
+                  // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
+                  // Maybe we want to change state to deleted and cleanup later?
+                  logger.debug(`Deleting stale session | ${session.id}`);
+                  await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id);
 
-        if (!session.attributes.persisted) {
-          if (isSessionStale(session, config, logger)) {
-            deleted = true;
-            // delete saved object to free up memory
-            // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
-            // Maybe we want to change state to deleted and cleanup later?
-            logger.debug(`Deleting stale session | ${session.id}`);
-            await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id);
-
-            // Send a delete request for each async search to ES
-            Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
-              const searchInfo = session.attributes.idMapping[searchKey];
-              if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
-                try {
-                  await client.asyncSearch.delete({ id: searchInfo.id });
-                } catch (e) {
-                  logger.debug(
-                    `Error ignored while deleting async_search ${searchInfo.id}: ${e.message}`
-                  );
+                  // Send a delete request for each async search to ES
+                  Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
+                    const searchInfo = session.attributes.idMapping[searchKey];
+                    if (searchInfo.strategy === ENHANCED_ES_SEARCH_STRATEGY) {
+                      try {
+                        await client.asyncSearch.delete({ id: searchInfo.id });
+                      } catch (e) {
+                        logger.debug(
+                          `Error ignored while deleting async_search ${searchInfo.id}: ${e.message}`
+                        );
+                      }
+                    }
+                  });
                 }
               }
-            });
+
+              if (updated && !deleted) {
+                updatedSessions.push(session);
+              }
+            })
+          );
+
+          // Do a bulk update
+          if (updatedSessions.length) {
+            // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
+            const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
+              updatedSessions
+            );
+            logger.debug(`Updated ${updatedResponse.saved_objects.length} search sessions`);
           }
-        }
-
-        if (updated && !deleted) {
-          updatedSessions.push(session);
-        }
-      })
-    );
-
-    // Do a bulk update
-    if (updatedSessions.length) {
-      // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
-      const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
-        updatedSessions
-      );
-      logger.debug(`Updated ${updatedResponse.saved_objects.length} search sessions`);
-    }
+        })
+      )
+      .toPromise();
   } catch (err) {
     logger.error(err);
   }

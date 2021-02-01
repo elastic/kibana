@@ -21,7 +21,7 @@ describe('getSearchStatus', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   const config: SearchSessionsConfig = {
     enabled: true,
-    pageSize: 10000,
+    pageSize: 5,
     notTouchedTimeout: moment.duration(1, 'm'),
     completedTimeout: moment.duration(5, 'm'),
     maxUpdateRetries: 3,
@@ -33,6 +33,14 @@ describe('getSearchStatus', () => {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
+  };
+
+  const emptySO = {
+    persisted: false,
+    status: SearchSessionStatus.IN_PROGRESS,
+    created: moment().subtract(moment.duration(3, 'm')),
+    touched: moment().subtract(moment.duration(10, 's')),
+    idMapping: {},
   };
 
   beforeEach(() => {
@@ -66,6 +74,98 @@ describe('getSearchStatus', () => {
 
     expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
     expect(savedObjectsClient.delete).not.toBeCalled();
+  });
+
+  describe('pagination', () => {
+    test('fetches one page if not objects exist', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    });
+
+    test('fetches one page if less than page size object are returned', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [emptySO, emptySO],
+        total: 5,
+      } as any);
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    });
+
+    test('fetches two pages if exactly page size objects are returned', async () => {
+      let i = 0;
+      savedObjectsClient.find.mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolve({
+            saved_objects: i++ === 0 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [],
+            total: 5,
+            page: i,
+          } as any);
+        });
+      });
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      // validate that page number increases
+      const { page: page1 } = savedObjectsClient.find.mock.calls[0][0];
+      const { page: page2 } = savedObjectsClient.find.mock.calls[1][0];
+      expect(page1).toBe(1);
+      expect(page2).toBe(2);
+    });
+
+    test('fetches two pages if page size +1 objects are returned', async () => {
+      let i = 0;
+      savedObjectsClient.find.mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolve({
+            saved_objects: i++ === 0 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [emptySO],
+            total: 5,
+            page: i,
+          } as any);
+        });
+      });
+
+      await checkRunningSessions(
+        {
+          savedObjectsClient,
+          client: mockClient,
+          logger: mockLogger,
+        },
+        config
+      );
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('delete', () => {
