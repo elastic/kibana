@@ -97,126 +97,130 @@ describe('ES search strategy', () => {
   });
 
   describe('search', () => {
-    it('makes a POST request with params when no ID is provided', async () => {
-      mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+    describe('no sessionId', () => {
+      it('makes a POST request with params when no ID provided', async () => {
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-      const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
 
-      await esSearch.search({ params }, {}, mockDeps).toPromise();
+        await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-      expect(mockSubmitCaller).toBeCalled();
-      const request = mockSubmitCaller.mock.calls[0][0];
-      expect(request.index).toEqual(params.index);
-      expect(request.body).toEqual(params.body);
-      expect(request).toHaveProperty('keep_alive', '1m');
+        expect(mockSubmitCaller).toBeCalled();
+        const request = mockSubmitCaller.mock.calls[0][0];
+        expect(request.index).toEqual(params.index);
+        expect(request.body).toEqual(params.body);
+        expect(request).toHaveProperty('keep_alive', '1m');
+      });
+
+      it('makes a GET request to async search with ID', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
+
+        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+
+        expect(mockGetCaller).toBeCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).toHaveProperty('keep_alive', '1m');
+      });
+
+      it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = { index: 'foo-*', body: {} };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
+
+        await esSearch.search({ params }, {}, mockDeps).toPromise();
+
+        expect(mockSubmitCaller).toBeCalled();
+        const request = mockSubmitCaller.mock.calls[0][0];
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).toHaveProperty('keep_alive');
+      });
+
+      it('calls the rollup API if the index is a rollup type', async () => {
+        mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+
+        const params = { index: 'foo-程', body: {} };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
+
+        await esSearch
+          .search(
+            {
+              indexType: 'rollup',
+              params,
+            },
+            {},
+            mockDeps
+          )
+          .toPromise();
+
+        expect(mockApiCaller).toBeCalled();
+        const { method, path } = mockApiCaller.mock.calls[0][0];
+        expect(method).toBe('POST');
+        expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+      });
     });
 
-    it('makes a POST request with params when sessionId is provided, with long keepalive', async () => {
-      mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+    describe('with sessionId', () => {
+      it('makes a POST request with params (long keepalive)', async () => {
+        mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-      const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
 
-      await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
+        await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
 
-      expect(mockSubmitCaller).toBeCalled();
-      const request = mockSubmitCaller.mock.calls[0][0];
-      expect(request.index).toEqual(params.index);
-      expect(request.body).toEqual(params.body);
+        expect(mockSubmitCaller).toBeCalled();
+        const request = mockSubmitCaller.mock.calls[0][0];
+        expect(request.index).toEqual(params.index);
+        expect(request.body).toEqual(params.body);
 
-      expect(request).toHaveProperty('keep_alive', '60000ms');
-    });
+        expect(request).toHaveProperty('keep_alive', '60000ms');
+      });
 
-    it('makes a GET request to async search with ID when ID is provided', async () => {
-      mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+      it('makes a GET request to async search without keepalive', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-      const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockConfig$,
+          mockLegacyConfig$,
+          mockLogger
+        );
 
-      await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+        await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
 
-      expect(mockGetCaller).toBeCalled();
-      const request = mockGetCaller.mock.calls[0][0];
-      expect(request.id).toEqual('foo');
-      expect(request).toHaveProperty('wait_for_completion_timeout');
-      expect(request).toHaveProperty('keep_alive', '1m');
-    });
-
-    it('makes a GET request to async search without keepalive when session ID is provided', async () => {
-      mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-      const params = { index: 'logstash-*', body: { query: {} } };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
-
-      await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
-
-      expect(mockGetCaller).toBeCalled();
-      const request = mockGetCaller.mock.calls[0][0];
-      expect(request.id).toEqual('foo');
-      expect(request).toHaveProperty('wait_for_completion_timeout');
-      expect(request).not.toHaveProperty('keep_alive');
-    });
-
-    it('calls the rollup API if the index is a rollup type', async () => {
-      mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
-
-      const params = { index: 'foo-程', body: {} };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
-
-      await esSearch
-        .search(
-          {
-            indexType: 'rollup',
-            params,
-          },
-          {},
-          mockDeps
-        )
-        .toPromise();
-
-      expect(mockApiCaller).toBeCalled();
-      const { method, path } = mockApiCaller.mock.calls[0][0];
-      expect(method).toBe('POST');
-      expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
-    });
-
-    it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
-      mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-      const params = { index: 'foo-*', body: {} };
-      const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
-        mockLegacyConfig$,
-        mockLogger
-      );
-
-      await esSearch.search({ params }, {}, mockDeps).toPromise();
-
-      expect(mockSubmitCaller).toBeCalled();
-      const request = mockSubmitCaller.mock.calls[0][0];
-      expect(request).toHaveProperty('wait_for_completion_timeout');
-      expect(request).toHaveProperty('keep_alive');
+        expect(mockGetCaller).toBeCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).not.toHaveProperty('keep_alive');
+      });
     });
 
     it('throws normalized error if ResponseError is thrown', async () => {
