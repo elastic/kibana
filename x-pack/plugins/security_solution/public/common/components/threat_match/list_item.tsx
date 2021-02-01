@@ -22,7 +22,6 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 
 interface ListItemProps {
   listItem: ThreatMapEntries;
-  listId: string;
   listItemIndex: number;
   indexPattern: IndexPattern;
   threatIndexPatterns: IndexPattern;
@@ -35,7 +34,6 @@ interface ListItemProps {
 export const ListItemComponent = React.memo<ListItemProps>(
   ({
     listItem,
-    listId,
     listItemIndex,
     indexPattern,
     threatIndexPatterns,
@@ -88,7 +86,7 @@ export const ListItemComponent = React.memo<ListItemProps>(
           <MyOverflowContainer grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => (
-                <EuiFlexItem key={`${listId}-${index}`} grow={1}>
+                <EuiFlexItem key={item.id} grow={1}>
                   <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
                     <MyOverflowContainer grow={1}>
                       <EntryItem
