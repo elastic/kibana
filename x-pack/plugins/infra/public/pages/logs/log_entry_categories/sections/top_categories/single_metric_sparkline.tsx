@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { TimeRange } from '../../../../../../common/time';
 
 interface TimeSeriesPoint {
   timestamp: number;

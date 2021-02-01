@@ -5,7 +5,7 @@
  */
 
 // @ts-expect-error Untyped Elastic library
-import { evaluate } from 'tinymath';
+import { evaluate } from '@kbn/tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
