@@ -102,7 +102,10 @@ export function useFetcher<TReturn>(
 
       try {
         const data = await promise;
-
+        // when http fetches are aborted, the promise will be rejected
+        // and this code is never reached. For async operations that are
+        // not cancellable, we need to check whether the signal was
+        // aborted before updating the result.
         if (!signal.aborted) {
           setResult({
             data,

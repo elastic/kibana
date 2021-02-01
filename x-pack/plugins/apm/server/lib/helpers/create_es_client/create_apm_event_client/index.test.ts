@@ -65,10 +65,12 @@ describe('createApmEventClient', () => {
 
     await new Promise((resolve) => {
       setTimeout(() => {
+        incomingRequest.on('abort', () => {
+          setTimeout(() => {
+            resolve(undefined);
+          }, 0);
+        });
         incomingRequest.abort();
-        setTimeout(() => {
-          resolve(undefined);
-        }, 0);
       }, 50);
     });
 
