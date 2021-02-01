@@ -5,7 +5,7 @@
  */
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
-import { EuiTheme } from '../../../../../observability/public';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import {
   SERVICE_NAME,

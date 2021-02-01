@@ -6,4 +6,11 @@
  * Public License, v 1.
  */
 
-export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export {
+  SavedObjectWithMetadata,
+  SavedObjectMetadata,
+  SavedObjectRelation,
+  SavedObjectRelationKind,
+  SavedObjectInvalidRelation,
+  SavedObjectGetRelationshipsResponse,
+} from './types';

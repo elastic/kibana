@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { FC, useCallback } from 'react';
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -39,9 +39,15 @@ export async function mountApp(
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
     attributeService: () => Promise<LensAttributeService>;
+    getPresentationUtilContext: () => Promise<FC>;
   }
 ) {
-  const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
+  const {
+    createEditorFrame,
+    getByValueFeatureFlag,
+    attributeService,
+    getPresentationUtilContext,
+  } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
@@ -196,21 +202,26 @@ export async function mountApp(
   });
 
   params.element.classList.add('lnsAppWrapper');
+
+  const PresentationUtilContext = await getPresentationUtilContext();
+
   render(
     <I18nProvider>
       <KibanaContextProvider services={lensServices}>
-        <HashRouter>
-          <Switch>
-            <Route exact path="/edit/:id" component={EditorRoute} />
-            <Route
-              exact
-              path={`/${LENS_EDIT_BY_VALUE}`}
-              render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-            />
-            <Route exact path="/" component={EditorRoute} />
-            <Route path="/" component={NotFound} />
-          </Switch>
-        </HashRouter>
+        <PresentationUtilContext>
+          <HashRouter>
+            <Switch>
+              <Route exact path="/edit/:id" component={EditorRoute} />
+              <Route
+                exact
+                path={`/${LENS_EDIT_BY_VALUE}`}
+                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+              />
+              <Route exact path="/" component={EditorRoute} />
+              <Route path="/" component={NotFound} />
+            </Switch>
+          </HashRouter>
+        </PresentationUtilContext>
       </KibanaContextProvider>
     </I18nProvider>,
     params.element
