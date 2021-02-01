@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
-import { SeveritySelector } from './severity_selector';
+import { SeverityControl } from './severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import type { AnomalyResultType } from '../../common/types/anomalies';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
+import { ANOMALY_THRESHOLD } from '../../common';
 
 export interface MlAnomalyThresholdAlertParams {
   jobSelection: {
@@ -52,6 +53,10 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
     []
   );
 
+  useEffect(function setDefaults() {
+    onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
+  }, []);
+
   return (
     <>
       <JobSelectorControl
@@ -63,10 +68,11 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
         value={alertParams.resultType}
         onChange={useCallback(onAlertParamChange('resultType'), [])}
       />
-      <SeveritySelector
+      <SeverityControl
         value={alertParams.severity}
         onChange={useCallback(onAlertParamChange('severity'), [])}
       />
+      <EuiSpacer size="m" />
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
 
       <EuiSpacer size="m" />

@@ -12,7 +12,7 @@ export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {
-    preview(params: MlAnomalyThresholdAlertParams) {
+    preview(params: { alertParams: MlAnomalyThresholdAlertParams; timeRange: string }) {
       const body = JSON.stringify(params);
       return httpService.http<any>({
         path: `${ML_BASE_PATH}/alerting/preview`,

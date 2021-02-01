@@ -7,8 +7,9 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
-import { SEVERITY_OPTIONS } from '../application/components/controls/select_severity/select_severity';
-import { ANOMALY_THRESHOLD } from '../../common';
+import { SEVERITY_OPTIONS } from '../../application/components/controls/select_severity/select_severity';
+import { ANOMALY_THRESHOLD } from '../../../common';
+import './styles.scss';
 
 export interface SeveritySelectorProps {
   value: number | undefined;
@@ -17,7 +18,7 @@ export interface SeveritySelectorProps {
 
 const MAX_ANOMALY_SCORE = 100;
 
-export const SeveritySelector: FC<SeveritySelectorProps> = React.memo(({ value, onChange }) => {
+export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, onChange }) => {
   const levels: EuiRangeProps['levels'] = [
     {
       min: ANOMALY_THRESHOLD.LOW,
@@ -58,6 +59,7 @@ export const SeveritySelector: FC<SeveritySelectorProps> = React.memo(({ value, 
     >
       <>
         <EuiRange
+          className={'mlSeverityControl'}
           fullWidth
           min={ANOMALY_THRESHOLD.LOW}
           max={MAX_ANOMALY_SCORE}

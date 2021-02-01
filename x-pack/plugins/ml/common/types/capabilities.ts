@@ -107,7 +107,7 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
+        all: Object.values(ML_ALERT_TYPES),
         read: [],
       },
     },
@@ -123,7 +123,7 @@ export function getPluginPrivileges() {
       },
       alerting: {
         all: [],
-        read: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
+        read: Object.values(ML_ALERT_TYPES),
       },
     },
     apmUser: {

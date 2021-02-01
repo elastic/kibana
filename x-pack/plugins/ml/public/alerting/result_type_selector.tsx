@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
@@ -69,7 +69,9 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
             <EuiFlexItem key={value}>
               <EuiCard
                 title={title}
-                description={description}
+                titleSize={'xs'}
+                paddingSize={'s'}
+                description={<EuiText size={'xs'}>{description}</EuiText>}
                 selectable={{
                   onClick: () => {
                     if (selectedResultType === value) {
