@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CasePostRequest, CasesConfigureRequest, ConnectorTypes } from '../../../../common/api';
+import {
+  ActionTypeConnector,
+  CasePostRequest,
+  CasesConfigureRequest,
+  ConnectorTypes,
+} from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
 
@@ -100,6 +105,49 @@ export const getActions = (): FindActionResult[] => [
     },
     isPreconfigured: false,
     referencedByCount: 0,
+  },
+];
+
+export const getActionTypes = (): ActionTypeConnector[] => [
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.index',
+    name: 'Index',
+    minimumLicenseRequired: 'basic',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.resilient',
+    name: 'IBM Resilient',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
   },
 ];
 

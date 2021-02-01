@@ -7,6 +7,7 @@
 import { ElasticUser } from '../types';
 import {
   ActionType,
+  ActionTypeConnector,
   CasesConfigurationMaps,
   CaseField,
   ClosureType,
@@ -18,6 +19,7 @@ import {
 
 export {
   ActionType,
+  ActionTypeConnector,
   CasesConfigurationMaps,
   CaseField,
   ClosureType,
