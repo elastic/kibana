@@ -5,7 +5,7 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -13,13 +13,13 @@ import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { UseField, RuntimeType } from '../../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from '../constants';
 
-export const TypeField = () => {
-  const onTypeChange = useCallback((newType: Array<EuiComboBoxOptionOption<RuntimeType>>) => {
-    // setPainlessContext(mapReturnTypeToPainlessContext(newType[0]!.value!));
-  }, []);
+interface Props {
+  isDisabled?: boolean;
+}
 
+export const TypeField = ({ isDisabled = false }: Props) => {
   return (
-    <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>> path="type" onChange={onTypeChange}>
+    <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>> path="type">
       {({ label, value, setValue }) => {
         if (value === undefined) {
           return null;
@@ -45,6 +45,7 @@ export const TypeField = () => {
                   setValue(newValue);
                 }}
                 isClearable={false}
+                isDisabled={isDisabled}
                 data-test-subj="typeField"
                 aria-label={i18n.translate(
                   'indexPatternFieldEditor.editor.form.typeSelectAriaLabel',
