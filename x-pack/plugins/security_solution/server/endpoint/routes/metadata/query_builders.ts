@@ -143,8 +143,14 @@ export function getESQueryHostMetadataByID(
       query: {
         bool: {
           filter: [
-            { term: { 'agent.id': agentID } },
-            { term: { 'HostDetails.agent.id': agentID } },
+            {
+              bool: {
+                should: [
+                  { term: { 'agent.id': agentID } },
+                  { term: { 'HostDetails.agent.id': agentID } },
+                ],
+              },
+            },
           ],
         },
       },

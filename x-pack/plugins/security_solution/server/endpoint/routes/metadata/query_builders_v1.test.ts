@@ -168,7 +168,7 @@ describe('query builder v1', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV1());
 
-      expect(query.body.query.bool.filter).toContainEqual({
+      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
         term: { 'agent.id': mockID },
       });
     });

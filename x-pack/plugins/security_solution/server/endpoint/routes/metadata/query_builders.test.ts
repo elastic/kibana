@@ -193,7 +193,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
-      expect(query.body.query.bool.filter).toContainEqual({
+      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
         term: { 'agent.id': mockID },
       });
     });
@@ -202,7 +202,7 @@ describe('query builder', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
       const query = getESQueryHostMetadataByID(mockID, metadataQueryStrategyV2());
 
-      expect(query.body.query.bool.filter).toContainEqual({
+      expect(query.body.query.bool.filter[0].bool.should).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
     });
