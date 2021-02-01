@@ -492,10 +492,10 @@ export class SearchSource {
     let filteredDocvalueFields = docvalueFields;
     if (index) {
       const sourceFilters = index.getSourceFiltering();
-      if (!body.hasOwnProperty('_source')) {
+      if (!body.hasOwnProperty('_source') && !fieldListProvided) {
         body._source = sourceFilters;
       }
-      if (body._source.excludes) {
+      if (body._source && body._source.excludes) {
         const filter = fieldWildcardFilter(
           body._source.excludes,
           getConfig(UI_SETTINGS.META_FIELDS)
@@ -537,7 +537,7 @@ export class SearchSource {
         ...Object.keys(body.runtime_mappings),
       ]).filter(Boolean);
 
-      if (body._source.excludes) {
+      if (body._source && body._source.excludes) {
         // TODO: optimize complexity
         remainingFields = remainingFields.filter((remainingField) => {
           return !body._source.excludes.includes(remainingField);

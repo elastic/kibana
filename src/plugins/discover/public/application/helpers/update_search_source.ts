@@ -11,6 +11,7 @@ import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common
 import { IndexPattern, ISearchSource } from '../../../../data/common/';
 import { SortOrder } from '../../saved_searches/types';
 import { DiscoverServices } from '../../build_services';
+import { getFieldListFromIndexPattern } from './get_field_list';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
@@ -46,7 +47,8 @@ export function updateSearchSource(
     .setField('filter', data.query.filterManager.getFilters());
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', ['*']);
+    const fields = getFieldListFromIndexPattern(indexPattern);
+    searchSource.setField('fields', fields);
   } else {
     searchSource.removeField('fields');
     const fieldNames = indexPattern.fields.map((field) => field.name);
