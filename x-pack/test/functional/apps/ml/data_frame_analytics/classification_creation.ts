@@ -40,6 +40,17 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '60mb',
         createIndexPattern: true,
         expected: {
+          scatterplotMatrixColorStats: [
+            // background
+            { key: '#000000', value: 94 },
+            // tick/grid/axis
+            { key: '#DDDDDD', value: 1 },
+            { key: '#D3DAE6', value: 1 },
+            { key: '#F5F7FA', value: 1 },
+            // scatterplot circles
+            { key: '#6A717D', value: 1 },
+            { key: '#54B39A', value: 1 },
+          ],
           row: {
             type: 'classification',
             status: 'stopped',
@@ -88,6 +99,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+            testData.expected.scatterplotMatrixColorStats
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -207,6 +224,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+            'mlDFExpandableSection-splom',
+            testData.expected.scatterplotMatrixColorStats
+          );
         });
 
         it('displays the analytics job in the map view', async () => {
