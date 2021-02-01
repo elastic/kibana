@@ -149,7 +149,8 @@ export const EditIndexPattern = withRouter(
     chrome.docTitle.change(indexPattern.title);
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-
+    const kibana = useKibana();
+    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
@@ -182,11 +183,7 @@ export const EditIndexPattern = withRouter(
                 defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
-              <EuiLink
-                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
-                target="_blank"
-                external
-              >
+              <EuiLink href={docsUrl} target="_blank" external>
                 {mappingAPILink}
               </EuiLink>
             </p>
