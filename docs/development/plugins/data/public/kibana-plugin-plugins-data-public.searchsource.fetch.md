@@ -4,8 +4,12 @@
 
 ## SearchSource.fetch() method
 
-Fetch this source and reject the returned Promise on error
+> Warning: This API is now obsolete.
+> 
+> Use fetch$ instead
+> 
 
+Fetch this source and reject the returned Promise on error
 
 <b>Signature:</b>
 

@@ -12,6 +12,7 @@ import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { shimHitsTotal } from './shim_hits_total';
+import { getKbnServerError } from '../../../../kibana_utils/server';
 import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
 
 /** @internal */
@@ -46,6 +47,9 @@ interface CallMsearchDependencies {
  * @internal
  */
 export function getCallMsearch(dependencies: CallMsearchDependencies) {
+  /**
+   * @throws KbnServerError
+   */
   return async (params: {
     body: MsearchRequestBody;
     signal?: AbortSignal;
@@ -59,28 +63,28 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     // trackTotalHits is not supported by msearch
     const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(uiSettings);
 
-    const body = convertRequestBody(params.body, timeout);
-
-    const response = await shimAbortSignal(
-      esClient.asCurrentUser.msearch(
+    try {
+      const promise = esClient.asCurrentUser.msearch(
         {
           // @ts-expect-error client types don't support plain string bodies
-          body,
+          body: convertRequestBody(params.body, timeout),
         },
         {
           querystring: defaultParams,
         }
-      ),
-      params.signal
-    );
+      );
+      const response = await shimAbortSignal(promise, params.signal);
 
-    return {
-      body: {
-        ...response,
+      return {
         body: {
-          responses: response.body.responses?.map((r) => shimHitsTotal(r)),
+          ...response,
+          body: {
+            responses: response.body.responses?.map((r) => shimHitsTotal(r)),
+          },
         },
-      },
-    };
+      };
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
   };
 }
