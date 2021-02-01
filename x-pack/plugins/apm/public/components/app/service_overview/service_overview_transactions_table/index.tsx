@@ -100,9 +100,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     sort.direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const transactionNames = currentPageTransactionGroups
-    .map(({ name }) => name)
-    .join();
+  const transactionNames = JSON.stringify(
+    currentPageTransactionGroups.map(({ name }) => name)
+  );
 
   const {
     data: transactionGroupsAggResults,

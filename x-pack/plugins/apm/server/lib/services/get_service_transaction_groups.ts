@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
@@ -66,6 +67,7 @@ export async function getServiceTransactionGroups({
         },
       },
       aggs: {
+        total_duration: { sum: { field: TRANSACTION_DURATION } },
         transaction_groups: {
           terms: {
             field: TRANSACTION_NAME,
@@ -73,6 +75,9 @@ export async function getServiceTransactionGroups({
             order: { _count: 'desc' },
           },
           aggs: {
+            transaction_group_total_duration: {
+              sum: { field: TRANSACTION_DURATION },
+            },
             ...getLatencyAggregation(latencyAggregationType, field),
             transaction_count: { value_count: { field } },
             [EVENT_OUTCOME]: {
@@ -85,6 +90,8 @@ export async function getServiceTransactionGroups({
     },
   });
 
+  const totalDuration = response.aggregations?.total_duration.value;
+
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
       const errorRate =
@@ -92,6 +99,9 @@ export async function getServiceTransactionGroups({
           ? (bucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
             bucket.transaction_count.value
           : null;
+
+      const transactionGroupTotalDuration =
+        bucket.transaction_group_total_duration.value || 0;
 
       return {
         name: bucket.key as string,
@@ -101,29 +111,14 @@ export async function getServiceTransactionGroups({
         }),
         throughput: bucket.transaction_count.value / deltaAsMinutes,
         errorRate,
+        impact: totalDuration
+          ? (transactionGroupTotalDuration * 100) / totalDuration
+          : 0,
       };
     }) ?? [];
 
-  const totalDurationValues = transactionGroups.map(
-    (group) => (group.latency ?? 0) * group.throughput
-  );
-
-  const minTotalDuration = Math.min(...totalDurationValues);
-  const maxTotalDuration = Math.max(...totalDurationValues);
-
-  const transactionGroupsWithImpact = transactionGroups.map((group) => ({
-    ...group,
-    impact:
-      (((group.latency ?? 0) * group.throughput - minTotalDuration) /
-        (maxTotalDuration - minTotalDuration)) *
-      100,
-  }));
-
   // By default sorts transactions by impact
-  const sortedTransactionGroups = sortBy(
-    transactionGroupsWithImpact,
-    'impact'
-  ).reverse();
+  const sortedTransactionGroups = sortBy(transactionGroups, 'impact').reverse();
 
   return {
     requestId: uuid(),

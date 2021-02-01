@@ -140,7 +140,7 @@ export const transactionGroupsAggResultsRoute = createRoute({
     return getServiceTransactionGroupsAggResults({
       setup,
       serviceName,
-      transactionNames: transactionNames.split(','),
+      transactionNames: JSON.parse(transactionNames),
       searchAggregatedTransactions,
       transactionType,
       numBuckets,

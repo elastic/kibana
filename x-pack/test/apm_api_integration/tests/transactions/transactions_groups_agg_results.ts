@@ -31,7 +31,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               latencyAggregationType: 'avg',
               transactionType: 'request',
-              transactionNames: 'DispatcherServlet#doGet,APIRestController#customers',
+              transactionNames: JSON.stringify([
+                'DispatcherServlet#doGet',
+                'APIRestController#customers',
+              ]),
             },
           })
         );
@@ -57,7 +60,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               numBuckets: 20,
               transactionType: 'request',
               latencyAggregationType: 'avg',
-              transactionNames: 'DispatcherServlet#doGet,APIRestController#customers',
+              transactionNames: JSON.stringify([
+                'DispatcherServlet#doGet',
+                'APIRestController#customers',
+              ]),
             },
           })
         );
@@ -74,8 +80,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(Object.values(response.body).map((group: any) => group.impact))
           .toMatchInline(`
           Array [
-            100,
-            1.43059146953109,
+            93.9295870910491,
+            1.35334507158962,
           ]
         `);
 

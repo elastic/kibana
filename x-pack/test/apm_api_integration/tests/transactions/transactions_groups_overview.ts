@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { pick } from 'lodash';
+import { pick, sum } from 'lodash';
 import url from 'url';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
@@ -81,23 +81,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        expectSnapshot(response.body.transactionGroups.map((group: any) => group.impact))
-          .toMatchInline(`
+        const impacts = response.body.transactionGroups.map((group: any) => group.impact);
+        expectSnapshot(impacts).toMatchInline(`
           Array [
-            100,
-            1.43059146953109,
-            0.953769516915408,
-            0.905498741191481,
-            0.894989230293471,
-            0.734894148230161,
-            0.496596820588832,
-            0.465199881087606,
-            0.269203783423923,
-            0.142856373806016,
-            0.0557715877137418,
-            0,
+            93.9295870910491,
+            1.35334507158962,
+            0.905514602241759,
+            0.860178761411346,
+            0.850308244392878,
+            0.699947181217412,
+            0.476138685202191,
+            0.446650726277923,
+            0.262571482598846,
+            0.143906183235671,
+            0.062116281544223,
+            0.00973568923904662,
           ]
         `);
+
+        expect(sum(impacts)).to.eql(100);
 
         const firstItem = response.body.transactionGroups[0];
 
@@ -105,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .toMatchInline(`
           Object {
             "errorRate": 0.0625,
-            "impact": 100,
+            "impact": 93.9295870910491,
             "latency": 1044995.1875,
             "name": "DispatcherServlet#doGet",
             "throughput": 0.533333333333333,
