@@ -28,12 +28,26 @@ export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
   meta: SavedObjectMetadata;
 };
 
+export type SavedObjectRelationKind = 'child' | 'parent';
+
 /**
  * Represents a relation between two {@link SavedObject | saved object}
  */
 export interface SavedObjectRelation {
   id: string;
   type: string;
-  relationship: 'child' | 'parent';
+  relationship: SavedObjectRelationKind;
   meta: SavedObjectMetadata;
+}
+
+export interface SavedObjectInvalidRelation {
+  id: string;
+  type: string;
+  relationship: SavedObjectRelationKind;
+  error: string;
+}
+
+export interface SavedObjectGetRelationshipsResponse {
+  relations: SavedObjectRelation[];
+  invalidRelations: SavedObjectInvalidRelation[];
 }
