@@ -158,7 +158,8 @@ export async function getServiceTransactionGroupsAggResults({
         x: timeseriesBucket.key,
         y:
           timeseriesBucket.doc_count > 0
-            ? timeseriesBucket[EVENT_OUTCOME].doc_count / bucket.doc_count
+            ? timeseriesBucket[EVENT_OUTCOME].doc_count /
+              timeseriesBucket.doc_count
             : null,
       })
     );
