@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
@@ -67,7 +67,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
     <EuiPopover
       anchorPosition="downRight"
       button={
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="logEntryActionsMenuButton"
           disabled={!hasMenuItems}
           iconSide="right"
@@ -76,9 +76,9 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.infra.logEntryActionsMenu.buttonLabel"
-            defaultMessage="Actions"
+            defaultMessage="Investigate"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       closePopover={hide}
       id="logEntryActionsMenu"

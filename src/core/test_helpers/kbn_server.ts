@@ -40,7 +40,7 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  migrations: { skip: true },
+  migrations: { skip: false },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {

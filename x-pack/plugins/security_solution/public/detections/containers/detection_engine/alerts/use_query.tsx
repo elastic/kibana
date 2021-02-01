@@ -46,7 +46,7 @@ export const useQueryAlerts = <Hit, Aggs>(
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         setLoading(true);
         const alertResponse = await fetchQueryAlerts<Hit, Aggs>({
@@ -77,7 +77,7 @@ export const useQueryAlerts = <Hit, Aggs>(
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     return () => {

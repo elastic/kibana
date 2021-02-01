@@ -26,7 +26,7 @@ export const useTags = (): ReturnTags => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData() {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const fetchTagsResult = await fetchTags({
@@ -44,7 +44,7 @@ export const useTags = (): ReturnTags => {
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     reFetchTags.current = fetchData;
@@ -53,8 +53,7 @@ export const useTags = (): ReturnTags => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatchToaster]);
 
   return [loading, tags, reFetchTags.current];
 };

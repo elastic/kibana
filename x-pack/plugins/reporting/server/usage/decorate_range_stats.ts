@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
+import { CSV_JOB_TYPE_DEPRECATED, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
 import { AvailableTotal, ExportType, FeatureAvailabilityMap, RangeStats } from './types';
 
 function getForFeature(
@@ -54,7 +54,7 @@ export const decorateRangeStats = (
 
   // combine the known types with any unknown type found in reporting data
   const keysBasic = uniq([
-    CSV_JOB_TYPE,
+    CSV_JOB_TYPE_DEPRECATED,
     PNG_JOB_TYPE,
     ...Object.keys(rangeStatsBasic),
   ]) as ExportType[];
