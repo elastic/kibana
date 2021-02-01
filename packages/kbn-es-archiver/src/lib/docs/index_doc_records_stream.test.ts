@@ -6,11 +6,48 @@
  * Public License, v 1.
  */
 
-import { createListStream, createPromiseFromStreams, ToolingLog } from '@kbn/dev-utils';
+import {
+  createListStream,
+  createPromiseFromStreams,
+  ToolingLog,
+  createAbsolutePathSerializer,
+  createRecursiveSerializer,
+} from '@kbn/dev-utils';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
 import { createStats } from '../stats';
+
+const AT_LINE_RE = /^\s+at /m;
+
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (v) => typeof v === 'string' && AT_LINE_RE.test(v),
+    (v: string) => {
+      const lines = v.split('\n');
+      const withoutStack: string[] = [];
+
+      // move source lines to withoutStack, filtering out stacktrace lines
+      while (lines.length) {
+        const line = lines.shift()!;
+
+        if (!AT_LINE_RE.test(line)) {
+          withoutStack.push(line);
+        } else {
+          // push in representation of stack trace indented to match "at"
+          withoutStack.push(`${' '.repeat(line.indexOf('at'))}<stack trace>`);
+
+          // shift off all subsequent `at ...` lines
+          while (lines.length && AT_LINE_RE.test(lines[0])) {
+            lines.shift();
+          }
+        }
+      }
+
+      return withoutStack.join('\n');
+    }
+  )
+);
 
 const log = new ToolingLog();
 
@@ -233,21 +270,15 @@ describe('bulk helper onDrop param', () => {
                 Error: Bulk doc failure [operation=index]:
                   doc: {\\"hello\\":\\"world\\"}
                   error: {\\"reason\\":\\"1 conflicts with something\\"}
-                    at Array.map (<anonymous>)
-                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
-                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)
+                    <stack trace>
                 Error: Bulk doc failure [operation=index]:
                   doc: {\\"hello\\":\\"world\\"}
                   error: {\\"reason\\":\\"2 conflicts with something\\"}
-                    at Array.map (<anonymous>)
-                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
-                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)
+                    <stack trace>
                 Error: Bulk doc failure [operation=index]:
                   doc: {\\"hello\\":\\"world\\"}
                   error: {\\"reason\\":\\"3 conflicts with something\\"}
-                    at Array.map (<anonymous>)
-                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
-                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)"
+                    <stack trace>"
           `);
   });
 });
