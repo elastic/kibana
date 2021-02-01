@@ -86,7 +86,7 @@ export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListItem
   },
 });
 
-export const getThreatListItemMock = (): ThreatListItem => ({
+export const getThreatListItemMock = (overrides: Partial<ThreatListItem> = {}): ThreatListItem => ({
   '@timestamp': '2020-09-09T21:59:13Z',
   host: {
     name: 'host-1',
@@ -100,6 +100,7 @@ export const getThreatListItemMock = (): ThreatListItem => ({
     ip: '127.0.0.1',
     port: 1,
   },
+  ...overrides,
 });
 
 export const getFilterThreatMapping = (): ThreatMapping => [

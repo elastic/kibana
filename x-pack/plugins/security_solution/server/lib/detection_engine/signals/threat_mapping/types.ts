@@ -185,6 +185,18 @@ export interface ThreatListItem {
   [key: string]: unknown;
 }
 
+export interface ThreatIndicator {
+  [key: string]: unknown;
+}
+
 export interface SortWithTieBreaker {
   [key: string]: string;
 }
+
+export interface ThreatMatchNamedQuery {
+  id: string;
+  field: string;
+  value: string;
+}
+
+export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
