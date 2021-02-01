@@ -7,7 +7,7 @@
  */
 
 import './discover.scss';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -103,13 +103,12 @@ export function Discover({
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
-  const getColumns = () => {
+  const columns = useMemo(() => {
     if (!state.columns) {
       return [];
     }
     return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  };
-  const columns = getColumns();
+  }, [state, useNewFieldsApi]);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
