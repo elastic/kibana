@@ -30,7 +30,6 @@ import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
-  canHandleDrop,
   getDropTypes,
   onDrop,
 } from './dimension_panel';
@@ -44,7 +43,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -52,14 +51,8 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { DragDropIdentifier } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
-
-export type DraggedField = DragDropIdentifier & {
-  field: IndexPatternField;
-  indexPatternId: string;
-};
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -314,8 +307,6 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
-
-    canHandleDrop,
     getDropTypes,
     onDrop,
 

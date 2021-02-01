@@ -31,6 +31,10 @@ export {
   MovingAverageIndexPatternColumn,
 } from './operations';
 
+export type DraggedField = DragDropIdentifier & {
+  field: IndexPatternField;
+  indexPatternId: string;
+};
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];

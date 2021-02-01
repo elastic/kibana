@@ -20,6 +20,7 @@ import {
 } from './providers';
 import { announce } from './announcements';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { DropType } from '../types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
@@ -74,13 +75,11 @@ interface BaseProps {
   /**
    * Additional class names to apply when another element is over the drop target
    */
-  getAdditionalClassesOnEnter?: (
-    dropType?: 'add' | 'replace' | 'reorder'
-  ) => string /**
-
-  * Additional class names to apply when another element is droppable
-  */;
-  getAdditionalClassesOnDroppable?: (dropType?: 'add' | 'replace' | 'reorder') => string;
+  getAdditionalClassesOnEnter?: (dropType?: DropType) => string;
+  /**
+   * Additional class names to apply when another element is droppable
+   */
+  getAdditionalClassesOnDroppable?: (dropType?: DropType) => string;
 
   /**
    * The optional test subject associated with this DOM element.
@@ -102,7 +101,7 @@ interface BaseProps {
    * Indicates to the user whether the drop action will
    * replace something that is existing or add a new one
    */
-  dropType?: 'add' | 'replace' | 'reorder';
+  dropType?: DropType;
 
   /**
    * temporary flag to exclude the draggable elements that don't have keyboard nav yet. To be removed along with the feature development
@@ -396,7 +395,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     isDragging,
     isNotDroppable,
     dragType = 'copy',
-    dropType = 'add',
+    dropType = 'field_add',
     keyboardMode,
     activeDropTarget,
     setActiveDropTarget,

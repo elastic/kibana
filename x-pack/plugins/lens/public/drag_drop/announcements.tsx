@@ -125,7 +125,7 @@ export const announcements = {
         },
       }),
   },
-  duplicateInGroup: {
+  duplicate_in_group: {
     ...defaultAnnouncements,
     selectedTarget: ({ label }, { label: targetLabel, groupLabel, position }) =>
       i18n.translate('xpack.lens.dragDrop.elementMoved', {

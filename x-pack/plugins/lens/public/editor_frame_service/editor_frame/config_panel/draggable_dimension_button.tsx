@@ -17,16 +17,16 @@ const isSelf = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
 
 const getAdditionalClassesOnEnter = (dropType?: string) => {
   if (
-    dropType === 'remove_add' ||
-    dropType === 'remove_move' ||
-    dropType === 'remove_convert_move'
+    dropType === 'field_replace' ||
+    dropType === 'replace_compatible' ||
+    dropType === 'replace_incompatible'
   ) {
     return 'lnsDragDrop-isReplacing';
   }
 };
 
 const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (dropType === 'convert_add' || dropType === 'remove_convert_move') {
+  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
     return 'lnsDragDrop-notCompatible';
   }
 };
@@ -101,8 +101,6 @@ export function DraggableDimensionButton({
 
   const { dragging } = dragDropContext;
 
-  const dragType = isSelf(value, dragging) ? 'move' : 'copy';
-
   const filterSameGroup = useMemo(
     () => (el?: DragDropIdentifier) => {
       return !!(!el || !isFromTheSameGroup(value, el) || el.isNew);
@@ -117,7 +115,7 @@ export function DraggableDimensionButton({
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
-        dragType={dragType}
+        dragType={isSelf(value, dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         dropTargetsFilter={filterSameGroup}

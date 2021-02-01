@@ -5,8 +5,7 @@
  */
 
 import { DataType } from '../types';
-import { IndexPattern, IndexPatternLayer } from './types';
-import { DraggedField } from './indexpattern';
+import { IndexPattern, IndexPatternLayer, DraggedField } from './types';
 import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,

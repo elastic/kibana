@@ -18,7 +18,7 @@ const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
 });
 
 const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (dropType === 'convert_add' || dropType === 'remove_convert_move') {
+  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
     return 'lnsDragDrop-notCompatible';
   }
 };
