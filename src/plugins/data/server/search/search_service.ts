@@ -134,7 +134,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    registerBsearchRoute(bfetch, this.asScoped);
+    registerBsearchRoute(bfetch, (request: KibanaRequest) => this.asScoped(request));
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
