@@ -13,14 +13,13 @@ export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
  * Some properties are optional for a non-persisted Search Session.
  * This interface makes them mandatory, because management only shows persisted search sessions.
  */
-export interface PersistedSearchSessionSavedObjectAttributes
-  extends SearchSessionSavedObjectAttributes {
-  name: string;
-  appId: string;
-  urlGeneratorId: string;
-  initialState: Record<string, unknown>;
-  restoreState: Record<string, unknown>;
-}
+export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObjectAttributes &
+  Required<
+    Pick<
+      SearchSessionSavedObjectAttributes,
+      'name' | 'appId' | 'urlGeneratorId' | 'initialState' | 'restoreState'
+    >
+  >;
 
 export interface UISession {
   id: string;
