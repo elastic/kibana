@@ -141,6 +141,33 @@ describe('SearchSource', () => {
           ],
         }
       `);
+
+      // calling twice gives the same result: no searchSources in the hierarchy were modified
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
     });
 
     test('recurses parents to get the entire filters: function filter', () => {
@@ -167,6 +194,33 @@ describe('SearchSource', () => {
       }));
       searchSource.setParent(parent);
       searchSource.setField('aggs', 5);
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+
+      // calling twice gives the same result: no double-added filters
       expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
         Object {
           "aggs": 5,

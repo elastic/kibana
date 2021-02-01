@@ -206,10 +206,13 @@ export class SearchSource {
           }
         }
 
-        // set filter to the array of non-function-type filters
-        this.setField('filter', thisFilter);
+        // add combined filters to the fields
+        const thisFields = {
+          ...this.fields,
+          filter: thisFilter,
+        };
 
-        return { ...parentFields, ...this.fields };
+        return { ...parentFields, ...thisFields };
       }
     }
     return { ...this.fields };
