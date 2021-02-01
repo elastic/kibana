@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/tinymath';
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { getColumnOrder } from '../layer_helpers';
-import { mathOperation } from './math';
+import { mathOperation, hasMathNode, findVariables, sanifyOperationNames } from './math';
 
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
@@ -43,26 +44,39 @@ export const formulaOperation: OperationDefinition<
       return;
     }
     const ast = parse(column.params.ast);
-    const extracted = extractColumns(
-      columnId,
-      removeUnderscore(operationDefinitionMap),
-      ast,
-      layer,
-      indexPattern
-    );
-
-    const errors = extracted
-      .flatMap(({ operationType, label }) => {
-        if (layer.columns[label]) {
-          return operationDefinitionMap[operationType]?.getErrorMessage?.(
-            layer,
-            label,
-            indexPattern,
-            operationDefinitionMap
+    const errors = [];
+    try {
+      const flattenAstWithParamsValidation = addParamsValidation(
+        ast,
+        sanifyOperationNames(operationDefinitionMap)
+      );
+      for (const node of flattenAstWithParamsValidation) {
+        const missingParams = (node.params as Array<{ name: string; isMissing: boolean }>)
+          .filter(({ isMissing }) => isMissing)
+          .map(({ name }) => name);
+        if (missingParams.length) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+              defaultMessage:
+                'The operation {operation} in the Formula is missing the following parameters: {params}',
+              values: {
+                operation: node.name,
+                params: missingParams.join(', '),
+              },
+            })
           );
         }
-      })
-      .filter(Boolean) as string[];
+      }
+    } catch (e) {
+      errors.push(
+        i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+          defaultMessage: 'The Formula {expression} cannot be parsed',
+          values: {
+            expression: ast,
+          },
+        })
+      );
+    }
     return errors.length ? errors : undefined;
   },
   getPossibleOperation() {
@@ -126,7 +140,7 @@ export const formulaOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern, operationDefinitionMap) => {
     // Basic idea: if it has any math operation in it, probably it cannot be transferable
     const ast = parse(column.params.ast);
-    return !hasMathNode(ast, operationDefinitionMap);
+    return !hasMathNode(ast, sanifyOperationNames(operationDefinitionMap));
   },
 
   paramEditor: function ParamEditor({
@@ -177,11 +191,11 @@ export function regenerateLayerFromAst(
 ) {
   const ast = parse(text);
   /*
-            { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
-            */
+  { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
+  */
   const extracted = extractColumns(
     columnId,
-    removeUnderscore(operationDefinitionMap),
+    sanifyOperationNames(operationDefinitionMap),
     ast,
     layer,
     indexPattern
@@ -224,6 +238,33 @@ export function regenerateLayerFromAst(
   // set state
 }
 
+function addParamsValidation(ast: any, operations: Record<string, GenericOperationDefinition>) {
+  function validateNodeParams(node: any) {
+    if (typeof node === 'number' || typeof node === 'string') {
+      return [];
+    }
+    const nodeOperation = operations[node.name];
+    if (!nodeOperation) {
+      return [];
+    }
+    if (nodeOperation.input === 'field') {
+      const [_, ...params] = node.args;
+      // maybe validate params here?
+      return [{ ...node, params: validateParams(nodeOperation, params) }];
+    }
+    if (nodeOperation.input === 'fullReference') {
+      const [fieldName, ...params] = node.args;
+      // maybe validate params here?
+      return [
+        { ...node, params: validateParams(nodeOperation, params) },
+        ...validateNodeParams(fieldName),
+      ];
+    }
+    throw new Error('unexpected node');
+  }
+  return validateNodeParams(ast);
+}
+
 function extractColumns(
   idPrefix: string,
   operations: Record<string, GenericOperationDefinition>,
@@ -234,18 +275,11 @@ function extractColumns(
   const columns: IndexPatternColumn[] = [];
   // let currentTree: any  = cloneDeep(ast);
   function parseNode(node: any) {
-    if (typeof node === 'number') {
+    if (typeof node === 'number' || typeof node === 'string') {
       // leaf node
       return node;
     }
-    if (typeof node === 'string') {
-      if (indexPattern.getFieldByName(node)) {
-        // leaf node
-        return node;
-      }
-      // create a fake node just for making run a validation pass
-      return parseNode({ name: 'avg', args: [node] });
-    }
+
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
       // it's a regular math node
@@ -317,7 +351,7 @@ function extractColumns(
       return `${idPrefix}X${columns.length - 1}`;
     }
 
-    throw new Error('unexpected node');
+    return;
   }
   const root = parseNode(ast);
   const variables = findVariables(root);
@@ -334,40 +368,25 @@ function extractColumns(
   return columns;
 }
 
-// traverse a tree and find all string leaves
-function findVariables(node: any): string[] {
-  if (typeof node === 'string') {
-    // leaf node
-    return [node];
-  }
-  if (typeof node === 'number') {
-    return [];
-  }
-  return node.args.flatMap(findVariables);
-}
-
-function hasMathNode(root: any, operations: Record<string, GenericOperationDefinition>): boolean {
-  function findMathNodes(node: any): boolean[] {
-    if (typeof node === 'string') {
-      return [false];
-    }
-    if (typeof node === 'number') {
-      return [false];
-    }
-    if (node.name in operations) {
-      return [false];
-    }
-    return node.args.flatMap(findMathNodes);
-  }
-  return Boolean(findMathNodes(root).filter(Boolean).length);
-}
-
 function getSafeFieldName(fieldName: string | undefined) {
   // clean up the "Records" field for now
   if (!fieldName || fieldName === 'Records') {
     return '';
   }
   return fieldName;
+}
+
+function validateParams(
+  operation:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+  params: unknown[]
+) {
+  const paramsObj = getOperationParams(operation, params);
+  const formalArgs = operation.operationParams || [];
+  return formalArgs
+    .filter(({ required }) => required)
+    .map(({ name }) => ({ name, isMissing: !(name in paramsObj) }));
 }
 
 function getOperationParams(
@@ -386,16 +405,4 @@ function getOperationParams(
     }
     return args;
   }, {});
-}
-
-function removeUnderscore(
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-): Record<string, GenericOperationDefinition> {
-  return Object.keys(operationDefinitionMap).reduce((memo, operationTypeSnakeCase) => {
-    const operationType = operationTypeSnakeCase.replace(/([_][a-z])/, (group) =>
-      group.replace('_', '')
-    );
-    memo[operationType] = operationDefinitionMap[operationTypeSnakeCase];
-    return memo;
-  }, {} as Record<string, GenericOperationDefinition>);
 }

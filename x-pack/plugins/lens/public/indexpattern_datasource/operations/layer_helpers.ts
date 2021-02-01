@@ -911,7 +911,7 @@ export function getErrorMessages(
     .flatMap(([columnId, column]) => {
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
-        return def.getErrorMessage(layer, columnId, indexPattern);
+        return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
       }
     })
     // remove the undefined values

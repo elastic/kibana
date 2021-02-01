@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
-import { parse } from 'tinymath';
-import { EuiButton, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternLayer } from '../../types';
+
+const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
@@ -32,8 +33,46 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
   },
-  getErrorMessage(layer, columnId, indexPattern) {
-    return undefined;
+  getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
+    const column = layer.columns[columnId] as MathIndexPatternColumn;
+    if (!column.params.tinymathAst || !operationDefinitionMap) {
+      return;
+    }
+    const errors: string[] = [];
+    if (typeof column.params.tinymathAst !== 'string') {
+      const node = getMathNode(layer, column.params.tinymathAst);
+      if (node) {
+        const missingOperations = hasInvalidOperations(node, operationDefinitionMap);
+        if (missingOperations.length) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
+              defaultMessage:
+                '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
+              values: {
+                operationLength: missingOperations.length,
+                operationsList: missingOperations.join(', '),
+              },
+            })
+          );
+        }
+        const missingVariables = findVariables(node).filter(
+          (variable) => !indexPattern.getFieldByName(variable) && !layer.columns[variable]
+        );
+        // need to check the arguments here: check only strings for now
+
+        errors.push(
+          i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+            defaultMessage:
+              '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
+            values: {
+              variablesLength: missingOperations.length,
+              variablesList: missingVariables.join(', '),
+            },
+          })
+        );
+      }
+    }
+    return errors.length ? errors : undefined;
   },
   getPossibleOperation() {
     return {
@@ -92,4 +131,69 @@ function astToString(ast: any) {
     return ast;
   }
   return `${ast.name}(${ast.args.map(astToString).join(',')})`;
+}
+
+export function sanifyOperationNames(
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+): Record<string, GenericOperationDefinition> {
+  return Object.keys(operationDefinitionMap).reduce((memo, operationTypeSnakeCase) => {
+    const operationType = operationTypeSnakeCase.replace(/([_][a-z])/, (group) =>
+      group.replace('_', '')
+    );
+    memo[operationType] = operationDefinitionMap[operationTypeSnakeCase];
+    return memo;
+  }, {} as Record<string, GenericOperationDefinition>);
+}
+
+function findMathNodes(root: any, operations: Record<string, GenericOperationDefinition>) {
+  function flattenMathNodes(node: any) {
+    if (typeof node === 'string' || typeof node === 'number' || operations[node.name]) {
+      return [];
+    }
+    return [node, ...node.args.flatMap(findMathNodes)].filter(Boolean);
+  }
+  return flattenMathNodes(root);
+}
+
+export function hasMathNode(
+  root: any,
+  operations: Record<string, GenericOperationDefinition>
+): boolean {
+  return Boolean(findMathNodes(root, operations).length);
+}
+
+function hasInvalidOperations(
+  node: { name: string; args: any[] },
+  operations: Record<string, GenericOperationDefinition>
+) {
+  // avoid duplicates
+  return Array.from(
+    new Set(
+      findMathNodes(node, operations)
+        .filter(({ name }) => !tinymathValidOperators.has(name))
+        .map(({ name }) => name)
+    )
+  );
+}
+
+// traverse a tree and find all string leaves
+export function findVariables(node: any): string[] {
+  if (typeof node === 'string') {
+    // leaf node
+    return [node];
+  }
+  if (typeof node === 'number') {
+    return [];
+  }
+  return node.args.flatMap(findVariables);
+}
+
+function getMathNode(layer: IndexPatternLayer, ast: string | { name: string; args: any[] }) {
+  if (typeof ast === 'string') {
+    const refColumn = layer.columns[ast];
+    if (refColumn) {
+      return refColumn.sourceField;
+    }
+  }
+  return ast;
 }
