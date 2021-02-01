@@ -20,6 +20,7 @@ import {
 } from '../utils/package_json';
 import {
   buildProjectGraph,
+  getNonBazelProjectsOnly,
   getProjects,
   includeTransitiveProjects,
   topologicallyBatchProjects,
@@ -35,7 +36,7 @@ export async function buildNonBazelProductionProjects({
   buildRoot: string;
   onlyOSS?: boolean;
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
+  const projects = await getNonBazelProjectsOnly(await getProductionProjects(kibanaRoot, onlyOSS));
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 

@@ -46,7 +46,7 @@ export const isBazelPackageDependency = (depVersion: string) =>
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  *
- * Additionally it also taken care of replacing `link:bazel-dist/kibana/` with
+ * Additionally it also taken care of replacing `link:bazel-dist/bin/` with
  * `file:` so we can also support the copy of the Bazel packages dist already into
  * build/packages to be copied into the node_modules
  */
@@ -61,7 +61,7 @@ export function transformDependencies(dependencies: IPackageDependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel-dist/kibana/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel-dist/bin/', 'file:');
       continue;
     }
 

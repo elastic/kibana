@@ -85,21 +85,27 @@ export class Project {
 
   public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(
+      Path.relative(this.path, `bazel-dist/bin/packages/${Path.basename(project.path)}`)
+    );
 
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`;
 
-    // TODO: after introduce bazel to build packages do not allow child projects
-    // to hold dependencies
-
-    if (versionInPackageJson === expectedVersionInPackageJson) {
+    // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
+    //  do not allow child projects to hold dependencies
+    if (
+      versionInPackageJson === expectedVersionInPackageJson ||
+      versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg
+    ) {
       return;
     }
 
     const updateMsg = 'Update its package.json to the expected value below.';
     const meta = {
       actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
       package: `${this.name} (${this.packageJsonLocation})`,
     };
 

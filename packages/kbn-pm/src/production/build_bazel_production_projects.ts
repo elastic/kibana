@@ -7,7 +7,7 @@
  */
 
 import copy from 'cpy';
-import { join, relative, resolve } from 'path';
+import { basename, join, relative, resolve } from 'path';
 
 import { buildProject, getProductionProjects } from './build_non_bazel_production_projects';
 import { isFile } from '../utils/fs';
@@ -37,6 +37,7 @@ export async function buildBazelProductionProjects({
   for (const project of projects.values()) {
     await buildProject(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
+    // chmod 644
   }
 }
 
@@ -58,7 +59,7 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
 
   const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
   await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: join(kibanaRoot, 'bazel-dist', 'kibana', 'packages', project.name),
+    cwd: join(kibanaRoot, 'bazel-dist', 'bin', 'packages', basename(buildProjectPath)),
     dot: true,
     onlyFiles: true,
     parents: true,

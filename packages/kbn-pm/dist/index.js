@@ -22949,18 +22949,20 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.path, `bazel-dist/bin/packages/${path__WEBPACK_IMPORTED_MODULE_0___default.a.basename(project.path)}`));
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`; // TODO: after introduce bazel to build packages do not allow child projects
-    // to hold dependencies
+    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
+    //  do not allow child projects to hold dependencies
 
-    if (versionInPackageJson === expectedVersionInPackageJson) {
+    if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
       return;
     }
 
     const updateMsg = 'Update its package.json to the expected value below.';
     const meta = {
       actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
       package: `${this.name} (${this.packageJsonLocation})`
     };
 
@@ -23077,6 +23079,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "writePackageJson", function() { return writePackageJson; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createProductionPackageJson", function() { return createProductionPackageJson; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isLinkDependency", function() { return isLinkDependency; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBazelPackageDependency", function() { return isBazelPackageDependency; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformDependencies", function() { return transformDependencies; });
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(252);
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(read_pkg__WEBPACK_IMPORTED_MODULE_0__);
@@ -23110,6 +23113,7 @@ const createProductionPackageJson = pkgJson => _objectSpread(_objectSpread({}, p
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
+const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel-dist/kibana/');
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
  * dependencies, these `file:` dependencies will be copied into `node_modules`
@@ -23118,6 +23122,10 @@ const isLinkDependency = depVersion => depVersion.startsWith('link:');
  * This will allow us to copy packages into the build and run `yarn`, which
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
+ *
+ * Additionally it also taken care of replacing `link:bazel-dist/bin/` with
+ * `file:` so we can also support the copy of the Bazel packages dist already into
+ * build/packages to be copied into the node_modules
  */
 
 function transformDependencies(dependencies = {}) {
@@ -23126,11 +23134,17 @@ function transformDependencies(dependencies = {}) {
   for (const name of Object.keys(dependencies)) {
     const depVersion = dependencies[name];
 
-    if (isLinkDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:', 'file:');
-    } else {
+    if (!isLinkDependency(depVersion)) {
       newDeps[name] = depVersion;
+      continue;
     }
+
+    if (isBazelPackageDependency(depVersion)) {
+      newDeps[name] = depVersion.replace('link:bazel-dist/bin/', 'file:');
+      continue;
+    }
+
+    newDeps[name] = depVersion.replace('link:', 'file:');
   }
 
   return newDeps;
@@ -59570,7 +59584,7 @@ async function buildBazelProductionProjects({
 
   for (const project of projects.values()) {
     await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_2__["buildProject"])(project);
-    await copyToBuild(project, kibanaRoot, buildRoot);
+    await copyToBuild(project, kibanaRoot, buildRoot); // chmod 644
   }
 }
 /**
@@ -59591,7 +59605,7 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(buildRoot, relativeProjectPath);
   const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_1__["join"])(kibanaRoot, 'bazel-dist', 'kibana', 'packages', project.name),
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_1__["join"])(kibanaRoot, 'bazel-dist', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_1__["basename"])(buildProjectPath)),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -87061,7 +87075,7 @@ async function buildNonBazelProductionProjects({
   buildRoot,
   onlyOSS
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getNonBazelProjectsOnly"])(await getProductionProjects(kibanaRoot, onlyOSS));
   const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
   const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
