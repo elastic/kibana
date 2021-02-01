@@ -8,15 +8,15 @@ import { Feature, FeatureCollection } from 'geojson';
 import { AbstractVectorSource, BoundsFilters, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import {
-  GeoJsonFileFieldDescriptor,
+  InlineFieldDescriptor,
   GeojsonFileSourceDescriptor,
   MapExtent,
 } from '../../../../common/descriptor_types';
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
-import { GeoJsonFileField } from '../../fields/geojson_file_field';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { InlineField } from '../../fields/inline_field';
 
 function getFeatureCollection(
   geoJson: Feature | FeatureCollection | null | undefined
@@ -56,14 +56,14 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     super(normalizedDescriptor, inspectorAdapters);
   }
 
-  _getFields(): GeoJsonFileFieldDescriptor[] {
+  _getFields(): InlineFieldDescriptor[] {
     const fields = (this._descriptor as GeojsonFileSourceDescriptor).__fields;
     return fields ? fields : [];
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
     const fields = this._getFields();
-    const descriptor: GeoJsonFileFieldDescriptor | undefined = fields.find((field) => {
+    const descriptor: InlineFieldDescriptor | undefined = fields.find((field) => {
       return field.name === fieldName;
     });
 
@@ -74,7 +74,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
         )} `
       );
     }
-    return new GeoJsonFileField({
+    return new InlineField<GeoJsonFileSource>({
       fieldName: descriptor.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
@@ -84,8 +84,8 @@ export class GeoJsonFileSource extends AbstractVectorSource {
 
   async getFields(): Promise<IField[]> {
     const fields = this._getFields();
-    return fields.map((field: GeoJsonFileFieldDescriptor) => {
-      return new GeoJsonFileField({
+    return fields.map((field: InlineFieldDescriptor) => {
+      return new InlineField<GeoJsonFileSource>({
         fieldName: field.name,
         source: this,
         origin: FIELD_ORIGIN.SOURCE,

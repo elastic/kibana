@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -18,7 +18,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -64,6 +64,7 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { SessionService, IScopedSessionService, ISessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
+import { registerBsearchRoute } from './routes/bsearch';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -137,43 +138,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<
-      { request: IKibanaSearchResponse; options?: ISearchOptions },
-      any
-    >('/internal/bsearch', (request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          return search
-            .search(requestData, options)
-            .pipe(
-              first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
-              catchError((err) => {
-                // eslint-disable-next-line no-throw-literal
-                throw {
-                  statusCode: err.statusCode || 500,
-                  body: {
-                    message: err.message,
-                    attributes: {
-                      error: err.body?.error || err.message,
-                    },
-                  },
-                };
-              })
-            )
-            .toPromise();
-        },
-      };
-    });
+    registerBsearchRoute(bfetch, core.getStartServices(), this.asScopedProvider);
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
@@ -285,10 +250,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     options: ISearchOptions,
     deps: SearchStrategyDependencies
   ) => {
-    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy
-    );
-    return session.search(strategy, request, options, deps);
+    try {
+      const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+        options.strategy
+      );
+      return session.search(strategy, request, options, deps);
+    } catch (e) {
+      return throwError(e);
+    }
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
