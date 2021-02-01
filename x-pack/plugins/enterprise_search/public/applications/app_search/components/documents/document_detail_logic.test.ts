@@ -9,9 +9,10 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-  expectedAsyncError,
 } from '../../../__mocks__';
 import { mockEngineValues } from '../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
@@ -56,23 +57,21 @@ describe('DocumentDetailLogic', () => {
       it('will call an API endpoint and then store the result', async () => {
         const fields = [{ name: 'name', value: 'python', type: 'string' }];
         jest.spyOn(DocumentDetailLogic.actions, 'setFields');
-        const promise = Promise.resolve({ fields });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve({ fields }));
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
 
         expect(http.get).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
-        await promise;
+        await nextTick();
         expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occurred');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occurred'));
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred', { isQueued: true });
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
@@ -81,13 +80,11 @@ describe('DocumentDetailLogic', () => {
 
     describe('deleteDocument', () => {
       let confirmSpy: any;
-      let promise: Promise<any>;
 
       beforeEach(() => {
         confirmSpy = jest.spyOn(window, 'confirm');
         confirmSpy.mockImplementation(jest.fn(() => true));
-        promise = Promise.resolve({});
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve({}));
       });
 
       afterEach(() => {
@@ -99,7 +96,7 @@ describe('DocumentDetailLogic', () => {
         DocumentDetailLogic.actions.deleteDocument('1');
 
         expect(http.delete).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
-        await promise;
+        await nextTick();
         expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
           'Successfully marked document for deletion. It will be deleted momentarily.'
         );
@@ -113,16 +110,15 @@ describe('DocumentDetailLogic', () => {
         DocumentDetailLogic.actions.deleteDocument('1');
 
         expect(http.delete).not.toHaveBeenCalled();
-        await promise;
+        await nextTick();
       });
 
       it('handles errors', async () => {
         mount();
-        promise = Promise.reject('An error occured');
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.reject('An error occured'));
 
         DocumentDetailLogic.actions.deleteDocument('1');
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });

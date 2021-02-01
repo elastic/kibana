@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { fetchRuleById } from './api';
+import { transformInput } from './transforms';
 import * as i18n from './translations';
 import { Rule } from './types';
 
@@ -28,13 +29,15 @@ export const useRule = (id: string | undefined): ReturnRule => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function fetchData(idToFetch: string) {
+    const fetchData = async (idToFetch: string) => {
       try {
         setLoading(true);
-        const ruleResponse = await fetchRuleById({
-          id: idToFetch,
-          signal: abortCtrl.signal,
-        });
+        const ruleResponse = transformInput(
+          await fetchRuleById({
+            id: idToFetch,
+            signal: abortCtrl.signal,
+          })
+        );
         if (isSubscribed) {
           setRule(ruleResponse);
         }
@@ -47,7 +50,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
     if (id != null) {
       fetchData(id);
     }
@@ -55,8 +58,7 @@ export const useRule = (id: string | undefined): ReturnRule => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, dispatchToaster]);
 
   return [loading, rule];
 };
