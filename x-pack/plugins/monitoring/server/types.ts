@@ -92,6 +92,10 @@ export interface IBulkUploader {
   stop: () => void;
 }
 
+export interface MonitoringPluginSetup {
+  getKibanaStats: IBulkUploader['getKibanaStats'];
+}
+
 export interface LegacyRequest {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
