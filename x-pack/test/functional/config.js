@@ -231,6 +231,7 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },

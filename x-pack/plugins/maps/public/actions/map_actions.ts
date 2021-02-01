@@ -19,6 +19,7 @@ import {
   getQuery,
   getTimeFilters,
   getLayerList,
+  getSearchSessionId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -225,11 +226,13 @@ export function setQuery({
   timeFilters,
   filters = [],
   forceRefresh = false,
+  searchSessionId,
 }: {
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   forceRefresh?: boolean;
+  searchSessionId?: string;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -249,12 +252,14 @@ export function setQuery({
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
+      searchSessionId,
     };
 
     const prevQueryContext = {
       timeFilters: getTimeFilters(getState()),
       query: getQuery(getState()),
       filters: getFilters(getState()),
+      searchSessionId: getSearchSessionId(getState()),
     };
 
     if (_.isEqual(nextQueryContext, prevQueryContext)) {
