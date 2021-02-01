@@ -13,8 +13,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const panelActions = getService('dashboardPanelActions');
 
   describe('embeddable library', () => {
     before(async () => {
@@ -24,45 +27,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.clickNewDashboard();
     });
 
-    it('unlink panel from embeddable library', async () => {
-      await PageObjects.dashboard.switchToEditMode();
-      let firstPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      const libraryAction = await testSubjects.findDescendant(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        firstPanel
-      );
-      await libraryAction.click();
-      await testSubjects.click('libraryNotificationUnlinkButton');
+    it('unlink visualize panel from embeddable library', async () => {
+      // add heatmap panel from library
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: heatmap');
+      await find.clickByButtonText('Rendering Test: heatmap');
+      await dashboardAddPanel.closeAddPanel();
+
+      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
+      await panelActions.unlinkFromLibary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
-      firstPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
+      const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
       const libraryActionExists = await testSubjects.descendantExists(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        firstPanel
+        updatedPanel
       );
       expect(libraryActionExists).to.be(false);
     });
 
-    it('save panel to embeddable library', async () => {
+    it('save visualize panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:heatmap');
-      const menuIcon = await testSubjects.findDescendant(
-        'embeddablePanelToggleMenuIcon',
-        originalPanel
-      );
-      await menuIcon.click();
-      await testSubjects.click('embeddablePanelMore-mainMenu');
-      await testSubjects.click('embeddablePanelAction-addToFromLibrary');
-      await testSubjects.setValue('savedObjectTitle', 'Rendering Test: heatmap - copy', {
-        clearWithKeyboard: true,
-      });
-      await testSubjects.click('confirmSaveSavedObjectButton');
+      await panelActions.saveToLibrary('Rendering Test: heatmap - copy', originalPanel);
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
 
       const updatedPanel = await testSubjects.find(
         'embeddablePanelHeading-RenderingTest:heatmap-copy'
+      );
+      const libraryActionExists = await testSubjects.descendantExists(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        updatedPanel
+      );
+      expect(libraryActionExists).to.be(true);
+    });
+
+    it('unlink map panel from embeddable library', async () => {
+      // add map panel from library
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: geo map');
+      await find.clickByButtonText('Rendering Test: geo map');
+      await dashboardAddPanel.closeAddPanel();
+
+      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
+      await panelActions.unlinkFromLibary(originalPanel);
+      await testSubjects.existOrFail('unlinkPanelSuccess');
+
+      const updatedPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
+      const libraryActionExists = await testSubjects.descendantExists(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        updatedPanel
+      );
+      expect(libraryActionExists).to.be(false);
+    });
+
+    it('save map panel to embeddable library', async () => {
+      const originalPanel = await testSubjects.find('embeddablePanelHeading-RenderingTest:geomap');
+      await panelActions.saveToLibrary('Rendering Test: geo map - copy', originalPanel);
+      await testSubjects.existOrFail('addPanelToLibrarySuccess');
+
+      const updatedPanel = await testSubjects.find(
+        'embeddablePanelHeading-RenderingTest:geomap-copy'
       );
       const libraryActionExists = await testSubjects.descendantExists(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
