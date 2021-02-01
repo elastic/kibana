@@ -94,7 +94,7 @@ export function getActionType({
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
@@ -138,7 +138,10 @@ function validateActionTypeConfig(
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -162,7 +165,7 @@ export async function executor(
       ...basicAuth,
       headers,
       data,
-      proxySettings: execOptions.proxySettings,
+      configurationUtilities,
     })
   );
 
@@ -202,7 +205,7 @@ export async function executor(
         );
       }
       return errorResultInvalid(actionId, message);
-    } else if (error.isAxiosError) {
+    } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       return errorResultRequestFailed(actionId, message);

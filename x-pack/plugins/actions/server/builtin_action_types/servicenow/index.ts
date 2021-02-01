@@ -60,14 +60,17 @@ export function getActionType(
       }),
       params: ExecutorParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 // action executor
 const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: ActionTypeExecutorOptions<
     ServiceNowPublicConfigurationType,
     ServiceNowSecretConfigurationType,
@@ -84,7 +87,7 @@ async function executor(
       secrets,
     },
     logger,
-    execOptions.proxySettings
+    configurationUtilities
   );
 
   if (!api[subAction]) {

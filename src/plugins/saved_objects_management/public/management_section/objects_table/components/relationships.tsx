@@ -26,11 +26,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IBasePath } from 'src/core/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import { SavedObjectWithMetadata, SavedObjectRelation } from '../../../types';
+import {
+  SavedObjectWithMetadata,
+  SavedObjectRelationKind,
+  SavedObjectRelation,
+  SavedObjectInvalidRelation,
+  SavedObjectGetRelationshipsResponse,
+} from '../../../types';
 
 export interface RelationshipsProps {
   basePath: IBasePath;
-  getRelationships: (type: string, id: string) => Promise<SavedObjectRelation[]>;
+  getRelationships: (type: string, id: string) => Promise<SavedObjectGetRelationshipsResponse>;
   savedObject: SavedObjectWithMetadata;
   close: () => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
@@ -38,17 +44,47 @@ export interface RelationshipsProps {
 }
 
 export interface RelationshipsState {
-  relationships: SavedObjectRelation[];
+  relations: SavedObjectRelation[];
+  invalidRelations: SavedObjectInvalidRelation[];
   isLoading: boolean;
   error?: string;
 }
+
+const relationshipColumn = {
+  field: 'relationship',
+  name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnRelationshipName', {
+    defaultMessage: 'Direct relationship',
+  }),
+  dataType: 'string',
+  sortable: false,
+  width: '125px',
+  'data-test-subj': 'directRelationship',
+  render: (relationship: SavedObjectRelationKind) => {
+    return (
+      <EuiText size="s">
+        {relationship === 'parent' ? (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.relationships.columnRelationship.parentAsValue"
+            defaultMessage="Parent"
+          />
+        ) : (
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.relationships.columnRelationship.childAsValue"
+            defaultMessage="Child"
+          />
+        )}
+      </EuiText>
+    );
+  },
+};
 
 export class Relationships extends Component<RelationshipsProps, RelationshipsState> {
   constructor(props: RelationshipsProps) {
     super(props);
 
     this.state = {
-      relationships: [],
+      relations: [],
+      invalidRelations: [],
       isLoading: false,
       error: undefined,
     };
@@ -70,8 +106,11 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     this.setState({ isLoading: true });
 
     try {
-      const relationships = await getRelationships(savedObject.type, savedObject.id);
-      this.setState({ relationships, isLoading: false, error: undefined });
+      const { relations, invalidRelations } = await getRelationships(
+        savedObject.type,
+        savedObject.id
+      );
+      this.setState({ relations, invalidRelations, isLoading: false, error: undefined });
     } catch (err) {
       this.setState({ error: err.message, isLoading: false });
     }
@@ -99,9 +138,83 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     );
   }
 
-  renderRelationships() {
-    const { goInspectObject, savedObject, basePath } = this.props;
-    const { relationships, isLoading, error } = this.state;
+  renderInvalidRelationship() {
+    const { invalidRelations } = this.state;
+    if (!invalidRelations.length) {
+      return null;
+    }
+
+    const columns = [
+      {
+        field: 'type',
+        name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnTypeName', {
+          defaultMessage: 'Type',
+        }),
+        width: '150px',
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.relationships.columnTypeDescription',
+          { defaultMessage: 'Type of the saved object' }
+        ),
+        sortable: false,
+        'data-test-subj': 'relationshipsObjectType',
+      },
+      {
+        field: 'id',
+        name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnIdName', {
+          defaultMessage: 'Id',
+        }),
+        width: '150px',
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.relationships.columnIdDescription',
+          { defaultMessage: 'Id of the saved object' }
+        ),
+        sortable: false,
+        'data-test-subj': 'relationshipsObjectId',
+      },
+      relationshipColumn,
+      {
+        field: 'error',
+        name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnErrorName', {
+          defaultMessage: 'Error',
+        }),
+        description: i18n.translate(
+          'savedObjectsManagement.objectsTable.relationships.columnErrorDescription',
+          { defaultMessage: 'Error encountered with the relation' }
+        ),
+        sortable: false,
+        'data-test-subj': 'relationshipsError',
+      },
+    ];
+
+    return (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={i18n.translate(
+            'savedObjectsManagement.objectsTable.relationships.invalidRelationShip',
+            {
+              defaultMessage: 'This saved object has some invalid relations.',
+            }
+          )}
+        />
+        <EuiSpacer />
+        <EuiInMemoryTable
+          items={invalidRelations}
+          columns={columns as any}
+          pagination={true}
+          rowProps={() => ({
+            'data-test-subj': `invalidRelationshipsTableRow`,
+          })}
+        />
+        <EuiSpacer />
+      </>
+    );
+  }
+
+  renderRelationshipsTable() {
+    const { goInspectObject, basePath, savedObject } = this.props;
+    const { relations, isLoading, error } = this.state;
 
     if (error) {
       return this.renderError();
@@ -137,39 +250,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           );
         },
       },
-      {
-        field: 'relationship',
-        name: i18n.translate(
-          'savedObjectsManagement.objectsTable.relationships.columnRelationshipName',
-          { defaultMessage: 'Direct relationship' }
-        ),
-        dataType: 'string',
-        sortable: false,
-        width: '125px',
-        'data-test-subj': 'directRelationship',
-        render: (relationship: string) => {
-          if (relationship === 'parent') {
-            return (
-              <EuiText size="s">
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.relationships.columnRelationship.parentAsValue"
-                  defaultMessage="Parent"
-                />
-              </EuiText>
-            );
-          }
-          if (relationship === 'child') {
-            return (
-              <EuiText size="s">
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.relationships.columnRelationship.childAsValue"
-                  defaultMessage="Child"
-                />
-              </EuiText>
-            );
-          }
-        },
-      },
+      relationshipColumn,
       {
         field: 'meta.title',
         name: i18n.translate('savedObjectsManagement.objectsTable.relationships.columnTitleName', {
@@ -224,7 +305,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     ];
 
     const filterTypesMap = new Map(
-      relationships.map((relationship) => [
+      relations.map((relationship) => [
         relationship.type,
         {
           value: relationship.type,
@@ -277,7 +358,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     };
 
     return (
-      <div>
+      <>
         <EuiCallOut>
           <p>
             {i18n.translate(
@@ -296,7 +377,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         </EuiCallOut>
         <EuiSpacer />
         <EuiInMemoryTable
-          items={relationships}
+          items={relations}
           columns={columns as any}
           pagination={true}
           search={search}
@@ -304,7 +385,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             'data-test-subj': `relationshipsTableRow`,
           })}
         />
-      </div>
+      </>
     );
   }
 
@@ -328,8 +409,10 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-
-        <EuiFlyoutBody>{this.renderRelationships()}</EuiFlyoutBody>
+        <EuiFlyoutBody>
+          {this.renderInvalidRelationship()}
+          {this.renderRelationshipsTable()}
+        </EuiFlyoutBody>
       </EuiFlyout>
     );
   }
