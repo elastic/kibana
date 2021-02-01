@@ -446,7 +446,7 @@ export const SOURCE_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
 );
 
 export const SOURCE_DISABLED_CALLOUT_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.button',
   {
     defaultMessage: 'Explore Platinum license',
   }

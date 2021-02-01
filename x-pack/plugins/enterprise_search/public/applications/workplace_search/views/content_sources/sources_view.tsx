@@ -99,7 +99,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
 
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.success"
+                id="xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.docPermissions.description"
                 defaultMessage="Documents will not be searchable from Workplace Search until user and group mappings have been configured. {documentPermissionsLink}."
                 values={{
                   documentPermissionsLink: (
