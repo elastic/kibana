@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseValueType } from '../../../apm/typings/common';
+import type { UnwrapPromise } from '@kbn/utility-types';
 
 export function unwrapEsResponse<T extends Promise<{ body: any }>>(
   responsePromise: T
-): Promise<PromiseValueType<T>['body']> {
+): Promise<UnwrapPromise<T>['body']> {
   return responsePromise.then((res) => res.body);
 }
