@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ISessionsClient } from './sessions_client';
 import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
