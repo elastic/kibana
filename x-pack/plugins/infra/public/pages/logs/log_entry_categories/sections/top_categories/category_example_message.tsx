@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
 
-import { LogEntry, LogEntryContext } from '../../../../../../common/http_api';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
+import { TimeRange } from '../../../../../../common/time';
 import {
   getFriendlyNameForPartitionId,
   partitionField,

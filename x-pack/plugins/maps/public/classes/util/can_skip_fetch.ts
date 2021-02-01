@@ -113,6 +113,7 @@ export async function canSkipSourceUpdate({
   if (isQueryAware) {
     updateDueToApplyGlobalQuery = prevMeta.applyGlobalQuery !== nextMeta.applyGlobalQuery;
     updateDueToSourceQuery = !_.isEqual(prevMeta.sourceQuery, nextMeta.sourceQuery);
+
     if (nextMeta.applyGlobalQuery) {
       updateDueToQuery = !_.isEqual(prevMeta.query, nextMeta.query);
       updateDueToFilters = !_.isEqual(prevMeta.filters, nextMeta.filters);
@@ -121,6 +122,11 @@ export async function canSkipSourceUpdate({
       // Exception is "Refresh" query.
       updateDueToQuery = isRefreshOnlyQuery(prevMeta.query, nextMeta.query);
     }
+  }
+
+  let updateDueToSearchSessionId = false;
+  if (timeAware || isQueryAware) {
+    updateDueToSearchSessionId = prevMeta.searchSessionId !== nextMeta.searchSessionId;
   }
 
   let updateDueToPrecisionChange = false;
@@ -146,7 +152,8 @@ export async function canSkipSourceUpdate({
     !updateDueToSourceQuery &&
     !updateDueToApplyGlobalQuery &&
     !updateDueToPrecisionChange &&
-    !updateDueToSourceMetaChange
+    !updateDueToSourceMetaChange &&
+    !updateDueToSearchSessionId
   );
 }
 
@@ -174,8 +181,14 @@ export function canSkipStyleMetaUpdate({
     ? !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters)
     : false;
 
+  const updateDueToSearchSessionId = prevMeta.searchSessionId !== nextMeta.searchSessionId;
+
   return (
-    !updateDueToFields && !updateDueToSourceQuery && !updateDueToIsTimeAware && !updateDueToTime
+    !updateDueToFields &&
+    !updateDueToSourceQuery &&
+    !updateDueToIsTimeAware &&
+    !updateDueToTime &&
+    !updateDueToSearchSessionId
   );
 }
 
