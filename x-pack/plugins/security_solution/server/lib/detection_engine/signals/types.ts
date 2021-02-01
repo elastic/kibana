@@ -5,7 +5,7 @@
  */
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -263,6 +263,11 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: SignalHit[];
   errors: string[];
+  totalToFromTuples?: Array<{
+    to: Moment | undefined;
+    from: Moment | undefined;
+    maxSignals: number;
+  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
