@@ -6,7 +6,7 @@ The index threshold alert type is designed to run an ES query over indices,
 aggregating field values from documents, comparing them to threshold values,
 and scheduling actions to run when the thresholds are met.
 
-And example would be checking a monitoring index for percent cpu usage field
+An example would be checking a monitoring index for percent cpu usage field
 values that are greater than some threshold, which could then be used to invoke
 an action (email, slack, etc) to notify interested parties when the threshold
 is exceeded.

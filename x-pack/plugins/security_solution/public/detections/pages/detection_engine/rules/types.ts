@@ -161,6 +161,11 @@ export interface DefineStepRuleJson {
     cardinality_field: string;
     cardinality_value: number;
   };
+  threat_query?: string;
+  threat_mapping?: ThreatMapping;
+  threat_language?: string;
+  threat_index?: string[];
+  threat_filters?: Filter[];
   timeline_id?: string;
   timeline_title?: string;
   type: Type;

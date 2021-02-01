@@ -33,7 +33,7 @@ import { ComponentStrings } from '../../../i18n';
 
 const { AssetManager: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   /** The assets to display within the modal */
   assets: AssetType[];
   /** Function to invoke when the modal is closed */

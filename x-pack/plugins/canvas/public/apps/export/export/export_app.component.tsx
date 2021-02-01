@@ -13,7 +13,7 @@ import { WorkpadPage } from '../../../components/workpad_page';
 import { Link } from '../../../components/link';
 import { CanvasWorkpad } from '../../../../types';
 
-interface Props {
+export interface Props {
   workpad: CanvasWorkpad;
   selectedPageIndex: number;
   initializeWorkpad: () => void;
