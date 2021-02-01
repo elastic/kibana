@@ -310,9 +310,6 @@ export type CloneDataFrameAnalyticsConfig = Omit<
  */
 export function extractCloningConfig({
   id,
-  version,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  create_time,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
   return (cloneDeep({

@@ -7,7 +7,7 @@
 import { useMemo, useEffect } from 'react';
 import useSetState from 'react-use/lib/useSetState';
 import usePrevious from 'react-use/lib/usePrevious';
-import { esKuery } from '../../../../../../../src/plugins/data/public';
+import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { LogEntryCursor, LogEntry } from '../../../../common/log_entry';
@@ -18,7 +18,7 @@ interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string;
+  query?: string | Query;
   center?: LogEntryCursor;
   columns?: LogSourceConfigurationProperties['logColumns'];
 }
@@ -84,9 +84,21 @@ export function useLogStream({
   }, [prevEndTimestamp, endTimestamp, setState]);
 
   const parsedQuery = useMemo(() => {
-    return query
-      ? JSON.stringify(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query)))
-      : null;
+    if (!query) {
+      return null;
+    }
+
+    let q;
+
+    if (typeof query === 'string') {
+      q = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
+    } else if (query.language === 'kuery') {
+      q = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
+    } else if (query.language === 'lucene') {
+      q = esQuery.luceneStringToDsl(query.query as string);
+    }
+
+    return JSON.stringify(q);
   }, [query]);
 
   // Callbacks
