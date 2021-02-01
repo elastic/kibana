@@ -19,6 +19,8 @@ import {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
+import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
+import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 
 export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
@@ -45,6 +47,13 @@ export class Plugin implements InfraClientPluginClass {
         fetchData: createMetricsFetchData(core.getStartServices),
       });
     }
+
+    const getCoreServices = async () => (await core.getStartServices())[0];
+
+    pluginsSetup.embeddable.registerEmbeddableFactory(
+      LOG_STREAM_EMBEDDABLE,
+      new LogStreamEmbeddableFactoryDefinition(getCoreServices)
+    );
 
     core.application.register({
       id: 'logs',

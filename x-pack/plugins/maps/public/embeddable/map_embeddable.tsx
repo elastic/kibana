@@ -74,7 +74,7 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput };
+export { MapEmbeddableInput, MapEmbeddableOutput };
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
@@ -89,6 +89,7 @@ export class MapEmbeddable
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
   private _prevSyncColors?: boolean;
+  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -142,6 +143,7 @@ export class MapEmbeddable
       timeRange: this.input.timeRange,
       filters: this.input.filters,
       forceRefresh: false,
+      searchSessionId: this.input.searchSessionId,
     });
     if (this.input.refreshConfig) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
@@ -212,13 +214,15 @@ export class MapEmbeddable
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters)
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters) ||
+      this.input.searchSessionId !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
         query: this.input.query,
         timeRange: this.input.timeRange,
         filters: this.input.filters,
         forceRefresh: false,
+        searchSessionId: this.input.searchSessionId,
       });
     }
 
@@ -236,21 +240,25 @@ export class MapEmbeddable
     timeRange,
     filters = [],
     forceRefresh,
+    searchSessionId,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters?: Filter[];
     forceRefresh: boolean;
+    searchSessionId?: string;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
+    this._prevSearchSessionId = searchSessionId;
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         forceRefresh,
+        searchSessionId,
       })
     );
   }
@@ -401,10 +409,11 @@ export class MapEmbeddable
 
   reload() {
     this._dispatchSetQuery({
-      query: this._prevQuery,
-      timeRange: this._prevTimeRange,
-      filters: this._prevFilters ?? [],
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
       forceRefresh: true,
+      searchSessionId: this.input.searchSessionId,
     });
   }
 

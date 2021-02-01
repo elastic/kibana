@@ -130,11 +130,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |The legacyExport plugin adds support for the legacy saved objects export format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOss]
-|The lens_oss plugin registers the lens visualization on OSS.
-It is registered as disabled. The x-pack plugin should unregister this.
-
-
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual managment section into it. This plugin does not contain any individual
@@ -143,11 +138,6 @@ management section itself.
 
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
-
-
-|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOss]
-|The maps_oss plugin registers the maps visualization on OSS.
-It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -160,8 +150,8 @@ It also provides a stateful version of it on the start contract.
 Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.md[presentationUtil]
-|Utilities and components used by the presentation-related plugins
+|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
+|The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
@@ -380,10 +370,6 @@ and actions.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
-|Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
@@ -453,6 +439,10 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/maps_file_upload/README.md[mapsFileUpload]
+|Deprecated - plugin targeted for removal and will get merged into file_upload plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
 |This plugin provides access to the detailed tile map services from Elastic.
 
@@ -468,6 +458,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|This plugin adds extended support to Security Solution Fleet Osquery integration
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
@@ -563,10 +557,6 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/vis_type_timeseries_enhanced/README.md[visTypeTimeseriesEnhanced]
-|The vis_type_timeseries_enhanced plugin is the x-pack counterpart to the OSS vis_type_timeseries plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]
