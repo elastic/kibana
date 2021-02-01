@@ -50,12 +50,7 @@ export class MockRouter {
   };
 
   public callRoute = async (request: MockRouterRequest) => {
-    const routerCalls = this.router[this.method].mock.calls as any[];
-    if (!routerCalls.length) throw new Error('No routes registered.');
-
-    const route = routerCalls.find(([router]: any) => router.path === this.path);
-    if (!route) throw new Error('No matching registered routes found - check method/path keys');
-
+    const route = this.findRouteRegistration();
     const [, handler] = route;
     const context = {} as jest.Mocked<RequestHandlerContext>;
     await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
@@ -68,14 +63,8 @@ export class MockRouter {
   public validateRoute = (request: MockRouterRequest) => {
     if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
 
-    // Ignoring a TS error here because it's tricky to resolve and unimportant to fix
-    // @ts-ignore
-    const configForMethodAndPath = this.router[this.method].mock.calls.find(
-      ([config]: Array<{ path: string }>) => config.path === this.path
-    );
-    if (!configForMethodAndPath)
-      throw new Error(`No route registered for ${this.method} & ${this.path}`);
-    const [config] = configForMethodAndPath;
+    const route = this.findRouteRegistration();
+    const [config] = route;
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
 
     const payloadValidation = validate[this.payload] as { validate(request: KibanaRequest): void };
@@ -90,6 +79,16 @@ export class MockRouter {
 
   public shouldThrow = (request: MockRouterRequest) => {
     expect(() => this.validateRoute(request)).toThrow();
+  };
+
+  findRouteRegistration = () => {
+    const routerCalls = this.router[this.method].mock.calls as any[];
+    if (!routerCalls.length) throw new Error('No routes registered.');
+
+    const route = routerCalls.find(([router]: any) => router.path === this.path);
+    if (!route) throw new Error('No matching registered routes found - check method/path keys');
+
+    return route;
   };
 }
 
