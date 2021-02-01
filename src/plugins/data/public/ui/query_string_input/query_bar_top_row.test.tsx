@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { mockPersistedLogFactory } from './query_string_input.test.mocks';
+import { mockPersistedLogFactory, mockFetchIndexPatterns } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
@@ -109,6 +109,7 @@ describe('QueryBarTopRowTopRow', () => {
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
+    mockFetchIndexPatterns.mockResolvedValue([stubIndexPatternWithFields]);
     jest.clearAllMocks();
   });
 
