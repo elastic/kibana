@@ -4,7 +4,12 @@
     "incremental": false,
     "types": ["node", "flot"]
   },
-  "include": ["**/*", "../typings/elastic__node_crypto.d.ts", "typings/**/*", "../packages/kbn-test/types/ftr_globals/**/*"],
+  "include": [
+    "**/*",
+    "../typings/elastic__node_crypto.d.ts",
+    "typings/**/*",
+    "../packages/kbn-test/types/ftr_globals/**/*"
+  ],
   "exclude": ["plugin_functional/plugins/**/*", "interpreter_functional/plugins/**/*"],
   "references": [
     { "path": "../src/core/tsconfig.json" },
@@ -34,5 +39,6 @@
     { "path": "../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../src/plugins/legacy_export/tsconfig.json" }
   ]
 }
