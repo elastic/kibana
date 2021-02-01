@@ -31,7 +31,8 @@ interface MinimalSaveModalProps {
 
 export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
-  I18nContext: I18nStart['Context']
+  I18nContext: I18nStart['Context'],
+  Wrapper?: React.FC
 ) {
   const container = document.createElement('div');
   const closeModal = () => {
@@ -55,5 +56,13 @@ export function showSaveModal(
     onClose: closeModal,
   });
 
-  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  const wrappedElement = Wrapper ? (
+    <I18nContext>
+      <Wrapper>{element}</Wrapper>
+    </I18nContext>
+  ) : (
+    <I18nContext>{element}</I18nContext>
+  );
+
+  ReactDOM.render(wrappedElement, container);
 }

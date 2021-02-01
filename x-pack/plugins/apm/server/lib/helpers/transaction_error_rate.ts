@@ -10,40 +10,21 @@ import {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '../../../../../typings/elasticsearch/aggregations';
-import { getTransactionDurationFieldForAggregatedTransactions } from './aggregated_transactions';
 
-export function getOutcomeAggregation({
-  searchAggregatedTransactions,
-}: {
-  searchAggregatedTransactions: boolean;
-}) {
-  return {
-    terms: {
-      field: EVENT_OUTCOME,
-      include: [EventOutcome.failure, EventOutcome.success],
-    },
-    aggs: {
-      // simply using the doc count to get the number of requests is not possible for transaction metrics (histograms)
-      // to work around this we get the number of transactions by counting the number of latency values
-      count: {
-        value_count: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
-      },
-    },
-  };
-}
+export const getOutcomeAggregation = () => ({
+  terms: {
+    field: EVENT_OUTCOME,
+    include: [EventOutcome.failure, EventOutcome.success],
+  },
+});
+
+type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
 export function calculateTransactionErrorPercentage(
-  outcomeResponse: AggregationResultOf<
-    ReturnType<typeof getOutcomeAggregation>,
-    {}
-  >
+  outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {
   const outcomes = Object.fromEntries(
-    outcomeResponse.buckets.map(({ key, count }) => [key, count.value])
+    outcomeResponse.buckets.map(({ key, doc_count: count }) => [key, count])
   );
 
   const failedTransactions = outcomes[EventOutcome.failure] ?? 0;
@@ -56,7 +37,7 @@ export function getTransactionErrorRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { outcomes: ReturnType<typeof getOutcomeAggregation> };
+      aggs: { outcomes: OutcomeAggregation };
     },
     {}
   >['buckets']

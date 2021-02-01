@@ -62,6 +62,36 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: (_, { allTags }) => allTags,
       },
     ],
+    recentQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { recentQueries }) => recentQueries,
+      },
+    ],
+    topQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueries }) => topQueries,
+      },
+    ],
+    topQueriesNoResults: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoResults }) => topQueriesNoResults,
+      },
+    ],
+    topQueriesNoClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoClicks }) => topQueriesNoClicks,
+      },
+    ],
+    topQueriesWithClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesWithClicks }) => topQueriesWithClicks,
+      },
+    ],
     totalQueries: [
       0,
       {
@@ -108,6 +138,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       [],
       {
         onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
+    topClicksForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { topClicksForQuery }) => topClicksForQuery,
       },
     ],
     startDate: [

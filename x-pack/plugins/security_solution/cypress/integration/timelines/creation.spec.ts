@@ -47,7 +47,8 @@ import { openTimeline } from '../../tasks/timelines';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('Timelines', () => {
+// Skipped at the moment as there looks to be in-deterministic bugs with the open timeline dialog.
+describe.skip('Timelines', () => {
   beforeEach(() => {
     cleanKibana();
   });
@@ -89,7 +90,7 @@ describe('Timelines', () => {
 
       cy.get(FAVORITE_TIMELINE).should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description); // This is the flake part where it sometimes does not show/load the timelines correctly
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
       cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
       cy.get(PIN_EVENT)
