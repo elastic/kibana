@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useValues, useActions } from 'kea';
+import { EuiSpacer } from '@elastic/eui';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -47,6 +48,7 @@ export const AnalyticsLayout: React.FC<Props> = ({
       <FlashMessages />
       <LogRetentionCallout type={LogRetentionOptions.Analytics} />
       {children}
+      <EuiSpacer />
     </>
   );
 };
