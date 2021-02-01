@@ -14,9 +14,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { BasicOptions, SwitchOption } from '../../../../vis_default_editor/public';
-import { TruncateLabelsOption } from '../../../../vis_type_xy/public';
+import { TruncateLabelsOption, getPositions } from '../../../../vis_type_xy/public';
 
 import { PieVisParams } from '../../pie';
+
+const collections = {
+  legendPositions: getPositions(),
+};
 
 function PieOptions(props: VisEditorOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
@@ -45,7 +49,7 @@ function PieOptions(props: VisEditorOptionsProps<PieVisParams>) {
           value={stateParams.isDonut}
           setValue={setValue}
         />
-        <BasicOptions {...props} />
+        <BasicOptions {...props} collections={collections} />
       </EuiPanel>
 
       <EuiSpacer size="s" />

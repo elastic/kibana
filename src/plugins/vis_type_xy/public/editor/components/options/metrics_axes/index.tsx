@@ -326,14 +326,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         setMultipleValidity={props.setMultipleValidity}
         seriesParams={stateParams.seriesParams}
         valueAxes={stateParams.valueAxes}
-        vis={vis}
       />
       <EuiSpacer size="s" />
       <CategoryAxisPanel
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
-        vis={vis}
       />
     </>
   ) : null;

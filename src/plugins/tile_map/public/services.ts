@@ -11,6 +11,7 @@ import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { SharePluginStart } from '../../share/public';
+import { TmsLayer } from '../../maps_legacy/public';
 
 export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 
@@ -27,3 +28,5 @@ export const [getShareService, setShareService] = createGetterSetter<SharePlugin
 export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
   'KibanaLegacy'
 );
+
+export const [getTmsLayers, setTmsLayers] = createGetterSetter<TmsLayer[]>('TmsLayers');

@@ -20,13 +20,13 @@ interface Props<K> {
   stateParams: K;
   setValue: (title: 'wms', options: WMSOptions) => void;
   vis: Vis;
+  tmsLayers: TmsLayer[];
 }
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions<K extends { wms: WMSOptions }>({ stateParams, setValue, vis }: Props<K>) {
+function WmsOptions<K extends { wms: WMSOptions }>({ stateParams, setValue, tmsLayers }: Props<K>) {
   const { wms } = stateParams;
-  const { tmsLayers } = vis.type.editorConfig.collections;
   const tmsLayerOptions = useMemo(() => tmsLayers.map(mapLayerForOption), [tmsLayers]);
 
   const setWmsOption = <T extends keyof WMSOptions>(paramName: T, value: WMSOptions[T]) =>

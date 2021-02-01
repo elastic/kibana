@@ -22,7 +22,7 @@ interface BasicOptionsParams {
 function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
-  vis,
+  collections,
 }: VisEditorOptionsProps<VisParams>) {
   return (
     <>
@@ -30,7 +30,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
         label={i18n.translate('visDefaultEditor.options.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
-        options={vis.type.editorConfig.collections.legendPositions}
+        options={collections.legendPositions}
         paramName="legendPosition"
         value={stateParams.legendPosition}
         setValue={setValue}

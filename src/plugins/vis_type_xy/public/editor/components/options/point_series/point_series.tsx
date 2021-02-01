@@ -20,6 +20,11 @@ import { ThresholdPanel } from './threshold_panel';
 import { ChartType } from '../../../../../common';
 import { ValidationVisOptionsProps } from '../../common';
 import { ElasticChartsOptions } from './elastic_charts_options';
+import { getPositions } from '../../../collections';
+
+const collections = {
+  legendPositions: getPositions(),
+};
 
 export function PointSeriesOptions(
   props: ValidationVisOptionsProps<
@@ -54,7 +59,7 @@ export function PointSeriesOptions(
         </EuiTitle>
         <EuiSpacer size="m" />
 
-        <BasicOptions {...props} />
+        <BasicOptions {...props} collections={collections} />
 
         {vis.data.aggs!.aggs.some(
           (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
