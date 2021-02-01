@@ -7,6 +7,7 @@
 
 import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
+import { get } from './cases/get';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
 import { getFields } from './configure/get_fields';
@@ -27,6 +28,15 @@ export const createCaseClient = ({
 }: CaseClientFactoryArguments): CaseClient => {
   return {
     create: create({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
+      userActionService,
+    }),
+    get: get({
       alertsService,
       caseConfigureService,
       caseService,

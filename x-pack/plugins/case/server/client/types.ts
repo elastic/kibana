@@ -35,6 +35,11 @@ export interface CaseClientUpdate {
   cases: CasesPatchRequest;
 }
 
+export interface CaseClientGet {
+  id: string;
+  includeComments?: boolean;
+}
+
 export interface CaseClientAddComment {
   caseClient: CaseClient;
   caseId: string;
@@ -65,6 +70,7 @@ export interface ConfigureFields {
 export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
+  get: (args: CaseClientGet) => Promise<CaseResponse>;
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
