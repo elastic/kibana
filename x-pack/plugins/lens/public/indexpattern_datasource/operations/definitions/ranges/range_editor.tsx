@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -189,15 +189,6 @@ export const RangeEditor = ({
   rangeFormatter: IFieldFormat;
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
-
-  // if the maxBars in the params is set to auto refresh it with the default value only on bootstrap
-  useEffect(() => {
-    if (!isAdvancedEditor) {
-      if (params.maxBars !== maxBars) {
-        setParam('maxBars', maxBars);
-      }
-    }
-  }, [maxBars, params.maxBars, setParam, isAdvancedEditor]);
 
   if (isAdvancedEditor) {
     return (
