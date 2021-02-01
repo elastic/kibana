@@ -77,7 +77,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  const onChoicesSuccess = (values: Choice[]) => {
+  const onChoicesSuccess = useCallback((values: Choice[]) => {
     setChoices(
       values.reduce(
         (acc, value) => ({
@@ -87,7 +87,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         defaultFields
       )
     );
-  };
+  }, []);
 
   const { isLoading: isLoadingChoices } = useGetChoices({
     http,

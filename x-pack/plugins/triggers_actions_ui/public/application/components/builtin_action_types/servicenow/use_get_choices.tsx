@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnector } from '../../../../types';
 import { getChoices } from './api';
@@ -36,60 +36,61 @@ export const useGetChoices = ({
 }: UseGetChoicesProps): UseGetChoices => {
   const [isLoading, setIsLoading] = useState(false);
   const [choices, setChoices] = useState<Choice[]>([]);
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
-  useEffect(() => {
-    let didCancel = false;
-    const fetchData = async () => {
-      if (!actionConnector) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchData = useCallback(async () => {
+    if (!actionConnector) {
+      setIsLoading(false);
+      return;
+    }
 
+    try {
+      didCancel.current = false;
+      abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
       setIsLoading(true);
 
-      try {
-        const res = await getChoices({
-          http,
-          signal: abortCtrl.current.signal,
-          connectorId: actionConnector.id,
-          fields,
-        });
+      const res = await getChoices({
+        http,
+        signal: abortCtrl.current.signal,
+        connectorId: actionConnector.id,
+        fields,
+      });
 
-        if (!didCancel) {
-          setIsLoading(false);
-          setChoices(res.data ?? []);
-          if (res.status && res.status === 'error') {
-            toastNotifications.addDanger({
-              title: i18n.CHOICES_API_ERROR,
-              text: `${res.serviceMessage ?? res.message}`,
-            });
-          } else if (onSuccess) {
-            onSuccess(res.data ?? []);
-          }
-        }
-      } catch (error) {
-        if (!didCancel) {
-          setIsLoading(false);
+      if (!didCancel.current) {
+        setIsLoading(false);
+        setChoices(res.data ?? []);
+        if (res.status && res.status === 'error') {
           toastNotifications.addDanger({
             title: i18n.CHOICES_API_ERROR,
-            text: error.message,
+            text: `${res.serviceMessage ?? res.message}`,
           });
+        } else if (onSuccess) {
+          onSuccess(res.data ?? []);
         }
       }
-    };
+    } catch (error) {
+      if (!didCancel.current) {
+        setIsLoading(false);
+        toastNotifications.addDanger({
+          title: i18n.CHOICES_API_ERROR,
+          text: error.message,
+        });
+      }
+    }
+  }, [actionConnector, http, fields, onSuccess, toastNotifications]);
 
-    abortCtrl.current.abort();
+  useEffect(() => {
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
+      setIsLoading(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [http, actionConnector, toastNotifications, fields]);
+  }, []);
 
   return {
     choices,
