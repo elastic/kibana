@@ -57,7 +57,6 @@
  *  - When a filter is added to the search box, or via a visualization, it is written to the
  *    `appSearchSource`.
  */
-
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
@@ -455,7 +454,6 @@ export class SearchSource {
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
-
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
@@ -528,20 +526,24 @@ export class SearchSource {
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
-      const remainingFields = difference(uniqFieldNames, [
+      let remainingFields = difference(uniqFieldNames, [
         ...Object.keys(body.script_fields),
         ...Object.keys(body.runtime_mappings),
       ]).filter(Boolean);
 
+      if (body._source.excludes) {
+        // TODO: optimize complexity
+        remainingFields = remainingFields.filter((remainingField) => {
+          return !body._source.excludes.includes(remainingField);
+        });
+      }
+
+      body.stored_fields = remainingFields;
       // only include unique values
-      body.stored_fields = [...new Set(remainingFields)];
-
       if (fieldsFromSource.length) {
-        // include remaining fields in _source
-        setWith(body, '_source.includes', remainingFields, (nsValue) =>
+        /* setWith(body, '_source.includes', fieldsFromSource, (nsValue) =>
           isObject(nsValue) ? {} : nsValue
-        );
-
+        );*/
         // if items that are in the docvalueFields are provided, we should
         // make sure those are added to the fields API unless they are
         // already set in docvalue_fields
