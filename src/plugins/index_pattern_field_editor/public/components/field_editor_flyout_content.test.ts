@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { registerTestBed, TestBed, noop, docLinks } from '../../test_utils';
+import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
 import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
