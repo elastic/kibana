@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 source src/dev/ci_setup/setup_env.sh
 
 cd "$XPACK_DIR/plugins/canvas"
