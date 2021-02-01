@@ -119,6 +119,7 @@ export const QueryInput = ({
       dataTestSubj="indexPattern-filters-queryStringInput"
       size="s"
       isInvalid={isInvalid}
+      className="lnsIndexPatternFilters__input"
       bubbleSubmitEvent={false}
       indexPatterns={[indexPattern]}
       query={inputValue}

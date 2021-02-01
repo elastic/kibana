@@ -1,3 +1,12 @@
 .lnsIndexPatternDimensionEditor__filtersEditor {
   width: $euiSize * 60;
 }
+
+.lnsIndexPatternFilters__input {
+  @include kbnThemeStyle('v8') {
+    overflow:hidden;
+    .kbnQueryBar__textarea:not(:focus) {
+      margin-top: 1px;
+    }
+  }
+}
