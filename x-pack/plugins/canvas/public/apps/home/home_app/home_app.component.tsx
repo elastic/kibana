@@ -11,7 +11,7 @@ import { WorkpadManager } from '../../../components/workpad_manager';
 // @ts-expect-error untyped local
 import { setDocTitle } from '../../../lib/doc_title';
 
-interface Props {
+export interface Props {
   onLoad: () => void;
 }
 
