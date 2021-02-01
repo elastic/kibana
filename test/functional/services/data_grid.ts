@@ -91,7 +91,7 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
         `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"]:nth-of-type(${
-          columnNumber * rowIndex + columnIndex + 2
+          columnNumber * (rowIndex - 1) + columnIndex + 1
         })`
       );
     }
