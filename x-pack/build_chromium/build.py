@@ -33,10 +33,10 @@ source_version = sys.argv[1]
 base_version = source_version[:7].strip('.')
 
 # Set to "arm" to build for ARM on Linux
-arch_name = sys.argv[2] if len(sys.argv) >= 3 else 'x64'
+arch_name = sys.argv[2] if len(sys.argv) >= 3 else 'unknown'
 
 if arch_name != 'x64' and arch_name != 'arm64':
-  raise Exception('Unexpected architecture: ' + arch_name)
+  raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 print('Building Chromium ' + source_version + ' for ' + arch_name + ' from ' + src_path)
 print('src path: ' + src_path)
