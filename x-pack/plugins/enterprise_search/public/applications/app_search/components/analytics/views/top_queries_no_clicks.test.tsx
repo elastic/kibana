@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { setMockValues } from '../../../../__mocks__';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { AnalyticsTable } from '../components';
 import { TopQueriesNoClicks } from './';
 
 describe('TopQueriesNoClicks', () => {
   it('renders', () => {
+    setMockValues({ topQueriesNoClicks: [] });
     const wrapper = shallow(<TopQueriesNoClicks />);
 
-    expect(wrapper.isEmptyRender()).toBe(false); // TODO
+    expect(wrapper.find(AnalyticsTable)).toHaveLength(1);
   });
 });
