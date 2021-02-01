@@ -251,7 +251,7 @@ export interface Plugin<
 /**
  * A plugin with asynchronous lifecycle methods.
  *
- * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
  * @public
  */
 export interface AsyncPlugin<

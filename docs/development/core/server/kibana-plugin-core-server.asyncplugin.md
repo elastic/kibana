@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Asynchronous lifecycles are deprecated, and should be migrated to sync
+> Asynchronous lifecycles are deprecated, and should be migrated to sync [plugin](./kibana-plugin-core-server.plugin.md)
 > 
 
 A plugin with asynchronous lifecycle methods.
