@@ -289,6 +289,87 @@ export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   }
 );
 
+export const PRIVATE_SOURCES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSources.description',
+  {
+    defaultMessage:
+      'Private sources are connected by users in your organization to create a personalized search experience.',
+  }
+);
+
+export const PRIVATE_SOURCES_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSourcesToggle.description',
+  {
+    defaultMessage: 'Enable private sources for your organization',
+  }
+);
+
+export const REMOTE_SOURCES_TOGGLE_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesToggle.text',
+  {
+    defaultMessage: 'Enable remote private sources',
+  }
+);
+
+export const REMOTE_SOURCES_TABLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesTable.description',
+  {
+    defaultMessage:
+      'Remote sources synchronize and store a limited amount of data on disk, with a low impact on storage resources.',
+  }
+);
+
+export const REMOTE_SOURCES_EMPTY_TABLE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.remoteSourcesEmptyTable.title',
+  {
+    defaultMessage: 'No remote private sources configured yet',
+  }
+);
+
+export const STANDARD_SOURCES_TOGGLE_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesToggle.text',
+  {
+    defaultMessage: 'Enable standard private sources',
+  }
+);
+
+export const STANDARD_SOURCES_TABLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesTable.description',
+  {
+    defaultMessage:
+      'Standard sources synchronize and store all searchable data on disk, with a directly correlated impact on storage resources.',
+  }
+);
+
+export const STANDARD_SOURCES_EMPTY_TABLE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.standardSourcesEmptyTable.title',
+  {
+    defaultMessage: 'No standard private sources configured yet',
+  }
+);
+
+export const SECURITY_UNSAVED_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.unsavedChanges.message',
+  {
+    defaultMessage:
+      'Your private sources settings have not been saved. Are you sure you want to leave?',
+  }
+);
+
+export const PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.privateSourcesUpdateConfirmation.text',
+  {
+    defaultMessage: 'Updates to private source configuration will take effect immediately.',
+  }
+);
+
+export const SOURCE_RESTRICTIONS_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.security.sourceRestrictionsSuccess.message',
+  {
+    defaultMessage: 'Successfully updated source restrictions.',
+  }
+);
+
 export const PUBLIC_KEY_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.publicKey.label',
   {
@@ -379,6 +460,20 @@ export const SAVE_CHANGES_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.saveChanges.button',
   {
     defaultMessage: 'Save changes',
+  }
+);
+
+export const SAVE_SETTINGS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.saveSettings.button',
+  {
+    defaultMessage: 'Save settings',
+  }
+);
+
+export const KEEP_EDITING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.keepEditing.button',
+  {
+    defaultMessage: 'Keep editing',
   }
 );
 
@@ -493,6 +588,10 @@ export const UPDATE_BUTTON = i18n.translate(
   }
 );
 
+export const RESET_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.reset.button', {
+  defaultMessage: 'Reset',
+});
+
 export const CONFIGURE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.configure.button',
   {
@@ -522,10 +621,28 @@ export const PRIVATE_PLATINUM_LICENSE_CALLOUT = i18n.translate(
   }
 );
 
+export const SOURCE = i18n.translate('xpack.enterpriseSearch.workplaceSearch.source.text', {
+  defaultMessage: 'Source',
+});
+
 export const PRIVATE_SOURCE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.privateSource.text',
   {
     defaultMessage: 'Private Source',
+  }
+);
+
+export const PRIVATE_SOURCES = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.privateSources.text',
+  {
+    defaultMessage: 'Private Sources',
+  }
+);
+
+export const CONFIRM_CHANGES_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.confirmChanges.text',
+  {
+    defaultMessage: 'Confirm changes',
   }
 );
 

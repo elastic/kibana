@@ -28,7 +28,9 @@ import { populateTimeline } from '../../tasks/timeline';
 import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-describe('Sourcerer', () => {
+// Skipped at the moment as this has flake due to click handler issues. This has been raised with team members
+// and the code is being re-worked and then these tests will be unskipped
+describe.skip('Sourcerer', () => {
   before(() => {
     cleanKibana();
   });

@@ -81,7 +81,7 @@ import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
-import { runFleetServerMigration } from './services/fleet_server_migration';
+import { isFleetServerSetup } from './services/fleet_server_migration';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -299,7 +299,14 @@ export class FleetPlugin
     if (fleetServerEnabled) {
       // We need licence to be initialized before using the SO service.
       await this.licensing$.pipe(first()).toPromise();
-      await runFleetServerMigration();
+
+      const fleetSetup = await isFleetServerSetup();
+
+      if (!fleetSetup) {
+        this.logger?.warn(
+          'Extra setup is needed to be able to use central management for agent, please visit the Fleet app in Kibana.'
+        );
+      }
     }
 
     return {
