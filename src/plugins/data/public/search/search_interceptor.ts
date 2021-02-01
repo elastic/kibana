@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { get, memoize } from 'lodash';
+import { memoize } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -25,7 +25,11 @@ import {
   getHttpError,
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
-import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
+import {
+  AbortError,
+  getCombinedAbortSignal,
+  KibanaServerError,
+} from '../../../kibana_utils/public';
 import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {
@@ -87,8 +91,12 @@ export class SearchInterceptor {
    * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
    * @internal
    */
-  protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error {
-    if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
+  protected handleSearchError(
+    e: KibanaServerError | AbortError,
+    timeoutSignal: AbortSignal,
+    options?: ISearchOptions
+  ): Error {
+    if (timeoutSignal.aborted || e.message === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
 
@@ -96,7 +104,7 @@ export class SearchInterceptor {
       // The timeout error is shown any time a request times out, or once per session, if the request is part of a session.
       this.showTimeoutError(err, options?.sessionId);
       return err;
-    } else if (options?.abortSignal?.aborted) {
+    } else if (e instanceof AbortError) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
     } else if (isEsError(e)) {
@@ -106,12 +114,13 @@ export class SearchInterceptor {
         return new EsError(e);
       }
     } else {
-      return e;
+      return e instanceof Error ? e : new Error(e.message);
     }
   }
 
   /**
    * @internal
+   * @throws `AbortError` | `ErrorLike`
    */
   protected runSearch(
     request: IKibanaSearchRequest,
@@ -234,7 +243,7 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
-        catchError((e: Error) => {
+        catchError((e: Error | AbortError) => {
           return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {

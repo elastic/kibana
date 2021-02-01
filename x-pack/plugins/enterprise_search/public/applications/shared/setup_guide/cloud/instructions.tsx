@@ -34,10 +34,16 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     editDeploymentLink: cloudDeploymentLink ? (
                       <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
-                        edit your deployment
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText',
+                          { defaultMessage: 'edit your deployment' }
+                        )}
                       </EuiLink>
                     ) : (
-                      'Visit the Elastic Cloud console'
+                      i18n.translate(
+                        'xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText',
+                        { defaultMessage: 'edit your deployment' }
+                      )
                     ),
                   }}
                 />
@@ -76,7 +82,10 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                         href={`${docLinks.enterpriseSearchBase}/configuration.html`}
                         target="_blank"
                       >
-                        configurable options
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step3.instruction1LinkText',
+                          { defaultMessage: 'configurable options' }
+                        )}
                       </EuiLink>
                     ),
                   }}
@@ -118,7 +127,10 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                         href={`${docLinks.cloudBase}/ec-configure-index-management.html`}
                         target="_blank"
                       >
-                        configure an index lifecycle policy
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step5.instruction1LinkText',
+                          { defaultMessage: 'configure an index lifecycle policy' }
+                        )}
                       </EuiLink>
                     ),
                   }}
