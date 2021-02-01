@@ -581,7 +581,7 @@ describe('reindexService', () => {
             id: '2',
             attributes: {
               ...reindexOp.attributes,
-              indexName: `.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`,
+              indexName: `.reindexed-v${prevMajor}-ml-anomalies`,
             },
           } as ReindexSavedObject;
           const updatedOp = await service.processNextStep(mlReindexedOp);
