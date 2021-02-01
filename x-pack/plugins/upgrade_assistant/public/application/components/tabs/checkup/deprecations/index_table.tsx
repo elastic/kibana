@@ -8,7 +8,7 @@ import { sortBy } from 'lodash';
 import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
@@ -24,7 +24,7 @@ export interface IndexDeprecationDetails {
   details?: string;
 }
 
-export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
+export interface IndexDeprecationTableProps {
   indices: IndexDeprecationDetails[];
 }
 
@@ -35,7 +35,7 @@ interface IndexDeprecationTableState {
   pageSize: number;
 }
 
-export class IndexDeprecationTableUI extends React.Component<
+export class IndexDeprecationTable extends React.Component<
   IndexDeprecationTableProps,
   IndexDeprecationTableState
 > {
@@ -51,24 +51,27 @@ export class IndexDeprecationTableUI extends React.Component<
   }
 
   public render() {
-    const { intl } = this.props;
     const { pageIndex, pageSize, sortField, sortDirection } = this.state;
 
     const columns = [
       {
         field: 'index',
-        name: intl.formatMessage({
-          id: 'xpack.upgradeAssistant.checkupTab.deprecations.indexTable.indexColumnLabel',
-          defaultMessage: 'Index',
-        }),
+        name: i18n.translate(
+          'xpack.upgradeAssistant.checkupTab.deprecations.indexTable.indexColumnLabel',
+          {
+            defaultMessage: 'Index',
+          }
+        ),
         sortable: true,
       },
       {
         field: 'details',
-        name: intl.formatMessage({
-          id: 'xpack.upgradeAssistant.checkupTab.deprecations.indexTable.detailsColumnLabel',
-          defaultMessage: 'Details',
-        }),
+        name: i18n.translate(
+          'xpack.upgradeAssistant.checkupTab.deprecations.indexTable.detailsColumnLabel',
+          {
+            defaultMessage: 'Details',
+          }
+        ),
       },
     ];
 
@@ -181,5 +184,3 @@ export class IndexDeprecationTableUI extends React.Component<
     };
   }
 }
-
-export const IndexDeprecationTable = injectI18n(IndexDeprecationTableUI);
