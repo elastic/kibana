@@ -13,14 +13,14 @@ import { ResultsTable } from '../../results/results_table';
 
 const QueryAgentResultsComponent = () => {
   const { actionId, agentId } = useParams<{ actionId: string; agentId: string }>();
-  const [, { actionDetails }] = useActionDetails({ actionId });
+  const { data } = useActionDetails({ actionId });
 
   return (
     <>
       <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
         {
           // @ts-expect-error
-          actionDetails._source?.data.commands[0].query
+          data?.actionDetails._source?.data.commands[0].query
         }
       </EuiCodeBlock>
       <EuiSpacer />

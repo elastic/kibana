@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { produce } from 'immer';
+import { Index } from '../../../../types';
 
 const shard1 = {
   id: ['L22w_FX2SbqlQYOP5QrYDg', '.kibana_1', '0'],
@@ -334,7 +335,7 @@ const search1Child = {
 (searchRoot.treeRoot as any) = search1;
 (shard1.searches[0] as any) = searchRoot;
 
-export const processedResponseWithFirstShard = produce<any>(null, () => [
+export const processedResponseWithFirstShard = produce<Index[]>([], () => [
   {
     shards: [shard1],
     time: 0.058419,

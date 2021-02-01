@@ -11,7 +11,8 @@ import { useMutation } from 'react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 import { SavedQueryForm } from '../form';
-import { AgentsTable } from '../../agents/agents_table';
+import { LiveQueryForm } from '../../live_query/form';
+import { ResultTabs } from '../edit/tabs';
 
 const NewSavedQueryPageComponent = () => {
   const { http } = useKibana().services;
@@ -30,11 +31,29 @@ const NewSavedQueryPageComponent = () => {
     updateSavedQueryMutation,
   ]);
 
+  const createActionMutation = useMutation((payload) =>
+    http.post('/api/osquery/action', { body: JSON.stringify(payload) })
+  );
+
+  console.error('createActionMutation', createActionMutation);
+
   return (
     <>
       <SavedQueryForm onSubmit={handleSubmit} />
       <EuiSpacer />
-      <AgentsTable />
+      <LiveQueryForm onSubmit={createActionMutation.mutate} />
+
+      {createActionMutation.data ||
+        (true && (
+          <>
+            <EuiSpacer />
+            <ResultTabs
+              actionId={
+                '6f80265b-f4bd-40ac-a677-4b60426e1a69' ?? createActionMutation.data.action.action_id
+              }
+            />
+          </>
+        ))}
     </>
   );
 };

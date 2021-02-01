@@ -6,13 +6,11 @@
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 
 import { ResultsTable } from '../../results/results_table';
 import { ActionResultsTable } from '../../action_results/action_results_table';
 
-const ResultTabsComponent = () => {
-  const { actionId } = useParams<{ actionId: string }>();
+const ResultTabsComponent = ({ actionId }: { actionId: string }) => {
   const tabs = useMemo(
     () => [
       {

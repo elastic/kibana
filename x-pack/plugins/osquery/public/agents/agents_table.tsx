@@ -48,8 +48,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
-      // @ts-expect-error
-      onChange(newSelectedItems.map((item) => item._id));
+
+      if (onChange) {
+        // @ts-expect-error
+        onChange(newSelectedItems.map((item) => item._id));
+      }
     },
     [onChange]
   );
@@ -60,7 +63,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     return <EuiHealth color={color}>{label}</EuiHealth>;
   };
 
-  const [, { agents, totalCount }] = useAllAgents({
+  const { data = {} } = useAllAgents({
     activePage: pageIndex,
     limit: pageSize,
     direction: sortDirection,
@@ -95,10 +98,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: totalCount,
+      totalItemCount: data.totalCount ?? 0,
       pageSizeOptions: [3, 5, 8],
     }),
-    [pageIndex, pageSize, totalCount]
+    [pageIndex, pageSize, data.totalCount]
   );
 
   const sorting = useMemo(
@@ -122,18 +125,21 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   );
 
   useEffect(() => {
-    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
+    if (
+      selectedAgents?.length &&
+      data.agents?.length &&
+      selectedItems.length !== selectedAgents.length
+    ) {
       tableRef?.current?.setSelection(
-        // @ts-expect-error
-        selectedAgents.map((agentId) => find({ _id: agentId }, agents))
+        selectedAgents.map((agentId) => find({ _id: agentId }, data.agents))
       );
     }
-  }, [selectedAgents, agents, selectedItems.length]);
+  }, [selectedAgents, data.agents, selectedItems.length]);
 
   return (
     <EuiBasicTable<Agent>
       ref={tableRef}
-      items={agents}
+      items={data.agents ?? []}
       itemId="_id"
       columns={columns}
       pagination={pagination}

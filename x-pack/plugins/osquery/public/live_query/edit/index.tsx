@@ -5,22 +5,25 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
+// import { useQuery } from 'react-query';
 
 import { ResultTabs } from './tabs';
 import { LiveQueryForm } from '../form';
-import { useKibana } from '../../common/lib/kibana';
+// import { useKibana } from '../../common/lib/kibana';
+import { useActionDetails } from '../../actions/use_action_details';
 
 const EditLiveQueryPageComponent = () => {
-  const { http } = useKibana().services;
-  const { savedQueryId } = useParams<{ savedQueryId: string }>();
+  // const { http } = useKibana().services;
+  const { actionId } = useParams<{ actionId: string }>();
 
-  const { isLoading, data: actionDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
-    http.get(`/api/osquery/saved_query/${savedQueryId}`)
-  );
+  const { isLoading, data: actionDetails } = useActionDetails({ actionId });
+
+  // const { isLoading, data: actionDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
+  //   http.get(`/api/osquery/saved_query/${savedQueryId}`)
+  // );
 
   const handleSubmit = useCallback(() => Promise.resolve(), []);
 
@@ -28,13 +31,15 @@ const EditLiveQueryPageComponent = () => {
     return <>{'Loading...'}</>;
   }
 
+  console.error('actionDetails', actionDetails);
+
   return (
     <>
-      {!isEmpty(actionDetails) && (
-        <LiveQueryForm actionDetails={actionDetails} onSubmit={handleSubmit} />
-      )}
+      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
+        {actionDetails?.actionDetails?._source?.data.commands[0].query}
+      </EuiCodeBlock>
       <EuiSpacer />
-      <ResultTabs />
+      {/* <ResultTabs /> */}
     </>
   );
 };

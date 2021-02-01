@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {  find, map } from 'lodash/fp';
+import { find, map } from 'lodash/fp';
 import {
   EuiDataGrid,
   EuiDataGridProps,
@@ -21,7 +21,6 @@ import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
-
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -76,7 +75,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const [, { results, totalCount }] = useActionResults({
+  const { data: actionResultsData } = useActionResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -91,14 +90,12 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     setVisibleColumns,
   ]);
 
-  const [, { agents }] = useAllAgents({
+  const { data: agentsData } = useAllAgents({
     activePage: 0,
     limit: 1000,
     direction: Direction.desc,
     sortField: '@timestamp',
   });
-
-  console.error('agenmts', agents);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () => ({ rowIndex, columnId, setCellProps }) => {
@@ -135,7 +132,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent_status') {
         const agentIdValue = value.fields.agent_id[0];
-        const agent = find(['_id', agentIdValue], agents);
+        const agent = find(['_id', agentIdValue], agentsData?.agents);
         const online = agent?.active;
         const color = online ? 'success' : 'danger';
         const label = online ? 'Online' : 'Offline';
@@ -144,10 +141,16 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent') {
         const agentIdValue = value.fields.agent_id[0];
-        const agent = find(['_id', agentIdValue], agents);
+        const agent = find(['_id', agentIdValue], agentsData?.agents);
         const agentName = agent?.local_metadata.host.name;
 
-        console.error('aaa', value, agentIdValue, agentName, find(['_id', agentIdValue], agents));
+        console.error(
+          'aaa',
+          value,
+          agentIdValue,
+          agentName,
+          find(['_id', agentIdValue], agentsData?.agents)
+        );
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(
           `/live_query/queries/${actionId}/results/${agentIdValue}`
@@ -163,7 +166,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       return '-';
     },
-    [actionId, agents]
+    [actionId, agentsData?.agents, pagination.pageIndex, pagination.pageSize]
   );
 
   const tableSorting: EuiDataGridSorting = useMemo(
@@ -181,14 +184,13 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
-
   return (
-    <DataContext.Provider value={results}>
+    <DataContext.Provider value={actionResultsData?.results}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        rowCount={totalCount}
+        rowCount={actionResultsData?.totalCount}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}

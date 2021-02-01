@@ -42,7 +42,7 @@ const ActionsTableComponent = () => {
   // ** Sorting config
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const [actionsLoading, { actions, totalCount }] = useAllActions({
+  const { isLoading: actionsLoading, data: actionsData } = useAllActions({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
@@ -90,7 +90,7 @@ const ActionsTableComponent = () => {
   );
 
   useEffect(() => {
-    const newColumns = keys(actions[0]?.fields)
+    const newColumns = keys(actionsData?.actions[0]?.fields)
       .sort()
       .map((fieldName) => ({
         id: fieldName,
@@ -102,19 +102,19 @@ const ActionsTableComponent = () => {
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-  }, [columns, actions]);
+  }, [columns, actionsData?.actions]);
 
   if (actionsLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
   return (
-    <DataContext.Provider value={actions}>
+    <DataContext.Provider value={actionsData?.actions ?? []}>
       <EuiDataGrid
         aria-label="Osquery actions"
         columns={columns}
         columnVisibility={columnVisibility}
-        rowCount={totalCount}
+        rowCount={actionsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}

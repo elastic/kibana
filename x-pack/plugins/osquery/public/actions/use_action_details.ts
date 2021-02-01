@@ -5,7 +5,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
@@ -17,12 +18,7 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse, InspectResponse } from './helpers';
-
-const ID = 'actionDetailsQuery';
 
 export interface ActionDetailsArgs {
   actionDetails: Record<string, string>;
@@ -43,78 +39,30 @@ export const useActionDetails = ({
   docValueFields,
   filterQuery,
   skip = false,
-}: UseActionDetails): [boolean, ActionDetailsArgs] => {
-  const { data, notifications } = useKibana().services;
+}: UseActionDetails) => {
+  const { data } = useKibana().services;
 
-  const abortCtrl = useRef(new AbortController());
-  const [loading, setLoading] = useState(false);
   const [actionDetailsRequest, setHostRequest] = useState<ActionDetailsRequestOptions | null>(null);
 
-  const [actionDetailsResponse, setActionDetailsResponse] = useState<ActionDetailsArgs>({
-    actionDetails: {},
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-  });
+  const response = useQuery(
+    ['action', { actionId }],
+    async () => {
+      if (!actionDetailsRequest) return Promise.resolve();
 
-  const actionDetailsSearch = useCallback(
-    (request: ActionDetailsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
+      const responseData = await data.search
+        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(actionDetailsRequest!, {
+          strategy: 'osquerySearchStrategy',
+        })
+        .toPromise();
 
-      let didCancel = false;
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        const searchSubscription$ = data.search
-          .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(request, {
-            strategy: 'osquerySearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setActionDetailsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    actionDetails: response.actionDetails,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                  }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_ACTION_DETAILS);
-                searchSubscription$.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_ACTION_DETAILS,
-                  text: msg.message,
-                });
-              }
-            },
-          });
-      };
-      abortCtrl.current.abort();
-      asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
+      return {
+        ...responseData,
+        inspect: getInspectResponse(responseData, {}),
       };
     },
-    [data.search, notifications.toasts, skip]
+    {
+      enabled: !skip && !!actionDetailsRequest,
+    }
   );
 
   useEffect(() => {
@@ -133,9 +81,5 @@ export const useActionDetails = ({
     });
   }, [actionId, docValueFields, filterQuery]);
 
-  useEffect(() => {
-    actionDetailsSearch(actionDetailsRequest);
-  }, [actionDetailsRequest, actionDetailsSearch]);
-
-  return [loading, actionDetailsResponse];
+  return response;
 };

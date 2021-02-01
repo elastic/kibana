@@ -20,10 +20,10 @@ const LiveQueryComponent = () => {
       <Route path={`${match.url}/queries/new`}>
         <NewLiveQueryPage />
       </Route>
-      <Route path={`${match.url}/queries/:savedQueryId/results/:agentId`}>
+      <Route path={`${match.url}/queries/:actionId/results/:agentId`}>
         <QueryAgentResults />
       </Route>
-      <Route path={`${match.url}/queries/:savedQueryId`}>
+      <Route path={`${match.url}/queries/:actionId`}>
         <EditLiveQueryPage />
       </Route>
       <Route path={`${match.url}/queries`}>

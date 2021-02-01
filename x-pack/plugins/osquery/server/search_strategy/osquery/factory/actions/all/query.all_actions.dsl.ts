@@ -11,21 +11,35 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 export const buildActionsQuery = ({
   docValueFields,
   filterQuery,
-  pagination: { activePage, querySize },
+  pagination: { activePage, cursorStart, querySize },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  const filter = [...createQueryFilterClauses(filterQuery)];
+  // const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
     allowNoIndices: true,
     index: '.fleet-actions',
     ignoreUnavailable: true,
     body: {
-      query: { bool: { filter } },
-      from: activePage * querySize,
+      // query: { bool: { filter } },
+      query: {
+        term: {
+          type: {
+            value: 'INPUT_ACTION',
+          },
+        },
+      },
+      from: cursorStart,
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      ],
     },
   };
 

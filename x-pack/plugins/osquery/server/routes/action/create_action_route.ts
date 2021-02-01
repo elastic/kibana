@@ -21,29 +21,34 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
+      const action = {
+        action_id: uuid.v4(),
+        '@timestamp': moment().toISOString(),
+        expiration: moment().add(2, 'days').toISOString(),
+        type: 'INPUT_ACTION',
+        input_type: 'osquery',
+        // @ts-expect-error
+        agents: request.body.agents,
+        data: {
+          commands: [
+            {
+              id: uuid.v4(),
+              // @ts-expect-error
+              query: request.body.command.query,
+            },
+          ],
+        },
+      };
       const query = await esClient.index<{}, {}>({
         index: '.fleet-actions',
-        body: {
-          action_id: uuid.v4(),
-          '@timestamp': moment().toISOString(),
-          expiration: moment().add(2, 'days').toISOString(),
-          type: 'APP_ACTION',
-          input_id: 'osquery',
-          // @ts-expect-error
-          agents: request.body.agents,
-          data: {
-            commands: [
-              {
-                id: uuid.v4(),
-                // @ts-expect-error
-                query: request.body.command.query,
-              },
-            ],
-          },
-        },
+        body: action,
       });
+
       return response.ok({
-        body: query,
+        body: {
+          response: query,
+          action,
+        },
       });
     }
   );
