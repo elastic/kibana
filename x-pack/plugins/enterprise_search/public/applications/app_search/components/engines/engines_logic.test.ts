@@ -6,6 +6,8 @@
 
 import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
+import { nextTick } from '@kbn/test/jest';
+
 import { EngineDetails } from '../engine/types';
 import { EnginesLogic } from './';
 
@@ -124,13 +126,12 @@ describe('EnginesLogic', () => {
 
     describe('loadEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
-        const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_ENGINES_API_RESPONSE));
         mount({ enginesPage: 10 });
         jest.spyOn(EnginesLogic.actions, 'onEnginesLoad');
 
         EnginesLogic.actions.loadEngines();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'indexed', pageIndex: 10 },
@@ -144,13 +145,12 @@ describe('EnginesLogic', () => {
 
     describe('loadMetaEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
-        const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(MOCK_ENGINES_API_RESPONSE));
         mount({ metaEnginesPage: 99 });
         jest.spyOn(EnginesLogic.actions, 'onMetaEnginesLoad');
 
         EnginesLogic.actions.loadMetaEngines();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'meta', pageIndex: 99 },

@@ -7,6 +7,7 @@ import { ThreatMap, ThreatMapEntry } from '../../../../common/detection_engine/s
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 export interface FormattedEntry {
+  id: string;
   field: IFieldType | undefined;
   type: 'mapping';
   value: IFieldType | undefined;

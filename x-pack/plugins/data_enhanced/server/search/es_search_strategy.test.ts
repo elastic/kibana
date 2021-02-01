@@ -7,6 +7,10 @@
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 import { BehaviorSubject } from 'rxjs';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server/search';
+import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import * as indexNotFoundException from '../../../../../src/plugins/data/common/search/test_data/index_not_found_exception.json';
+import * as xContentParseException from '../../../../../src/plugins/data/common/search/test_data/x_content_parse_exception.json';
 
 const mockAsyncResponse = {
   body: {
@@ -145,6 +149,54 @@ describe('ES search strategy', () => {
       expect(request).toHaveProperty('wait_for_completion_timeout');
       expect(request).toHaveProperty('keep_alive');
     });
+
+    it('throws normalized error if ResponseError is thrown', async () => {
+      const errResponse = new ResponseError({
+        body: indexNotFoundException,
+        statusCode: 404,
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
+
+      mockSubmitCaller.mockRejectedValue(errResponse);
+
+      const params = { index: 'logstash-*', body: { query: {} } };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      let err: KbnServerError | undefined;
+      try {
+        await esSearch.search({ params }, {}, mockDeps).toPromise();
+      } catch (e) {
+        err = e;
+      }
+      expect(mockSubmitCaller).toBeCalled();
+      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err?.statusCode).toBe(404);
+      expect(err?.message).toBe(errResponse.message);
+      expect(err?.errBody).toBe(indexNotFoundException);
+    });
+
+    it('throws normalized error if Error is thrown', async () => {
+      const errResponse = new Error('not good');
+
+      mockSubmitCaller.mockRejectedValue(errResponse);
+
+      const params = { index: 'logstash-*', body: { query: {} } };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      let err: KbnServerError | undefined;
+      try {
+        await esSearch.search({ params }, {}, mockDeps).toPromise();
+      } catch (e) {
+        err = e;
+      }
+      expect(mockSubmitCaller).toBeCalled();
+      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err?.statusCode).toBe(500);
+      expect(err?.message).toBe(errResponse.message);
+      expect(err?.errBody).toBe(undefined);
+    });
   });
 
   describe('cancel', () => {
@@ -159,6 +211,33 @@ describe('ES search strategy', () => {
       expect(mockDeleteCaller).toBeCalled();
       const request = mockDeleteCaller.mock.calls[0][0];
       expect(request).toEqual({ id });
+    });
+
+    it('throws normalized error on ResponseError', async () => {
+      const errResponse = new ResponseError({
+        body: xContentParseException,
+        statusCode: 400,
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      });
+      mockDeleteCaller.mockRejectedValue(errResponse);
+
+      const id = 'some_id';
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      let err: KbnServerError | undefined;
+      try {
+        await esSearch.cancel!(id, {}, mockDeps);
+      } catch (e) {
+        err = e;
+      }
+
+      expect(mockDeleteCaller).toBeCalled();
+      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err?.statusCode).toBe(400);
+      expect(err?.message).toBe(errResponse.message);
+      expect(err?.errBody).toBe(xContentParseException);
     });
   });
 
@@ -175,6 +254,28 @@ describe('ES search strategy', () => {
       expect(mockGetCaller).toBeCalled();
       const request = mockGetCaller.mock.calls[0][0];
       expect(request).toEqual({ id, keep_alive: keepAlive });
+    });
+
+    it('throws normalized error on ElasticsearchClientError', async () => {
+      const errResponse = new ElasticsearchClientError('something is wrong with EsClient');
+      mockGetCaller.mockRejectedValue(errResponse);
+
+      const id = 'some_other_id';
+      const keepAlive = '1d';
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      let err: KbnServerError | undefined;
+      try {
+        await esSearch.extend!(id, keepAlive, {}, mockDeps);
+      } catch (e) {
+        err = e;
+      }
+
+      expect(mockGetCaller).toBeCalled();
+      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err?.statusCode).toBe(500);
+      expect(err?.message).toBe(errResponse.message);
+      expect(err?.errBody).toBe(undefined);
     });
   });
 });
