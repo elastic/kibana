@@ -33,6 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
+    after(async function () {
+      log.debug('reset uiSettings');
+      await kibanaServer.uiSettings.replace({});
+    });
+
     it('should show the first 50 rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();

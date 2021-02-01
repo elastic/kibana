@@ -6,12 +6,14 @@
 
 import { useEffect, useCallback } from 'react';
 
+import { flow } from 'fp-ts/lib/function';
 import { useAsync, withOptionalSignal } from '../../../../shared_imports';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { pureFetchRuleById } from './api';
 import { Rule } from './types';
 import * as i18n from './translations';
+import { transformInput } from './transforms';
 
 export interface UseRuleAsync {
   error: unknown;
@@ -20,11 +22,15 @@ export interface UseRuleAsync {
   rule: Rule | null;
 }
 
-const _fetchRule = withOptionalSignal(pureFetchRuleById);
-const _useRuleAsync = () => useAsync(_fetchRule);
+const _fetchRule = flow(withOptionalSignal(pureFetchRuleById), async (rule: Promise<Rule>) =>
+  transformInput(await rule)
+);
+
+/** This does not use "_useRuleAsyncInternal" as that would deactivate the useHooks linter rule, so instead it has the word "Internal" post-pended  */
+const useRuleAsyncInternal = () => useAsync(_fetchRule);
 
 export const useRuleAsync = (ruleId: string): UseRuleAsync => {
-  const { start, loading, result, error } = _useRuleAsync();
+  const { start, loading, result, error } = useRuleAsyncInternal();
   const http = useHttp();
   const { addError } = useAppToasts();
 

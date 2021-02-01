@@ -45,9 +45,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
     <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
       {NAV.ROLE_MAPPINGS}
     </SideNavLink>
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
-      {NAV.SECURITY}
-    </SideNavLink>
+    <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
     <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
       {NAV.SETTINGS}
     </SideNavLink>
