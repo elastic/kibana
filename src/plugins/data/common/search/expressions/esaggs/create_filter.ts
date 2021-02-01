@@ -8,9 +8,9 @@
 
 import { Filter } from '../../../es_query';
 import { IAggConfig } from '../../aggs';
-import { TabbedTable } from '../../tabify';
+import { Datatable } from '../../../../../expressions/common';
 
-const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowIndex: number) => {
+const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowIndex: number) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -36,7 +36,7 @@ const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowI
 
 export const createFilter = (
   aggConfigs: IAggConfig[],
-  table: TabbedTable,
+  table: Datatable,
   columnIndex: number,
   rowIndex: number,
   cellValue: any

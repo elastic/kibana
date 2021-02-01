@@ -18,7 +18,6 @@ import {
   Query,
   TimeRange,
 } from '../../../../common';
-import { FormatFactory } from '../../../../common/field_formats/utils';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -29,7 +28,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from '../utils';
 export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
-  deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
   indexPattern?: IndexPattern;
   inspectorAdapters: Adapters;
@@ -46,7 +44,6 @@ export interface RequestHandlerParams {
 export const handleRequest = async ({
   abortSignal,
   aggs,
-  deserializeFieldFormat,
   filters,
   indexPattern,
   inspectorAdapters,

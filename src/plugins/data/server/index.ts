@@ -213,10 +213,6 @@ export {
   IEsSearchRequest,
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export {
