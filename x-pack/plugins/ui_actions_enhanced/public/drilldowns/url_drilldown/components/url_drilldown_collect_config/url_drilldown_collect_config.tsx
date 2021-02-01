@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiTextColor,
 } from '@elastic/eui';
+import { monaco } from '@kbn/monaco';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
@@ -45,7 +46,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   syntaxHelpDocsLink,
   variablesHelpDocsLink,
 }) => {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [showUrlError, setShowUrlError] = React.useState(false);
   const urlTemplate = config.url.template ?? '';
 
@@ -68,15 +69,12 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
       variables={variables}
       variablesHelpLink={variablesHelpDocsLink}
       onSelect={(variable: string) => {
-        if (textAreaRef.current) {
-          updateUrlTemplate(
-            urlTemplate.substr(0, textAreaRef.current!.selectionStart) +
-              `{{${variable}}}` +
-              urlTemplate.substr(textAreaRef.current!.selectionEnd)
-          );
-        } else {
-          updateUrlTemplate(urlTemplate + `{{${variable}}}`);
-        }
+        const editor = editorRef.current;
+        if (!editor) return;
+
+        editor.trigger('keyboard', 'type', {
+          text: '{{' + variable + '}}',
+        });
       }}
     />
   );
@@ -98,9 +96,12 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         labelAppend={variablesDropdown}
       >
         <UrlTemplateEditor
+          variables={variables}
           value={urlTemplate}
           onChange={(newUrlTemplate) => updateUrlTemplate(newUrlTemplate)}
-          variables={variables}
+          onEditor={(editor) => {
+            editorRef.current = editor;
+          }}
         />
       </EuiFormRow>
       <EuiSpacer size={'l'} />

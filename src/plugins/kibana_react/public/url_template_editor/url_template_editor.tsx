@@ -32,6 +32,7 @@ export interface UrlTemplateEditorProps {
   height?: CodeEditorProps['height'];
   variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
+  onEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
@@ -39,6 +40,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   value,
   variables,
   onChange,
+  onEditor,
 }) => {
   React.useEffect(() => {
     if (!variables) {
@@ -89,6 +91,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         height={height}
         value={value}
         onChange={onChange}
+        editorDidMount={onEditor}
         options={{
           fontSize: 14,
           highlightActiveIndentGuide: false,
