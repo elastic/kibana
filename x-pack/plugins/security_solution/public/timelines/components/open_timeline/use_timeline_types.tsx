@@ -99,9 +99,7 @@ export const useTimelineTypes = ({
   const onFilterClicked = useCallback(
     (tabId, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
-        if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
-          return tabId === TimelineType.default ? TimelineType.template : TimelineType.default;
-        } else if (prevTimelineTypes !== tabId) {
+        if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);
         }
         return prevTimelineTypes;
