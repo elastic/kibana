@@ -86,9 +86,6 @@ export const createConnectedSearchSessionIndicator = ({
           onSaveResults={() => {
             sessionService.save();
           }}
-          onRefresh={() => {
-            sessionService.refresh();
-          }}
           onCancel={() => {
             sessionService.cancel();
           }}

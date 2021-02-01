@@ -30,7 +30,6 @@ export interface SearchSessionIndicatorProps {
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
   onSaveResults?: () => void;
-  onRefresh?: () => void;
   disabled?: boolean;
   disabledReasonText?: string;
   onOpened?: (openedState: SearchSessionState) => void;
@@ -80,19 +79,6 @@ const ViewAllSearchSessionsButton = ({
     <FormattedMessage
       id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
       defaultMessage="Manage sessions"
-    />
-  </EuiButtonEmpty>
-);
-
-const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    onClick={onRefresh}
-    data-test-subj={'searchSessionIndicatorRefreshBtn'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.refreshButtonText"
-      defaultMessage="Re-run session"
     />
   </EuiButtonEmpty>
 );
@@ -237,7 +223,6 @@ const searchSessionIndicatorViewStateToProps: {
           defaultMessage: 'You can leave and get back to the results later',
         }
       ),
-      primaryAction: RefreshButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -263,7 +248,6 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage:
           'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session.',
       }),
-      primaryAction: RefreshButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -285,7 +269,6 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate('xpack.data.searchSessionIndicator.canceledDescriptionText', {
         defaultMessage: 'You are viewing incomplete data',
       }),
-      primaryAction: RefreshButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },

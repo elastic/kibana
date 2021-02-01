@@ -74,12 +74,6 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverClosed();
     }
 
-    public async refresh() {
-      await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorRefreshBtn');
-      await this.ensurePopoverClosed();
-    }
-
     public async openPopover() {
       await this.ensurePopoverOpened();
     }

@@ -74,31 +74,36 @@ test('BackgroundCompleted state', async () => {
 });
 
 test('Restored state', async () => {
-  const onRefresh = jest.fn();
   render(
     <Container>
-      <SearchSessionIndicator state={SearchSessionState.Restored} onRefresh={onRefresh} />
+      <SearchSessionIndicator
+        state={SearchSessionState.Restored}
+        viewSearchSessionsLink={'__link__'}
+      />
     </Container>
   );
 
   await userEvent.click(screen.getByLabelText('Search session restored'));
-  await userEvent.click(screen.getByText('Re-run session'));
 
-  expect(onRefresh).toBeCalled();
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+    '__link__'
+  );
 });
 
 test('Canceled state', async () => {
-  const onRefresh = jest.fn();
   render(
     <Container>
-      <SearchSessionIndicator state={SearchSessionState.Canceled} onRefresh={onRefresh} />
+      <SearchSessionIndicator
+        state={SearchSessionState.Canceled}
+        viewSearchSessionsLink={'__link__'}
+      />
     </Container>
   );
 
   await userEvent.click(screen.getByLabelText('Search session canceled'));
-  await userEvent.click(screen.getByText('Re-run session'));
-
-  expect(onRefresh).toBeCalled();
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+    '__link__'
+  );
 });
 
 test('Disabled state', async () => {
