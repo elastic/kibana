@@ -14,6 +14,7 @@ import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
 import { get as getUserActions } from './user_actions/get';
+import { get as getAlerts } from './alerts/get';
 
 export { CaseClient } from './types';
 
@@ -61,6 +62,16 @@ export const createCaseClient = ({
       caseConfigureService,
       caseService,
       connectorMappingsService,
+      request,
+      savedObjectsClient,
+      userActionService,
+    }),
+    getAlerts: getAlerts({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      context,
       request,
       savedObjectsClient,
       userActionService,

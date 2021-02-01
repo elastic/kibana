@@ -26,6 +26,7 @@ import {
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 import type { CasesRequestHandlerContext } from '../types';
+import { CaseClientGetAlertsResponse } from './alerts/types';
 
 export interface CaseClientCreate {
   theCase: CasePostRequest;
@@ -52,6 +53,10 @@ export interface CaseClientUpdateAlertsStatus {
   status: CaseStatuses;
 }
 
+export interface CaseClientGetAlerts {
+  ids: string[];
+}
+
 export interface CaseClientGetUserActions {
   caseId: string;
 }
@@ -76,6 +81,7 @@ export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   get: (args: CaseClientGet) => Promise<CaseResponse>;
+  getAlerts: (args: CaseClientGetAlerts) => Promise<CaseClientGetAlertsResponse>;
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
   getUserActions: (args: CaseClientGetUserActions) => Promise<CaseUserActionsResponse>;
