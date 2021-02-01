@@ -57,8 +57,8 @@
  *  - When a filter is added to the search box, or via a visualization, it is written to the
  *    `appSearchSource`.
  */
-import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
+
+import { uniqueId, keyBy, pick, difference, omit, isFunction } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -549,7 +549,7 @@ export class SearchSource {
       if (fieldsFromSource.length) {
         /* setWith(body, '_source.includes', fieldsFromSource, (nsValue) =>
           isObject(nsValue) ? {} : nsValue
-        );*/
+        ); */
         // if items that are in the docvalueFields are provided, we should
         // make sure those are added to the fields API unless they are
         // already set in docvalue_fields
