@@ -6,7 +6,7 @@
 
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
-import { first, tap } from 'rxjs/operators';
+import { catchError, first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
 import { from } from 'rxjs';
 import type {
@@ -33,7 +33,7 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { AsyncSearchResponse } from './types';
-import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -41,7 +41,11 @@ export const enhancedEsSearchStrategyProvider = (
   usage?: SearchUsage
 ): ISearchStrategy<IEsSearchRequest> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    await esClient.asCurrentUser.asyncSearch.delete({ id });
+    try {
+      await esClient.asCurrentUser.asyncSearch.delete({ id });
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
   }
 
   function asyncSearch(
@@ -70,7 +74,10 @@ export const enhancedEsSearchStrategyProvider = (
 
     return pollSearch(search, cancel, options).pipe(
       tap((response) => (id = response.id)),
-      tap(searchUsageObserver(logger, usage))
+      tap(searchUsageObserver(logger, usage)),
+      catchError((e) => {
+        throw getKbnServerError(e);
+      })
     );
   }
 
@@ -90,40 +97,72 @@ export const enhancedEsSearchStrategyProvider = (
       ...params,
     };
 
-    const promise = esClient.asCurrentUser.transport.request({
-      method,
-      path,
-      body,
-      querystring,
-    });
+    try {
+      const promise = esClient.asCurrentUser.transport.request({
+        method,
+        path,
+        body,
+        querystring,
+      });
 
-    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
-    const response = esResponse.body as SearchResponse<any>;
-    return {
-      rawResponse: response,
-      ...getTotalLoaded(response),
-    };
+      const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+      const response = esResponse.body as SearchResponse<any>;
+      return {
+        rawResponse: response,
+        ...getTotalLoaded(response),
+      };
+    } catch (e) {
+      throw getKbnServerError(e);
+    }
   }
 
   return {
+    /**
+     * @param request
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Observable<IEsSearchResponse<any>>`
+     * @throws `KbnServerError`
+     */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+      if (request.indexType && request.indexType !== 'rollup') {
+        throw new KbnServerError('Unknown indexType', 400);
+      }
 
       if (request.indexType === undefined) {
         return asyncSearch(request, options, deps);
-      } else if (request.indexType === 'rollup') {
-        return from(rollupSearch(request, options, deps));
       } else {
-        throw new KbnServerError('Unknown indexType', 400);
+        return from(rollupSearch(request, options, deps));
       }
     },
+    /**
+     * @param id async search ID to cancel, as returned from _async_search API
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Promise<void>`
+     * @throws `KbnServerError`
+     */
     cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
       await cancelAsyncSearch(id, esClient);
     },
+    /**
+     *
+     * @param id async search ID to extend, as returned from _async_search API
+     * @param keepAlive
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Promise<void>`
+     * @throws `KbnServerError`
+     */
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
-      await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+      try {
+        await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
   };
 };

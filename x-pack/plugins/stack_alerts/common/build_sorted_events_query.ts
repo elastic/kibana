@@ -87,7 +87,7 @@ export const buildSortedEventsQuery = ({
         ...searchQuery.body,
         search_after: [searchAfterSortId],
       },
-    };
+    } as ESSearchRequest;
   }
-  return searchQuery;
+  return searchQuery as ESSearchRequest;
 };
