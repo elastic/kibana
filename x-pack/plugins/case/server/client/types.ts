@@ -16,6 +16,7 @@ import {
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
+  CaseUserActionsResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -51,6 +52,10 @@ export interface CaseClientUpdateAlertsStatus {
   status: CaseStatuses;
 }
 
+export interface CaseClientGetUserActions {
+  caseId: string;
+}
+
 export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
@@ -73,6 +78,7 @@ export interface CaseClient {
   get: (args: CaseClientGet) => Promise<CaseResponse>;
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
+  getUserActions: (args: CaseClientGetUserActions) => Promise<CaseUserActionsResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
 }

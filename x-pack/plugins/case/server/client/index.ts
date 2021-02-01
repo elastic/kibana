@@ -13,9 +13,11 @@ import { addComment } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
 import { updateAlertsStatus } from './alerts/update_status';
+import { get as getUserActions } from './user_actions/get';
 
 export { CaseClient } from './types';
 
+// TODO: Refactor to accommodate the growth of the case client
 export const createCaseClient = ({
   caseConfigureService,
   caseService,
@@ -65,6 +67,15 @@ export const createCaseClient = ({
     }),
     getFields: getFields(),
     getMappings: getMappings({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
+      userActionService,
+    }),
+    getUserActions: getUserActions({
       alertsService,
       caseConfigureService,
       caseService,
