@@ -50,6 +50,7 @@ function normalize(
   }
 
   // FIXME: for unknown reason on the server this setting is serialized
+  // https://github.com/elastic/kibana/issues/89902
   if (typeof defaultSortOptions === 'string') {
     defaultSortOptions = JSON.parse(defaultSortOptions);
   }
