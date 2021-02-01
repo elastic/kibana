@@ -63,7 +63,7 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
-    executor: curry(teamsExecutor)({ logger }),
+    executor: curry(teamsExecutor)({ logger, configurationUtilities }),
   };
 }
 
@@ -95,7 +95,10 @@ function validateActionTypeConfig(
 // action executor
 
 async function teamsExecutor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: TeamsActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -114,7 +117,7 @@ async function teamsExecutor(
       url: webhookUrl,
       logger,
       data,
-      proxySettings: execOptions.proxySettings,
+      configurationUtilities,
     })
   );
 
