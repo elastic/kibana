@@ -45,7 +45,7 @@ interface FieldTypeFormat {
 export interface FormatSelectEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   fieldFormatId?: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams?: { [key: string]: unknown };
   format: FieldFormat;
 }
 
@@ -87,15 +87,19 @@ export class FormatSelectEditor extends PureComponent<
       fieldAttrs: { name, type, esTypes },
     } = props;
 
-    /* todo we're getting this twice, once at the form level. I'm not sure if we need to. */
     /* also to do - dealing with kbn type and es type */
     /* changing type should change formatter options */
-    /* also, just review work so far */
+
+    // get current formatter for field, provides default if none exists
     const format = indexPattern.getFormatterForField({
       name,
       type,
       esTypes,
     });
+
+    // get saved formatter info
+    const formatConfig = indexPattern.getFormatterForFieldNoDefault(name);
+    formatConfig?.params();
 
     this.state = {
       fieldTypeFormats: getFieldTypeFormatsList(
@@ -103,9 +107,9 @@ export class FormatSelectEditor extends PureComponent<
         fieldFormats.getDefaultType(type, esTypes) as FieldFormatInstanceType,
         fieldFormats
       ),
-      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(name)?.type?.id,
-      fieldFormatParams: format.params(),
       format,
+      fieldFormatId: formatConfig?.type?.id,
+      fieldFormatParams: formatConfig?.params(),
     };
   }
   onFormatChange = (formatId: string, params?: any) => {
