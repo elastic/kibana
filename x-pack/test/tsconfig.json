@@ -40,6 +40,7 @@
     { "path": "../plugins/alerts/tsconfig.json"},
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/data_enhanced/tsconfig.json" },
+    { "path": "../plugins/enterprise_search/tsconfig.json" },
     { "path": "../plugins/global_search/tsconfig.json" },
     { "path": "../plugins/global_search_providers/tsconfig.json" },
     { "path": "../plugins/features/tsconfig.json" },
@@ -59,6 +60,8 @@
     { "path": "../plugins/cloud/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "../plugins/global_search_bar/tsconfig.json" },
-    { "path": "../plugins/license_management/tsconfig.json" }
+    { "path": "../plugins/license_management/tsconfig.json" },
+    { "path": "../plugins/painless_lab/tsconfig.json" },
+    { "path": "../plugins/watcher/tsconfig.json" }
   ]
 }
