@@ -138,7 +138,7 @@ export const language: monaco.languages.IMonarchLanguage = {
             token: 'delimiter',
           },
           {
-            token: 'text.label.key.query.url',
+            token: 'label.label.key.query.url',
           },
         ],
       ],
@@ -152,7 +152,7 @@ export const language: monaco.languages.IMonarchLanguage = {
             token: 'delimiter',
           },
           {
-            token: 'variable.value.query.url',
+            token: 'metatag.value.query.url',
           },
         ],
       ],

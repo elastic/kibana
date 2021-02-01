@@ -83,6 +83,7 @@ export function createTheme(
       { token: 'predefined.sql', foreground: euiTheme.euiColorMediumShade },
 
       { token: 'text', foreground: euiTheme.euiColorInk },
+      { token: 'label', foreground: euiTheme.euiColorVis9 },
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,

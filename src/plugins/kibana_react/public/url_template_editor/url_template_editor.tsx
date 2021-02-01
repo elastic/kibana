@@ -91,6 +91,12 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         glyphMargin: false,
         folding: false,
         lineDecorationsWidth: 2,
+        quickSuggestions: {
+          comments: true,
+          strings: true,
+          other: true,
+        },
+        suggestOnTriggerCharacters: true,
         minimap: {
           enabled: false,
         },
