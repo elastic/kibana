@@ -819,6 +819,7 @@ describe('utils', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
         body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
             [timestampField]: {
               date: {
@@ -858,6 +859,7 @@ describe('utils', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
         body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
             [timestampField]: {
               date: {
