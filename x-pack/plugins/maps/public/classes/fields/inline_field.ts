@@ -7,10 +7,9 @@
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IField, AbstractField } from './field';
 import { IVectorSource } from '../sources/vector_source';
-import { GeoJsonFileSource } from '../sources/geojson_file_source';
 
-export class GeoJsonFileField extends AbstractField implements IField {
-  private readonly _source: GeoJsonFileSource;
+export class InlineField<T extends IVectorSource> extends AbstractField implements IField {
+  private readonly _source: T;
   private readonly _dataType: string;
 
   constructor({
@@ -20,7 +19,7 @@ export class GeoJsonFileField extends AbstractField implements IField {
     dataType,
   }: {
     fieldName: string;
-    source: GeoJsonFileSource;
+    source: T;
     origin: FIELD_ORIGIN;
     dataType: string;
   }) {

@@ -16,6 +16,7 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
@@ -29,7 +30,7 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.country_iso_code',
@@ -46,7 +47,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.region_iso_code',
