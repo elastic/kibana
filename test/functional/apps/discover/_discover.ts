@@ -85,9 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
-      it('gugu1 should modify the time range when a bar is clicked', async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+      it('should modify the time range when a bar is clicked', async function () {
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
@@ -100,9 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('gugu1 should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+      it('should modify the time range when the histogram is brushed', async function () {
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
