@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('tests with auditbeat data', () => {
+    describe('tests with auditbeat data', () => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
@@ -252,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
-      describe.only('indicator enrichment', () => {
+      describe('indicator enrichment', () => {
         beforeEach(async () => {
           await esArchiver.load('filebeat/threat_intel');
         });
@@ -301,6 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               indicator: [
                 {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
@@ -320,6 +321,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               indicator: [
                 {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
@@ -350,22 +352,17 @@ export default ({ getService }: FtrProviderContext) => {
             language: 'kuery',
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
-            query: '*:*',
-            threat_query: 'threat.indicator: *', // narrow things down to indicators with a domain
+            query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_query: 'threat.indicator.ip: *',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
               {
                 entries: [
                   {
-                    value: 'threat.indicator.port',
-                    field: 'source.port',
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'mapping',
                   },
-                  // {
-                  //   value: 'threat.indicator.ip',
-                  //   field: 'source.ip',
-                  //   type: 'mapping',
-                  // },
                 ],
               },
             ],
@@ -384,7 +381,115 @@ export default ({ getService }: FtrProviderContext) => {
             {
               indicator: [
                 {
+                  description: 'this should match auditbeat/hosts on both port and ip',
                   first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    field: 'threat.indicator.ip',
+                    type: 'url',
+                  },
+                  port: 57324,
+                  provider: 'geenensp',
+                  type: 'url',
+                },
+                {
+                  description: 'this should match auditbeat/hosts on ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    field: 'threat.indicator.ip',
+                    type: 'ip',
+                  },
+                  provider: 'other_provider',
+                  type: 'ip',
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('adds a single indicator that matched multiple fields', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_query: 'threat.indicator.ip: *',
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.port',
+                    field: 'source.port',
+                    type: 'mapping',
+                  },
+                ],
+              },
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(1);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat);
+          // TODO how should a signal be enriched if a single indicator matches
+          // on multiple fields? As evidenced below, we currently duplicate the
+          // indicator with a different matched object.
+          expect(threats).to.eql([
+            {
+              indicator: [
+                {
+                  description: 'this should match auditbeat/hosts on both port and ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    field: 'threat.indicator.ip',
+                    type: 'url',
+                  },
+                  port: 57324,
+                  provider: 'geenensp',
+                  type: 'url',
+                },
+                {
+                  description: 'this should match auditbeat/hosts on ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    field: 'threat.indicator.ip',
+                    type: 'ip',
+                  },
+                  provider: 'other_provider',
+                  type: 'ip',
+                },
+                {
+                  description: 'this should match auditbeat/hosts on both port and ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
                   matched: {
                     atomic: 57324,
                     field: 'threat.indicator.port',
@@ -393,15 +498,132 @@ export default ({ getService }: FtrProviderContext) => {
                   port: 57324,
                   provider: 'geenensp',
                   type: 'url',
-                  url: {
-                    full: 'http://193.70.81.238:59600/bin.sh',
-                    scheme: 'http',
-                  },
                 },
               ],
             },
           ]);
         });
+
+        it('generates multiple signals with multiple matches', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*', // narrow our query to a single record that matches two indicators
+            threat_query: '',
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.port',
+                    field: 'source.port',
+                    type: 'mapping',
+                  },
+                  {
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.domain',
+                    field: 'destination.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(2);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat);
+          expect(threats).to.eql([
+            {
+              indicator: [
+                {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
+                  domain: '159.89.119.67',
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    field: 'threat.indicator.domain',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+            {
+              indicator: [
+                {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
+                  domain: '159.89.119.67',
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    field: 'threat.indicator.domain',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+                {
+                  description: 'this should match auditbeat/hosts on both port and ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: '45.115.45.3',
+                    field: 'threat.indicator.ip',
+                    type: 'url',
+                  },
+                  port: 57324,
+                  provider: 'geenensp',
+                  type: 'url',
+                },
+                {
+                  description: 'this should match auditbeat/hosts on both port and ip',
+                  first_seen: '2021-01-26T11:06:03.000Z',
+                  ip: '45.115.45.3',
+                  matched: {
+                    atomic: 57324,
+                    field: 'threat.indicator.port',
+                    type: 'url',
+                  },
+                  port: 57324,
+                  provider: 'geenensp',
+                  type: 'url',
+                },
+              ],
+            },
+          ]);
+        });
+        it('deduplicates a signal if it is found in multiple separate query loops');
       });
     });
   });

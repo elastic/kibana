@@ -40,6 +40,7 @@
       ],
       "threat": {
         "indicator": {
+          "description": "domain should match the auditbeat hosts' data's source.ip",
           "domain": "159.89.119.67",
           "first_seen": "2021-01-26T11:09:04.000Z",
           "provider": "geenensp",
@@ -108,14 +109,11 @@
       ],
       "threat": {
         "indicator": {
-          "domain": "125.46.136.106",
+          "description": "this should not match the auditbeat hosts data",
+          "ip": "125.46.136.106",
           "first_seen": "2021-01-26T11:06:03.000Z",
           "provider": "geenensp",
-          "type": "url",
-          "url": {
-            "full": "http://125.46.136.106:52014/bin.sh",
-            "scheme": "http"
-          }
+          "type": "ip"
         }
       },
       "threatintel": {
@@ -180,14 +178,12 @@
       ],
       "threat": {
         "indicator": {
+          "description": "this should match auditbeat/hosts on both port and ip",
+          "ip": "45.115.45.3",
           "port": 57324,
           "first_seen": "2021-01-26T11:06:03.000Z",
           "provider": "geenensp",
-          "type": "url",
-          "url": {
-            "full": "http://193.70.81.238:59600/bin.sh",
-            "scheme": "http"
-          }
+          "type": "url"
         }
       },
       "threatintel": {
@@ -252,6 +248,7 @@
       ],
       "threat": {
         "indicator": {
+          "description": "this should match auditbeat/hosts on ip",
           "ip": "45.115.45.3",
           "first_seen": "2021-01-26T11:06:03.000Z",
           "provider": "other_provider",
