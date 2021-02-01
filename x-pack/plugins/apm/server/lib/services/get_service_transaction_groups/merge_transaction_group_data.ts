@@ -52,18 +52,14 @@ export function mergeTransactionGroupData({
             ...acc.throughput,
             timeseries: acc.throughput.timeseries.concat({
               x: point.key,
-              y: point.transaction_count.value / deltaAsMinutes,
+              y: point.doc_count / deltaAsMinutes,
             }),
           },
           errorRate: {
             ...acc.errorRate,
             timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
-              y:
-                point.transaction_count.value > 0
-                  ? (point[EVENT_OUTCOME].transaction_count.value ?? 0) /
-                    point.transaction_count.value
-                  : null,
+              y: point[EVENT_OUTCOME].doc_count / point.doc_count,
             }),
           },
         };
