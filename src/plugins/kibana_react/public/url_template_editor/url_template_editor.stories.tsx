@@ -14,13 +14,13 @@ import { UrlTemplateEditor } from './url_template_editor';
 storiesOf('UrlTemplateEditor', module)
   .add('default', () => (
     <UrlTemplateEditor
-      initialValue={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
+      value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
       onChange={action('onChange')}
     />
   ))
   .add('with variables', () => (
     <UrlTemplateEditor
-      initialValue={'http://elastic.co/{{event.value}}'}
+      value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
       variables={[
         {
           label: 'event.value',

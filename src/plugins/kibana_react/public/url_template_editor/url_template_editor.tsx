@@ -28,7 +28,7 @@ export interface UrlTemplateEditorVariable {
   sortText?: string;
 }
 export interface UrlTemplateEditorProps {
-  initialValue: string;
+  value: string;
   height?: CodeEditorProps['height'];
   variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
@@ -36,7 +36,7 @@ export interface UrlTemplateEditorProps {
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   height = 200,
-  initialValue,
+  value,
   variables,
   onChange,
 }) => {
@@ -87,7 +87,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       <CodeEditor
         languageId={LANG}
         height={height}
-        value={initialValue}
+        value={value}
         onChange={onChange}
         options={{
           fontSize: 14,

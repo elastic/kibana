@@ -8,7 +8,6 @@ import React, { useRef } from 'react';
 import {
   EuiFormRow,
   EuiLink,
-  EuiTextArea,
   EuiSwitch,
   EuiAccordion,
   EuiSpacer,
@@ -21,7 +20,6 @@ import {
   txtUrlTemplateSyntaxHelpLinkText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
-  txtUrlTemplatePlaceholder,
   txtUrlTemplateAdditionalOptions,
   txtUrlTemplateEncodeUrl,
   txtUrlTemplateEncodeDescription,
@@ -100,36 +98,9 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         labelAppend={variablesDropdown}
       >
         <UrlTemplateEditor
-          initialValue={urlTemplate}
-          onChange={(value) => {}}
-          variables={variables}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        isInvalid={isInvalid}
-        className={'uaeUrlDrilldownCollectConfig__urlTemplateFormRow'}
-        label={txtUrlTemplateLabel}
-        helpText={
-          syntaxHelpDocsLink && (
-            <EuiLink external target={'_blank'} href={syntaxHelpDocsLink}>
-              {txtUrlTemplateSyntaxHelpLinkText}
-            </EuiLink>
-          )
-        }
-        labelAppend={variablesDropdown}
-      >
-        <EuiTextArea
-          fullWidth
-          isInvalid={isInvalid}
-          name="url"
-          data-test-subj="urlInput"
           value={urlTemplate}
-          placeholder={txtUrlTemplatePlaceholder}
-          onChange={(event) => updateUrlTemplate(event.target.value)}
-          onBlur={() => setShowUrlError(true)}
-          rows={3}
-          inputRef={textAreaRef}
+          onChange={(newUrlTemplate) => updateUrlTemplate(newUrlTemplate)}
+          variables={variables}
         />
       </EuiFormRow>
       <EuiSpacer size={'l'} />
