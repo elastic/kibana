@@ -17,6 +17,7 @@ import { createConfig$ } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { initSavedObjects } from './saved_objects';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -35,6 +36,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     const router = core.http.createRouter();
 
+    initSavedObjects(core.savedObjects);
     // Register server side APIs
     defineRoutes(router);
 

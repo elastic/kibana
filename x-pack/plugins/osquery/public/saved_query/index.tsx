@@ -7,30 +7,31 @@
 import React from 'react';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 
-import { QueriesPage } from './queries';
-import { NewLiveQueryPage } from './new';
-import { EditLiveQueryPage } from './edit';
-import { QueryAgentResults } from './agent_results';
+import { SavedQueriesPage } from './queries';
+import { NewSavedQueryPage } from './new';
+import { EditSavedQueryPage } from './edit';
+// import { QueryAgentResults } from './agent_results';
+// import { SavedQueriesPage } from './saved_query';
 
-const LiveQueryComponent = () => {
+const SavedQueryComponent = () => {
   const match = useRouteMatch();
 
   return (
     <Switch>
       <Route path={`${match.url}/queries/new`}>
-        <NewLiveQueryPage />
+        <NewSavedQueryPage />
       </Route>
-      <Route path={`${match.url}/queries/:savedQueryId/results/:agentId`}>
+      {/* <Route path={`${match.url}/queries/:savedQueryId/results/:agentId`}>
         <QueryAgentResults />
-      </Route>
+      </Route> */}
       <Route path={`${match.url}/queries/:savedQueryId`}>
-        <EditLiveQueryPage />
+        <EditSavedQueryPage />
       </Route>
       <Route path={`${match.url}/queries`}>
-        <QueriesPage />
+        <SavedQueriesPage />
       </Route>
     </Switch>
   );
 };
 
-export const LiveQuery = React.memo(LiveQueryComponent);
+export const SavedQuery = React.memo(SavedQueryComponent);

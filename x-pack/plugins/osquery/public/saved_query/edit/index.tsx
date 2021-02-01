@@ -8,21 +8,26 @@ import { isEmpty } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 import { ResultTabs } from './tabs';
-import { LiveQueryForm } from '../form';
+import { SavedQueryForm } from '../form';
 import { useKibana } from '../../common/lib/kibana';
 
-const EditLiveQueryPageComponent = () => {
+const EditSavedQueryPageComponent = () => {
   const { http } = useKibana().services;
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
 
   const { isLoading, data: actionDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
     http.get(`/api/osquery/saved_query/${savedQueryId}`)
   );
+  const updateSavedQueryMutation = useMutation((payload) =>
+    http.put(`/api/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) })
+  );
 
-  const handleSubmit = useCallback(() => Promise.resolve(), []);
+  const handleSubmit = useCallback((payload) => updateSavedQueryMutation.mutate(payload), [
+    updateSavedQueryMutation,
+  ]);
 
   if (isLoading) {
     return <>{'Loading...'}</>;
@@ -31,12 +36,12 @@ const EditLiveQueryPageComponent = () => {
   return (
     <>
       {!isEmpty(actionDetails) && (
-        <LiveQueryForm actionDetails={actionDetails} onSubmit={handleSubmit} />
+        <SavedQueryForm actionDetails={actionDetails} onSubmit={handleSubmit} />
       )}
       <EuiSpacer />
-      <ResultTabs />
+      {/* <ResultTabs /> */}
     </>
   );
 };
 
-export const EditLiveQueryPage = React.memo(EditLiveQueryPageComponent);
+export const EditSavedQueryPage = React.memo(EditSavedQueryPageComponent);
