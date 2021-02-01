@@ -201,3 +201,53 @@ describe('bulk helper onDocument param', () => {
     ]);
   });
 });
+
+describe('bulk helper onDrop param', () => {
+  it('throws an error reporting any docs which failed all retry attempts', async () => {
+    const client = new MockClient();
+    let counter = -1;
+    client.helpers.bulk.mockImplementation(async ({ datasource, onDrop }) => {
+      for (const d of datasource) {
+        counter++;
+        if (counter > 0) {
+          onDrop({
+            document: d,
+            error: {
+              reason: `${counter} conflicts with something`,
+            },
+          });
+        }
+      }
+    });
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const promise = createPromiseFromStreams([
+      createListStream(testRecords),
+      createIndexDocRecordsStream(client as any, stats, progress),
+    ]);
+
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"1 conflicts with something\\"}
+                    at Array.map (<anonymous>)
+                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
+                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"2 conflicts with something\\"}
+                    at Array.map (<anonymous>)
+                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
+                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"3 conflicts with something\\"}
+                    at Array.map (<anonymous>)
+                    at indexDocs (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:49:13)
+                    at Writable.writev [as _writev] (/Users/spalger/kbn-dev/master/kibana/packages/kbn-es-archiver/src/lib/docs/index_doc_records_stream.ts:73:9)"
+          `);
+  });
+});

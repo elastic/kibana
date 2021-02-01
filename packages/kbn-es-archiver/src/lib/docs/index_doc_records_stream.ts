@@ -21,7 +21,7 @@ export function createIndexDocRecordsStream(
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? 'create' : 'index';
     const ops = new WeakMap<any, any>();
-    const errors: Error[] = [];
+    const errors: string[] = [];
 
     await client.helpers.bulk({
       retries: 5,
@@ -41,7 +41,7 @@ export function createIndexDocRecordsStream(
       onDrop(dropped) {
         const dj = JSON.stringify(dropped.document);
         const ej = JSON.stringify(dropped.error);
-        errors.push(new Error(`Failed to [${operation}]:\n  doc: ${dj}\n  error:${ej}`));
+        errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
       },
     });
 
