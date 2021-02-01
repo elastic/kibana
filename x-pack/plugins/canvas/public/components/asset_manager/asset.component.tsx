@@ -28,7 +28,7 @@ import { ComponentStrings } from '../../../i18n';
 
 const { Asset: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   /** The asset to be rendered */
   asset: AssetType;
   /** The function to execute when the user clicks 'Create' */

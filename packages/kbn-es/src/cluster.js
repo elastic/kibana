@@ -246,7 +246,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['indices.query.bool.max_nested_depth=100'].concat(options.esArgs || []);
+    const esArgs = options.esArgs || [];
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
@@ -279,7 +279,7 @@ exports.Cluster = class Cluster {
       env: {
         ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
-        ...(options.bundledJDK ? { JAVA_HOME: '' } : {}),
+        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ...(options.esEnvVars || {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
