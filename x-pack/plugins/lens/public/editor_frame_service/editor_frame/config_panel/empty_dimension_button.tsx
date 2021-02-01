@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../id_generator';
 import { DragDrop, DragDropIdentifier } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig } from '../../../types';
+import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
@@ -37,7 +37,11 @@ export function EmptyDimensionButton({
   groupIndex: number;
   layerIndex: number;
   onClick: (id: string) => void;
-  onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
+  onDrop: (
+    droppedItem: DragDropIdentifier,
+    dropTarget: DragDropIdentifier,
+    dropType: DropType
+  ) => void;
   group: VisualizationDimensionGroupConfig;
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
@@ -72,8 +76,6 @@ export function EmptyDimensionButton({
     };
   }, [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]);
 
-  const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value, dropType);
-
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
@@ -81,8 +83,7 @@ export function EmptyDimensionButton({
         value={value}
         /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
         order={[2, layerIndex, groupIndex, itemIndex]}
-        onDrop={handleDrop}
-        label={label}
+        onDrop={(droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType)}
         dropType={dropType}
         droppable={!!dropType}
       >

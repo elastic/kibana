@@ -83,15 +83,6 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
-const workspaceDropValue = {
-  id: 'lnsWorkspace',
-  humanData: {
-    label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
-      defaultMessage: 'Workspace',
-    }),
-  },
-};
-
 const dropProps = {
   value: {
     id: 'lnsWorkspace',

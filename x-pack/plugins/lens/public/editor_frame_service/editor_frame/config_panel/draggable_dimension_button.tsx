@@ -6,7 +6,12 @@
 
 import React, { useMemo } from 'react';
 import { DragDrop, DragDropIdentifier, DragContextState } from '../../../drag_drop';
-import { Datasource, VisualizationDimensionGroupConfig, isDraggedOperation } from '../../../types';
+import {
+  Datasource,
+  VisualizationDimensionGroupConfig,
+  isDraggedOperation,
+  DropType,
+} from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
 const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
@@ -49,7 +54,11 @@ export function DraggableDimensionButton({
   layerId: string;
   groupIndex: number;
   layerIndex: number;
-  onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
+  onDrop: (
+    droppedItem: DragDropIdentifier,
+    dropTarget: DragDropIdentifier,
+    dropType: DropType
+  ) => void;
   group: VisualizationDimensionGroupConfig;
   label: string;
   children: React.ReactElement;
@@ -120,9 +129,8 @@ export function DraggableDimensionButton({
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         dropTargetsFilter={filterSameGroup}
         value={value}
-        label={label}
         droppable={!!(dragging && dropType)}
-        onDrop={(drag) => onDrop(drag, value, dropType)}
+        onDrop={(drag, selectedDropType) => onDrop(drag, value, selectedDropType)}
       >
         {children}
       </DragDrop>

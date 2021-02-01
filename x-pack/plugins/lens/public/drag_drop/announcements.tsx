@@ -5,16 +5,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DropType } from '../types';
 
 type ActionType = 'lifted' | 'cancelled' | 'selectedTarget' | 'dropped' | 'blockedArrows';
 
 // draggingElement: label, groupLabel, position
 // droppingElement: label, groupLabel, position
-
 export interface HumanData {
   label: string;
   groupLabel?: string;
   position?: number;
+}
+
+export interface AnnouncementProps {
+  draggedElement: HumanData;
+  dropElement: HumanData;
 }
 
 const defaultAnnouncements = {
@@ -24,7 +29,7 @@ const defaultAnnouncements = {
         'You have started reordering and you cannot choose any external target now. Press escape to cancel and try again.',
     });
   },
-  lifted: ({ label }) => {
+  lifted: ({ draggedElement: { label } }: AnnouncementProps) => {
     return i18n.translate('xpack.lens.dragDrop.liftedAnnounce', {
       defaultMessage: `You have lifted an item {label}`,
       values: {
@@ -32,7 +37,7 @@ const defaultAnnouncements = {
       },
     });
   },
-  cancelled: ({ label }) => {
+  cancelled: ({ draggedElement: { label } }: AnnouncementProps) => {
     return i18n.translate('xpack.lens.dragDrop.cancelledAnnounce', {
       defaultMessage: 'Movement cancelled',
       values: {
@@ -40,9 +45,9 @@ const defaultAnnouncements = {
       },
     });
   },
-  dropped: (dragging, dropTarget) => {
-    const { label } = dragging;
-    const { groupLabel, position, label: dropLabel } = dropTarget;
+  dropped: ({ draggedElement, dropElement }: AnnouncementProps) => {
+    const { label } = draggedElement;
+    const { groupLabel, position, label: dropLabel } = dropElement;
     if (groupLabel && position) {
       return i18n.translate('xpack.lens.dragDrop.droppedAnnounceAll', {
         defaultMessage:
@@ -63,8 +68,8 @@ const defaultAnnouncements = {
       },
     });
   },
-  selectedTarget: ({ label, groupLabel }, dropTarget) => {
-    const { label: dropTargetLabel, groupLabel: dropTargetGroupLabel, position } = dropTarget;
+  selectedTarget: ({ draggedElement: { label, groupLabel }, dropElement }: AnnouncementProps) => {
+    const { label: dropTargetLabel, groupLabel: dropTargetGroupLabel, position } = dropElement;
     if (label === dropTargetLabel && groupLabel === dropTargetGroupLabel) {
       return i18n.translate('xpack.lens.dragDrop.elementUnselected', {
         defaultMessage: `You have no target selected. Use arros keys to select a target.`,
@@ -93,9 +98,9 @@ const defaultAnnouncements = {
 export const announcements = {
   reorder: {
     ...defaultAnnouncements,
-    selectedTarget: (dragged, drop) => {
-      const { label, position: prevPosition } = dragged;
-      const { position } = drop;
+    selectedTarget: ({ draggedElement, dropElement }: AnnouncementProps) => {
+      const { label, position: prevPosition } = draggedElement;
+      const { position } = dropElement;
       if (prevPosition === position) {
         return i18n.translate('xpack.lens.dragDrop.elementReturned', {
           defaultMessage: `You have moved the item {label} back to position {prevPosition}`,
@@ -114,7 +119,10 @@ export const announcements = {
         },
       });
     },
-    dropped: ({ label, position: prevPosition }, { position }) =>
+    dropped: ({
+      draggedElement: { label, position: prevPosition },
+      dropElement: { position },
+    }: AnnouncementProps) =>
       i18n.translate('xpack.lens.dragDrop.dropMessageReorder', {
         defaultMessage:
           'You have dropped the item {label}. You have moved the item from position {prevPosition} to positon {position}',
@@ -127,7 +135,10 @@ export const announcements = {
   },
   duplicate_in_group: {
     ...defaultAnnouncements,
-    selectedTarget: ({ label }, { label: targetLabel, groupLabel, position }) =>
+    selectedTarget: ({
+      draggedElement: { label },
+      dropElement: { label: targetLabel, groupLabel, position },
+    }: AnnouncementProps) =>
       i18n.translate('xpack.lens.dragDrop.elementMoved', {
         defaultMessage: `You have selected {targetLabel} in {groupLabel} group in position {position}. Press space or enter to duplicate the item.`,
         values: {
@@ -137,9 +148,9 @@ export const announcements = {
           position,
         },
       }),
-    dropped: (dragging, dropTarget) => {
-      const { label } = dragging;
-      const { groupLabel, position } = dropTarget;
+    dropped: ({ draggedElement, dropElement }: AnnouncementProps) => {
+      const { label } = draggedElement;
+      const { groupLabel, position } = dropElement;
       return i18n.translate('xpack.lens.dragDrop.droppedAnnounce', {
         defaultMessage:
           'You have dropped the item. You have duplicated {label} in {groupLabel} group in position {position}',
@@ -155,14 +166,16 @@ export const announcements = {
 
 export const announce = (
   actionType: ActionType,
-  dropType: 'reorder' | undefined,
-  draggingElement: HumanData,
-  droppingElement?: HumanData
+  dropType: DropType | undefined,
+  draggedElement: HumanData,
+  dropElement?: HumanData
 ) => {
-  const announcement = announcements?.[dropType]?.[actionType] || defaultAnnouncements[actionType];
+  const announcementType =
+    dropType && dropType in announcements ? announcements[dropType] : defaultAnnouncements;
+  const announcement = announcementType?.[actionType] || defaultAnnouncements[actionType];
   // console.log(
   //   `%c ${announcement(draggingElement, droppingElement)}`,
   //   'background: #251e3e; color: #eee3e7'
   // );
-  return announcement(draggingElement, droppingElement);
+  return announcement({ draggedElement, dropElement });
 };

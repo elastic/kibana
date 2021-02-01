@@ -17,17 +17,13 @@ import {
   getTargetOnDrop,
   ReorderContext,
   ReorderState,
+  DropHandler,
 } from './providers';
 import { announce } from './announcements';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { DropType } from '../types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
-
-/**
- * A function that handles a drop event.
- */
-export type DropHandler = (dropped: DragDropIdentifier) => void;
 
 export interface GroupMoveResult {
   targetDescription: string;
@@ -75,11 +71,11 @@ interface BaseProps {
   /**
    * Additional class names to apply when another element is over the drop target
    */
-  getAdditionalClassesOnEnter?: (dropType?: DropType) => string;
+  getAdditionalClassesOnEnter?: (dropType?: DropType) => string | undefined;
   /**
    * Additional class names to apply when another element is droppable
    */
-  getAdditionalClassesOnDroppable?: (dropType?: DropType) => string;
+  getAdditionalClassesOnDroppable?: (dropType?: DropType) => string | undefined;
 
   /**
    * The optional test subject associated with this DOM element.
@@ -306,7 +302,7 @@ const DragInner = memo(function DragInner({
         )
       );
 
-      onTargetDrop?.(value);
+      onTargetDrop?.(value, activeDropTarget?.activeDropTarget?.dropType);
     }
   };
 
@@ -422,6 +418,9 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
 
   const isMoveDragging = isDragging && dragType === 'move';
 
+  const classesOnEnter = getAdditionalClassesOnEnter?.(dropType);
+  const classesOnDroppable = getAdditionalClassesOnDroppable?.(dropType);
+
   const classes = classNames(
     'lnsDragDrop',
     {
@@ -434,12 +433,8 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
         droppable && activeDropTargetMatches && dropType !== 'reorder',
       'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
     },
-    getAdditionalClassesOnEnter && {
-      [getAdditionalClassesOnEnter(dropType)]: activeDropTargetMatches,
-    },
-    getAdditionalClassesOnDroppable && {
-      [getAdditionalClassesOnDroppable(dropType)]: droppable,
-    }
+    classesOnEnter && { [classesOnEnter]: activeDropTargetMatches },
+    classesOnDroppable && { [classesOnDroppable]: droppable }
   );
 
   const dragOver = (e: DroppableEvent) => {
@@ -452,7 +447,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     // todo: replace with custom function ?
     if (!activeDropTargetMatches) {
       setActiveDropTarget(value);
-      setA11yMessage(announce('selectedTarget', dropType, dragging.humanData, value.humanData));
+      setA11yMessage(announce('selectedTarget', dropType, dragging?.humanData, value.humanData));
     }
   };
 
@@ -466,7 +461,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
 
     if (onDrop && droppable && dragging) {
       trackUiEvent('drop_total');
-      onDrop(dragging);
+      onDrop(dragging, dropType);
       setTimeout(() =>
         setA11yMessage(announce('dropped', dropType, dragging.humanData, value.humanData))
       );
@@ -733,7 +728,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
 
     if (onDrop && droppable && dragging) {
       trackUiEvent('drop_total');
-      onDrop(dragging);
+      onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>
         setA11yMessage(announce('dropped', 'reorder', dragging.humanData, value.humanData))

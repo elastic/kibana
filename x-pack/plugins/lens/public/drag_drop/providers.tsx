@@ -9,6 +9,12 @@ import classNames from 'classnames';
 import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HumanData } from './announcements';
+import { DropType } from '../types';
+
+/**
+ * A function that handles a drop event.
+ */
+export type DropHandler = (dropped: DragDropIdentifier, dropType: DropType) => void;
 
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
@@ -22,7 +28,7 @@ export interface ActiveDropTarget {
   activeDropTarget?: DragDropIdentifier;
   dropTargetsByOrder: Record<
     string,
-    { dropTarget: DragDropIdentifier; onDrop?: (dropped: DragDropIdentifier) => void } | undefined
+    { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
   >;
 }
 /**
@@ -55,7 +61,7 @@ export interface DragContextState {
   registerDropTarget: (
     order: number[],
     dropTarget: DragDropIdentifier | undefined,
-    onDrop?: (drop: DragDropIdentifier) => void
+    onDrop?: DropHandler
   ) => void;
 }
 
@@ -106,8 +112,7 @@ export interface ProviderProps {
     activeDropTarget?: DragDropIdentifier;
     dropTargetsByOrder: Record<
       string,
-      | { dropTarget: DragDropIdentifier; onDrop?: (dragging: DragDropIdentifier) => void }
-      | undefined
+      { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
     >;
   };
 
@@ -116,7 +121,7 @@ export interface ProviderProps {
   registerDropTarget: (
     order: number[],
     dropTarget?: DragDropIdentifier,
-    onDrop?: (dragging: DragDropIdentifier) => void
+    onDrop?: DropHandler
   ) => void;
 
   /**
@@ -144,8 +149,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     activeDropTarget?: DragDropIdentifier;
     dropTargetsByOrder: Record<
       string,
-      | { dropTarget: DragDropIdentifier; onDrop?: (dragging: DragDropIdentifier) => void }
-      | undefined
+      { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
     >;
   }>({
     activeDropTarget: undefined,
@@ -168,11 +172,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   );
 
   const registerDropTarget = useMemo(
-    () => (
-      order: number[],
-      dropTarget?: DragDropIdentifier,
-      onDrop?: (dragging: DragDropIdentifier) => void
-    ) => {
+    () => (order: number[], dropTarget?: DragDropIdentifier, onDrop?: DropHandler) => {
       return setActiveDropTargetState((s) => {
         return {
           ...s,

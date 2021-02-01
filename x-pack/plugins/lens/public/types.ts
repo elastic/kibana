@@ -186,7 +186,6 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
-  canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   getDropTypes: (
     props: DatasourceDimensionDropProps<T> & { groupId: string }
   ) => DropType | undefined;
@@ -311,11 +310,8 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   dragDropContext: DragContextState;
 };
 
-export type DatasourceDimensionDropHandlerProps<
-  T,
-  D = DraggedOperation
-> = DatasourceDimensionDropProps<T> & {
-  droppedItem: D;
+export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
+  droppedItem: unknown;
   dropType: DropType;
 };
 

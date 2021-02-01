@@ -439,7 +439,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.canHandleDrop.mockReturnValue(true);
+      mockDatasource.getDropTypes.mockReturnValue('field_add');
 
       const draggingField = {
         field: { name: 'dragged' },
@@ -454,7 +454,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
         expect.objectContaining({
           dragDropContext: expect.objectContaining({
             dragging: draggingField,
@@ -487,7 +487,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.canHandleDrop.mockImplementation(({ columnId }) => columnId !== 'a');
+      mockDatasource.getDropTypes.mockImplementation(({ columnId }) => columnId !== 'a');
 
       const draggingField = {
         field: { name: 'dragged' },
@@ -502,7 +502,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
         expect.objectContaining({ columnId: 'a' })
       );
 
@@ -543,7 +543,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.canHandleDrop.mockReturnValue(true);
+      mockDatasource.getDropTypes.mockReturnValue('replace_compatible');
 
       const draggingOperation = {
         layerId: 'first',
@@ -559,7 +559,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+      expect(mockDatasource.getDropTypes).toHaveBeenCalledWith(
         expect.objectContaining({
           dragDropContext: expect.objectContaining({
             dragging: draggingOperation,

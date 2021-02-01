@@ -87,7 +87,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    canHandleDrop: jest.fn(),
     getDropTypes: jest.fn(),
     onDrop: jest.fn(),
 

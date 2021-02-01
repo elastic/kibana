@@ -105,9 +105,6 @@ const bytesColumn: IndexPatternColumn = {
  *
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
- *
- * - canHandleDrop: Tests for dropping of fields or other dimensions
- * - onDrop: Correct application of drop logic
  */
 describe('IndexPatternDimensionEditorPanel', () => {
   let state: IndexPatternPrivateState;
