@@ -41,6 +41,7 @@ export default async function ({ readConfigFile }) {
         '--oss',
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+        '--xpack.maps.showMapVisualizationTypes=true',
       ],
     },
 

@@ -103,10 +103,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
 
-      if (isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-        loadTestFile(require.resolve('./_region_map'));
-      }
+      loadTestFile(require.resolve('./_tile_map'));
+      loadTestFile(require.resolve('./_region_map'));
     });
 
     describe('', function () {
