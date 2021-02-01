@@ -92,10 +92,11 @@ export const schema: FormSchema<FieldFormInternal> = {
       {
         validator: numberGreaterThanField({
           than: 0,
+          allowEquality: true,
           message: i18n.translate(
             'indexPatternFieldEditor.editor.form.validations.popularityGreaterThan0ErrorMessage',
             {
-              defaultMessage: 'The popularity must be greater than zero.',
+              defaultMessage: 'The popularity must be zero or greater.',
             }
           ),
         }),
