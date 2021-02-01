@@ -128,6 +128,7 @@ exports[`LoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
+          autoComplete="off"
           data-test-subj="loginUsername"
           disabled={false}
           id="username"
