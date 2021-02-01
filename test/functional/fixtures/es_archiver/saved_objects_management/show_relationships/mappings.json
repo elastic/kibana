@@ -26,11 +26,81 @@
           },
           "type": "nested"
         },
+        "apm-telemetry": {
+          "properties": {
+            "has_any_services": {
+              "type": "boolean"
+            },
+            "services_per_agent": {
+              "properties": {
+                "go": {
+                  "type": "long",
+                  "null_value": 0
+                },
+                "java": {
+                  "type": "long",
+                  "null_value": 0
+                },
+                "js-base": {
+                  "type": "long",
+                  "null_value": 0
+                },
+                "nodejs": {
+                  "type": "long",
+                  "null_value": 0
+                },
+                "python": {
+                  "type": "long",
+                  "null_value": 0
+                },
+                "ruby": {
+                  "type": "long",
+                  "null_value": 0
+                }
+              }
+            }
+          }
+        },
+        "canvas-workpad": {
+          "dynamic": "false",
+          "properties": {
+            "@created": {
+              "type": "date"
+            },
+            "@timestamp": {
+              "type": "date"
+            },
+            "id": {
+              "type": "text",
+              "index": false
+            },
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
         "config": {
           "dynamic": "true",
           "properties": {
+            "accessibility:disableAnimations": {
+              "type": "boolean"
+            },
             "buildNum": {
               "type": "keyword"
+            },
+            "dateFormat:tz": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
             },
             "defaultIndex": {
               "type": "text",
@@ -103,6 +173,32 @@
             }
           }
         },
+        "map": {
+          "properties": {
+            "bounds": {
+              "type": "geo_shape",
+              "tree": "quadtree"
+            },
+            "description": {
+              "type": "text"
+            },
+            "layerListJSON": {
+              "type": "text"
+            },
+            "mapStateJSON": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
         "graph-workspace": {
           "properties": {
             "description": {
@@ -154,8 +250,50 @@
             },
             "title": {
               "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "typeMeta": {
+              "type": "keyword"
             }
           }
+        },
+        "kql-telemetry": {
+          "properties": {
+            "optInCount": {
+              "type": "long"
+            },
+            "optOutCount": {
+              "type": "long"
+            }
+          }
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "index-pattern": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "space": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
         },
         "search": {
           "properties": {
@@ -190,6 +328,44 @@
           "properties": {
             "uuid": {
               "type": "keyword"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
+            }
+          }
+        },
+        "spaceId": {
+          "type": "keyword"
+        },
+        "telemetry": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
             }
           }
         },
