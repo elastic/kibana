@@ -9,29 +9,51 @@ import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
-  META_DATA_REQUEST_ID_SUFFIX,
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
+  META_DATA_REQUEST_ID_SUFFIX,
+  SOURCE_TYPES,
 } from '../../../common/constants';
-import { JoinDescriptor } from '../../../common/descriptor_types';
+import {
+  ESTermSourceDescriptor,
+  JoinDescriptor,
+  TableSourceDescriptor,
+  TermJoinSourceDescriptor,
+} from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
+import { ITermJoinSource } from '../sources/term_join_source';
+import { TableSource } from '../sources/table_source';
+import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
+
+function createJoinTermSource(
+  descriptor: Partial<TermJoinSourceDescriptor> | undefined,
+  inspectorAdapters: Adapters | undefined
+): ITermJoinSource | undefined {
+  if (!descriptor) {
+    return;
+  }
+
+  if (
+    descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE &&
+    'indexPatternId' in descriptor &&
+    'term' in descriptor
+  ) {
+    return new ESTermSource(descriptor as ESTermSourceDescriptor, inspectorAdapters);
+  } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
+    return new TableSource(descriptor as TableSourceDescriptor, inspectorAdapters);
+  }
+}
 
 export class InnerJoin {
   private readonly _descriptor: JoinDescriptor;
-  private readonly _rightSource?: ESTermSource;
+  private readonly _rightSource?: ITermJoinSource;
   private readonly _leftField?: IField;
 
   constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
     const inspectorAdapters = leftSource.getInspectorAdapters();
-    if (
-      joinDescriptor.right &&
-      'indexPatternId' in joinDescriptor.right &&
-      'term' in joinDescriptor.right
-    ) {
-      this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
-    }
+    this._rightSource = createJoinTermSource(this._descriptor.right, inspectorAdapters);
     this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
       : undefined;
@@ -47,8 +69,8 @@ export class InnerJoin {
     return this._leftField && this._rightSource ? this._rightSource.hasCompleteConfig() : false;
   }
 
-  getJoinFields() {
-    return this._rightSource ? this._rightSource.getMetricFields() : [];
+  getJoinFields(): IField[] {
+    return this._rightSource ? this._rightSource.getRightFields() : [];
   }
 
   // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
@@ -77,7 +99,7 @@ export class InnerJoin {
     if (!feature.properties || !this._leftField || !this._rightSource) {
       return false;
     }
-    const rightMetricFields = this._rightSource.getMetricFields();
+    const rightMetricFields: IField[] = this._rightSource.getRightFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
       const metricPropertyKey = rightMetricFields[j].getName();
@@ -106,7 +128,7 @@ export class InnerJoin {
     }
   }
 
-  getRightJoinSource(): ESTermSource {
+  getRightJoinSource(): ITermJoinSource {
     if (!this._rightSource) {
       throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
     }
