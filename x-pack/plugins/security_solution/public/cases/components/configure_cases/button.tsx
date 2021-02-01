@@ -38,6 +38,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
     },
     [history, urlSearch]
   );
+
   const configureCaseButton = useMemo(
     () => (
       <LinkButton
@@ -53,6 +54,7 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
     ),
     [label, isDisabled, formatUrl, goToCaseConfigure]
   );
+
   return showToolTip ? (
     <EuiToolTip
       position="top"
