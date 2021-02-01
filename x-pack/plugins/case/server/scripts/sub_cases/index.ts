@@ -153,8 +153,8 @@ async function main() {
       },
     })
     .command({
-      command: ['alerts', 'gen', 'genAlerts'],
-      aliases: ['$0'],
+      command: 'alerts',
+      aliases: ['gen', 'genAlerts'],
       describe: 'generate a group of alerts',
       builder: (args) => {
         return args
