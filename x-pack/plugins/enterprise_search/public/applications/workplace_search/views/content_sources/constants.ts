@@ -429,3 +429,25 @@ export const LICENSE_CALLOUT_DESCRIPTION = i18n.translate(
     defaultMessage: 'Contact your search experience administrator for more information.',
   }
 );
+
+export const SOURCE_DISABLED_CALLOUT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.title',
+  {
+    defaultMessage: 'Content source is disabled',
+  }
+);
+
+export const SOURCE_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.description',
+  {
+    defaultMessage:
+      'Your organization’s license level has changed. Your data is safe, but document-level permissions are no longer supported and searching of this source has been disabled. Upgrade to a Platinum license to re-enable this source.',
+  }
+);
+
+export const SOURCE_DISABLED_CALLOUT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.description',
+  {
+    defaultMessage: 'Explore Platinum license',
+  }
+);
