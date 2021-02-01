@@ -15,7 +15,7 @@ import { ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from '.';
 
-interface Arguments {
+export interface Arguments {
   group: string[];
   ungrouped: boolean;
 }
