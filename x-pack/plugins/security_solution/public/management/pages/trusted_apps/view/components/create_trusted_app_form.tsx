@@ -25,6 +25,7 @@ import {
 import {
   isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
+  isPolicyEffectScope,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 import { defaultConditionEntry } from '../../store/builders';
@@ -229,27 +230,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           ],
         });
       }
-
-      // setFormValues(
-      //   (prevState): NewTrustedApp => {
-      //     if (prevState.os === OperatingSystem.WINDOWS) {
-      //       return {
-      //         ...prevState,
-      //         entries: [...prevState.entries, defaultConditionEntry()].filter(
-      //           isWindowsTrustedAppCondition
-      //         ),
-      //       };
-      //     } else {
-      //       return {
-      //         ...prevState,
-      //         entries: [
-      //           ...prevState.entries.filter(isMacosLinuxTrustedAppCondition),
-      //           defaultConditionEntry(),
-      //         ],
-      //       };
-      //     }
-      //   }
-      // );
     }, [notifyOfChange, trustedApp]);
 
     const handleDomChangeEvents = useCallback<
@@ -260,15 +240,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           ...trustedApp,
           [name]: value,
         });
-
-        // setFormValues(
-        //   (prevState): NewTrustedApp => {
-        //     return {
-        //       ...prevState,
-        //       [name]: value,
-        //     };
-        //   }
-        // );
       },
       [notifyOfChange, trustedApp]
     );
@@ -314,29 +285,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         }
 
         notifyOfChange(updatedState);
-
-        // setFormValues(
-        //   (prevState): NewTrustedApp => {
-        //     const updatedState: NewTrustedApp = {
-        //       ...prevState,
-        //       entries: [],
-        //       os: newOsValue,
-        //     };
-        //     if (updatedState.os !== OperatingSystem.WINDOWS) {
-        //       updatedState.entries.push(
-        //         ...(prevState.entries.filter((entry) =>
-        //           isMacosLinuxTrustedAppCondition(entry)
-        //         ) as MacosLinuxConditionEntry[])
-        //       );
-        //       if (updatedState.entries.length === 0) {
-        //         updatedState.entries.push(defaultConditionEntry());
-        //       }
-        //     } else {
-        //       updatedState.entries.push(...prevState.entries);
-        //     }
-        //     return updatedState;
-        //   }
-        // );
       },
       [notifyOfChange, trustedApp]
     );
@@ -347,15 +295,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           ...trustedApp,
           entries: trustedApp.entries.filter((item) => item !== entry),
         });
-
-        // setFormValues(
-        //   (prevState): NewTrustedApp => {
-        //     return {
-        //       ...prevState,
-        //       entries: prevState.entries.filter((item) => item !== entry),
-        //     } as NewTrustedApp;
-        //   }
-        // );
       },
       [notifyOfChange, trustedApp]
     );
@@ -383,32 +322,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             }),
           } as NewTrustedApp);
         }
-
-        // setFormValues(
-        //   (prevState): NewTrustedApp => {
-        //     if (prevState.os === OperatingSystem.WINDOWS) {
-        //       return {
-        //         ...prevState,
-        //         entries: prevState.entries.map((item) => {
-        //           if (item === oldEntry) {
-        //             return newEntry;
-        //           }
-        //           return item;
-        //         }),
-        //       } as NewTrustedApp;
-        //     } else {
-        //       return {
-        //         ...prevState,
-        //         entries: prevState.entries.map((item) => {
-        //           if (item === oldEntry) {
-        //             return newEntry;
-        //           }
-        //           return item;
-        //         }),
-        //       } as NewTrustedApp;
-        //     }
-        //   }
-        // );
       },
       [notifyOfChange, trustedApp]
     );
@@ -443,47 +356,53 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           ...trustedApp,
           effectScope: newEffectedScope,
         });
-
-        // setFormValues((prevState) => {
-        //   return {
-        //     ...prevState,
-        //     effectScope: newEffectedScope,
-        //   };
-        // });
       },
       [notifyOfChange, trustedApp]
     );
-
-    // Anytime the `trustedApp` prop changes, copy its values to the form state if necessary
-    // FIXME:PT cleanup here
-    // useEffect(() => {
-    //   setFormValues((prevState) => {
-    //     if (trustedApp && prevState !== trustedApp) {
-    //       return trustedApp as NewTrustedApp;
-    //     }
-    //     return prevState;
-    //   });
-    // }, [trustedApp]);
 
     // Anytime the form values change, re-validate
     useEffect(() => {
       setValidationResult((prevState) => {
         const newResults = validateFormValues(trustedApp);
         if (newResults.isValid !== prevState.isValid) {
-          debugger;
           return newResults;
         }
         return prevState;
       });
     }, [trustedApp]);
 
-    // Anytime the form values change - notify
-    // useEffect(() => {
-    //   onChange({
-    //     isValid: validationResult.isValid,
-    //     item: trustedApp,
-    //   });
-    // }, [trustedApp, onChange, validationResult.isValid]);
+    // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
+    // those polices are selected in the UI while at teh same time preserving prior
+    // selections (UX requirement)
+    useEffect(() => {
+      if (isPolicyEffectScope(trustedApp.effectScope) && policies.options.length > 0) {
+        setSelectedPolicies((currentSelection) => {
+          const missingSelectedPolicies: EffectedPolicySelectProps['selected'] = [];
+
+          for (const policyId of trustedApp.effectScope.policies) {
+            if (
+              !currentSelection.selected.find(
+                (currentlySelectedPolicyItem) => currentlySelectedPolicyItem.id === policyId
+              )
+            ) {
+              const newSelectedPolicy = policies.options.find((policy) => policy.id === policyId);
+              if (newSelectedPolicy) {
+                missingSelectedPolicies.push(newSelectedPolicy);
+              }
+            }
+          }
+
+          if (missingSelectedPolicies.length) {
+            return {
+              ...currentSelection,
+              selected: [...currentSelection.selected, ...missingSelectedPolicies],
+            };
+          }
+
+          return currentSelection;
+        });
+      }
+    }, [policies.options, trustedApp.effectScope]);
 
     return (
       <EuiForm {...formProps} component="div">
@@ -559,7 +478,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         </EuiFormRow>
         <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
           <EffectedPolicySelect
-            isGlobal={selectedPolicies.isGlobal}
+            isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
             selected={selectedPolicies.selected}
             options={policies.options}
             onChange={handlePolicySelectChange}
