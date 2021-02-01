@@ -14,7 +14,7 @@ import * as KibanaServer from './kibana_server';
 
 export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiver {
   const config = getService('config');
-  const client = getService('legacyEs');
+  const client = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
