@@ -7,7 +7,7 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { LensMultiTable } from '../types';
 
-export interface SharedLayerState {
+export interface SharedPieLayerState {
   groups: string[];
   metric?: string;
   numberDisplay: 'hidden' | 'percent' | 'value';
@@ -18,17 +18,17 @@ export interface SharedLayerState {
   percentDecimals?: number;
 }
 
-export type LayerState = SharedLayerState & {
+export type PieLayerState = SharedPieLayerState & {
   layerId: string;
 };
 
 export interface PieVisualizationState {
   shape: 'donut' | 'pie' | 'treemap';
-  layers: LayerState[];
+  layers: PieLayerState[];
   palette?: PaletteOutput;
 }
 
-export type PieExpressionArgs = SharedLayerState & {
+export type PieExpressionArgs = SharedPieLayerState & {
   title?: string;
   description?: string;
   shape: 'pie' | 'donut' | 'treemap';

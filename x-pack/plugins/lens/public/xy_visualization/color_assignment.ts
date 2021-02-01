@@ -9,7 +9,7 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { Datatable } from 'src/plugins/expressions';
 import { AccessorConfig, FormatFactory, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { LayerConfig } from './types';
+import { XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -95,7 +95,7 @@ export function getColorAssignments(
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
   frame: FramePublicAPI,
-  layer: LayerConfig,
+  layer: XYLayerConfig,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);

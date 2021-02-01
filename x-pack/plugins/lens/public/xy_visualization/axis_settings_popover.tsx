@@ -15,7 +15,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayerConfig, AxesSettingsConfig } from './types';
+import { XYLayerConfig, AxesSettingsConfig } from './types';
 import { ToolbarPopover } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
@@ -33,7 +33,7 @@ export interface AxisSettingsPopoverProps {
   /**
    * Contains the chart layers
    */
-  layers?: LayerConfig[];
+  layers?: XYLayerConfig[];
   /**
    * Determines the axis title
    */

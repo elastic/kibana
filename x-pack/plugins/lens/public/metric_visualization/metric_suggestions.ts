@@ -5,7 +5,7 @@
  */
 
 import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import { State } from './types';
+import { MetricState } from './types';
 import { LensIconChartMetric } from '../assets/chart_metric';
 
 /**
@@ -17,7 +17,7 @@ export function getSuggestions({
   table,
   state,
   keptLayerIds,
-}: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
+}: SuggestionRequest<MetricState>): Array<VisualizationSuggestion<MetricState>> {
   // We only render metric charts for single-row queries. We require a single, numeric column.
   if (
     table.isMultiRow ||
@@ -37,7 +37,7 @@ export function getSuggestions({
   return [getSuggestion(table)];
 }
 
-function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
+function getSuggestion(table: TableSuggestion): VisualizationSuggestion<MetricState> {
   const col = table.columns[0];
   const title = table.label || col.operation.label;
 

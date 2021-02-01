@@ -1,5 +1,10 @@
 # Lens
 
+## Embedding
+
+It's possible to embed Lens visualizations in other apps using `EmbeddableComponent` and `navigateToPrefilledEditor`
+exposed via contract. For more information check out the example in `x-pack/examples/embedded_lens_example`.
+
 ## Testing
 
 Run all tests from the `x-pack` root directory

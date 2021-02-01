@@ -15,7 +15,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
-import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
+import { State, SeriesType, visualizationTypes, XYLayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
@@ -341,9 +341,9 @@ export const getXyVisualization = ({
 
   getErrorMessages(state, frame) {
     // Data error handling below here
-    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+    const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
-    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
 
     const errors: Array<{
@@ -354,14 +354,14 @@ export const getXyVisualization = ({
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+      const checks: Array<[string, (layer: XYLayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
         ['Break down', hasNoSplitAccessor],
       ];
 
       // filter out those layers with no accessors at all
       const filteredLayers = state.layers.filter(
-        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+        ({ accessors, xAccessor, splitAccessor }: XYLayerConfig) =>
           accessors.length > 0 || xAccessor != null || splitAccessor != null
       );
       for (const [dimension, criteria] of checks) {
@@ -382,7 +382,7 @@ export const getXyVisualization = ({
 
     const layers = state.layers;
 
-    const filteredLayers = layers.filter(({ accessors }: LayerConfig) => accessors.length > 0);
+    const filteredLayers = layers.filter(({ accessors }: XYLayerConfig) => accessors.length > 0);
     const accessorsWithArrayValues = [];
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
@@ -409,8 +409,8 @@ export const getXyVisualization = ({
 
 function validateLayersForDimension(
   dimension: string,
-  layers: LayerConfig[],
-  missingCriteria: (layer: LayerConfig) => boolean
+  layers: XYLayerConfig[],
+  missingCriteria: (layer: XYLayerConfig) => boolean
 ):
   | { valid: true }
   | {
@@ -480,7 +480,7 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
+function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
   return {
     layerId,
     seriesType,

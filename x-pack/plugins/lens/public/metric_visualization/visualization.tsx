@@ -9,10 +9,10 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import { State } from './types';
+import { MetricState } from './types';
 
 const toExpression = (
-  state: State,
+  state: MetricState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   attributes?: { mode?: 'reduced' | 'full'; title?: string; description?: string }
 ): Ast | null => {
@@ -41,7 +41,7 @@ const toExpression = (
   };
 };
 
-export const metricVisualization: Visualization<State> = {
+export const metricVisualization: Visualization<MetricState> = {
   id: 'lnsMetric',
 
   visualizationTypes: [

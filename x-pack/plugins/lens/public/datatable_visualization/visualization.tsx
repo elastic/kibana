@@ -16,13 +16,13 @@ import type {
 import type { DatatableColumnWidth } from './components/types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
-export interface LayerState {
+export interface DatatableLayerState {
   layerId: string;
   columns: string[];
 }
 
 export interface DatatableVisualizationState {
-  layers: LayerState[];
+  layers: DatatableLayerState[];
   sorting?: {
     columnId: string | undefined;
     direction: 'asc' | 'desc' | 'none';
@@ -30,7 +30,7 @@ export interface DatatableVisualizationState {
   columnWidth?: DatatableColumnWidth[];
 }
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): DatatableLayerState {
   return {
     layerId,
     columns: [],
@@ -300,7 +300,7 @@ function getDataSourceAndSortedColumns(
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   layerId: string
 ) {
-  const layer = state.layers.find((l: LayerState) => l.layerId === layerId);
+  const layer = state.layers.find((l: DatatableLayerState) => l.layerId === layerId);
   if (!layer) {
     return undefined;
   }
