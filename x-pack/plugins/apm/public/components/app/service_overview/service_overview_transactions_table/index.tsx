@@ -132,6 +132,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
                 transactionNames,
               },
             },
+            isCachable: true,
           });
 
           return { [requestId]: metrics };
