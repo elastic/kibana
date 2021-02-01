@@ -39,7 +39,7 @@ export interface SourceActions {
   ): { sourceId: string; source: { name: string } };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
-  initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
+  initializeSource(sourceId: string): { sourceId: string };
   getSourceConfigData(serviceType: string): { serviceType: string };
   setButtonNotLoading(): void;
 }
@@ -88,7 +88,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
-    initializeSource: (sourceId: string, history: object) => ({ sourceId, history }),
+    initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
@@ -126,29 +126,22 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [

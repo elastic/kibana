@@ -12,13 +12,28 @@
     "urlForwarding",
     "visualizations",
     "dashboard",
-    "charts",
     "uiActions",
     "embeddable",
-    "share"
+    "share",
+    "presentationUtil"
   ],
-  "optionalPlugins": ["usageCollection", "taskManager", "globalSearch", "savedObjectsTagging"],
-  "configPath": ["xpack", "lens"],
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable", "lensOss", "presentationUtil"]
+  "optionalPlugins": [
+    "usageCollection",
+    "taskManager",
+    "globalSearch",
+    "savedObjectsTagging"
+  ],
+  "configPath": [
+    "xpack",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaUtils",
+    "kibanaReact",
+    "embeddable"
+  ]
 }

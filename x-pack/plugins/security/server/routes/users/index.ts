@@ -9,6 +9,8 @@ import { defineGetUserRoutes } from './get';
 import { defineGetAllUsersRoutes } from './get_all';
 import { defineCreateOrUpdateUserRoutes } from './create_or_update';
 import { defineDeleteUserRoutes } from './delete';
+import { defineDisableUserRoutes } from './disable';
+import { defineEnableUserRoutes } from './enable';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
 export function defineUsersRoutes(params: RouteDefinitionParams) {
@@ -16,5 +18,7 @@ export function defineUsersRoutes(params: RouteDefinitionParams) {
   defineGetAllUsersRoutes(params);
   defineCreateOrUpdateUserRoutes(params);
   defineDeleteUserRoutes(params);
+  defineDisableUserRoutes(params);
+  defineEnableUserRoutes(params);
   defineChangeUserPasswordRoutes(params);
 }

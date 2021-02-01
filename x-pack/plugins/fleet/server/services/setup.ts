@@ -11,6 +11,7 @@ import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
   ensureInstalledDefaultPackages,
+  ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
 import {
@@ -20,6 +21,8 @@ import {
   Installation,
   Output,
   DEFAULT_AGENT_POLICIES_PACKAGES,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SERVER_INDICES,
 } from '../../common';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
@@ -29,6 +32,8 @@ import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
+import { appContextService } from './app_context';
+import { runFleetServerMigration } from './fleet_server_migration';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -59,6 +64,7 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -76,6 +82,15 @@ async function createSetupSideEffects(
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
+  if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+    await ensureInstalledPackage({
+      savedObjectsClient: soClient,
+      pkgName: FLEET_SERVER_PACKAGE,
+      callCluster,
+    });
+    await ensureFleetServerIndicesCreated(esClient);
+    await runFleetServerMigration();
+  }
 
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
@@ -126,15 +141,40 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-export async function setupFleet(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser,
-  options?: { forceRecreate?: boolean }
-) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const res = await callCluster('transport.request', {
+async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
+  try {
+    await callCluster('transport.request', {
+      method: 'GET',
+      path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+    });
+  } catch (e) {
+    if (e.status === 404) {
+      return;
+    }
+
+    throw e;
+  }
+
+  return putFleetRole(callCluster);
+}
+
+async function ensureFleetServerIndicesCreated(esClient: ElasticsearchClient) {
+  await Promise.all(
+    FLEET_SERVER_INDICES.map(async (index) => {
+      const res = await esClient.indices.exists({
+        index,
+      });
+      if (res.statusCode === 404) {
+        await esClient.indices.create({
+          index,
+        });
+      }
+    })
+  );
+}
+
+async function putFleetRole(callCluster: CallESAsCurrentUser) {
+  return callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -156,6 +196,18 @@ export async function setupFleet(
       ],
     },
   });
+}
+
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  const res = await putFleetRole(callCluster);
+
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
     return;

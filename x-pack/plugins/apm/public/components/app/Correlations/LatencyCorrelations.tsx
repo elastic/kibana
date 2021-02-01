@@ -128,7 +128,7 @@ export function LatencyCorrelations() {
                 <EuiFormRow
                   fullWidth={true}
                   label="Field"
-                  helpText="Fields to analyse for significant terms"
+                  helpText="Fields to analyse for correlations"
                 >
                   <EuiComboBox
                     fullWidth={true}

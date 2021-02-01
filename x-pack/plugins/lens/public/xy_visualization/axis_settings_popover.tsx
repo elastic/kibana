@@ -16,12 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerConfig, AxesSettingsConfig } from './types';
-import { ToolbarPopover, ToolbarButtonProps } from '../shared_components';
+import { ToolbarPopover } from '../shared_components';
 import { isHorizontalChart } from './state_helpers';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../assets/axis_left';
 import { EuiIconAxisRight } from '../assets/axis_right';
 import { EuiIconAxisTop } from '../assets/axis_top';
+import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 export interface AxisSettingsPopoverProps {

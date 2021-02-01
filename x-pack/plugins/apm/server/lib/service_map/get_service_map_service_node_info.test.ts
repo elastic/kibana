@@ -52,8 +52,10 @@ describe('getServiceMapServiceNodeInfo', () => {
         apmEventClient: {
           search: () =>
             Promise.resolve({
+              hits: {
+                total: { value: 1 },
+              },
               aggregations: {
-                count: { value: 1 },
                 duration: { value: null },
                 avgCpuUsage: { value: null },
                 avgMemoryUsage: { value: null },
