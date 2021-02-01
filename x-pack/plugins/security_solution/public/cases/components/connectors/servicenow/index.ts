@@ -9,15 +9,15 @@ import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
 import {
-  ServiceNowIMFieldsType,
+  ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
 } from '../../../../../../case/common/api/connectors';
 import * as i18n from './translations';
 
-export const getServiceNowIMCaseConnector = (): CaseConnector<ServiceNowIMFieldsType> => {
+export const getServiceNowITSMCaseConnector = (): CaseConnector<ServiceNowITSMFieldsType> => {
   return {
     id: '.servicenow',
-    fieldsComponent: lazy(() => import('./servicenow_case_fields')),
+    fieldsComponent: lazy(() => import('./servicenow_itsm_case_fields')),
   };
 };
 
@@ -28,7 +28,7 @@ export const getServiceNowSIRCaseConnector = (): CaseConnector<ServiceNowSIRFiel
   };
 };
 
-export const serviceNowIMFieldLabels = {
+export const serviceNowITSMFieldLabels = {
   impact: i18n.IMPACT,
   severity: i18n.SEVERITY,
   urgency: i18n.URGENCY,

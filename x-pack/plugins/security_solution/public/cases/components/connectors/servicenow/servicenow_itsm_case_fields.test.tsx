@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 
 import { connector, choices as mockChoices } from '../mock';
 import { Choice } from './types';
-import Fields from './servicenow_case_fields';
+import Fields from './servicenow_itsm_case_fields';
 
 let onChoicesSuccess = (c: Choice[]) => {};
 
@@ -24,7 +24,7 @@ jest.mock('./use_get_choices', () => ({
   },
 }));
 
-describe('ServiceNowIM Fields', () => {
+describe('ServiceNowITSM Fields', () => {
   const fields = { severity: '1', urgency: '2', impact: '3' };
   const onChange = jest.fn();
 

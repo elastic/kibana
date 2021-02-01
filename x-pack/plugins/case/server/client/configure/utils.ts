@@ -70,7 +70,7 @@ export const formatFields = (theData: unknown, theType: string): ConnectorField[
       return normalizeJiraFields(theData as JiraGetFieldsResponse);
     case ConnectorTypes.resilient:
       return normalizeResilientFields(theData as ResilientGetFieldsResponse);
-    case ConnectorTypes.serviceNowIM:
+    case ConnectorTypes.serviceNowITSM:
       return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
     case ConnectorTypes.serviceNowSIR:
       return normalizeServiceNowFields(theData as ServiceNowGetFieldsResponse);
@@ -99,7 +99,10 @@ const getPreferredFields = (theType: string) => {
   } else if (theType === ConnectorTypes.resilient) {
     title = 'name';
     description = 'description';
-  } else if (theType === ConnectorTypes.serviceNowIM || theType === ConnectorTypes.serviceNowSIR) {
+  } else if (
+    theType === ConnectorTypes.serviceNowITSM ||
+    theType === ConnectorTypes.serviceNowSIR
+  ) {
     title = 'short_description';
     description = 'description';
   }

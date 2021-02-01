@@ -12,7 +12,7 @@ import * as i18n from './translations';
 import { ConnectorFieldsProps } from '../types';
 import {
   ConnectorTypes,
-  ServiceNowIMFieldsType,
+  ServiceNowITSMFieldsType,
 } from '../../../../../../case/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
@@ -26,8 +26,8 @@ const defaultOptions: Options = {
   impact: [],
 };
 
-const ServiceNowFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ServiceNowIMFieldsType>
+const ServiceNowITSMFieldsComponent: React.FunctionComponent<
+  ConnectorFieldsProps<ServiceNowITSMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const { severity = null, urgency = null, impact = null } = fields ?? {};
   const { http, notifications } = useKibana().services;
@@ -93,8 +93,8 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 
   const onChangeCb = useCallback(
     (
-      key: keyof ServiceNowIMFieldsType,
-      value: ServiceNowIMFieldsType[keyof ServiceNowIMFieldsType]
+      key: keyof ServiceNowITSMFieldsType,
+      value: ServiceNowITSMFieldsType[keyof ServiceNowITSMFieldsType]
     ) => {
       onChange({ ...fields, [key]: value });
     },
@@ -149,7 +149,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
     </span>
   ) : (
     <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowIM}
+      connectorType={ConnectorTypes.serviceNowITSM}
       title={connector.name}
       listItems={listItems}
       isLoading={false}
@@ -158,4 +158,4 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowFieldsComponent as default };
+export { ServiceNowITSMFieldsComponent as default };

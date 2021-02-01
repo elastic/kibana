@@ -48,7 +48,7 @@ export const params = {
     severityCode: '1',
     ...entity,
   } as ServiceConnectorCaseParams,
-  [ConnectorTypes.serviceNowIM]: {
+  [ConnectorTypes.serviceNowITSM]: {
     ...basicParams,
     impact: '3',
     severity: '1',

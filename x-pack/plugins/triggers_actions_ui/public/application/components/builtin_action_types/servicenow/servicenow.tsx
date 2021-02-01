@@ -69,8 +69,8 @@ export function getServiceNowITSMActionType(): ActionTypeModel<
   return {
     id: '.servicenow',
     iconClass: logo,
-    selectMessage: i18n.SERVICENOW_DESC,
-    actionTypeTitle: i18n.SERVICENOW_TITLE,
+    selectMessage: i18n.SERVICENOW_ITSM_DESC,
+    actionTypeTitle: i18n.SERVICENOW_ITSM_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (

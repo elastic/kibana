@@ -36,7 +36,7 @@ const defaultFields: Fields = {
 const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
   choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
-const ServiceNowFieldsComponent: React.FunctionComponent<
+const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowSIRFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const {
@@ -269,7 +269,7 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
     </span>
   ) : (
     <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowIM}
+      connectorType={ConnectorTypes.serviceNowITSM}
       title={connector.name}
       listItems={listItems}
       isLoading={false}
@@ -278,4 +278,4 @@ const ServiceNowFieldsComponent: React.FunctionComponent<
 };
 
 // eslint-disable-next-line import/no-default-export
-export { ServiceNowFieldsComponent as default };
+export { ServiceNowSIRFieldsComponent as default };

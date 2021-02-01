@@ -24,7 +24,7 @@ import {
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 import { mappings as mappingsMock } from '../../../../client/configure/mock';
 const formatComment = { commentId: commentObj.commentId, comment: commentObj.comment };
-const serviceNowParams = params[ConnectorTypes.serviceNowIM] as ServiceConnectorCaseParams;
+const serviceNowParams = params[ConnectorTypes.serviceNowITSM] as ServiceConnectorCaseParams;
 describe('api/cases/configure/utils', () => {
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
@@ -395,8 +395,8 @@ describe('api/cases/configure/utils', () => {
       const res = await mapIncident(
         actionsMock,
         '123',
-        ConnectorTypes.serviceNowIM,
-        mappingsMock[ConnectorTypes.serviceNowIM],
+        ConnectorTypes.serviceNowITSM,
+        mappingsMock[ConnectorTypes.serviceNowITSM],
         serviceNowParams
       );
       expect(res).toEqual({
@@ -421,7 +421,7 @@ describe('api/cases/configure/utils', () => {
         actionsMock,
         '123',
         'invalid',
-        mappingsMock[ConnectorTypes.serviceNowIM],
+        mappingsMock[ConnectorTypes.serviceNowITSM],
         serviceNowParams
       ).catch((e) => {
         expect(e).not.toBeNull();
@@ -441,8 +441,8 @@ describe('api/cases/configure/utils', () => {
       const res = await mapIncident(
         actionsMock,
         '123',
-        ConnectorTypes.serviceNowIM,
-        mappingsMock[ConnectorTypes.serviceNowIM],
+        ConnectorTypes.serviceNowITSM,
+        mappingsMock[ConnectorTypes.serviceNowITSM],
         { ...serviceNowParams, externalId: '123' }
       );
       expect(res).toEqual({
@@ -470,8 +470,8 @@ describe('api/cases/configure/utils', () => {
       await mapIncident(
         actionsMock,
         '123',
-        ConnectorTypes.serviceNowIM,
-        mappingsMock[ConnectorTypes.serviceNowIM],
+        ConnectorTypes.serviceNowITSM,
+        mappingsMock[ConnectorTypes.serviceNowITSM],
         { ...serviceNowParams, externalId: '123' }
       ).catch((e) => {
         expect(e).not.toBeNull();
@@ -507,7 +507,7 @@ describe('api/cases/configure/utils', () => {
       },
     },
     {
-      name: ConnectorTypes.serviceNowIM,
+      name: ConnectorTypes.serviceNowITSM,
       result: {
         incident: {
           impact: '3',
