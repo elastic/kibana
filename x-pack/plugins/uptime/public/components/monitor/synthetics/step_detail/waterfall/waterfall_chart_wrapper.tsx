@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiButtonEmpty, EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
@@ -16,6 +16,7 @@ import {
   RenderItem,
   useFlyout,
 } from '../../waterfall';
+import { WaterfallFlyout } from '../../waterfall/components/waterfall_flyout';
 
 const StyledButton = styled(EuiButtonEmpty)`
   &&& {
@@ -40,19 +41,21 @@ export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
     return is400 || is500 || isSpecific300;
   };
 
-  const handleSidebarClick = () => {
+  const handleSidebarClick = useCallback(() => {
     if (onClick) {
       onClick({ buttonRef, networkItemIndex: index });
     }
-  };
+  }, [buttonRef, index, onClick]);
+
+  const setRef = useCallback((ref) => setButtonRef(ref), [setButtonRef]);
 
   return (
     <>
       {!status || !isErrorStatusCode(status) ? (
         <StyledButton
           onClick={handleSidebarClick}
-          buttonRef={(ref) => setButtonRef(ref)}
-          data-testSubj={`sidebarItem${index}`}
+          buttonRef={setRef}
+          data-test-subj={`sidebarItem${index}`}
         >
           <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
         </StyledButton>
@@ -61,8 +64,8 @@ export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
           <EuiFlexItem>
             <StyledButton
               onClick={handleSidebarClick}
-              buttonRef={(ref) => setButtonRef(ref)}
-              data-testSubj={`sidebarItem${index}`}
+              buttonRef={setRef}
+              data-test-subj={`sidebarItem${index}`}
             >
               <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
             </StyledButton>
@@ -96,7 +99,9 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     return getSidebarItems(networkData);
   }, [networkData]);
 
-  const legendItems = getLegendItems();
+  const legendItems = useMemo(() => {
+    return getLegendItems();
+  }, []);
 
   const {
     flyoutData,
@@ -112,28 +117,30 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}
       data={series}
-      flyoutData={flyoutData}
-      onFlyoutClose={onFlyoutClose}
       onSidebarClick={onSidebarClick}
-      isFlyoutVisible={isFlyoutVisible}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       metaData={metaData}
-      renderTooltipItem={(tooltipProps) => {
+      renderTooltipItem={useCallback((tooltipProps) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
-      }}
+      }, [])}
     >
       <WaterfallChart
-        tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
+        tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={(datum) => {
+        barStyleAccessor={useCallback((datum) => {
           return datum.datum.config.colour;
-        }}
+        }, [])}
         renderSidebarItem={RenderSidebarItem}
         renderLegendItem={renderLegendItem}
         fullHeight={true}
-        onBarClick={onBarClick}
-        onProjectionClick={onProjectionClick}
+        onBarClick={useCallback(onBarClick, [onBarClick])}
+        onProjectionClick={useCallback(onProjectionClick, [onProjectionClick])}
+      />
+      <WaterfallFlyout
+        flyoutData={flyoutData}
+        isFlyoutVisible={isFlyoutVisible}
+        onFlyoutClose={onFlyoutClose}
       />
     </WaterfallProvider>
   );

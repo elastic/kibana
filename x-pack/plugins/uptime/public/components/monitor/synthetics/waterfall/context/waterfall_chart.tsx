@@ -5,22 +5,14 @@
  */
 
 import React, { createContext, useContext, Context } from 'react';
-import {
-  WaterfallData,
-  WaterfallDataEntry,
-  WaterfallMetaData,
-  WaterfallMetaDataEntry,
-} from '../types';
-import { OnFlyoutClose, OnSidebarClick } from '../components/use_flyout';
+import { WaterfallData, WaterfallDataEntry, WaterfallMetaData } from '../types';
+import { OnSidebarClick } from '../components/use_flyout';
 
 export interface IWaterfallContext {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: WaterfallData;
-  flyoutData?: WaterfallMetaDataEntry;
-  onFlyoutClose: OnFlyoutClose;
   onSidebarClick?: OnSidebarClick;
-  isFlyoutVisible?: boolean;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
   metaData: WaterfallMetaData;
@@ -36,10 +28,7 @@ interface ProviderProps {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
-  flyoutData?: IWaterfallContext['flyoutData'];
-  onFlyoutClose?: IWaterfallContext['onFlyoutClose'];
   onSidebarClick?: IWaterfallContext['onSidebarClick'];
-  isFlyoutVisible?: IWaterfallContext['isFlyoutVisible'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
   metaData: IWaterfallContext['metaData'];
@@ -49,10 +38,7 @@ interface ProviderProps {
 export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
-  flyoutData,
-  onFlyoutClose,
   onSidebarClick,
-  isFlyoutVisible,
   sidebarItems,
   legendItems,
   metaData,
@@ -67,10 +53,7 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         sidebarItems,
         legendItems,
         metaData,
-        isFlyoutVisible,
-        onFlyoutClose,
         onSidebarClick,
-        flyoutData,
         renderTooltipItem,
         totalNetworkRequests,
         fetchedNetworkRequests,

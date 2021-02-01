@@ -18,9 +18,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
+import { WaterfallMetaDataEntry } from '../types';
+import { OnFlyoutClose } from './use_flyout';
 import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
-
-import { useWaterfallContext } from '../context/waterfall_chart';
 
 export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',
@@ -51,9 +51,18 @@ const FlyoutContainer = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
-export const WaterfallFlyout = () => {
-  const { flyoutData, isFlyoutVisible, onFlyoutClose } = useWaterfallContext();
-  const flyoutRef = useRef<HTMLSpanElement>(null);
+export interface WaterfallFlyoutProps {
+  flyoutData?: WaterfallMetaDataEntry;
+  onFlyoutClose: OnFlyoutClose;
+  isFlyoutVisible?: boolean;
+}
+
+export const WaterfallFlyout = ({
+  flyoutData,
+  isFlyoutVisible,
+  onFlyoutClose,
+}: WaterfallFlyoutProps) => {
+  const flyoutRef = useRef<HTMLDivElement>(null);
   const trackMetric = useUiTracker({ app: 'uptime' });
 
   useEffect(() => {
@@ -72,7 +81,7 @@ export const WaterfallFlyout = () => {
 
   return (
     <EuiPortal>
-      <span tab-index={-1} ref={flyoutRef} data-testSubj="waterfallFlyout">
+      <div tab-index={-1} ref={flyoutRef} data-test-subj="waterfallFlyout">
         <FlyoutContainer size="s" onClose={onFlyoutClose} aria-labelledby="flyoutTitle">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
@@ -103,7 +112,7 @@ export const WaterfallFlyout = () => {
             )}
           </EuiFlyoutBody>
         </FlyoutContainer>
-      </span>
+      </div>
     </EuiPortal>
   );
 };

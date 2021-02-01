@@ -15,17 +15,6 @@ import {
 } from './waterfall_flyout';
 import { WaterfallMetaDataEntry } from '../types';
 
-import * as contextHook from '../context/waterfall_chart';
-
-jest.mock('../context/waterfall_chart', () => {
-  const actualModule = jest.requireActual('../context/waterfall_chart');
-
-  return {
-    ...actualModule,
-    useWaterfallContext: jest.fn(),
-  };
-});
-
 describe('WaterfallFlyout', () => {
   const flyoutData: WaterfallMetaDataEntry = {
     x: 0,
@@ -41,16 +30,14 @@ describe('WaterfallFlyout', () => {
     ],
   };
 
-  beforeEach(() => {
-    jest.spyOn(contextHook, 'useWaterfallContext').mockReturnValue({
-      ...jest.requireActual('../context/waterfall_chart').useFlyout,
-      flyoutData,
-      isFlyoutVisible: true,
-    });
-  });
+  const defaultProps = {
+    flyoutData,
+    isFlyoutVisible: true,
+    onFlyoutClose: () => null,
+  };
 
   it('displays flyout information and omits sections that are undefined', () => {
-    const { getByText, queryByText } = render(<WaterfallFlyout />);
+    const { getByText, queryByText } = render(<WaterfallFlyout {...defaultProps} />);
 
     expect(getByText(flyoutData.url)).toBeInTheDocument();
     expect(queryByText(DETAILS)).toBeInTheDocument();
@@ -83,15 +70,14 @@ describe('WaterfallFlyout', () => {
         value: '*.elastic.co',
       },
     ];
-    jest.spyOn(contextHook, 'useWaterfallContext').mockReturnValue({
-      ...jest.requireActual('../context/waterfall_chart').useFlyout,
-      flyoutData: {
-        ...flyoutData,
-        certificates,
-      },
-      isFlyoutVisible: true,
-    });
-    const { getByText } = render(<WaterfallFlyout />);
+    const flyoutDataWithCertificates = {
+      ...flyoutData,
+      certificates,
+    };
+
+    const { getByText } = render(
+      <WaterfallFlyout {...defaultProps} flyoutData={flyoutDataWithCertificates} />
+    );
 
     expect(getByText(flyoutData.url)).toBeInTheDocument();
     expect(getByText(DETAILS)).toBeInTheDocument();
@@ -115,16 +101,14 @@ describe('WaterfallFlyout', () => {
         value: 'sample response header value',
       },
     ];
-    jest.spyOn(contextHook, 'useWaterfallContext').mockReturnValue({
-      ...jest.requireActual('../context/waterfall_chart').useFlyout,
-      flyoutData: {
-        ...flyoutData,
-        requestHeaders,
-        responseHeaders,
-      },
-      isFlyoutVisible: true,
-    });
-    const { getByText } = render(<WaterfallFlyout />);
+    const flyoutDataWithHeaders = {
+      ...flyoutData,
+      requestHeaders,
+      responseHeaders,
+    };
+    const { getByText } = render(
+      <WaterfallFlyout {...defaultProps} flyoutData={flyoutDataWithHeaders} />
+    );
 
     expect(getByText(flyoutData.url)).toBeInTheDocument();
     expect(getByText(DETAILS)).toBeInTheDocument();
@@ -141,23 +125,13 @@ describe('WaterfallFlyout', () => {
   });
 
   it('renders null when isFlyoutVisible is false', () => {
-    jest.spyOn(contextHook, 'useWaterfallContext').mockReturnValue({
-      ...jest.requireActual('../context/waterfall_chart').useFlyout,
-      flyoutData,
-      isFlyoutVisible: false,
-    });
-    const { queryByText } = render(<WaterfallFlyout />);
+    const { queryByText } = render(<WaterfallFlyout {...defaultProps} isFlyoutVisible={false} />);
 
     expect(queryByText(flyoutData.url)).not.toBeInTheDocument();
   });
 
   it('renders null when flyoutData is undefined', () => {
-    jest.spyOn(contextHook, 'useWaterfallContext').mockReturnValue({
-      ...jest.requireActual('../context/waterfall_chart').useFlyout,
-      flyoutData: undefined,
-      isFlyoutVisible: true,
-    });
-    const { queryByText } = render(<WaterfallFlyout />);
+    const { queryByText } = render(<WaterfallFlyout {...defaultProps} flyoutData={undefined} />);
 
     expect(queryByText(flyoutData.url)).not.toBeInTheDocument();
   });

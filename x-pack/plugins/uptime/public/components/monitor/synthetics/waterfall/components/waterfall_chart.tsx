@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   Axis,
@@ -39,7 +39,6 @@ import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from 
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
-import { WaterfallFlyout } from './waterfall_flyout';
 import { NetworkRequestsTotal } from './network_requests_total';
 
 const Tooltip = (tooltipInfo: TooltipInfo) => {
@@ -103,6 +102,10 @@ export const WaterfallChart = ({
     totalNetworkRequests,
     fetchedNetworkRequests,
   } = useWaterfallContext();
+  const handleElementClick = useMemo(() => onBarClick, [onBarClick]);
+  const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
+  const memoizedTickFormat = useCallback(tickFormat, [tickFormat]);
+  const memoizedBarStyleAccessor = useCallback(barStyleAccessor, [barStyleAccessor]);
 
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -154,7 +157,7 @@ export const WaterfallChart = ({
                   <Axis
                     id="time"
                     position={Position.Top}
-                    tickFormat={tickFormat}
+                    tickFormat={memoizedTickFormat}
                     domain={domain}
                     showGridLines={true}
                     style={{
@@ -171,7 +174,7 @@ export const WaterfallChart = ({
                     xAccessor="x"
                     yAccessors={['y']}
                     y0Accessors={['y0']}
-                    styleAccessor={barStyleAccessor}
+                    styleAccessor={memoizedBarStyleAccessor}
                     data={[{ x: 0, y0: 0, y1: 0 }]}
                   />
                 </Chart>
@@ -199,14 +202,14 @@ export const WaterfallChart = ({
                     rotation={90}
                     tooltip={{ customTooltip: Tooltip }}
                     theme={theme}
-                    onElementClick={onBarClick}
-                    onProjectionClick={onProjectionClick}
+                    onElementClick={handleElementClick}
+                    onProjectionClick={handleProjectionClick}
                   />
 
                   <Axis
                     id="time"
                     position={Position.Top}
-                    tickFormat={tickFormat}
+                    tickFormat={memoizedTickFormat}
                     domain={domain}
                     showGridLines={true}
                     style={{
@@ -223,7 +226,7 @@ export const WaterfallChart = ({
                     xAccessor="x"
                     yAccessors={['y']}
                     y0Accessors={['y0']}
-                    styleAccessor={barStyleAccessor}
+                    styleAccessor={memoizedBarStyleAccessor}
                     data={chartData}
                   />
                 </Chart>
@@ -232,7 +235,6 @@ export const WaterfallChart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
-        <WaterfallFlyout />
       </>
     </WaterfallChartOuterContainer>
   );

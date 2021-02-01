@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
@@ -23,6 +23,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   const { onSidebarClick } = useWaterfallContext();
+  const handleSidebarClick = useMemo(() => onSidebarClick, [onSidebarClick]);
 
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
@@ -36,7 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
             {items.map((item, index) => {
               return (
                 <WaterfallChartSidebarFlexItem key={index}>
-                  {render(item, index, onSidebarClick)}
+                  {render(item, index, handleSidebarClick)}
                 </WaterfallChartSidebarFlexItem>
               );
             })}
