@@ -17,6 +17,12 @@ const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
 });
 
+const getAdditionalClassesOnDroppable = (dropType?: string) => {
+  if (dropType === 'convert_add' || dropType === 'remove_convert_move') {
+    return 'lnsDragDrop-notCompatible';
+  }
+};
+
 export function EmptyDimensionButton({
   group,
   layerDatasource,
@@ -65,12 +71,6 @@ export function EmptyDimensionButton({
       },
     };
   }, [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]);
-
-  const getAdditionalClassesOnDroppable = React.useCallback((currentDropType?: string) => {
-    if (currentDropType === 'convert_add' || currentDropType === 'remove_convert_move') {
-      return 'lnsDragDrop-notCompatible';
-    }
-  }, []);
 
   const handleDrop = (droppedItem: DragDropIdentifier) => onDrop(droppedItem, value, dropType);
 

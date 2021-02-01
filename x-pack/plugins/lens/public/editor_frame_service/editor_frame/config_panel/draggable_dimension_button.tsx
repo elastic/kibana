@@ -15,6 +15,22 @@ const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =
 const isSelf = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
   isDraggedOperation(el2) && el1.columnId === el2.columnId;
 
+const getAdditionalClassesOnEnter = (dropType?: string) => {
+  if (
+    dropType === 'remove_add' ||
+    dropType === 'remove_move' ||
+    dropType === 'remove_convert_move'
+  ) {
+    return 'lnsDragDrop-isReplacing';
+  }
+};
+
+const getAdditionalClassesOnDroppable = (dropType?: string) => {
+  if (dropType === 'convert_add' || dropType === 'remove_convert_move') {
+    return 'lnsDragDrop-notCompatible';
+  }
+};
+
 export function DraggableDimensionButton({
   layerId,
   label,
@@ -48,7 +64,6 @@ export function DraggableDimensionButton({
     filterOperations: group.filterOperations,
     groupId: group.groupId,
   });
-
 
   const value = useMemo(
     () => ({
@@ -94,22 +109,6 @@ export function DraggableDimensionButton({
     },
     [value]
   );
-
-  const getAdditionalClassesOnEnter = React.useCallback((chosenDropType?: string) => {
-    if (
-      chosenDropType === 'remove_add' ||
-      chosenDropType === 'remove_move' ||
-      chosenDropType === 'remove_convert_move'
-    ) {
-      return 'lnsDragDrop-isReplacing';
-    }
-  }, []);
-
-  const getAdditionalClassesOnDroppable = React.useCallback((chosenDropType?: string) => {
-    if (chosenDropType === 'convert_add' || chosenDropType === 'remove_convert_move') {
-      return 'lnsDragDrop-notCompatible';
-    }
-  }, []);
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>

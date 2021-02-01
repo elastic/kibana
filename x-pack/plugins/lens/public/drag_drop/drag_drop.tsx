@@ -373,7 +373,7 @@ const DragInner = memo(function DragInner({
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable', {
-          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode, // but move!
+          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode,
         }),
         draggable: true,
         onDragEnd: dragEnd,
@@ -624,9 +624,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
                 0
               )}px)`,
             }
-          : {
-              transform: `translateY(0px)`,
-            }
+          : undefined
       }
     >
       <DragInner
@@ -752,9 +750,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
             ? {
                 transform: `translateY(${direction}${draggingHeight}px)`,
               }
-            : {
-                transform: `translateY(0px)`,
-              }
+            : undefined
         }
         ref={heightRef}
         data-test-subj="lnsDragDrop-translatableDrop"

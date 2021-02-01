@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-type ActionType = 'lifted' | 'cancelled' | 'selectedTarget' | 'dropped';
+type ActionType = 'lifted' | 'cancelled' | 'selectedTarget' | 'dropped' | 'blockedArrows';
 
 // draggingElement: label, groupLabel, position
 // droppingElement: label, groupLabel, position
@@ -18,11 +18,11 @@ export interface HumanData {
 }
 
 const defaultAnnouncements = {
-  blockedArrows: ()=> {
+  blockedArrows: () => {
     return i18n.translate('xpack.lens.dragDrop.finishReordering', {
       defaultMessage:
         'You have started reordering and you cannot choose any external target now. Press escape to cancel and try again.',
-    })
+    });
   },
   lifted: ({ label }) => {
     return i18n.translate('xpack.lens.dragDrop.liftedAnnounce', {
@@ -160,9 +160,9 @@ export const announce = (
   droppingElement?: HumanData
 ) => {
   const announcement = announcements?.[dropType]?.[actionType] || defaultAnnouncements[actionType];
-  console.log(
-    `%c ${announcement(draggingElement, droppingElement)}`,
-    'background: #251e3e; color: #eee3e7'
-  );
+  // console.log(
+  //   `%c ${announcement(draggingElement, droppingElement)}`,
+  //   'background: #251e3e; color: #eee3e7'
+  // );
   return announcement(draggingElement, droppingElement);
 };
