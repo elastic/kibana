@@ -41,7 +41,7 @@ describe('search settings routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/search_settings/details',
+        path: '/as/engines/:engineName/search_settings/details',
       });
     });
   });
@@ -67,7 +67,7 @@ describe('search settings routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/search_settings',
+        path: '/as/engines/:engineName/search_settings',
       });
     });
 
@@ -103,7 +103,7 @@ describe('search settings routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/search_settings/reset',
+        path: '/as/engines/:engineName/search_settings/reset',
       });
     });
   });
@@ -129,7 +129,7 @@ describe('search settings routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/search_settings_search',
+        path: '/as/engines/:engineName/search_settings_search',
       });
     });
 

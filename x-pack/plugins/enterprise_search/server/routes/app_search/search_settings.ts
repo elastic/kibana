@@ -36,11 +36,9 @@ export function registerSearchSettingsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/search_settings/details`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/search_settings/details`,
+    })
   );
 
   router.post(
@@ -52,11 +50,9 @@ export function registerSearchSettingsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/search_settings/reset`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/search_settings/reset`,
+    })
   );
 
   router.put(
@@ -69,11 +65,9 @@ export function registerSearchSettingsRoutes({
         body: searchSettingsSchema,
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/search_settings`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/search_settings`,
+    })
   );
 
   router.post(
@@ -92,10 +86,8 @@ export function registerSearchSettingsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/search_settings_search`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/search_settings_search`,
+    })
   );
 }
