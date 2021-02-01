@@ -17,6 +17,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
@@ -62,6 +63,9 @@ export async function getServiceTransactionGroups({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
             ...esFilter,
           ],
         },
@@ -79,10 +83,8 @@ export async function getServiceTransactionGroups({
               sum: { field: TRANSACTION_DURATION },
             },
             ...getLatencyAggregation(latencyAggregationType, field),
-            transaction_count: { value_count: { field } },
             [EVENT_OUTCOME]: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-              aggs: { transaction_count: { value_count: { field } } },
             },
           },
         },
@@ -95,9 +97,8 @@ export async function getServiceTransactionGroups({
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
       const errorRate =
-        bucket.transaction_count.value > 0
-          ? (bucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
-            bucket.transaction_count.value
+        bucket.doc_count > 0
+          ? bucket[EVENT_OUTCOME].doc_count / bucket.doc_count
           : null;
 
       const transactionGroupTotalDuration =
@@ -109,7 +110,7 @@ export async function getServiceTransactionGroups({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.transaction_count.value / deltaAsMinutes,
+        throughput: bucket.doc_count / deltaAsMinutes,
         errorRate,
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration

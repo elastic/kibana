@@ -202,7 +202,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
         endIndex + 1
-      }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
+      }) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },

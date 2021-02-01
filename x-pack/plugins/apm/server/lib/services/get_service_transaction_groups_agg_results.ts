@@ -16,6 +16,7 @@ import { LatencyAggregationType } from '../../../common/latency_aggregation_type
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinate } from '../../../typings/timeseries';
 import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
@@ -78,6 +79,9 @@ export async function getServiceTransactionGroupsAggResults({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
             ...esFilter,
           ],
         },
@@ -108,12 +112,10 @@ export async function getServiceTransactionGroupsAggResults({
                   },
                   aggs: {
                     ...getLatencyAggregation(latencyAggregationType, field),
-                    transaction_count: { value_count: { field } },
                     [EVENT_OUTCOME]: {
                       filter: {
                         term: { [EVENT_OUTCOME]: EventOutcome.failure },
                       },
-                      aggs: { transaction_count: { value_count: { field } } },
                     },
                   },
                 },
@@ -147,7 +149,7 @@ export async function getServiceTransactionGroupsAggResults({
     const throughput: Coordinate[] = bucket.timeseries.buckets.map(
       (timeseriesBucket) => ({
         x: timeseriesBucket.key,
-        y: timeseriesBucket.transaction_count.value / deltaAsMinutes,
+        y: timeseriesBucket.doc_count / deltaAsMinutes,
       })
     );
 
@@ -155,9 +157,8 @@ export async function getServiceTransactionGroupsAggResults({
       (timeseriesBucket) => ({
         x: timeseriesBucket.key,
         y:
-          timeseriesBucket.transaction_count.value > 0
-            ? (timeseriesBucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
-              timeseriesBucket.transaction_count.value
+          timeseriesBucket.doc_count > 0
+            ? timeseriesBucket[EVENT_OUTCOME].doc_count / bucket.doc_count
             : null,
       })
     );
