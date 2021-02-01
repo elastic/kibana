@@ -15,7 +15,7 @@ import { RendererStrings } from '../../../../i18n';
 
 const { dropdownFilter: strings } = RendererStrings;
 
-interface Config {
+export interface Config {
   /** The column to use within the exactly function */
   column: string;
   /**

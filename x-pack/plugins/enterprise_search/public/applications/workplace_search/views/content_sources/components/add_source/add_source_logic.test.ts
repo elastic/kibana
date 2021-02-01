@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-} from '../../../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
 
 import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+
+import { nextTick } from '@kbn/test/jest';
 
 import { CustomSource } from '../../../../types';
 
@@ -271,23 +268,21 @@ describe('AddSourceLogic', () => {
       describe('getSourceConfigData', () => {
         it('calls API and sets values', async () => {
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
-          const promise = Promise.resolve(sourceConfigData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConfigData));
 
           AddSourceLogic.actions.getSourceConfigData('github');
           expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/settings/connectors/github'
           );
-          await promise;
+          await nextTick();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceConfigData('github');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -302,15 +297,14 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setSourceConnectData'
           );
-          const promise = Promise.resolve(sourceConnectData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConnectData));
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
 
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
           expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/github/prepare');
-          await promise;
+          await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
           expect(successCallback).toHaveBeenCalledWith(sourceConnectData.oauthUrl);
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
@@ -327,11 +321,10 @@ describe('AddSourceLogic', () => {
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -343,24 +336,22 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setSourceConnectData'
           );
-          const promise = Promise.resolve(sourceConnectData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConnectData));
 
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/sources/github/reauth_prepare'
           );
-          await promise;
+          await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceReConnectData('github');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -372,22 +363,20 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setPreContentSourceConfigData'
           );
-          const promise = Promise.resolve(config);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(config));
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
 
           expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
-          await promise;
+          await nextTick();
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -414,8 +403,7 @@ describe('AddSourceLogic', () => {
           const successCallback = jest.fn();
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
-          const promise = Promise.resolve({ sourceConfigData });
-          http.put.mockReturnValue(promise);
+          http.put.mockReturnValue(Promise.resolve({ sourceConfigData }));
 
           AddSourceLogic.actions.saveSourceConfig(true, successCallback);
 
@@ -428,7 +416,7 @@ describe('AddSourceLogic', () => {
             { body: JSON.stringify({ params }) }
           );
 
-          await promise;
+          await nextTick();
           expect(successCallback).toHaveBeenCalled();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
@@ -453,11 +441,10 @@ describe('AddSourceLogic', () => {
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.put.mockReturnValue(promise);
+          http.put.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.saveSourceConfig(true);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -495,8 +482,7 @@ describe('AddSourceLogic', () => {
         it('calls API and sets values', async () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setCustomSourceDataSpy = jest.spyOn(AddSourceLogic.actions, 'setCustomSourceData');
-          const promise = Promise.resolve({ sourceConfigData });
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve({ sourceConfigData }));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
 
@@ -505,18 +491,17 @@ describe('AddSourceLogic', () => {
           expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/create_source', {
             body: JSON.stringify({ ...params }),
           });
-          await promise;
+          await nextTick();
           expect(setCustomSourceDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(successCallback).toHaveBeenCalled();
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
