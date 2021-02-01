@@ -265,13 +265,6 @@ export const serviceErrorGroupsRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        numBuckets: toNumberRt,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        sortField: t.union([
-          t.literal('last_seen'),
-          t.literal('occurrences'),
-          t.literal('name'),
-        ]),
         transactionType: t.string,
       }),
     ]),
@@ -282,21 +275,18 @@ export const serviceErrorGroupsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { numBuckets, sortDirection, sortField, transactionType },
+      query: { transactionType },
     } = context.params;
     return getServiceErrorGroups({
       serviceName,
       setup,
-      numBuckets,
-      sortDirection,
-      sortField,
       transactionType,
     });
   },
 });
 
-export const serviceErrorGroupsMetricsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/metrics',
+export const serviceErrorGroupsAggResultsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/agg_results',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -324,7 +314,7 @@ export const serviceErrorGroupsMetricsRoute = createRoute({
       setup,
       numBuckets,
       transactionType,
-      groupIds: groupIds.split(','),
+      groupIds: JSON.parse(groupIds),
     });
   },
 });

@@ -6,6 +6,7 @@
 
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import uuid from 'uuid';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeFilter } from '../../../../common/utils/range_filter';
@@ -27,16 +28,10 @@ export type ServiceErrorGroupItem = ValuesType<
 export async function getServiceErrorGroups({
   serviceName,
   setup,
-  numBuckets,
-  sortDirection,
-  sortField,
   transactionType,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  numBuckets: number;
-  sortDirection: 'asc' | 'desc';
-  sortField: 'name' | 'last_seen' | 'occurrences';
   transactionType: string;
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
@@ -95,24 +90,17 @@ export async function getServiceErrorGroups({
       },
     })) ?? [];
 
-  // Sort error groups first, and only get timeseries for data in view.
-  // This is to limit the possibility of creating too many buckets.
-
-  const sortedAndSlicedErrorGroups = orderBy(
+  const sortedErrorGroups = orderBy(
     errorGroups,
-    (group) => {
-      if (sortField === 'occurrences') {
-        return group.occurrences.value;
-      }
-      return group[sortField];
-    },
-    [sortDirection]
+    (group) => group.occurrences.value,
+    'desc'
   );
 
   return {
+    requestId: uuid(),
     total_error_groups: errorGroups.length,
     is_aggregation_accurate:
       (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
-    error_groups: sortedAndSlicedErrorGroups,
+    error_groups: sortedErrorGroups,
   };
 }

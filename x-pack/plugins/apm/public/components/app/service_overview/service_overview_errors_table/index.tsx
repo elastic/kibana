@@ -5,29 +5,21 @@
  */
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { asInteger } from '../../../../../common/utils/formatters';
+import { isEmpty, orderBy } from 'lodash';
+import React, { useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../services/rest/createCallApmApi';
-import { px, unit } from '../../../../style/variables';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import { getColumns } from './get_column';
 
 interface Props {
   serviceName: string;
@@ -41,84 +33,6 @@ const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'occurrences' as const,
 };
-
-type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups'>;
-type GroupIdsErrorMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/metrics'>;
-
-function getColumns({
-  serviceName,
-  groupIdsErrorMetrics,
-}: {
-  serviceName: string;
-  groupIdsErrorMetrics: GroupIdsErrorMetrics;
-}): Array<EuiBasicTableColumn<ErrorGroupItem['error_groups'][0]>> {
-  return [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.apm.serviceOverview.errorsTableColumnName', {
-        defaultMessage: 'Name',
-      }),
-      render: (_, { name, group_id: errorGroupId }) => {
-        return (
-          <TruncateWithTooltip
-            text={name}
-            content={
-              <ErrorDetailLink
-                serviceName={serviceName}
-                errorGroupId={errorGroupId}
-              >
-                {name}
-              </ErrorDetailLink>
-            }
-          />
-        );
-      },
-    },
-    {
-      field: 'last_seen',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
-        {
-          defaultMessage: 'Last seen',
-        }
-      ),
-      render: (_, { last_seen: lastSeen }) => {
-        return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
-      },
-      width: px(unit * 9),
-    },
-    {
-      field: 'occurrences',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.errorsTableColumnOccurrences',
-        {
-          defaultMessage: 'Occurrences',
-        }
-      ),
-      width: px(unit * 12),
-      render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries = groupIdsErrorMetrics
-          ? groupIdsErrorMetrics[errorGroupId]?.timeseries
-          : undefined;
-        return (
-          <SparkPlot
-            color="euiColorVis7"
-            series={timeseries}
-            valueLabel={i18n.translate(
-              'xpack.apm.serviceOveriew.errorsTableOccurrences',
-              {
-                defaultMessage: `{occurrencesCount} occ.`,
-                values: {
-                  occurrencesCount: asInteger(occurrences.value),
-                },
-              }
-            )}
-          />
-        );
-      },
-    },
-  ];
-}
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
@@ -137,14 +51,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const { pageIndex, sort } = tableOptions;
+
   const {
     data = {
       totalItemCount: 0,
       items: [],
-      tableOptions: {
-        pageIndex: 0,
-        sort: DEFAULT_SORT,
-      },
+      requestId: '',
     },
     status,
   } = useFetcher(() => {
@@ -160,74 +73,78 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           start,
           end,
           uiFilters: JSON.stringify(uiFilters),
-          numBuckets: 20,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
           transactionType,
         },
       },
     }).then((response) => {
       return {
+        requestId: response.requestId,
         items: response.error_groups,
         totalItemCount: response.total_error_groups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
-          },
-        },
       };
     });
-  }, [
-    start,
-    end,
-    serviceName,
-    uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    transactionType,
-  ]);
+  }, [start, end, serviceName, uiFilters, transactionType]);
 
-  const {
+  const { items, totalItemCount, requestId } = data;
+  const currentPageErrorGroups = orderBy(
     items,
-    totalItemCount,
-    tableOptions: { pageIndex, sort },
-  } = data;
+    (group) => {
+      if (sort.field === 'occurrences') {
+        return group.occurrences.value;
+      }
+      return group[sort.field];
+    },
+    sort.direction
+  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const groupIds = useMemo(
-    () => items.map(({ group_id: groupId }) => groupId),
-    [items]
+  const groupIds = JSON.stringify(
+    currentPageErrorGroups.map(({ group_id: groupId }) => groupId)
   );
   const {
-    data: groupIdsErrorMetrics,
-    status: groupIdsErrorMetricsStatus,
+    data: groupIdsErrorAggResults,
+    status: groupIdsErrorAggResultsStatus,
   } = useFetcher(
     () => {
-      if (groupIds.length && start && end && transactionType) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/error_groups/metrics',
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              numBuckets: 20,
-              transactionType,
-              groupIds: groupIds.join(),
+      async function fetchAggResults() {
+        if (
+          !isEmpty(requestId) &&
+          groupIds &&
+          start &&
+          end &&
+          transactionType
+        ) {
+          const aggResults = await callApmApi({
+            endpoint:
+              'GET /api/apm/services/{serviceName}/error_groups/agg_results',
+            params: {
+              path: { serviceName },
+              query: {
+                start,
+                end,
+                uiFilters: JSON.stringify(uiFilters),
+                numBuckets: 20,
+                transactionType,
+                groupIds,
+              },
             },
-          },
-        });
+            isCachable: true,
+          });
+          return { [requestId]: aggResults };
+        }
       }
+      return fetchAggResults();
     },
-    // only fetches metrics when groupIds change
-    // eslint-disable-next-line
-    [groupIds]
+    // only fetches agg results when requestId changes or group ids change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId, groupIds]
   );
 
-  const columns = getColumns({ serviceName, groupIdsErrorMetrics });
+  const columns = getColumns({
+    serviceName,
+    groupIdsErrorAggResults: groupIdsErrorAggResults
+      ? groupIdsErrorAggResults[requestId]
+      : undefined,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -260,10 +177,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           >
             <EuiBasicTable
               columns={columns}
-              items={items.slice(
-                pageIndex * PAGE_SIZE,
-                (pageIndex + 1) * PAGE_SIZE
-              )}
+              items={currentPageErrorGroups}
               pagination={{
                 pageIndex,
                 pageSize: PAGE_SIZE,
@@ -273,7 +187,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                groupIdsErrorMetricsStatus === FETCH_STATUS.LOADING
+                groupIdsErrorAggResultsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {
@@ -293,10 +207,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               sorting={{
                 enableAllColumns: true,
-                sort: {
-                  direction: sort.direction,
-                  field: sort.field,
-                },
+                sort,
               }}
             />
           </ServiceOverviewTableContainer>
