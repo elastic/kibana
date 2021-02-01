@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { BehaviorSubject, from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
+import { first, switchMap } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -66,6 +66,7 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { tapFirst } from '../../common';
+import { registerBsearchRoute } from './routes/bsearch';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -94,7 +95,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
   private sessionService: ISearchSessionService;
-  private asScoped!: (request: KibanaRequest) => IScopedSearchClient;
+  private asScoped!: ISearchStart['asScoped'];
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -133,43 +134,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<
-      { request: IKibanaSearchResponse; options?: ISearchOptions },
-      any
-    >('/internal/bsearch', (request) => {
-      const search = this.asScoped(request);
-
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          return search
-            .search(requestData, options)
-            .pipe(
-              first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
-              catchError((err) => {
-                // eslint-disable-next-line no-throw-literal
-                throw {
-                  statusCode: err.statusCode || 500,
-                  body: {
-                    message: err.message,
-                    attributes: {
-                      error: err.body?.error || err.message,
-                    },
-                  },
-                };
-              })
-            )
-            .toPromise();
-        },
-      };
-    });
+    registerBsearchRoute(bfetch, this.asScoped);
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
@@ -294,25 +259,29 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => {
-    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy
-    );
+    try {
+      const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+        options.strategy
+      );
 
-    const getSearchRequest = async () =>
-      !options.sessionId || !options.isRestore || request.id
-        ? request
-        : {
-            ...request,
-            id: await deps.searchSessionsClient.getId(request, options),
-          };
+      const getSearchRequest = async () =>
+        !options.sessionId || !options.isRestore || request.id
+          ? request
+          : {
+              ...request,
+              id: await deps.searchSessionsClient.getId(request, options),
+            };
 
-    return from(getSearchRequest()).pipe(
-      switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
-      tapFirst((response) => {
-        if (request.id || !options.sessionId || !response.id || options.isRestore) return;
-        deps.searchSessionsClient.trackId(request, response.id, options);
-      })
-    );
+      return from(getSearchRequest()).pipe(
+        switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
+        tapFirst((response) => {
+          if (request.id || !options.sessionId || !response.id || options.isRestore) return;
+          deps.searchSessionsClient.trackId(request, response.id, options);
+        })
+      );
+    } catch (e) {
+      return throwError(e);
+    }
   };
 
   private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {

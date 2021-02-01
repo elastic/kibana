@@ -51,7 +51,14 @@ describe('SearchSource', () => {
   let searchSource: SearchSource;
 
   beforeEach(() => {
-    mockSearchMethod = jest.fn().mockReturnValue(of({ rawResponse: '' }));
+    mockSearchMethod = jest
+      .fn()
+      .mockReturnValue(
+        of(
+          { rawResponse: { isPartial: true, isRunning: true } },
+          { rawResponse: { isPartial: false, isRunning: false } }
+        )
+      );
 
     searchSourceDependencies = {
       getConfig: jest.fn(),
@@ -563,6 +570,34 @@ describe('SearchSource', () => {
 
       await searchSource.fetch(options);
       expect(mockSearchMethod).toBeCalledTimes(1);
+    });
+
+    test('should return partial results', (done) => {
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      const options = {};
+
+      const next = jest.fn();
+      const complete = () => {
+        expect(next).toBeCalledTimes(2);
+        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": true,
+              "isRunning": true,
+            },
+          ]
+        `);
+        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": false,
+              "isRunning": false,
+            },
+          ]
+        `);
+        done();
+      };
+      searchSource.fetch$(options).subscribe({ next, complete });
     });
   });
 
