@@ -15,7 +15,6 @@ import {
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,
   SavedObjectsFindOptions,
-  SavedObjectsOpenPointInTimeOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
@@ -145,6 +144,7 @@ export interface SavedObjectsFindResponse<T = unknown> {
   total: number;
   per_page: number;
   page: number;
+  pit_id?: string;
 }
 
 /**
@@ -310,6 +310,20 @@ export interface SavedObjectsResolveResponse<T = unknown> {
    *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
    */
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeOptions {
+  /**
+   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   */
+  keepAlive?: string;
+  /**
+   * An optional ES preference value to be used for the query.
+   */
+  preference?: string;
 }
 
 /**

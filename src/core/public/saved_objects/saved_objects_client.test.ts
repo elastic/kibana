@@ -428,7 +428,9 @@ describe('SavedObjectsClient', () => {
         hasReference: { id: '1', type: 'reference' },
         page: 10,
         perPage: 100,
+        pit: { id: 'abc', keepAlive: '1m' },
         search: 'what is the meaning of life?|life',
+        searchAfter: [123, 'abc'],
         searchFields: ['title^5', 'body'],
         sortField: 'sort_field',
         type: 'index-pattern',
@@ -450,7 +452,12 @@ describe('SavedObjectsClient', () => {
                 "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "page": 10,
                 "per_page": 100,
+                "pit": "{\\"id\\":\\"abc\\",\\"keep_alive\\":\\"1m\\"}",
                 "search": "what is the meaning of life?|life",
+                "search_after": Array [
+                  123,
+                  "abc",
+                ],
                 "search_fields": Array [
                   "title^5",
                   "body",

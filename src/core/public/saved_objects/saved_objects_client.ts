@@ -106,6 +106,7 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
   total: number;
   perPage: number;
   page: number;
+  pit_id?: string;
 }
 
 interface BatchQueueEntry {
@@ -320,6 +321,7 @@ export class SavedObjectsClient {
       hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
+      pit: 'pit',
       search: 'search',
       searchAfter: 'search_after',
       searchFields: 'search_fields',
@@ -336,10 +338,13 @@ export class SavedObjectsClient {
       any
     >;
 
-    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
-    // is not doing it implicitly.
+    // `has_references` and `pit` are structured objects. We need to stringify before sending,
+    // as `fetch` is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
+    }
+    if (query.pit) {
+      query.pit = JSON.stringify(renameKeys({ id: 'id', keepAlive: 'keep_alive' }, query.pit));
     }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
@@ -356,6 +361,7 @@ export class SavedObjectsClient {
           total: 'total',
           per_page: 'perPage',
           page: 'page',
+          pit_id: 'pit_id',
         },
         {
           ...resp,

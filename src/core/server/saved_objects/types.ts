@@ -118,20 +118,10 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
-}
-
-/**
- * @public
- */
-export interface SavedObjectsOpenPointInTimeOptions {
   /**
-   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   * Search against a specific Point In Time (PIT) that you've opened with `savedObjects.openPointInTimeForType`.
    */
-  keepAlive?: string;
-  /**
-   * An optional ES preference value to be used for the query.
-   */
-  preference?: string;
+  pit?: { id: string; keepAlive?: string };
 }
 
 /**

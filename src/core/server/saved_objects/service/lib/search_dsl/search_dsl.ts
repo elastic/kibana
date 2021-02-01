@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
+import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
@@ -25,6 +26,7 @@ interface GetSearchDslOptions {
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
+  pit?: { id: string; keepAlive?: string };
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
@@ -46,6 +48,7 @@ export function getSearchDsl(
     sortField,
     sortOrder,
     namespaces,
+    pit,
     typeToNamespacesMap,
     hasReference,
     hasReferenceOperator,
@@ -75,6 +78,7 @@ export function getSearchDsl(
       kueryNode,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),
+    ...getPitParams(pit),
     ...(searchAfter ? { search_after: searchAfter } : {}),
   };
 }

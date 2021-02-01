@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
+ */
+
+interface SavedObjectsPitParams {
+  id: string;
+  keepAlive?: string;
+}
+
+export function getPitParams(pit?: SavedObjectsPitParams) {
+  if (!pit) {
+    return {};
+  }
+
+  return {
+    pit: {
+      id: pit.id,
+      ...(pit.keepAlive ? { keep_alive: pit.keepAlive } : {}),
+    },
+  };
+}

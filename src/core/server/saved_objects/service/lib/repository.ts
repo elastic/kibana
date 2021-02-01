@@ -36,6 +36,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -54,7 +55,6 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
-  SavedObjectsOpenPointInTimeOptions,
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
@@ -728,6 +728,7 @@ export class SavedObjectsRepository {
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
+      pit,
       searchAfter,
       sortField,
       sortOrder,
@@ -790,18 +791,25 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
+      // If `pit` is provided, we drop the `index` and `preference` as those are already
+      // associated with the PIT in ES, and will otherwise return a 400.
+      ...(pit
+        ? {}
+        : {
+            index: this.getIndicesForTypes(allowedTypes),
+            preference,
+          }),
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
       rest_total_hits_as_int: true,
-      preference,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
           searchFields,
+          pit,
           rootSearchFields,
           type: allowedTypes,
           searchAfter,
@@ -840,6 +848,7 @@ export class SavedObjectsRepository {
           score: (hit as any)._score,
         })
       ),
+      ...(body.pit_id ? { pit_id: body.pit_id } : {}),
     } as SavedObjectsFindResponse<T>;
   }
 

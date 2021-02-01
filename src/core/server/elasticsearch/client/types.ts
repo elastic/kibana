@@ -100,6 +100,7 @@ export interface SearchResponse<T = unknown> {
     }>;
   };
   aggregations?: any;
+  pit_id?: string;
 }
 
 /**

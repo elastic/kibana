@@ -239,6 +239,25 @@ describe('GET /api/saved_objects/_find', () => {
     );
   });
 
+  it('accepts the optional query parameter pit', async () => {
+    const pitValues = querystring.escape(JSON.stringify({ id: 'abc', keep_alive: '1m' }));
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&pit=${pitValues}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        pit: {
+          id: 'abc',
+          keepAlive: '1m',
+        },
+      })
+    );
+  });
+
   it('accepts the query parameter fields as a string', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=foo&fields=title')
