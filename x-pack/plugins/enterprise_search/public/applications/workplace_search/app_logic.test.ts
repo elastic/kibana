@@ -20,6 +20,7 @@ describe('AppLogic', () => {
     account: {},
     hasInitialized: false,
     isFederatedAuth: true,
+    isOrganization: false,
     organization: {},
   };
 
@@ -35,6 +36,7 @@ describe('AppLogic', () => {
     },
     hasInitialized: true,
     isFederatedAuth: false,
+    isOrganization: false,
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',
@@ -60,6 +62,14 @@ describe('AppLogic', () => {
         hasInitialized: true,
         isFederatedAuth: false,
       });
+    });
+  });
+
+  describe('setContext()', () => {
+    it('sets context', () => {
+      AppLogic.actions.setContext(true);
+
+      expect(AppLogic.values.isOrganization).toEqual(true);
     });
   });
 });
