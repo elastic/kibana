@@ -9476,7 +9476,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyLink": "创建新策略",
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage": "输入现有快照策略的名称，或使用此名称{link}。",
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyTitle": "未找到策略名称",
-    "xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText": "您不再需要自己的索引。 您可以定义安全删除它的时间。",
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink": "创建快照生命周期策略",
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage": "{link}以自动创建和删除集群快照。",
     "xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedTitle": "找不到快照策略",
