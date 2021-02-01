@@ -12,5 +12,6 @@ export default function savedObjectsManagementApp({ loadTestFile }: FtrProviderC
   describe('saved objects management', function savedObjectsManagementAppTestSuite() {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./edit_saved_object'));
+    loadTestFile(require.resolve('./show_relationships'));
   });
 }

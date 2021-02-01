@@ -17,7 +17,7 @@ import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../i18n';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Legend } from '../../../types';
 
-interface Arguments {
+export interface Arguments {
   seriesStyle: SeriesStyle[];
   defaultStyle: SeriesStyle;
   palette: PaletteOutput;
