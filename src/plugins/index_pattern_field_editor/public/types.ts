@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { DataPublicPluginStart, RuntimeField } from './shared_imports';
+import { DataPublicPluginStart, RuntimeField, FieldFormat } from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 
@@ -35,5 +35,5 @@ export interface Field {
   script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;
-  format?: Record<string, any>; // TODO set correct interface
+  format?: ReturnType<FieldFormat['toJSON']>;
 }

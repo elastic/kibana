@@ -22,6 +22,6 @@ export const deserializeField = (
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
-    format: indexPattern.getFormatterForFieldNoDefault(field.name),
+    format: indexPattern.getFormatterForFieldNoDefault(field.name)?.toJSON(),
   };
 };

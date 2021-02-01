@@ -6,7 +6,12 @@
  * Public License, v 1.
  */
 
-export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
+export {
+  IndexPattern,
+  IndexPatternField,
+  DataPublicPluginStart,
+  FieldFormat,
+} from '../../data/public';
 
 export { RuntimeType, RuntimeField, KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 

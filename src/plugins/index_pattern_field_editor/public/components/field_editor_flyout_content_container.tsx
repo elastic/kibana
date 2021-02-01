@@ -85,6 +85,7 @@ export const FieldEditorFlyoutContentContainer = ({
     async (updatedField: Field) => {
       const script = updatedField.script?.source ? updatedField.script : undefined;
 
+      // TODO if script is defined OR runtime type is changed
       if (script) {
         indexPattern.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,

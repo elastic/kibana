@@ -16,12 +16,10 @@ export const FormatField = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
-  onChange,
-  onError,
-}: FormatSelectEditorProps) => {
+}: Omit<FormatSelectEditorProps, 'onChange' | 'onError'>) => {
   return (
     <UseField path="format">
-      {({ value, setValue }) => {
+      {({ setValue, setErrors }) => {
         return (
           <FormatSelectEditor
             fieldAttrs={fieldAttrs}
@@ -30,7 +28,7 @@ export const FormatField = ({
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
             onChange={setValue}
-            onError={onError}
+            onError={(error) => setErrors(error ? [{ message: error }] : [])}
           />
         );
       }}

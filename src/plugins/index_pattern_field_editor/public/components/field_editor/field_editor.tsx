@@ -6,9 +6,11 @@
  * Public License, v 1.
  */
 import React, { useEffect } from 'react';
+import { isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
+import { castEsToKbnFieldTypeName } from '../../../../data/public';
 
 import {
   Form,
@@ -20,7 +22,6 @@ import {
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
-  KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
 } from '../../shared_imports';
 import { Field, PluginStart } from '../../types';
@@ -241,20 +242,19 @@ const FieldEditorComponent = ({
         formFieldPath="__meta__.isFormatVisible"
         withDividerRule
       >
-        {/** TODO types, onChange, onError */}
-        {/** is type es or kbn? */}
+        {/** type need to be set to kbn type, esTypes need to be set */}
         <FormatField
           fieldAttrs={{
             name,
-            type: 'string' as KBN_FIELD_TYPES,
-            esTypes: ['keyword'] as ES_FIELD_TYPES[],
+            type: castEsToKbnFieldTypeName(field?.type || 'keyword'),
+            esTypes:
+              (isArray(field?.type) ? field?.type : ([field?.type] as ES_FIELD_TYPES[])) ||
+              (['keyword'] as ES_FIELD_TYPES[]),
           }}
           indexPattern={indexPattern}
           fieldFormatEditors={fieldFormatEditors}
           fieldFormats={fieldFormats}
           uiSettings={uiSettings}
-          onChange={() => {}}
-          onError={() => {}}
         />
       </FormRow>
 
