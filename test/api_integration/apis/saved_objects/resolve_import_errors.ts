@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
+      it('should return 200 with internal server errors', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
           .field(
