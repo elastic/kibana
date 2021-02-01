@@ -37,9 +37,6 @@ export interface HostQueryResult {
 
 export interface MetadataQueryStrategy {
   index: string;
-  elasticAgentIdProperty: string;
-  hostIdProperty: string;
-  sortProperty: JsonObject[];
   extraBodyProperties?: JsonObject;
   queryResponseToHostListResult: (
     searchResponse: SearchResponse<HostMetadata>

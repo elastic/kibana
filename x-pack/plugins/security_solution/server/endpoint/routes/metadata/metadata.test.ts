@@ -252,16 +252,14 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-        bool: {
-          must_not: {
-            terms: {
-              'elastic.agent.id': [
-                '00000000-0000-0000-0000-000000000000',
-                '11111111-1111-1111-1111-111111111111',
-              ],
-            },
-          },
+      expect(
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must_not
+      ).toContainEqual({
+        terms: {
+          'elastic.agent.id': [
+            '00000000-0000-0000-0000-000000000000',
+            '11111111-1111-1111-1111-111111111111',
+          ],
         },
       });
       expect(routeConfig.options).toEqual({
@@ -311,35 +309,46 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+      expect(
+        // KQL filter to be passed through
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+      ).toContainEqual({
         bool: {
-          must: [
-            {
-              bool: {
-                must_not: {
-                  terms: {
-                    'elastic.agent.id': [
-                      '00000000-0000-0000-0000-000000000000',
-                      '11111111-1111-1111-1111-111111111111',
-                    ],
+          must_not: {
+            bool: {
+              should: [
+                {
+                  match: {
+                    'host.ip': '10.140.73.246',
                   },
                 },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      });
+      expect(
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+      ).toContainEqual({
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                ],
               },
             },
             {
-              bool: {
-                must_not: {
-                  bool: {
-                    should: [
-                      {
-                        match: {
-                          'host.ip': '10.140.73.246',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
+              terms: {
+                // here we DO want to see both schemas are present
+                // to make this schema-compatible forward and back
+                'HostDetails.elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                ],
               },
             },
           ],
