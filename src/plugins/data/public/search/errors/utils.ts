@@ -6,19 +6,15 @@
  * Public License, v 1.
  */
 
-import { IEsError } from './types';
+import { FailedShard } from './types';
+import { KibanaServerError } from '../../../../kibana_utils/common';
 
-export function getFailedShards(err: IEsError) {
-  const failedShards =
-    err.body?.attributes?.error?.failed_shards ||
-    err.body?.attributes?.error?.caused_by?.failed_shards;
+export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
+  const errorInfo = err.attributes;
+  const failedShards = errorInfo?.failed_shards || errorInfo?.caused_by?.failed_shards;
   return failedShards ? failedShards[0] : undefined;
 }
 
-export function getTopLevelCause(err: IEsError) {
-  return err.body?.attributes?.error;
-}
-
-export function getRootCause(err: IEsError) {
+export function getRootCause(err: KibanaServerError) {
   return getFailedShards(err)?.reason;
 }
