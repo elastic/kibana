@@ -48,32 +48,42 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
+  // TODO: reuse logic from signal_rule_alert_type
+  const thresholdFields = Array.isArray(threshold.field) ? threshold.field : [threshold.field];
+
   const aggregations =
     threshold && !isEmpty(threshold.field)
-      ? {
-          threshold: {
-            terms: {
-              field: threshold.field,
-              min_doc_count: threshold.value,
-              size: 10000, // max 10k buckets
-            },
-            aggs: {
-              // Get the most recent hit per bucket
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      [timestampOverride ?? '@timestamp']: {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  size: 1,
-                },
+      ? thresholdFields.map((field, idx) => {
+          return {
+            [`threshold_${idx}`]: {
+              terms: {
+                field,
+                min_doc_count: threshold.value,
+                // TODO: is size needed on outer aggs?
+                size: 10000, // max 10k buckets
               },
+              aggs:
+                idx === threshold.field.length - 1
+                  ? {
+                      // Get the most recent hit per inner-most bucket
+                      top_threshold_hits: {
+                        top_hits: {
+                          sort: [
+                            {
+                              [timestampOverride ?? '@timestamp']: {
+                                order: 'desc',
+                              },
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                      // TODO: cardinality aggs
+                    }
+                  : {},
             },
-          },
-        }
+          };
+        })
       : {};
 
   return singleSearchAfter({

@@ -8,11 +8,12 @@ import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { sampleDocNoSortId, sampleDocSearchResultsNoSortId } from './__mocks__/es_results';
 import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals';
 import { calculateThresholdSignalUuid } from './utils';
+import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 
 describe('transformThresholdResultsToEcs', () => {
   it('should return transformed threshold results', () => {
-    const threshold = {
-      field: 'source.ip',
+    const threshold: Threshold = {
+      field: ['source.ip'],
       value: 1,
     };
     const startedAt = new Date('2020-12-17T16:27:00Z');
@@ -43,7 +44,7 @@ describe('transformThresholdResultsToEcs', () => {
       '1234',
       undefined
     );
-    const _id = calculateThresholdSignalUuid('1234', startedAt, 'source.ip', '127.0.0.1');
+    const _id = calculateThresholdSignalUuid('1234', startedAt, ['source.ip'], '127.0.0.1');
     expect(transformedResults).toEqual({
       took: 10,
       timed_out: false,

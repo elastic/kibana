@@ -66,13 +66,13 @@ export const findPreviousThresholdSignals = async ({
             'signal.rule.rule_id': ruleId,
           },
         },
-        {
-          term: {
-            // TODO: account for array
-            // 'signal.rule.threshold.field': bucketByFields,
-            'signal.rule.threshold.field': bucketByFields[0],
-          },
-        },
+        ...bucketByFields.map((field) => {
+          return {
+            term: {
+              'signal.rule.threshold.field': field,
+            },
+          };
+        }),
       ],
     },
   };

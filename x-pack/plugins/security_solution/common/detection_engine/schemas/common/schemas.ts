@@ -458,15 +458,21 @@ export type Threats = t.TypeOf<typeof threats>;
 export const threatsOrUndefined = t.union([threats, t.undefined]);
 export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
-export const threshold = t.exact(
-  t.type({
-    field: t.union([t.string, t.array(t.string)]),
-    // field: t.array(t.string),
-    value: PositiveIntegerGreaterThanZero,
-    cardinality_field: t.union([t.string, t.undefined]),
-    cardinality_value: t.union([PositiveInteger, t.undefined]),
-  })
-);
+export const threshold = t.intersection([
+  t.exact(
+    t.type({
+      field: t.union([t.string, t.array(t.string)]),
+      // field: t.array(t.string),
+      value: PositiveIntegerGreaterThanZero,
+    })
+  ),
+  t.exact(
+    t.partial({
+      cardinality_field: t.union([t.string, t.undefined]),
+      cardinality_value: t.union([PositiveInteger, t.undefined]),
+    })
+  ),
+]);
 // TODO: codec to transform threshold field string to string[]
 export type Threshold = t.TypeOf<typeof threshold>;
 
