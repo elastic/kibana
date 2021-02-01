@@ -843,6 +843,7 @@ describe('utils', () => {
         timestampField,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
         ruleStatusServiceMock,
         mockLogger,
         buildRuleMessage
@@ -881,6 +882,7 @@ describe('utils', () => {
         timestampField,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
         ruleStatusServiceMock,
         mockLogger,
         buildRuleMessage

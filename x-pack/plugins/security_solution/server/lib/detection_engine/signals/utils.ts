@@ -100,6 +100,26 @@ export const hasReadIndexPrivileges = async (
   return false;
 };
 
+const getFieldCapFailingIndices = (
+  inputIndices: string[], // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
+  timestampField: string
+) => {
+  if (
+    isEmpty(timestampFieldCapsResponse.body.fields) &&
+    isEmpty(timestampFieldCapsResponse.body.indices)
+  ) {
+    return inputIndices;
+  } else if (
+    isEmpty(timestampFieldCapsResponse.body.fields) &&
+    !isEmpty(timestampFieldCapsResponse.body.indices)
+  ) {
+    return timestampFieldCapsResponse.body.indices;
+  } else {
+    return timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices;
+  }
+};
+
 export const hasTimestampFields = async (
   wroteStatus: boolean,
   timestampField: string,
@@ -107,11 +127,21 @@ export const hasTimestampFields = async (
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
+  inputIndices: string[],
   ruleStatusService: RuleStatusService,
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<boolean> => {
-  if (
+  if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
+    const errorString = `The following indices are missing the ${
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(inputIndices)}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.error(errorString);
+    return true;
+  } else if (
     !wroteStatus &&
     (isEmpty(timestampFieldCapsResponse.body.fields) ||
       timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -124,9 +154,7 @@ export const hasTimestampFields = async (
         ? 'timestamp field "@timestamp"'
         : `timestamp override field "${timestampField}"`
     }: ${JSON.stringify(
-      isEmpty(timestampFieldCapsResponse.body.fields)
-        ? timestampFieldCapsResponse.body.indices
-        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+      getFieldCapFailingIndices(inputIndices, timestampFieldCapsResponse, timestampField)
     )}`;
     logger.error(buildRuleMessage(errorString));
     await ruleStatusService.partialFailure(errorString);
