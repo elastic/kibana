@@ -189,6 +189,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
       ${storybooksMessage}
+      ${getDocsChangesLink()}
     """
   } else if(status == 'UNSTABLE') {
     def message = """
@@ -196,6 +197,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
       ${storybooksMessage}
+      ${getDocsChangesLink()}
     """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
@@ -213,6 +215,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       ${storybooksMessage}
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
+      ${getDocsChangesLink()}
     """
   }
 
@@ -299,6 +302,21 @@ def deleteComment(commentId) {
 
 def getCommitHash() {
   return env.ghprbActualCommit
+}
+
+def getDocsChangesLink() {
+  def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
+
+  try {
+    // httpRequest throws on status codes >400 and failures
+    httpRequest([ method: "GET", url: url ])
+    return "* [Documentation Changes](${url})"
+  } catch (ex) {
+    print "Failed to reach ${url}"
+    buildUtils.printStacktrace(ex)
+  }
+
+  return ""
 }
 
 def getFailedSteps() {

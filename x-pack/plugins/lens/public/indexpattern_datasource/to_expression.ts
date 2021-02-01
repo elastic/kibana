@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { IUiSettingsClient } from 'kibana/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -24,7 +25,8 @@ import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  uiSettings: IUiSettingsClient
 ): ExpressionAstExpression | null {
   const { columns, columnOrder } = layer;
   if (columnOrder.length === 0) {
@@ -44,7 +46,7 @@ function getExpressionForLayer(
         aggs.push(
           buildExpression({
             type: 'expression',
-            chain: [def.toEsAggsFn(col, colId, indexPattern, layer)],
+            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
           })
         );
       }
@@ -184,11 +186,16 @@ function getExpressionForLayer(
   return null;
 }
 
-export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+export function toExpression(
+  state: IndexPatternPrivateState,
+  layerId: string,
+  uiSettings: IUiSettingsClient
+) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId]
+      state.indexPatterns[state.layers[layerId].indexPatternId],
+      uiSettings
     );
   }
 
