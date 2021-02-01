@@ -25,7 +25,7 @@ export function getThroughputBuckets({
         return {
           x: bucket.key,
           // divide by minutes
-          y: bucket.count.value / (bucketSize / 60),
+          y: bucket.doc_count / (bucketSize / 60),
         };
       });
 
@@ -34,7 +34,7 @@ export function getThroughputBuckets({
         resultKey === '' ? NOT_AVAILABLE_LABEL : (resultKey as string);
 
       const docCountTotal = timeseries.buckets
-        .map((bucket) => bucket.count.value)
+        .map((bucket) => bucket.doc_count)
         .reduce((a, b) => a + b, 0);
 
       // calculate average throughput

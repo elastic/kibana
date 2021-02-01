@@ -24,6 +24,7 @@
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../src/plugins/legacy_export/tsconfig.json" },
     { "path": "../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../src/plugins/newsfeed/tsconfig.json" },
     { "path": "../../src/plugins/saved_objects/tsconfig.json" },
@@ -36,8 +37,8 @@
     { "path": "../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../src/plugins/url_forwarding/tsconfig.json" },
 
-    { "path": "../plugins/actions/tsconfig.json"},
-    { "path": "../plugins/alerts/tsconfig.json"},
+    { "path": "../plugins/actions/tsconfig.json" },
+    { "path": "../plugins/alerts/tsconfig.json" },
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/data_enhanced/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },
