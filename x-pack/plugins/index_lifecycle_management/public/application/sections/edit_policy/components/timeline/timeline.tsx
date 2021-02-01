@@ -5,13 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 
@@ -22,7 +16,6 @@ import {
   AbsoluteTimings,
 } from '../../lib';
 
-
 import { InfinityIcon } from '../infinity_icon';
 
 import './timeline.scss';
@@ -30,7 +23,6 @@ import './timeline.scss';
 import { TimelinePhaseText } from './components';
 
 const exists = (v: unknown) => v != null;
-
 
 import './timeline.scss';
 
