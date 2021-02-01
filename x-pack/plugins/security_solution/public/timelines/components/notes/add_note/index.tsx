@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFocusTrap,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
