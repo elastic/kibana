@@ -84,6 +84,9 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
+// FAILING: https://github.com/elastic/kibana/issues/85715
+// FAILING: https://github.com/elastic/kibana/issues/89603
+// FAILING: https://github.com/elastic/kibana/issues/89641
 describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();

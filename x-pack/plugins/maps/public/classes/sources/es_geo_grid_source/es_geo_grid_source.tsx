@@ -195,6 +195,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   async _compositeAggRequest({
     searchSource,
+    searchSessionId,
     indexPattern,
     precision,
     layerName,
@@ -204,6 +205,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     bufferedExtent,
   }: {
     searchSource: ISearchSource;
+    searchSessionId?: string;
     indexPattern: IndexPattern;
     precision: number;
     layerName: string;
@@ -280,6 +282,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
             values: { requestId },
           }
         ),
+        searchSessionId,
       });
 
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
@@ -325,6 +328,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   // see https://github.com/elastic/kibana/pull/57875#issuecomment-590515482 for explanation on using separate code paths
   async _nonCompositeAggRequest({
     searchSource,
+    searchSessionId,
     indexPattern,
     precision,
     layerName,
@@ -332,6 +336,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     bufferedExtent,
   }: {
     searchSource: ISearchSource;
+    searchSessionId?: string;
     indexPattern: IndexPattern;
     precision: number;
     layerName: string;
@@ -348,6 +353,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
+      searchSessionId,
     });
 
     return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
@@ -373,6 +379,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         bucketsPerGrid === 1
           ? await this._nonCompositeAggRequest({
               searchSource,
+              searchSessionId: searchFilters.searchSessionId,
               indexPattern,
               precision: searchFilters.geogridPrecision || 0,
               layerName,
@@ -381,6 +388,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
             })
           : await this._compositeAggRequest({
               searchSource,
+              searchSessionId: searchFilters.searchSessionId,
               indexPattern,
               precision: searchFilters.geogridPrecision || 0,
               layerName,
