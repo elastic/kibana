@@ -11,10 +11,7 @@
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import {
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getTransactionCoordinates({
   setup,
@@ -49,15 +46,6 @@ export async function getTransactionCoordinates({
             fixed_interval: bucketSize,
             min_doc_count: 0,
           },
-          aggs: {
-            count: {
-              value_count: {
-                field: getTransactionDurationFieldForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
-              },
-            },
-          },
         },
       },
     },
@@ -68,7 +56,7 @@ export async function getTransactionCoordinates({
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.count.value / deltaAsMinutes,
+      y: bucket.doc_count / deltaAsMinutes,
     })) || []
   );
 }
