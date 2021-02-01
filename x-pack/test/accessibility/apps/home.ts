@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Sample data page meets a11y requirements ', async () => {
-      await testSubjects.click('sampleData');
+      await testSubjects.click('homeTab-sampleData');
       await a11y.testAppSnapshot();
     });
 
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await testSubjects.click('all');
+      await testSubjects.click('homeTab-all');
       await testSubjects.click('homeSynopsisLinkactivemqlogs');
       await a11y.testAppSnapshot();
     });

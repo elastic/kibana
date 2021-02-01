@@ -179,7 +179,7 @@ class TutorialDirectoryUi extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
-        data-test-subj={tab.id}
+        data-test-subj={`homeTab-${tab.id}`}
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -205,7 +205,7 @@ class TutorialDirectoryUi extends React.Component {
           })
           .map((tutorial) => {
             return (
-              <EuiFlexItem data-test-subj={tutorial.name} key={tutorial.name}>
+              <EuiFlexItem data-test-subj={`homeTab-${tutorial.name}`} key={tutorial.name}>
                 <Synopsis
                   id={tutorial.id}
                   iconType={tutorial.icon}
