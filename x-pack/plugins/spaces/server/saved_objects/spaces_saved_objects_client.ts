@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
@@ -377,5 +378,22 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this.client.openPointInTimeForType(type, options);
   }
 }

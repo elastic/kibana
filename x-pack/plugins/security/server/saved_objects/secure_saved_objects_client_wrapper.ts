@@ -17,6 +17,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUtils,
@@ -560,6 +561,34 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.baseClient.removeReferencesTo(type, id, options);
+  }
+
+  public async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions
+  ) {
+    try {
+      const args = { type, options };
+      await this.ensureAuthorized(type, 'open_point_in_time', undefined, { args });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.OPEN_POINT_IN_TIME,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    const pit = await this.baseClient.openPointInTimeForType(type, options);
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.OPEN_POINT_IN_TIME,
+      })
+    );
+
+    return pit;
   }
 
   private async checkPrivileges(

@@ -190,6 +190,7 @@ export enum SavedObjectAction {
   ADD_TO_SPACES = 'saved_object_add_to_spaces',
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
+  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
 }
 
 type VerbsTuple = [string, string, string];
@@ -203,6 +204,7 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
+  saved_object_open_point_in_time: ['open', 'opening', 'opened'],
   saved_object_remove_references: [
     'remove references to',
     'removing references to',
@@ -219,6 +221,7 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EventType> = {
   saved_object_find: EventType.ACCESS,
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
+  saved_object_open_point_in_time: EventType.CREATION,
   saved_object_remove_references: EventType.CHANGE,
 };
 
