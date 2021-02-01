@@ -87,7 +87,7 @@ const addGeneratedAlerts = async ({
     id: caseId,
   });
 
-  if (query.type === CommentType.generatedAlert && myCase.attributes.type !== CaseType.parent) {
+  if (query.type === CommentType.generatedAlert && myCase.attributes.type !== CaseType.collection) {
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
   }
 
@@ -99,9 +99,9 @@ const addGeneratedAlerts = async ({
   });
 
   const userDetails = {
-    username: myCase.attributes.converted_by?.username,
-    full_name: myCase.attributes.converted_by?.full_name,
-    email: myCase.attributes.converted_by?.email,
+    username: myCase.attributes.created_by?.username,
+    full_name: myCase.attributes.created_by?.full_name,
+    email: myCase.attributes.created_by?.email,
   };
 
   const [newComment, updatedCase, updatedSubCase] = await Promise.all([

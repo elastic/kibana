@@ -53,13 +53,11 @@ async function findCases({
   caseOptions,
   subCaseOptions,
   caseService,
-  includeEmptyCollections,
 }: {
   client: SavedObjectsClientContract;
   caseOptions: SavedObjectFindOptions;
   subCaseOptions?: SavedObjectFindOptions;
   caseService: CaseServiceSetup;
-  includeEmptyCollections: boolean;
 }): Promise<CasesMapWithPageInfo> {
   const cases = await caseService.findCases({
     client,
@@ -71,23 +69,17 @@ async function findCases({
     options: subCaseOptions,
     caseService,
     ids: cases.saved_objects
-      .filter((caseInfo) => caseInfo.type === CaseType.parent)
+      .filter((caseInfo) => caseInfo.type === CaseType.collection)
       .map((caseInfo) => caseInfo.id),
   });
   const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
     const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
+
     /**
-     * If we don't have the sub cases for the case and the case is a collection then ignore it
-     * unless we're forcing retrieval of empty collections. Otherwise if the case is an individual case
-     * then include it.
+     * This will include empty collections unless the query explicitly requested type === CaseType.individual, in which
+     * case we'd not have any collections anyway.
      */
-    if (
-      (subCasesForCase && caseInfo.attributes.type === CaseType.parent) ||
-      includeEmptyCollections ||
-      caseInfo.attributes.type === CaseType.individual
-    ) {
-      accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
-    }
+    accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
     return accMap;
   }, new Map<string, Collection>());
 
@@ -160,7 +152,6 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           caseOptions: { ...queryParams, ...caseQueries.case },
           subCaseOptions: caseQueries.subCase,
           caseService,
-          includeEmptyCollections: queryParams.type === CaseType.parent || !queryParams.status,
         });
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([

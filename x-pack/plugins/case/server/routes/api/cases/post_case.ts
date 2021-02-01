@@ -8,7 +8,7 @@ import { wrapError, escapeHatch } from '../utils';
 
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
-import { CasePostRequest, CaseType } from '../../../../common/api';
+import { CasePostRequest } from '../../../../common/api';
 
 export function initPostCaseApi({ router }: RouteDeps) {
   router.post(
@@ -27,7 +27,7 @@ export function initPostCaseApi({ router }: RouteDeps) {
 
       try {
         return response.ok({
-          body: await caseClient.create({ ...theCase, type: CaseType.individual }),
+          body: await caseClient.create({ ...theCase }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

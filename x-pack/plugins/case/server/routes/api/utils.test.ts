@@ -27,7 +27,6 @@ import {
   ConnectorTypes,
   ESCaseConnector,
   CommentType,
-  CaseStatuses,
   AssociationType,
   CaseType,
   CaseResponse,

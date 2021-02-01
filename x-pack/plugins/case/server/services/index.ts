@@ -15,7 +15,6 @@ import {
   SavedObjectReference,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsBulkResponse,
-  SavedObjectsFindOptionsReference,
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
@@ -27,7 +26,6 @@ import {
   CommentPatchAttributes,
   SubCaseAttributes,
 } from '../../common/api';
-import { SUB_CASES_URL } from '../../common/constants';
 import { transformNewSubCase } from '../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,

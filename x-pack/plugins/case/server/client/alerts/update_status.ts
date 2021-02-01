@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient, KibanaRequest } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import { CaseStatuses } from '../../../common/api';
 import { AlertServiceContract } from '../../services';
 

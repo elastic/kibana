@@ -12,7 +12,7 @@ import {
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
-  CaseConvertRequest,
+  CasePostRequest,
   CaseResponse,
   CasesPatchRequest,
   CasesResponse,
@@ -77,18 +77,15 @@ export interface ConfigureFields {
 /**
  * This represents the interface that other plugins can access.
  */
-export interface CaseClientPluginContract {
+export interface CaseClient {
   addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
-  create(theCase: CaseClientPostRequest): Promise<CaseResponse>;
+  create(theCase: CasePostRequest): Promise<CaseResponse>;
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
   updateAlertsStatus(args: CaseClientUpdateAlertsStatus): Promise<void>;
 }
 
-export interface CaseClient extends CaseClientPluginContract {
-  convertCaseToCollection(caseInfo: CaseConvertRequest): Promise<CasesResponse>;
-}
 export interface MappingsClient {
   actionsClient: ActionsClient;
   connectorId: string;

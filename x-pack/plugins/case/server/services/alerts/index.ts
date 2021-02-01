@@ -6,7 +6,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;

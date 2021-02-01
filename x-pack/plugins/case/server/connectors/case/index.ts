@@ -8,7 +8,7 @@ import { curry } from 'lodash';
 
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, CasePostRequest, CaseType } from '../../../common/api';
+import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createExternalCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
@@ -91,7 +91,6 @@ async function executor(
   if (subAction === 'create') {
     data = await caseClient.create({
       ...(subActionParams as CasePostRequest),
-      type: CaseType.individual,
     });
   }
 

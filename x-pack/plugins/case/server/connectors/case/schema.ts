@@ -15,22 +15,6 @@ const ContextTypeUserSchema = schema.object({
   comment: schema.string(),
 });
 
-/**
- * TODO: remove
- * ContextTypeAlertSchema has been deleted.
- * Comments of type alert need the siem signal index.
- * Case connector is not being passed the context which contains the
- * security solution app client which in turn provides the siem signal index.
- * For that reason, we disable comments of type alert for the case connector until
- * we figure out how to pass the security solution app client to the connector.
- * See: x-pack/plugins/case/server/connectors/case/index.ts L76.
- *
- * The schema:
- *
- *
- * Issue: https://github.com/elastic/kibana/issues/85750
- *  */
-
 const AlertIDSchema = schema.object(
   {
     _id: schema.string(),

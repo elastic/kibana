@@ -14,6 +14,7 @@ import {
 } from '../../__fixtures__';
 import { initGetCasesStatusApi } from './get_status';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { CaseType } from '../../../../../common/api';
 
 describe('GET status', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -45,20 +46,17 @@ describe('GET status', () => {
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
       ...findArgs,
-      filter:
-        '((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
+      filter: `((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
       ...findArgs,
-      filter:
-        '((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
+      filter: `((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
       ...findArgs,
-      filter:
-        '((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: parent)',
+      filter: `((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
     });
 
     expect(response.payload).toEqual({

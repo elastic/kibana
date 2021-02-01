@@ -18,7 +18,8 @@ import {
   CaseResponseRt,
   CaseResponse,
   CaseClientPostRequestRt,
-  CaseClientPostRequest,
+  CasePostRequest,
+  CaseType,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -38,7 +39,7 @@ interface CreateCaseArgs {
   request: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
-  theCase: CaseClientPostRequest;
+  theCase: CasePostRequest;
 }
 
 export const create = async ({
@@ -49,8 +50,11 @@ export const create = async ({
   request,
   theCase,
 }: CreateCaseArgs): Promise<CaseResponse> => {
+  // default to an individual case if the type is not defined.
+  const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
   const query = pipe(
-    excess(CaseClientPostRequestRt).decode(theCase),
+    // decode with the defaulted type field
+    excess(CaseClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

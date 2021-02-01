@@ -47,7 +47,48 @@ describe('create', () => {
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.create(postCase);
 
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "closed_at": null,
+          "closed_by": null,
+          "comments": Array [],
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "Jira",
+            "type": ".jira",
+          },
+          "converted_by": null,
+          "created_at": "2019-11-25T21:54:48.952Z",
+          "created_by": Object {
+            "email": "d00d@awesome.com",
+            "full_name": "Awesome D00d",
+            "username": "awesome",
+          },
+          "description": "This is a brand new case of a bad meanie defacing data",
+          "external_service": null,
+          "id": "mock-it",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "status": "open",
+          "subCases": undefined,
+          "tags": Array [
+            "defacement",
+          ],
+          "title": "Super Bad Security Issue",
+          "totalAlerts": 0,
+          "totalComment": 0,
+          "type": "individual",
+          "updated_at": null,
+          "updated_by": null,
+          "version": "WzksMV0=",
+        }
+      `);
 
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions

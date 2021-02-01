@@ -15,8 +15,6 @@ import {
 import {
   CaseConnector,
   ESCaseConnector,
-  ESCaseAttributes,
-  ESCasePatchRequest,
   ESCasesConfigureAttributes,
   ConnectorTypes,
   CaseStatuses,
@@ -188,7 +186,7 @@ export const findCaseStatusStats = async ({
   });
 
   const caseIds = cases.saved_objects
-    .filter((caseInfo) => caseInfo.attributes.type === CaseType.parent)
+    .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
     .map((caseInfo) => caseInfo.id);
 
   let subCasesTotal = 0;
@@ -203,8 +201,8 @@ export const findCaseStatusStats = async ({
   }
 
   const total =
-    cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.parent).length +
-    subCasesTotal;
+    cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.collection)
+      .length + subCasesTotal;
 
   return total;
 };
@@ -320,7 +318,7 @@ export const findSubCases = async ({
       hasReference: ids.map((id) => {
         return {
           id,
-          type: SUB_CASE_SAVED_OBJECT,
+          type: CASE_SAVED_OBJECT,
         };
       }),
     },
@@ -428,10 +426,10 @@ export const constructQueries = ({
         },
       };
     }
-    case CaseType.parent: {
+    case CaseType.collection: {
       // The cases filter will result in this structure "(type == parent) and (tags == blah) and (reporter == yo)"
       // The sub case filter will use the query.status if it exists
-      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
+      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
       const caseFilters = combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND');
 
       return {
@@ -457,7 +455,7 @@ export const constructQueries = ({
        * The sub case filter will use the query.status if it exists
        */
       const typeIndividual = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
-      const typeParent = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.parent}`;
+      const typeParent = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
 
       const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
       const statusAndType = combineFilters([statusFilter, typeParent], 'OR');

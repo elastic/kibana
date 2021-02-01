@@ -20,33 +20,10 @@ describe('updateAlertsStatus', () => {
     });
 
     expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
+      callCluster: expect.any(Function),
       ids: ['alert-id-1'],
       indices: new Set<string>(['.siem-signals']),
       status: CaseStatuses.closed,
     });
   });
-
-  // TODO: maybe test the plugin code instead?
-  /* describe('unhappy path', () => {
-      test('it throws when missing securitySolutionClient', async () => {
-        expect.assertions(3);
-
-        const savedObjectsClient = createMockSavedObjectsRepository();
-
-        const caseClient = await createCaseClientWithMockSavedObjectsClient({
-          savedObjectsClient,
-          omitFromContext: ['securitySolution'],
-        });
-        caseClient.client
-          .updateAlertsStatus({
-            ids: ['alert-id-1'],
-            status: CaseStatuses.closed,
-          })
-          .catch((e) => {
-            expect(e).not.toBeNull();
-            expect(e.isBoom).toBe(true);
-            expect(e.output.statusCode).toBe(404);
-          });
-      });
-    });*/
 });

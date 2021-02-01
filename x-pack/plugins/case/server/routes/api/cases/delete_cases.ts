@@ -39,7 +39,7 @@ async function unremovableCases({
      * might have failed to find the ID. If it fails to find it, it will set the error field but not
      * the attributes so check that we didn't receive an error.
      */
-    (caseObj) => !caseObj.error && caseObj.attributes.type === CaseType.parent
+    (caseObj) => !caseObj.error && caseObj.attributes.type === CaseType.collection
   );
 
   return parentCases.map((parentCase) => parentCase.id);

@@ -17,7 +17,7 @@ import { transformESConnectorToCaseConnector } from '../../routes/api/cases/help
 import { flattenCommentSavedObjects, flattenSubCaseSavedObject } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
-import { countAlerts, countAlertsFindResponse } from '../index';
+import { countAlertsFindResponse } from '../index';
 
 interface UserInfo {
   username: string | null | undefined;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseClientFactoryArguments, CaseClientPluginContract } from './types';
+import { CaseClientFactoryArguments, CaseClient } from './types';
 import { CaseClientImpl } from './client';
 
 export { CaseClientImpl } from './client';
@@ -26,9 +26,7 @@ export { CaseClient } from './types';
   };
 };*/
 
-export const createExternalCaseClient = (
-  clientArgs: CaseClientFactoryArguments
-): CaseClientPluginContract => {
+export const createExternalCaseClient = (clientArgs: CaseClientFactoryArguments): CaseClient => {
   const client = new CaseClientImpl(clientArgs);
   return client;
 };

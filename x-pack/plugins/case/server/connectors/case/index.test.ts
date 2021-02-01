@@ -842,7 +842,7 @@ describe('case connector', () => {
           },
           title: 'Case from case connector!!',
           tags: ['case', 'connector'],
-          type: CaseType.parent,
+          type: CaseType.collection,
           description: 'Yo fields!!',
           external_service: null,
           status: CaseStatuses.open,
@@ -902,7 +902,6 @@ describe('case connector', () => {
               parent: null,
             },
           },
-          type: CaseType.individual,
         });
       });
     });
@@ -939,7 +938,7 @@ describe('case connector', () => {
             title: 'Update title',
             totalComment: 0,
             totalAlerts: 0,
-            type: CaseType.parent,
+            type: CaseType.collection,
             updated_at: '2019-11-25T21:54:48.952Z',
             updated_by: {
               email: 'd00d@awesome.com',
@@ -1016,7 +1015,7 @@ describe('case connector', () => {
           title: 'Super Bad Security Issue',
           status: CaseStatuses.open,
           tags: ['defacement'],
-          type: CaseType.parent,
+          type: CaseType.collection,
           updated_at: null,
           updated_by: null,
           comments: [

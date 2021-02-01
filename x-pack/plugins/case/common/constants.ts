@@ -13,7 +13,6 @@ export const APP_ID = 'case';
 export const CASES_URL = '/api/cases';
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}`;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure`;
-export const CASE_COLLECTION_URL = `${CASES_URL}/collection`;
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
 export const CASE_CONFIGURE_CONNECTOR_DETAILS_URL = `${CASE_CONFIGURE_CONNECTORS_URL}/{connector_id}`;
 export const CASE_CONFIGURE_PUSH_URL = `${CASE_CONFIGURE_CONNECTOR_DETAILS_URL}/push`;

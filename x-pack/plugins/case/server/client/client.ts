@@ -36,12 +36,9 @@ import {
   AlertServiceContract,
 } from '../services';
 import {
-  CaseClientPostRequest,
-  CaseConvertRequest,
-  CaseConvertRequestRt,
   CasesPatchRequest,
   CasesPatchRequestRt,
-  CaseType,
+  CasePostRequest,
   excess,
   throwErrors,
 } from '../../common/api';
@@ -91,7 +88,7 @@ export class CaseClientImpl implements CaseClient {
     return this._alertsService;
   }
 
-  public async create(caseInfo: CaseClientPostRequest) {
+  public async create(caseInfo: CasePostRequest) {
     return create({
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
@@ -118,24 +115,6 @@ export class CaseClientImpl implements CaseClient {
       userActionService: this._userActionService,
       request: this.request,
       cases: validatedCases,
-      caseClient: this,
-    });
-  }
-
-  public async convertCaseToCollection(caseInfo: CaseConvertRequest) {
-    const validatedRequest = pipe(
-      excess(CaseConvertRequestRt).decode(caseInfo),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    return update({
-      savedObjectsClient: this._savedObjectsClient,
-      caseService: this._caseService,
-      userActionService: this._userActionService,
-      request: this.request,
-      cases: {
-        cases: [{ ...validatedRequest, type: CaseType.parent }],
-      },
       caseClient: this,
     });
   }

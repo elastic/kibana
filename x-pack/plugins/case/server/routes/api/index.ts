@@ -5,7 +5,6 @@
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
-import { initConvertCaseToCollectionApi } from './cases/convert_case';
 import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
 import { initPatchCasesApi } from './cases/patch_cases';
@@ -44,7 +43,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseUserActionApi(deps);
   initGetAllUserActionsApi(deps);
-  initConvertCaseToCollectionApi(deps);
   // Sub cases
   initGetSubCaseApi(deps);
   initPatchSubCasesApi(deps);

@@ -13,7 +13,7 @@ import { TestProviders } from '../../../common/mock';
 import { casesStatus, useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -515,6 +515,8 @@ describe('AllCases', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
       expect(onRowClick).toHaveBeenCalledWith({
+        // TODO: remove
+        converted_by: null,
         closedAt: null,
         closedBy: null,
         comments: [],
@@ -543,7 +545,9 @@ describe('AllCases', () => {
         status: 'open',
         tags: ['coke', 'pepsi'],
         title: 'Another horrible breach!!',
+        totalAlerts: 0,
         totalComment: 0,
+        type: CaseType.individual,
         updatedAt: '2020-02-20T15:02:57.995Z',
         updatedBy: {
           email: 'leslie.knope@elastic.co',

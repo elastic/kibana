@@ -14,11 +14,11 @@ import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 import { SubCaseResponseRt } from './sub_case';
 
 export enum CaseType {
-  parent = 'parent',
+  collection = 'collection',
   individual = 'individual',
 }
 
-const CaseTypeRt = rt.union([rt.literal(CaseType.parent), rt.literal(CaseType.individual)]);
+const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
 
 const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -71,7 +71,7 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CasePostRequestRt = rt.type({
+const CasePostRequestNoTypeRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
@@ -79,10 +79,24 @@ export const CasePostRequestRt = rt.type({
   settings: SettingsRt,
 });
 
+/**
+ * This type is used for validating a create case request. It requires that the type field be defined.
+ */
 export const CaseClientPostRequestRt = rt.type({
-  ...CasePostRequestRt.props,
+  ...CasePostRequestNoTypeRt.props,
   type: CaseTypeRt,
 });
+
+/**
+ * This type is not used for validation when decoding a request because intersection does not have props defined which
+ * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
+ * optional and the server will handle setting it to a default value before validating that the request
+ * has all the necessary fields. CaseClientPostRequestRt is used for validation.
+ */
+export const CasePostRequestRt = rt.intersection([
+  rt.partial({ type: CaseTypeRt }),
+  CasePostRequestNoTypeRt,
+]);
 
 export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
 
@@ -140,14 +154,16 @@ export const CaseUpdateRequestRt = rt.intersection([
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
-export const CaseConvertRequestRt = rt.type({ id: rt.string, version: rt.string });
-
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 export const CasesUpdateRequestRt = rt.type({ cases: rt.array(CaseUpdateRequestRt) });
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
-// TODO: document how this is different from the CasePostRequest
+/**
+ * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
+ * that the type field be defined. The CasePostRequest should be used in most places (the UI etc). This type is really
+ * only necessary for validation.
+ */
 export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
@@ -166,5 +182,3 @@ export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: 
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
   connector?: ESCaseConnector;
 };
-
-export type CaseConvertRequest = rt.TypeOf<typeof CaseConvertRequestRt>;

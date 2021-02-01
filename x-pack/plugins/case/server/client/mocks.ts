@@ -5,6 +5,9 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+// TODO: fix this
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { legacyClientMock } from 'src/core/server/elasticsearch/legacy/mocks';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {
@@ -14,12 +17,12 @@ import {
   CaseUserActionServiceSetup,
   ConnectorMappingsService,
 } from '../services';
-import { CaseClientPluginContract } from './types';
+import { CaseClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { createExternalCaseClient } from '.';
 import { getActions } from '../routes/api/__mocks__/request_responses';
 
-export type CaseClientPluginContractMock = jest.Mocked<CaseClientPluginContract>;
+export type CaseClientPluginContractMock = jest.Mocked<CaseClient>;
 export const createExternalCaseClientMock = (): CaseClientPluginContractMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
@@ -38,12 +41,13 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   badAuth?: boolean;
   omitFromContext?: string[];
 }): Promise<{
-  client: CaseClientPluginContract;
+  client: CaseClient;
   services: {
     userActionService: jest.Mocked<CaseUserActionServiceSetup>;
     alertsService: jest.Mocked<AlertServiceContract>;
   };
 }> => {
+  const esLegacyCluster = legacyClientMock.createScopedClusterClient();
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
@@ -72,6 +76,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     connectorMappingsService,
     userActionService,
     alertsService,
+    callCluster: esLegacyCluster.callAsCurrentUser,
   });
   return {
     client: caseClient,

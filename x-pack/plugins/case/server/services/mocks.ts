@@ -43,6 +43,7 @@ export const createCaseServiceMock = (): CaseServiceMock => ({
   patchComment: jest.fn(),
   patchComments: jest.fn(),
   patchSubCase: jest.fn(),
+  patchSubCases: jest.fn(),
 });
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({

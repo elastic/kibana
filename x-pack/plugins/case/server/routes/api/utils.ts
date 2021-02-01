@@ -39,15 +39,12 @@ import {
   SubCaseResponse,
   CommentRequestGeneratedAlertType,
   ContextTypeGeneratedAlertRt,
-  CollectionWithSubCaseResponse,
   SubCasesFindResponse,
   AttributesTypeAlerts,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase, TotalCommentByCase } from './types';
-// TODO: figure out where the class should actually be stored
-import { CommentableCase } from '../../common';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 

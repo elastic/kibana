@@ -8,27 +8,16 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import {
-  SavedObjectsClientContract,
-  KibanaRequest,
-  SavedObjectsFindResponse,
-  SavedObject,
-} from 'kibana/server';
+import { SavedObjectsClientContract, KibanaRequest, SavedObject } from 'kibana/server';
 
-import { CaseClient, CaseClientImpl } from '../../../../client';
+import { CaseClient } from '../../../../client';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
-import { buildCaseUserActions } from '../../../../services/user_actions/helpers';
 import {
-  CasePatchRequest,
-  CasesPatchRequest,
-  CasesResponse,
-  CasesResponseRt,
   CaseStatuses,
   SubCasesPatchRequest,
   SubCasesPatchRequestRt,
   CommentType,
-  ESCasePatchRequest,
   excess,
   throwErrors,
   SubCasesResponse,
@@ -38,7 +27,7 @@ import {
   SubCaseResponse,
   SubCasesResponseRt,
 } from '../../../../../common/api';
-import { CASES_URL, SUB_CASES_PATCH_URL } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
