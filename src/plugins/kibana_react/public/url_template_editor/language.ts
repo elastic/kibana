@@ -65,6 +65,7 @@ export const language: monaco.languages.IMonarchLanguage = {
       { include: '@whitespace' },
       { include: '@urlScheme' },
       { include: '@urlAuthority' },
+      { include: '@urlSlash' },
       { include: '@urlParamKey' },
       { include: '@urlParamValue' },
       { include: '@text' },
@@ -84,7 +85,7 @@ export const language: monaco.languages.IMonarchLanguage = {
 
     text: [
       [
-        /[^<{\?\&]+/,
+        /[^<{\?\&\/]+/,
         {
           token: 'text',
           next: '@popall',
@@ -127,6 +128,15 @@ export const language: monaco.languages.IMonarchLanguage = {
             token: 'metatag.keyword.authority.url',
           },
         ],
+      ],
+    ],
+
+    urlSlash: [
+      [
+        /\/+/,
+        {
+          token: 'delimiter',
+        },
       ],
     ],
 
