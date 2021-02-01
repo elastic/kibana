@@ -17,7 +17,7 @@ export enum CanvasShareableActions {
   SET_TOOLBAR_AUTOHIDE = 'SET_TOOLBAR_AUTOHIDE',
 }
 
-interface FluxAction<T, P> {
+export interface FluxAction<T, P> {
   type: T;
   payload: P;
 }

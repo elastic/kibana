@@ -529,7 +529,7 @@ export class TaskStore {
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { max_docs }: UpdateByQueryOpts = {}
+    { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
@@ -548,10 +548,22 @@ export class TaskStore {
         },
       });
 
+      /**
+       * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
+       * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
+       * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
+       * many docs as we could have.
+       * This is still no more than an estimation, as there might have been less docuemnt to update that the
+       * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
+       * have for an unhealthy cluster distribution of Task Manager polling intervals
+       */
+      const conflictsCorrectedForContinuation =
+        max_docs && version_conflicts + updated > max_docs ? max_docs - updated : version_conflicts;
+
       return {
         total,
         updated,
-        version_conflicts,
+        version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {
       this.errors$.next(e);

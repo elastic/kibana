@@ -17,12 +17,13 @@ import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
 import { readYarnLock } from '../utils/yarn_lock';
 import { validateDependencies } from '../utils/validate_dependencies';
+import { installBazelTools } from '../utils/bazel';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 
-  async run(projects, projectGraph, { options, kbn }) {
+  async run(projects, projectGraph, { options, kbn, rootPath }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path;
     const extraArgs = [
@@ -30,6 +31,10 @@ export const BootstrapCommand: ICommand = {
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
     ];
 
+    // Install bazel machinery tools if needed
+    await installBazelTools(rootPath);
+
+    // Install monorepo npm dependencies
     for (const batch of batchedProjects) {
       for (const project of batch) {
         const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${sep}plugins`);
