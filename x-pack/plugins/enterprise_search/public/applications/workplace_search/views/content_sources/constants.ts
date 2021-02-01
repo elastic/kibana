@@ -311,3 +311,25 @@ export const SOURCE_NAME_LABEL = i18n.translate(
     defaultMessage: 'Source name',
   }
 );
+
+export const ORG_SOURCES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.link',
+  {
+    defaultMessage: 'Add an organization content source',
+  }
+);
+
+export const ORG_SOURCES_HEADER_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.title',
+  {
+    defaultMessage: 'Organization sources',
+  }
+);
+
+export const ORG_SOURCES_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.description',
+  {
+    defaultMessage:
+      'Organization sources are available to the entire organization and can be assigned to specific user groups.',
+  }
+);
