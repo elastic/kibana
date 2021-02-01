@@ -84,6 +84,7 @@ export interface VisualizeServices extends CoreStart {
   toastNotifications: ToastsStart;
   share?: SharePluginStart;
   visualizeCapabilities: any;
+  dashboardCapabilities: any;
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
   savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];

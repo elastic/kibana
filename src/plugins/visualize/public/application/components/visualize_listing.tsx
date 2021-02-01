@@ -30,6 +30,7 @@ export const VisualizeListing = () => {
       application,
       chrome,
       dashboard,
+      dashboardCapabilities,
       history,
       savedVisualizations,
       toastNotifications,
@@ -172,7 +173,7 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+      {dashboardCapabilities.show && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
         <div className="visListingCallout">
           <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
         </div>

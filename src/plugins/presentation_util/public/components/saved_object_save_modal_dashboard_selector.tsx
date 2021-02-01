@@ -38,7 +38,7 @@ export interface SaveModalDashboardSelectorProps {
 export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProps) {
   const { documentId, onSelectDashboard, dashboardOption, onChange, copyOnSave } = props;
   const { capabilities } = pluginServices.getHooks();
-  const { canCreateNewDashboards, canEditDashboards } = capabilities.useService();
+  const { canCreateNewDashboards } = capabilities.useService();
 
   const isDisabled = !copyOnSave && !!documentId;
 
@@ -70,31 +70,28 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
       >
         <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
           <div>
-            {canEditDashboards() && (
-              <>
-                {' '}
-                <EuiRadio
-                  checked={dashboardOption === 'existing'}
-                  id="existing-dashboard-option"
-                  name="dashboard-option"
-                  label={i18n.translate(
-                    'presentationUtil.saveModalDashboard.existingDashboardOptionLabel',
-                    {
-                      defaultMessage: 'Existing',
-                    }
-                  )}
-                  onChange={() => onChange('existing')}
-                  disabled={isDisabled}
+            <>
+              <EuiRadio
+                checked={dashboardOption === 'existing'}
+                id="existing-dashboard-option"
+                name="dashboard-option"
+                label={i18n.translate(
+                  'presentationUtil.saveModalDashboard.existingDashboardOptionLabel',
+                  {
+                    defaultMessage: 'Existing',
+                  }
+                )}
+                onChange={() => onChange('existing')}
+                disabled={isDisabled}
+              />
+              <div className="savAddDashboard__searchDashboards">
+                <DashboardPicker
+                  isDisabled={dashboardOption !== 'existing'}
+                  onChange={onSelectDashboard}
                 />
-                <div className="savAddDashboard__searchDashboards">
-                  <DashboardPicker
-                    isDisabled={dashboardOption !== 'existing'}
-                    onChange={onSelectDashboard}
-                  />
-                </div>
-                <EuiSpacer size="s" />
-              </>
-            )}
+              </div>
+              <EuiSpacer size="s" />
+            </>
             {canCreateNewDashboards() && (
               <>
                 {' '}
