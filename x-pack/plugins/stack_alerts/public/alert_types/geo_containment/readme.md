@@ -152,6 +152,7 @@ source data to work with:
 - Minimally here are a few tips for working with live data:
     - Consider adding multiple layers for the alerts, minimally add the tracks created
     by the live data and the points of the alerts.
+    ![Map containment view](plugins/stack_alerts/public/alert_types/geo_containment/images/geo_containment_alert_map_view.png)
     - If you add `mtatracks*`, consider setting the `Top Hits` setting to 1 or a larger
     number if you want to see a trail of where it's been. Just be aware that many busses
     moving around will create a lot of points. You could do multiple layers here where
