@@ -59,6 +59,7 @@ const toggleItemDetailsInMap = (
     changedMap[item.id] = (
       <TrustedAppCard
         trustedApp={item}
+        onEdit={() => {}}
         onDelete={() => {
           dispatch({
             type: 'trustedAppDeletionDialogStarted',

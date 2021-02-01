@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
   EffectScope,
-  Immutable,
   MacosLinuxConditionEntry,
+  MaybeImmutable,
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
@@ -78,7 +78,7 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
-const validateFormValues = (values: NewTrustedApp): ValidationResult => {
+const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
@@ -156,7 +156,7 @@ export type CreateTrustedAppFormProps = Pick<
   'className' | 'data-test-subj' | 'isInvalid' | 'error' | 'invalidCallout'
 > & {
   /** The trusted app values that will be passed to the form */
-  trustedApp: NewTrustedApp | Immutable<NewTrustedApp>;
+  trustedApp: MaybeImmutable<NewTrustedApp>;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: {
@@ -167,7 +167,9 @@ export type CreateTrustedAppFormProps = Pick<
   fullWidth?: boolean;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, trustedApp, policies = { options: [] }, ...formProps }) => {
+  ({ fullWidth, onChange, trustedApp: _trustedApp, policies = { options: [] }, ...formProps }) => {
+    const trustedApp = _trustedApp as NewTrustedApp;
+
     const dataTestSubj = formProps['data-test-subj'];
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
@@ -294,7 +296,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
         notifyOfChange({
           ...trustedApp,
           entries: trustedApp.entries.filter((item) => item !== entry),
-        });
+        } as NewTrustedApp);
       },
       [notifyOfChange, trustedApp]
     );
@@ -375,8 +377,8 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     // those polices are selected in the UI while at teh same time preserving prior
     // selections (UX requirement)
     useEffect(() => {
-      if (isPolicyEffectScope(trustedApp.effectScope) && policies.options.length > 0) {
-        setSelectedPolicies((currentSelection) => {
+      setSelectedPolicies((currentSelection) => {
+        if (isPolicyEffectScope(trustedApp.effectScope) && policies.options.length > 0) {
           const missingSelectedPolicies: EffectedPolicySelectProps['selected'] = [];
 
           for (const policyId of trustedApp.effectScope.policies) {
@@ -398,10 +400,10 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
               selected: [...currentSelection.selected, ...missingSelectedPolicies],
             };
           }
+        }
 
-          return currentSelection;
-        });
-      }
+        return currentSelection;
+      });
     }, [policies.options, trustedApp.effectScope]);
 
     return (

@@ -15,6 +15,7 @@ import {
 } from '../../../../../common/mock/endpoint';
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
+import { defaultNewTrustedApp } from '../../store/builders';
 
 describe('When showing the Trusted App Create Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -97,6 +98,7 @@ describe('When showing the Trusted App Create Form', () => {
 
     formProps = {
       'data-test-subj': dataTestSubjForForm,
+      trustedApp: defaultNewTrustedApp(),
       onChange: jest.fn(),
       policies: {
         options: [],
