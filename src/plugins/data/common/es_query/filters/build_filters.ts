@@ -70,6 +70,8 @@ function buildBaseFilter(
     case 'range':
       const newParams = { gte: params.from, lt: params.to };
       return buildRangeFilter(field, newParams, indexPattern);
+    case 'range_from_value':
+      return buildRangeFilter(field, params, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
     default:

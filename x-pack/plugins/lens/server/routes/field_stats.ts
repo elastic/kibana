@@ -85,6 +85,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           return result;
         };
 
+        if (field.type.includes('range')) {
+          return res.ok({ body: {} });
+        }
+
         if (field.type === 'number') {
           return res.ok({
             body: await getNumberHistogram(search, field),
@@ -149,12 +153,14 @@ export async function getNumberHistogram(
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
   const terms = minMaxResult.aggregations!.sample.top_values;
-  const topValuesBuckets = {
-    buckets: terms.buckets.map((bucket) => ({
-      count: bucket.doc_count,
-      key: bucket.key,
-    })),
-  };
+  const topValuesBuckets = !skipTopValues
+    ? {
+        buckets: terms.buckets.map((bucket) => ({
+          count: bucket.doc_count,
+          key: bucket.key,
+        })),
+      }
+    : { buckets: [] };
 
   let histogramInterval = (maxValue! - minValue!) / 10;
 
