@@ -54,7 +54,7 @@ export function mergeTransactionGroupData({
               y: calculateThroughput({
                 start,
                 end,
-                value: point.transaction_count.value,
+                value: point.doc_count,
               }),
             }),
           },
@@ -62,11 +62,7 @@ export function mergeTransactionGroupData({
             ...acc.errorRate,
             timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
-              y:
-                point.transaction_count.value > 0
-                  ? (point[EVENT_OUTCOME].transaction_count.value ?? 0) /
-                    point.transaction_count.value
-                  : null,
+              y: point[EVENT_OUTCOME].doc_count / point.doc_count,
             }),
           },
         };

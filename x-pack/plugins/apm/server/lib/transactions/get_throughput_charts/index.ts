@@ -15,7 +15,6 @@ import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
@@ -56,10 +55,6 @@ async function searchThroughput({
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
-
   const params = {
     apm: {
       events: [
@@ -82,7 +77,6 @@ async function searchThroughput({
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end },
               },
-              aggs: { count: { value_count: { field } } },
             },
           },
         },

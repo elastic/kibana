@@ -12,7 +12,7 @@ import { RendererFactory, Style, Datatable } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
 
-interface TableArguments {
+export interface TableArguments {
   font?: Style;
   paginate: boolean;
   perPage: number;
