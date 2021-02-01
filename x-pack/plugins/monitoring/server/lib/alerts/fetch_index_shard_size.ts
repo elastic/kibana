@@ -84,7 +84,12 @@ export async function fetchIndexShardSize(
                           },
                         ],
                         _source: {
-                          includes: ['_index', 'index_stats', 'source_node'],
+                          includes: [
+                            '_index',
+                            'index_stats.primaries.store.size_in_bytes',
+                            'source_node.name',
+                            'source_node.uuid',
+                          ],
                         },
                         size: 1,
                       },
