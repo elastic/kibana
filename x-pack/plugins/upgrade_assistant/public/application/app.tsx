@@ -16,7 +16,7 @@ export interface AppDependencies extends ContextValue {
 }
 
 export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
-  const nextMajorVersion = contextValue.kibanaVersion.major + 1;
+  const { nextMajor } = contextValue.kibanaVersionInfo;
   return (
     <i18n.Context>
       <AppContextProvider value={contextValue}>
@@ -28,7 +28,7 @@ export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
                   <FormattedMessage
                     id="xpack.upgradeAssistant.appTitle"
                     defaultMessage="{version} Upgrade Assistant"
-                    values={{ version: `${nextMajorVersion}.0` }}
+                    values={{ version: `${nextMajor}.0` }}
                   />
                 </h1>
               </EuiTitle>

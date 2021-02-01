@@ -3,15 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import SemVer from 'semver/classes/semver';
 import { DocLinksStart, HttpSetup } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
+
+export interface KibanaVersionContext {
+  currentMajor: number;
+  prevMajor: number;
+  nextMajor: number;
+}
 
 export interface ContextValue {
   http: HttpSetup;
   isCloudEnabled: boolean;
   docLinks: DocLinksStart;
-  kibanaVersion: SemVer;
+  kibanaVersionInfo: KibanaVersionContext;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

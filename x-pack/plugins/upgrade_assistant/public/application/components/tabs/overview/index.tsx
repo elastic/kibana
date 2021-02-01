@@ -23,8 +23,8 @@ import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
 export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
-  const { kibanaVersion } = useAppContext();
-  const nextMajorVersion = kibanaVersion.major + 1;
+  const { kibanaVersionInfo } = useAppContext();
+  const { nextMajor } = kibanaVersionInfo;
 
   return (
     <>
@@ -37,7 +37,7 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
             defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
            {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
             values={{
-              nextEsVersion: `${nextMajorVersion}.x`,
+              nextEsVersion: `${nextMajor}.x`,
             }}
           />
         </p>

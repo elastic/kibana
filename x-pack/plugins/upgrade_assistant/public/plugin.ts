@@ -31,9 +31,15 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
     const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
+    const kibanaVersionInfo = {
+      currentMajor: kibanaVersion.major,
+      prevMajor: kibanaVersion.major - 1,
+      nextMajor: kibanaVersion.major + 1,
+    };
+
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
       defaultMessage: '{version} Upgrade Assistant',
-      values: { version: `${kibanaVersion.major}.0` },
+      values: { version: `${kibanaVersionInfo.nextMajor}.0` },
     });
 
     appRegistrar.registerApp({
@@ -54,7 +60,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
           coreSetup,
           isCloudEnabled,
           params,
-          kibanaVersion
+          kibanaVersionInfo
         );
 
         return () => {

@@ -12,13 +12,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppContext } from '../app_context';
 
 export const LatestMinorBanner: React.FunctionComponent = () => {
-  const { docLinks, kibanaVersion } = useAppContext();
+  const { docLinks, kibanaVersionInfo } = useAppContext();
 
   const { ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
 
-  const currentMajorVersion = kibanaVersion.major;
-  const nextMajorVersion = currentMajorVersion + 1;
+  const { currentMajor, nextMajor } = kibanaVersionInfo;
 
   return (
     <EuiCallOut
@@ -50,8 +49,8 @@ export const LatestMinorBanner: React.FunctionComponent = () => {
                 />
               </EuiLink>
             ),
-            nextEsVersion: `${nextMajorVersion}.x`,
-            currentEsVersion: `${currentMajorVersion}.x`,
+            nextEsVersion: `${nextMajor}.x`,
+            currentEsVersion: `${currentMajor}.x`,
           }}
         />
       </p>

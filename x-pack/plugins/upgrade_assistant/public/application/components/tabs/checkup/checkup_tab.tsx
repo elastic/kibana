@@ -52,11 +52,12 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
   const [search, setSearch] = useState<string>('');
   const [currentGroupBy, setCurrentGroupBy] = useState<GroupByOption>(GroupByOption.message);
 
-  const { docLinks, kibanaVersion } = useAppContext();
+  const { docLinks, kibanaVersionInfo } = useAppContext();
 
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
-  const nextMajorVersion = kibanaVersion.major + 1;
+
+  const { nextMajor } = kibanaVersionInfo;
 
   const changeFilter = (filter: LevelFilterOption) => {
     setCurrentFilter(filter);
@@ -99,7 +100,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
             defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
             values={{
               strongCheckupLabel: <strong>{checkupLabel}</strong>,
-              nextEsVersion: `${nextMajorVersion}.x`,
+              nextEsVersion: `${nextMajor}.x`,
             }}
           />
         </p>

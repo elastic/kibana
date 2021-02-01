@@ -31,7 +31,11 @@ jest.mock('../../../app_context', () => {
           DOC_LINK_VERSION: 'current',
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
-        kibanaVersion: mockKibanaVersion,
+        kibanaVersionInfo: {
+          currentMajor: mockKibanaVersion.major,
+          prevMajor: mockKibanaVersion.major - 1,
+          nextMajor: mockKibanaVersion.major + 1,
+        },
       };
     },
   };
