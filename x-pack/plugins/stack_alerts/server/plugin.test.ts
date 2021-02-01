@@ -67,25 +67,6 @@ describe('AlertingBuiltins Plugin', () => {
         }
       `);
 
-      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
-      const testedEsQueryArgs = {
-        id: esQueryArgs.id,
-        name: esQueryArgs.name,
-        actionGroups: esQueryArgs.actionGroups,
-      };
-      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
-        Object {
-          "actionGroups": Array [
-            Object {
-              "id": "query matched",
-              "name": "Query matched",
-            },
-          ],
-          "id": ".es-query",
-          "name": "ES query",
-        }
-      `);
-
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith(BUILT_IN_ALERTS_FEATURE);
     });
   });
