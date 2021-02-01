@@ -25,7 +25,7 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
       })
     );
   }
-  return indexPattern.getFormatterForField(field as any);
+  return indexPattern.getFormatterForField(field);
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {

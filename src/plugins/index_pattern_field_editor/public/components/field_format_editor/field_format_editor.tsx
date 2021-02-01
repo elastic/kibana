@@ -96,12 +96,11 @@ export class FormatSelectEditor extends PureComponent<
       type,
       esTypes,
     });
-    const DefaultFieldFormat = fieldFormats.getDefaultType(type, esTypes);
 
     this.state = {
       fieldTypeFormats: getFieldTypeFormatsList(
         type,
-        DefaultFieldFormat as FieldFormatInstanceType,
+        fieldFormats.getDefaultType(type, esTypes) as FieldFormatInstanceType,
         fieldFormats
       ),
       fieldFormatId: indexPattern.getFormatterForFieldNoDefault(name)?.type?.id,

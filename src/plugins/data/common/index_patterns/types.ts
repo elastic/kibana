@@ -12,7 +12,7 @@ import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES, FieldFormat } from '..';
+import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -42,11 +42,9 @@ export interface IIndexPattern {
   /**
    * Look up a formatter for a given field
    */
-  getFormatterForField?: (field: {
-    name: string;
-    type: KBN_FIELD_TYPES;
-    esTypes: ES_FIELD_TYPES[];
-  }) => FieldFormat;
+  getFormatterForField?: (
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+  ) => FieldFormat;
 }
 
 /**
