@@ -9,9 +9,45 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSearchSettingsRoutes } from './search_settings';
 
 describe('search settings routes', () => {
-  const boosts = { foo: [{}] };
-  const resultFields = { foo: {} };
-  const searchFields = { foo: {} };
+  const boosts = {
+    types: [
+      {
+        type: 'value',
+        factor: 6.2,
+        value: ['1313'],
+      },
+    ],
+    hp: [
+      {
+        function: 'exponential',
+        type: 'functional',
+        factor: 1,
+        operation: 'add',
+      },
+    ],
+  };
+  const resultFields = {
+    id: {
+      raw: {},
+    },
+    hp: {
+      raw: {},
+    },
+    name: {
+      raw: {},
+    },
+  };
+  const searchFields = {
+    hp: {
+      weight: 1,
+    },
+    name: {
+      weight: 1,
+    },
+    id: {
+      weight: 1,
+    },
+  };
   const searchSettings = {
     boosts,
     result_fields: resultFields,
