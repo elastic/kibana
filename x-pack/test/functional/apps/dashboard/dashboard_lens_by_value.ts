@@ -10,39 +10,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
-  const log = getService('log');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
-
-  async function createAndAddLensByValue() {
-    log.debug(`createAndAddLensByValue`);
-    const inViewMode = await PageObjects.dashboard.getIsInViewMode();
-    if (inViewMode) {
-      await PageObjects.dashboard.switchToEditMode();
-    }
-    await PageObjects.visualize.clickLensWidget();
-    await PageObjects.lens.goToTimeRange();
-    await PageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-
-    await PageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'avg',
-      field: 'bytes',
-    });
-
-    await PageObjects.lens.configureDimension({
-      dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
-      operation: 'terms',
-      field: 'ip',
-    });
-    await PageObjects.lens.saveAndReturn();
-  }
 
   describe('dashboard lens by value', function () {
     before(async () => {
@@ -55,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can add a lens panel by value', async () => {
       await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-      await createAndAddLensByValue();
+      await PageObjects.lens.createAndAddLensFromDashboard({});
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);
     });
