@@ -67,6 +67,7 @@
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../src/plugins/legacy_export/tsconfig.json" },
     { "path": "../src/plugins/management/tsconfig.json" },
     { "path": "../src/plugins/navigation/tsconfig.json" },
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
@@ -111,12 +112,12 @@
     { "path": "./plugins/searchprofiler/tsconfig.json" },
     { "path": "./plugins/security/tsconfig.json" },
     { "path": "./plugins/spaces/tsconfig.json" },
-    { "path": "./plugins/stack_alerts/tsconfig.json"},
+    { "path": "./plugins/stack_alerts/tsconfig.json" },
     { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
-    { "path": "./plugins/triggers_actions_ui/tsconfig.json"},
+    { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/watcher/tsconfig.json" },
+    { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }
