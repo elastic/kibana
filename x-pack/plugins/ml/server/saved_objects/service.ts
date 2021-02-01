@@ -30,7 +30,7 @@ export function jobSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
   spacesEnabled: boolean,
-  authorization: SecurityPluginSetup['authz'] | undefined,
+  securityPlugin: SecurityPluginSetup | undefined,
   isMlReady: () => Promise<void>
 ) {
   async function _getJobObjects(
@@ -349,10 +349,10 @@ export function jobSavedObjectServiceFactory(
   }
 
   async function canCreateGlobalJobs(request: KibanaRequest) {
-    if (authorization === undefined) {
+    if (securityPlugin === undefined) {
       return true;
     }
-    const { authorizationCheck } = authorizationProvider(authorization);
+    const { authorizationCheck } = authorizationProvider(securityPlugin);
     return (await authorizationCheck(request)).canCreateGlobally;
   }
 

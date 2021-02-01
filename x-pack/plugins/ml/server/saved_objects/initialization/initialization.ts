@@ -50,7 +50,7 @@ export function jobSavedObjectsInitializationFactory(
         savedObjectsClient,
         savedObjectsClient,
         spacesEnabled,
-        security?.authz,
+        security,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
 
