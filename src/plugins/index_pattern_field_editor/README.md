@@ -25,6 +25,9 @@ This is the only required option. You need to provide the context in which the e
 
 - `indexPattern: IndexPattern`: the index pattern you want to create/edit the field into.
 
+- `fieldTypeToCreate?: 'scripted'|'runtime'`: optionally you can provide the field type to create. When you edit a field you don't need to provide this prop as it is automatically detected.  
+**Default:** `runtime`.
+
 `onSave(field: IndexPatternField): void` (optional)
 
 You can provide an optional `onSave` handler to be notified when the field has being created/updated. This handler is called after the field has been persisted to the saved object.
