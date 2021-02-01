@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AddDocumentsAccordion } from './add_documents_accordion';
+export { AddDocumentsAccordion } from './add_docs_accordion';
