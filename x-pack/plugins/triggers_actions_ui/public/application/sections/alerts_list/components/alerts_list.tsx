@@ -52,14 +52,16 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusValues,
   ALERTS_FEATURE_ID,
+  AlertExecutionStatusErrorReasons,
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
-import { alertsStatusesTranslationsMapping } from '../translations';
+import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { ManageLicenseModal } from './manage_license_modal';
 
 const ENTER_KEY = 13;
 
@@ -97,6 +99,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [manageLicenseMessage, setManageLicenseMessage] = useState<string | undefined>(undefined);
   const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
     AlertExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
@@ -237,34 +240,52 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  const renderAlertExecutionStatus = (executionStatus: AlertExecutionStatus) => {
+    const healthColor = getHealthColor(executionStatus.status);
+    const tooltipMessage =
+      executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
+    const statusMessage =
+      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License
+        ? ALERT_STATUS_LICENSE_ERROR
+        : alertsStatusesTranslationsMapping[executionStatus.status];
+    const showLicenseLink =
+      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+
+    const health = (
+      <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
+        {statusMessage}
+      </EuiHealth>
+    );
+
+    const healthWithTooltip = tooltipMessage ? (
+      <EuiToolTip position="top" content={tooltipMessage}>
+        {health}
+      </EuiToolTip>
+    ) : (
+      health
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={6}>{healthWithTooltip}</EuiFlexItem>
+        {showLicenseLink && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={() => setManageLicenseMessage(executionStatus?.error?.message)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
+                defaultMessage="(Fix)"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
   const alertsTableColumns = [
-    {
-      field: 'executionStatus',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
-        { defaultMessage: 'Status' }
-      ),
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-status',
-      render: (executionStatus: AlertExecutionStatus) => {
-        const healthColor = getHealthColor(executionStatus.status);
-        const tooltipMessage =
-          executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-        const health = (
-          <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
-            {alertsStatusesTranslationsMapping[executionStatus.status]}
-          </EuiHealth>
-        );
-        return tooltipMessage ? (
-          <EuiToolTip position="top" content={tooltipMessage}>
-            {health}
-          </EuiToolTip>
-        ) : (
-          health
-        );
-      },
-    },
     {
       field: 'name',
       name: i18n.translate(
@@ -299,6 +320,19 @@ export const AlertsList: React.FunctionComponent = () => {
             {link}
           </EuiToolTip>
         );
+      },
+    },
+    {
+      field: 'executionStatus',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
+        { defaultMessage: 'Status' }
+      ),
+      sortable: false,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-status',
+      render: (executionStatus: AlertExecutionStatus) => {
+        return renderAlertExecutionStatus(executionStatus);
       },
     },
     {
@@ -647,6 +681,15 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage(changedPage);
         }}
       />
+      {manageLicenseMessage !== undefined && (
+        <ManageLicenseModal
+          message={manageLicenseMessage}
+          onConfirm={() => {
+            window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
+          }}
+          onCancel={() => setManageLicenseMessage(undefined)}
+        />
+      )}
     </Fragment>
   );
 
