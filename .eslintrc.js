@@ -1193,6 +1193,32 @@ module.exports = {
     },
 
     /**
+     * Osquery overrides
+     */
+    {
+      extends: ['eslint:recommended', 'plugin:react/recommended'],
+      plugins: ['react'],
+      files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
+        'no-unused-vars': 'off',
+        'react/prop-types': 'off',
+      },
+    },
+    {
+      // typescript and javascript for front end react performance
+      files: ['x-pack/plugins/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react', 'react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+
+    /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {

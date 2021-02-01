@@ -28,6 +28,7 @@ interface GetEventLogParams {
   id: string;
   provider: string;
   actions: Map<string, { gte: number } | { equal: number }>;
+  filter?: string;
 }
 
 // Return event log entries given the specified parameters; for the `actions`
@@ -37,7 +38,9 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000`;
+  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000${
+    params.filter ? `&filter=${params.filter}` : ''
+  }`;
 
   const { body: result } = await supertest.get(url).expect(200);
   if (!result.total) {
