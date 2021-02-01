@@ -12,6 +12,8 @@ import { CodeEditor, Props as CodeEditorProps } from '../code_editor/code_editor
 import { LANG } from './constants';
 import { language, conf } from './language';
 
+import './styles.scss';
+
 monaco.languages.register({
   id: LANG,
 });
@@ -81,26 +83,31 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   }, [variables]);
 
   return (
-    <CodeEditor
-      languageId={LANG}
-      height={height}
-      value={initialValue}
-      onChange={onChange}
-      options={{
-        lineNumbers: 'off',
-        glyphMargin: false,
-        folding: false,
-        lineDecorationsWidth: 2,
-        quickSuggestions: {
-          comments: true,
-          strings: true,
-          other: true,
-        },
-        suggestOnTriggerCharacters: true,
-        minimap: {
-          enabled: false,
-        },
-      }}
-    />
+    <div className={'urlTemplateEditor__container'}>
+      <CodeEditor
+        languageId={LANG}
+        height={height}
+        value={initialValue}
+        onChange={onChange}
+        options={{
+          fontSize: 14,
+          highlightActiveIndentGuide: false,
+          renderLineHighlight: 'none',
+          lineNumbers: 'off',
+          glyphMargin: false,
+          folding: false,
+          lineDecorationsWidth: 2,
+          quickSuggestions: {
+            comments: true,
+            strings: true,
+            other: true,
+          },
+          suggestOnTriggerCharacters: true,
+          minimap: {
+            enabled: false,
+          },
+        }}
+      />
+    </div>
   );
 };
