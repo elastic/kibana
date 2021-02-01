@@ -20,7 +20,7 @@ export const configureClient = (
   const clientOptions = parseClientOptions(config, scoped);
 
   const client = new Client(clientOptions);
-  addLogging(client, logger, type);
+  addLogging(client, logger.get('query', type));
 
   return client;
 };
@@ -67,15 +67,13 @@ function getResponseMessage(event: RequestEvent): string {
   return `${event.statusCode}\n${params.method} ${url}${body}`;
 }
 
-const addLogging = (client: Client, logger: Logger, type: string) => {
-  const queryLogger = logger.get('query', type);
-
+const addLogging = (client: Client, logger: Logger) => {
   client.on('response', (error, event) => {
     if (event) {
       if (error) {
-        queryLogger.debug(getErrorMessage(error, event));
+        logger.debug(getErrorMessage(error, event));
       } else {
-        queryLogger.debug(getResponseMessage(event));
+        logger.debug(getResponseMessage(event));
       }
     }
   });
