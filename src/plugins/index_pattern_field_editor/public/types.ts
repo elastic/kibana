@@ -29,6 +29,8 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
 }
 
+export type InternalFieldType = 'concrete' | 'runtime';
+
 export interface Field {
   name: string;
   type: RuntimeField['type'] | string;

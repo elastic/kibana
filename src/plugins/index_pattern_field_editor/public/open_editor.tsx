@@ -15,16 +15,18 @@ import {
   toMountPoint,
   IndexPatternField,
   DataPublicPluginStart,
+  IndexPattern,
 } from './shared_imports';
-import {
-  FieldEditorFlyoutContentContainer,
-  Props as FieldEditorFlyoutContentContainerProps,
-} from './components/field_editor_flyout_content_container';
+
+import { InternalFieldType } from './types';
+import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 
 import { PluginStart } from './types';
 
 export interface OpenFieldEditorOptions {
-  ctx: FieldEditorFlyoutContentContainerProps['ctx'];
+  ctx: {
+    indexPattern: IndexPattern;
+  };
   onSave?: (field: IndexPatternField) => void;
   fieldName?: string;
 }
@@ -43,6 +45,9 @@ export const getFieldEditorOpener = (
   let overlayRef: OverlayRef | null = null;
 
   const openEditor = ({ onSave, fieldName, ctx }: OpenFieldEditorOptions): CloseEditor => {
+    // TODO (Matt): here will come the logic to define the internal field type (concrete|runtime)
+    const fieldTypeToProcess: InternalFieldType = 'runtime';
+
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -82,7 +87,7 @@ export const getFieldEditorOpener = (
             onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
-            ctx={ctx}
+            ctx={{ ...ctx, fieldTypeToProcess }}
             indexPatternService={indexPatternService}
             notifications={notifications}
             fieldFormatEditors={fieldFormatEditors}

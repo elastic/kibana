@@ -16,13 +16,18 @@ import {
   DataPublicPluginStart,
   RuntimeType,
 } from '../shared_imports';
-import { Field, PluginStart } from '../types';
+import { Field, PluginStart, InternalFieldType } from '../types';
 import { deserializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
+  /**
+   * The Kibana field type of the field to create or edit
+   * Default: "runtime"
+   */
+  fieldTypeToProcess: InternalFieldType;
 }
 
 export interface Props {
@@ -72,7 +77,7 @@ export const FieldEditorFlyoutContentContainer = ({
   onCancel,
   docLinks,
   indexPatternService,
-  ctx: { indexPattern },
+  ctx: { indexPattern, fieldTypeToProcess },
   notifications,
   fieldFormatEditors,
   fieldFormats,
@@ -147,6 +152,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldFormats={fieldFormats}
       uiSettings={uiSettings}
       indexPattern={indexPattern}
+      fieldTypeToProcess={fieldTypeToProcess}
     />
   );
 };

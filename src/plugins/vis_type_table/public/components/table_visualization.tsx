@@ -14,8 +14,7 @@ import { CoreStart } from 'kibana/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import type { PersistedState } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { TableVisConfig } from '../types';
-import { TableContext } from '../table_vis_response_handler';
+import { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 import { useUiState } from '../utils';
@@ -23,7 +22,7 @@ import { useUiState } from '../utils';
 interface TableVisualizationComponentProps {
   core: CoreStart;
   handlers: IInterpreterRenderHandlers;
-  visData: TableContext;
+  visData: TableVisData;
   visConfig: TableVisConfig;
 }
 

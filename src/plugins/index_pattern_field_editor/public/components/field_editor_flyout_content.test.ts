@@ -24,6 +24,7 @@ const defaultProps: Props = {
   uiSettings: {} as any,
   fieldFormats: {} as any,
   fieldFormatEditors: {} as any,
+  fieldTypeToProcess: 'runtime',
 };
 
 describe('<FieldEditorFlyoutContent />', () => {
