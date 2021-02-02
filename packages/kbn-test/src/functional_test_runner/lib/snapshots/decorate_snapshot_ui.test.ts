@@ -25,25 +25,6 @@ const createRootSuite = () => {
   return suite;
 };
 
-const createMockSuite = ({ tests, root = true }: { tests: Test[]; root?: boolean }) => {
-  const suite = {
-    tests,
-    root: false,
-    eachTest: (cb) => {
-      suite.tests.forEach((test) => cb(test));
-    },
-    parent: {
-      tests,
-      root,
-      eachTest: (cb) => {
-        suite.eachTest(cb);
-      },
-    },
-  } as Suite;
-
-  return suite;
-};
-
 const registerTest = ({
   parent,
   title = 'Test',
