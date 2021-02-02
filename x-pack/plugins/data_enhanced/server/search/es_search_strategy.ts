@@ -23,6 +23,7 @@ import {
   getTotalLoaded,
   searchUsageObserver,
   shimAbortSignal,
+  shimHitsTotal,
 } from '../../../../../src/plugins/data/server';
 import type { IAsyncSearchOptions } from '../../common';
 import { pollSearch } from '../../common';
@@ -69,7 +70,8 @@ export const enhancedEsSearchStrategyProvider = (
         ? client.get<AsyncSearchResponse>({ ...params, id })
         : client.submit<AsyncSearchResponse>(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
-      return toAsyncKibanaSearchResponse(body);
+      const response = shimHitsTotal(body.response, options);
+      return toAsyncKibanaSearchResponse({ ...body, response });
     };
 
     const cancel = async () => {
@@ -114,7 +116,7 @@ export const enhancedEsSearchStrategyProvider = (
       const esResponse = await shimAbortSignal(promise, options?.abortSignal);
       const response = esResponse.body as SearchResponse<any>;
       return {
-        rawResponse: response,
+        rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),
       };
     } catch (e) {

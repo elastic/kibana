@@ -9,8 +9,7 @@
 import React, { memo } from 'react';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { TableGroup } from '../table_vis_response_handler';
-import { TableVisConfig, TableVisUseUiStateProps } from '../types';
+import { TableGroup, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 
 interface TableVisSplitProps {
@@ -24,11 +23,11 @@ export const TableVisSplit = memo(
   ({ fireEvent, tables, visConfig, uiStateProps }: TableVisSplitProps) => {
     return (
       <>
-        {tables.map(({ tables: dataTable, key, title }) => (
-          <div key={key} className="tbvChart__split">
+        {tables.map(({ table, title }) => (
+          <div key={title} className="tbvChart__split">
             <TableVisBasic
               fireEvent={fireEvent}
-              table={dataTable[0]}
+              table={table}
               visConfig={visConfig}
               title={title}
               uiStateProps={uiStateProps}
