@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(url).to.contain('searchSessionId');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
+      await searchSessions.ensurePopoverClosed();
       expect(
         await dashboardPanelActions.getSearchSessionIdByTitle('Sum of Bytes by Extension')
       ).to.be(fakeSessionId);

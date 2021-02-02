@@ -78,7 +78,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverOpened();
     }
 
-    private async ensurePopoverOpened() {
+    public async ensurePopoverOpened() {
       const isAlreadyOpen = await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
       if (isAlreadyOpen) return;
       return retry.waitFor(`searchSessions popover opened`, async () => {
@@ -87,7 +87,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    private async ensurePopoverClosed() {
+    public async ensurePopoverClosed() {
       const isAlreadyClosed = !(await testSubjects.exists(
         SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
       ));
