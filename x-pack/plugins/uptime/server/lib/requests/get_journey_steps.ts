@@ -9,11 +9,23 @@ import { Ping } from '../../../common/runtime_types';
 
 interface GetJourneyStepsParams {
   checkGroup: string;
+  syntheticEventTypes?: string | string[];
 }
+
+const defaultEventTypes = ['step/end', 'stderr', 'cmd/status', 'step/screenshot'];
+
+export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
+  if (!eventTypes) {
+    return defaultEventTypes;
+  } else {
+    return Array.isArray(eventTypes) ? eventTypes : [eventTypes];
+  }
+};
 
 export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
   uptimeEsClient,
   checkGroup,
+  syntheticEventTypes,
 }) => {
   const params = {
     query: {
@@ -21,7 +33,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
         filter: [
           {
             terms: {
-              'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
+              'synthetics.type': formatSyntheticEvents(syntheticEventTypes),
             },
           },
           {
