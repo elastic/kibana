@@ -22,7 +22,7 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getProxyAgents } from './lib/get_proxy_agents';
+import { getCustomAgents } from './lib/get_custom_agents';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -130,10 +130,10 @@ async function slackExecutor(
   const { message } = params;
   const proxySettings = configurationUtilities.getProxySettings();
 
-  const proxyAgents = getProxyAgents(configurationUtilities, logger);
-  const httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
-    ? proxyAgents.httpsAgent
-    : proxyAgents.httpAgent;
+  const customAgents = getCustomAgents(configurationUtilities, logger);
+  const agent = webhookUrl.toLowerCase().startsWith('https')
+    ? customAgents.httpsAgent
+    : customAgents.httpAgent;
 
   if (proxySettings) {
     logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
@@ -143,7 +143,7 @@ async function slackExecutor(
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
-      agent: httpProxyAgent,
+      agent,
     });
     result = await webhook.send(message);
   } catch (err) {

@@ -32,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
+        `--migrations.enableV2=false`,
         `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
         `--logging.json=false`,
         `--server.maxPayloadBytes=1679958`,

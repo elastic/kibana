@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFocusTrap,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
@@ -83,31 +82,29 @@ export const AddNote = React.memo<{
 
   return (
     <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
-      <EuiFocusTrap>
-        <div style={{ width: '100%' }}>
-          <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-            <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
-          </EuiScreenReaderOnly>
-          <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-          <ButtonsContainer gutterSize="none">
-            {onCancelAddNote != null ? (
-              <EuiFlexItem grow={false}>
-                <CancelButton onCancelAddNote={onCancelAddNote} />
-              </EuiFlexItem>
-            ) : null}
+      <div style={{ width: '100%' }}>
+        <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+          <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
+        </EuiScreenReaderOnly>
+        <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+        <ButtonsContainer gutterSize="none">
+          {onCancelAddNote != null ? (
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="add-note"
-                isDisabled={newNote.trim().length === 0}
-                fill={true}
-                onClick={handleClick}
-              >
-                {i18n.ADD_NOTE}
-              </EuiButton>
+              <CancelButton onCancelAddNote={onCancelAddNote} />
             </EuiFlexItem>
-          </ButtonsContainer>
-        </div>
-      </EuiFocusTrap>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="add-note"
+              isDisabled={newNote.trim().length === 0}
+              fill={true}
+              onClick={handleClick}
+            >
+              {i18n.ADD_NOTE}
+            </EuiButton>
+          </EuiFlexItem>
+        </ButtonsContainer>
+      </div>
     </AddNotesContainer>
   );
 });
