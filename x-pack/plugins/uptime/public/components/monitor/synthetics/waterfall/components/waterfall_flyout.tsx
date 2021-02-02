@@ -7,14 +7,7 @@ import React, { useEffect, useRef } from 'react';
 
 import styled from 'styled-components';
 
-import {
-  EuiPortal,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
@@ -80,44 +73,42 @@ export const WaterfallFlyout = ({
   trackMetric({ metric: 'waterfall_flyout', metricType: METRIC_TYPE.CLICK });
 
   return (
-    <EuiPortal>
-      <div
-        tab-index={-1}
-        ref={flyoutRef}
-        data-test-subj="waterfallFlyout"
-        aria-labelledby="flyoutTitle"
-      >
-        <FlyoutContainer size="s" onClose={onFlyoutClose}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s">
-              <h2 id="flyoutTitle">
-                <MiddleTruncatedText text={url} url={url} />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <Table rows={details} title={DETAILS} />
-            {!!requestHeaders && (
-              <>
-                <EuiSpacer size="m" />
-                <Table rows={requestHeaders} title={REQUEST_HEADERS} />
-              </>
-            )}
-            {!!responseHeaders && (
-              <>
-                <EuiSpacer size="m" />
-                <Table rows={responseHeaders} title={RESPONSE_HEADERS} />
-              </>
-            )}
-            {!!certificates && (
-              <>
-                <EuiSpacer size="m" />
-                <Table rows={certificates} title={CERTIFICATES} />
-              </>
-            )}
-          </EuiFlyoutBody>
-        </FlyoutContainer>
-      </div>
-    </EuiPortal>
+    <div
+      tab-index={-1}
+      ref={flyoutRef}
+      data-test-subj="waterfallFlyout"
+      aria-labelledby="flyoutTitle"
+    >
+      <FlyoutContainer size="s" onClose={onFlyoutClose}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2 id="flyoutTitle">
+              <MiddleTruncatedText text={url} url={url} />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <Table rows={details} title={DETAILS} />
+          {!!requestHeaders && (
+            <>
+              <EuiSpacer size="m" />
+              <Table rows={requestHeaders} title={REQUEST_HEADERS} />
+            </>
+          )}
+          {!!responseHeaders && (
+            <>
+              <EuiSpacer size="m" />
+              <Table rows={responseHeaders} title={RESPONSE_HEADERS} />
+            </>
+          )}
+          {!!certificates && (
+            <>
+              <EuiSpacer size="m" />
+              <Table rows={certificates} title={CERTIFICATES} />
+            </>
+          )}
+        </EuiFlyoutBody>
+      </FlyoutContainer>
+    </div>
   );
 };
