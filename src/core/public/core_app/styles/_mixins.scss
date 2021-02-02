@@ -130,5 +130,7 @@
     @if ($kbnThemeVersion == $themeDark) {
       @content;
     }
+  } @else {
+    @warn 'The second parameter must be a valid mode -- got #{$mode}';
   }
 }
