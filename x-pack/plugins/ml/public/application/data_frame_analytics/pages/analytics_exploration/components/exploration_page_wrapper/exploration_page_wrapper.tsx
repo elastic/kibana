@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
 
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
-import { AucRocChartView } from '../../../../../components/auc_roc_chart/auc_roc_chart';
 
 import {
   defaultSearchQuery,
@@ -197,7 +196,6 @@ export const ExplorationPageWrapper: FC<Props> = ({
           </>
         )}
 
-      <AucRocChartView />
       <EuiSpacer size="m" />
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}

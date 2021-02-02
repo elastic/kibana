@@ -21,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { AucRocChartView } from '../../../../../components/auc_roc_chart/auc_roc_chart';
 import { ErrorCallout } from '../error_callout';
 import {
   getDependentVar,
@@ -34,6 +35,7 @@ import { DataFrameTaskStateType } from '../../../analytics_management/components
 import {
   isResultsSearchBoolQuery,
   isClassificationEvaluateResponse,
+  AucRocCurveItem,
   ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
@@ -91,12 +93,17 @@ function getHelpText(dataSubsetTitle: string) {
   return helpText;
 }
 
+interface AucRocDataRow extends AucRocCurveItem {
+  class_name: string;
+}
+
 export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
+  const [aucRocData, setAucRocData] = useState<AucRocDataRow[]>([]);
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
@@ -105,7 +112,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const [error, setError] = useState<null | string>(null);
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(() =>
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
     columns.map(({ id }: { id: string }) => id)
   );
 
@@ -240,6 +247,53 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
 
     loadData({ isTraining });
   }, [JSON.stringify(searchQuery)]);
+
+  useEffect(() => {
+    const loadAucRocData = async () => {
+      const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
+      const newAucRocData: AucRocDataRow[] = [];
+
+      try {
+        requiresKeyword = isKeywordAndTextType(dependentVariable);
+      } catch (e) {
+        // Additional error handling due to missing field type is handled by loadEvalData
+        console.error('Unable to load new field types', error); // eslint-disable-line no-console
+      }
+
+      for (let i = 0; i < classificationClasses.length; i++) {
+        const aucRocClassName = classificationClasses[i];
+        const evalData = await loadEvalData({
+          isTraining: false,
+          index,
+          dependentVariable,
+          resultsField,
+          predictionFieldName,
+          searchQuery,
+          jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
+          requiresKeyword,
+          aucRocClassName,
+          includeMulticlassConfusionMatrix: false,
+        });
+
+        if (
+          evalData.success === true &&
+          evalData.eval &&
+          isClassificationEvaluateResponse(evalData.eval)
+        ) {
+          const aucRocDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
+            (d) => ({
+              class_name: aucRocClassName,
+              ...d,
+            })
+          );
+          newAucRocData.push(...aucRocDataForClass);
+        }
+      }
+
+      setAucRocData(newAucRocData);
+    };
+    loadAucRocData();
+  }, [JSON.stringify([searchQuery, visibleColumns])]);
 
   const renderCellValue = ({
     rowIndex,
@@ -431,9 +485,27 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                       )}
                     </div>
                   </div>
+                  {/* END TABLE ELEMENTS */}
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="none">
+                    <EuiTitle size="xxs">
+                      <span>AUC ROC</span>
+                    </EuiTitle>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                        content={i18n.translate(
+                          'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
+                          {
+                            defaultMessage: 'AUC ROC Help Text',
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <AucRocChartView data={aucRocData} />
                 </>
               )}
-              {/* END TABLE ELEMENTS */}
             </>
           ) : null
         }

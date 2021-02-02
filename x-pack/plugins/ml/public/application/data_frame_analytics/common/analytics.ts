@@ -148,10 +148,20 @@ export interface ConfusionMatrix {
   other_predicted_class_doc_count: number;
 }
 
+export interface AucRocCurveItem {
+  fpr: number;
+  threshold: number;
+  tpr: number;
+}
+
 export interface ClassificationEvaluateResponse {
   classification: {
-    multiclass_confusion_matrix: {
+    multiclass_confusion_matrix?: {
       confusion_matrix: ConfusionMatrix[];
+    };
+    auc_roc?: {
+      curve?: AucRocCurveItem[];
+      value: number;
     };
   };
 }
@@ -238,7 +248,8 @@ export const isClassificationEvaluateResponse = (
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    arg?.classification?.multiclass_confusion_matrix !== undefined
+    (arg?.classification?.multiclass_confusion_matrix !== undefined ||
+      arg?.classification?.auc_roc !== undefined)
   );
 };
 
@@ -416,7 +427,8 @@ export enum REGRESSION_STATS {
 
 interface EvaluateMetrics {
   classification: {
-    multiclass_confusion_matrix: object;
+    multiclass_confusion_matrix?: object;
+    auc_roc?: { include_curve: boolean; class_name: string };
   };
   regression: {
     r_squared: object;
@@ -436,6 +448,8 @@ interface LoadEvalDataConfig {
   ignoreDefaultQuery?: boolean;
   jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
+  aucRocClassName?: string;
+  includeMulticlassConfusionMatrix?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -448,6 +462,8 @@ export const loadEvalData = async ({
   ignoreDefaultQuery,
   jobType,
   requiresKeyword,
+  aucRocClassName,
+  includeMulticlassConfusionMatrix = true,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -463,7 +479,10 @@ export const loadEvalData = async ({
 
   const metrics: EvaluateMetrics = {
     classification: {
-      multiclass_confusion_matrix: {},
+      ...(includeMulticlassConfusionMatrix ? { multiclass_confusion_matrix: {} } : {}),
+      ...(aucRocClassName !== undefined
+        ? { auc_roc: { include_curve: true, class_name: aucRocClassName } }
+        : {}),
     },
     regression: {
       r_squared: {},
