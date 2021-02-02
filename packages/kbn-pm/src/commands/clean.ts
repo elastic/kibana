@@ -23,10 +23,8 @@ export const CleanCommand: ICommand = {
 
   async run(projects) {
     log.warning(dedent`
-
-      'yarn kbn clean' does not remove node_modules now. It runs a more soft clean and should be used as the way to go between branches using Bazel.
-      When switching between a non Bazel branch and a Bazel branch or for situations where you need a deeper clean, run 'yarn kbn destroy' instead.
-
+      NOTICE: When switching between Bazel and non-Bazel branches, you might want to instead
+      run 'yarn kbn destroy', which also removes node_module directories.
     `);
 
     const toDelete = [];
