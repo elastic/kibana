@@ -132,10 +132,11 @@ async function handleTransformInstall({
       throw err;
     }
   }
-
   await callCluster('transport.request', {
     method: 'POST',
     path: `/_transform/${transform.installationName}/_start`,
+    // Ignore error if the transform is already started
+    ignore: [409],
   });
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };
