@@ -26,15 +26,6 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
   schema: configSchema,
 };
 
-export {
-  AbstractSearchStrategy,
-  ReqFacade,
-} from './lib/search_strategies/strategies/abstract_search_strategy';
-
-export { VisPayload } from '../common/types';
-
-export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);
 }

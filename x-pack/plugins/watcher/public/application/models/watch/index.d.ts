@@ -5,3 +5,4 @@
  */
 
 export const Watch: any;
+export const defaultWatch: any;

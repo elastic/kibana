@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternSavedObject } from '../../csv/types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../../csv/types';
 import { SavedObjectReference, SavedSearchObjectAttributesJSON, SearchSource } from '../types';
 
 export async function getDataSource(
@@ -12,10 +12,10 @@ export async function getDataSource(
   indexPatternId?: string,
   savedSearchObjectId?: string
 ): Promise<{
-  indexPatternSavedObject: IndexPatternSavedObject;
+  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   searchSource: SearchSource | null;
 }> {
-  let indexPatternSavedObject: IndexPatternSavedObject;
+  let indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   let searchSource: SearchSource | null = null;
 
   if (savedSearchObjectId) {

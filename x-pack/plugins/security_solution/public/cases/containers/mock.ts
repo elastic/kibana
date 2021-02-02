@@ -199,6 +199,13 @@ export const actionLicenses: ActionLicense[] = [
     enabledInConfig: true,
     enabledInLicense: true,
   },
+  {
+    id: '.jira',
+    name: 'Jira',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
 ];
 
 // Snake case for mock api responses

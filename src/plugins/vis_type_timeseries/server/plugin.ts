@@ -23,9 +23,14 @@ import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
-import { SearchStrategyRegistry } from './lib/search_strategies';
 import { uiSettings } from './ui_settings';
 import type { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRouter } from './types';
+
+import {
+  SearchStrategyRegistry,
+  DefaultSearchStrategy,
+  RollupSearchStrategy,
+} from './lib/search_strategies';
 
 export interface LegacySetup {
   server: Server;
@@ -45,7 +50,6 @@ export interface VisTypeTimeseriesSetup {
     fakeRequest: FakeRequest,
     options: GetVisDataOptions
   ) => ReturnType<GetVisData>;
-  addSearchStrategy: SearchStrategyRegistry['addStrategy'];
 }
 
 export interface Framework {
@@ -76,6 +80,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     const searchStrategyRegistry = new SearchStrategyRegistry();
 
+    searchStrategyRegistry.addStrategy(new DefaultSearchStrategy());
+    searchStrategyRegistry.addStrategy(new RollupSearchStrategy());
+
     const framework: Framework = {
       core,
       plugins,
@@ -97,7 +104,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       ) => {
         return await getVisData(requestContext, { ...fakeRequest, body: options }, framework);
       },
-      addSearchStrategy: searchStrategyRegistry.addStrategy.bind(searchStrategyRegistry),
     };
   }
 

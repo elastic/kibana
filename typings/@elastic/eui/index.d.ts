@@ -6,6 +6,12 @@
  * Public License, v 1.
  */
 
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
-
 // TODO: Remove once typescript definitions are in EUI
+
+declare module '@elastic/eui/lib/services' {
+  export const RIGHT_ALIGNMENT: any;
+}
+
+declare module '@elastic/eui/lib/services/format' {
+  export const dateFormatAliases: any;
+}

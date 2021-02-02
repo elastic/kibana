@@ -68,7 +68,14 @@ export {
   StopSyncStateFnType,
 } from './state_sync';
 export { Configurable, CollectConfigProps } from './ui';
-export { removeQueryParam, redirectWhenMissing, getQueryParams } from './history';
+export {
+  removeQueryParam,
+  redirectWhenMissing,
+  getQueryParams,
+  createQueryParamsObservable,
+  createHistoryObservable,
+  createQueryParamObservable,
+} from './history';
 export { applyDiff } from './state_management/utils/diff_object';
 export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
 

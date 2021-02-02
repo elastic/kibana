@@ -37,6 +37,7 @@ export {
   SearchSessionState,
   SessionsClient,
   ISessionsClient,
+  noSearchSessionStorageCapabilityMessage,
 } from './session';
 export { getEsPreference } from './es_search';
 

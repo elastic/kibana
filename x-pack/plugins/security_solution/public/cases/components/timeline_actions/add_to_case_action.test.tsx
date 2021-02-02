@@ -6,18 +6,24 @@
 
 /* eslint-disable react/display-name */
 import React, { ReactNode } from 'react';
-
 import { mount } from 'enzyme';
+import { EuiGlobalToastList } from '@elastic/eui';
+
+import { useKibana } from '../../../common/lib/kibana';
+import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { usePostComment } from '../../containers/use_post_comment';
+import { Case } from '../../containers/types';
 import { AddToCaseAction } from './add_to_case_action';
 
 jest.mock('../../containers/use_post_comment');
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../../common/components/toasters', () => {
+  const actual = jest.requireActual('../../../common/components/toasters');
   return {
-    ...originalModule,
-    useGetUserSavedObjectPermissions: jest.fn(),
+    ...actual,
+    useStateToaster: jest.fn(),
   };
 });
 
@@ -44,14 +50,16 @@ jest.mock('../create/form_context', () => {
       onSuccess,
     }: {
       children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => void;
+      onSuccess: (theCase: Partial<Case>) => void;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() => onSuccess({ id: 'new-case' })}
+            onClick={() =>
+              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } })
+            }
           >
             {'submit'}
           </button>
@@ -95,9 +103,16 @@ describe('AddToCaseAction', () => {
     disabled: false,
   };
 
+  const mockDispatchToaster = jest.fn();
+  const mockNavigateToApp = jest.fn();
+
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     usePostCommentMock.mockImplementation(() => defaultPostComment);
+    (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { application: { navigateToApp: mockNavigateToApp } },
+    });
   });
 
   it('it renders', async () => {
@@ -186,5 +201,38 @@ describe('AddToCaseAction', () => {
       index: 'test-index',
       type: 'alert',
     });
+  });
+
+  it('navigates to case view', async () => {
+    usePostCommentMock.mockImplementation(() => {
+      return {
+        ...defaultPostComment,
+        postComment: jest.fn().mockImplementation((caseId, data, updateCase) => updateCase()),
+      };
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AddToCaseAction {...props} />
+      </TestProviders>
+    );
+
+    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
+
+    expect(mockDispatchToaster).toHaveBeenCalled();
+    const toast = mockDispatchToaster.mock.calls[0][0].toast;
+
+    const toastWrapper = mount(
+      <EuiGlobalToastList toasts={[toast]} toastLifeTimeMs={6000} dismissToast={() => {}} />
+    );
+
+    toastWrapper
+      .find('[data-test-subj="toaster-content-case-view-link"]')
+      .first()
+      .simulate('click');
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/new-case' });
   });
 });

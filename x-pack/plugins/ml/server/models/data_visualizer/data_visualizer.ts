@@ -1189,7 +1189,8 @@ export class DataVisualizer {
     });
 
     const searchBody = {
-      _source: field,
+      fields: [field],
+      _source: false,
       query: {
         bool: {
           filter: filterCriteria,
@@ -1209,16 +1210,16 @@ export class DataVisualizer {
     if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {
-        // Look in the _source for the field value.
-        // If the field is not in the _source (as will happen if the
-        // field is populated using copy_to in the index mapping),
-        // there will be no example to add.
         // Use lodash get() to support field names containing dots.
-        const example: any = get(hits[i]._source, field);
-        if (example !== undefined && stats.examples.indexOf(example) === -1) {
-          stats.examples.push(example);
-          if (stats.examples.length === maxExamples) {
-            break;
+        const doc: object[] | undefined = get(hits[i].fields, field);
+        // the results from fields query is always an array
+        if (Array.isArray(doc) && doc.length > 0) {
+          const example = doc[0];
+          if (example !== undefined && stats.examples.indexOf(example) === -1) {
+            stats.examples.push(example);
+            if (stats.examples.length === maxExamples) {
+              break;
+            }
           }
         }
       }

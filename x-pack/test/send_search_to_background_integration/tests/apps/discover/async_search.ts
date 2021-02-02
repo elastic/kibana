@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['discover', 'common', 'timePicker', 'header']);
+  const searchSessions = getService('searchSessions');
 
   describe('discover async search', () => {
     before(async () => {
@@ -31,18 +32,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(searchSessionId2).not.to.be(searchSessionId1);
     });
 
-    it('search session id should be picked up from the URL, non existing session id errors out', async () => {
-      const url = await browser.getCurrentUrl();
+    it('search session id should be picked up from the URL, non existing session id errors out, back button restores a session', async () => {
+      let url = await browser.getCurrentUrl();
       const fakeSearchSessionId = '__test__';
       const savedSessionURL = url + `&searchSessionId=${fakeSearchSessionId}`;
       await browser.navigateTo(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('completed');
       const searchSessionId2 = await getSearchSessionId();
       expect(searchSessionId2).not.to.be(searchSessionId1);
+
+      // back button should restore the session:
+      url = await browser.getCurrentUrl();
+      expect(url).not.to.contain('searchSessionId');
+
+      await browser.goBack();
+
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain('searchSessionId');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('restored');
+      expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
     });
   });
 

@@ -9,16 +9,15 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
-
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
-
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -83,8 +82,13 @@ export const DashboardListing = ({
 
   const tableColumns = useMemo(
     () =>
-      getTableColumns((id) => redirectTo({ destination: 'dashboard', id }), savedObjectsTagging),
-    [savedObjectsTagging, redirectTo]
+      getTableColumns(
+        core.application,
+        kbnUrlStateStorage,
+        core.uiSettings.get('state:storeInSessionStorage'),
+        savedObjectsTagging
+      ),
+    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
   const noItemsFragment = useMemo(
@@ -99,7 +103,6 @@ export const DashboardListing = ({
     (filter: string) => {
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
-
       if (savedObjectsTagging) {
         const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
           useName: true,
@@ -164,7 +167,9 @@ export const DashboardListing = ({
 };
 
 const getTableColumns = (
-  redirectTo: (id?: string) => void,
+  application: ApplicationStart,
+  kbnUrlStateStorage: IKbnUrlStateStorage,
+  useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return [
@@ -172,9 +177,15 @@ const getTableColumns = (
       field: 'title',
       name: dashboardListingTable.getTitleColumnName(),
       sortable: true,
-      render: (field: string, record: { id: string; title: string }) => (
+      render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
-          onClick={() => redirectTo(record.id)}
+          href={getDashboardListItemLink(
+            application,
+            kbnUrlStateStorage,
+            useHash,
+            record.id,
+            record.timeRestore
+          )}
           data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
         >
           {field}

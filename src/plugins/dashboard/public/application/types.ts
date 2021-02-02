@@ -55,6 +55,7 @@ export interface DashboardCapabilities {
   saveQuery: boolean;
   createNew: boolean;
   show: boolean;
+  storeSearchSession: boolean;
 }
 
 export interface DashboardAppServices {

@@ -7,12 +7,10 @@
  */
 
 import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
-import { DefaultSearchCapabilities } from '../default_search_capabilities';
+import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
 import { VisPayload } from '../../../../common/types';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  name = 'default';
-
   checkForViability(req: ReqFacade<VisPayload>) {
     return Promise.resolve({
       isViable: true,

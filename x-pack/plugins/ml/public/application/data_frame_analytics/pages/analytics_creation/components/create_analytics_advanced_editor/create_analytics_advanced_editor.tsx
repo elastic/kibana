@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useRef } from 'react';
-
+import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiCallOut,
   EuiCodeEditor,
@@ -22,6 +22,9 @@ import { XJsonMode } from '../../../../../../../shared_imports';
 
 const xJsonMode = new XJsonMode();
 
+import { useNotifications } from '../../../../../contexts/kibana';
+import { ml } from '../../../../../services/ml_api_service';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
@@ -42,10 +45,32 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
   } = state.form;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
+  const { toasts } = useNotifications();
 
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
   };
+
+  const debouncedJobIdCheck = useMemo(
+    () =>
+      debounce(async () => {
+        try {
+          const { results } = await ml.dataFrameAnalytics.jobsExists([jobId], true);
+          setFormState({ jobIdExists: results[jobId] });
+        } catch (e) {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.ml.dataframe.analytics.create.advancedEditor.errorCheckingJobIdExists',
+              {
+                defaultMessage: 'The following error occurred checking if job id exists: {error}',
+                values: { error: extractErrorMessage(e) },
+              }
+            )
+          );
+        }
+      }, 400),
+    [jobId]
+  );
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
@@ -56,6 +81,18 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     evt.initEvent('mouseup', true, true);
     forceInput.current.dispatchEvent(evt);
   }, []);
+
+  useEffect(() => {
+    if (jobIdValid === true) {
+      debouncedJobIdCheck();
+    } else if (typeof jobId === 'string' && jobId.trim() === '' && jobIdExists === true) {
+      setFormState({ jobIdExists: false });
+    }
+
+    return () => {
+      debouncedJobIdCheck.cancel();
+    };
+  }, [jobId]);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">

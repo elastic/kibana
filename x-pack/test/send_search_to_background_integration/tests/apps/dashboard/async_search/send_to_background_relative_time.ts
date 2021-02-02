@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'home',
     'timePicker',
+    'maps',
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
@@ -112,5 +113,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking vega chart rendered');
     const tsvb = await find.existsByCssSelector('.vgaVis__view');
     expect(tsvb).to.be(true);
+    log.debug('Checking map rendered');
+    await dashboardPanelActions.openInspectorByTitle(
+      '[Flights] Origin and Destination Flight Time'
+    );
+    await testSubjects.click('inspectorRequestChooser');
+    await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
+    const requestStats = await inspector.getTableData();
+    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+    expect(totalHits).to.equal('0');
+    await inspector.close();
   }
 }

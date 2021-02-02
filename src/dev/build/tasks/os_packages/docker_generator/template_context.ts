@@ -7,6 +7,7 @@
  */
 
 export interface TemplateContext {
+  artifactPrefix: string;
   artifactTarball: string;
   imageFlavor: string;
   version: string;
@@ -21,4 +22,5 @@ export interface TemplateContext {
   usePublicArtifact?: boolean;
   ubi: boolean;
   revision: string;
+  architecture?: string;
 }

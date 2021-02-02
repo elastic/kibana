@@ -29,7 +29,6 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
-    setSearchSessionInfoProvider: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => () => {}),
     destroy: jest.fn(),
     onRefresh$: new Subject(),
@@ -40,5 +39,8 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     save: jest.fn(),
     isCurrentSession: jest.fn(),
     getSearchOptions: jest.fn(),
+    enableStorage: jest.fn(),
+    isSessionStorageReady: jest.fn(() => true),
+    getSearchSessionIndicatorUiConfig: jest.fn(() => ({ isDisabled: () => ({ disabled: false }) })),
   };
 }

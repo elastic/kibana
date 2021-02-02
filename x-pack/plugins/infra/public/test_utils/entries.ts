@@ -5,7 +5,7 @@
  */
 
 import faker from 'faker';
-import { LogEntry } from '../../common/http_api';
+import { LogEntry } from '../../common/log_entry';
 import { LogSourceConfiguration } from '../containers/logs/log_source';
 
 export const ENTRIES_EMPTY = {
@@ -28,6 +28,7 @@ export function generateFakeEntries(
     const timestamp = i === count - 1 ? endTimestamp : startTimestamp + timestampStep * i;
     entries.push({
       id: `entry-${i}`,
+      index: 'logs-fake',
       context: {},
       cursor: { time: timestamp, tiebreaker: i },
       columns: columns.map((column) => {

@@ -16,7 +16,7 @@ export const RunCommand: ICommand = {
   description: 'Run script defined in package.json in each package that contains that script.',
   name: 'run',
 
-  async run(projects, projectGraph, { extraArgs }) {
+  async run(projects, projectGraph, { extraArgs, options }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
@@ -27,13 +27,21 @@ export const RunCommand: ICommand = {
     const scriptArgs = extraArgs.slice(1);
 
     await parallelizeBatches(batchedProjects, async (project) => {
-      if (project.hasScript(scriptName)) {
-        log.info(`[${project.name}] running "${scriptName}" script`);
-        await project.runScriptStreaming(scriptName, {
-          args: scriptArgs,
-        });
-        log.success(`[${project.name}] complete`);
+      if (!project.hasScript(scriptName)) {
+        if (!!options['skip-missing']) {
+          return;
+        }
+
+        throw new CliError(
+          `[${project.name}] no "${scriptName}" script defined. To skip packages without the "${scriptName}" script pass --skip-missing`
+        );
       }
+
+      log.info(`[${project.name}] running "${scriptName}" script`);
+      await project.runScriptStreaming(scriptName, {
+        args: scriptArgs,
+      });
+      log.success(`[${project.name}] complete`);
     });
   },
 };

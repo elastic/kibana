@@ -13,9 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import { HttpStart } from 'kibana/public';
+import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowEmbed: boolean;
@@ -29,6 +31,8 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   embedUrlParamExtensions?: UrlParamExtension[];
+  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 export class ShareContextMenu extends Component<Props> {
@@ -62,6 +66,8 @@ export class ShareContextMenu extends Component<Props> {
           basePath={this.props.basePath}
           post={this.props.post}
           shareableUrl={this.props.shareableUrl}
+          anonymousAccess={this.props.anonymousAccess}
+          showPublicUrlSwitch={this.props.showPublicUrlSwitch}
         />
       ),
     };
@@ -91,6 +97,8 @@ export class ShareContextMenu extends Component<Props> {
             post={this.props.post}
             shareableUrl={this.props.shareableUrl}
             urlParamExtensions={this.props.embedUrlParamExtensions}
+            anonymousAccess={this.props.anonymousAccess}
+            showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           />
         ),
       };

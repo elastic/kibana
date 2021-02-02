@@ -71,7 +71,7 @@ describe('Data Streams tab', () => {
 
     test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { fleet: { hi: 'ok' } },
+        plugins: { isFleetEnabled: true },
       });
 
       await act(async () => {

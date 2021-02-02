@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge } from 'lodash';
-import { Logger, LegacyCallAPIOptions } from 'kibana/server';
-import { IndicesStatsParams, Client } from 'elasticsearch';
+import { Logger } from 'kibana/server';
+import { RequestParams } from '@elastic/elasticsearch';
 import {
   ESSearchRequest,
   ESSearchResponse,
@@ -20,9 +20,17 @@ type TelemetryTaskExecutor = (params: {
     params: TSearchRequest
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
-    params: IndicesStatsParams,
-    options?: LegacyCallAPIOptions
-  ): ReturnType<Client['indices']['stats']>;
+    params: RequestParams.IndicesStats
+    // promise returned by client has an abort property
+    // so we cannot use its ReturnType
+  ): Promise<{
+    _all?: {
+      total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
+    };
+    _shards?: {
+      total?: number;
+    };
+  }>;
   transportRequest: (params: {
     path: string;
     method: 'get';

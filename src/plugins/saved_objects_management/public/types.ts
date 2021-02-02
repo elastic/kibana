@@ -6,4 +6,11 @@
  * Public License, v 1.
  */
 
-export { SavedObjectMetadata, SavedObjectWithMetadata, SavedObjectRelation } from '../common';
+export {
+  SavedObjectMetadata,
+  SavedObjectWithMetadata,
+  SavedObjectRelationKind,
+  SavedObjectRelation,
+  SavedObjectInvalidRelation,
+  SavedObjectGetRelationshipsResponse,
+} from '../common';

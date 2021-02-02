@@ -18,7 +18,7 @@ import { licenseMock } from '../../../../../licensing/common/licensing.mock';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../fleet/common';
 import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
-import { factory } from '../../../../common/endpoint/models/policy_config';
+import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import { PolicyConfig } from '../../../../common/endpoint/types';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
@@ -27,7 +27,7 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
     // eslint-disable-next-line no-param-reassign
     cb = (p) => p;
   }
-  const policyConfig = cb(factory());
+  const policyConfig = cb(policyFactory());
   packagePolicy.inputs[0].config = { policy: { value: policyConfig } };
   return packagePolicy;
 };

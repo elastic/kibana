@@ -90,7 +90,7 @@ describe('sync_query_state_with_url', () => {
   test('url is actually changed when data in services changes', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    kbnUrlStateStorage.flush(); // sync force location change
+    kbnUrlStateStorage.kbnUrlControls.flush(); // sync force location change
     expect(history.location.hash).toMatchInlineSnapshot(
       `"#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!t,index:'logstash-*',key:query,negate:!t,type:custom,value:'%7B%22match%22:%7B%22key1%22:%22value1%22%7D%7D'),query:(match:(key1:value1)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))"`
     );
@@ -126,7 +126,7 @@ describe('sync_query_state_with_url', () => {
 
   test('when url is changed, filters synced back to filterManager', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
-    kbnUrlStateStorage.cancel(); // stop initial syncing pending update
+    kbnUrlStateStorage.kbnUrlControls.cancel(); // stop initial syncing pending update
     history.push(pathWithFilter);
     expect(filterManager.getGlobalFilters()).toHaveLength(1);
     stop();

@@ -53,3 +53,10 @@ export const CASE_CREATED_SUCCESS_TOAST_TEXT = i18n.translate(
     defaultMessage: 'Alerts in this case have their status synched with the case status',
   }
 );
+
+export const VIEW_CASE = i18n.translate(
+  'xpack.securitySolution.case.timeline.actions.caseCreatedSuccessToastViewCaseLink',
+  {
+    defaultMessage: 'View Case',
+  }
+);

@@ -6,7 +6,11 @@
  * Public License, v 1.
  */
 
-import { AbstractSearchStrategy, DefaultSearchCapabilities, ReqFacade } from '../../..';
+import {
+  AbstractSearchStrategy,
+  DefaultSearchCapabilities,
+  ReqFacade,
+} from '../../search_strategies';
 
 export const createFieldsFetcher = (
   req: ReqFacade,
