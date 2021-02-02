@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes } from '../../types';
+import type { AgentSOAttributes } from '../../types';
+import { AgentReassignmentError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
 import { getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
@@ -45,12 +46,16 @@ export async function reassignAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new Error(`Cannot reassign an agent from managed agent policy ${agentPolicy.id}`);
+    throw new AgentReassignmentError(
+      `Cannot reassign an agent from managed agent policy ${agentPolicy.id}`
+    );
   }
 
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
-    throw new Error(`Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`);
+    throw new AgentReassignmentError(
+      `Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`
+    );
   }
 
   return true;

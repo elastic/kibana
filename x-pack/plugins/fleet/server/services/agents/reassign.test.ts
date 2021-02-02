@@ -7,6 +7,7 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
 import type { Agent, AgentPolicy } from '../../types';
+import { AgentReassignmentError } from '../../errors';
 import { reassignAgent, reassignAgents } from './reassign';
 
 const agentInManagedSO = {
@@ -57,7 +58,7 @@ describe('reassignAgent (singular)', () => {
         agentInUnmanagedSO.id,
         agentInManagedSO.attributes.policy_id!
       )
-    ).rejects.toThrow('to managed');
+    ).rejects.toThrowError(AgentReassignmentError);
 
     // does not call ES update
     expect(soClient.update).toBeCalledTimes(0);
@@ -68,13 +69,13 @@ describe('reassignAgent (singular)', () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     await expect(
       reassignAgent(soClient, esClient, agentInManagedSO.id, agentInManagedSO2.id)
-    ).rejects.toThrow('from managed');
+    ).rejects.toThrowError(AgentReassignmentError);
     // does not call ES update
     expect(soClient.update).toBeCalledTimes(0);
 
     await expect(
       reassignAgent(soClient, esClient, agentInManagedSO.id, agentInUnmanagedSO.id)
-    ).rejects.toThrow('from managed');
+    ).rejects.toThrowError(AgentReassignmentError);
     // does not call ES update
     expect(soClient.update).toBeCalledTimes(0);
   });

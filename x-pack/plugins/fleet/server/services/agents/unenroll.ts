@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentSOAttributes } from '../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { AgentSOAttributes } from '../../types';
+import { AgentUnenrollmentError } from '../../errors';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
@@ -17,7 +18,9 @@ async function unenrollAgentIsAllowed(
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
-    throw new Error(`Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`);
+    throw new AgentUnenrollmentError(
+      `Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`
+    );
   }
 
   return true;

@@ -31,3 +31,5 @@ export class PackageCacheError extends IngestManagerError {}
 export class PackageOperationNotSupportedError extends IngestManagerError {}
 export class FleetAdminUserInvalidError extends IngestManagerError {}
 export class ConcurrentInstallOperationError extends IngestManagerError {}
+export class AgentReassignmentError extends IngestManagerError {}
+export class AgentUnenrollmentError extends IngestManagerError {}

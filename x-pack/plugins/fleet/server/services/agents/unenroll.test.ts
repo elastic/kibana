@@ -7,6 +7,7 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
 import type { Agent, AgentPolicy } from '../../types';
+import { AgentUnenrollmentError } from '../../errors';
 import { unenrollAgent, unenrollAgents } from './unenroll';
 
 const agentInManagedSO = {
@@ -46,7 +47,9 @@ describe('unenrollAgent (singular)', () => {
   it('cannot unenroll from managed policy', async () => {
     const soClient = createClientMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    await expect(unenrollAgent(soClient, esClient, agentInManagedSO.id)).rejects.toThrow('managed');
+    await expect(unenrollAgent(soClient, esClient, agentInManagedSO.id)).rejects.toThrowError(
+      AgentUnenrollmentError
+    );
     // does not call ES update
     expect(soClient.update).toBeCalledTimes(0);
   });

@@ -72,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
         .send({ name: 'Test policy', namespace: 'default', is_managed: true })
         .expect(200);
 
-      await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(500);
+      await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(400);
     });
 
     it('/agents/{agent_id}/unenroll should allow from unmanaged policy', async () => {
