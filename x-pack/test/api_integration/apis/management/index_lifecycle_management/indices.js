@@ -13,9 +13,10 @@ import { getPolicyPayload } from './fixtures';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
-  const { getIndex, createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
+  const { getIndex, createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(
+    getService
+  );
 
   const { addPolicyToIndex, removePolicyFromIndex, retryPolicyOnIndex } = registerIndexHelpers({
     supertest,

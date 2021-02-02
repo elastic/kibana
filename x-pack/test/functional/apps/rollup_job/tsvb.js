@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -96,8 +97,7 @@ export default function ({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexName });
+      await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
       await esArchiver.load('empty_kibana');
     });
   });

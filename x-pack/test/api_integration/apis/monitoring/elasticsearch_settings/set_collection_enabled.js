@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('update collection_enabled setting', () => {
     after(async () => {
@@ -26,7 +27,7 @@ export default function ({ getService }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esSupertest.delete('/.monitoring-*').expect(200);
+      await esDeleteAllIndices('/.monitoring-*');
     });
 
     it('should set collection.enabled to true', async () => {

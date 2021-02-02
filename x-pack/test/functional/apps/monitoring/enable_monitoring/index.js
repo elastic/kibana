@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Monitoring is turned off', function () {
     before(async () => {
@@ -37,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esSupertest.delete('/.monitoring-*').expect(200);
+      await esDeleteAllIndices('/.monitoring-*');
     });
 
     it('Monitoring enabled', async function () {
