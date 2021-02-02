@@ -87,7 +87,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'put',
       path: '/api/app_search/engines/{engineName}/search_settings',
-      payload: 'body',
     });
 
     beforeEach(() => {
@@ -149,7 +148,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'post',
       path: '/api/app_search/engines/{engineName}/search_settings_search',
-      payload: 'body',
     });
 
     beforeEach(() => {
