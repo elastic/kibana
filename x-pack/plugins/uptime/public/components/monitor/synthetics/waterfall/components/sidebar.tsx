@@ -34,9 +34,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
             gutterSize="none"
             responsive={false}
           >
-            {items.map((item, index) => (
-              <WaterfallChartSidebarFlexItem key={index}>
-                {render(item, index)}
+            {items.map((item) => (
+              <WaterfallChartSidebarFlexItem key={item.offsetIndex}>
+                {render(item)}
               </WaterfallChartSidebarFlexItem>
             ))}
           </WaterfallChartSidebarContainerFlexGroup>

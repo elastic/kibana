@@ -4,9 +4,142 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { colourPalette, getSeriesAndDomain } from './data_formatting';
+import { colourPalette, getSeriesAndDomain, getSidebarItems } from './data_formatting';
 import { NetworkItems, MimeType } from './types';
 import { WaterfallDataEntry } from '../../waterfall/types';
+
+const networkItems: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/todomvc-app-css@2.0.4/index.css',
+    status: 200,
+    mimeType: 'text/css',
+    requestSentTime: 18098833.175,
+    requestStartTime: 18098835.439,
+    loadEndTime: 18098957.145,
+    timings: {
+      connect: 81.10800000213203,
+      wait: 34.577999998873565,
+      receive: 0.5520000013348181,
+      send: 0.3600000018195715,
+      total: 123.97000000055414,
+      proxy: -1,
+      blocked: 0.8540000017092098,
+      queueing: 2.263999998831423,
+      ssl: 55.38700000033714,
+      dns: 3.559999997378327,
+    },
+  },
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/director@1.2.8/build/director.js',
+    status: 200,
+    mimeType: 'application/javascript',
+    requestSentTime: 18098833.537,
+    requestStartTime: 18098837.233999997,
+    loadEndTime: 18098977.648000002,
+    timings: {
+      blocked: 84.54599999822676,
+      receive: 3.068000001803739,
+      queueing: 3.69700000010198,
+      proxy: -1,
+      total: 144.1110000014305,
+      wait: 52.56100000042352,
+      connect: -1,
+      send: 0.2390000008745119,
+      ssl: -1,
+      dns: -1,
+    },
+  },
+];
+
+const networkItemsWithoutFullTimings: NetworkItems = [
+  networkItems[0],
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+    timings: {
+      total: 2.7929999996558763,
+      blocked: -1,
+      ssl: -1,
+      wait: -1,
+      connect: -1,
+      dns: -1,
+      queueing: -1,
+      send: -1,
+      proxy: -1,
+      receive: -1,
+    },
+  },
+];
+
+const networkItemsWithoutAnyTimings: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+    timings: {
+      total: -1,
+      blocked: -1,
+      ssl: -1,
+      wait: -1,
+      connect: -1,
+      dns: -1,
+      queueing: -1,
+      send: -1,
+      proxy: -1,
+      receive: -1,
+    },
+  },
+];
+
+const networkItemsWithoutTimingsObject: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+  },
+];
+
+const networkItemsWithUncommonMimeType: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/director@1.2.8/build/director.js',
+    status: 200,
+    mimeType: 'application/x-javascript',
+    requestSentTime: 18098833.537,
+    requestStartTime: 18098837.233999997,
+    loadEndTime: 18098977.648000002,
+    timings: {
+      blocked: 84.54599999822676,
+      receive: 3.068000001803739,
+      queueing: 3.69700000010198,
+      proxy: -1,
+      total: 144.1110000014305,
+      wait: 52.56100000042352,
+      connect: -1,
+      send: 0.2390000008745119,
+      ssl: -1,
+      dns: -1,
+    },
+  },
+];
 
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
@@ -29,139 +162,6 @@ describe('Palettes', () => {
 });
 
 describe('getSeriesAndDomain', () => {
-  const networkItems: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/todomvc-app-css@2.0.4/index.css',
-      status: 200,
-      mimeType: 'text/css',
-      requestSentTime: 18098833.175,
-      requestStartTime: 18098835.439,
-      loadEndTime: 18098957.145,
-      timings: {
-        connect: 81.10800000213203,
-        wait: 34.577999998873565,
-        receive: 0.5520000013348181,
-        send: 0.3600000018195715,
-        total: 123.97000000055414,
-        proxy: -1,
-        blocked: 0.8540000017092098,
-        queueing: 2.263999998831423,
-        ssl: 55.38700000033714,
-        dns: 3.559999997378327,
-      },
-    },
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/director@1.2.8/build/director.js',
-      status: 200,
-      mimeType: 'application/javascript',
-      requestSentTime: 18098833.537,
-      requestStartTime: 18098837.233999997,
-      loadEndTime: 18098977.648000002,
-      timings: {
-        blocked: 84.54599999822676,
-        receive: 3.068000001803739,
-        queueing: 3.69700000010198,
-        proxy: -1,
-        total: 144.1110000014305,
-        wait: 52.56100000042352,
-        connect: -1,
-        send: 0.2390000008745119,
-        ssl: -1,
-        dns: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutFullTimings: NetworkItems = [
-    networkItems[0],
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-      timings: {
-        total: 2.7929999996558763,
-        blocked: -1,
-        ssl: -1,
-        wait: -1,
-        connect: -1,
-        dns: -1,
-        queueing: -1,
-        send: -1,
-        proxy: -1,
-        receive: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutAnyTimings: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-      timings: {
-        total: -1,
-        blocked: -1,
-        ssl: -1,
-        wait: -1,
-        connect: -1,
-        dns: -1,
-        queueing: -1,
-        send: -1,
-        proxy: -1,
-        receive: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutTimingsObject: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-    },
-  ];
-
-  const networkItemsWithUncommonMimeType: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/director@1.2.8/build/director.js',
-      status: 200,
-      mimeType: 'application/x-javascript',
-      requestSentTime: 18098833.537,
-      requestStartTime: 18098837.233999997,
-      loadEndTime: 18098977.648000002,
-      timings: {
-        blocked: 84.54599999822676,
-        receive: 3.068000001803739,
-        queueing: 3.69700000010198,
-        proxy: -1,
-        total: 144.1110000014305,
-        wait: 52.56100000042352,
-        connect: -1,
-        send: 0.2390000008745119,
-        ssl: -1,
-        dns: -1,
-      },
-    },
-  ];
-
   it('formats timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual).toMatchInlineSnapshot(`
@@ -520,5 +520,12 @@ describe('getSeriesAndDomain', () => {
       return false;
     });
     expect(contentDownloadedingConfigItem).toBeDefined();
+  });
+});
+
+describe('getSidebarItems', () => {
+  it('passes the item index offset by 1 to offsetIndex for visual display', () => {
+    const actual = getSidebarItems(networkItems, false, '', []);
+    expect(actual[0].offsetIndex).toBe(1);
   });
 });

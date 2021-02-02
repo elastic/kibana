@@ -6,12 +6,13 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry } from '../types';
+import { SidebarItems } from '../../step_detail/waterfall/types';
 
 export interface IWaterfallContext {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: WaterfallData;
-  sidebarItems?: unknown[];
+  sidebarItems?: SidebarItems;
   legendItems?: unknown[];
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],

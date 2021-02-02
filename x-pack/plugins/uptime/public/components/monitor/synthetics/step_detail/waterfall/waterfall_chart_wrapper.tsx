@@ -17,8 +17,8 @@ import {
 import { WaterfallFilter } from './waterfall_filter';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 
-export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
-  const { status } = item;
+export const renderSidebarItem: RenderItem<SidebarItem> = (item) => {
+  const { status, offsetIndex } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
     const is400 = statusCode >= 400 && statusCode <= 499;
@@ -33,11 +33,11 @@ export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
       data-test-subj={item.isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
     >
       {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+        <MiddleTruncatedText text={`${offsetIndex}. ${item.url}`} />
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+            <MiddleTruncatedText text={`${offsetIndex}. ${item.url}`} />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiBadge color="danger">{status}</EuiBadge>

@@ -195,10 +195,11 @@ export const getSidebarItems = (
   query: string,
   activeFilters: string[]
 ): SidebarItems => {
-  const sideBarItems = items.map((item) => {
+  const sideBarItems = items.map((item, index) => {
     const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const offsetIndex = index + 1;
     const { url, status, method } = item;
-    return { url, status, method, isHighlighted };
+    return { url, status, method, isHighlighted, offsetIndex };
   });
   if (onlyHighlighted) {
     return sideBarItems.filter((item) => item.isHighlighted);

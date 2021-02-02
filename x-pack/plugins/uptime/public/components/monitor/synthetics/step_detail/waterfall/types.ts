@@ -154,6 +154,7 @@ export type NetworkItems = NetworkItem[];
 
 export type SidebarItem = Pick<NetworkItem, 'url' | 'status' | 'method'> & {
   isHighlighted: boolean;
+  offsetIndex: number;
 };
 export type SidebarItems = SidebarItem[];
 
