@@ -17,6 +17,7 @@ export interface ISearchOptions
 |  [abortSignal](./kibana-plugin-plugins-data-public.isearchoptions.abortsignal.md) | <code>AbortSignal</code> | An <code>AbortSignal</code> that allows the caller of <code>search</code> to abort a search request. |
 |  [isRestore](./kibana-plugin-plugins-data-public.isearchoptions.isrestore.md) | <code>boolean</code> | Whether the session is restored (i.e. search requests should re-use the stored search IDs, rather than starting from scratch) |
 |  [isStored](./kibana-plugin-plugins-data-public.isearchoptions.isstored.md) | <code>boolean</code> | Whether the session is already saved (i.e. sent to background) |
+|  [legacyHitsTotal](./kibana-plugin-plugins-data-public.isearchoptions.legacyhitstotal.md) | <code>boolean</code> | Request the legacy format for the total number of hits. If sending <code>rest_total_hits_as_int</code> to something other than <code>true</code>, this should be set to <code>false</code>. |
 |  [sessionId](./kibana-plugin-plugins-data-public.isearchoptions.sessionid.md) | <code>string</code> | A session ID, grouping multiple search requests into a single session. |
 |  [strategy](./kibana-plugin-plugins-data-public.isearchoptions.strategy.md) | <code>string</code> | Use this option to force using a specific server side search strategy. Leave empty to use the default strategy. |
 

@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
 
   describe('resolve_import_errors', () => {
     // mock success results including metadata
@@ -35,14 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('without kibana index', () => {
       // Cleanup data that got created in import
-      before(
-        async () =>
-          // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana*',
-            ignore: [404],
-          })
-      );
+      after(() => esArchiver.unload('saved_objects/basic'));
 
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
@@ -59,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should return 200 with internal server errors', async () => {
+      it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
           .field(
@@ -86,42 +78,12 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
-              successCount: 0,
-              success: false,
-              errors: [
-                {
-                  ...indexPattern,
-                  ...{ title: indexPattern.meta.title },
-                  overwrite: true,
-                  error: {
-                    statusCode: 500,
-                    error: 'Internal Server Error',
-                    message: 'An internal server error occurred',
-                    type: 'unknown',
-                  },
-                },
-                {
-                  ...visualization,
-                  ...{ title: visualization.meta.title },
-                  overwrite: true,
-                  error: {
-                    statusCode: 500,
-                    error: 'Internal Server Error',
-                    message: 'An internal server error occurred',
-                    type: 'unknown',
-                  },
-                },
-                {
-                  ...dashboard,
-                  ...{ title: dashboard.meta.title },
-                  overwrite: true,
-                  error: {
-                    statusCode: 500,
-                    error: 'Internal Server Error',
-                    message: 'An internal server error occurred',
-                    type: 'unknown',
-                  },
-                },
+              success: true,
+              successCount: 3,
+              successResults: [
+                { ...indexPattern, overwrite: true },
+                { ...visualization, overwrite: true },
+                { ...dashboard, overwrite: true },
               ],
               warnings: [],
             });
