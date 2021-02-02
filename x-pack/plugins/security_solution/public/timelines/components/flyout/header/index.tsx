@@ -272,7 +272,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const timeline: TimelineModel = useSelector(
     (state: State) => getTimeline(state, timelineId) ?? timelineDefaults
   );
-  const { dataProviders, filters, timelineType, kqlMode } = timeline;
+  const { dataProviders, filters, timelineType, kqlMode, activeTab } = timeline;
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
@@ -328,7 +328,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={1}>
-        <TimelineKPIs kpis={kpis} isLoading={loading} />
+        {activeTab === 'query' ? <TimelineKPIs kpis={kpis} isLoading={loading} /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
