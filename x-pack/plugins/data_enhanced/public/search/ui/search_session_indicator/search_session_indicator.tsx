@@ -213,7 +213,7 @@ const searchSessionIndicatorViewStateToProps: {
       title: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundTitleText',
         {
-          defaultMessage: 'Saved session complete',
+          defaultMessage: 'Search session saved',
         }
       ),
       description: i18n.translate(
