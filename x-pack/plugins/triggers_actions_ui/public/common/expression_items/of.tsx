@@ -44,7 +44,7 @@ interface OfExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
-  helpText?: string;
+  helpText?: string | JSX.Element;
 }
 
 export const OfExpression = ({
