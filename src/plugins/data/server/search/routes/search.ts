@@ -9,7 +9,6 @@
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '../../lib';
-import { shimHitsTotal } from './shim_hits_total';
 import { reportServerError } from '../../../../kibana_utils/server';
 import type { DataPluginRouter } from '../types';
 
@@ -27,6 +26,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
 
         body: schema.object(
           {
+            legacyHitsTotal: schema.maybe(schema.boolean()),
             sessionId: schema.maybe(schema.string()),
             isStored: schema.maybe(schema.boolean()),
             isRestore: schema.maybe(schema.boolean()),
@@ -36,7 +36,13 @@ export function registerSearchRoute(router: DataPluginRouter): void {
       },
     },
     async (context, request, res) => {
-      const { sessionId, isStored, isRestore, ...searchRequest } = request.body;
+      const {
+        legacyHitsTotal = true,
+        sessionId,
+        isStored,
+        isRestore,
+        ...searchRequest
+      } = request.body;
       const { strategy, id } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -47,6 +53,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
             {
               abortSignal,
               strategy,
+              legacyHitsTotal,
               sessionId,
               isStored,
               isRestore,
@@ -55,14 +62,7 @@ export function registerSearchRoute(router: DataPluginRouter): void {
           .pipe(first())
           .toPromise();
 
-        return res.ok({
-          body: {
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
-            },
-          },
-        });
+        return res.ok({ body: response });
       } catch (err) {
         return reportServerError(res, err);
       }
