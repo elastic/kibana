@@ -5,7 +5,15 @@
  */
 import { timeline } from '../../objects/timeline';
 
-import { LOCKED_ICON, PIN_EVENT } from '../../screens/timeline';
+import {
+  FAVORITE_TIMELINE,
+  LOCKED_ICON,
+  NOTES_TAB_BUTTON,
+  NOTES_TEXT,
+  PIN_EVENT,
+  QUERY_TAB_BUTTON,
+  TIMELINE_FILTER,
+} from '../../screens/timeline';
 
 import { cleanKibana } from '../../tasks/common';
 
@@ -54,6 +62,7 @@ describe('Timelines', (): void => {
 
     it('can be added filter', () => {
       addFilter(timeline.filter);
+      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
     });
 
     it('pins an event', () => {
@@ -69,11 +78,15 @@ describe('Timelines', (): void => {
 
     it('can be added notes', () => {
       addNotesToTimeline(timeline.notes);
+      cy.get(NOTES_TAB_BUTTON).click({ force: true });
+      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
+      cy.get(QUERY_TAB_BUTTON).click({ force: true });
     });
 
     it('can be marked as favorite', () => {
       markAsFavorite();
       waitForTimelineChanges();
+      cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
     });
   });
 });
