@@ -15,6 +15,7 @@ export default function upgradeAssistantFunctionalTests({
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const security = getService('security');
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('Upgrade Checkup', function () {
     this.tags('includeFirefox');
@@ -39,19 +40,22 @@ export default function upgradeAssistantFunctionalTests({
       expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
       expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
 
-      log.debug('Now toggle to off');
-      await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await retry.try(async () => {
+        log.debug('Now toggle to off');
+        await PageObjects.upgradeAssistant.toggleDeprecationLogging();
 
-      log.debug('expect state to be OFF after toggle');
-      expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(false);
-      expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('Off');
+        log.debug('expect state to be OFF after toggle');
+        expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(false);
+        expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('Off');
+      });
 
       log.debug('Now toggle back on.');
-      await PageObjects.upgradeAssistant.toggleDeprecationLogging();
-
-      log.debug('expect state to be ON after toggle');
-      expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
-      expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
+      await retry.try(async () => {
+        await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+        log.debug('expect state to be ON after toggle');
+        expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
+        expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
+      });
     });
 
     it('allows user to open cluster tab', async () => {
