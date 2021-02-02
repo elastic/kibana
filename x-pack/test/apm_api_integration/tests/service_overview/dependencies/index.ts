@@ -335,7 +335,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "errorRate": Object {
               "value": 0,
             },
-            "impact": 0,
+            "impact": 1.97910470896139,
             "latency": Object {
               "value": 1043.99015586546,
             },
@@ -444,13 +444,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(impactValues).toMatchInline(`
           Array [
             Object {
-              "impact": 5.4753760019723,
+              "impact": 1.36961744704522,
               "latency": 2568.40816326531,
               "name": "elasticsearch",
               "throughput": 13.0666666666667,
             },
             Object {
-              "impact": 88.1778158446408,
+              "impact": 0,
               "latency": 25593.875,
               "name": "opbeans-java",
               "throughput": 0.533333333333333,
@@ -462,7 +462,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "throughput": 50.8,
             },
             Object {
-              "impact": 0,
+              "impact": 1.97910470896139,
               "latency": 1043.99015586546,
               "name": "redis",
               "throughput": 40.6333333333333,
