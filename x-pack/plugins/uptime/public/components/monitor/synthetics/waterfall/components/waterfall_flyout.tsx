@@ -12,7 +12,6 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiLink,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';

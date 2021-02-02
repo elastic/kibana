@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '../../../../../../../../../src/plugins/ki
 import { WaterfallChart } from './waterfall_chart';
 import {
   renderLegendItem,
-  renderSidebarItem,
+  RenderSidebarItem,
 } from '../../step_detail/waterfall/waterfall_chart_wrapper';
 import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { WaterfallChartOuterContainer } from './styles';
@@ -31,7 +31,7 @@ describe('waterfall', () => {
           barStyleAccessor={(datum) => {
             return datum.datum.config.colour;
           }}
-          renderSidebarItem={renderSidebarItem}
+          renderSidebarItem={RenderSidebarItem}
           renderLegendItem={renderLegendItem}
           fullHeight={true}
         />

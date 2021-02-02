@@ -33,9 +33,6 @@ export const extractItems = (data: NetworkEvent[]): NetworkItems => {
 };
 
 const formatValueForDisplay = (value: number, points: number = 3) => {
-  if (value === undefined) {
-    return '--';
-  }
   return Number(value).toFixed(points);
 };
 
