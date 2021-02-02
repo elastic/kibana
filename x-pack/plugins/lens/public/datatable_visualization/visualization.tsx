@@ -13,7 +13,6 @@ import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
-  Operation,
   DatasourcePublicAPI,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
@@ -232,9 +231,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     });
 
     const columns = sortedColumns!
-      .map((columnId) => ({ columnId, operation: datasource!.getOperationForColumnId(columnId) }))
-      .filter((o): o is { columnId: string; operation: Operation } => !!o.operation)
-      .map(({ columnId }) => columnMap[columnId]);
+      .filter((columnId) => datasource!.getOperationForColumnId(columnId))
+      .map((columnId) => columnMap[columnId]);
 
     return {
       type: 'expression',
@@ -289,7 +287,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
             if (column.columnId === event.data.columnId) {
               return {
                 ...column,
-                hidden: !!column.hidden,
+                hidden: !column.hidden,
               };
             } else {
               return column;

@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import dedent from 'dedent';
 import { resolve } from 'path';
 import { spawn } from '../child_process';
 import { readFile } from '../fs';
@@ -25,6 +26,16 @@ async function readBazelToolsVersionFile(repoRootPath: string, versionFilename: 
   return version;
 }
 
+async function isBazelBinAvailable() {
+  try {
+    await spawn('bazel', ['--version'], { stdio: 'pipe' });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function installBazelTools(repoRootPath: string) {
   log.debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
@@ -32,10 +43,17 @@ export async function installBazelTools(repoRootPath: string) {
 
   // Check what globals are installed
   log.debug(`[bazel_tools] verify if bazelisk is installed`);
-  const { stdout } = await spawn('yarn', ['global', 'list'], { stdio: 'pipe' });
+  const { stdout: bazeliskPkgInstallStdout } = await spawn('yarn', ['global', 'list'], {
+    stdio: 'pipe',
+  });
+
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable();
 
   // Install bazelisk if not installed
-  if (!stdout.includes(`@bazel/bazelisk@${bazeliskVersion}`)) {
+  if (
+    !bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`) ||
+    !isBazelBinAlreadyAvailable
+  ) {
     log.info(`[bazel_tools] installing Bazel tools`);
 
     log.debug(
@@ -47,6 +65,13 @@ export async function installBazelTools(repoRootPath: string) {
       },
       stdio: 'pipe',
     });
+
+    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable();
+    if (!isBazelBinAvailableAfterInstall) {
+      throw new Error(dedent`
+        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure 'yarn global bin' is on your $PATH, otherwise just add it there
+      `);
+    }
   }
 
   log.success(`[bazel_tools] all bazel tools are correctly installed`);
