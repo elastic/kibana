@@ -26,8 +26,6 @@ import {
 import { OVERVIEW_URL } from '../../urls/navigation';
 
 describe('Timelines', (): void => {
-  let timelineId: string | null = null;
-
   before(() => {
     cleanKibana();
     loginAndWaitForPage(OVERVIEW_URL);
@@ -49,13 +47,8 @@ describe('Timelines', (): void => {
     });
 
     before(() => {
-      cy.intercept('PATCH', '/api/timeline').as('timeline');
-
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(timeline);
-      cy.wait('@timeline').then(({ response }) => {
-        timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
-      });
       populateTimeline();
     });
 
