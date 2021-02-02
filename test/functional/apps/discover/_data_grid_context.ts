@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover data grid context tests', () => {
     before(async () => {
+      await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
