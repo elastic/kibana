@@ -57,7 +57,7 @@ export function DraggableDimensionButton({
   onDrop: (
     droppedItem: DragDropIdentifier,
     dropTarget: DragDropIdentifier,
-    dropType: DropType
+    dropType?: DropType
   ) => void;
   group: VisualizationDimensionGroupConfig;
   label: string;
@@ -97,7 +97,7 @@ export function DraggableDimensionButton({
         columnId: g.columnId,
         id: g.columnId,
         groupId: group.groupId,
-        dropType: 'reorder',
+        dropType: 'reorder' as DropType,
         humanData: {
           label: `item ${index + 1}`,
           groupLabel: group.groupLabel,

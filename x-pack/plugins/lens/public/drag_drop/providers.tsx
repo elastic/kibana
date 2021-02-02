@@ -14,7 +14,7 @@ import { DropType } from '../types';
 /**
  * A function that handles a drop event.
  */
-export type DropHandler = (dropped: DragDropIdentifier, dropType: DropType) => void;
+export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
@@ -22,6 +22,7 @@ export type DragDropIdentifier = Record<string, unknown> & {
    * The data for accessibility, consists of required label and not required groupLabel and position in group
    */
   humanData: HumanData;
+  dropType?: DropType;
 };
 
 export interface ActiveDropTarget {
@@ -161,9 +162,13 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     [setDraggingState]
   );
 
-  const setA11yMessage = useMemo(() => (message: string) => setA11yMessageState(message), [
-    setA11yMessageState,
-  ]);
+  const setA11yMessage = useMemo(
+    () => (message: string) => {
+      console.log(`%c ${message}`, 'background: #251e3e; color: #eee3e7');
+      return setA11yMessageState(message);
+    },
+    [setA11yMessageState]
+  );
 
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DragDropIdentifier) =>

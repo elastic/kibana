@@ -18,9 +18,7 @@ import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../ty
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { getOperationSupportMatrix } from './operation_support';
 
-type DropHandlerProps<
-  T = DraggedOperation
-> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
+type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
 };
 
@@ -99,12 +97,18 @@ export function getDropTypes(
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const { droppedItem, dropType } = props;
-  if (isDraggedField(droppedItem)) {
-    return onFieldDrop(props);
+
+  if (dropType === 'field_add' || dropType === 'field_replace') {
+    return operationOnDropMap[dropType]({
+      ...props,
+      droppedItem: droppedItem as DraggedField,
+    });
   }
-  if (isDraggedOperation(droppedItem)) {
-    return operationOnDropMap[dropType](props);
-  }
+
+  return operationOnDropMap[dropType]({
+    ...props,
+    droppedItem: droppedItem as DraggedOperation,
+  });
 }
 
 const operationOnDropMap = {
@@ -129,7 +133,13 @@ function reorderElements(items: string[], dest: string, src: string) {
   return result;
 }
 
-function onReorderDrop({ columnId, setState, state, layerId, droppedItem }: DropHandlerProps) {
+function onReorderDrop({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+}: DropHandlerProps<DraggedOperation>) {
   setState(
     mergeLayer({
       state,
@@ -147,7 +157,7 @@ function onReorderDrop({ columnId, setState, state, layerId, droppedItem }: Drop
   return true;
 }
 
-function onMoveDropToNonCompatibleGroup(props: DropHandlerProps) {
+function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation>) {
   const { columnId, setState, state, layerId, droppedItem } = props;
 
   const layer = state.layers[layerId];
@@ -203,7 +213,7 @@ function onSameGroupDuplicateDrop({
   state,
   layerId,
   droppedItem,
-}: DropHandlerProps) {
+}: DropHandlerProps<DraggedOperation>) {
   const layer = state.layers[layerId];
 
   const op = { ...layer.columns[droppedItem.columnId] };
@@ -240,7 +250,7 @@ function onMoveDropToCompatibleGroup({
   state,
   layerId,
   droppedItem,
-}: DropHandlerProps) {
+}: DropHandlerProps<DraggedOperation>) {
   const layer = state.layers[layerId];
   const op = { ...layer.columns[droppedItem.columnId] };
   const newColumns = { ...layer.columns };

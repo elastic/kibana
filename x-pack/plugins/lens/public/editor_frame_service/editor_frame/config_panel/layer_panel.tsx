@@ -116,8 +116,11 @@ export function LayerPanel(
     return (
       droppedItem: DragDropIdentifier,
       targetItem: DragDropIdentifier,
-      dropType: DropType
+      dropType?: DropType
     ) => {
+      if (!dropType) {
+        return;
+      }
       const {
         columnId,
         groupId,
@@ -317,7 +320,6 @@ export function LayerPanel(
                   </ReorderProvider>
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
-                      dragDropContext={dragDropContext}
                       group={group}
                       groupIndex={groupIndex}
                       layerId={layerId}

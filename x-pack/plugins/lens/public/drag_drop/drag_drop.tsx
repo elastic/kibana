@@ -269,7 +269,7 @@ const DragInner = memo(function DragInner({
     const currentTarget = e?.currentTarget;
     setTimeout(() => {
       setDragging(value);
-      setA11yMessage(announce('lifted', undefined, value.humanData));
+      setA11yMessage(announce.lifted(value.humanData));
       if (onDragStart) {
         onDragStart(currentTarget);
       }
@@ -281,7 +281,7 @@ const DragInner = memo(function DragInner({
     setDragging(undefined);
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
-    setA11yMessage(announce('cancelled', undefined, value.humanData));
+    setA11yMessage(announce.cancelled());
     if (onDragEnd) {
       onDragEnd();
     }
@@ -290,19 +290,9 @@ const DragInner = memo(function DragInner({
     if (isDragging && activeDropTarget?.activeDropTarget) {
       trackUiEvent('drop_total');
       const onTargetDrop = getTargetOnDrop(activeDropTarget);
-
-      setTimeout(() =>
-        setA11yMessage(
-          announce(
-            'dropped',
-            activeDropTarget?.activeDropTarget?.dropType,
-            value.humanData,
-            activeDropTarget?.activeDropTarget.humanData
-          )
-        )
-      );
-
-      onTargetDrop?.(value, activeDropTarget?.activeDropTarget?.dropType);
+      const { dropType, humanData } = activeDropTarget?.activeDropTarget;
+      setTimeout(() => setA11yMessage(announce.dropped(dropType, value.humanData, humanData)));
+      onTargetDrop?.(value, dropType);
     }
   };
 
@@ -317,11 +307,12 @@ const DragInner = memo(function DragInner({
       dropTargetsFilter,
       reversed
     );
-
-    setActiveDropTarget(nextTarget);
-    setA11yMessage(
-      announce('selectedTarget', nextTarget?.dropType, value.humanData, nextTarget?.humanData)
-    );
+    if (nextTarget) {
+      setActiveDropTarget(nextTarget);
+      setA11yMessage(
+        announce.selectedTarget(nextTarget.dropType, value.humanData, nextTarget.humanData)
+      );
+    }
   };
   return (
     <div className={className}>
@@ -352,7 +343,7 @@ const DragInner = memo(function DragInner({
                 dragEnd();
               } else if (keyboardMode && order) {
                 if (hasReorderingStarted) {
-                  setA11yMessage(announce('blockedArrows', undefined, value.humanData));
+                  setA11yMessage(announce.blockedArrows());
                 } else {
                   setNextTarget(!!(keys.ARROW_LEFT === e.key));
                 }
@@ -445,9 +436,9 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
 
     // An optimization to prevent a bunch of React churn.
     // todo: replace with custom function ?
-    if (!activeDropTargetMatches) {
+    if (!activeDropTargetMatches && dragging) {
       setActiveDropTarget(value);
-      setA11yMessage(announce('selectedTarget', dropType, dragging?.humanData, value.humanData));
+      setA11yMessage(announce.selectedTarget(dropType, dragging.humanData, value.humanData));
     }
   };
 
@@ -463,7 +454,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
       trackUiEvent('drop_total');
       onDrop(dragging, dropType);
       setTimeout(() =>
-        setA11yMessage(announce('dropped', dropType, dragging.humanData, value.humanData))
+        setA11yMessage(announce.dropped(dropType, dragging.humanData, value.humanData))
       );
       setDragging(undefined);
       setActiveDropTarget(undefined);
@@ -581,7 +572,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         reorderedItems: [],
       }));
     }
-    setA11yMessage(announce('selectedTarget', 'reorder', value.humanData, target.humanData));
+    setA11yMessage(announce.selectedTarget('reorder', value.humanData, target.humanData));
 
     setReorderState((s: ReorderState) =>
       draggingIndex < droppingIndex
@@ -731,7 +722,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>
-        setA11yMessage(announce('dropped', 'reorder', dragging.humanData, value.humanData))
+        setA11yMessage(announce.dropped('reorder', dragging.humanData, value.humanData))
       );
     }
   };

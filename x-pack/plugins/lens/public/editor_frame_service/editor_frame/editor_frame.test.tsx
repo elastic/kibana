@@ -1322,7 +1322,7 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({ id: 'draggedField', humanData: { label: 'draggedField' } });
                   }
                 },
               },
@@ -1338,11 +1338,15 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-          id: '1',
-        });
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: { label: 'draggedField' },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1420,7 +1424,7 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField' });
+                    setDragging({ id: 'draggedField', humanData: { label: '1' } });
                   }
                 },
               },
@@ -1436,11 +1440,17 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-          id: '1',
-        });
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+            humanData: {
+              label: 'label',
+            },
+          },
+          'field_replace'
+        );
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

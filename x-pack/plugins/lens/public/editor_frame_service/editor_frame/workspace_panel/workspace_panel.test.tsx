@@ -831,7 +831,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',

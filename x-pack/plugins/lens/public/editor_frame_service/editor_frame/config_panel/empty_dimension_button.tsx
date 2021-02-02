@@ -40,7 +40,7 @@ export function EmptyDimensionButton({
   onDrop: (
     droppedItem: DragDropIdentifier,
     dropTarget: DragDropIdentifier,
-    dropType: DropType
+    dropType?: DropType
   ) => void;
   group: VisualizationDimensionGroupConfig;
   layerDatasource: Datasource<unknown, unknown>;

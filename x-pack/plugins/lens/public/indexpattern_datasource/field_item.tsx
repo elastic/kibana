@@ -167,16 +167,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   }
 
   const value = useMemo(
-    () =>
-      ({
-        field,
-        indexPatternId: indexPattern.id,
-        id: field.name,
-        humanData: {
-          label: field.displayName,
-          position: itemIndex + 1,
-        },
-      } as DraggedField),
+    () => ({
+      field,
+      indexPatternId: indexPattern.id,
+      id: field.name,
+      humanData: {
+        label: field.displayName,
+        position: itemIndex + 1,
+      },
+    }),
     [field, indexPattern.id, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
@@ -281,8 +280,8 @@ function FieldPanelHeader({
     id: field.name,
     field,
     humanData: {
-      label: field.displayName
-    }
+      label: field.displayName,
+    },
   };
 
   return (
@@ -653,11 +652,7 @@ const DragToWorkspaceButton = ({
   dropOntoWorkspace,
   isEnabled,
 }: {
-  field: {
-    indexPatternId: string;
-    id: string;
-    field: IndexPatternField;
-  };
+  field: DraggedField;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   isEnabled: boolean;
 }) => {

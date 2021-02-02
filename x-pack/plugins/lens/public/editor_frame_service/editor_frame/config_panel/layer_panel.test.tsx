@@ -487,7 +487,9 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.getDropTypes.mockImplementation(({ columnId }) => columnId !== 'a');
+      mockDatasource.getDropTypes.mockImplementation(({ columnId }) =>
+        columnId !== 'a' ? 'field_replace' : undefined
+      );
 
       const draggingField = {
         field: { name: 'dragged' },
@@ -618,7 +620,7 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
 
-      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation);
+      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           groupId: 'a',
