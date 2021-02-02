@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useParams } from 'react-router-dom';
+import { generatePath, useParams } from 'react-router-dom';
 
-export const encodePathParams = (pathParams: Record<string, string | number>) => {
-  const encodedParams: Record<string, string> = {};
+type PathParams = Record<string, string>;
+
+export const encodePathParams = (pathParams: PathParams) => {
+  const encodedParams: PathParams = {};
 
   Object.entries(pathParams).map(([key, value]) => {
     encodedParams[key] = encodeURIComponent(value);
@@ -16,8 +18,12 @@ export const encodePathParams = (pathParams: Record<string, string | number>) =>
   return encodedParams;
 };
 
+export const generateEncodedPath = (path: string, pathParams: PathParams) => {
+  return generatePath(path, encodePathParams(pathParams));
+};
+
 export const useDecodedParams = () => {
-  const decodedParams: Record<string, string> = {};
+  const decodedParams: PathParams = {};
 
   const params = useParams();
   Object.entries(params).map(([key, value]) => {
