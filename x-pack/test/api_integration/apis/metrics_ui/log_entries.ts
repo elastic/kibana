@@ -6,21 +6,17 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-
-import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
-
 import {
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
 } from '../../../../plugins/infra/common/http_api';
-
 import {
-  LogTimestampColumn,
   LogFieldColumn,
   LogMessageColumn,
+  LogTimestampColumn,
 } from '../../../../plugins/infra/common/log_entry';
-
+import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_WITHIN_DATA_RANGE = {
