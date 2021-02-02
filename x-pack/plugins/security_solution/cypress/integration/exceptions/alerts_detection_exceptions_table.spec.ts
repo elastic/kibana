@@ -105,7 +105,7 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
   });
 
-  it('Exports exception list', function () {
+  it('Exports exception list', async function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
     goToExceptionsTable();
