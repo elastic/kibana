@@ -21,7 +21,7 @@ const defaultProps = {
   setSelectedTabIndex: jest.fn(),
 };
 
-const mockKibanaVersion = new SemVer('8.0.0');
+const mockKibanaVersion = new SemVer('7.0.0');
 
 jest.mock('../../../app_context', () => {
   return {
