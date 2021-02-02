@@ -126,7 +126,8 @@ export class ElasticsearchService
   private createClusterClient(type: string, config: ElasticsearchClientConfig) {
     return new ClusterClient(
       config,
-      this.coreContext.logger.get('elasticsearch', type),
+      this.coreContext.logger.get('elasticsearch'),
+      type,
       this.getAuthHeaders
     );
   }
@@ -134,7 +135,8 @@ export class ElasticsearchService
   private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
     return new LegacyClusterClient(
       config,
-      this.coreContext.logger.get('elasticsearch', type),
+      this.coreContext.logger.get('elasticsearch'),
+      type,
       this.getAuthHeaders
     );
   }
