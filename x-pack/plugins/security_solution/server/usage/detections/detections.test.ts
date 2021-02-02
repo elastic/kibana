@@ -12,6 +12,7 @@ import {
   getMockListModulesResponse,
   getMockRulesResponse,
   getMockMlJobDetailsResponse,
+  getMockMlStatsResponse,
 } from './detections.mocks';
 import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
 
@@ -129,8 +130,10 @@ describe('Detections Usage and Metrics', () => {
       });
 
       const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
+      const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlStatsResponse());
       mlMock.anomalyDetectorsProvider.mockReturnValue(({
         jobs: mockJobsResponse,
+        jobStats: mockJobStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
       const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
@@ -140,8 +143,32 @@ describe('Detections Usage and Metrics', () => {
           ml_jobs: [
             {
               job_id: 'high_distinct_count_error_message',
-              time_finish: 1611739871669,
-              time_start: 1603838214983,
+              state: 'closed',
+              data_counts: {
+                bucket_count: 8612,
+                empty_bucket_count: 8590,
+                input_bytes: 45957,
+                input_record_count: 162,
+                last_data_time: 1610470367123,
+                processed_record_count: 162,
+              },
+              model_size_stats: {
+                bucket_allocation_failures_count: 0,
+                memory_status: 'ok',
+                model_bytes: 72574,
+                model_bytes_exceeded: 0,
+                model_bytes_memory_limit: 16777216,
+                peak_model_bytes: 78682,
+              },
+              timing_stats: {
+                average_bucket_processing_time_ms: 0.4900837644740133,
+                bucket_count: 16236,
+                exponential_average_bucket_processing_time_ms: 0.23614068552903306,
+                exponential_average_bucket_processing_time_per_hour_ms: 1.5551298175461634,
+                maximum_bucket_processing_time_ms: 392,
+                minimum_bucket_processing_time_ms: 0,
+                total_bucket_processing_time_ms: 7957.00000000008,
+              },
             },
           ],
         })

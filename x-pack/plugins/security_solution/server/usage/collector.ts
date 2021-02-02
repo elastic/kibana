@@ -66,10 +66,34 @@ export const registerCollector: RegisterCollector = ({
         ml_jobs: {
           type: 'array',
           items: {
-            // @pjhampton: these are still undecided - taking id and times for now
+            // @pjhampton / @jeska: these are still undecided - taking id and times for now
             job_id: { type: 'keyword' },
-            time_start: { type: 'long' },
-            time_finish: { type: 'long' },
+            open_time: { type: 'keyword' },
+            state: { type: 'keyword' },
+            data_counts: {
+              bucket_count: { type: 'long' },
+              empty_bucket_count: { type: 'long' },
+              input_bytes: { type: 'long' },
+              input_record_count: { type: 'long' },
+              last_data_time: { type: 'long' },
+              processed_record_count: { type: 'long' },
+            },
+            model_size_stats: {
+              bucket_allocation_failures_count: { type: 'long' },
+              model_bytes: { type: 'long' },
+              model_bytes_exceeded: { type: 'long' },
+              model_bytes_memory_limit: { type: 'long' },
+              peak_model_bytes: { type: 'long' },
+            },
+            timing_stats: {
+              average_bucket_processing_time_ms: { type: 'long' },
+              bucket_count: { type: 'long' },
+              exponential_average_bucket_processing_time_ms: { type: 'long' },
+              exponential_average_bucket_processing_time_per_hour_ms: { type: 'long' },
+              maximum_bucket_processing_time_ms: { type: 'long' },
+              minimum_bucket_processing_time_ms: { type: 'long' },
+              total_bucket_processing_time_ms: { type: 'long' },
+            },
           },
         },
       },
