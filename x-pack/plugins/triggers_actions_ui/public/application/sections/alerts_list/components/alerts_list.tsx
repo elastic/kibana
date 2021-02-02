@@ -57,7 +57,6 @@ import {
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
@@ -300,10 +299,7 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: true,
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
-        const checkEnabledResult = checkAlertTypeEnabled(
-          alertTypesState.data.get(alert.alertTypeId)
-        );
-        const link = (
+        return (
           <EuiLink
             title={name}
             onClick={() => {
@@ -312,17 +308,6 @@ export const AlertsList: React.FunctionComponent = () => {
           >
             {name}
           </EuiLink>
-        );
-        return checkEnabledResult.isEnabled ? (
-          link
-        ) : (
-          <EuiToolTip
-            position="top"
-            data-test-subj={`${alert.id}-disabledTooltip`}
-            content={checkEnabledResult.message}
-          >
-            {link}
-          </EuiToolTip>
         );
       },
     },
