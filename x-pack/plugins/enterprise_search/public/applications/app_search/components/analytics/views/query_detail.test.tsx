@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 
-import { AnalyticsCards, AnalyticsChart } from '../components';
+import { AnalyticsCards, AnalyticsChart, QueryClicksTable } from '../components';
 import { QueryDetail } from './';
 
 describe('QueryDetail', () => {
@@ -41,5 +41,6 @@ describe('QueryDetail', () => {
 
     expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
+    expect(wrapper.find(QueryClicksTable)).toHaveLength(1);
   });
 });

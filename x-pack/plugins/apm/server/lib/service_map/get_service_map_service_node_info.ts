@@ -162,19 +162,12 @@ async function getTransactionStats({
             ),
           },
         },
-        count: {
-          value_count: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          },
-        },
       },
     },
   };
   const response = await apmEventClient.search(params);
 
-  const totalRequests = response.aggregations?.count.value ?? 0;
+  const totalRequests = response.hits.total.value;
 
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
