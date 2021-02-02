@@ -337,6 +337,30 @@ describe('alerts_list component with items', () => {
 
     expect(loadAlerts).toHaveBeenCalled();
   });
+
+  it('renders license errors and manage license modal on click', async () => {
+    global.open = jest.fn();
+    await setup();
+    expect(wrapper.find('ManageLicenseModal').exists()).toBeFalsy();
+    expect(
+      wrapper.find('EuiButtonEmpty[data-test-subj="alertStatus-error-license-fix"]').length
+    ).toEqual(1);
+    wrapper
+      .find('EuiButtonEmpty[data-test-subj="alertStatus-error-license-fix"]')
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('ManageLicenseModal').exists()).toBeTruthy();
+    expect(wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').text()).toEqual(
+      'Manage license'
+    );
+    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(global.open).toHaveBeenCalled();
+  });
 });
 
 describe('alerts_list component empty with show only capability', () => {
