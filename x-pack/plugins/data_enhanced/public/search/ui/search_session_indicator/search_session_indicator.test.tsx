@@ -51,7 +51,7 @@ test('Loading in the background state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session saved and loading'));
+  await userEvent.click(screen.getByLabelText(/Saved session in progress/));
   await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
@@ -67,7 +67,7 @@ test('BackgroundCompleted state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session complete'));
+  await userEvent.click(screen.getByLabelText(/Saved session complete/));
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );
@@ -83,7 +83,7 @@ test('Restored state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session restored'));
+  await userEvent.click(screen.getByLabelText(/Saved session restored/));
 
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
@@ -100,7 +100,7 @@ test('Canceled state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session canceled'));
+  await userEvent.click(screen.getByLabelText(/Search session stopped/));
   expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );

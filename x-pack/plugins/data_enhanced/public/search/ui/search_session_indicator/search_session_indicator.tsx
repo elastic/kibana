@@ -113,7 +113,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Loading]: {
     button: {
       color: 'subdued',
-      iconType: 'clock',
+      iconType: 'clock', // TODO: NEW ICON
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
         { defaultMessage: 'Search session loading' }
@@ -128,7 +128,7 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'Your search is taking a while...',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.loadingResultsDescription', {
-        defaultMessage: 'Save your session to get back to the results later',
+        defaultMessage: 'Save your session, continue your work, and return to completed results.',
       }),
       primaryAction: CancelButton,
       secondaryAction: ContinueInBackgroundButton,
@@ -136,8 +136,8 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Completed]: {
     button: {
-      color: 'text',
-      iconType: 'check',
+      color: 'subdued',
+      iconType: 'clock',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',
       }),
@@ -155,7 +155,7 @@ const searchSessionIndicatorViewStateToProps: {
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.resultsLoadedDescriptionText',
         {
-          defaultMessage: 'Save your session to get back to the results later',
+          defaultMessage: 'Save your session and return to it later.',
         }
       ),
       primaryAction: SaveButton,
@@ -168,25 +168,24 @@ const searchSessionIndicatorViewStateToProps: {
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel',
         {
-          defaultMessage: 'Search session saved and loading',
+          defaultMessage: 'Saved session in progress',
         }
       ),
       tooltipText: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconTooltipText',
         {
-          defaultMessage: 'Search session saved and loading',
+          defaultMessage: 'Saved session in progress',
         }
       ),
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
-        defaultMessage: 'Search session loading',
+        defaultMessage: 'Saved session in progress.',
       }),
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
         {
-          defaultMessage:
-            'Search session is saved. You can leave the page and get back to the results later.',
+          defaultMessage: 'You can return to completed results from Management.',
         }
       ),
       primaryAction: CancelButton,
@@ -200,13 +199,13 @@ const searchSessionIndicatorViewStateToProps: {
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundIconAriaLabel',
         {
-          defaultMessage: 'Search session complete',
+          defaultMessage: 'Saved session complete',
         }
       ),
       tooltipText: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
         {
-          defaultMessage: 'Search session complete',
+          defaultMessage: 'Saved session complete',
         }
       ),
     },
@@ -214,13 +213,13 @@ const searchSessionIndicatorViewStateToProps: {
       title: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundTitleText',
         {
-          defaultMessage: 'Search session complete',
+          defaultMessage: 'Saved session complete.',
         }
       ),
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundDescriptionText',
         {
-          defaultMessage: 'You can leave and get back to the results later',
+          defaultMessage: 'You can return to these results from Management.',
         }
       ),
       secondaryAction: ViewAllSearchSessionsButton,
@@ -233,7 +232,7 @@ const searchSessionIndicatorViewStateToProps: {
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.restoredResultsIconAriaLabel',
         {
-          defaultMessage: 'Search session restored',
+          defaultMessage: 'Saved session restored',
         }
       ),
       tooltipText: i18n.translate('xpack.data.searchSessionIndicator.restoredResultsTooltipText', {
@@ -242,7 +241,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.restoredTitleText', {
-        defaultMessage: 'Search session restored',
+        defaultMessage: 'Search session restored.',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.restoredDescriptionText', {
         defaultMessage:
@@ -256,18 +255,18 @@ const searchSessionIndicatorViewStateToProps: {
       color: 'danger',
       iconType: 'alert',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.canceledIconAriaLabel', {
-        defaultMessage: 'Search session canceled',
+        defaultMessage: 'Search session stopped',
       }),
       tooltipText: i18n.translate('xpack.data.searchSessionIndicator.canceledTooltipText', {
-        defaultMessage: 'Search session canceled',
+        defaultMessage: 'Search session stopped',
       }),
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.canceledTitleText', {
-        defaultMessage: 'Search session canceled',
+        defaultMessage: 'Search session stopped.',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.canceledDescriptionText', {
-        defaultMessage: 'You are viewing incomplete data',
+        defaultMessage: 'You are viewing incomplete data.',
       }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
