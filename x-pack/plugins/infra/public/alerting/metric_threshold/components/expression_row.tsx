@@ -182,6 +182,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
                   helpText={ofExpressionHelpText}
+                  data-test-subj="ofExpression"
                 />
               </StyledExpression>
             )}
