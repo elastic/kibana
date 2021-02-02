@@ -2172,7 +2172,7 @@
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
-"@elastic/datemath@link:bazel-dist/bin/packages/elastic-datemath":
+"@elastic/datemath@link:packages/elastic-datemath":
   version "0.0.0"
   uid ""
 
