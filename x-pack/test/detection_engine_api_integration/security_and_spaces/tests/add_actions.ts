@@ -24,16 +24,19 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
       beforeEach(async () => {
+        await esArchiver.load('auditbeat/hosts');
         await createSignalsIndex(supertest);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
