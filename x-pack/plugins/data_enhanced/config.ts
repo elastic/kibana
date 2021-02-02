@@ -12,8 +12,8 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
       pageSize: schema.number({ defaultValue: 10000 }),
       trackingInterval: schema.duration({ defaultValue: '10s' }),
-      completedTimeout: schema.duration({ defaultValue: '5m' }),
-      notTouchedTimeout: schema.duration({ defaultValue: '1m' }),
+      notTouchedTimeout: schema.duration({ defaultValue: '5m' }),
+      notTouchedInProgressTimeout: schema.duration({ defaultValue: '1m' }),
       maxUpdateRetries: schema.number({ defaultValue: 3 }),
       defaultExpiration: schema.duration({ defaultValue: '7d' }),
       management: schema.object({

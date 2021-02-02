@@ -37,15 +37,15 @@ function isSessionStale(
   logger: Logger
 ) {
   const curTime = moment();
-  // Delete if a running session wasn't polled for in the last notTouchedTimeout OR
-  // if a completed \ errored \ canceled session wasn't saved for within completedTimeout
+  // Delete if a running session wasn't polled for in the last notTouchedInProgressTimeout OR
+  // if a completed \ errored \ canceled session wasn't saved for within notTouchedTimeout
   return (
     (session.attributes.status === SearchSessionStatus.IN_PROGRESS &&
       curTime.diff(moment(session.attributes.touched), 'ms') >
-        config.notTouchedTimeout.asMilliseconds()) ||
+        config.notTouchedInProgressTimeout.asMilliseconds()) ||
     (session.attributes.status !== SearchSessionStatus.IN_PROGRESS &&
       curTime.diff(moment(session.attributes.touched), 'ms') >
-        config.completedTimeout.asMilliseconds())
+        config.notTouchedTimeout.asMilliseconds())
   );
 }
 

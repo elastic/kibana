@@ -51,8 +51,8 @@ describe('SearchSessionService', () => {
         sessions: {
           enabled: true,
           pageSize: 10000,
-          notTouchedTimeout: moment.duration(1, 'm'),
-          completedTimeout: moment.duration(2, 'm'),
+          notTouchedInProgressTimeout: moment.duration(1, 'm'),
+          notTouchedTimeout: moment.duration(2, 'm'),
           maxUpdateRetries: MAX_UPDATE_RETRIES,
           defaultExpiration: moment.duration(7, 'd'),
           trackingInterval: moment.duration(10, 's'),

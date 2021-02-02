@@ -22,8 +22,8 @@ describe('getSearchStatus', () => {
   const config: SearchSessionsConfig = {
     enabled: true,
     pageSize: 5,
-    notTouchedTimeout: moment.duration(1, 'm'),
-    completedTimeout: moment.duration(5, 'm'),
+    notTouchedInProgressTimeout: moment.duration(1, 'm'),
+    notTouchedTimeout: moment.duration(5, 'm'),
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
