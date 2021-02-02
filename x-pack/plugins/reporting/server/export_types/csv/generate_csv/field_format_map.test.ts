@@ -6,13 +6,13 @@
 
 import expect from '@kbn/expect';
 import { fieldFormats, FieldFormatsGetConfigFn, UI_SETTINGS } from 'src/plugins/data/server';
-import { IndexPatternSavedObject } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
 
 describe('field format map', function () {
-  const indexPatternSavedObject: IndexPatternSavedObject = {
+  const indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV = {
     timeFieldName: '@timestamp',
     title: 'logstash-*',
     attributes: {

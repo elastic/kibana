@@ -231,6 +231,7 @@ export {
   SearchUsage,
   SessionService,
   ISessionService,
+  IScopedSessionService,
   DataApiRequestHandlerContext,
   DataRequestHandlerContext,
 } from './search';
