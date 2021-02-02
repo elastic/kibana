@@ -8,102 +8,110 @@ import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
 
-const ACTION_TYPE_ID = '.servicenow';
-let actionTypeModel: ActionTypeModel;
+const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
+const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
+let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
-  if (getResult !== null) {
-    actionTypeModel = getResult;
-  }
 });
 
 describe('actionTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+    test(`${id}: action type static data is as expected`, () => {
+      const actionTypeModel = actionTypeRegistry.get(id);
+      expect(actionTypeModel.id).toEqual(id);
+    });
   });
 });
 
 describe('servicenow connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
-    const actionConnector = {
-      secrets: {
-        username: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.servicenow',
-      name: 'ServiceNow',
-      isPreconfigured: false,
-      config: {
-        apiUrl: 'https://dev94428.service-now.com/',
-      },
-    } as ServiceNowActionConnector;
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+    test(`${id}: connector validation succeeds when connector config is valid`, () => {
+      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionConnector = {
+        secrets: {
+          username: 'user',
+          password: 'pass',
+        },
+        id: 'test',
+        actionTypeId: id,
+        name: 'ServiceNow',
+        isPreconfigured: false,
+        config: {
+          apiUrl: 'https://dev94428.service-now.com/',
+        },
+      } as ServiceNowActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          apiUrl: [],
+      expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+        config: {
+          errors: {
+            apiUrl: [],
+          },
         },
-      },
-      secrets: {
-        errors: {
-          username: [],
-          password: [],
+        secrets: {
+          errors: {
+            username: [],
+            password: [],
+          },
         },
-      },
+      });
     });
-  });
 
-  test('connector validation fails when connector config is not valid', () => {
-    const actionConnector = ({
-      secrets: {
-        username: 'user',
-      },
-      id: '.servicenow',
-      actionTypeId: '.servicenow',
-      name: 'servicenow',
-      config: {},
-    } as unknown) as ServiceNowActionConnector;
+    test(`${id}: connector validation fails when connector config is not valid`, () => {
+      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionConnector = ({
+        secrets: {
+          username: 'user',
+        },
+        id,
+        actionTypeId: id,
+        name: 'servicenow',
+        config: {},
+      } as unknown) as ServiceNowActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {
-          apiUrl: ['URL is required.'],
+      expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+        config: {
+          errors: {
+            apiUrl: ['URL is required.'],
+          },
         },
-      },
-      secrets: {
-        errors: {
-          username: [],
-          password: ['Password is required.'],
+        secrets: {
+          errors: {
+            username: [],
+            password: ['Password is required.'],
+          },
         },
-      },
+      });
     });
   });
 });
 
 describe('servicenow action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
-    const actionParams = {
-      subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
-    };
+  [SERVICENOW_ITSM_ACTION_TYPE_ID, SERVICENOW_SIR_ACTION_TYPE_ID].forEach((id) => {
+    test(`${id}: action params validation succeeds when action params is valid`, () => {
+      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionParams = {
+        subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
+      };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { ['subActionParams.incident.short_description']: [] },
+      expect(actionTypeModel.validateParams(actionParams)).toEqual({
+        errors: { ['subActionParams.incident.short_description']: [] },
+      });
     });
-  });
 
-  test('params validation fails when body is not valid', () => {
-    const actionParams = {
-      subActionParams: { incident: { short_description: '' }, comments: [] },
-    };
+    test(`${id}: params validation fails when body is not valid`, () => {
+      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionParams = {
+        subActionParams: { incident: { short_description: '' }, comments: [] },
+      };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        ['subActionParams.incident.short_description']: ['Short description is required.'],
-      },
+      expect(actionTypeModel.validateParams(actionParams)).toEqual({
+        errors: {
+          ['subActionParams.incident.short_description']: ['Short description is required.'],
+        },
+      });
     });
   });
 });
