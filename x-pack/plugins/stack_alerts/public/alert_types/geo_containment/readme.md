@@ -109,9 +109,13 @@ choice.
 ### 9. Create containment alert
 - Go to the Alerts tab and click `Create Alert` > `Tracking containment`
 - Fill the side bar form top to bottom. This _should_ flow somewhat logically. In the top 
-section, set both `Check every` and `Notify every` to `2 seconds`. For `Notify`, leave
+section, set both `Check every` and `Notify every` to `2 seconds`.
+ For `Notify`, leave
 on default selected option `Only on status change`, this will notify only on newly
 contained entities.
+ **Please note that `2 seconds` is an unusually quick interval but done here for demo
+ purposes. With real world data, setting an appropriate interval speed is highly dependent
+ upon the quantity, update frequency and complexity of data handled.**
 - The default settings for `Select Entity` will mostly be correct. Select `mta_tracks*`
 as the index you'd like to track. Use the defaults populated under
 `Select entity` > `INDEX`, update `Select entity` > `BY` to `vehicle_ref`.
