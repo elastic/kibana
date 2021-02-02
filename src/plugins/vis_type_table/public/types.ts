@@ -7,6 +7,7 @@
  */
 
 import { IFieldFormat } from 'src/plugins/data/public';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { SchemaConfig } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../common';
 
@@ -43,11 +44,31 @@ export interface TableVisConfig extends TableVisParams {
 }
 
 export interface FormattedColumn {
-  id: string;
   title: string;
   formatter: IFieldFormat;
   formattedTotal?: string | number;
   filterable: boolean;
   sumTotal?: number;
   total?: number;
+}
+
+export interface FormattedColumns {
+  [key: string]: FormattedColumn;
+}
+
+export interface TableContext {
+  columns: DatatableColumn[];
+  rows: DatatableRow[];
+  formattedColumns: FormattedColumns;
+}
+
+export interface TableGroup {
+  table: TableContext;
+  title: string;
+}
+
+export interface TableVisData {
+  table?: TableContext;
+  tables: TableGroup[];
+  direction?: 'row' | 'column';
 }
