@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
-import { mount } from 'enzyme';
-import { Location, History } from 'history';
-import { MemoryRouter, Router } from 'react-router-dom';
-import moment from 'moment-timezone';
-import { IUrlParams } from './types';
-import { getParsedDate } from './helpers';
 import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
+import { History, Location } from 'history';
+import moment from 'moment-timezone';
+import * as React from 'react';
+import { MemoryRouter, Router } from 'react-router-dom';
+import { IUrlParams } from './types';
+import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
 function mountParams(location: Location) {
   return mount(
@@ -33,11 +32,11 @@ function getDataFromOutput(wrapper: ReturnType<typeof mount>) {
 }
 
 describe('UrlParamsContext', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     moment.tz.setDefault('Etc/GMT');
   });
 
-  afterEach(() => {
+  afterAll(() => {
     moment.tz.setDefault('');
   });
 
@@ -50,8 +49,11 @@ describe('UrlParamsContext', () => {
 
     const wrapper = mountParams(location);
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2010-03-15T12:00:00.000Z');
-    expect(params.end).toEqual('2010-04-10T12:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2010-03-15T00:00:00.000Z',
+      '2010-04-11T00:00:00.000Z',
+    ]);
   });
 
   it('should update param values if location has changed', () => {
@@ -66,8 +68,11 @@ describe('UrlParamsContext', () => {
     // force an update
     wrapper.setProps({ abc: 123 });
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2009-03-15T12:00:00.000Z');
-    expect(params.end).toEqual('2009-04-10T12:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2009-03-15T00:00:00.000Z',
+      '2009-04-11T00:00:00.000Z',
+    ]);
   });
 
   it('should parse relative time ranges on mount', () => {
@@ -76,13 +81,20 @@ describe('UrlParamsContext', () => {
       search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED',
     } as Location;
 
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
+
     const wrapper = mountParams(location);
 
     // force an update
     wrapper.setProps({ abc: 123 });
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual(getParsedDate('now-1d/d'));
-    expect(params.end).toEqual(getParsedDate('now-1d/d', { roundUp: true }));
+
+    expect([params.start, params.end]).toEqual([
+      '1969-12-31T00:00:00.000Z',
+      '1970-01-01T00:00:00.000Z',
+    ]);
+
+    nowSpy.mockRestore();
   });
 
   it('should refresh the time range with new values', async () => {
@@ -130,8 +142,11 @@ describe('UrlParamsContext', () => {
     expect(calls.length).toBe(2);
 
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2005-09-20T12:00:00.000Z');
-    expect(params.end).toEqual('2005-10-21T12:00:00.000Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2005-09-19T00:00:00.000Z',
+      '2005-10-23T00:00:00.000Z',
+    ]);
   });
 
   it('should refresh the time range with new values if time range is relative', async () => {
@@ -177,7 +192,10 @@ describe('UrlParamsContext', () => {
     await waitFor(() => {});
 
     const params = getDataFromOutput(wrapper);
-    expect(params.start).toEqual('2000-06-14T00:00:00.000Z');
-    expect(params.end).toEqual('2000-06-14T23:59:59.999Z');
+
+    expect([params.start, params.end]).toEqual([
+      '2000-06-14T00:00:00.000Z',
+      '2000-06-15T00:00:00.000Z',
+    ]);
   });
 });
