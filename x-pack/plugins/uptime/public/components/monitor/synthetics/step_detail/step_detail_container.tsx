@@ -32,7 +32,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
 
   useEffect(() => {
     if (checkGroup) {
-      dispatch(getJourneySteps({ checkGroup, stepTypes: ['step/end'] }));
+      dispatch(getJourneySteps({ checkGroup, syntheticEventTypes: ['step/end'] }));
     }
   }, [dispatch, checkGroup]);
 

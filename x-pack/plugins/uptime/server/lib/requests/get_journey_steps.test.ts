@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getJourneySteps, formatStepTypes } from './get_journey_steps';
+import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
 import { getUptimeESMockClient } from './helper';
 
 describe('getJourneySteps request module', () => {
   describe('formatStepTypes', () => {
     it('returns default steps if none are provided', () => {
-      expect(formatStepTypes()).toMatchInlineSnapshot(`
+      expect(formatSyntheticEvents()).toMatchInlineSnapshot(`
         Array [
           "step/end",
           "stderr",
@@ -21,7 +21,7 @@ describe('getJourneySteps request module', () => {
     });
 
     it('returns provided step array if isArray', () => {
-      expect(formatStepTypes(['step/end', 'stderr'])).toMatchInlineSnapshot(`
+      expect(formatSyntheticEvents(['step/end', 'stderr'])).toMatchInlineSnapshot(`
         Array [
           "step/end",
           "stderr",
@@ -30,7 +30,7 @@ describe('getJourneySteps request module', () => {
     });
 
     it('returns provided step string in an array', () => {
-      expect(formatStepTypes('step/end')).toMatchInlineSnapshot(`
+      expect(formatSyntheticEvents('step/end')).toMatchInlineSnapshot(`
         Array [
           "step/end",
         ]
@@ -153,9 +153,8 @@ describe('getJourneySteps request module', () => {
         ]
       `);
 
-      expect(call.body.size).toBe(500);
-
       expect(result).toHaveLength(2);
+      // `getJourneySteps` is responsible for formatting these fields, so we need to check them
       result.forEach((step: any) => {
         expect(['2021-02-01T17:45:19.001Z', '2021-02-01T17:45:49.944Z']).toContain(step.timestamp);
         expect(['o6myXncBFt2V8m6r6z-r', 'IjqzXncBn2sjqrYxYoCG']).toContain(step.docId);
@@ -173,7 +172,7 @@ describe('getJourneySteps request module', () => {
       const result: any = await getJourneySteps({
         uptimeEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
-        stepTypes: ['stderr', 'step/end'],
+        syntheticEventTypes: ['stderr', 'step/end'],
       });
 
       const call: any = mockEsClient.search.mock.calls[0][0];

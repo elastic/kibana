@@ -9,7 +9,7 @@ import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
-  stepTypes?: string[];
+  syntheticEventTypes?: string[];
 }
 
 export interface GetJourneyFailPayload {

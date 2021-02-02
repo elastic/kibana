@@ -17,16 +17,20 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       _debug: schema.maybe(schema.boolean()),
     }),
     query: schema.object({
-      stepTypes: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+      // provides a filter for the types of synthetic events to include
+      // when fetching a journey's data
+      syntheticEventTypes: schema.maybe(
+        schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+      ),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroup } = request.params;
-    const { stepTypes } = request.query;
+    const { syntheticEventTypes } = request.query;
     const result = await libs.requests.getJourneySteps({
       uptimeEsClient,
       checkGroup,
-      stepTypes,
+      syntheticEventTypes,
     });
 
     const details = await libs.requests.getJourneyDetails({
