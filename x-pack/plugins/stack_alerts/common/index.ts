@@ -5,3 +5,4 @@
  */
 export * from './config';
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;

@@ -67,6 +67,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await createAlert({
         name: 'never fire',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
         thresholdComparator: '<',
         threshold: [0],
       });
@@ -74,6 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await createAlert({
         name: 'always fire',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+        size: 100,
         thresholdComparator: '>',
         threshold: [-1],
       });
@@ -122,6 +124,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await createAlert({
         name: 'never fire',
         esQuery: JSON.stringify(rangeQuery(ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE + 1)),
+        size: 100,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -131,6 +134,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         esQuery: JSON.stringify(
           rangeQuery(Math.floor((ES_GROUPS_TO_WRITE * ALERT_INTERVALS_TO_WRITE) / 2))
         ),
+        size: 100,
         thresholdComparator: '>=',
         threshold: [0],
       });
@@ -172,6 +176,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       name: string;
       timeField?: string;
       esQuery: string;
+      size: number;
       thresholdComparator: string;
       threshold: number[];
       timeWindowSize?: number;

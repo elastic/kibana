@@ -29,6 +29,7 @@ import {
   COMPARATORS,
   ThresholdExpression,
   ForLastExpression,
+  ValueExpression,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
@@ -44,6 +45,7 @@ const DEFAULT_VALUES = {
     "match_all" : {}
   }
 }`,
+  SIZE: 100,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
@@ -52,6 +54,7 @@ const DEFAULT_VALUES = {
 const expressionFieldsWithValidation = [
   'index',
   'esQuery',
+  'size',
   'timeField',
   'threshold0',
   'threshold1',
@@ -73,6 +76,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     index,
     timeField,
     esQuery,
+    size,
     thresholdComparator,
     threshold,
     timeWindowSize,
@@ -82,6 +86,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const getDefaultParams = () => ({
     ...alertParams,
     esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
+    size: size ?? DEFAULT_VALUES.SIZE,
     timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
     timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
     threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
@@ -213,7 +218,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndex"
-            defaultMessage="Select an index"
+            defaultMessage="Select an index and size"
           />
         </h5>
       </EuiTitle>
@@ -233,6 +238,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
               ...alertParams,
               index: indices,
               esQuery: DEFAULT_VALUES.QUERY,
+              size: DEFAULT_VALUES.SIZE,
               thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
               timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
               timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
@@ -244,6 +250,19 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
+      />
+      <ValueExpression
+        description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
+          defaultMessage: 'Size',
+        })}
+        data-test-subj="sizeValueExpression"
+        value={size}
+        errors={errors.size}
+        display="fullWidth"
+        popupPosition={'upLeft'}
+        onChangeSelectedValue={(updatedValue) => {
+          setParam('size', updatedValue);
+        }}
       />
       <EuiSpacer />
       <EuiTitle size="xs">

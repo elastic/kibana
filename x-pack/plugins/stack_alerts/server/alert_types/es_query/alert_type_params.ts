@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { AlertTypeState } from '../../../../alerts/server';
+import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
 
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
@@ -20,6 +21,7 @@ export const EsQueryAlertParamsSchemaProperties = {
   index: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
   timeField: schema.string({ minLength: 1 }),
   esQuery: schema.string({ minLength: 1 }),
+  size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),

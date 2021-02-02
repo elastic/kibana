@@ -16,6 +16,7 @@ export interface EsQueryAlertParams extends AlertTypeParams {
   index: string[];
   timeField?: string;
   esQuery: string;
+  size: number;
   thresholdComparator?: string;
   threshold: number[];
   timeWindowSize: number;
