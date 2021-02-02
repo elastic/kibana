@@ -158,6 +158,8 @@ const RuntimeFieldFormComp = ({
     existingConcreteFields
   );
 
+  let editorValidationTimeout: ReturnType<typeof setTimeout>;
+
   useEffect(() => {
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, submit });
@@ -255,7 +257,7 @@ const RuntimeFieldFormComp = ({
 
       {/* Script */}
       <UseField<string> path="script.source">
-        {({ value, setValue, label, isValid, getErrorsMessages }) => {
+        {({ value, setValue, label, isValid, getErrorsMessages, setErrors }) => {
           return (
             <EuiFormRow
               label={label}
@@ -290,7 +292,28 @@ const RuntimeFieldFormComp = ({
                 width="100%"
                 height="300px"
                 value={value}
-                onChange={setValue}
+                onChange={(val) => {
+                  setValue(val);
+
+                  // monaco waits 500ms before validating, so we also add a small delay
+                  // before checking if there are any syntax errors
+                  clearTimeout(editorValidationTimeout);
+                  editorValidationTimeout = setTimeout(() => {
+                    const hasSyntaxError = PainlessLang.hasSyntaxError();
+                    if (hasSyntaxError) {
+                      setErrors([
+                        {
+                          message: i18n.translate(
+                            'xpack.runtimeFields.form.scriptEditorValidationMessage',
+                            {
+                              defaultMessage: 'Invalid syntax.',
+                            }
+                          ),
+                        },
+                      ]);
+                    }
+                  }, 600);
+                }}
                 options={{
                   fontSize: 12,
                   minimap: {
