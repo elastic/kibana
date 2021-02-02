@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await browser.setLocalStorageItem('insecureClusterWarningVisibility', '');
         await esArchiver.unload('hamlet');
-        await esArchiver.emptyKibanaIndex();
       });
 
       it('should not warn when the cluster contains no user data', async () => {

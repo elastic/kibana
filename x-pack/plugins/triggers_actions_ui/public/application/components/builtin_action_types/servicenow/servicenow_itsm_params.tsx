@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -14,38 +13,29 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowActionParams } from './types';
+import { ServiceNowITSMActionParams, Choice, Options } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { useGetChoices } from './use_get_choices';
+import * as i18n from './translations';
 
-const selectOptions = [
-  {
-    value: '1',
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectHighOptionLabel',
-      { defaultMessage: 'High' }
-    ),
-  },
-  {
-    value: '2',
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectMediumOptionLabel',
-      { defaultMessage: 'Medium' }
-    ),
-  },
-  {
-    value: '3',
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectLawOptionLabel',
-      { defaultMessage: 'Low' }
-    ),
-  },
-];
+const useGetChoicesFields = ['urgency', 'severity', 'impact'];
+const defaultOptions: Options = {
+  urgency: [],
+  severity: [],
+  impact: [],
+};
 
 const ServiceNowParamsFields: React.FunctionComponent<
-  ActionParamsProps<ServiceNowActionParams>
+  ActionParamsProps<ServiceNowITSMActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
     () =>
@@ -53,9 +43,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
       (({
         incident: {},
         comments: [],
-      } as unknown) as ServiceNowActionParams['subActionParams']),
+      } as unknown) as ServiceNowITSMActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
+
+  const [options, setOptions] = useState<Options>(defaultOptions);
 
   const editSubActionProperty = useCallback(
     (key: string, value: any) => {
@@ -80,6 +72,28 @@ const ServiceNowParamsFields: React.FunctionComponent<
     [editSubActionProperty]
   );
 
+  const onChoicesSuccess = (choices: Choice[]) =>
+    setOptions(
+      choices.reduce(
+        (acc, choice) => ({
+          ...acc,
+          [choice.element]: [
+            ...(acc[choice.element] != null ? acc[choice.element] : []),
+            { value: choice.value, text: choice.label },
+          ],
+        }),
+        defaultOptions
+      )
+    );
+
+  const { isLoading: isLoadingChoices } = useGetChoices({
+    http,
+    toastNotifications: toasts,
+    actionConnector,
+    fields: useGetChoicesFields,
+    onSuccess: onChoicesSuccess,
+  });
+
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
@@ -94,6 +108,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
@@ -114,64 +129,47 @@ const ServiceNowParamsFields: React.FunctionComponent<
   return (
     <Fragment>
       <EuiTitle size="s">
-        <h3>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.title',
-            { defaultMessage: 'Incident' }
-          )}
-        </h3>
+        <h3>{i18n.INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.urgencySelectFieldLabel',
-          { defaultMessage: 'Urgency' }
-        )}
-      >
+      <EuiFormRow fullWidth label={i18n.URGENCY_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="urgencySelect"
           hasNoInitialSelection
-          options={selectOptions}
-          value={incident.urgency ?? undefined}
+          isLoading={isLoadingChoices}
+          disabled={isLoadingChoices}
+          options={options.urgency}
+          value={incident.urgency ?? ''}
           onChange={(e) => editSubActionProperty('urgency', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.severitySelectFieldLabel',
-              { defaultMessage: 'Severity' }
-            )}
-          >
+          <EuiFormRow fullWidth label={i18n.SEVERITY_LABEL}>
             <EuiSelect
               fullWidth
               data-test-subj="severitySelect"
               hasNoInitialSelection
-              options={selectOptions}
-              value={incident.severity ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={options.severity}
+              value={incident.severity ?? ''}
               onChange={(e) => editSubActionProperty('severity', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.impactSelectFieldLabel',
-              { defaultMessage: 'Impact' }
-            )}
-          >
+          <EuiFormRow fullWidth label={i18n.IMPACT_LABEL}>
             <EuiSelect
               fullWidth
               data-test-subj="impactSelect"
               hasNoInitialSelection
-              options={selectOptions}
-              value={incident.impact ?? undefined}
+              isLoading={isLoadingChoices}
+              disabled={isLoadingChoices}
+              options={options.impact}
+              value={incident.impact ?? ''}
               onChange={(e) => editSubActionProperty('impact', e.target.value)}
             />
           </EuiFormRow>
@@ -185,10 +183,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           errors['subActionParams.incident.short_description'].length > 0 &&
           incident.short_description !== undefined
         }
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.titleFieldLabel',
-          { defaultMessage: 'Short description (required)' }
-        )}
+        label={i18n.SHORT_DESCRIPTION_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -205,10 +200,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         messageVariables={messageVariables}
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
-          { defaultMessage: 'Description' }
-        )}
+        label={i18n.DESCRIPTION_LABEL}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -216,10 +208,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         messageVariables={messageVariables}
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.commentsTextAreaFieldLabel',
-          { defaultMessage: 'Additional comments' }
-        )}
+        label={i18n.COMMENTS_LABEL}
       />
     </Fragment>
   );
