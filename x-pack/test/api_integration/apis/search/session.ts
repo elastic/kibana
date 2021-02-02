@@ -252,38 +252,5 @@ export default function ({ getService }: FtrProviderContext) {
         getSessionSecondTime.body.attributes.touched
       );
     });
-
-    it('session is cleared by monitoring task if notTouchedTimeout expires', async () => {
-      const sessionId = `my-session-${Math.random()}`;
-
-      // run search
-      await supertest
-        .post(`/internal/search/ese`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          sessionId,
-          params: {
-            body: {
-              query: {
-                term: {
-                  agent: '1',
-                },
-              },
-            },
-            wait_for_completion_timeout: '1ms',
-          },
-        })
-        .expect(200);
-
-      // it might take the session a moment to be created
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
-
-      // wait for session to expire due to completedTimeout (as if user stayed on screen and didn't save the search session)
-      await new Promise((resolve) => setTimeout(resolve, 20000));
-
-      await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(404);
-    });
   });
 }
