@@ -11,6 +11,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "__mocks__/**/*",
     "shared_imports.ts",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
