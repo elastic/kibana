@@ -29,10 +29,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
-  async function defineAlert(alertName: string) {
+  async function defineAlert(alertName: string, alertType?: string) {
+    alertType = alertType || '.index-threshold';
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click(`${alertType}-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const comboBox = await find.byCssSelector('#indexSelectSearchBox');
     await comboBox.click();
@@ -216,6 +217,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('confirmAlertCloseModal');
       await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
       await testSubjects.missingOrFail('confirmAlertCloseModal');
+    });
+
+    it('should successfully test valid es_query alert', async () => {
+      const alertName = generateUniqueKey();
+      await defineAlert(alertName, '.es-query');
+
+      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.existOrFail('testQuerySuccess');
+      await testSubjects.missingOrFail('testQueryError');
+
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
     });
   });
 };

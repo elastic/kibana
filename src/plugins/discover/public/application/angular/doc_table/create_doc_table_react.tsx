@@ -9,8 +9,11 @@
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
 import { IndexPatternField } from '../../../../../data/common/index_patterns';
+
 export type AngularScope = IScope;
 
 export interface AngularDirective {
@@ -83,9 +86,11 @@ export interface DocTableLegacyProps {
   indexPattern: IIndexPattern;
   minimumVisibleRows: number;
   onAddColumn?: (column: string) => void;
+  onBackToTop: () => void;
   onSort?: (sort: string[][]) => void;
   onMoveColumn?: (columns: string, newIdx: number) => void;
   onRemoveColumn?: (column: string) => void;
+  sampleSize: number;
   sort?: string[][];
   useNewFieldsApi?: boolean;
 }
@@ -120,5 +125,31 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
       return renderFn(ref.current, renderProps);
     }
   }, [renderFn, renderProps]);
-  return <div ref={ref} />;
+  return (
+    <div>
+      <div ref={ref} />
+      {renderProps.rows.length === renderProps.sampleSize ? (
+        <div
+          className="dscTable__footer"
+          data-test-subj="discoverDocTableFooter"
+          tabIndex={-1}
+          id="discoverBottomMarker"
+        >
+          <FormattedMessage
+            id="discover.howToSeeOtherMatchingDocumentsDescription"
+            defaultMessage="These are the first {sampleSize} documents matching
+                  your search, refine your search to see others."
+            values={{ sampleSize: renderProps.sampleSize }}
+          />
+          <EuiButtonEmpty onClick={renderProps.onBackToTop}>
+            <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
+          </EuiButtonEmpty>
+        </div>
+      ) : (
+        <span tabIndex={-1} id="discoverBottomMarker">
+          &#8203;
+        </span>
+      )}
+    </div>
+  );
 }

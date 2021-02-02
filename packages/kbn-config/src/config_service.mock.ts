@@ -17,8 +17,8 @@ const createConfigServiceMock = ({
 }: { atPath?: Record<string, any>; getConfig$?: Record<string, any> } = {}) => {
   const mocked: jest.Mocked<IConfigService> = {
     atPath: jest.fn(),
+    atPathSync: jest.fn(),
     getConfig$: jest.fn(),
-    optionalAtPath: jest.fn(),
     getUsedPaths: jest.fn(),
     getUnusedPaths: jest.fn(),
     isEnabledAtPath: jest.fn(),
@@ -27,6 +27,7 @@ const createConfigServiceMock = ({
     validate: jest.fn(),
   };
   mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));
+  mocked.atPathSync.mockReturnValue(atPath);
   mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$)));
   mocked.getUsedPaths.mockResolvedValue([]);
   mocked.getUnusedPaths.mockResolvedValue([]);

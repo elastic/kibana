@@ -6,14 +6,14 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 const optionalDateFieldSchema = schema.maybe(
@@ -48,12 +48,13 @@ export const findOptionsSchema = schema.object({
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'asc',
   }),
+  filter: schema.maybe(schema.string()),
 });
 // page & perPage are required, other fields are optional
 // using schema.maybe allows us to set undefined, but not to make the field optional
 export type FindOptionsType = Pick<
   TypeOf<typeof findOptionsSchema>,
-  'page' | 'per_page' | 'sort_field' | 'sort_order'
+  'page' | 'per_page' | 'sort_field' | 'sort_order' | 'filter'
 > &
   Partial<TypeOf<typeof findOptionsSchema>>;
 

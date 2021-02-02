@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraLogEntryHighlightFields } from '../../graphql/types';
 import {
   LogEntry,
   LogColumn,
@@ -12,14 +11,7 @@ import {
   LogFieldColumn,
   LogMessagePart,
   LogMessageFieldPart,
-} from '../../../common/http_api';
-
-export type LogEntryHighlightColumn = InfraLogEntryHighlightFields.Columns;
-export type LogEntryHighlightMessageColumn = InfraLogEntryHighlightFields.InfraLogEntryMessageColumnInlineFragment;
-export type LogEntryHighlightFieldColumn = InfraLogEntryHighlightFields.InfraLogEntryFieldColumnInlineFragment;
-
-export type LogEntryHighlightMessageSegment = InfraLogEntryHighlightFields.Message | {};
-export type LogEntryHighlightFieldMessageSegment = InfraLogEntryHighlightFields.InfraLogMessageFieldSegmentInlineFragment;
+} from '../../../common/log_entry';
 
 export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];

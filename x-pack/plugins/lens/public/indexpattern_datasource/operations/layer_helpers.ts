@@ -870,12 +870,7 @@ export function getErrorMessages(
 ): string[] | undefined {
   const errors: string[] = Object.entries(layer.columns)
     .flatMap(([columnId, column]) => {
-      // If we're transitioning to another operation, check for "new" incompleteColumns rather
-      // than "old" saved operation on the layer
-      const columnFinalRef =
-        layer.incompleteColumns?.[columnId]?.operationType || column.operationType;
-      const def = operationDefinitionMap[columnFinalRef];
-
+      const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
         return def.getErrorMessage(layer, columnId, indexPattern);
       }

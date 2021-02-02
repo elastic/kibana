@@ -5,11 +5,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
+
+import { getExecuteDetails } from '../__fixtures__';
+import { defaultWatch } from '../public/application/models/watch';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/jest_constants';
-import defaultWatchJson from '../public/application/models/watch/default_watch.json';
-import { getExecuteDetails } from '../__fixtures__';
 
 const { setup } = pageHelpers.watchCreateJson;
 
@@ -117,7 +118,7 @@ describe('<JsonWatchEdit /> create route', () => {
                   },
                 },
               ],
-              watch: defaultWatchJson,
+              watch: defaultWatch,
             })
           );
         });
@@ -172,7 +173,7 @@ describe('<JsonWatchEdit /> create route', () => {
 
           const latestRequest = server.requests[server.requests.length - 1];
 
-          const actionModes = Object.keys(defaultWatchJson.actions).reduce(
+          const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = 'simulate';
               return actionAccum;
@@ -186,7 +187,7 @@ describe('<JsonWatchEdit /> create route', () => {
             isNew: true,
             isActive: true,
             actions: [],
-            watch: defaultWatchJson,
+            watch: defaultWatch,
           };
 
           expect(latestRequest.requestBody).toEqual(
@@ -234,7 +235,7 @@ describe('<JsonWatchEdit /> create route', () => {
 
           const latestRequest = server.requests[server.requests.length - 1];
 
-          const actionModes = Object.keys(defaultWatchJson.actions).reduce(
+          const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = ACTION_MODE;
               return actionAccum;
@@ -248,7 +249,7 @@ describe('<JsonWatchEdit /> create route', () => {
             isNew: true,
             isActive: true,
             actions: [],
-            watch: defaultWatchJson,
+            watch: defaultWatch,
           };
 
           const triggeredTime = `now+${TRIGGERED_TIME}s`;

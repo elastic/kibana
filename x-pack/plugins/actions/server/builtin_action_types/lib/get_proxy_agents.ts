@@ -4,28 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent } from 'http';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface GetProxyAgentsResponse {
-  httpAgent: Agent | undefined;
-  httpsAgent: Agent | undefined;
+  httpAgent: HttpAgent | undefined;
+  httpsAgent: HttpsAgent | undefined;
 }
 
 export function getProxyAgents(
-  proxySettings: ProxySettings | undefined | null,
+  configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger
 ): GetProxyAgentsResponse {
-  const undefinedResponse = {
+  const proxySettings = configurationUtilities.getProxySettings();
+  const defaultResponse = {
     httpAgent: undefined,
-    httpsAgent: undefined,
+    httpsAgent: new HttpsAgent({
+      rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
+    }),
   };
 
   if (!proxySettings) {
-    return undefinedResponse;
+    return defaultResponse;
   }
 
   logger.debug(`Creating proxy agents for proxy: ${proxySettings.proxyUrl}`);
@@ -34,7 +38,7 @@ export function getProxyAgents(
     proxyUrl = new URL(proxySettings.proxyUrl);
   } catch (err) {
     logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored`);
-    return undefinedResponse;
+    return defaultResponse;
   }
 
   const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
@@ -45,8 +49,8 @@ export function getProxyAgents(
     headers: proxySettings.proxyHeaders,
     // do not fail on invalid certs if value is false
     rejectUnauthorized: proxySettings.proxyRejectUnauthorizedCertificates,
-  }) as unknown) as Agent;
-  // vsCode wasn't convinced HttpsProxyAgent is an http.Agent, so we convinced it
+  }) as unknown) as HttpsAgent;
+  // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 
   return { httpAgent, httpsAgent };
 }

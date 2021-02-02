@@ -30,7 +30,7 @@ import {
   PostAgentAcksResponse,
   PostAgentAcksRequest,
 } from '../../../fleet/common';
-import { factory as policyConfigFactory } from './models/policy_config';
+import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 

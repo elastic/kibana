@@ -40,6 +40,7 @@ export const VisualizeListing = () => {
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -94,11 +95,10 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history, savedObjectsTagging), [
-    application,
-    history,
-    savedObjectsTagging,
-  ]);
+  const tableColumns = useMemo(
+    () => getTableColumns(application, kbnUrlStateStorage, savedObjectsTagging),
+    [application, kbnUrlStateStorage, savedObjectsTagging]
+  );
 
   const fetchItems = useCallback(
     (filter) => {

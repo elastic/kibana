@@ -6,23 +6,24 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
-import { Services, ProxySettings } from '../../types';
+import { Services } from '../../types';
 import { request } from './axios_utils';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 interface PostPagerdutyOptions {
   apiUrl: string;
   data: unknown;
   headers: Record<string, string>;
   services: Services;
-  proxySettings?: ProxySettings;
 }
 
 // post an event to pagerduty
 export async function postPagerduty(
   options: PostPagerdutyOptions,
-  logger: Logger
+  logger: Logger,
+  configurationUtilities: ActionsConfigurationUtilities
 ): Promise<AxiosResponse> {
-  const { apiUrl, data, headers, proxySettings } = options;
+  const { apiUrl, data, headers } = options;
   const axiosInstance = axios.create();
 
   return await request({
@@ -31,8 +32,8 @@ export async function postPagerduty(
     method: 'post',
     logger,
     data,
-    proxySettings,
     headers,
+    configurationUtilities,
     validateStatus: () => true,
   });
 }

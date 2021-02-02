@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
-import { PropTypes } from 'prop-types';
+import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import {
+  htmlIdGenerator,
   EuiCheckbox,
   EuiSearchBar,
   EuiFlexGroup,
@@ -25,6 +25,7 @@ import {
   EuiTableRowCellCheckbox,
   EuiTableHeaderMobile,
 } from '@elastic/eui';
+import { PropTypes } from 'prop-types';
 
 import { Pager } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
@@ -179,6 +180,8 @@ export function CustomSelectionTable({
     return indexOfUnselectedItem === -1;
   }
 
+  const selectAllCheckboxId = useMemo(() => htmlIdGenerator()(), []);
+
   function renderSelectAll(mobile) {
     const selectAll = i18n.translate('xpack.ml.jobSelector.customTable.selectAllCheckboxLabel', {
       defaultMessage: 'Select all',
@@ -186,7 +189,7 @@ export function CustomSelectionTable({
 
     return (
       <EuiCheckbox
-        id="selectAllCheckbox"
+        id={`${mobile ? `mobile-` : ''}${selectAllCheckboxId}`}
         label={mobile ? selectAll : null}
         checked={areAllItemsSelected()}
         onChange={toggleAll}

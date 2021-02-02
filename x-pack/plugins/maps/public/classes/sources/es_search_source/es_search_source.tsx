@@ -325,6 +325,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource,
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const allHits: any[] = [];
@@ -391,6 +392,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource,
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     return {

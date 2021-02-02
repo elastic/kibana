@@ -6,4 +6,4 @@
  * Public License, v 1.
  */
 
-export { runDockerGenerator, runDockerGeneratorForUBI } from './run';
+export { runDockerGenerator } from './run';

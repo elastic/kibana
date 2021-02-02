@@ -29,6 +29,7 @@ kibanaPipeline(timeoutMinutes: 150) {
       withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
         parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+          'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
           'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
             'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
             'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),

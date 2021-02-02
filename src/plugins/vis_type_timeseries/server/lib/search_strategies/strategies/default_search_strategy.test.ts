@@ -7,8 +7,8 @@
  */
 
 import { DefaultSearchStrategy } from './default_search_strategy';
-import { ReqFacade } from './abstract_search_strategy';
-import { VisPayload } from '../../../../common/types';
+import type { ReqFacade } from './abstract_search_strategy';
+import type { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchStrategy', () => {
   let defaultSearchStrategy: DefaultSearchStrategy;
@@ -20,7 +20,6 @@ describe('DefaultSearchStrategy', () => {
   });
 
   test('should init an DefaultSearchStrategy instance', () => {
-    expect(defaultSearchStrategy.name).toBe('default');
     expect(defaultSearchStrategy.checkForViability).toBeDefined();
     expect(defaultSearchStrategy.search).toBeDefined();
     expect(defaultSearchStrategy.getFieldsForWildcard).toBeDefined();

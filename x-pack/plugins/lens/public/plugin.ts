@@ -17,6 +17,7 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
@@ -71,6 +72,7 @@ export interface LensPluginStartDependencies {
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface LensPublicStart {
@@ -172,6 +174,12 @@ export class LensPlugin {
       return deps.dashboard.dashboardFeatureFlagConfig;
     };
 
+    const getPresentationUtilContext = async () => {
+      const [, deps] = await core.getStartServices();
+      const { ContextProvider } = deps.presentationUtil;
+      return ContextProvider;
+    };
+
     core.application.register({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -183,6 +191,7 @@ export class LensPlugin {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
           getByValueFeatureFlag,
+          getPresentationUtilContext,
         });
       },
     });

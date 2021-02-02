@@ -206,7 +206,7 @@ export function getState({
       }
     },
     // helper function just needed for testing
-    flushToUrl: (replace?: boolean) => stateStorage.flush({ replace }),
+    flushToUrl: (replace?: boolean) => stateStorage.kbnUrlControls.flush(replace),
   };
 }
 

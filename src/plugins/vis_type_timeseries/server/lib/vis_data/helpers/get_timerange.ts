@@ -7,7 +7,8 @@
  */
 
 import { utc } from 'moment';
-import { ReqFacade, VisPayload } from '../../..';
+import type { ReqFacade } from '../../search_strategies';
+import type { VisPayload } from '../../../../common/types';
 
 export const getTimerange = (req: ReqFacade<VisPayload>) => {
   const { min, max } = req.payload.timerange;

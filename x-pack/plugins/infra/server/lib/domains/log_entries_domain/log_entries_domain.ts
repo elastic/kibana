@@ -10,22 +10,21 @@ import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntry,
-  LogColumn,
   LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
-import { getBuiltinRules } from './builtin_rules';
+import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
   Highlights,
   compileFormattingRules,
-} from './message';
+} from '../../../services/log_entries/message/message';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -34,7 +33,6 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
-import { LogEntryCursor } from '../../../../common/log_entry';
 
 export interface LogEntriesParams {
   startTimestamp: number;
@@ -157,6 +155,7 @@ export class InfraLogEntriesDomain {
     const entries = documents.map((doc) => {
       return {
         id: doc.id,
+        index: doc.index,
         cursor: doc.cursor,
         columns: columnDefinitions.map(
           (column): LogColumn => {
@@ -318,6 +317,7 @@ export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   id: string;
+  index: string;
   fields: Fields;
   highlights: Highlights;
   cursor: LogEntryCursor;
