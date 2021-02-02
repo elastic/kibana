@@ -6,8 +6,11 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { EsQueryAlertParamsSchema, EsQueryAlertParams } from './alert_type_params';
-import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
+import {
+  EsQueryAlertParamsSchema,
+  EsQueryAlertParams,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+} from './alert_type_params';
 
 const DefaultParams: Writable<Partial<EsQueryAlertParams>> = {
   index: ['index-name'],

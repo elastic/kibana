@@ -9,7 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
 import { AlertTypeState } from '../../../../alerts/server';
-import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
+
+export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;

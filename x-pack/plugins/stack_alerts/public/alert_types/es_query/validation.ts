@@ -5,7 +5,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { EsQueryAlertParams } from './types';
-import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
@@ -109,11 +108,11 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
       })
     );
   }
-  if ((size && size < 0) || size > ES_QUERY_MAX_HITS_PER_EXECUTION) {
+  if ((size && size < 0) || size > 10000) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
         defaultMessage: 'Size must be between 0 and {max, number}.',
-        values: { max: ES_QUERY_MAX_HITS_PER_EXECUTION },
+        values: { max: 10000 },
       })
     );
   }
