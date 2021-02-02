@@ -50,7 +50,8 @@ export function getTransposeId(value: string, columnId: string) {
 
 export function getOriginalId(id: string) {
   if (id.includes(TRANSPOSE_SEPARATOR)) {
-    return id.split(TRANSPOSE_SEPARATOR)[1];
+    const idParts = id.split(TRANSPOSE_SEPARATOR);
+    return idParts[idParts.length - 1];
   }
   return id;
 }
@@ -137,8 +138,8 @@ export const getDatatable = ({
             return {
               ...metricColumn,
               columnId: getTransposeId(uniqueValue, metricColumn.columnId),
-              originalColumnId: metricColumn.columnId,
-              originalName: originalDatatableColumn.name,
+              originalColumnId: metricColumn.originalColumnId || metricColumn.columnId,
+              originalName: metricColumn.originalName || originalDatatableColumn.name,
             };
           });
         });
