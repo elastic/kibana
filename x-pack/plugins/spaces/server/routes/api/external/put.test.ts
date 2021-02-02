@@ -60,7 +60,6 @@ describe('PUT /api/spaces/space', () => {
     initPutSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,

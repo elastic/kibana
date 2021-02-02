@@ -11,7 +11,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../contexts/kibana';
+import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -93,6 +93,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [
     timeSeriesExplorerUrlState,
@@ -249,7 +250,12 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       setLastRefresh(Date.now());
       appStateHandler(APP_STATE_ACTION.CLEAR);
     }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    const validatedJobId = validateJobSelection(
+      jobsWithTimeRange,
+      selectedJobIds,
+      setGlobalState,
+      toasts
+    );
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }

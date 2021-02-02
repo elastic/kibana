@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum BackgroundSessionStatus {
+export enum SearchSessionStatus {
   IN_PROGRESS = 'in_progress',
   ERROR = 'error',
   COMPLETE = 'complete',

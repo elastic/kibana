@@ -22,6 +22,7 @@ export async function getServiceTransactionGroups({
   sortDirection,
   sortField,
   searchAggregatedTransactions,
+  transactionType,
   latencyAggregationType,
 }: {
   serviceName: string;
@@ -32,6 +33,7 @@ export async function getServiceTransactionGroups({
   sortDirection: 'asc' | 'desc';
   sortField: ServiceOverviewTransactionGroupSortField;
   searchAggregatedTransactions: boolean;
+  transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
@@ -51,6 +53,7 @@ export async function getServiceTransactionGroups({
     sortDirection,
     size,
     searchAggregatedTransactions,
+    transactionType,
     latencyAggregationType,
   });
 
@@ -66,6 +69,7 @@ export async function getServiceTransactionGroups({
     serviceName,
     size,
     transactionNames,
+    transactionType,
     latencyAggregationType,
   });
 
@@ -76,6 +80,7 @@ export async function getServiceTransactionGroups({
       start,
       end,
       latencyAggregationType,
+      transactionType,
     }),
     totalTransactionGroups,
     isAggregationAccurate,

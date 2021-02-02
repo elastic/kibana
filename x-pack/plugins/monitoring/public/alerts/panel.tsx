@@ -10,6 +10,7 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { CommonAlert, CommonAlertState, AlertMessage } from '../../common/types/alerts';
@@ -47,12 +48,24 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
       </EuiListGroup>
     ) : null;
 
+  const { code } = alertState.state.ui.message;
   return (
     <Fragment>
       <div style={{ padding: '1rem' }}>
         <EuiTitle size="xs">
           <h5>{replaceTokens(alertState.state.ui.message)}</h5>
         </EuiTitle>
+        {code?.length ? (
+          <EuiCodeBlock
+            fontSize="s"
+            paddingSize="s"
+            language="json"
+            isCopyable={true}
+            overflowHeight={150}
+          >
+            {code}
+          </EuiCodeBlock>
+        ) : null}
         {nextStepsUi ? <EuiSpacer size="s" /> : null}
         {nextStepsUi}
       </div>

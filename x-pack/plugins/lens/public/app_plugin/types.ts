@@ -33,9 +33,12 @@ import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '../../../../../src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+} from '../../../../../src/plugins/embeddable/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { EditorFrameInstance } from '..';
+import { EditorFrameInstance } from '../types';
 
 export interface LensAppState {
   isLoading: boolean;
@@ -52,16 +55,12 @@ export interface LensAppState {
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
 
-  // Properties needed to interface with TopNav
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
   isSaveable: boolean;
   activeData?: TableInspectorAdapter;
+  searchSessionId: string;
 }
 
 export interface RedirectToOriginProps {
@@ -100,6 +99,7 @@ export interface LensAppServices {
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];

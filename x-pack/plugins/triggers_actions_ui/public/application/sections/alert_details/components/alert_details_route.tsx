@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { ToastsApi } from 'kibana/public';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import { AlertDetailsWithApi as AlertDetails } from './alert_details';
@@ -21,6 +20,7 @@ import {
   withActionOperations,
 } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type AlertDetailsRouteProps = RouteComponentProps<{
   alertId: string;
@@ -66,14 +66,7 @@ export const AlertDetailsRoute: React.FunctionComponent<AlertDetailsRouteProps> 
       requestRefresh={async () => requestRefresh(Date.now())}
     />
   ) : (
-    <div
-      style={{
-        textAlign: 'center',
-        margin: '4em 0em',
-      }}
-    >
-      <EuiLoadingSpinner size="l" />
-    </div>
+    <CenterJustifiedSpinner />
   );
 };
 

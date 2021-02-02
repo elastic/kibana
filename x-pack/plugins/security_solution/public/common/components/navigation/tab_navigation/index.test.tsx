@@ -6,12 +6,12 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { navTabs } from '../../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../../app/types';
 import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
-import { TimelineTabs } from '../../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';

@@ -10,20 +10,21 @@ import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
 import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
-import { useTransactionOverviewHref } from '../../shared/Links/apm/TransactionOverviewLink';
+import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface Tab {
   key: string;
@@ -46,6 +47,9 @@ interface Props {
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useApmServiceContext();
   const { uiSettings } = useApmPluginContext().core;
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
 
   const overviewTab = {
     key: 'overview',
@@ -60,7 +64,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useTransactionOverviewHref(serviceName),
+    href: useTransactionsOverviewHref({ serviceName, latencyAggregationType }),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),

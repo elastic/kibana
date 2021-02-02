@@ -138,12 +138,11 @@ export const REMOVE_DATA_PROVIDER = i18n.translate(
   }
 );
 
-export const SHOW_OPTIONS_DATA_PROVIDER = i18n.translate(
-  'xpack.securitySolution.dataProviders.showOptionsDataProvider',
-  {
-    defaultMessage: 'Show options for',
-  }
-);
+export const SHOW_OPTIONS_DATA_PROVIDER = ({ field, value }: { field: string; value: string }) =>
+  i18n.translate('xpack.securitySolution.dataProviders.showOptionsDataProviderAriaLabel', {
+    values: { field, value },
+    defaultMessage: '{field} {value} Press enter for options, or press space to begin dragging',
+  });
 
 export const TEMPORARILY_DISABLE_DATA_PROVIDER = i18n.translate(
   'xpack.securitySolution.dataProviders.temporaryDisableDataProvider',
@@ -183,3 +182,17 @@ export const TEMPLATE_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Template field',
   }
 );
+
+export const QUERY_AREA_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.queryAreaAriaLabel',
+  {
+    defaultMessage:
+      'You are in the timeline query area, which contains groups of data providers that query for events',
+  }
+);
+
+export const GROUP_AREA_ARIA_LABEL = (group: number) =>
+  i18n.translate('xpack.securitySolution.dataProviders.groupAreaAriaLabel', {
+    values: { group },
+    defaultMessage: 'You are in group {group}',
+  });

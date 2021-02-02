@@ -9,7 +9,7 @@ import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
 import { MapSettings } from '../../reducers/map';
 
 export async function getInitialView(
-  goto: Goto | null,
+  goto: Goto | null | undefined,
   settings: MapSettings
 ): Promise<MapCenterAndZoom | null> {
   if (settings.initialLocation === INITIAL_LOCATION.FIXED_LOCATION) {

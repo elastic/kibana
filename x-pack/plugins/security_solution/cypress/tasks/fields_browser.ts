@@ -32,7 +32,9 @@ export const addsHostGeoCountryNameToTimelineDraggingIt = () => {
   cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).should('exist');
   cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).then((field) => drag(field));
 
-  cy.get(FIELDS_BROWSER_HEADER_DROP_AREA).then((headersDropArea) => drop(headersDropArea));
+  cy.get(FIELDS_BROWSER_HEADER_DROP_AREA)
+    .first()
+    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const clearFieldsBrowser = () => {

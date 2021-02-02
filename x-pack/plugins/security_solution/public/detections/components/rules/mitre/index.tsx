@@ -6,19 +6,18 @@
 
 import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, camelCase } from 'lodash/fp';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
+import { Threat, Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
-import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import { isMitreAttackInvalid } from './helpers';
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -40,12 +39,9 @@ interface AddItemProps {
 }
 
 export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
-  const [showValidation, setShowValidation] = useState(false);
-  const { errorMessage } = getFieldValidityAndErrorMessage(field);
-
   const removeTactic = useCallback(
     (index: number) => {
-      const values = [...(field.value as IMitreEnterpriseAttack[])];
+      const values = [...(field.value as Threats)];
       values.splice(index, 1);
       if (isEmpty(values)) {
         field.setValue(threatDefault);
@@ -57,7 +53,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
   );
 
   const addMitreAttackTactic = useCallback(() => {
-    const values = [...(field.value as IMitreEnterpriseAttack[])];
+    const values = [...(field.value as Threats)];
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
@@ -70,7 +66,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
 
   const updateTactic = useCallback(
     (index: number, value: string) => {
-      const values = [...(field.value as IMitreEnterpriseAttack[])];
+      const values = [...(field.value as Threats)];
       const { id, reference, name } = tacticsOptions.find((t) => t.value === value) || {
         id: '',
         name: '',
@@ -87,15 +83,11 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
   );
 
   const values = useMemo(() => {
-    return [...(field.value as IMitreEnterpriseAttack[])];
+    return [...(field.value as Threats)];
   }, [field]);
 
-  const isTacticValid = useCallback((threat: IMitreEnterpriseAttack) => {
-    return isMitreAttackInvalid(threat.tactic.name, threat.technique);
-  }, []);
-
   const getSelectTactic = useCallback(
-    (threat: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
+    (threat: Threat, index: number, disabled: boolean) => {
       const tacticName = threat.tactic.name;
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -125,8 +117,6 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
               valueOfSelected={camelCase(tacticName)}
               data-test-subj="mitreAttackTactic"
               placeholder={i18n.TACTIC_PLACEHOLDER}
-              isInvalid={showValidation && isTacticValid(threat)}
-              onBlur={() => setShowValidation(true)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -141,7 +131,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         </EuiFlexGroup>
       );
     },
-    [field, isDisabled, removeTactic, showValidation, updateTactic, values, isTacticValid]
+    [field, isDisabled, removeTactic, updateTactic, values]
   );
 
   /**
@@ -150,7 +140,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
    * Value is memoized on top level props, any deep changes will have to be new objects
    */
   const onFieldChange = useCallback(
-    (threats: IMitreEnterpriseAttack[]) => {
+    (threats: Threats) => {
       field.setValue(threats);
     },
     [field]
@@ -166,16 +156,12 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
               label={`${field.label} ${i18n.THREATS}`}
               labelAppend={field.labelAppend}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
-              isInvalid={showValidation && isTacticValid(threat)}
-              error={errorMessage}
             >
               <>{getSelectTactic(threat, index, isDisabled)}</>
             </InitialMitreAttackFormRow>
           ) : (
             <EuiFormRow
               fullWidth
-              isInvalid={showValidation && isTacticValid(threat)}
-              error={errorMessage}
               describedByIds={idAria ? [`${idAria} ${i18n.TACTIC}`] : undefined}
             >
               {getSelectTactic(threat, index, isDisabled)}

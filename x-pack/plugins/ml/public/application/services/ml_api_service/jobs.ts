@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
@@ -12,6 +13,8 @@ import {
   MlJobWithTimeRange,
   MlSummaryJobs,
   CombinedJobWithStats,
+  Job,
+  Datafeed,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
@@ -23,6 +26,7 @@ import {
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import { Category } from '../../../../common/types/categories';
+import { JobsExistResponse } from '../../../../common/types/job_service';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {
@@ -41,6 +45,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       jobsMap: Dictionary<MlJobWithTimeRange>;
     }>({
       path: `${basePath()}/jobs/jobs_with_time_range`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobForCloning(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
+      path: `${basePath()}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });
@@ -138,9 +151,18 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobsExist(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
-    return httpService.http<any>({
+  jobsExist(jobIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http<JobsExistResponse>({
+      path: `${basePath()}/jobs/jobs_exist`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobsExist$(jobIds: string[], allSpaces: boolean = false): Observable<JobsExistResponse> {
+    const body = JSON.stringify({ jobIds, allSpaces });
+    return httpService.http$({
       path: `${basePath()}/jobs/jobs_exist`,
       method: 'POST',
       body,

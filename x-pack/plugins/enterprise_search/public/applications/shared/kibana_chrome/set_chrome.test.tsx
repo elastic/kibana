@@ -5,8 +5,7 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { setMockValues } from '../../__mocks__/kea.mock';
-import { mockKibanaValues, mockHistory } from '../../__mocks__';
+import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';

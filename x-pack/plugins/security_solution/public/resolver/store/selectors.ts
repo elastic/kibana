@@ -132,6 +132,8 @@ export const currentRelatedEventData = composeSelectors(
   dataSelectors.currentRelatedEventData
 );
 
+export const timeRangeFilters = composeSelectors(dataStateSelector, dataSelectors.timeRangeFilters);
+
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */

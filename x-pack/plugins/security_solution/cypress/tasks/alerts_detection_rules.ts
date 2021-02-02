@@ -41,7 +41,9 @@ export const changeToThreeHundredRowsPerPage = () => {
 };
 
 export const editFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
 };
 

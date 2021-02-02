@@ -46,7 +46,11 @@ export interface TemplateDeserialized {
     name: string;
   };
   _meta?: { [key: string]: any }; // Composable template only
-  dataStream?: {}; // Composable template only
+  // Composable template only
+  dataStream?: {
+    hidden?: boolean;
+    [key: string]: any;
+  };
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

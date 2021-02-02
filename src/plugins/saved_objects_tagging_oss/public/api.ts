@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -126,26 +115,42 @@ export interface SavedObjectsTaggingApiUi {
    * Parse given query using EUI's `Query` syntax, and return the search term and the tag references
    * to be used when using the `_find` API to retrieve the filtered objects.
    *
+   * @remark if the query cannot be parsed, `searchTerm` will contain the raw query value, and `valid`
+   *         will be `false`
+   *
    * @param query The query to parse
    * @param options see {@link ParseSearchQueryOptions}
    *
    * @example
    * ```typescript
-   * parseSearchQuery('(tag:(tag-1 or tag-2) some term', { useNames: true })
+   * parseSearchQuery('tag:(tag-1 or tag-2) some term', { useNames: true })
    * >>
    * {
    *    searchTerm: 'some term',
-   *    tagReferences: [{type: 'tag', id: 'tag-1-id'}, {type: 'tag', id: 'tag-2-id'}]
+   *    tagReferences: [{type: 'tag', id: 'tag-1-id'}, {type: 'tag', id: 'tag-2-id'}],
+   *    valid: true,
    * }
    * ```
    *
    * @example
    * ```typescript
-   * parseSearchQuery('(tagging:(some-tag-uuid or some-other-tag-uuid) some term', { tagClause: 'tagging' })
+   * parseSearchQuery('tagging:(some-tag-uuid or some-other-tag-uuid) some term', { tagClause: 'tagging' })
    * >>
    * {
    *    searchTerm: 'some term',
-   *    tagReferences: [{type: 'tag', id: 'some-tag-uuid'}, {type: 'tag', id: 'some-other-tag-uuid'}]
+   *    tagReferences: [{type: 'tag', id: 'some-tag-uuid'}, {type: 'tag', id: 'some-other-tag-uuid'}],
+   *    valid: true,
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * parseSearchQuery('tag:(tag-1) [foo]')
+   * >>
+   * {
+   *    searchTerm: 'tag:(tag-1) [foo]',
+   *    tagReferences: [],
+   *    valid: false,
    * }
    * ```
    */
@@ -282,7 +287,8 @@ export interface GetSearchBarFilterOptions {
  */
 export interface ParsedSearchQuery {
   searchTerm: string;
-  tagReferences?: SavedObjectsFindOptionsReference[];
+  tagReferences: SavedObjectsFindOptionsReference[];
+  valid: boolean;
 }
 
 /**

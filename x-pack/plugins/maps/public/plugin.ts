@@ -27,7 +27,6 @@ import {
   setStartServices,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-// @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import {
@@ -35,7 +34,6 @@ import {
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { PLUGIN_ID_OSS } from '../../../../src/plugins/maps_oss/common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -49,14 +47,15 @@ import { MapsXPackConfig, MapsConfigType } from '../config';
 import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
+import { createLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { StartContract as FileUploadStartContract } from '../../file_upload/public';
+import { StartContract as FileUploadStartContract } from '../../maps_file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   getIsEnterprisePlus,
   registerLicensedFeatures,
@@ -78,7 +77,7 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  fileUpload: FileUploadStartContract;
+  mapsFileUpload: FileUploadStartContract;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -88,6 +87,7 @@ export interface MapsPluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 /**
@@ -161,13 +161,18 @@ export class MapsPlugin
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
-    plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
-    // unregisters the OSS alias
-    plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
+
+    if (core.application.capabilities.maps.show) {
+      plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
+    }
+
+    if (!core.application.capabilities.maps.save) {
+      plugins.visualizations.unRegisterAlias(APP_ID);
+    }
 
     return {
-      createSecurityLayerDescriptors,
+      createLayerDescriptors,
       registerLayerWizard,
       registerSource,
     };

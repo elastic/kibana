@@ -108,19 +108,21 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
+  const showCustomRuleFilter = filterOptions.showCustomRules
+    ? [`alert.attributes.tags: "__internal_immutable:false"`]
+    : [];
+  const showElasticRuleFilter = filterOptions.showElasticRules
+    ? [`alert.attributes.tags: "__internal_immutable:true"`]
+    : [];
   const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...(filterOptions.showCustomRules
-      ? [`alert.attributes.tags: "__internal_immutable:false"`]
-      : []),
-    ...(filterOptions.showElasticRules
-      ? [`alert.attributes.tags: "__internal_immutable:true"`]
-      : []),
+    ...showCustomRuleFilter,
+    ...showElasticRuleFilter,
   ].join(' AND ');
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
+  const tags = filterOptions.tags
+    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
+    .join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''
@@ -203,7 +205,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 

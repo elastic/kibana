@@ -6,6 +6,4 @@
 import { PluginInitializerContext } from 'kibana/server';
 import { WatcherServerPlugin } from './plugin';
 
-export { WatcherContext } from './plugin';
-
 export const plugin = (ctx: PluginInitializerContext) => new WatcherServerPlugin(ctx);

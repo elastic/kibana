@@ -8,6 +8,14 @@ import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
+import {
+  PUBLIC_KEY_LABEL,
+  CONSUMER_KEY_LABEL,
+  BASE_URL_LABEL,
+  CLIENT_ID_LABEL,
+  CLIENT_SECRET_LABEL,
+} from '../../../constants';
+
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 
@@ -35,13 +43,13 @@ export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
     <>
       {publicKey && (
         <>
-          <ApiKey label="Public Key" apiKey={publicKey} />
+          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey} />
           <EuiSpacer />
         </>
       )}
       {consumerKey && (
         <>
-          <ApiKey label="Consumer Key" apiKey={consumerKey} />
+          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey} />
           <EuiSpacer />
         </>
       )}
@@ -51,11 +59,11 @@ export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
   return (
     <>
       {showApiKey && keyElement}
-      {credentialItem('Client id', clientId)}
+      {credentialItem(CLIENT_ID_LABEL, clientId)}
       <EuiSpacer size="s" />
-      {credentialItem('Client secret', clientSecret)}
+      {credentialItem(CLIENT_SECRET_LABEL, clientSecret)}
       <EuiSpacer size="s" />
-      {credentialItem('Base URL', baseUrl)}
+      {credentialItem(BASE_URL_LABEL, baseUrl)}
     </>
   );
 };

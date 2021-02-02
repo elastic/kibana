@@ -15,11 +15,10 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
   return LEGACY_ALERTS.map((legacyAlert) => {
     return {
       id: legacyAlert,
-      name: LEGACY_ALERT_DETAILS[legacyAlert].label,
       description: LEGACY_ALERT_DETAILS[legacyAlert].description,
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/cluster-alerts.html`;
+        return `${docLinks.links.monitoring.alertsCluster}`;
       },
       alertParamsExpression: () => (
         <Fragment>

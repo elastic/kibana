@@ -17,7 +17,7 @@ import {
   ProcessedImportResponse,
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { CopyOptions, ImportRetry } from '../types';
 import { SpaceResult, SpaceResultProcessing } from './space_result';
 import { summarizeCopyResult } from '..';

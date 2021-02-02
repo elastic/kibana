@@ -5,11 +5,24 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableContext,
+  EmbeddableInput,
+  IEmbeddable,
+} from '../../../../../../src/plugins/embeddable/public';
+import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
 import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
+
+interface EmbeddableQueryInput extends EmbeddableInput {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+type EmbeddableQueryContext = EmbeddableContext<IEmbeddable<EmbeddableQueryInput>>;
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
@@ -18,15 +31,15 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
  * menu of a dashboard panel.
  */
 export class ExploreDataContextMenuAction
-  extends AbstractExploreDataAction<EmbeddableContext>
-  implements Action<EmbeddableContext> {
+  extends AbstractExploreDataAction<EmbeddableQueryContext>
+  implements Action<EmbeddableQueryContext> {
   public readonly id = ACTION_EXPLORE_DATA;
 
   public readonly type = ACTION_EXPLORE_DATA;
 
   public readonly order = 200;
 
-  protected readonly getUrl = async (context: EmbeddableContext): Promise<KibanaURL> => {
+  protected readonly getUrl = async (context: EmbeddableQueryContext): Promise<KibanaURL> => {
     const { plugins } = this.params.start();
     const { urlGenerator } = plugins.discover;
 

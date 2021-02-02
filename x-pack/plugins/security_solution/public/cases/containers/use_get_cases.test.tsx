@@ -13,7 +13,7 @@ import {
   useGetCases,
   UseGetCases,
 } from './use_get_cases';
-import { UpdateKey } from './use_update_case';
+import { UpdateKey } from './types';
 import { allCases, basicCase } from './mock';
 import * as api from './api';
 

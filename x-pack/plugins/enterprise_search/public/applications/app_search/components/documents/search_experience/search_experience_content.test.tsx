@@ -15,6 +15,7 @@ import { Results } from '@elastic/react-search-ui';
 
 import { ResultView } from './views';
 import { Pagination } from './pagination';
+import { SchemaTypes } from '../../../../shared/types';
 import { SearchExperienceContent } from './search_experience_content';
 
 describe('SearchExperienceContent', () => {
@@ -27,6 +28,11 @@ describe('SearchExperienceContent', () => {
     engineName: 'engine1',
     isMetaEngine: false,
     myRole: { canManageEngineDocuments: true },
+    engine: {
+      schema: {
+        title: 'string' as SchemaTypes,
+      },
+    },
   };
 
   beforeEach(() => {
@@ -40,27 +46,32 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.isEmptyRender()).toBe(false);
   });
 
-  it('passes engineName to the result view', () => {
-    const props = {
-      result: {
-        id: {
-          raw: '1',
-        },
-        _meta: {
-          id: '1',
-          scopedId: '1',
-          score: 100,
-          engine: 'my-engine',
-        },
-        foo: {
-          raw: 'bar',
-        },
+  it('passes result, schema, and isMetaEngine to the result view', () => {
+    const result = {
+      id: {
+        raw: '1',
+      },
+      _meta: {
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
+      foo: {
+        raw: 'bar',
       },
     };
 
     const wrapper = shallow(<SearchExperienceContent />);
     const resultView: any = wrapper.find(Results).prop('resultView');
-    expect(resultView(props)).toEqual(<ResultView {...props} />);
+    expect(resultView({ result })).toEqual(
+      <ResultView
+        {...{
+          isMetaEngine: values.isMetaEngine,
+          result,
+          schemaForTypeHighlights: values.engine.schema,
+        }}
+      />
+    );
   });
 
   it('renders pagination', () => {

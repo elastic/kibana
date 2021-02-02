@@ -13,6 +13,8 @@ import {
   AlertType,
   AlertInstanceState,
   AlertInstanceContext,
+  AlertTypeState,
+  AlertTypeParams,
 } from '../../../../../../../plugins/alerts/server';
 
 export const EscapableStrings = {
@@ -24,6 +26,25 @@ export const EscapableStrings = {
   escapableLineFeed: 'line\x0afeed',
 };
 
+export const DeepContextVariables = {
+  objectA: {
+    stringB: 'B',
+    arrayC: [
+      { stringD: 'D1', numberE: 42 },
+      { stringD: 'D2', numberE: 43 },
+    ],
+    objectF: {
+      stringG: 'G',
+      nullG: null,
+      undefinedG: undefined,
+    },
+  },
+  stringH: 'H',
+  arrayI: [44, 45],
+  nullJ: null,
+  undefinedK: undefined,
+};
+
 function getAlwaysFiringAlertType() {
   const paramsSchema = schema.object({
     index: schema.string(),
@@ -31,7 +52,7 @@ function getAlwaysFiringAlertType() {
     groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     groupInSeriesIndex?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -40,7 +61,13 @@ function getAlwaysFiringAlertType() {
   interface InstanceContext extends AlertInstanceContext {
     instanceContextValue: boolean;
   }
-  const result: AlertType<ParamsType, State, InstanceState, InstanceContext> = {
+  const result: AlertType<
+    ParamsType & AlertTypeParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    'default' | 'other'
+  > = {
     id: 'test.always-firing',
     name: 'Test: Always Firing',
     actionGroups: [
@@ -122,13 +149,13 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
 }
 
 function getCumulativeFiringAlertType() {
-  interface State {
+  interface State extends AlertTypeState {
     runCount?: number;
   }
   interface InstanceState extends AlertInstanceState {
     instanceStateValue: boolean;
   }
-  const result: AlertType<{}, State, InstanceState, {}> = {
+  const result: AlertType<{}, State, InstanceState, {}, 'default' | 'other'> = {
     id: 'test.cumulative-firing',
     name: 'Test: Cumulative Firing',
     actionGroups: [
@@ -156,7 +183,7 @@ function getCumulativeFiringAlertType() {
       };
     },
   };
-  return result as AlertType;
+  return result;
 }
 
 function getNeverFiringAlertType() {
@@ -165,10 +192,10 @@ function getNeverFiringAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     globalStateValue: boolean;
   }
-  const result: AlertType<ParamsType, State, {}, {}> = {
+  const result: AlertType<ParamsType, State, {}, {}, 'default'> = {
     id: 'test.never-firing',
     name: 'Test: Never firing',
     actionGroups: [
@@ -208,7 +235,7 @@ function getFailingAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, {}, {}, {}> = {
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.failing',
     name: 'Test: Failing',
     validate: {
@@ -250,7 +277,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, {}, {}, {}> = {
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     actionGroups: [
@@ -337,7 +364,7 @@ function getValidationAlertType() {
     param1: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, {}, {}, {}> = {
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.validation',
     name: 'Test: Validation',
     actionGroups: [
@@ -366,10 +393,10 @@ function getPatternFiringAlertType() {
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     patternIndex?: number;
   }
-  const result: AlertType<ParamsType, State, {}, {}> = {
+  const result: AlertType<ParamsType, State, {}, {}, 'default'> = {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -410,7 +437,10 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default', EscapableStrings);
+          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+            ...EscapableStrings,
+            deep: DeepContextVariables,
+          });
         } else if (typeof scheduleByPattern === 'string') {
           services
             .alertInstanceFactory(instanceId)
@@ -430,7 +460,7 @@ export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerts }: Pick<FixtureSetupDeps, 'alerts'>
 ) {
-  const noopAlertType: AlertType = {
+  const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -439,7 +469,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     async executor() {},
   };
-  const goldNoopAlertType: AlertType = {
+  const goldNoopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -448,7 +478,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'gold',
     async executor() {},
   };
-  const onlyContextVariablesAlertType: AlertType = {
+  const onlyContextVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -460,7 +490,7 @@ export function defineAlertTypes(
     },
     async executor() {},
   };
-  const onlyStateVariablesAlertType: AlertType = {
+  const onlyStateVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -472,7 +502,7 @@ export function defineAlertTypes(
     minimumLicenseRequired: 'basic',
     async executor() {},
   };
-  const throwAlertType: AlertType = {
+  const throwAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
     name: 'Test: Throw',
     actionGroups: [
@@ -488,7 +518,7 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
-  const longRunningAlertType: AlertType = {
+  const longRunningAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.longRunning',
     name: 'Test: Long Running',
     actionGroups: [

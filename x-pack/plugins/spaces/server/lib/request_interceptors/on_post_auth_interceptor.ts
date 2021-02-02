@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger, CoreSetup } from 'src/core/server';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { wrapError } from '../errors';
 import { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { PluginsSetup } from '../../plugin';

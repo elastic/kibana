@@ -40,6 +40,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       id: ALERT_MISSING_MONITORING_DATA,
       name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
       accessorKey: 'gapDuration',
+      fetchClustersRange: LIMIT_BUFFER,
       defaultParams: {
         duration: '15m',
         limit: '1d',
@@ -62,7 +63,6 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       ],
     });
   }
-
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,

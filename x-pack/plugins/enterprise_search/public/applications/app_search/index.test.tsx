@@ -5,7 +5,6 @@
  */
 
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import { setMockValues, setMockActions } from '../__mocks__';
 
@@ -55,7 +54,7 @@ describe('AppSearchConfigured', () => {
   it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout)).toHaveLength(1);
+    expect(wrapper.find(Layout)).toHaveLength(2);
     expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);

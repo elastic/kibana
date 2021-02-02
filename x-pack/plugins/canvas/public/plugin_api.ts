@@ -12,24 +12,26 @@ import {
 import { ElementFactory } from '../types';
 import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
-type AddToRegistry<T extends any> = (add: T[]) => void;
+type SpecPromiseFn<T extends any> = () => Promise<T[]>;
+type AddToRegistry<T extends any> = (add: T[] | SpecPromiseFn<T>) => void;
+type AddSpecsToRegistry<T extends any> = (add: T[]) => void;
 
 export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddToRegistry<() => AnyExpressionFunctionDefinition>;
+  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
   addModelUIs: AddToRegistry<any>;
-  addRenderers: AddToRegistry<AnyRendererFactory>;
+  addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
   addTransformUIs: AddToRegistry<any>;
   addTransitions: AddToRegistry<any>;
-  addTypes: AddToRegistry<() => AnyExpressionTypeDefinition>;
+  addTypes: AddSpecsToRegistry<() => AnyExpressionTypeDefinition>;
   addViewUIs: AddToRegistry<any>;
 }
 
-export interface SetupRegistries {
-  elements: ElementFactory[];
+export interface SetupRegistries extends Record<string, any[]> {
+  elements: Array<ElementFactory | SpecPromiseFn<ElementFactory>>;
   transformUIs: any[];
   datasourceUIs: any[];
   modelUIs: any[];
@@ -51,6 +53,16 @@ export function getPluginApi(
     argumentUIs: [],
     tagUIs: [],
     transitions: [],
+  };
+
+  const addToRegistry = <T>(registry: Array<T | SpecPromiseFn<T>>) => {
+    return (entries: T[] | SpecPromiseFn<T>) => {
+      if (Array.isArray(entries)) {
+        registry.push(...entries);
+      } else {
+        registry.push(entries);
+      }
+    };
   };
 
   const api: CanvasApi = {
@@ -75,14 +87,14 @@ export function getPluginApi(
     },
 
     // All these others are local to canvas, and they will only register on start
-    addElements: (elements) => registries.elements.push(...elements),
-    addTransformUIs: (transforms) => registries.transformUIs.push(...transforms),
-    addDatasourceUIs: (datasources) => registries.datasourceUIs.push(...datasources),
-    addModelUIs: (models) => registries.modelUIs.push(...models),
-    addViewUIs: (views) => registries.viewUIs.push(...views),
-    addArgumentUIs: (args) => registries.argumentUIs.push(...args),
-    addTagUIs: (tags) => registries.tagUIs.push(...tags),
-    addTransitions: (transitions) => registries.transitions.push(...transitions),
+    addElements: addToRegistry(registries.elements),
+    addTransformUIs: addToRegistry(registries.transformUIs),
+    addDatasourceUIs: addToRegistry(registries.datasourceUIs),
+    addModelUIs: addToRegistry(registries.modelUIs),
+    addViewUIs: addToRegistry(registries.viewUIs),
+    addArgumentUIs: addToRegistry(registries.argumentUIs),
+    addTagUIs: addToRegistry(registries.tagUIs),
+    addTransitions: addToRegistry(registries.transitions),
   };
 
   return { api, registries };

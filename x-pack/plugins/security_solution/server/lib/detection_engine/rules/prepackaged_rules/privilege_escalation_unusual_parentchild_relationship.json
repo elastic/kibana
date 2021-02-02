@@ -36,9 +36,16 @@
       },
       "technique": [
         {
-          "id": "T1093",
-          "name": "Process Hollowing",
-          "reference": "https://attack.mitre.org/techniques/T1093/"
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/",
+          "subtechnique": [
+            {
+              "id": "T1055.012",
+              "name": "Process Hollowing",
+              "reference": "https://attack.mitre.org/techniques/T1055/012/"
+            }
+          ]
         }
       ]
     }

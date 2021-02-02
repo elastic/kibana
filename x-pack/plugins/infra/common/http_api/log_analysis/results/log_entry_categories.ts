@@ -13,6 +13,8 @@ import {
   routeTimingMetadataRT,
 } from '../../shared';
 
+import { logEntryCategoryRT, categoriesSortRT } from '../../../log_analysis';
+
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH =
   '/api/infra/log_analysis/results/log_entry_categories';
 
@@ -41,6 +43,8 @@ export const getLogEntryCategoriesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
       // a list of histograms to create
       histograms: rt.array(logEntryCategoriesHistogramParametersRT),
+      // the criteria to the categories by
+      sort: categoriesSortRT,
     }),
     rt.partial({
       // the datasets to filter for (optional, unfiltered if not present)
@@ -56,39 +60,6 @@ export type GetLogEntryCategoriesRequestPayload = rt.TypeOf<
 /**
  * response
  */
-
-export const logEntryCategoryHistogramBucketRT = rt.type({
-  startTime: rt.number,
-  bucketDuration: rt.number,
-  logEntryCount: rt.number,
-});
-
-export type LogEntryCategoryHistogramBucket = rt.TypeOf<typeof logEntryCategoryHistogramBucketRT>;
-
-export const logEntryCategoryHistogramRT = rt.type({
-  histogramId: rt.string,
-  buckets: rt.array(logEntryCategoryHistogramBucketRT),
-});
-
-export type LogEntryCategoryHistogram = rt.TypeOf<typeof logEntryCategoryHistogramRT>;
-
-export const logEntryCategoryDatasetRT = rt.type({
-  name: rt.string,
-  maximumAnomalyScore: rt.number,
-});
-
-export type LogEntryCategoryDataset = rt.TypeOf<typeof logEntryCategoryDatasetRT>;
-
-export const logEntryCategoryRT = rt.type({
-  categoryId: rt.number,
-  datasets: rt.array(logEntryCategoryDatasetRT),
-  histograms: rt.array(logEntryCategoryHistogramRT),
-  logEntryCount: rt.number,
-  maximumAnomalyScore: rt.number,
-  regularExpression: rt.string,
-});
-
-export type LogEntryCategory = rt.TypeOf<typeof logEntryCategoryRT>;
 
 export const getLogEntryCategoriesSuccessReponsePayloadRT = rt.intersection([
   rt.type({

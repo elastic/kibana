@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, ILegacyScopedClusterClient, RequestHandlerContext } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
@@ -26,7 +26,7 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: RollupPluginRouter;
   license: License;
   lib: {
     isEsError: typeof isEsError;
@@ -37,3 +37,22 @@ export interface RouteDependencies {
     IndexPatternsFetcher: typeof IndexPatternsFetcher;
   };
 }
+
+/**
+ * @internal
+ */
+interface RollupApiRequestHandlerContext {
+  client: ILegacyScopedClusterClient;
+}
+
+/**
+ * @internal
+ */
+export interface RollupHandlerContext extends RequestHandlerContext {
+  rollup: RollupApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type RollupPluginRouter = IRouter<RollupHandlerContext>;

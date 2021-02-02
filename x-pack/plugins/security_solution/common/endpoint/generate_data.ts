@@ -17,11 +17,12 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
   parentEntityIDSafeVersion,
+  processNameSafeVersion,
   timestampSafeVersion,
 } from './models/event';
 import {
@@ -965,6 +966,7 @@ export class EndpointDocGenerator {
           eventCategory: ['process'],
           eventType: ['end'],
           eventsDataStream: opts.eventsDataStream,
+          processName: processNameSafeVersion(root),
         })
       );
     }
@@ -1002,6 +1004,7 @@ export class EndpointDocGenerator {
             ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
             eventsDataStream: opts.eventsDataStream,
+            processName: processNameSafeVersion(ancestor),
           })
         );
       }

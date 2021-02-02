@@ -35,13 +35,20 @@
       },
       "technique": [
         {
-          "id": "T1050",
-          "name": "New Service",
-          "reference": "https://attack.mitre.org/techniques/T1050/"
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

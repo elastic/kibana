@@ -11,6 +11,8 @@ import { RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
 import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
+import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
+import { Alert, AlertTypeParams } from '../../../../../../alerts/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
@@ -20,7 +22,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
       path: '/api/monitoring/v1/alerts/enable',
       validate: false,
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       try {
         const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
 
@@ -75,12 +77,19 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           },
         ];
 
-        const createdAlerts = await Promise.all(
-          alerts.map(
-            async (alert) => await alert.createIfDoesNotExist(alertsClient, actionsClient, actions)
-          )
+        let createdAlerts: Array<Alert<AlertTypeParams>> = [];
+        const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
+          npRoute.cluster.asScoped(request).callAsCurrentUser,
+          npRoute.logger
         );
-        return response.ok({ body: createdAlerts });
+
+        if (disabledWatcherClusterAlerts) {
+          createdAlerts = await Promise.all(
+            alerts.map((alert) => alert.createIfDoesNotExist(alertsClient, actionsClient, actions))
+          );
+        }
+
+        return response.ok({ body: { createdAlerts, disabledWatcherClusterAlerts } });
       } catch (err) {
         throw handleError(err);
       }

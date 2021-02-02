@@ -32,7 +32,7 @@ export function getActionType(): ActionTypeModel {
     iconClass: 'securityAnalyticsApp',
     selectMessage: i18n.CASE_CONNECTOR_DESC,
     actionTypeTitle: i18n.CASE_CONNECTOR_TITLE,
-    validateConnector: () => ({ errors: {} }),
+    validateConnector: () => ({ config: { errors: {} }, secrets: { errors: {} } }),
     validateParams,
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./fields')),

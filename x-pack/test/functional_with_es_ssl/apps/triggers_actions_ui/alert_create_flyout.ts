@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
-}
+import { generateUniqueKey } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -33,10 +29,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
-  async function defineAlert(alertName: string) {
+  async function defineAlert(alertName: string, alertType?: string) {
+    alertType = alertType || '.index-threshold';
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('alertNameInput', alertName);
-    await testSubjects.click('.index-threshold-SelectOption');
+    await testSubjects.click(`${alertType}-SelectOption`);
     await testSubjects.click('selectIndexExpression');
     const comboBox = await find.byCssSelector('#indexSelectSearchBox');
     await comboBox.click();
@@ -61,8 +58,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/85105
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -179,7 +175,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should show save confirmation before creating alert with no actions', async () => {
       const alertName = generateUniqueKey();
-      await defineAlert(alertName);
+      await defineAlwaysFiringAlert(alertName);
 
       await testSubjects.click('saveAlertButton');
       await testSubjects.existOrFail('confirmAlertSaveModal');
@@ -200,7 +196,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: alertName,
           tagsText: '',
-          alertType: 'Index threshold',
+          alertType: 'Always Firing',
           interval: '1m',
         },
       ]);
@@ -208,6 +204,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
+    it('should show discard confirmation before closing flyout without saving', async () => {
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
+
+      await pageObjects.triggersActionsUI.clickCreateAlertButton();
+      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.click('cancelSaveAlertButton');
+      await testSubjects.existOrFail('confirmAlertCloseModal');
+      await testSubjects.click('confirmAlertCloseModal > confirmModalCancelButton');
+      await testSubjects.missingOrFail('confirmAlertCloseModal');
+    });
+
+    it('should successfully test valid es_query alert', async () => {
+      const alertName = generateUniqueKey();
+      await defineAlert(alertName, '.es-query');
+
+      // Valid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"match_all":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.existOrFail('testQuerySuccess');
+      await testSubjects.missingOrFail('testQueryError');
+
+      // Invalid query
+      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.click('testQuery');
+      await testSubjects.missingOrFail('testQuerySuccess');
+      await testSubjects.existOrFail('testQueryError');
     });
   });
 };

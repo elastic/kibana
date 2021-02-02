@@ -54,7 +54,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.featureImportance;
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -106,10 +106,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (
-                  <EuiLink
-                    href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
-                    target="_blank"
-                  >
+                  <EuiLink href={docLink} target="_blank">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.explorationResults.linkedFeatureImportanceValues"
                       defaultMessage="feature importance values"

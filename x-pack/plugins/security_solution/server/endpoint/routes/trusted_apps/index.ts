@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
 import {
   DeleteTrustedAppsRequestSchema,
   GetTrustedAppsRequestSchema,
@@ -14,16 +13,19 @@ import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
+  TRUSTED_APPS_SUMMARY_API,
 } from '../../../../common/endpoint/constants';
 import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
   getTrustedAppsListRouteHandler,
+  getTrustedAppsSummaryRouteHandler,
 } from './handlers';
 import { EndpointAppContext } from '../../types';
+import { SecuritySolutionPluginRouter } from '../../../types';
 
 export const registerTrustedAppsRoutes = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) => {
   // DELETE one
@@ -54,5 +56,15 @@ export const registerTrustedAppsRoutes = (
       options: { authRequired: true },
     },
     getTrustedAppsCreateRouteHandler(endpointAppContext)
+  );
+
+  // SUMMARY
+  router.get(
+    {
+      path: TRUSTED_APPS_SUMMARY_API,
+      validate: false,
+      options: { authRequired: true },
+    },
+    getTrustedAppsSummaryRouteHandler(endpointAppContext)
   );
 };

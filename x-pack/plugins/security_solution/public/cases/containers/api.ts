@@ -16,7 +16,6 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
-  ConnectorField,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   User,
@@ -24,7 +23,6 @@ import {
 
 import {
   ACTION_TYPES_URL,
-  CASE_CONFIGURE_CONNECTORS_URL,
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
@@ -158,7 +156,10 @@ export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): P
 
 export const patchCase = async (
   caseId: string,
-  updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
+  updatedCase: Pick<
+    CasePatchRequest,
+    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+  >,
   version: string,
   signal: AbortSignal
 ): Promise<Case[]> => {
@@ -271,22 +272,5 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
     method: 'GET',
     signal,
   });
-  return response;
-};
-export const getFields = async (
-  connectorId: string,
-  connectorType: string,
-  signal: AbortSignal
-): Promise<ConnectorField[]> => {
-  const response = await KibanaServices.get().http.fetch<ConnectorField[]>(
-    `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}`,
-    {
-      query: {
-        connector_type: connectorType,
-      },
-      method: 'GET',
-      signal,
-    }
-  );
   return response;
 };

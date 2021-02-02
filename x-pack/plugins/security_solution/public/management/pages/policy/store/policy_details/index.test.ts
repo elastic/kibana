@@ -8,7 +8,7 @@ import { PolicyDetailsState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction, policyDetailsMiddlewareFactory } from './index';
 import { policyConfig } from './selectors';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
   createSpyMiddleware,
@@ -20,6 +20,7 @@ import {
 } from '../../../../../common/mock/endpoint';
 import { HttpFetchOptions } from 'kibana/public';
 import { cloneDeep } from 'lodash';
+import { licenseMock } from '../../../../../../../licensing/common/licensing.mock';
 
 describe('policy details: ', () => {
   let store: Store;
@@ -53,7 +54,7 @@ describe('policy details: ', () => {
               },
             },
             policy: {
-              value: policyConfigFactory(),
+              value: policyFactory(),
             },
           },
         },
@@ -151,6 +152,49 @@ describe('policy details: ', () => {
         expect(config!.linux.events.file).toEqual(true);
       });
     });
+
+    describe('when the policy config has paid features enabled', () => {
+      const CustomMessage = 'Some Popup message change';
+      const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
+      const Platinum = licenseMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      });
+
+      beforeEach(() => {
+        const config = policyConfig(getState());
+        if (!config) {
+          throw new Error();
+        }
+
+        // have a paid-policy field existing in the store from a previous time
+        const newPayload1 = cloneDeep(config);
+        newPayload1.windows.popup.malware.message = CustomMessage;
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload1 },
+        });
+      });
+
+      it('preserves paid fields when license level allows', () => {
+        dispatch({
+          type: 'licenseChanged',
+          payload: Platinum,
+        });
+        const config = policyConfig(getState());
+
+        expect(config.windows.popup.malware.message).toEqual(CustomMessage);
+      });
+
+      it('reverts paid fields to default when license level does not allow', () => {
+        dispatch({
+          type: 'licenseChanged',
+          payload: Basic,
+        });
+        const config = policyConfig(getState());
+
+        expect(config.windows.popup.malware.message).not.toEqual(CustomMessage);
+      });
+    });
   });
 
   describe('when saving policy data', () => {
@@ -210,6 +254,7 @@ describe('policy details: ', () => {
         http.put.mock.calls.length - 1
       ] as unknown) as [string, HttpFetchOptions])[1];
 
+      // license is below platinum in this test, paid features are off
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({
         name: '',
         description: '',
@@ -238,9 +283,14 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'off' },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                     },
@@ -252,9 +302,14 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'off' },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                     },

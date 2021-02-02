@@ -110,7 +110,9 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
 
     const serviceAnomalyStats = serviceName
-      ? anomalies.serviceAnomalies[serviceName]
+      ? anomalies.serviceAnomalies.find(
+          (item) => item.serviceName === serviceName
+        )
       : null;
 
     if (matchedServiceNodes.length) {

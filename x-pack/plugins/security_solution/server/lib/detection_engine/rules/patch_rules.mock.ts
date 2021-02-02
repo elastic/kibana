@@ -9,8 +9,9 @@ import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { SanitizedAlert } from '../../../../../alerts/common';
+import { RuleTypeParams } from '../types';
 
-const rule: SanitizedAlert = {
+const rule: SanitizedAlert<RuleTypeParams> = {
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
@@ -67,6 +68,8 @@ const rule: SanitizedAlert = {
     note: '# Investigative notes',
     version: 1,
     exceptionsList: [
+      /**
+      TODO: fix this mock. Which the typing has revealed is wrong
       {
         field: 'source.ip',
         values_operator: 'included',
@@ -96,8 +99,31 @@ const rule: SanitizedAlert = {
             ],
           },
         ],
-      },
+      },*/
     ],
+    /**
+     * The fields below were missing as the type was partial and hence not technically correct
+     */
+    author: [],
+    buildingBlockType: undefined,
+    eventCategoryOverride: undefined,
+    license: undefined,
+    savedId: undefined,
+    interval: undefined,
+    riskScoreMapping: undefined,
+    ruleNameOverride: undefined,
+    name: undefined,
+    severityMapping: undefined,
+    tags: undefined,
+    threshold: undefined,
+    threatFilters: undefined,
+    threatIndex: undefined,
+    threatQuery: undefined,
+    threatMapping: undefined,
+    threatLanguage: undefined,
+    concurrentSearches: undefined,
+    itemsPerSearch: undefined,
+    timestampOverride: undefined,
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),

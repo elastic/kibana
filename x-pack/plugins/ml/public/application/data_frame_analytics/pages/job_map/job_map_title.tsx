@@ -13,7 +13,7 @@ export const JobMapTitle: FC<{ analyticsId?: string; modelId?: string }> = ({
   modelId,
 }) => (
   <EuiTitle size="xs">
-    <span>
+    <span data-test-subj="mlPageDataFrameAnalyticsMapTitle">
       {analyticsId ? (
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"

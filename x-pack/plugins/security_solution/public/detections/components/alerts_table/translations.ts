@@ -180,3 +180,10 @@ export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
     defaultMessage: 'Failed to mark alert(s) as in progress',
   }
 );
+
+export const MORE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.moreActionsAriaLabel',
+  {
+    defaultMessage: 'More actions',
+  }
+);

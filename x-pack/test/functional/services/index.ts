@@ -42,6 +42,7 @@ import { PipelineEditorProvider } from './pipeline_editor';
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { AceEditorProvider } from './ace_editor';
+import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
@@ -93,6 +94,7 @@ export const services = {
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
   aceEditor: AceEditorProvider,
+  canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,

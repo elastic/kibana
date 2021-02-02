@@ -19,15 +19,13 @@ import {
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
   ResilientPushToServiceApiParams,
-  ServiceNowPushToServiceApiParams,
+  ServiceNowITSMPushToServiceApiParams,
   SimpleComment,
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
 } from '../../../../../common/api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionsClient } from '../../../../../../actions/server/actions_client';
-
+import { ActionsClient } from '../../../../../../actions/server';
 export const mapIncident = async (
   actionsClient: ActionsClient,
   connectorId: string,
@@ -59,13 +57,11 @@ export const mapIncident = async (
       );
     }
   }
-
   const fields = prepareFieldsForTransformation({
     defaultPipes,
     mappings,
     params,
   });
-
   const transformedFields = transformFields<
     ServiceConnectorCaseParams,
     ExternalServiceParams,
@@ -109,7 +105,11 @@ export const serviceFormatter = (
         thirdPartyName: 'Resilient',
       };
     case ConnectorTypes.servicenow:
-      const { severity, urgency, impact } = params as ServiceNowPushToServiceApiParams['incident'];
+      const {
+        severity,
+        urgency,
+        impact,
+      } = params as ServiceNowITSMPushToServiceApiParams['incident'];
       return {
         incident: { severity, urgency, impact },
         thirdPartyName: 'ServiceNow',

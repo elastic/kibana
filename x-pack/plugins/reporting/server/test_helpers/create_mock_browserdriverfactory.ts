@@ -64,6 +64,9 @@ mockBrowserEvaluate.mockImplementation(() => {
   if (mockCall === contexts.CONTEXT_GETNUMBEROFITEMS) {
     return Promise.resolve(1);
   }
+  if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
+    return Promise.resolve([600, 800]);
+  }
   if (mockCall === contexts.CONTEXT_INJECTCSS) {
     return Promise.resolve();
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackagePolicyMock } from '../../common/mocks';
 import { packagePolicyService } from './package_policy';
 import { PackageInfo, PackagePolicySOAttributes } from '../types';
@@ -295,6 +295,36 @@ describe('Package policy service', () => {
         },
       ]);
     });
+
+    it('should work with a package without input', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: undefined,
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
+
+    it('should work with a package with a empty inputs array', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          policy_templates: [
+            {
+              inputs: [],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        []
+      );
+
+      expect(inputs).toEqual([]);
+    });
   });
 
   describe('update', () => {
@@ -315,9 +345,11 @@ describe('Package policy service', () => {
           throw savedObjectsClient.errors.createConflictError('abc', '123');
         }
       );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       await expect(
         packagePolicyService.update(
           savedObjectsClient,
+          elasticsearchClient,
           'the-package-policy-id',
           createPackagePolicyMock()
         )

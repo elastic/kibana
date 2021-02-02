@@ -15,7 +15,7 @@ import {
   BaseActionFactoryContext,
 } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { txtGetMoreActions } from './i18n';
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
@@ -41,14 +41,14 @@ export interface FormDrilldownWizardProps<
    * Trigger selection has changed
    * @param triggers
    */
-  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  onSelectedTriggersChange: (triggers?: string[]) => void;
 
-  getTriggerInfo: (triggerId: TriggerId) => Trigger;
+  getTriggerInfo: (triggerId: string) => Trigger;
 
   /**
    * List of possible triggers in current context
    */
-  triggers: TriggerId[];
+  triggers: string[];
 
   triggerPickerDocsLink?: string;
 }

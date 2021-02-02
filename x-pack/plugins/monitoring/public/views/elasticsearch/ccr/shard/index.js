@@ -13,7 +13,13 @@ import { routeInitProvider } from '../../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CCR_READ_EXCEPTIONS,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../../../../common/constants';
+import { SetupModeRenderer } from '../../../../components/renderers';
+import { SetupModeContext } from '../../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -27,6 +33,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
     constructor($injector, $scope, pageData) {
+      const $route = $injector.get('$route');
       super({
         title: i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.routeTitle', {
           defaultMessage: 'Elasticsearch - Ccr - Shard',
@@ -35,6 +42,17 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
         getPageData,
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CCR_READ_EXCEPTIONS],
+            filters: [
+              {
+                shardId: $route.current.pathParams.shardId,
+              },
+            ],
+          },
+        },
       });
 
       $scope.instance = i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.instanceTitle', {
@@ -62,7 +80,20 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
             })
           );
 
-          this.renderReact(<CcrShard {...data} />);
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <CcrShard {...data} alerts={this.alerts} />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
+          );
         }
       );
     }

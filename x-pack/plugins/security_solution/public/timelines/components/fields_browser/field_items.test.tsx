@@ -62,6 +62,7 @@ describe('field_items', () => {
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
+              onUpdateColumns={jest.fn()}
               timelineId={timelineId}
             />
           </TestProviders>
@@ -93,6 +94,7 @@ describe('field_items', () => {
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
+              onUpdateColumns={jest.fn()}
               timelineId={timelineId}
             />
           </TestProviders>
@@ -123,6 +125,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -153,6 +156,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -185,6 +189,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -244,6 +249,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -283,6 +289,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -312,6 +319,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -328,11 +336,17 @@ describe('field_items', () => {
   describe('getFieldColumns', () => {
     test('it returns the expected column definitions', () => {
       expect(getFieldColumns().map((column) => omit('render', column))).toEqual([
-        { field: 'field', name: 'Field', sortable: true, width: '250px' },
+        {
+          field: 'checkbox',
+          name: '',
+          sortable: false,
+          width: '25px',
+        },
+        { field: 'field', name: 'Field', sortable: false, width: '225px' },
         {
           field: 'description',
           name: 'Description',
-          sortable: true,
+          sortable: false,
           truncateText: true,
           width: '400px',
         },

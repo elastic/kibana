@@ -39,10 +39,6 @@ export class EMSSettings {
     return this._config.emsUrl!.replace(/\/$/, '');
   }
 
-  isOnPrem(): boolean {
-    return this.isEMSUrlSet();
-  }
-
   isIncludeElasticMapsService() {
     return !!this._config.includeElasticMapsService;
   }

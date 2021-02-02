@@ -35,7 +35,7 @@ const MONITOR_TYPES: Record<string, string> = {
 };
 
 export const MonitorNameColumn = ({ summary }: Props) => {
-  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
+  const params = useGetUrlParams();
 
   const linkParameters = stringifyUrlParams(params, true);
 

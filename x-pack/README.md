@@ -2,7 +2,7 @@
 
 This directory tree contains files subject to the Elastic License. The files subject
 to the Elastic License are grouped in this directory to clearly separate them
-from files licensed under the Apache License 2.0.
+from files dual-licensed under the Server Side Public License and the Elastic License.
 
 # Development
 
@@ -84,8 +84,9 @@ Jest integration tests can be used to test behavior with Elasticsearch and the K
 yarn test:jest_integration
 ```
 
-An example test exists at [test_utils/jest/integration_tests/example_integration.test.ts](test_utils/jest/integration_tests/example_integration.test.ts)
-
 #### Running Reporting functional tests
 
-See [here](test/reporting/README.md) for more information on running reporting tests.
+See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
+
+#### Running Security Solution Cypress E2E/integration tests
+See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.

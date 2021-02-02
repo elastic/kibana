@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN, API_BASE_PATH, BASE_PATH } from './constants';
+export { API_BASE_PATH, BASE_PATH } from './constants';
 
 export { getTemplateParameter } from './lib';
 

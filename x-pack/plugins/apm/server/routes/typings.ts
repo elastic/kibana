@@ -14,6 +14,7 @@ import {
 import { Observable } from 'rxjs';
 import { RequiredKeys } from 'utility-types';
 import { ObservabilityPluginSetup } from '../../../observability/server';
+import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
 import { FetchOptions } from '../../common/fetch_options';
@@ -64,9 +65,16 @@ export interface Route<
   handler: RouteHandler<TRouteParamsRT, TReturn>;
 }
 
+/**
+ * @internal
+ */
+export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+  licensing: LicensingApiRequestHandlerContext;
+}
+
 export type APMRequestHandlerContext<
   TRouteParams = {}
-> = RequestHandlerContext & {
+> = ApmPluginRequestHandlerContext & {
   params: TRouteParams & { query: { _debug: boolean } };
   config: APMConfig;
   logger: Logger;
@@ -123,15 +131,20 @@ type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   ? { params?: T['params'] }
   : { params: T['params'] };
 
-export type Client<TRouteState> = <
-  TEndpoint extends keyof TRouteState & string
->(
-  options: Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+export type Client<
+  TRouteState,
+  TOptions extends { abortable: boolean } = { abortable: true }
+> = <TEndpoint extends keyof TRouteState & string>(
+  options: Omit<
+    FetchOptions,
+    'query' | 'body' | 'pathname' | 'method' | 'signal'
+  > & {
     forceCache?: boolean;
     endpoint: TEndpoint;
   } & (TRouteState[TEndpoint] extends { params: t.Any }
       ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
-      : {})
+      : {}) &
+    (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
 ) => Promise<
   TRouteState[TEndpoint] extends { ret: any }
     ? TRouteState[TEndpoint]['ret']

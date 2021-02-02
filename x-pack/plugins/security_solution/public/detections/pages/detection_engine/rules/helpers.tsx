@@ -22,7 +22,6 @@ import {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
-  IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
@@ -30,6 +29,7 @@ import {
   SeverityMapping,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -177,7 +177,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as IMitreEnterpriseAttack[],
+    threat: threat as Threats,
   };
 };
 

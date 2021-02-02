@@ -35,9 +35,16 @@
       },
       "technique": [
         {
-          "id": "T1088",
-          "name": "Bypass User Account Control",
-          "reference": "https://attack.mitre.org/techniques/T1088/"
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.002",
+              "name": "Bypass User Access Control",
+              "reference": "https://attack.mitre.org/techniques/T1548/002/"
+            }
+          ]
         }
       ]
     }

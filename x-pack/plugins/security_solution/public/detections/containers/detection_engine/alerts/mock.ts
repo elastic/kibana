@@ -1015,6 +1015,7 @@ export const mockUserPrivilege: Privilege = {
   index: {
     '.siem-signals-default': {
       all: true,
+      maintenance: true,
       manage_ilm: true,
       read: true,
       create_index: true,

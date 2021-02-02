@@ -454,8 +454,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
     },
 
-    async waitForAnomalyDetectionJobToExist(jobId: string) {
-      await retry.waitForWithTimeout(`'${jobId}' to exist`, 5 * 1000, async () => {
+    async waitForAnomalyDetectionJobToExist(jobId: string, timeout: number = 5 * 1000) {
+      await retry.waitForWithTimeout(`'${jobId}' to exist`, timeout, async () => {
         if (await this.getAnomalyDetectionJob(jobId)) {
           return true;
         } else {
@@ -464,8 +464,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async waitForAnomalyDetectionJobNotToExist(jobId: string) {
-      await retry.waitForWithTimeout(`'${jobId}' to not exist`, 5 * 1000, async () => {
+    async waitForAnomalyDetectionJobNotToExist(jobId: string, timeout: number = 5 * 1000) {
+      await retry.waitForWithTimeout(`'${jobId}' to not exist`, timeout, async () => {
         if (await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(404)) {
           return true;
         } else {

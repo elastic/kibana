@@ -22,6 +22,9 @@ import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
+
 export class FilterListsUI extends Component {
   static displayName = 'FilterLists';
   static propTypes = {
@@ -85,6 +88,7 @@ export class FilterListsUI extends Component {
   render() {
     const { filterLists, selectedFilterLists } = this.state;
     const { canCreateFilter, canDeleteFilter } = this.props;
+    const helpLink = getDocLinks().links.ml.customRules;
 
     return (
       <Fragment>
@@ -111,6 +115,7 @@ export class FilterListsUI extends Component {
             </EuiPageContent>
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

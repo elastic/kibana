@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPortal, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -39,6 +39,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   timelineId,
   width,
 }) => {
+  const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** tracks the latest timeout id from `setTimeout`*/
   const inputTimeoutId = useRef(0);
 
@@ -126,6 +127,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
         <EuiButtonIcon
           aria-label={i18n.CUSTOMIZE_COLUMNS}
+          buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
           data-test-subj="show-field-browser"
           iconType="list"
@@ -136,24 +138,29 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       </EuiToolTip>
 
       {show && (
-        <FieldsBrowser
-          browserFields={browserFieldsWithDefaultCategory}
-          columnHeaders={columnHeaders}
-          filteredBrowserFields={
-            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
-          }
-          height={height}
-          isSearching={isSearching}
-          onCategorySelected={setSelectedCategoryId}
-          onFieldSelected={onFieldSelected}
-          onHideFieldBrowser={hideFieldBrowser}
-          onOutsideClick={show ? hideFieldBrowser : noop}
-          onSearchInputChange={updateFilter}
-          searchInput={filterInput}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-          width={width}
-        />
+        <EuiPortal>
+          <FieldsBrowser
+            browserFields={browserFieldsWithDefaultCategory}
+            columnHeaders={columnHeaders}
+            filteredBrowserFields={
+              filteredBrowserFields != null
+                ? filteredBrowserFields
+                : browserFieldsWithDefaultCategory
+            }
+            height={height}
+            isSearching={isSearching}
+            onCategorySelected={setSelectedCategoryId}
+            onFieldSelected={onFieldSelected}
+            onHideFieldBrowser={hideFieldBrowser}
+            onOutsideClick={show ? hideFieldBrowser : noop}
+            onSearchInputChange={updateFilter}
+            restoreFocusTo={customizeColumnsButtonRef}
+            searchInput={filterInput}
+            selectedCategoryId={selectedCategoryId}
+            timelineId={timelineId}
+            width={width}
+          />
+        </EuiPortal>
       )}
     </FieldsBrowserButtonContainer>
   );

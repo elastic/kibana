@@ -2,7 +2,7 @@
   "name": "@kbn/optimizer",
   "version": "1.0.0",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "main": "./target/index.js",
   "scripts": {
     "build": "../../node_modules/.bin/babel src --out-dir target --copy-files --delete-dir-on-start --extensions .ts --ignore *.test.ts --source-maps=inline",

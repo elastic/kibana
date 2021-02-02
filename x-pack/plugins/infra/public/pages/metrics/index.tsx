@@ -92,7 +92,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                               )}
                               size="s"
                               color="primary"
-                              iconType="plusInCircle"
+                              iconType="indexOpen"
                             >
                               {ADD_DATA_LABEL}
                             </EuiButtonEmpty>

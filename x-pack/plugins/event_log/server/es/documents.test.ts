@@ -18,7 +18,8 @@ describe('getIlmPolicy()', () => {
 });
 
 describe('getIndexTemplate()', () => {
-  const esNames = getEsNames('XYZ');
+  const kibanaVersion = '1.2.3';
+  const esNames = getEsNames('XYZ', kibanaVersion);
 
   test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames);

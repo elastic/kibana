@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -43,6 +32,9 @@ export class DocLinksService {
           urlDrilldownTemplateSyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html`,
           urlDrilldownVariables: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html#url-template-variables`,
         },
+        discover: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/discover.html`,
+        },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
           installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
@@ -53,6 +45,11 @@ export class DocLinksService {
         },
         auditbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
+        },
+        enterpriseSearch: {
+          base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
+          appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
+          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -72,6 +69,7 @@ export class DocLinksService {
         aggs: {
           date_histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
           date_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
+          date_format_pattern: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`,
           filter: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filter-aggregation.html`,
           filters: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filters-aggregation.html`,
           geohash_grid: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-geohashgrid-aggregation.html`,
@@ -101,12 +99,14 @@ export class DocLinksService {
           sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
+        runtimeFields: `${ELASTICSEARCH_DOCS}runtime.html`,
         scriptedFields: {
           scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
           painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
+          painlessLanguage: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
@@ -115,6 +115,13 @@ export class DocLinksService {
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
+        elasticsearch: {
+          remoteClusters: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html`,
+          remoteClustersProxy: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#proxy-mode`,
+          remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}modules-remote-clusters.html#remote-cluster-proxy-settings`,
+          scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
+          transportSettings: `${ELASTICSEARCH_DOCS}modules-transport.html`,
+        },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -147,12 +154,84 @@ export class DocLinksService {
           featureImportance: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`,
           outlierDetectionRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`,
           regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`,
+          classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
+        },
+        transforms: {
+          guide: `${ELASTICSEARCH_DOCS}transforms.html`,
         },
         visualize: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
+          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+        },
+        observability: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+        },
+        alerting: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
+          actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
+          emailAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html`,
+          generalSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`,
+          indexAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html`,
+          indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-types.html#alert-type-index-threshold`,
+          pagerDutyAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pagerduty-action-type.html`,
+          preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`,
+          serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html`,
+          setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`,
+          slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html`,
+          teamsAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/teams-action-type.html`,
+        },
+        maps: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
+        },
+        monitoring: {
+          alertsCluster: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/cluster-alerts.html`,
+          alertsKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html`,
+          alertsKibanaCpuThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-cpu-threshold`,
+          alertsKibanaDiskThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`,
+          alertsKibanaJvmThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-jvm-memory-threshold`,
+          alertsKibanaMissingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-missing-monitoring-data`,
+          monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
+          monitorKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`,
+        },
+        security: {
+          apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
+          clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
+          elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
+          elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}get-started-enable-security.html`,
+          indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
+          kibanaTLS: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`,
+          kibanaPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-privileges.html`,
+          mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
+          mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
+          runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+        },
+        watcher: {
+          jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
+          pagerDutyAction: `${ELASTICSEARCH_DOCS}actions-pagerduty.html`,
+          slackAction: `${ELASTICSEARCH_DOCS}actions-slack.html`,
+          ui: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/watcher-ui.html`,
+        },
+        ccs: {
+          guide: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html`,
+        },
+        apis: {
+          createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
+          createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
+          createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
+          createRoleMappingTemplates: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html#_role_templates`,
+          createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
+          createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
+          createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
+          executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
+          openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
+          putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
+          painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
+          putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
+          putWatch: `${ELASTICSEARCH_DOCS}/watcher-api-put-watch.html`,
+          updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
       },
     });
@@ -171,6 +250,7 @@ export interface DocLinksStart {
       readonly urlDrilldownTemplateSyntax: string;
       readonly urlDrilldownVariables: string;
     };
+    readonly discover: Record<string, string>;
     readonly filebeat: {
       readonly base: string;
       readonly installation: string;
@@ -184,6 +264,11 @@ export interface DocLinksStart {
     };
     readonly metricbeat: {
       readonly base: string;
+    };
+    readonly enterpriseSearch: {
+      readonly base: string;
+      readonly appSearchBase: string;
+      readonly workplaceSearchBase: string;
     };
     readonly heartbeat: {
       readonly base: string;
@@ -200,6 +285,7 @@ export interface DocLinksStart {
     readonly aggs: {
       readonly date_histogram: string;
       readonly date_range: string;
+      readonly date_format_pattern: string;
       readonly filter: string;
       readonly filters: string;
       readonly geohash_grid: string;
@@ -229,6 +315,7 @@ export interface DocLinksStart {
       readonly sum: string;
       readonly top_hits: string;
     };
+    readonly runtimeFields: string;
     readonly scriptedFields: {
       readonly scriptFields: string;
       readonly scriptAggs: string;
@@ -243,6 +330,7 @@ export interface DocLinksStart {
     };
     readonly addData: string;
     readonly kibana: string;
+    readonly elasticsearch: Record<string, string>;
     readonly siem: {
       readonly guide: string;
       readonly gettingStarted: string;
@@ -258,6 +346,41 @@ export interface DocLinksStart {
     };
     readonly management: Record<string, string>;
     readonly ml: Record<string, string>;
+    readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
+    readonly apis: Readonly<{
+      createIndex: string;
+      createSnapshotLifecyclePolicy: string;
+      createRoleMapping: string;
+      createRoleMappingTemplates: string;
+      createApiKey: string;
+      createPipeline: string;
+      createTransformRequest: string;
+      executeWatchActionModes: string;
+      openIndex: string;
+      putComponentTemplate: string;
+      painlessExecute: string;
+      putComponentTemplateMetadata: string;
+      putWatch: string;
+      updateTransform: string;
+    }>;
+    readonly observability: Record<string, string>;
+    readonly alerting: Record<string, string>;
+    readonly maps: Record<string, string>;
+    readonly monitoring: Record<string, string>;
+    readonly security: Readonly<{
+      apiKeyServiceSettings: string;
+      clusterPrivileges: string;
+      elasticsearchSettings: string;
+      elasticsearchEnableSecurity: string;
+      indicesPrivileges: string;
+      kibanaTLS: string;
+      kibanaPrivileges: string;
+      mappingRoles: string;
+      mappingRolesFieldRules: string;
+      runAsPrivilege: string;
+    }>;
+    readonly watcher: Record<string, string>;
+    readonly ccs: Record<string, string>;
   };
 }

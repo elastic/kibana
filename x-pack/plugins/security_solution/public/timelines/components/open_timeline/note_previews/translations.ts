@@ -12,3 +12,14 @@ export const TOGGLE_EXPAND_EVENT_DETAILS = i18n.translate(
     defaultMessage: 'Expand event details',
   }
 );
+
+export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.timeline.addedANoteLabel', {
+  defaultMessage: 'added a note',
+});
+
+export const AN_UNKNOWN_USER = i18n.translate(
+  'xpack.securitySolution.timeline.anUnknownUserLabel',
+  {
+    defaultMessage: 'an unknown user',
+  }
+);

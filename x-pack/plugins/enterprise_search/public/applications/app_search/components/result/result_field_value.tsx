@@ -22,10 +22,7 @@ const getRawArrayDisplay = (rawArray: Array<string | number>): string => {
 };
 
 const parseHighlights = (highlight: string): string => {
-  return highlight.replace(
-    /<em>(.+?)<\/em>/gi,
-    '<em class="enterpriseSearchResultHighlight">$1</em>'
-  );
+  return highlight.replace(/<em>(.+?)<\/em>/gi, '<mark class="euiMark">$1</mark>');
 };
 
 const isFieldValueEmpty = (type?: string, raw?: Raw, snippet?: Snippet) => {

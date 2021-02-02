@@ -23,7 +23,7 @@ export const SearchBoxView: React.FC<Props> = ({ onChange, value, inputProps }) 
     <EuiFieldSearch
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      fullWidth={true}
+      fullWidth
       {...inputProps}
     />
   );

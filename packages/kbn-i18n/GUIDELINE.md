@@ -387,6 +387,50 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
 ### Unit tests
 
+#### How to test `FormattedMessage` and `i18n.translate()` components. 
+
+To make `FormattedMessage` component work properly, wrapping it with `I18nProvider` is required. In development/production app, this is done in the ancestor components and developers don't have to worry about that. 
+
+But when unit-testing them, no other component provides that wrapping. That's why `shallowWithI18nProvider` and `mountWithI18nProvider` helpers are created. 
+
+For example, there is a component that has `FormattedMessage` inside, like `SaveModal` component:
+
+```js
+// ...
+export const SaveModal = (props) => {
+  return (
+    <div>
+      {/* Other things. */}
+      <EuiButton>
+        <FormattedMessage
+          id="kbn.dashboard.topNav.saveModal.saveButtonText"
+          defaultMessage="Save"
+        />
+      </EuiButton>
+      {/* More other things. */}
+    </div>
+  )
+}
+```
+
+To test `SaveModal` component, it should be wrapped with `I18nProvider` by using `shallowWithI18nProvider`: 
+
+```js
+// ...
+it('should render normally', async () => {
+    const component = shallowWithI18nProvider(
+      <SaveModal dashboard={{}}/>
+    );
+
+    expect(component).toMatchSnapshot();
+});
+// ...
+```
+
+If a component uses only `i18n.translate()`, it doesn't need `I18nProvider`. In that case, you can test them with `shallow` and `mount` functions that `enzyme` providers out of the box. 
+
+#### How to test `injectI18n` HOC components. 
+
 Testing React component that uses the `injectI18n` higher-order component is more complicated because `injectI18n()` creates a wrapper component around the original component.
 
 With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.

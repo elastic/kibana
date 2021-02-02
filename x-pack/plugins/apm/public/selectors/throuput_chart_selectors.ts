@@ -5,10 +5,9 @@
  */
 
 import { difference, zipObject } from 'lodash';
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asTransactionRate } from '../../common/utils/formatters';
 import { TimeSeries } from '../../typings/timeseries';
-import { getEmptySeries } from '../components/shared/charts/helper/get_empty_series';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
@@ -34,7 +33,7 @@ export function getThrouputChartSelector({
   };
 }
 
-export function getThroughputTimeseries({
+function getThroughputTimeseries({
   throuputChart,
   theme,
 }: {
@@ -44,15 +43,6 @@ export function getThroughputTimeseries({
   const { throughputTimeseries } = throuputChart;
   const bucketKeys = throughputTimeseries.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys, theme);
-
-  if (!throughputTimeseries.length) {
-    const start = throughputTimeseries[0].dataPoints[0].x;
-    const end =
-      throughputTimeseries[0].dataPoints[
-        throughputTimeseries[0].dataPoints.length - 1
-      ].x;
-    return getEmptySeries(start, end);
-  }
 
   return throughputTimeseries.map((bucket) => {
     return {

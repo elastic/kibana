@@ -10,13 +10,8 @@ import {
   initialPolicyDetailsState,
 } from '../pages/policy/store/policy_details/reducer';
 import {
-  policyListReducer,
-  initialPolicyListState,
-} from '../pages/policy/store/policy_list/reducer';
-import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
-  MANAGEMENT_STORE_POLICY_LIST_NAMESPACE,
   MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
 } from '../common/constants';
 import { ImmutableCombineReducers } from '../../common/store';
@@ -35,7 +30,6 @@ const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
  * Returns the initial state of the store for the SIEM Management section
  */
 export const mockManagementState: Immutable<ManagementState> = {
-  [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: initialPolicyListState(),
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: initialPolicyDetailsState(),
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: initialEndpointListState,
   [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: initialTrustedAppsPageState(),
@@ -45,7 +39,6 @@ export const mockManagementState: Immutable<ManagementState> = {
  * Redux store reducer for the SIEM Management section
  */
 export const managementReducer = immutableCombineReducers({
-  [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
   [MANAGEMENT_STORE_ENDPOINTS_NAMESPACE]: endpointListReducer,
   [MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE]: trustedAppsPageReducer,

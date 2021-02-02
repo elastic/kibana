@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { emptyFilter } from './__tests__/fixtures/test_filters';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { emptyFilter } from './__fixtures__/test_filters';
 import { exactly } from './exactly';
 
 describe('exactly', () => {

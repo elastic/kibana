@@ -7,6 +7,7 @@
 import { ElasticUser } from '../types';
 import {
   ActionConnector,
+  ActionTypeConnector,
   ActionType,
   CaseConnector,
   CaseField,
@@ -15,7 +16,15 @@ import {
   ThirdPartyField,
 } from '../../../../../case/common/api';
 
-export { ActionConnector, ActionType, CaseConnector, CaseField, ClosureType, ThirdPartyField };
+export {
+  ActionConnector,
+  ActionTypeConnector,
+  ActionType,
+  CaseConnector,
+  CaseField,
+  ClosureType,
+  ThirdPartyField,
+};
 
 export interface CaseConnectorMapping {
   actionType: ActionType;
@@ -28,6 +37,7 @@ export interface CaseConfigure {
   connector: CasesConfigure['connector'];
   createdAt: string;
   createdBy: ElasticUser;
+  error: string | null;
   mappings: CaseConnectorMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;

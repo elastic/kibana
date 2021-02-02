@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/constants';
 
 import { UptimeThemeContext } from '../../../../contexts';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 
 interface MonitorListStatusColumnProps {
@@ -123,7 +123,13 @@ export const getLocationStatus = (summaryPings: Ping[], status: string) => {
           values: { noLoc: statusMessage },
         }
       ),
-      locTooltip: upsMessage + downMessage,
+      locTooltip: (
+        <>
+          <span>{upsMessage}</span>
+          <EuiSpacer size="xs" />
+          <span>{downMessage}</span>
+        </>
+      ),
     };
   }
 

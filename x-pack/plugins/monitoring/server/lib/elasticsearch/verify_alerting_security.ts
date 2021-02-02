@@ -43,7 +43,7 @@ export class AlertingSecurity {
 
     return {
       isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-      hasPermanentEncryptionKey: !encryptedSavedObjects?.usingEphemeralEncryptionKey,
+      hasPermanentEncryptionKey: Boolean(encryptedSavedObjects),
     };
   };
 }

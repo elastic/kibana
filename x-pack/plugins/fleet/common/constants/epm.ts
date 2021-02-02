@@ -6,8 +6,9 @@
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
 export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
-export const INDEX_PATTERN_PLACEHOLDER_SUFFIX = '-index_pattern_placeholder';
 export const MAX_TIME_COMPLETE_INSTALL = 60000;
+
+export const FLEET_SERVER_PACKAGE = 'fleet_server';
 
 export const requiredPackages = {
   System: 'system',

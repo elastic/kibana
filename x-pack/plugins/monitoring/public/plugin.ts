@@ -18,7 +18,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
@@ -27,6 +26,14 @@ import {
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_DETAILS,
 } from '../common/constants';
+
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
+import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -73,7 +80,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlertsAsync(plugins);
+    this.registerAlerts(plugins);
 
     const app: App = {
       id,
@@ -98,7 +105,6 @@ export class MonitoringPlugin
         };
 
         this.setInitialTimefilter(deps);
-
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
@@ -121,18 +127,10 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
+  private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
-    const { uiSettings } = coreContext;
     const refreshInterval = { value: 10000, pause: false };
-    const time = { from: 'now-1h', to: 'now' };
     timefilter.setRefreshInterval(refreshInterval);
-    timefilter.setTime(time);
-    uiSettings.overrideLocalDefault(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
-      JSON.stringify(refreshInterval)
-    );
-    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
   }
 
   private getExternalConfig() {
@@ -145,18 +143,7 @@ export class MonitoringPlugin
     ];
   }
 
-  private registerAlertsAsync = async (plugins: MonitoringSetupPluginDependencies) => {
-    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
-    const { createMissingMonitoringDataAlertType } = await import(
-      './alerts/missing_monitoring_data_alert'
-    );
-    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
-    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
-    const { createThreadPoolRejectionsAlertType } = await import(
-      './alerts/thread_pool_rejections_alert'
-    );
-    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
-
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies) {
     const {
       triggersActionsUi: { alertTypeRegistry },
     } = plugins;
@@ -176,9 +163,10 @@ export class MonitoringPlugin
         ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
       )
     );
+    alertTypeRegistry.register(createCCRReadExceptionsAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);
     }
-  };
+  }
 }

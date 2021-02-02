@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../../licensing/server';
 import { RawKibanaPrivileges } from '../../../../common/model';
 import { defineGetPrivilegesRoutes } from './get';
+import type { SecurityRequestHandlerContext } from '../../../types';
 
 import { httpServerMock } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
@@ -66,7 +67,7 @@ describe('GET privileges', () => {
       });
       const mockContext = ({
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
+      } as unknown) as SecurityRequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);

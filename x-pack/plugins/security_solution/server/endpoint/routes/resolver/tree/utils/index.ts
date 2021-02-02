@@ -39,3 +39,12 @@ export function docValueFields(schema: ResolverSchema): Array<{ field: string }>
   }
   return filter;
 }
+
+/**
+ * Returns valid IDs that can be used in a search.
+ *
+ * @param ids array of ids
+ */
+export function validIDs(ids: NodeID[]): NodeID[] {
+  return ids.filter((id) => String(id) !== '');
+}

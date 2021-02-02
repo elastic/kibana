@@ -109,7 +109,7 @@ const installPreBuiltTemplates = async (paths: string[], callCluster: CallESAsCu
   try {
     return await Promise.all(templateInstallPromises);
   } catch (e) {
-    throw new Boom(`Error installing prebuilt index templates ${e.message}`, {
+    throw new Boom.Boom(`Error installing prebuilt index templates ${e.message}`, {
       statusCode: 400,
     });
   }
@@ -144,7 +144,7 @@ const installPreBuiltComponentTemplates = async (
   try {
     return await Promise.all(templateInstallPromises);
   } catch (e) {
-    throw new Boom(`Error installing prebuilt component templates ${e.message}`, {
+    throw new Boom.Boom(`Error installing prebuilt component templates ${e.message}`, {
       statusCode: 400,
     });
   }

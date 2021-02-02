@@ -6,7 +6,7 @@
 
 import { UserInputError } from 'apollo-server-errors';
 
-import { JsonObject } from '../../common/typed_json';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
 export const parseFilterQuery = (
   filterQuery: string | null | undefined

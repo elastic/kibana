@@ -17,10 +17,7 @@ interface Props {
 }
 
 export function ChartContainer({ children, height, status, hasData }: Props) {
-  if (
-    !hasData &&
-    (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING)
-  ) {
+  if (!hasData && status === FETCH_STATUS.LOADING) {
     return <LoadingChartPlaceholder height={height} />;
   }
 

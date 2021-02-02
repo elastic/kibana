@@ -13,6 +13,7 @@ interface FleetStatusState {
   enabled: boolean;
   isLoading: boolean;
   isReady: boolean;
+  error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
 }
 
@@ -44,7 +45,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
         missingRequirements: res.data?.missing_requirements,
       }));
     } catch (error) {
-      setState((s) => ({ ...s, isLoading: true }));
+      setState((s) => ({ ...s, isLoading: false, error }));
     }
   }
   useEffect(() => {

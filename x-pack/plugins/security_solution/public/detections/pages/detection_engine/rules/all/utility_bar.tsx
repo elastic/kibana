@@ -18,12 +18,13 @@ import * as i18n from '../translations';
 
 interface AllRulesUtilityBarProps {
   userHasNoPermissions: boolean;
-  numberSelectedRules: number;
+  numberSelectedItems: number;
   paginationTotal: number;
-  isAutoRefreshOn: boolean;
-  onRefresh: (refreshRule: boolean) => void;
-  onGetBatchItemsPopoverContent: (closePopover: () => void) => JSX.Element[];
-  onRefreshSwitch: (checked: boolean) => void;
+  isAutoRefreshOn?: boolean;
+  showBulkActions: boolean;
+  onRefresh?: (refreshRule: boolean) => void;
+  onGetBatchItemsPopoverContent?: (closePopover: () => void) => JSX.Element[];
+  onRefreshSwitch?: (checked: boolean) => void;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
@@ -31,22 +32,29 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     userHasNoPermissions,
     onRefresh,
     paginationTotal,
-    numberSelectedRules,
+    numberSelectedItems,
     onGetBatchItemsPopoverContent,
     isAutoRefreshOn,
+    showBulkActions = true,
     onRefreshSwitch,
   }) => {
     const handleGetBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel items={onGetBatchItemsPopoverContent(closePopover)} />
-      ),
+      (closePopover: () => void): JSX.Element | null => {
+        if (onGetBatchItemsPopoverContent != null) {
+          return <EuiContextMenuPanel items={onGetBatchItemsPopoverContent(closePopover)} />;
+        } else {
+          return null;
+        }
+      },
       [onGetBatchItemsPopoverContent]
     );
 
     const handleAutoRefreshSwitch = useCallback(
       (closePopover: () => void) => (e: EuiSwitchEvent) => {
-        onRefreshSwitch(e.target.checked);
-        closePopover();
+        if (onRefreshSwitch != null) {
+          onRefreshSwitch(e.target.checked);
+          closePopover();
+        }
       },
       [onRefreshSwitch]
     );
@@ -58,7 +66,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
             <EuiSwitch
               key="allRulesAutoRefreshSwitch"
               label={i18n.REFRESH_RULE_POPOVER_DESCRIPTION}
-              checked={isAutoRefreshOn}
+              checked={isAutoRefreshOn ?? false}
               onChange={handleAutoRefreshSwitch(closePopover)}
               compressed
               data-test-subj="refreshSettingsSwitch"
@@ -73,42 +81,64 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="showingRules">
-              {i18n.SHOWING_RULES(paginationTotal)}
-            </UtilityBarText>
+            {showBulkActions ? (
+              <UtilityBarText dataTestSubj="showingRules">
+                {i18n.SHOWING_RULES(paginationTotal)}
+              </UtilityBarText>
+            ) : (
+              <UtilityBarText dataTestSubj="showingExceptionLists">
+                {i18n.SHOWING_EXCEPTION_LISTS(paginationTotal)}
+              </UtilityBarText>
+            )}
           </UtilityBarGroup>
 
-          <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="selectedRules">
-              {i18n.SELECTED_RULES(numberSelectedRules)}
-            </UtilityBarText>
-            {!userHasNoPermissions && (
+          {showBulkActions ? (
+            <>
+              <UtilityBarGroup data-test-subj="tableBulkActions">
+                <UtilityBarText dataTestSubj="selectedRules">
+                  {i18n.SELECTED_RULES(numberSelectedItems)}
+                </UtilityBarText>
+                {!userHasNoPermissions && (
+                  <UtilityBarAction
+                    dataTestSubj="bulkActions"
+                    iconSide="right"
+                    iconType="arrowDown"
+                    popoverContent={handleGetBatchItemsPopoverContent}
+                  >
+                    {i18n.BATCH_ACTIONS}
+                  </UtilityBarAction>
+                )}
+
+                <UtilityBarAction
+                  dataTestSubj="refreshRulesAction"
+                  iconSide="left"
+                  iconType="refresh"
+                  onClick={onRefresh}
+                >
+                  {i18n.REFRESH}
+                </UtilityBarAction>
+                <UtilityBarAction
+                  dataTestSubj="refreshSettings"
+                  iconSide="right"
+                  iconType="arrowDown"
+                  popoverContent={handleGetRefreshSettingsPopoverContent}
+                >
+                  {i18n.REFRESH_RULE_POPOVER_LABEL}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+            </>
+          ) : (
+            <UtilityBarGroup>
               <UtilityBarAction
-                dataTestSubj="bulkActions"
-                iconSide="right"
-                iconType="arrowDown"
-                popoverContent={handleGetBatchItemsPopoverContent}
+                dataTestSubj="refreshRulesAction"
+                iconSide="left"
+                iconType="refresh"
+                onClick={onRefresh}
               >
-                {i18n.BATCH_ACTIONS}
+                {i18n.REFRESH}
               </UtilityBarAction>
-            )}
-            <UtilityBarAction
-              dataTestSubj="refreshRulesAction"
-              iconSide="left"
-              iconType="refresh"
-              onClick={onRefresh}
-            >
-              {i18n.REFRESH}
-            </UtilityBarAction>
-            <UtilityBarAction
-              dataTestSubj="refreshSettings"
-              iconSide="right"
-              iconType="arrowDown"
-              popoverContent={handleGetRefreshSettingsPopoverContent}
-            >
-              {i18n.REFRESH_RULE_POPOVER_LABEL}
-            </UtilityBarAction>
-          </UtilityBarGroup>
+            </UtilityBarGroup>
+          )}
         </UtilityBarSection>
       </UtilityBar>
     );

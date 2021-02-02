@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
-import { shimHitsTotal } from './shim_hits_total';
+import { reportServerError } from '../../../../kibana_utils/server';
+import type { DataPluginRouter } from '../types';
 
-export function registerSearchRoute(router: IRouter): void {
+export function registerSearchRoute(router: DataPluginRouter): void {
   router.post(
     {
       path: '/internal/search/{strategy}/{id?}',
@@ -37,6 +26,7 @@ export function registerSearchRoute(router: IRouter): void {
 
         body: schema.object(
           {
+            legacyHitsTotal: schema.maybe(schema.boolean()),
             sessionId: schema.maybe(schema.string()),
             isStored: schema.maybe(schema.boolean()),
             isRestore: schema.maybe(schema.boolean()),
@@ -46,7 +36,13 @@ export function registerSearchRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
-      const { sessionId, isStored, isRestore, ...searchRequest } = request.body;
+      const {
+        legacyHitsTotal = true,
+        sessionId,
+        isStored,
+        isRestore,
+        ...searchRequest
+      } = request.body;
       const { strategy, id } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -57,6 +53,7 @@ export function registerSearchRoute(router: IRouter): void {
             {
               abortSignal,
               strategy,
+              legacyHitsTotal,
               sessionId,
               isStored,
               isRestore,
@@ -65,24 +62,9 @@ export function registerSearchRoute(router: IRouter): void {
           .pipe(first())
           .toPromise();
 
-        return res.ok({
-          body: {
-            ...response,
-            ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
-            },
-          },
-        });
+        return res.ok({ body: response });
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );
@@ -106,15 +88,7 @@ export function registerSearchRoute(router: IRouter): void {
         await context.search!.cancel(id, { strategy });
         return res.ok();
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body.error,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );

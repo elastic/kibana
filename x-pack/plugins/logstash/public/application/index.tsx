@@ -17,7 +17,6 @@ import {
   MonitoringService,
   PipelineService,
   PipelinesService,
-  UpgradeService,
   // @ts-ignore
 } from '../services';
 // @ts-ignore
@@ -39,7 +38,6 @@ export const renderApp = async (
   const monitoringService = new MonitoringService(core.http, isMonitoringEnabled, clusterService);
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
-  const upgradeService = new UpgradeService(core.http);
 
   ReactDOM.render(
     <core.i18n.Context>
@@ -77,7 +75,6 @@ export const renderApp = async (
                 logstashLicenseService={logstashLicenseService}
                 pipelineService={pipelineService}
                 toasts={core.notifications.toasts}
-                upgradeService={upgradeService}
               />
             )}
           />
@@ -96,7 +93,6 @@ export const renderApp = async (
                 logstashLicenseService={logstashLicenseService}
                 pipelineService={pipelineService}
                 toasts={core.notifications.toasts}
-                upgradeService={upgradeService}
                 id={match.params.id}
               />
             )}

@@ -69,7 +69,12 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
           : undefined,
     };
   },
-  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
+      layer,
+      thisColumnId,
+      changedColumnId
+    ),
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
       id: columnId,

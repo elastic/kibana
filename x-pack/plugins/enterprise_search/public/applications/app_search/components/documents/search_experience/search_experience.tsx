@@ -3,36 +3,45 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
-import { SearchProvider, SearchBox, Sorting } from '@elastic/react-search-ui';
+import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 
 import './search_experience.scss';
 
-import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
+import { useLocalStorage } from '../../../../shared/use_local_storage';
+import { EngineLogic } from '../../engine';
 
-import { SearchBoxView, SortingView } from './views';
+import { Fields, SortOption } from './types';
+import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 import { SearchExperienceContent } from './search_experience_content';
+import { buildSearchUIConfig } from './build_search_ui_config';
+import { CustomizationCallout } from './customization_callout';
+import { CustomizationModal } from './customization_modal';
+import { buildSortOptions } from './build_sort_options';
+import { ASCENDING, DESCENDING } from './constants';
 
-const DEFAULT_SORT_OPTIONS = [
+const RECENTLY_UPLOADED = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
   {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedDesc', {
-      defaultMessage: 'Recently Uploaded (desc)',
-    }),
+    defaultMessage: 'Recently Uploaded',
+  }
+);
+const DEFAULT_SORT_OPTIONS: SortOption[] = [
+  {
+    name: DESCENDING(RECENTLY_UPLOADED),
     value: 'id',
     direction: 'desc',
   },
   {
-    name: i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.recentlyUploadedAsc', {
-      defaultMessage: 'Recently Uploaded (asc)',
-    }),
+    name: ASCENDING(RECENTLY_UPLOADED),
     value: 'id',
     direction: 'asc',
   },
@@ -42,8 +51,19 @@ export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
   const endpointBase = externalUrl.enterpriseSearchUrl;
 
-  // TODO const sortFieldsOptions = _flatten(fields.sortFields.map(fieldNameToSortOptions)) // we need to flatten this array since fieldNameToSortOptions returns an array of two sorting options
-  const sortingOptions = [...DEFAULT_SORT_OPTIONS /* TODO ...sortFieldsOptions*/];
+  const [showCustomizationModal, setShowCustomizationModal] = useState(false);
+  const openCustomizationModal = () => setShowCustomizationModal(true);
+  const closeCustomizationModal = () => setShowCustomizationModal(false);
+
+  const [fields, setFields] = useLocalStorage<Fields>(
+    `documents-search-experience-customization--${engine.name}`,
+    {
+      filterFields: [],
+      sortFields: [],
+    }
+  );
+
+  const sortingOptions = buildSortOptions(fields, DEFAULT_SORT_OPTIONS);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
@@ -52,15 +72,7 @@ export const SearchExperience: React.FC = () => {
     searchKey: engine.apiKey,
   });
 
-  const searchProviderConfig = {
-    alwaysSearchOnInitialLoad: true,
-    apiConnector: connector,
-    trackUrlState: false,
-    initialState: {
-      sortDirection: 'desc',
-      sortField: 'id',
-    },
-  };
+  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
 
   return (
     <div className="documentsSearchExperience">
@@ -92,12 +104,54 @@ export const SearchExperience: React.FC = () => {
               sortOptions={sortingOptions}
               view={SortingView}
             />
+            <EuiSpacer />
+            {fields.filterFields.length > 0 ? (
+              <>
+                {fields.filterFields.map((fieldName) => (
+                  <section key={fieldName}>
+                    <Facet
+                      field={fieldName}
+                      label={fieldName}
+                      view={MultiCheckboxFacetsView}
+                      filterType="any"
+                    />
+                    <EuiSpacer size="l" />
+                  </section>
+                ))}
+                <EuiButton
+                  data-test-subj="customize"
+                  color="primary"
+                  iconType="gear"
+                  onClick={openCustomizationModal}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.documents.search.customizationButton',
+                    {
+                      defaultMessage: 'Customize filters and sort',
+                    }
+                  )}
+                </EuiButton>
+              </>
+            ) : (
+              <CustomizationCallout onClick={openCustomizationModal} />
+            )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
             <SearchExperienceContent />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>
+      {showCustomizationModal && (
+        <CustomizationModal
+          filterFields={fields.filterFields}
+          sortFields={fields.sortFields}
+          onClose={closeCustomizationModal}
+          onSave={({ filterFields, sortFields }) => {
+            setFields({ filterFields, sortFields });
+            closeCustomizationModal();
+          }}
+        />
+      )}
     </div>
   );
 };

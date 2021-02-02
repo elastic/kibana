@@ -43,16 +43,9 @@ export const NodeEventsInCategory = memo(function ({
   eventCategory: string;
 }) {
   const node = useSelector((state: ResolverState) => selectors.graphNodeForID(state)(nodeID));
-  const eventCount = useSelector((state: ResolverState) =>
-    selectors.totalRelatedEventCountForNode(state)(nodeID)
-  );
-  const eventsInCategoryCount = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
-  );
-  const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
-
   const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
+
   return (
     <>
       {isLoading ? (
@@ -85,12 +78,10 @@ export const NodeEventsInCategory = memo(function ({
               <NodeEventsInCategoryBreadcrumbs
                 nodeName={node.name}
                 eventCategory={eventCategory}
-                eventCount={eventCount}
                 nodeID={nodeID}
-                eventsInCategoryCount={eventsInCategoryCount}
               />
               <EuiSpacer size="l" />
-              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
+              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} />
             </>
           )}
         </StyledPanel>
@@ -166,16 +157,12 @@ const NodeEventsListItem = memo(function ({
  */
 const NodeEventList = memo(function NodeEventList({
   eventCategory,
-  events,
   nodeID,
 }: {
   eventCategory: string;
-  /**
-   * The events to list.
-   */
-  events: SafeResolverEvent[];
   nodeID: string;
 }) {
+  const events = useSelector(selectors.nodeEventsInCategory);
   const dispatch = useResolverDispatch();
   const handleLoadMore = useCallback(() => {
     dispatch({
@@ -219,25 +206,20 @@ const NodeEventList = memo(function NodeEventList({
 const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
   eventCategory,
-  eventCount,
   nodeID,
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount,
 }: {
   nodeName: React.ReactNode;
   eventCategory: string;
-  /**
-   * The events to list.
-   */
-  eventCount: number | undefined;
   nodeID: string;
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount: number | undefined;
 }) {
+  const eventCount = useSelector((state: ResolverState) =>
+    selectors.totalRelatedEventCountForNode(state)(nodeID)
+  );
+
+  const eventsInCategoryCount = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
+  );
+
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
   });

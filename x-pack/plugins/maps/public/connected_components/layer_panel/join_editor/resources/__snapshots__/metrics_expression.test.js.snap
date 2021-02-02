@@ -19,7 +19,6 @@ exports[`Should render default props 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
 >
   <div
     style={
@@ -74,7 +73,6 @@ exports[`Should render metrics expression for metrics 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
-  withTitle={true}
 >
   <div
     style={
@@ -99,13 +97,32 @@ exports[`Should render metrics expression for metrics 1`] = `
         values={Object {}}
       />
     </EuiFormHelpText>
-    <EuiFormErrorText>
-      <FormattedMessage
-        defaultMessage="JOIN must be set"
-        id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
-        values={Object {}}
-      />
-    </EuiFormErrorText>
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      fields={
+        Array [
+          "foobar",
+          "prop1",
+        ]
+      }
+      metrics={
+        Array [
+          Object {
+            "label": "my count",
+            "type": "count",
+          },
+          Object {
+            "type": "max",
+          },
+          Object {
+            "field": "prop1",
+            "label": "mostest",
+            "type": "max",
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
   </div>
 </EuiPopover>
 `;

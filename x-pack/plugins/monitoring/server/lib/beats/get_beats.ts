@@ -14,7 +14,8 @@ import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
 // @ts-ignore
 import { getDiffCalculation } from './_beats_stats';
-import { ElasticsearchResponse, LegacyRequest } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Beat {
   uuid: string | undefined;
@@ -151,7 +152,7 @@ export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, cl
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }],
+          sort: [{ 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } }],
         },
       },
       sort: [

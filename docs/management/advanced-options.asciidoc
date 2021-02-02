@@ -134,11 +134,6 @@ The maximum numbers of buckets that a single data source can return. This might
 arise when the user selects a short interval (for example, 1s) for a long time
 period (1 year).
 
-[[pagenavigation]]`pageNavigation`::
-The style of navigation menu for Kibana. Choices are Legacy, the legacy style
-where every plugin is represented in the nav, and Modern, a new format that
-bundles related plugins together in flyaway nested navigation.
-
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
 Allows a wildcard (*) as the first character in a query clause. Only applies
 when experimental query features are enabled in the query bar. To disallow
@@ -261,6 +256,10 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
+
+[[doctable-legacy]]`doc_table:legacy`:: 
+Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
+
 
 [float]
 [[kibana-ml-settings]]
@@ -453,6 +452,9 @@ of buckets to try to represent.
 ==== Visualization
 
 [horizontal]
+[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
+Enables legacy charts library for area, line and bar charts in visualize.
+
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.

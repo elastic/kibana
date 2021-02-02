@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -24,7 +24,7 @@ import { deleteTemplate } from '../../index/delete_template';
  *
  * And ensuring they're all gone
  */
-export const deleteIndexRoute = (router: IRouter) => {
+export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
     {
       path: DETECTION_ENGINE_INDEX_URL,

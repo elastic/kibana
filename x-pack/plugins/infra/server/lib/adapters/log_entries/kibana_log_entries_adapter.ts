@@ -10,8 +10,8 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
 import { compact } from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
-import { JsonArray } from '../../../../common/typed_json';
+import { JsonArray } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -30,7 +30,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
   public async getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
@@ -123,7 +123,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     startTimestamp: number,
     endTimestamp: number,
@@ -215,6 +215,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
 
     return {
       id: hit._id,
+      index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},

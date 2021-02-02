@@ -9,11 +9,15 @@ import {
   coreMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
+  savedObjectsServiceMock,
 } from '../../../../../../../src/core/server/mocks';
 
 export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const typeRegistry = savedObjectsTypeRegistryMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
+  const savedObjectsExporter = savedObjectsServiceMock.createExporter();
+  const savedObjectsImporter = savedObjectsServiceMock.createImporter();
+
   savedObjectsClient.get.mockImplementation((type, id) => {
     const result = spaces.filter((s) => s.id === id);
     if (!result.length) {
@@ -43,6 +47,14 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
   const { savedObjects } = coreMock.createStart();
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
   savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+  savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
+  savedObjects.createImporter.mockReturnValue(savedObjectsImporter);
 
-  return { savedObjects, typeRegistry, savedObjectsClient };
+  return {
+    savedObjects,
+    typeRegistry,
+    savedObjectsClient,
+    savedObjectsExporter,
+    savedObjectsImporter,
+  };
 };

@@ -15,7 +15,6 @@ import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
@@ -34,7 +33,7 @@ async function searchThroughput({
   intervalString,
 }: {
   serviceName: string;
-  transactionType: string | undefined;
+  transactionType: string;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
@@ -48,20 +47,13 @@ async function searchThroughput({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...setup.esFilter,
   ];
 
   if (transactionName) {
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
-
-  if (transactionType) {
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
 
   const params = {
     apm: {
@@ -85,7 +77,6 @@ async function searchThroughput({
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end },
               },
-              aggs: { count: { value_count: { field } } },
             },
           },
         },
@@ -104,14 +95,12 @@ export async function getThroughputCharts({
   searchAggregatedTransactions,
 }: {
   serviceName: string;
-  transactionType: string | undefined;
+  transactionType: string;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end } = setup;
-  const { bucketSize, intervalString } = getBucketSize({ start, end });
-  const durationAsMinutes = (end - start) / 1000 / 60;
+  const { bucketSize, intervalString } = getBucketSize(setup);
 
   const response = await searchThroughput({
     serviceName,
@@ -126,7 +115,7 @@ export async function getThroughputCharts({
     throughputTimeseries: getThroughputBuckets({
       throughputResultBuckets: response.aggregations?.throughput.buckets,
       bucketSize,
-      durationAsMinutes,
+      setupTimeRange: setup,
     }),
   };
 }

@@ -210,8 +210,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors.name}
-        isInvalid={errors.name.length > 0 && incident.name !== undefined}
+        error={errors['subActionParams.incident.name']}
+        isInvalid={
+          errors['subActionParams.incident.name'].length > 0 && incident.name !== undefined
+        }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
           { defaultMessage: 'Name (required)' }
@@ -223,7 +225,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           messageVariables={messageVariables}
           paramsProperty={'name'}
           inputTargetValue={incident.name ?? undefined}
-          errors={errors.name as string[]}
+          errors={errors['subActionParams.incident.name'] as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
@@ -236,7 +238,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
-        errors={errors.description as string[]}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -248,7 +249,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
-        errors={errors.comments as string[]}
       />
     </Fragment>
   );

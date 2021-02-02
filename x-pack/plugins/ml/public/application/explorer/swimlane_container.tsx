@@ -46,11 +46,11 @@ import { useUiSettings } from '../contexts/kibana';
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
-const RESIZE_IGNORED_DIFF_PX = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const Y_AXIS_HEIGHT = 24;
+export const SWIM_LANE_LABEL_WIDTH = 200;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -167,12 +167,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      const labelWidth = 200;
-      const resultNewWidth = e.width - labelWidth;
-      if (Math.abs(resultNewWidth - chartWidth) > RESIZE_IGNORED_DIFF_PX) {
-        setChartWidth(resultNewWidth);
-        onResize(resultNewWidth);
-      }
+      const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
+      setChartWidth(resultNewWidth);
+      onResize(resultNewWidth);
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
@@ -255,7 +252,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
         onCellsSelection({
           lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000),
+          times: e.x.map((v) => (v as number) / 1000) as [number, number],
           type: swimlaneType,
           viewByFieldName: swimlaneData.fieldName,
         });
@@ -326,7 +323,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + swimlaneData.interval],
+        times: [startTime, startTime + swimlaneData.interval] as [number, number],
         type: swimlaneType,
         viewByFieldName: swimlaneData.fieldName,
       };

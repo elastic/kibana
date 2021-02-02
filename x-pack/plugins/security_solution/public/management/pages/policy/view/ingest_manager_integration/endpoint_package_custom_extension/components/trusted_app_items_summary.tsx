@@ -6,38 +6,69 @@
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { FC, memo, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
+import { GetTrustedAppsSummaryResponse } from '../../../../../../../../common/endpoint/types';
+
+const SUMMARY_KEYS: Readonly<Array<keyof GetTrustedAppsSummaryResponse>> = [
+  'windows',
+  'macos',
+  'linux',
+  'total',
+];
+
+const SUMMARY_LABELS: Readonly<{ [key in keyof GetTrustedAppsSummaryResponse]: string }> = {
+  windows: i18n.translate(
+    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.windows',
+    { defaultMessage: 'Windows' }
+  ),
+  linux: i18n.translate(
+    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.linux',
+    { defaultMessage: 'Linux' }
+  ),
+  macos: i18n.translate(
+    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.macos',
+    { defaultMessage: 'Mac' }
+  ),
+  total: i18n.translate(
+    'xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.total',
+    { defaultMessage: 'Total' }
+  ),
+};
+
+const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
 
 export const TrustedAppItemsSummary = memo(() => {
   const {
     services: { http },
   } = useKibana<CoreStart>();
-  const [total, setTotal] = useState<number>(0);
+  const [stats, setStats] = useState<GetTrustedAppsSummaryResponse | undefined>();
   const [trustedAppsApi] = useState(() => new TrustedAppsHttpService(http));
 
   useEffect(() => {
-    trustedAppsApi
-      .getTrustedAppsList({
-        page: 1,
-        per_page: 1,
-      })
-      .then((response) => {
-        setTotal(response.total);
-      });
+    trustedAppsApi.getTrustedAppsSummary().then((response) => {
+      setStats(response);
+    });
   }, [trustedAppsApi]);
 
   return (
-    <div>
-      <SummaryStat value={total} color="primary">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppItemsSummary.totalLabel"
-          defaultMessage="Total"
-        />
-      </SummaryStat>
-    </div>
+    <EuiFlexGroup responsive={false}>
+      {SUMMARY_KEYS.map((stat) => {
+        return (
+          <EuiFlexItem>
+            <SummaryStat
+              value={stats?.[stat] ?? 0}
+              color={stat === 'total' ? 'primary' : 'default'}
+              key={stat}
+            >
+              {SUMMARY_LABELS[stat]}
+            </SummaryStat>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 });
 
@@ -53,7 +84,7 @@ const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color'] }> = memo(
           direction="row"
           alignItems="center"
         >
-          <EuiFlexItem grow={false} style={{ fontWeight: 'bold' }}>
+          <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
             {children}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

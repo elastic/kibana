@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Role, RoleIndexPrivilege } from '../../../../common/model';
+import { NAME_REGEX, MAX_NAME_LENGTH } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
@@ -41,25 +42,36 @@ export class RoleValidator {
         i18n.translate(
           'xpack.security.management.editRole.validateRole.provideRoleNameWarningMessage',
           {
-            defaultMessage: 'Please provide a role name',
+            defaultMessage: 'Please provide a role name.',
           }
         )
       );
     }
-    if (role.name.length > 1024) {
+    if (role.name.length > MAX_NAME_LENGTH) {
       return invalid(
         i18n.translate('xpack.security.management.editRole.validateRole.nameLengthWarningMessage', {
-          defaultMessage: 'Name must not exceed 1024 characters',
+          defaultMessage: 'Name must not exceed {maxLength} characters.',
+          values: { maxLength: MAX_NAME_LENGTH },
         })
       );
     }
-    if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
+    if (role.name.trim() !== role.name) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.nameWhitespaceWarningMessage',
+          {
+            defaultMessage: `Name must not contain leading or trailing spaces.`,
+          }
+        )
+      );
+    }
+    if (!role.name.match(NAME_REGEX)) {
       return invalid(
         i18n.translate(
           'xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage',
           {
             defaultMessage:
-              'Name must begin with a letter or underscore and contain only letters, underscores, and numbers.',
+              'Name must contain only letters, numbers, spaces, punctuation and printable symbols.',
           }
         )
       );

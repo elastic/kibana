@@ -14,9 +14,15 @@ import {
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_creator';
-import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
-import { cardinalityValidator, CardinalityValidatorResult } from './validators';
+import { populateValidationMessages } from './util';
+import {
+  cardinalityValidator,
+  CardinalityValidatorResult,
+  jobIdValidator,
+  groupIdsValidator,
+  JobExistsResult,
+  GroupsExistResult,
+} from './validators';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -25,7 +31,9 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 // after every keystroke
 export const VALIDATION_DELAY_MS = 500;
 
-type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
+type AsyncValidatorsResult = Partial<
+  CardinalityValidatorResult & JobExistsResult & GroupsExistResult
+>;
 
 /**
  * Union of possible validation results.
@@ -69,7 +77,6 @@ export class JobValidator {
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
   private _asyncValidators$: Array<Observable<AsyncValidatorsResult>> = [];
   private _asyncValidatorsResult$: Observable<AsyncValidatorsResult>;
-  private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
     groupIds: { valid: true },
@@ -97,7 +104,7 @@ export class JobValidator {
    */
   public validationResult$: Observable<JobValidationResult>;
 
-  constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
+  constructor(jobCreator: JobCreatorType) {
     this._jobCreator = jobCreator;
     this._lastJobConfig = this._jobCreator.formattedJobJson;
     this._lastDatafeedConfig = this._jobCreator.formattedDatafeedJson;
@@ -105,9 +112,12 @@ export class JobValidator {
       basic: false,
       advanced: false,
     };
-    this._existingJobsAndGroups = existingJobsAndGroups;
 
-    this._asyncValidators$ = [cardinalityValidator(this._jobCreatorSubject$)];
+    this._asyncValidators$ = [
+      cardinalityValidator(this._jobCreatorSubject$),
+      jobIdValidator(this._jobCreatorSubject$),
+      groupIdsValidator(this._jobCreatorSubject$),
+    ];
 
     this._asyncValidatorsResult$ = combineLatest(this._asyncValidators$).pipe(
       map((res) => {
@@ -207,14 +217,6 @@ export class JobValidator {
       jobConfig,
       datafeedConfig
     );
-
-    // run addition job and group id validation
-    const idResults = checkForExistingJobAndGroupIds(
-      this._jobCreator.jobId,
-      this._jobCreator.groups,
-      this._existingJobsAndGroups
-    );
-    populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
     // Update validation results subject

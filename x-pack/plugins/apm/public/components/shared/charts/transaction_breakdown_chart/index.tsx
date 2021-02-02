@@ -26,7 +26,7 @@ export function TransactionBreakdownChart({
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-                defaultMessage: 'Average duration by span type',
+                defaultMessage: 'Time spent by span type',
               })}
             </h3>
           </EuiTitle>

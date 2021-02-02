@@ -9,12 +9,12 @@ import { render } from 'react-dom';
 import { FormDrilldownWizard } from './form_drilldown_wizard';
 import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
 import { txtNameOfDrilldown } from './i18n';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
-  actionFactoryContext: { triggers: [] as TriggerId[] },
-  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as TriggerId[],
-  getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
+  actionFactoryContext: { triggers: [] as string[] },
+  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as string[],
+  getTriggerInfo: (id: string) => ({ id } as Trigger),
   onSelectedTriggersChange: () => {},
 };
 

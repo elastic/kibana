@@ -47,11 +47,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: [],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -75,11 +81,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: [],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: [],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });
@@ -99,11 +111,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is required.'],
-        method: [],
-        user: [],
-        password: ['Password is required when username is used.'],
+      config: {
+        errors: {
+          url: ['URL is required.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: ['Password is required when username is used.'],
+        },
       },
     });
   });
@@ -125,11 +143,17 @@ describe('webhook connector validation', () => {
     } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        url: ['URL is invalid.'],
-        method: [],
-        user: [],
-        password: [],
+      config: {
+        errors: {
+          url: ['URL is invalid.'],
+          method: [],
+        },
+      },
+      secrets: {
+        errors: {
+          user: [],
+          password: [],
+        },
       },
     });
   });

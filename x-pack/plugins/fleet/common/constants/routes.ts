@@ -29,6 +29,7 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
 };
 
 // Data stream API routes

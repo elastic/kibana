@@ -5,3 +5,4 @@
  */
 
 export { useMlKibana } from './kibana_context';
+export { useTimefilter } from './use_timefilter';

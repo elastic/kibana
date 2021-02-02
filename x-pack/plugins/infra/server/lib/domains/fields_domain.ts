@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraIndexField, InfraIndexType } from '../../graphql/types';
 import { FieldsAdapter } from '../adapters/fields';
 import { InfraSources } from '../sources';
@@ -16,7 +16,7 @@ export class InfraFieldsDomain {
   ) {}
 
   public async getFields(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     indexType: InfraIndexType
   ): Promise<InfraIndexField[]> {

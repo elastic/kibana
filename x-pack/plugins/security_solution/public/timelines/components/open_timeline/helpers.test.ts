@@ -39,12 +39,16 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
-import { TimelineTabs } from '../../store/timeline/model';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -242,6 +246,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -315,6 +320,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -343,6 +349,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -416,6 +423,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -444,6 +452,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -517,6 +526,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -543,6 +553,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -616,6 +627,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -648,7 +660,7 @@ describe('helpers', () => {
             example: undefined,
             id: '@timestamp',
             placeholder: undefined,
-            type: undefined,
+            type: 'number',
             width: 190,
           },
           {
@@ -756,6 +768,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -811,6 +824,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -925,6 +939,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -949,6 +964,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1022,6 +1038,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -1050,6 +1067,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1123,6 +1141,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],

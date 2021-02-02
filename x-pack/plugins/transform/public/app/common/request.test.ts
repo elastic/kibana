@@ -18,7 +18,6 @@ import {
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
-  getMissingBucketConfig,
   getPivotQuery,
   isDefaultQuery,
   isMatchAllQuery,
@@ -26,6 +25,7 @@ import {
   matchAllQuery,
   PivotQuery,
 } from './request';
+import { LatestFunctionConfigUI } from '../../../common/types/transform';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -62,16 +62,6 @@ describe('Transform: Common', () => {
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 
-  test('getMissingBucketConfig()', () => {
-    expect(getMissingBucketConfig(groupByTerms)).toEqual({});
-    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: true } })).toEqual({
-      missing_bucket: true,
-    });
-    expect(getMissingBucketConfig({ ...groupByTerms, ...{ missing_bucket: false } })).toEqual({
-      missing_bucket: false,
-    });
-  });
-
   test('getPivotQuery()', () => {
     const query = getPivotQuery('the-query');
 
@@ -85,9 +75,13 @@ describe('Transform: Common', () => {
 
   test('getPreviewTransformRequestBody()', () => {
     const query = getPivotQuery('the-query');
-    const groupBy: PivotGroupByConfig[] = [groupByTerms];
-    const aggs: PivotAggsConfig[] = [aggsAvg];
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, groupBy, aggs);
+
+    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+    });
 
     expect(request).toEqual({
       pivot: {
@@ -103,13 +97,15 @@ describe('Transform: Common', () => {
 
   test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
     const query = getPivotQuery('the-query');
-    const groupBy: PivotGroupByConfig[] = [groupByTerms];
-    const aggs: PivotAggsConfig[] = [aggsAvg];
     const request = getPreviewTransformRequestBody(
       'the-index-pattern-title,the-other-title',
       query,
-      groupBy,
-      aggs
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
     );
 
     expect(request).toEqual({
@@ -126,9 +122,14 @@ describe('Transform: Common', () => {
 
   test('getPreviewTransformRequestBody() with missing_buckets config', () => {
     const query = getPivotQuery('the-query');
-    const groupBy: PivotGroupByConfig[] = [{ ...groupByTerms, ...{ missing_bucket: true } }];
-    const aggs: PivotAggsConfig[] = [aggsAvg];
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, groupBy, aggs);
+    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: {
+          'the-group-by-agg-name': { terms: { field: 'the-group-by-field', missing_bucket: true } },
+        },
+      },
+    });
 
     expect(request).toEqual({
       pivot: {
@@ -155,6 +156,17 @@ describe('Transform: Common', () => {
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,
+      transformFunction: 'pivot',
+      latestConfig: {} as LatestFunctionConfigUI,
+      previewRequest: {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      },
+      validationStatus: {
+        isValid: true,
+      },
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',

@@ -40,7 +40,13 @@ export type TransformIdParamSchema = TypeOf<typeof transformIdParamSchema>;
 
 export interface ResponseStatus {
   success: boolean;
-  error?: any;
+  // FIXME error response should have unified shape
+  error?: {
+    type: string;
+    reason: string;
+    root_cause: any[];
+    caused_by: any;
+  } & { response: any };
 }
 
 export interface CommonResponseStatusSchema {

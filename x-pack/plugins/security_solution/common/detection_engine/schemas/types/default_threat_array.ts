@@ -6,16 +6,16 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { Threat, threat } from '../common/schemas';
+import { Threats, threats } from '../common/schemas';
 
 /**
  * Types the DefaultThreatArray as:
  *   - If null or undefined, then an empty array will be set
  */
-export const DefaultThreatArray = new t.Type<Threat, Threat | undefined, unknown>(
+export const DefaultThreatArray = new t.Type<Threats, Threats | undefined, unknown>(
   'DefaultThreatArray',
-  threat.is,
-  (input, context): Either<t.Errors, Threat> =>
-    input == null ? t.success([]) : threat.validate(input, context),
+  threats.is,
+  (input, context): Either<t.Errors, Threats> =>
+    input == null ? t.success([]) : threats.validate(input, context),
   t.identity
 );

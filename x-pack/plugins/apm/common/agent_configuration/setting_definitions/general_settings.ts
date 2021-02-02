@@ -125,7 +125,7 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.',
     }),
-    excludeAgents: ['nodejs'],
+    excludeAgents: ['nodejs', 'rum-js', 'js-base'],
   },
 
   // SERVER_TIMEOUT
@@ -235,7 +235,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
       }
     ),
-    includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs'],
+    includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs', 'ruby'],
   },
 
   // Ignore transactions based on URLs
@@ -254,6 +254,6 @@ export const generalSettings: RawSettingDefinition[] = [
           'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
       }
     ),
-    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby'],
+    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby', 'go'],
   },
 ];

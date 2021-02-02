@@ -95,6 +95,7 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -231,6 +232,7 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },

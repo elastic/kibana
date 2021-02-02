@@ -1,11 +1,13 @@
 package vcs
 
+import getCorrespondingESBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
+import makeSafeId
 
 object Elasticsearch : GitVcsRoot({
-  id("elasticsearch_master")
+  id("elasticsearch_${makeSafeId(getCorrespondingESBranch())}")
 
-  name = "elasticsearch / master"
+  name = "elasticsearch / ${getCorrespondingESBranch()}"
   url = "https://github.com/elastic/elasticsearch.git"
-  branch = "refs/heads/master"
+  branch = "refs/heads/${getCorrespondingESBranch()}"
 })

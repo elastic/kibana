@@ -7,8 +7,12 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
+import isEmpty from 'lodash/isEmpty';
+import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
 
-import { Filter } from 'src/plugins/data/common';
+import { toError, toPromise } from '../../../../common/fp_utils';
+
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -29,7 +33,6 @@ import {
   SignalRuleAlertTypeDefinition,
   RuleAlertAttributes,
   EqlSignalSearchResponse,
-  ThresholdQueryBucket,
   WrappedSignalHit,
 } from './types';
 import {
@@ -43,14 +46,17 @@ import {
   createSearchAfterReturnType,
   mergeReturns,
   createSearchAfterReturnTypeFromResponse,
+  checkPrivileges,
+  hasTimestampFields,
+  hasReadIndexPrivileges,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
-import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
+import { getThresholdBucketFilters } from './threshold_get_bucket_filters';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -68,6 +74,7 @@ import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { isOutdated } from '../migrations/helpers';
+import { RuleTypeParams } from '../types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -88,7 +95,16 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
-      params: signalParamsSchema(),
+      /**
+       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
+       * Once that's done, you should be able to do:
+       * ```
+       * params: signalParamsSchema(),
+       * ```
+       */
+      params: (signalParamsSchema() as unknown) as {
+        validate: (object: unknown) => RuleTypeParams;
+      },
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
@@ -163,7 +179,55 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
+      let wrotePartialFailureStatus = false;
       await ruleStatusService.goingToRun();
+
+      // check if rule has permissions to access given index pattern
+      // move this collection of lines into a function in utils
+      // so that we can use it in create rules route, bulk, etc.
+      try {
+        if (!isEmpty(index)) {
+          const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
+          const inputIndices = await getInputIndex(services, version, index);
+          const [privileges, timestampFieldCaps] = await Promise.all([
+            checkPrivileges(services, inputIndices),
+            services.scopedClusterClient.fieldCaps({
+              index,
+              fields: hasTimestampOverride
+                ? ['@timestamp', timestampOverride as string]
+                : ['@timestamp'],
+              include_unmapped: true,
+            }),
+          ]);
+
+          wrotePartialFailureStatus = await flow(
+            () =>
+              tryCatch(
+                () =>
+                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                toError
+              ),
+            chain((wroteStatus) =>
+              tryCatch(
+                () =>
+                  hasTimestampFields(
+                    wroteStatus,
+                    hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    timestampFieldCaps,
+                    inputIndices,
+                    ruleStatusService,
+                    logger,
+                    buildRuleMessage
+                  ),
+                toError
+              )
+            ),
+            toPromise
+          )();
+        }
+      } catch (exc) {
+        logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
+      }
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
@@ -307,21 +371,11 @@ export const signalRulesAlertType = ({
           ]);
         } else if (isThresholdRule(type) && threshold) {
           const inputIndex = await getInputIndex(services, version, index);
-          const esFilter = await getFilter({
-            type,
-            filters,
-            language,
-            query,
-            savedId,
-            services,
-            index: inputIndex,
-            lists: exceptionItems ?? [],
-          });
 
           const {
-            searchResult: previousSignals,
+            filters: bucketFilters,
             searchErrors: previousSearchErrors,
-          } = await findPreviousThresholdSignals({
+          } = await getThresholdBucketFilters({
             indexPattern: [outputIndex],
             from,
             to,
@@ -333,29 +387,15 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
-          previousSignals.aggregations.threshold.buckets.forEach((bucket: ThresholdQueryBucket) => {
-            esFilter.bool.filter.push(({
-              bool: {
-                must_not: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          [threshold.field || 'signal.rule.rule_id']: bucket.key,
-                        },
-                      },
-                      {
-                        range: {
-                          [timestampOverride ?? '@timestamp']: {
-                            lte: bucket.lastSignalTimestamp.value_as_string,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            } as unknown) as Filter);
+          const esFilter = await getFilter({
+            type,
+            filters: filters ? filters.concat(bucketFilters) : bucketFilters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+            lists: exceptionItems ?? [],
           });
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
@@ -400,6 +440,7 @@ export const signalRulesAlertType = ({
             tags,
             buildRuleMessage,
           });
+
           result = mergeReturns([
             result,
             createSearchAfterReturnTypeFromResponse({
@@ -615,13 +656,28 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError) {
+          if (!hasError && !wrotePartialFailureStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,
               lastLookBackDate: result.lastLookBackDate?.toISOString(),
             });
           }
+
+          // adding this log line so we can get some information from cloud
+          logger.info(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount}  ${
+                !isEmpty(result.totalToFromTuples)
+                  ? `signals searched between date ranges ${JSON.stringify(
+                      result.totalToFromTuples,
+                      null,
+                      2
+                    )}`
+                  : ''
+              }`
+            )
+          );
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',

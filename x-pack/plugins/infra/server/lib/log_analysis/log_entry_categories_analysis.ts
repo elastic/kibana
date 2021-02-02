@@ -5,13 +5,14 @@
  */
 
 import type { ILegacyScopedClusterClient } from 'src/core/server';
-import { LogEntryContext } from '../../../common/http_api';
 import {
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
+  CategoriesSort,
 } from '../../../common/log_analysis';
+import { LogEntryContext } from '../../../common/log_entry';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -49,7 +50,8 @@ export async function getTopLogEntryCategories(
   endTime: number,
   categoryCount: number,
   datasets: string[],
-  histograms: HistogramParameters[]
+  histograms: HistogramParameters[],
+  sort: CategoriesSort
 ) {
   const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
 
@@ -68,7 +70,8 @@ export async function getTopLogEntryCategories(
     startTime,
     endTime,
     categoryCount,
-    datasets
+    datasets,
+    sort
   );
 
   const categoryIds = topLogEntryCategories.map(({ categoryId }) => categoryId);
@@ -214,7 +217,8 @@ async function fetchTopLogEntryCategories(
   startTime: number,
   endTime: number,
   categoryCount: number,
-  datasets: string[]
+  datasets: string[],
+  sort: CategoriesSort
 ) {
   const finalizeEsSearchSpan = startTracingSpan('Fetch top categories from ES');
 
@@ -225,7 +229,8 @@ async function fetchTopLogEntryCategories(
         startTime,
         endTime,
         categoryCount,
-        datasets
+        datasets,
+        sort
       ),
       [logEntryCategoriesCountJobId]
     )

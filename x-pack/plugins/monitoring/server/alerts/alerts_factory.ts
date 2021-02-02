@@ -5,6 +5,7 @@
  */
 
 import {
+  CCRReadExceptionsAlert,
   CpuUsageAlert,
   MissingMonitoringDataAlert,
   DiskUsageAlert,
@@ -32,6 +33,7 @@ import {
   ALERT_LOGSTASH_VERSION_MISMATCH,
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_CCR_READ_EXCEPTIONS,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 import { Alert } from '../../../alerts/common';
@@ -49,6 +51,7 @@ const BY_TYPE = {
   [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,
   [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
+  [ALERT_CCR_READ_EXCEPTIONS]: CCRReadExceptionsAlert,
 };
 
 export class AlertsFactory {
@@ -68,7 +71,6 @@ export class AlertsFactory {
 
     if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
       return;
-      // return new alertCls() as BaseAlert;
     }
 
     const [rawAlert] = alertClientAlerts.data as [Alert];

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
-import { euiStyled } from '../../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
@@ -51,7 +51,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
             {({ measureRef, bounds: { height = 0 } }) => (
               <ExpandedRowCell commandHeight={height}>
                 <EuiSpacer size="s" />
-                <EuiDescriptionList compressed>
+                <ExpandedRowDescriptionList>
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>
                       <div ref={measureRef}>
@@ -81,7 +81,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
-                  <EuiFlexGrid columns={2} gutterSize="s">
+                  <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
                     <EuiFlexItem>
                       <EuiDescriptionListTitle>
                         {i18n.translate(
@@ -92,7 +92,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         )}
                       </EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        <CodeLine>{item.pid}</CodeLine>
+                        <CodeListItem>{item.pid}</CodeListItem>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -105,12 +105,12 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         )}
                       </EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        <CodeLine>{item.user}</CodeLine>
+                        <CodeListItem>{item.user}</CodeListItem>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
                     <ProcessRowCharts command={item.command} />
                   </EuiFlexGrid>
-                </EuiDescriptionList>
+                </ExpandedRowDescriptionList>
               </ExpandedRowCell>
             )}
           </AutoSizer>
@@ -120,11 +120,15 @@ export const ProcessRow = ({ cells, item }: Props) => {
   );
 };
 
-export const CodeLine = euiStyled(EuiCode).attrs({
+const ExpandedRowDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+})`
+  width: 100%;
+`;
+
+const CodeListItem = euiStyled(EuiCode).attrs({
   transparentBackground: true,
 })`
-  text-overflow: ellipsis;
-  overflow: hidden;
   padding: 0 !important;
   & code.euiCodeBlock__code {
     white-space: nowrap !important;

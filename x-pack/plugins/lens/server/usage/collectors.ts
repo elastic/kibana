@@ -16,11 +16,6 @@ export function registerLensUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
   const lensUsageCollector = usageCollection.makeUsageCollector<LensUsage>({
     type: 'lens',
     async fetch() {
@@ -55,7 +50,10 @@ export function registerLensUsageCollector(
         };
       }
     },
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     schema: lensUsageSchema,
   });
 

@@ -15,7 +15,6 @@ import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 import { ancestorsRequestAmount, descendantsRequestAmount } from '../../models/resolver_tree';
-import { createRange } from './../../models/time_range';
 
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -45,6 +44,8 @@ export function ResolverTreeFetcher(
       let dataSource: string | undefined;
       let dataSourceSchema: ResolverSchema | undefined;
       let result: ResolverNode[] | undefined;
+      const timeRangeFilters = selectors.timeRangeFilters(state);
+
       // Inform the state that we've made the request. Without this, the middleware will try to make the request again
       // immediately.
       api.dispatch({
@@ -70,7 +71,7 @@ export function ResolverTreeFetcher(
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
-          timeRange: createRange(),
+          timeRange: timeRangeFilters,
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),

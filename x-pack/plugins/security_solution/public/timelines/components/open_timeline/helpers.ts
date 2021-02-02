@@ -27,6 +27,7 @@ import {
   TimelineId,
   TimelineStatus,
   TimelineType,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import {
@@ -42,11 +43,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import {
-  ColumnHeaderOptions,
-  TimelineModel,
-  TimelineTabs,
-} from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {

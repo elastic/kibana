@@ -39,7 +39,6 @@ module.exports = {
     'jquery',
     'lodash',
     'markdown-it',
-    'mocha',
     'monaco-editor',
     'prop-types',
     'react-ace',

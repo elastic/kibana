@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
@@ -27,8 +17,10 @@ import {
 import { IIndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { LOADING_STATUS } from './constants';
 import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
+import { TopNavMenuProps } from '../../../../../navigation/public';
 
 export interface ContextAppProps {
+  topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
   hits: Array<Record<string, unknown>>;
   indexPattern: IIndexPattern;
@@ -46,6 +38,7 @@ export interface ContextAppProps {
   onChangeSuccessorCount: (count: number) => void;
   predecessorStatus: string;
   successorStatus: string;
+  useNewFieldsApi?: boolean;
 }
 
 const PREDECESSOR_TYPE = 'predecessors';
@@ -85,7 +78,15 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
   };
 
   const docTableProps = () => {
-    const { hits, filter, sorting, columns, indexPattern, minimumVisibleRows } = renderProps;
+    const {
+      hits,
+      filter,
+      sorting,
+      columns,
+      indexPattern,
+      minimumVisibleRows,
+      useNewFieldsApi,
+    } = renderProps;
     return {
       columns,
       indexPattern,
@@ -93,7 +94,22 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       rows: hits,
       onFilter: filter,
       sort: sorting.map((el) => [el]),
+      useNewFieldsApi,
     } as DocTableLegacyProps;
+  };
+
+  const TopNavMenu = renderProps.topNavMenu;
+  const getNavBarProps = () => {
+    return {
+      appName: 'context',
+      showSearchBar: true,
+      showQueryBar: false,
+      showFilterBar: true,
+      showSaveQuery: false,
+      showDatePicker: false,
+      indexPatterns: [renderProps.indexPattern],
+      useDefaultBehaviors: true,
+    };
   };
 
   const loadingFeedback = () => {
@@ -112,20 +128,23 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       {isFailed ? (
         <ContextErrorMessage status={status} reason={renderProps.reason} />
       ) : (
-        <EuiPage>
-          <EuiPageContent paddingSize="s" className="dscCxtAppContent">
-            <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-            {loadingFeedback()}
-            <EuiHorizontalRule margin="xs" />
-            {isLoaded ? (
-              <div className="discover-table">
-                <DocTableLegacy {...docTableProps()} />
-              </div>
-            ) : null}
-            <EuiHorizontalRule margin="xs" />
-            <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
-          </EuiPageContent>
-        </EuiPage>
+        <div>
+          <TopNavMenu {...getNavBarProps()} />
+          <EuiPage>
+            <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+              <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
+              {loadingFeedback()}
+              <EuiHorizontalRule margin="xs" />
+              {isLoaded ? (
+                <div className="discover-table">
+                  <DocTableLegacy {...docTableProps()} />
+                </div>
+              ) : null}
+              <EuiHorizontalRule margin="xs" />
+              <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+            </EuiPageContent>
+          </EuiPage>
+        </div>
       )}
     </I18nProvider>
   );

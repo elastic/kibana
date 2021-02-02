@@ -26,6 +26,7 @@ import * as nodeModel from '../../../common/endpoint/models/node';
 import { act } from 'react-dom/test-utils';
 import { mockResolverNode } from '../mocks/resolver_node';
 import { endpointSourceSchema } from '../mocks/tree_schema';
+import { panAnimationDuration } from '../store/camera/scaling_constants';
 
 describe('useCamera on an unpainted element', () => {
   /** Enzyme full DOM wrapper for the element the camera is attached to. */
@@ -294,7 +295,7 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('could not find nodeID for process');
         }
         const cameraAction: ResolverAction = {
-          type: 'userBroughtNodeIntoView',
+          type: 'userSelectedResolverNode',
           payload: {
             time: simulator.controls.time,
             nodeID,
@@ -304,7 +305,7 @@ describe('useCamera on an unpainted element', () => {
       });
 
       it('should request animation frames in a loop', () => {
-        const animationDuration = 1000;
+        const animationDuration = panAnimationDuration;
         // When the animation begins, the camera should request an animation frame.
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(1);
 

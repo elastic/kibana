@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import { StatefulTimeline } from '../../timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
+import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
   timelineId: string;
@@ -28,10 +29,10 @@ const EuiFlyoutContainer = styled.div`
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const handleClose = useCallback(
-    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
-    [dispatch, timelineId]
-  );
+  const handleClose = useCallback(() => {
+    dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
+    focusActiveTimelineButton();
+  }, [dispatch, timelineId]);
 
   return (
     <EuiFlyoutContainer data-test-subj="flyout-pane">

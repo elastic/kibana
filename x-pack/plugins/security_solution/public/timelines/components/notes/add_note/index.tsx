@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -16,7 +22,7 @@ import * as i18n from '../translations';
 
 import { NewNote } from './new_note';
 
-const AddNotesContainer = styled(EuiFlexGroup)`
+const AddNotesContainer = styled.div`
   margin-bottom: 5px;
   user-select: none;
 `;
@@ -61,26 +67,44 @@ export const AddNote = React.memo<{
     [associateNote, newNote, updateNewNote, updateNote]
   );
 
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      // when editing notes, the row-level keyboard handlers shall not
+      // receive keyboard events
+      e.stopPropagation();
+
+      if (e.key === 'Escape' && onCancelAddNote != null) {
+        onCancelAddNote();
+      }
+    },
+    [onCancelAddNote]
+  );
+
   return (
-    <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
-      <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
-      <ButtonsContainer gutterSize="none">
-        {onCancelAddNote != null ? (
+    <AddNotesContainer onKeyDown={onKeyDown} role="dialog">
+      <div style={{ width: '100%' }}>
+        <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
+          <p>{i18n.YOU_ARE_EDITING_A_NOTE}</p>
+        </EuiScreenReaderOnly>
+        <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+        <ButtonsContainer gutterSize="none">
+          {onCancelAddNote != null ? (
+            <EuiFlexItem grow={false}>
+              <CancelButton onCancelAddNote={onCancelAddNote} />
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
-            <CancelButton onCancelAddNote={onCancelAddNote} />
+            <EuiButton
+              data-test-subj="add-note"
+              isDisabled={newNote.trim().length === 0}
+              fill={true}
+              onClick={handleClick}
+            >
+              {i18n.ADD_NOTE}
+            </EuiButton>
           </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="add-note"
-            isDisabled={newNote.trim().length === 0}
-            fill={true}
-            onClick={handleClick}
-          >
-            {i18n.ADD_NOTE}
-          </EuiButton>
-        </EuiFlexItem>
-      </ButtonsContainer>
+        </ButtonsContainer>
+      </div>
     </AddNotesContainer>
   );
 });

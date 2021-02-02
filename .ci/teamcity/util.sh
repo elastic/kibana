@@ -79,3 +79,10 @@ tc_retry() {
   }
   tc_end_block "Retryable Step - Attempt #1"
 }
+
+set_git_merge_base() {
+  if [[ "${GITHUB_PR_TARGET_BRANCH-}" ]]; then
+    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
+    tc_set_env GITHUB_PR_MERGE_BASE "$(git merge-base HEAD FETCH_HEAD)"
+  fi
+}

@@ -36,6 +36,7 @@ import {
   SpacesClientService,
   SpacesClientWrapper,
 } from './spaces_client';
+import type { SpacesRequestHandlerContext } from './types';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -123,17 +124,16 @@ export class Plugin {
       logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter();
+    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initExternalSpacesApi({
       externalRouter,
       log: this.log,
       getStartServices: core.getStartServices,
-      getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       getSpacesService,
       usageStatsServicePromise,
     });
 
-    const internalRouter = core.http.createRouter();
+    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
       internalRouter,
       getSpacesService,

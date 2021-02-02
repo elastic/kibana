@@ -5,19 +5,18 @@
  */
 
 import {
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
 import { defineSessionExtendRoutes } from './extend';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Extend session routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -26,7 +25,7 @@ describe('Extend session routes', () => {
   });
 
   describe('extend session', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [extendRouteConfig, extendRouteHandler] = router.post.mock.calls.find(
@@ -45,7 +44,7 @@ describe('Extend session routes', () => {
     it('always returns 302.', async () => {
       await expect(
         routeHandler(
-          ({} as unknown) as RequestHandlerContext,
+          ({} as unknown) as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )

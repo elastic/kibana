@@ -9,53 +9,109 @@ import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ObjectRemover } from '../../lib/object_remover';
 import { alwaysFiringAlertType } from '../../fixtures/plugins/alerts/server/plugin';
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header', 'alertDetailsUI']);
   const browser = getService('browser');
   const log = getService('log');
-  const alerting = getService('alerting');
   const retry = getService('retry');
   const find = getService('find');
+  const supertest = getService('supertest');
+  const comboBox = getService('comboBox');
+  const objectRemover = new ObjectRemover(supertest);
+
+  async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/action`)
+      .set('kbn-xsrf', 'foo')
+      .send(getTestActionData(overwrites))
+      .expect(200);
+    return createdAction;
+  }
+
+  async function createAction(overwrites: Record<string, any> = {}) {
+    const createdAction = await createActionManualCleanup(overwrites);
+    objectRemover.add(createdAction.id, 'action', 'actions');
+    return createdAction;
+  }
+
+  async function createAlert(overwrites: Record<string, any> = {}) {
+    const { body: createdAlert } = await supertest
+      .post(`/api/alerts/alert`)
+      .set('kbn-xsrf', 'foo')
+      .send(getTestAlertData(overwrites))
+      .expect(200);
+    objectRemover.add(createdAlert.id, 'alert', 'alerts');
+    return createdAlert;
+  }
+
+  async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
+    const { body: createdAlert } = await supertest
+      .post(`/api/alerts/alert`)
+      .set('kbn-xsrf', 'foo')
+      .send(
+        getTestAlertData({
+          alertTypeId: 'test.always-firing',
+          ...overwrites,
+        })
+      )
+      .expect(200);
+    objectRemover.add(createdAlert.id, 'alert', 'alerts');
+    return createdAlert;
+  }
+
+  async function createActions(testRunUuid: string) {
+    return await Promise.all([
+      createAction({ name: `slack-${testRunUuid}-${0}` }),
+      createAction({ name: `slack-${testRunUuid}-${1}` }),
+    ]);
+  }
+
+  async function createAlertWithActionsAndParams(
+    testRunUuid: string,
+    params: Record<string, any> = {}
+  ) {
+    const actions = await createActions(testRunUuid);
+    return await createAlwaysFiringAlert({
+      name: `test-alert-${testRunUuid}`,
+      actions: actions.map((action) => ({
+        id: action.id,
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+          level: 'warn',
+        },
+      })),
+      params,
+    });
+  }
+
+  async function getAlertInstanceSummary(alertId: string) {
+    const { body: summary } = await supertest
+      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .expect(200);
+    return summary;
+  }
+
+  async function muteAlertInstance(alertId: string, alertInstanceId: string) {
+    const { body: response } = await supertest
+      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204);
+
+    return response;
+  }
 
   describe('Alert Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-
-        const actions = await Promise.all([
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${0}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${1}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-        ]);
-
-        const alert = await alerting.alerts.createAlwaysFiringWithActions(
-          `test-alert-${testRunUuid}`,
-          actions.map((action) => ({
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          }))
-        );
+        const alert = await createAlertWithActionsAndParams(testRunUuid);
 
         // refresh to see alert
         await browser.refresh();
@@ -67,6 +123,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
       });
 
       it('renders the alert details', async () => {
@@ -154,33 +214,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit alert button', function () {
-      const testRunUuid = uuid.v4();
+      const alertName = uuid.v4();
+      const updatedAlertName = `Changed Alert Name ${alertName}`;
 
-      it('should open edit alert flyout', async () => {
-        await pageObjects.common.navigateToApp('triggersActions');
-        const params = {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        };
-        const alert = await alerting.alerts.createAlertWithActions(
-          testRunUuid,
-          '.index-threshold',
-          params,
-          [
+      before(async () => {
+        await createAlwaysFiringAlert({
+          name: alertName,
+          alertTypeId: '.index-threshold',
+          params: {
+            aggType: 'count',
+            termSize: 5,
+            thresholdComparator: '>',
+            timeWindowSize: 5,
+            timeWindowUnit: 'm',
+            groupBy: 'all',
+            threshold: [1000, 5000],
+            index: '.kibana_1',
+            timeField: 'alert',
+          },
+          actions: [
             {
               group: 'threshold met',
               id: 'my-server-log',
               params: { level: 'info', message: ' {{context.message}}' },
             },
-          ]
-        );
+          ],
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('should open edit alert flyout', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
         // refresh to see alert
         await browser.refresh();
 
@@ -190,13 +258,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alertName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
         await testSubjects.setValue('alertNameInput', updatedAlertName, {
           clearWithKeyboard: true,
         });
@@ -212,22 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should reset alert when canceling an edit', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-        const params = {
-          aggType: 'count',
-          termSize: 5,
-          thresholdComparator: '>',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          groupBy: 'all',
-          threshold: [1000, 5000],
-          index: ['.kibana_1'],
-          timeField: 'alert',
-        };
-        const alert = await alerting.alerts.createAlertWithActions(
-          testRunUuid,
-          '.index-threshold',
-          params
-        );
+
         // refresh to see alert
         await browser.refresh();
 
@@ -237,40 +289,184 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedAlertName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
 
-        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
-        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+        await testSubjects.setValue('alertNameInput', uuid.v4(), {
           clearWithKeyboard: true,
         });
 
         await testSubjects.click('cancelSaveEditedAlertButton');
+        await testSubjects.existOrFail('confirmAlertCloseModal');
+        await testSubjects.click('confirmAlertCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
 
         await editButton.click();
 
         const nameInputAfterCancel = await testSubjects.find('alertNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(alert.name);
+        expect(textAfterCancel).to.eql(updatedAlertName);
+      });
+    });
+
+    describe('Edit alert with deleted connector', function () {
+      const testRunUuid = uuid.v4();
+
+      afterEach(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
+        const action = await createActionManualCleanup({
+          name: `slack-${testRunUuid}-${0}`,
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        const alert = await createAlwaysFiringAlert({
+          name: testRunUuid,
+          actions: [
+            {
+              group: 'default',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ],
+        });
+
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // delete connector
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors(action.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 connector');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+
+        await comboBox.set('selectActionConnector-.slack-0', 'Slack#xyztest (preconfigured)');
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
+      });
+
+      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
+        const action = await createActionManualCleanup({
+          name: `index-${testRunUuid}-${0}`,
+          actionTypeId: '.index',
+          config: {
+            index: `index-${testRunUuid}-${0}`,
+          },
+          secrets: {},
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        const alert = await createAlwaysFiringAlert({
+          name: testRunUuid,
+          actions: [
+            {
+              group: 'default',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+            {
+              group: 'other',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ],
+        });
+
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // delete connector
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors(action.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 connector');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-1')).to.eql(true);
+
+        await testSubjects.click('createActionConnectorButton-0');
+        await testSubjects.existOrFail('connectorAddModal');
+        await testSubjects.setValue('nameInput', 'new connector');
+        await retry.try(async () => {
+          // At times we find the driver controlling the ComboBox in tests
+          // can select the wrong item, this ensures we always select the correct index
+          await comboBox.set('connectorIndexesComboBox', 'test-index');
+          expect(
+            await comboBox.isOptionSelected(
+              await testSubjects.find('connectorIndexesComboBox'),
+              'test-index'
+            )
+          ).to.be(true);
+        });
+        await testSubjects.click('connectorAddModal > saveActionButtonModal');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(true);
       });
     });
 
     describe('View In App', function () {
-      const testRunUuid = uuid.v4();
+      const alertName = uuid.v4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
       it('renders the alert details view in app button', async () => {
-        const alert = await alerting.alerts.createNoOp(`test-alert-${testRunUuid}`);
+        const alert = await createAlert({
+          name: alertName,
+          consumer: 'alerting_fixture',
+        });
 
         // refresh to see alert
         await browser.refresh();
-
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
@@ -287,14 +483,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders a disabled alert details view in app button', async () => {
-        const alert = await alerting.alerts.createAlwaysFiringWithActions(
-          `test-alert-disabled-nav`,
-          []
-        );
+        const alert = await createAlwaysFiringAlert({
+          name: `test-alert-disabled-nav`,
+        });
 
         // refresh to see alert
         await browser.refresh();
-
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
@@ -314,44 +508,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        const actions = await Promise.all([
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${0}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${1}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-        ]);
-
         const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
-        alert = await alerting.alerts.createAlwaysFiringWithActions(
-          `test-alert-${testRunUuid}`,
-          actions.map((action) => ({
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          })),
-          {
-            instances,
-          }
-        );
+        alert = await createAlertWithActionsAndParams(testRunUuid, {
+          instances,
+        });
 
         // refresh to see alert
         await browser.refresh();
-
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
@@ -362,11 +525,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-            alert.id
-          );
+          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
       });
 
       it('renders the active alert instances', async () => {
@@ -384,8 +549,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
           )?.name;
 
-        const summary = await alerting.alerts.getAlertInstanceSummary(alert.id);
-        const dateOnAllInstancesFromApiResponse = mapValues(
+        const summary = await getAlertInstanceSummary(alert.id);
+        const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
           summary.instances,
           (instance) => instance.activeStartDate
         );
@@ -404,7 +569,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .join(', ')}`
         );
 
-        const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
@@ -474,12 +639,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the muted inactive alert instances', async () => {
         // mute an alert instance that doesn't exist
-        await alerting.alerts.muteAlertInstance(alert.id, 'eu-east');
+        await muteAlertInstance(alert.id, 'eu-east');
 
         // refresh to see alert
         await browser.refresh();
 
-        const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(
           instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
         ).to.eql([
@@ -545,25 +710,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
 
-        const actions = await Promise.all([
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${0}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-          alerting.actions.createAction({
-            name: `slack-${testRunUuid}-${1}`,
-            actionTypeId: '.slack',
-            config: {},
-            secrets: {
-              webhookUrl: 'https://test',
-            },
-          }),
-        ]);
-
         const instances = flatten(
           range(10).map((index) => [
             { id: `us-central-${index}` },
@@ -571,26 +717,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { id: `us-west-${index}` },
           ])
         );
-        alert = await alerting.alerts.createAlwaysFiringWithActions(
-          `test-alert-${testRunUuid}`,
-          actions.map((action) => ({
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          })),
-          {
-            instances,
-          }
-        );
+        alert = await createAlertWithActionsAndParams(testRunUuid, {
+          instances,
+        });
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-            alert.id
-          );
+          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -606,14 +739,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
       });
 
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
       const PAGE_SIZE = 10;
       it('renders the first page', async () => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-          alert.id
-        );
+        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -626,9 +761,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-          alert.id
-        );
+        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

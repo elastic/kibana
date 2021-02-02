@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { SurrDocType, EsHitRecordList, EsHitRecord } from '../context';
 
 export type EsQuerySearchAfter = [string | number, string | number];
@@ -31,16 +21,30 @@ export function getEsQuerySearchAfter(
   documents: EsHitRecordList,
   timeFieldName: string,
   anchor: EsHitRecord,
-  nanoSeconds: string
+  nanoSeconds: string,
+  useNewFieldsApi?: boolean
 ): EsQuerySearchAfter {
   if (documents.length) {
     // already surrounding docs -> first or last record  is used
     const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
-    const afterTimeValue = nanoSeconds ? afterTimeDoc._source[timeFieldName] : afterTimeDoc.sort[0];
+    let afterTimeValue = afterTimeDoc.sort[0];
+    if (nanoSeconds) {
+      afterTimeValue = useNewFieldsApi
+        ? afterTimeDoc.fields[timeFieldName][0]
+        : afterTimeDoc._source[timeFieldName];
+    }
     return [afterTimeValue, afterTimeDoc.sort[1]];
   }
   // if data_nanos adapt timestamp value for sorting, since numeric value was rounded by browser
   // ES search_after also works when number is provided as string
-  return [nanoSeconds ? anchor._source[timeFieldName] : anchor.sort[0], anchor.sort[1]];
+  const searchAfter = new Array(2) as EsQuerySearchAfter;
+  searchAfter[0] = anchor.sort[0];
+  if (nanoSeconds) {
+    searchAfter[0] = useNewFieldsApi
+      ? anchor.fields[timeFieldName][0]
+      : anchor._source[timeFieldName];
+  }
+  searchAfter[1] = anchor.sort[1];
+  return searchAfter;
 }

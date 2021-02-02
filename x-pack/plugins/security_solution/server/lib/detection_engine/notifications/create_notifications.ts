@@ -6,7 +6,7 @@
 
 import { Alert } from '../../../../../alerts/common';
 import { SERVER_APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
-import { CreateNotificationParams } from './types';
+import { CreateNotificationParams, RuleNotificationAlertTypeParams } from './types';
 import { addTags } from './add_tags';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
@@ -17,8 +17,8 @@ export const createNotifications = async ({
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<Alert> =>
-  alertsClient.create({
+}: CreateNotificationParams): Promise<Alert<RuleNotificationAlertTypeParams>> =>
+  alertsClient.create<RuleNotificationAlertTypeParams>({
     data: {
       name,
       tags: addTags([], ruleAlertId),

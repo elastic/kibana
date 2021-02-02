@@ -10,18 +10,20 @@ import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { getThrouputChartSelector } from '../selectors/throuput_chart_selectors';
 import { useTheme } from './use_theme';
+import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
 export function useTransactionThroughputChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { transactionType, start, end, transactionName },
+    urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end) {
+      if (transactionType && serviceName && start && end) {
         return callApmApi({
           endpoint:
             'GET /api/apm/services/{serviceName}/transactions/charts/throughput',

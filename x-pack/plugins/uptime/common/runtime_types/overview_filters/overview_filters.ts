@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 
-export const OverviewFiltersType = t.type({
+export const OverviewFiltersType = t.partial({
   locations: t.array(t.string),
   ports: t.array(t.number),
   schemes: t.array(t.string),

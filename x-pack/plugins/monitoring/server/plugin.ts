@@ -12,7 +12,6 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
@@ -47,6 +46,7 @@ import {
   PluginsSetup,
   PluginsStart,
   LegacyRequest,
+  RequestHandlerContextMonitoringPlugin,
 } from './types';
 
 import { Globals } from './static_globals';
@@ -59,7 +59,7 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
   const boom = Boom.isBoom(error) ? error : Boom.boomify(error, options);
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 };
@@ -90,7 +90,7 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
     this.legacyShimDependencies = {
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
@@ -211,9 +211,11 @@ export class Plugin {
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
+        cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -305,7 +307,7 @@ export class Plugin {
       route: (options: any) => {
         const method = options.method;
         const handler = async (
-          context: RequestHandlerContext,
+          context: RequestHandlerContextMonitoringPlugin,
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
@@ -335,6 +337,7 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {

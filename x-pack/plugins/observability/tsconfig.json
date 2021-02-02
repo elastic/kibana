@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "typings/**/*"],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../alerts/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../translations/tsconfig.json" }
+  ]
+}

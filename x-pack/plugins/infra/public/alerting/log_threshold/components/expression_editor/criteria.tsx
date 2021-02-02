@@ -11,12 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
 import { Criterion } from './criterion';
 import {
-  AlertParams,
-  Comparator,
-  Criteria as CriteriaType,
-  Criterion as CriterionType,
-  CountCriteria as CountCriteriaType,
-  RatioCriteria as RatioCriteriaType,
+  PartialAlertParams,
+  PartialCountCriteria as PartialCountCriteriaType,
+  PartialCriteria as PartialCriteriaType,
+  PartialCriterion as PartialCriterionType,
+  PartialRatioCriteria as PartialRatioCriteriaType,
   isRatioAlert,
   getNumerator,
   getDenominator,
@@ -24,8 +23,6 @@ import {
 import { Errors, CriterionErrors } from '../../validation';
 import { ExpressionLike } from './editor';
 import { CriterionPreview } from './criterion_preview_chart';
-
-const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
 
 const QueryAText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryAText', {
   defaultMessage: 'Query A',
@@ -37,11 +34,12 @@ const QueryBText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCrit
 
 interface SharedProps {
   fields: IFieldType[];
-  criteria?: AlertParams['criteria'];
+  criteria?: PartialCriteriaType;
+  defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];
-  alertParams: Partial<AlertParams>;
+  alertParams: PartialAlertParams;
   sourceId: string;
-  updateCriteria: (criteria: AlertParams['criteria']) => void;
+  updateCriteria: (criteria: PartialCriteriaType) => void;
 }
 
 type CriteriaProps = SharedProps;
@@ -60,10 +58,10 @@ export const Criteria: React.FC<CriteriaProps> = (props) => {
 interface CriteriaWrapperProps {
   alertParams: SharedProps['alertParams'];
   fields: SharedProps['fields'];
-  updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
+  updateCriterion: (idx: number, params: PartialCriterionType) => void;
   removeCriterion: (idx: number) => void;
   addCriterion: () => void;
-  criteria: CriteriaType;
+  criteria: PartialCountCriteriaType;
   errors: CriterionErrors;
   sourceId: SharedProps['sourceId'];
   isRatio?: boolean;
@@ -118,29 +116,24 @@ const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
   );
 };
 
-interface RatioCriteriaProps {
-  alertParams: SharedProps['alertParams'];
-  fields: SharedProps['fields'];
-  criteria: RatioCriteriaType;
-  errors: Errors['criteria'];
-  sourceId: SharedProps['sourceId'];
-  updateCriteria: (criteria: AlertParams['criteria']) => void;
+interface RatioCriteriaProps extends SharedProps {
+  criteria: PartialRatioCriteriaType;
 }
 
 const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
-  const { criteria, errors, updateCriteria } = props;
+  const { criteria, defaultCriterion, errors, updateCriteria } = props;
 
   const handleUpdateNumeratorCriteria = useCallback(
-    (criteriaParam: CriteriaType) => {
-      const nextCriteria: RatioCriteriaType = [criteriaParam, getDenominator(criteria)];
+    (criteriaParam: PartialCountCriteriaType) => {
+      const nextCriteria: PartialRatioCriteriaType = [criteriaParam, getDenominator(criteria)];
       updateCriteria(nextCriteria);
     },
     [updateCriteria, criteria]
   );
 
   const handleUpdateDenominatorCriteria = useCallback(
-    (criteriaParam: CriteriaType) => {
-      const nextCriteria: RatioCriteriaType = [getNumerator(criteria), criteriaParam];
+    (criteriaParam: PartialCountCriteriaType) => {
+      const nextCriteria: PartialRatioCriteriaType = [getNumerator(criteria), criteriaParam];
       updateCriteria(nextCriteria);
     },
     [updateCriteria, criteria]
@@ -150,13 +143,13 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
     updateCriterion: updateNumeratorCriterion,
     addCriterion: addNumeratorCriterion,
     removeCriterion: removeNumeratorCriterion,
-  } = useCriteriaState(getNumerator(criteria), handleUpdateNumeratorCriteria);
+  } = useCriteriaState(getNumerator(criteria), defaultCriterion, handleUpdateNumeratorCriteria);
 
   const {
     updateCriterion: updateDenominatorCriterion,
     addCriterion: addDenominatorCriterion,
     removeCriterion: removeDenominatorCriterion,
-  } = useCriteriaState(getDenominator(criteria), handleUpdateDenominatorCriteria);
+  } = useCriteriaState(getDenominator(criteria), defaultCriterion, handleUpdateDenominatorCriteria);
 
   return (
     <>
@@ -191,28 +184,17 @@ const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
   );
 };
 
-interface CountCriteriaProps {
-  alertParams: SharedProps['alertParams'];
-  fields: SharedProps['fields'];
-  criteria: CountCriteriaType;
-  errors: Errors['criteria'];
-  sourceId: SharedProps['sourceId'];
-  updateCriteria: (criteria: AlertParams['criteria']) => void;
+interface CountCriteriaProps extends SharedProps {
+  criteria: PartialCountCriteriaType;
 }
 
 const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
-  const { criteria, updateCriteria, errors } = props;
-
-  const handleUpdateCriteria = useCallback(
-    (criteriaParam: CriteriaType) => {
-      updateCriteria(criteriaParam);
-    },
-    [updateCriteria]
-  );
+  const { criteria, defaultCriterion, updateCriteria, errors } = props;
 
   const { updateCriterion, addCriterion, removeCriterion } = useCriteriaState(
     criteria,
-    handleUpdateCriteria
+    defaultCriterion,
+    updateCriteria
   );
 
   return (
@@ -227,8 +209,9 @@ const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
 };
 
 const useCriteriaState = (
-  criteria: CriteriaType,
-  onUpdateCriteria: (criteria: CriteriaType) => void
+  criteria: PartialCountCriteriaType,
+  defaultCriterion: PartialCriterionType,
+  onUpdateCriteria: (criteria: PartialCountCriteriaType) => void
 ) => {
   const updateCriterion = useCallback(
     (idx, criterionParams) => {
@@ -241,13 +224,13 @@ const useCriteriaState = (
   );
 
   const addCriterion = useCallback(() => {
-    const nextCriteria = criteria ? [...criteria, DEFAULT_CRITERIA] : [DEFAULT_CRITERIA];
+    const nextCriteria = [...criteria, defaultCriterion];
     onUpdateCriteria(nextCriteria);
-  }, [criteria, onUpdateCriteria]);
+  }, [criteria, defaultCriterion, onUpdateCriteria]);
 
   const removeCriterion = useCallback(
     (idx) => {
-      const nextCriteria = criteria.filter((criterion, index) => {
+      const nextCriteria = criteria.filter((_criterion, index) => {
         return index !== idx;
       });
       onUpdateCriteria(nextCriteria);

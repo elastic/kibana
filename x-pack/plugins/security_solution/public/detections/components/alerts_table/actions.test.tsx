@@ -19,10 +19,14 @@ import {
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { TimelineTabs } from '../../../timelines/store/timeline/model';
 
 jest.mock('apollo-client');
 
@@ -107,6 +111,7 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
+                type: 'number',
                 width: 190,
               },
               {
@@ -203,6 +208,7 @@ describe('alert actions', () => {
             sort: [
               {
                 columnId: '@timestamp',
+                columnType: 'number',
                 sortDirection: 'desc',
               },
             ],

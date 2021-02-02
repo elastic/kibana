@@ -69,10 +69,11 @@ export function getAlertPanelsByNode(
           const states = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(({ state }) =>
             stateFilter(state)
           );
+          const { nodeName, itemLabel } = states[0].state;
           return {
             name: (
               <EuiText>
-                {states[0].state.nodeName} ({states.length})
+                {nodeName || itemLabel} ({states.length})
               </EuiText>
             ),
             panel: index + 1,
@@ -86,7 +87,8 @@ export function getAlertPanelsByNode(
       let title = '';
       for (const { alert, states } of alertsForNode) {
         for (const alertState of states) {
-          title = alertState.state.nodeName;
+          const { nodeName, itemLabel } = alertState.state;
+          title = nodeName || itemLabel;
           panelItems.push({
             name: (
               <Fragment>

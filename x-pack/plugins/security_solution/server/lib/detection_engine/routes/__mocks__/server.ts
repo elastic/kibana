@@ -8,13 +8,13 @@ import {
   RequestHandler,
   RouteConfig,
   KibanaRequest,
-  RequestHandlerContext,
 } from '../../../../../../../../src/core/server';
 import { httpServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';
 import { responseAdapter } from './test_adapters';
+import { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
 interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
@@ -53,7 +53,10 @@ class MockServer {
     return this.resultMock;
   }
 
-  public async inject(request: KibanaRequest, context: RequestHandlerContext = this.contextMock) {
+  public async inject(
+    request: KibanaRequest,
+    context: SecuritySolutionRequestHandlerContext = this.contextMock
+  ) {
     const validatedRequest = this.validateRequest(request);
     const [rejection] = this.resultMock.badRequest.mock.calls;
     if (rejection) {

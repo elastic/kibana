@@ -29,7 +29,7 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { EuiThemeProvider } from '../../../observability/public';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 
 export interface UptimeAppColors {
   danger: string;

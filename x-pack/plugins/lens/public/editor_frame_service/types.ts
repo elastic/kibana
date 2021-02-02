@@ -7,6 +7,3 @@
 import { Datatable } from 'src/plugins/expressions';
 
 export type TableInspectorAdapter = Record<string, Datatable>;
-export interface LensInspectorAdapters {
-  tables?: TableInspectorAdapter;
-}

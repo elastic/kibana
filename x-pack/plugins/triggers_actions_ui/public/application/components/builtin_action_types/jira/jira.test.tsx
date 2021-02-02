@@ -44,11 +44,17 @@ describe('jira connector validation', () => {
     } as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        email: [],
-        apiToken: [],
-        projectKey: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          projectKey: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: [],
+          email: [],
+        },
       },
     });
   });
@@ -65,11 +71,17 @@ describe('jira connector validation', () => {
     } as unknown) as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        email: [],
-        apiToken: ['API token or password is required'],
-        projectKey: ['Project key is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          projectKey: ['Project key is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: ['API token or password is required'],
+          email: [],
+        },
       },
     });
   });
@@ -82,7 +94,7 @@ describe('jira action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { summary: [] },
+      errors: { 'subActionParams.incident.summary': [] },
     });
   });
 
@@ -93,7 +105,7 @@ describe('jira action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        summary: ['Summary is required.'],
+        'subActionParams.incident.summary': ['Summary is required.'],
       },
     });
   });

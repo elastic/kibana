@@ -231,7 +231,7 @@ const INACTIVE_LABEL = i18n.translate(
 function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || alertType.defaultActionGroupId;
   const actionGroup = alertType?.actionGroups?.find(
-    (group: ActionGroup) => group.id === actionGroupId
+    (group: ActionGroup<string>) => group.id === actionGroupId
   );
   return actionGroup?.name;
 }

@@ -17,20 +17,28 @@ import '@kbn/test/target/jest/utils/stub_web_worker';
 
 import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { DocumentationLinksService } from '../../documentation_links';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
+  const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {
+    const coreStart = coreMock.createStart();
+    const viewProps = { ...props, docLinks: coreStart.docLinks };
+    return mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <RuleEditorPanel {...viewProps} />
+      </KibanaContextProvider>
+    );
+  };
   it('renders the visual editor when no rules are defined', () => {
     const props = {
       rawRules: {},
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
   });
@@ -49,9 +57,9 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
 
@@ -73,9 +81,8 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
@@ -109,9 +116,8 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
 

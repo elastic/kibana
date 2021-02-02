@@ -413,6 +413,7 @@ export const threat_tactic = t.type({
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
 export const threat_subtechnique_id = t.string;
 export const threat_subtechnique_name = t.string;
 export const threat_subtechnique_reference = t.string;
@@ -421,6 +422,7 @@ export const threat_subtechnique = t.type({
   name: threat_subtechnique_name,
   reference: threat_subtechnique_reference,
 });
+export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
 export const threat_subtechniques = t.array(threat_subtechnique);
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
@@ -439,21 +441,22 @@ export const threat_technique = t.intersection([
     })
   ),
 ]);
+export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
 export const threat_techniques = t.array(threat_technique);
-export const threat = t.array(
-  t.exact(
-    t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-      technique: threat_techniques,
-    })
-  )
+export const threat = t.exact(
+  t.type({
+    framework: threat_framework,
+    tactic: threat_tactic,
+    technique: threat_techniques,
+  })
 );
-
 export type Threat = t.TypeOf<typeof threat>;
 
-export const threatOrUndefined = t.union([threat, t.undefined]);
-export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
+export const threats = t.array(threat);
+export type Threats = t.TypeOf<typeof threats>;
+
+export const threatsOrUndefined = t.union([threats, t.undefined]);
+export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const threshold = t.exact(
   t.type({
@@ -518,3 +521,68 @@ export type Note = t.TypeOf<typeof note>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
+
+export const indexRecord = t.record(
+  t.string,
+  t.type({
+    all: t.boolean,
+    maintenance: t.boolean,
+    manage_ilm: t.boolean,
+    read: t.boolean,
+    create_index: t.boolean,
+    read_cross_cluster: t.boolean,
+    index: t.boolean,
+    monitor: t.boolean,
+    delete: t.boolean,
+    manage: t.boolean,
+    delete_index: t.boolean,
+    create_doc: t.boolean,
+    view_index_metadata: t.boolean,
+    create: t.boolean,
+    manage_follow_index: t.boolean,
+    manage_leader_index: t.boolean,
+    write: t.boolean,
+  })
+);
+export type IndexRecord = t.TypeOf<typeof indexRecord>;
+
+export const indexType = t.type({
+  index: indexRecord,
+});
+export type IndexType = t.TypeOf<typeof indexType>;
+
+export const privilege = t.type({
+  username: t.string,
+  has_all_requested: t.boolean,
+  cluster: t.type({
+    monitor_ml: t.boolean,
+    manage_ccr: t.boolean,
+    manage_index_templates: t.boolean,
+    monitor_watcher: t.boolean,
+    monitor_transform: t.boolean,
+    read_ilm: t.boolean,
+    manage_security: t.boolean,
+    manage_own_api_key: t.boolean,
+    manage_saml: t.boolean,
+    all: t.boolean,
+    manage_ilm: t.boolean,
+    manage_ingest_pipelines: t.boolean,
+    read_ccr: t.boolean,
+    manage_rollup: t.boolean,
+    monitor: t.boolean,
+    manage_watcher: t.boolean,
+    manage: t.boolean,
+    manage_transform: t.boolean,
+    manage_token: t.boolean,
+    manage_ml: t.boolean,
+    manage_pipeline: t.boolean,
+    monitor_rollup: t.boolean,
+    transport_client: t.boolean,
+    create_snapshot: t.boolean,
+  }),
+  index: indexRecord,
+  is_authenticated: t.boolean,
+  has_encryption_key: t.boolean,
+});
+
+export type Privilege = t.TypeOf<typeof privilege>;

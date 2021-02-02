@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, useCallback } from 'react';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';

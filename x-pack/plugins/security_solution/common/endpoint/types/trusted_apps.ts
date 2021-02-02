@@ -33,6 +33,13 @@ export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
+export interface GetTrustedAppsSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}
+
 export enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',

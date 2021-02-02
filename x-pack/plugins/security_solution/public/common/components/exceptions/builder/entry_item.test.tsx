@@ -25,6 +25,7 @@ import {
 } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getFoundListSchemaMock } from '../../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getEmptyValue } from '../../empty_value';
+import { waitFor } from '@testing-library/dom';
 
 // mock out lists hook
 const mockStart = jest.fn();
@@ -583,7 +584,7 @@ describe('BuilderEntryItem', () => {
     );
   });
 
-  test('it invokes "setErrorsExist" when user touches value input and leaves empty', () => {
+  test('it invokes "setErrorsExist" when user touches value input and leaves empty', async () => {
     const mockSetErrorExists = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
@@ -608,14 +609,16 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onBlur: () => void;
-    }).onBlur();
+    await waitFor(() => {
+      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
+        onBlur: () => void;
+      }).onBlur();
+    });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
   });
 
-  test('it invokes "setErrorsExist" when invalid value inputted for field value input', () => {
+  test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
     const mockSetErrorExists = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
@@ -639,14 +642,17 @@ describe('BuilderEntryItem', () => {
         setErrorsExist={mockSetErrorExists}
       />
     );
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onBlur: () => void;
-    }).onBlur();
 
-    // Invalid input because field type is number
-    ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
-      onSearchChange: (arg: string) => void;
-    }).onSearchChange('hellooo');
+    await waitFor(() => {
+      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
+        onBlur: () => void;
+      }).onBlur();
+
+      // Invalid input because field type is number
+      ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
+        onSearchChange: (arg: string) => void;
+      }).onSearchChange('hellooo');
+    });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
   });

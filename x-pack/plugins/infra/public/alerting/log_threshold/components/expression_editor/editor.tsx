@@ -4,25 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
-import { ForLastExpression } from '../../../../../../triggers_actions_ui/public';
 import {
-  AlertParams,
+  AlertTypeParamsExpressionProps,
+  ForLastExpression,
+} from '../../../../../../triggers_actions_ui/public';
+import {
   Comparator,
-  ThresholdType,
   isRatioAlert,
+  PartialAlertParams,
+  PartialCountAlertParams,
+  PartialCriteria as PartialCriteriaType,
+  PartialRatioAlertParams,
+  ThresholdType,
+  timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Threshold } from './threshold';
-import { Criteria } from './criteria';
-import { TypeSwitcher } from './type_switcher';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { ObjectEntries } from '../../../../../common/utility_types';
+import {
+  LogIndexField,
+  LogSourceProvider,
+  useLogSourceContext,
+} from '../../../../containers/logs/log_source';
 import { useSourceId } from '../../../../containers/source_id';
-import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
-import { Errors } from '../../validation';
+import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
+import { errorsRT } from '../../validation';
+import { Criteria } from './criteria';
+import { Threshold } from './threshold';
+import { TypeSwitcher } from './type_switcher';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -34,45 +47,50 @@ interface LogsContextMeta {
   isInternal?: boolean;
 }
 
-interface Props {
-  errors: Errors;
-  alertParams: Partial<AlertParams>;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  sourceId: string;
-  metadata: LogsContextMeta;
-}
-
-const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
-
 const DEFAULT_BASE_EXPRESSION = {
   timeSize: 5,
-  timeUnit: 'm',
+  timeUnit: 'm' as const,
 };
 
-const DEFAULT_COUNT_EXPRESSION = {
+const DEFAULT_FIELD = 'log.level';
+
+const createDefaultCriterion = (
+  availableFields: LogIndexField[],
+  value: ExpressionCriteria['value']
+) =>
+  availableFields.some((availableField) => availableField.name === DEFAULT_FIELD)
+    ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
+    : { field: undefined, comparator: undefined, value: undefined };
+
+const createDefaultCountAlertParams = (
+  availableFields: LogIndexField[]
+): PartialCountAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
     comparator: Comparator.GT,
   },
-  criteria: [DEFAULT_CRITERIA],
-};
+  criteria: [createDefaultCriterion(availableFields, 'error')],
+});
 
-const DEFAULT_RATIO_EXPRESSION = {
+const createDefaultRatioAlertParams = (
+  availableFields: LogIndexField[]
+): PartialRatioAlertParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
     comparator: Comparator.GT,
   },
   criteria: [
-    [DEFAULT_CRITERIA],
-    [{ field: 'log.level', comparator: Comparator.EQ, value: 'warning' }],
+    [createDefaultCriterion(availableFields, 'error')],
+    [createDefaultCriterion(availableFields, 'warning')],
   ],
-};
+});
 
-export const ExpressionEditor: React.FC<Props> = (props) => {
-  const isInternal = props.metadata?.isInternal;
+export const ExpressionEditor: React.FC<
+  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+> = (props) => {
+  const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
   const { http } = useKibana().services;
 
@@ -80,12 +98,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
     <>
       {isInternal ? (
         <SourceStatusWrapper {...props}>
-          <Editor {...props} sourceId={sourceId} />
+          <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
         <LogSourceProvider sourceId={sourceId} fetch={http!.fetch}>
           <SourceStatusWrapper {...props}>
-            <Editor {...props} sourceId={sourceId} />
+            <Editor {...props} />
           </SourceStatusWrapper>
         </LogSourceProvider>
       )}
@@ -93,7 +111,7 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
   );
 };
 
-export const SourceStatusWrapper: React.FC<Props> = (props) => {
+export const SourceStatusWrapper: React.FC = ({ children }) => {
   const {
     initialize,
     isLoadingSourceStatus,
@@ -101,7 +119,6 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
     hasFailedLoadingSourceStatus,
     loadSourceStatus,
   } = useLogSourceContext();
-  const { children } = props;
 
   useMount(() => {
     initialize();
@@ -136,16 +153,19 @@ export const SourceStatusWrapper: React.FC<Props> = (props) => {
   );
 };
 
-export const Editor: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, sourceId } = props;
+export const Editor: React.FC<
+  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+> = (props) => {
+  const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const { sourceStatus } = useLogSourceContext();
-  useMount(() => {
-    for (const [key, value] of Object.entries({ ...DEFAULT_COUNT_EXPRESSION, ...alertParams })) {
-      setAlertParams(key, value);
-    }
-    setHasSetDefaults(true);
-  });
+  const { sourceId, sourceStatus } = useLogSourceContext();
+
+  const {
+    criteria: criteriaErrors,
+    threshold: thresholdErrors,
+    timeSizeUnit: timeSizeUnitErrors,
+    timeWindowSize: timeWindowSizeErrors,
+  } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
@@ -176,7 +196,7 @@ export const Editor: React.FC<Props> = (props) => {
   );
 
   const updateCriteria = useCallback(
-    (criteria: AlertParams['criteria']) => {
+    (criteria: PartialCriteriaType) => {
       setAlertParams('criteria', criteria);
     },
     [setAlertParams]
@@ -191,7 +211,9 @@ export const Editor: React.FC<Props> = (props) => {
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      setAlertParams('timeUnit', tu);
+      if (timeUnitRT.is(tu)) {
+        setAlertParams('timeUnit', tu);
+      }
     },
     [setAlertParams]
   );
@@ -203,19 +225,30 @@ export const Editor: React.FC<Props> = (props) => {
     [setAlertParams]
   );
 
+  const defaultCountAlertParams = useMemo(() => createDefaultCountAlertParams(supportedFields), [
+    supportedFields,
+  ]);
+
   const updateType = useCallback(
     (type: ThresholdType) => {
-      const defaults = type === 'count' ? DEFAULT_COUNT_EXPRESSION : DEFAULT_RATIO_EXPRESSION;
+      const defaults =
+        type === 'count' ? defaultCountAlertParams : createDefaultRatioAlertParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
-      for (const [key, value] of Object.entries({
-        criteria: defaults.criteria,
-        count: defaults.count,
-      })) {
-        setAlertParams(key, value);
-      }
+      setAlertParams('count', defaults.count);
+      setAlertParams('criteria', defaults.criteria);
     },
-    [setAlertParams]
+    [defaultCountAlertParams, setAlertParams, supportedFields]
   );
+
+  useMount(() => {
+    const newAlertParams = { ...defaultCountAlertParams, ...alertParams };
+    for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
+      typeof newAlertParams
+    >) {
+      setAlertParams(key, value);
+    }
+    setHasSetDefaults(true);
+  });
 
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
@@ -224,7 +257,8 @@ export const Editor: React.FC<Props> = (props) => {
     <Criteria
       fields={supportedFields}
       criteria={alertParams.criteria}
-      errors={errors.criteria}
+      defaultCriterion={defaultCountAlertParams.criteria[0]}
+      errors={criteriaErrors}
       alertParams={alertParams}
       sourceId={sourceId}
       updateCriteria={updateCriteria}
@@ -241,7 +275,7 @@ export const Editor: React.FC<Props> = (props) => {
         comparator={alertParams.count?.comparator}
         value={alertParams.count?.value}
         updateThreshold={updateThreshold}
-        errors={errors.threshold}
+        errors={thresholdErrors}
       />
 
       <ForLastExpression
@@ -249,7 +283,7 @@ export const Editor: React.FC<Props> = (props) => {
         timeWindowUnit={alertParams.timeUnit}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
-        errors={{ timeWindowSize: errors.timeWindowSize, timeSizeUnit: errors.timeSizeUnit }}
+        errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
       />
 
       <GroupByExpression

@@ -13,8 +13,6 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
 
   describe('layer geo grid aggregation source', () => {
-    const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
-    const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 6;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
@@ -41,7 +39,11 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
-    function makeRequestTestsForGeoPrecision(LAYER_ID) {
+    function makeRequestTestsForGeoPrecision(
+      LAYER_ID,
+      expectedNumFeaturesZoomedOut,
+      expectedNumPartialFeatures
+    ) {
       describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
@@ -84,7 +86,7 @@ export default function ({ getPageObjects, getService }) {
         it('should request the data when the map covers the databounds', async () => {
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-            EXPECTED_NUMBER_FEATURES_ZOOMED_OUT
+            expectedNumFeaturesZoomedOut
           );
         });
 
@@ -92,7 +94,9 @@ export default function ({ getPageObjects, getService }) {
           //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
+            expectedNumPartialFeatures
+          );
         });
       });
     }
@@ -115,9 +119,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with scaled doc_count property', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-          EXPECTED_NUMBER_FEATURES_ZOOMED_IN
-        );
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(6);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(HEATMAP_PROP_NAME)).to.be(true);
@@ -125,7 +127,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 4, 2);
 
       describe('query bar', () => {
         before(async () => {
@@ -194,9 +196,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with metrics properterties', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-          EXPECTED_NUMBER_FEATURES_ZOOMED_IN
-        );
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(12);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(MAX_OF_BYTES_PROP_NAME)).to.be(true);
@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 8, 4);
 
       describe('query bar', () => {
         before(async () => {
@@ -262,7 +262,7 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_ID = 'g1xkv';
       it('should get expected number of grid cells', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(13);
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(26);
       });
 
       describe('inspector', () => {

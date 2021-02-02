@@ -14,7 +14,7 @@ import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
 
-export function isBoomError(error: { isBoom?: boolean }): error is Boom {
+export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
   return error.isBoom === true;
 }
 

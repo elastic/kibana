@@ -6,8 +6,8 @@
 
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
-import { getProxyAgent } from './get_proxy_agent';
+import { getCustomAgents } from './get_custom_agents';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const request = async <T = unknown>({
   axios,
@@ -15,11 +15,8 @@ export const request = async <T = unknown>({
   logger,
   method = 'get',
   data,
-  params,
-  proxySettings,
-  headers,
-  validateStatus,
-  auth,
+  configurationUtilities,
+  ...rest
 }: {
   axios: AxiosInstance;
   url: string;
@@ -27,22 +24,21 @@ export const request = async <T = unknown>({
   method?: Method;
   data?: T;
   params?: unknown;
-  proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, string> | null;
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
+  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+
   return await axios(url, {
+    ...rest,
     method,
     data: data ?? {},
-    params,
-    auth,
-    // use httpsAgent and embedded proxy: false, to be able to handle fail on invalid certs
-    httpsAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
-    httpAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
-    proxy: false, // the same way as it done for IncomingWebhook in
-    headers,
-    validateStatus,
+    // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
+    httpAgent,
+    httpsAgent,
+    proxy: false,
   });
 };
 
@@ -51,13 +47,13 @@ export const patch = async <T = unknown>({
   url,
   data,
   logger,
-  proxySettings,
+  configurationUtilities,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
-  proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -65,7 +61,7 @@ export const patch = async <T = unknown>({
     logger,
     method: 'patch',
     data,
-    proxySettings,
+    configurationUtilities,
   });
 };
 

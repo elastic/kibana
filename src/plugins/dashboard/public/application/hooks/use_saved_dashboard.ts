@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
@@ -36,7 +25,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
   // abstraction of service dependencies easier.
   const { indexPatterns } = data;
   const { recentlyAccessed: recentlyAccessedPaths, docTitle } = chrome;
-  const { addDanger: showDangerToast, addWarning: showWarningToast } = core.notifications.toasts;
+  const { toasts } = core.notifications;
 
   useEffect(() => {
     (async function loadSavedDashboard() {
@@ -46,7 +35,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
           pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
         });
 
-        showWarningToast(getDashboard60Warning());
+        toasts.addWarning(getDashboard60Warning());
         return;
       }
 
@@ -63,7 +52,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
-        showDangerToast(error.message);
+        toasts.addDanger(error.message);
         history.push(DashboardConstants.LANDING_PAGE_PATH);
       }
     })();
@@ -75,8 +64,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
     recentlyAccessedPaths,
     savedDashboardId,
     savedDashboards,
-    showDangerToast,
-    showWarningToast,
+    toasts,
   ]);
 
   return savedDashboard;

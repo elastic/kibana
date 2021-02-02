@@ -90,7 +90,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText className="eui-textBreakWord">
             <h1>
               {isLoading && isInitialRequest ? (
                 <Loading />

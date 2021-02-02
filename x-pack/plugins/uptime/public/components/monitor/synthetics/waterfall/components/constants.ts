@@ -13,3 +13,6 @@ export const SIDEBAR_GROW_SIZE = 2;
 // Axis height
 // NOTE: This isn't a perfect solution - changes in font size etc within charts could change the ideal height here.
 export const FIXED_AXIS_HEIGHT = 32;
+
+// number of items to display in canvas, since canvas can only have limited size
+export const CANVAS_MAX_ITEMS = 150;

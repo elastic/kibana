@@ -5,7 +5,7 @@
  */
 
 import './datapanel.scss';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
@@ -39,6 +40,7 @@ export interface FieldsAccordionProps {
   onToggle: (open: boolean) => void;
   id: string;
   label: string;
+  helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
   isFiltered: boolean;
@@ -48,13 +50,17 @@ export interface FieldsAccordionProps {
   exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
   hideDetails?: boolean;
+  groupIndex: number;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
-export const InnerFieldsAccordion = function InnerFieldsAccordion({
+export const FieldsAccordion = memo(function InnerFieldsAccordion({
   initialIsOpen,
   onToggle,
   id,
   label,
+  helpTooltip,
   hasLoaded,
   fieldsCount,
   isFiltered,
@@ -64,19 +70,72 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   exists,
   hideDetails,
   showExistenceFetchError,
+  groupIndex,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
-    (field: IndexPatternField) => (
+    (field: IndexPatternField, index) => (
       <FieldItem
         {...fieldProps}
         key={field.name}
         field={field}
         exists={exists(field)}
         hideDetails={hideDetails}
+        itemIndex={index}
+        groupIndex={groupIndex}
+        dropOntoWorkspace={dropOntoWorkspace}
+        hasSuggestionForField={hasSuggestionForField}
       />
     ),
-    [fieldProps, exists, hideDetails]
+    [fieldProps, exists, hideDetails, dropOntoWorkspace, hasSuggestionForField, groupIndex]
   );
+
+  const renderButton = useMemo(() => {
+    const titleClassname = classNames({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      lnsInnerIndexPatternDataPanel__titleTooltip: !!helpTooltip,
+    });
+    return (
+      <EuiText size="xs">
+        <strong className={titleClassname}>{label}</strong>
+        {!!helpTooltip && (
+          <EuiIconTip
+            aria-label={helpTooltip}
+            type="questionInCircle"
+            color="subdued"
+            size="s"
+            position="right"
+            content={helpTooltip}
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+          />
+        )}
+      </EuiText>
+    );
+  }, [label, helpTooltip]);
+
+  const extraAction = useMemo(() => {
+    return showExistenceFetchError ? (
+      <EuiIconTip
+        aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
+          defaultMessage: 'Existence fetch failed',
+        })}
+        type="alert"
+        color="warning"
+        content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
+          defaultMessage: "Field information can't be loaded",
+        })}
+      />
+    ) : hasLoaded ? (
+      <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
+        {fieldsCount}
+      </EuiNotificationBadge>
+    ) : (
+      <EuiLoadingSpinner size="m" />
+    );
+  }, [showExistenceFetchError, hasLoaded, isFiltered, fieldsCount]);
 
   return (
     <EuiAccordion
@@ -84,31 +143,8 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       onToggle={onToggle}
       data-test-subj={id}
       id={id}
-      buttonContent={
-        <EuiText size="xs">
-          <strong>{label}</strong>
-        </EuiText>
-      }
-      extraAction={
-        showExistenceFetchError ? (
-          <EuiIconTip
-            aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
-              defaultMessage: 'Existence fetch failed',
-            })}
-            type="alert"
-            color="warning"
-            content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
-              defaultMessage: "Field information can't be loaded",
-            })}
-          />
-        ) : hasLoaded ? (
-          <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
-            {fieldsCount}
-          </EuiNotificationBadge>
-        ) : (
-          <EuiLoadingSpinner size="m" />
-        )
-      }
+      buttonContent={renderButton}
+      extraAction={extraAction}
     >
       <EuiSpacer size="s" />
       {hasLoaded &&
@@ -121,6 +157,4 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
         ))}
     </EuiAccordion>
   );
-};
-
-export const FieldsAccordion = memo(InnerFieldsAccordion);
+});

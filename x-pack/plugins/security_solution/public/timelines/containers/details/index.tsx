@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
@@ -18,6 +18,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -50,7 +51,7 @@ export const useTimelineEventsDetails = ({
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
-      if (request == null || skip) {
+      if (request == null || skip || isEmpty(request.eventId)) {
         return;
       }
 
@@ -84,11 +85,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
+            error: (msg) => {
               if (!didCancel) {
                 setLoading(false);
               }
-              notifications.toasts.addDanger('Failed to run search');
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger('Failed to run search');
+              }
             },
           });
       };

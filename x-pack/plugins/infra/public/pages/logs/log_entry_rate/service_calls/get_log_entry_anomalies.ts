@@ -11,13 +11,13 @@ import {
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
 } from '../../../../../common/http_api/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { Sort, Pagination } from '../../../../../common/http_api/log_analysis';
+import { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
 
 interface RequestArgs {
   sourceId: string;
   startTime: number;
   endTime: number;
-  sort: Sort;
+  sort: AnomaliesSort;
   pagination: Pagination;
   datasets?: string[];
 }

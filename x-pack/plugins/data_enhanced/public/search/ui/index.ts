@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './connected_background_session_indicator';
+export * from './connected_search_session_indicator';

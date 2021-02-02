@@ -22,7 +22,7 @@ There is also an example of rendering dashboard container outside of dashboard a
 
 === Docs
 
-(./docs/README.md)[Embeddable docs, guides & caveats]
+link:./docs/README.md[Embeddable docs, guides & caveats]
 
 === API docs
 

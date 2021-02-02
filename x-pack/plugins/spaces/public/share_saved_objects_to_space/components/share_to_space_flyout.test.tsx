@@ -9,7 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';

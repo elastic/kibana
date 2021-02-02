@@ -9,12 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { getJourneySteps } from '../../../../state/actions/journey';
 import { journeySelector } from '../../../../state/selectors';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { StepDetail } from './step_detail';
+import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 
 export const NO_STEP_DATA = i18n.translate('xpack.uptime.synthetics.stepDetail.noData', {
   defaultMessage: 'No data could be found for this step',
@@ -33,7 +32,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
 
   useEffect(() => {
     if (checkGroup) {
-      dispatch(getJourneySteps({ checkGroup }));
+      dispatch(getJourneySteps({ checkGroup, syntheticEventTypes: ['step/end'] }));
     }
   }, [dispatch, checkGroup]);
 
@@ -48,12 +47,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
     };
   }, [stepIndex, journey]);
 
-  useBreadcrumbs([
-    ...(activeStep?.monitor?.name ? [{ text: activeStep?.monitor?.name }] : []),
-    ...(journey?.details?.timestamp
-      ? [{ text: moment(journey?.details?.timestamp).format(dateFormat) }]
-      : []),
-  ]);
+  useMonitorBreadcrumb({ journey, activeStep });
 
   const handleNextStep = useCallback(() => {
     history.push(`/journey/${checkGroup}/step/${stepIndex + 1}`);

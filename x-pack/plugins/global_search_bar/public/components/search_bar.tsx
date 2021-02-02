@@ -403,6 +403,9 @@ export function SearchBar({
         inputRef: setSearchRef,
         compressed: true,
         className: 'kbnSearchBar',
+        'aria-label': i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
+          defaultMessage: 'Search Elastic',
+        }),
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
           defaultMessage: 'Search Elastic',
         }),

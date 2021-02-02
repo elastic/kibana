@@ -12,7 +12,6 @@ A wrapper around the  method which navigates to the specified appId with [embedd
 navigateToEditor(appId: string, options?: {
         path?: string;
         state: EmbeddableEditorState;
-        appendToExistingState?: boolean;
     }): Promise<void>;
 ```
 
@@ -21,7 +20,7 @@ navigateToEditor(appId: string, options?: {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        state: EmbeddableEditorState;</code><br/><code>        appendToExistingState?: boolean;</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        state: EmbeddableEditorState;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

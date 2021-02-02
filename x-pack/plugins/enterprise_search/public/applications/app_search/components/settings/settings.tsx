@@ -16,9 +16,8 @@ import {
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LogRetentionPanel } from './log_retention/log_retention_panel';
-import { LogRetentionConfirmationModal } from './log_retention/log_retention_confirmation_modal';
 
+import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
 import { SETTINGS_TITLE } from './';
 
 export const Settings: React.FC = () => {

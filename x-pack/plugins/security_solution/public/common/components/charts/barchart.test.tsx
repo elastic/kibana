@@ -18,6 +18,15 @@ import '../../mock/react_beautiful_dnd';
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../lib/kibana');
 
 jest.mock('uuid', () => {

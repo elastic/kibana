@@ -38,26 +38,25 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
         )
       : '';
 
-  const error = {
-    response: {
-      error: {
-        root_cause: [
-          {
-            reason: i18n.translate(
-              'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
-              {
-                defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
-                values: {
-                  id,
-                  action,
-                  extra,
-                },
-              }
-            ),
-          },
-        ],
+  const reason = i18n.translate(
+    'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
+    {
+      defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
+      values: {
+        id,
+        action,
+        extra,
       },
-    },
+    }
+  );
+
+  const error = {
+    reason,
+    root_cause: [
+      {
+        reason,
+      },
+    ],
   };
 
   const newResults: CommonResponseStatusSchema | DeleteTransformsResponseSchema = {};
@@ -66,6 +65,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     if (results[currentVal.id] === undefined) {
       accumResults[currentVal.id] = {
         success: false,
+        // @ts-ignore
         error,
       };
     } else {
@@ -79,7 +79,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   const boom = Boom.isBoom(error) ? error : Boom.boomify(error, { statusCode: error.statusCode });
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 }
@@ -130,7 +130,6 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
     const causedByChain = extractCausedByChain(caused_by);
     const defaultCause = root_cause.length ? extractCausedByChain(root_cause[0]) : undefined;
 
-    // @ts-expect-error cause is not defined on payload type
     boomError.output.payload.cause = causedByChain.length ? causedByChain : defaultCause;
 
     // Set error message based on the root cause
@@ -144,7 +143,7 @@ export function wrapEsError(err: any, statusCodeToMessageMap: Record<string, any
   // Otherwise, use the custom message to create a Boom error response and
   // return it
   const message = statusCodeToMessageMap[statusCode];
-  return new Boom(message, { statusCode });
+  return new Boom.Boom(message, { statusCode });
 }
 
 interface EsError {

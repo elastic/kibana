@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -29,22 +18,23 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import {
+import type {
   ISearchSetup,
   ISearchStart,
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -72,13 +62,9 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { SessionService, IScopedSessionService, ISessionService } from './session';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
-  }
-}
+import { IScopedSessionService, ISessionService, SessionService } from './session';
+import { KbnServerError } from '../../../kibana_utils/server';
+import { registerBsearchRoute } from './routes/bsearch';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -122,7 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
     const routeDependencies = {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
@@ -134,11 +120,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.coreStart = coreStart;
     });
 
-    core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
-      return { ...search, session };
-    });
+    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
+      'search',
+      async (context, request) => {
+        const search = this.asScopedProvider(this.coreStart!)(request);
+        const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
+        return { ...search, session };
+      }
+    );
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -149,43 +138,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<
-      { request: IKibanaSearchResponse; options?: ISearchOptions },
-      any
-    >('/internal/bsearch', (request) => {
-      const search = this.asScopedProvider(this.coreStart!)(request);
-
-      return {
-        onBatchItem: async ({ request: requestData, options }) => {
-          return search
-            .search(requestData, options)
-            .pipe(
-              first(),
-              map((response) => {
-                return {
-                  ...response,
-                  ...{
-                    rawResponse: shimHitsTotal(response.rawResponse),
-                  },
-                };
-              }),
-              catchError((err) => {
-                // eslint-disable-next-line no-throw-literal
-                throw {
-                  statusCode: err.statusCode || 500,
-                  body: {
-                    message: err.message,
-                    attributes: {
-                      error: err.body?.error || err.message,
-                    },
-                  },
-                };
-              })
-            )
-            .toPromise();
-        },
-      };
-    });
+    registerBsearchRoute(bfetch, core.getStartServices(), this.asScopedProvider);
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
@@ -256,7 +209,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: asScoped(request).search,
-            onResponse: (req, res) => shimHitsTotal(res),
+            onResponse: (req, res) => res,
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,
@@ -297,15 +250,38 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     options: ISearchOptions,
     deps: SearchStrategyDependencies
   ) => {
-    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy
-    );
-    return session.search(strategy, request, options, deps);
+    try {
+      const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+        options.strategy
+      );
+      return session.search(strategy, request, options, deps);
+    } catch (e) {
+      return throwError(e);
+    }
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
     const strategy = this.getSearchStrategy(options.strategy);
-    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
+    if (!strategy.cancel) {
+      throw new KbnServerError(
+        `Search strategy ${options.strategy} doesn't support cancellations`,
+        400
+      );
+    }
+    return strategy.cancel(id, options, deps);
+  };
+
+  private extend = (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    const strategy = this.getSearchStrategy(options.strategy);
+    if (!strategy.extend) {
+      throw new KbnServerError(`Search strategy ${options.strategy} does not support extend`, 400);
+    }
+    return strategy.extend(id, keepAlive, options, deps);
   };
 
   private getSearchStrategy = <
@@ -317,7 +293,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
-      throw new Error(`Search strategy ${name} not found`);
+      throw new KbnServerError(`Search strategy ${name} not found`, 404);
     }
     return strategy;
   };
@@ -337,6 +313,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         search: (searchRequest, options = {}) =>
           this.search(scopedSession, searchRequest, options, deps),
         cancel: (id, options = {}) => this.cancel(id, options, deps),
+        extend: (id, keepAlive, options = {}) => this.extend(id, keepAlive, options, deps),
       };
     };
   };

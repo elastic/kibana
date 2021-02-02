@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage } from '../../common/types/alerts';
@@ -66,12 +67,24 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
       </div>
     );
 
+    const { code } = status.state.state.ui.message;
     const accordion = (
       <EuiAccordion
         id={`monitoringAlertCallout_${index}`}
         buttonContent={buttonContent}
         paddingSize="s"
       >
+        {code?.length ? (
+          <EuiCodeBlock
+            fontSize="s"
+            paddingSize="s"
+            language="json"
+            isCopyable={true}
+            overflowHeight={300}
+          >
+            {code}
+          </EuiCodeBlock>
+        ) : null}
         <EuiListGroup
           flush={true}
           bordered={true}
@@ -84,11 +97,19 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
             paddingLeft: `0.5rem`,
           }}
         >
-          {(status.state.state.ui.message.nextSteps || []).map((step: AlertMessage) => {
-            return <EuiListGroupItem onClick={() => {}} label={replaceTokens(step)} />;
-          })}
+          {(status.state.state.ui.message.nextSteps || []).map(
+            (step: AlertMessage, stepIndex: number) => {
+              return (
+                <EuiListGroupItem
+                  onClick={() => {}}
+                  label={replaceTokens(step)}
+                  key={index + stepIndex}
+                />
+              );
+            }
+          )}
           <EuiListGroupItem
-            label={<AlertConfiguration alert={status.alert.rawAlert} compressed />}
+            label={<AlertConfiguration alert={status.alert.rawAlert} key={index} compressed />}
           />
         </EuiListGroup>
       </EuiAccordion>

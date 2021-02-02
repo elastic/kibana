@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaRequest } from 'src/core/server';
+import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
@@ -26,14 +26,6 @@ export const ConfigSchema = schema.object({
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 export type IEventLogConfig$ = Observable<Readonly<IEventLogConfig>>;
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    eventLog?: {
-      getEventLogClient: () => IEventLogClient;
-    };
-  }
-}
-
 // the object exposed by plugin.setup()
 export interface IEventLogService {
   isEnabled(): boolean;
@@ -51,9 +43,9 @@ export interface IEventLogClientService {
 }
 
 export interface IEventLogClient {
-  findEventsBySavedObject(
+  findEventsBySavedObjectIds(
     type: string,
-    id: string,
+    ids: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult>;
 }
@@ -63,3 +55,22 @@ export interface IEventLogger {
   startTiming(event: IEvent): void;
   stopTiming(event: IEvent): void;
 }
+
+/**
+ * @internal
+ */
+export interface EventLogApiRequestHandlerContext {
+  getEventLogClient(): IEventLogClient;
+}
+
+/**
+ * @internal
+ */
+export interface EventLogRequestHandlerContext extends RequestHandlerContext {
+  eventLog: EventLogApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type EventLogRouter = IRouter<EventLogRequestHandlerContext>;

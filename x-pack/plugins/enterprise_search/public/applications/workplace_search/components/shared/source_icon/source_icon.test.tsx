@@ -24,4 +24,10 @@ describe('SourceIcon', () => {
 
     expect(wrapper.find('.wrapped-icon')).toHaveLength(1);
   });
+
+  it('renders a full bleed icon', () => {
+    const wrapper = shallow(<SourceIcon name="foo" fullBleed serviceType="custom" />);
+
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual('test-file-stub');
+  });
 });

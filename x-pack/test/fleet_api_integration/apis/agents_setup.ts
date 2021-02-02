@@ -66,6 +66,8 @@ export default function (providerContext: FtrProviderContext) {
               '.ds-logs-*',
               '.ds-metrics-*',
               '.ds-traces-*',
+              '.logs-endpoint.diagnostic.collection-*',
+              '.ds-.logs-endpoint.diagnostic.collection-*',
             ],
             privileges: ['write', 'create_index', 'indices:admin/auto_create'],
             allow_restricted_indices: false,

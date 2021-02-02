@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { CoreStart } from 'kibana/public';
@@ -23,18 +12,21 @@ import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
+  http: CoreStart['http'];
   overlays: CoreStart['overlays'];
   telemetryService: TelemetryService;
 }
 
 export class TelemetryNotifications {
+  private readonly http: CoreStart['http'];
   private readonly overlays: CoreStart['overlays'];
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ overlays, telemetryService }: TelemetryNotificationsConstructor) {
+  constructor({ http, overlays, telemetryService }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
+    this.http = http;
     this.overlays = overlays;
   }
 
@@ -46,6 +38,7 @@ export class TelemetryNotifications {
 
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
+      http: this.http,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
     });

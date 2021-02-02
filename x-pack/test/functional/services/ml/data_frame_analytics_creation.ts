@@ -125,7 +125,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const actualCheckState =
         (await testSubjects.getAttribute(
           'mlAnalyticsCreationDataGridHistogramButton',
-          'aria-checked'
+          'aria-pressed'
         )) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,

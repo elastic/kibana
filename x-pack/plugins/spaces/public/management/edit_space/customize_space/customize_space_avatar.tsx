@@ -17,7 +17,7 @@ import {
   isValidHex,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../common/model/space';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { imageTypes, encode } from '../../../../common/lib/dataurl';
 import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import { MAX_SPACE_INITIALS } from '../../../../common';

@@ -171,6 +171,7 @@ export function getAlertPanelsByCategory(
       for (const { alert, states } of category.alerts) {
         const items = [];
         for (const alertState of states.filter(({ state }) => stateFilter(state))) {
+          const { nodeName, itemLabel } = alertState.state;
           items.push({
             name: (
               <Fragment>
@@ -188,7 +189,7 @@ export function getAlertPanelsByCategory(
                     )}
                   </EuiText>
                 </EuiToolTip>
-                <EuiText size="s">{alertState.state.nodeName}</EuiText>
+                <EuiText size="s">{nodeName || itemLabel}</EuiText>
               </Fragment>
             ),
             panel: ++tertiaryPanelIndex,

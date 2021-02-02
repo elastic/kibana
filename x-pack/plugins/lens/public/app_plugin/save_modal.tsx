@@ -7,8 +7,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsStart } from '../../../../../src/core/public';
-
 import { Document } from '../persistence';
 import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
@@ -28,8 +26,6 @@ export interface Props {
 
   originatingApp?: string;
   allowByValueEmbeddables: boolean;
-
-  savedObjectsClient: SavedObjectsStart['client'];
 
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   tagsIds: string[];
@@ -51,7 +47,6 @@ export const SaveModal = (props: Props) => {
   const {
     originatingApp,
     savedObjectsTagging,
-    savedObjectsClient,
     tagsIds,
     lastKnownDoc,
     allowByValueEmbeddables,
@@ -88,7 +83,6 @@ export const SaveModal = (props: Props) => {
   return (
     <TagEnhancedSavedObjectSaveModalDashboard
       savedObjectsTagging={savedObjectsTagging}
-      savedObjectsClient={savedObjectsClient}
       initialTags={tagsIds}
       onSave={(saveProps) => {
         const saveToLibrary = saveProps.dashboardId === null;

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -142,7 +131,11 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
         if (preResponseResult.isNext(result)) {
           if (result.headers) {
             if (isBoom(response)) {
-              findHeadersIntersection(response.output.headers, result.headers, log);
+              findHeadersIntersection(
+                response.output.headers as { [key: string]: string },
+                result.headers,
+                log
+              );
               // hapi wraps all error response in Boom object internally
               response.output.headers = {
                 ...response.output.headers,
@@ -157,7 +150,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           const overriddenResponse = responseToolkit.response(result.body).code(statusCode);
 
           const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
-          setHeaders(overriddenResponse, originalHeaders);
+          setHeaders(overriddenResponse, originalHeaders as { [key: string]: string });
           if (result.headers) {
             setHeaders(overriddenResponse, result.headers);
           }
@@ -178,8 +171,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
   };
 }
 
-function isBoom(response: any): response is Boom {
-  return response instanceof Boom;
+function isBoom(response: any): response is Boom.Boom {
+  return response instanceof Boom.Boom;
 }
 
 function setHeaders(response: ResponseObject, headers: ResponseHeaders) {

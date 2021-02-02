@@ -12,6 +12,7 @@ import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
+import { DatasourceDataPanelProps } from '../types';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -22,6 +23,7 @@ export type FieldGroups = Record<
     showInAccordion: boolean;
     isInitiallyOpen: boolean;
     title: string;
+    helpText?: string;
     isAffectedByGlobalFilter: boolean;
     isAffectedByTimeFilter: boolean;
     hideDetails?: boolean;
@@ -38,7 +40,7 @@ function getDisplayedFieldsLength(
     .reduce((allFieldCount, [, { fields }]) => allFieldCount + fields.length, 0);
 }
 
-export function FieldList({
+export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
@@ -47,6 +49,8 @@ export function FieldList({
   filter,
   currentIndexPatternId,
   existFieldsInIndex,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -59,6 +63,8 @@ export function FieldList({
   };
   currentIndexPatternId: string;
   existFieldsInIndex: boolean;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -129,13 +135,17 @@ export function FieldList({
           {Object.entries(fieldGroups)
             .filter(([, { showInAccordion }]) => !showInAccordion)
             .flatMap(([, { fields }]) =>
-              fields.map((field) => (
+              fields.map((field, index) => (
                 <FieldItem
                   {...fieldProps}
                   exists={exists(field)}
                   field={field}
                   hideDetails={true}
                   key={field.name}
+                  itemIndex={index}
+                  groupIndex={0}
+                  dropOntoWorkspace={dropOntoWorkspace}
+                  hasSuggestionForField={hasSuggestionForField}
                 />
               ))
             )}
@@ -143,13 +153,16 @@ export function FieldList({
         <EuiSpacer size="s" />
         {Object.entries(fieldGroups)
           .filter(([, { showInAccordion }]) => showInAccordion)
-          .map(([key, fieldGroup]) => (
+          .map(([key, fieldGroup], index) => (
             <Fragment key={key}>
               <FieldsAccordion
+                dropOntoWorkspace={dropOntoWorkspace}
+                hasSuggestionForField={hasSuggestionForField}
                 initialIsOpen={Boolean(accordionState[key])}
                 key={key}
                 id={`lnsIndexPattern${key}`}
                 label={fieldGroup.title}
+                helpTooltip={fieldGroup.helpText}
                 exists={exists}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}
@@ -157,6 +170,7 @@ export function FieldList({
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
                 paginatedFields={paginatedFields[key]}
                 fieldProps={fieldProps}
+                groupIndex={index + 1}
                 onToggle={(open) => {
                   setAccordionState((s) => ({
                     ...s,
@@ -187,4 +201,4 @@ export function FieldList({
       </div>
     </div>
   );
-}
+});

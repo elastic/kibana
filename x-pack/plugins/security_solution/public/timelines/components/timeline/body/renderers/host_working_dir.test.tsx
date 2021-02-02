@@ -12,6 +12,15 @@ import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { HostWorkingDir } from './host_working_dir';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('HostWorkingDir', () => {
   const mount = useMountAppended();
 

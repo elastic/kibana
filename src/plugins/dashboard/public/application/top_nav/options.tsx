@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -27,17 +16,21 @@ interface Props {
   onUseMarginsChange: (useMargins: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  syncColors: boolean;
+  onSyncColorsChange: (syncColors: boolean) => void;
 }
 
 interface State {
   useMargins: boolean;
   hidePanelTitles: boolean;
+  syncColors: boolean;
 }
 
 export class OptionsMenu extends Component<Props, State> {
   state = {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
+    syncColors: this.props.syncColors,
   };
 
   constructor(props: Props) {
@@ -54,6 +47,12 @@ export class OptionsMenu extends Component<Props, State> {
     const isChecked = !evt.target.checked;
     this.props.onHidePanelTitlesChange(isChecked);
     this.setState({ hidePanelTitles: isChecked });
+  };
+
+  handleSyncColorsChange = (evt: any) => {
+    const isChecked = evt.target.checked;
+    this.props.onSyncColorsChange(isChecked);
+    this.setState({ syncColors: isChecked });
   };
 
   render() {
@@ -78,6 +77,17 @@ export class OptionsMenu extends Component<Props, State> {
             checked={!this.state.hidePanelTitles}
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label={i18n.translate('dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel', {
+              defaultMessage: 'Sync color palettes across panels',
+            })}
+            checked={this.state.syncColors}
+            onChange={this.handleSyncColorsChange}
+            data-test-subj="dashboardSyncColorsCheckbox"
           />
         </EuiFormRow>
       </EuiForm>

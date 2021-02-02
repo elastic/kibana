@@ -39,7 +39,7 @@ export const ColorStopsOrdinal = ({
     return error;
   };
 
-  const renderStopInput = (stop, onStopChange) => {
+  const renderStopInput = (stop, onStopChange, index) => {
     function handleOnChangeEvent(event) {
       const sanitizedValue = parseFloat(event.target.value);
       const newStopValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
@@ -50,9 +50,10 @@ export const ColorStopsOrdinal = ({
         aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
           defaultMessage: 'Stop',
         })}
-        value={stop}
+        value={index === 0 ? '' : stop}
         onChange={handleOnChangeEvent}
         compressed
+        disabled={index === 0}
       />
     );
   };

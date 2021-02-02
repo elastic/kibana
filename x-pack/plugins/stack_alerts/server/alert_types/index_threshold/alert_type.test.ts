@@ -19,7 +19,7 @@ describe('alertType', () => {
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.index-threshold');
     expect(alertType.name).toBe('Index threshold');
-    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold Met' }]);
+    expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold met' }]);
 
     expect(alertType.actionVariables).toMatchInlineSnapshot(`
       Object {

@@ -12,7 +12,7 @@ import { ErrorModel, NotesById } from './model';
 import { State } from '../types';
 import { TimelineResultNote } from '../../../timelines/components/open_timeline/types';
 
-const selectNotesById = (state: State): NotesById => state.app.notesById;
+export const selectNotesById = (state: State): NotesById => state.app.notesById;
 
 const getErrors = (state: State): ErrorModel => state.app.errors;
 

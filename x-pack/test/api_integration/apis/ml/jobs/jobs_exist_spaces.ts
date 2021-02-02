@@ -17,6 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const jobIdSpace1 = 'fq_single_space1';
   const jobIdSpace2 = 'fq_single_space2';
+  const groupSpace1 = 'farequote';
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
@@ -57,17 +58,25 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should find single job from same space', async () => {
       const body = await runRequest(idSpace1, 200, [jobIdSpace1]);
-      expect(body).to.eql({ [jobIdSpace1]: true });
+      expect(body).to.eql({ [jobIdSpace1]: { exists: true, isGroup: false } });
+    });
+
+    it('should find single job from same space', async () => {
+      const body = await runRequest(idSpace1, 200, [groupSpace1]);
+      expect(body).to.eql({ [groupSpace1]: { exists: true, isGroup: true } });
     });
 
     it('should not find single job from different space', async () => {
       const body = await runRequest(idSpace2, 200, [jobIdSpace1]);
-      expect(body).to.eql({ [jobIdSpace1]: false });
+      expect(body).to.eql({ [jobIdSpace1]: { exists: false, isGroup: false } });
     });
 
     it('should only find job from same space when called with a list of jobs', async () => {
       const body = await runRequest(idSpace1, 200, [jobIdSpace1, jobIdSpace2]);
-      expect(body).to.eql({ [jobIdSpace1]: true, [jobIdSpace2]: false });
+      expect(body).to.eql({
+        [jobIdSpace1]: { exists: true, isGroup: false },
+        [jobIdSpace2]: { exists: false, isGroup: false },
+      });
     });
   });
 };

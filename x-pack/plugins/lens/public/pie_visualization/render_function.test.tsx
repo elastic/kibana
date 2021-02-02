@@ -71,6 +71,7 @@ describe('PieVisualization component', () => {
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
         renderMode: 'display' as const,
+        syncColors: false,
       };
     }
 
@@ -172,6 +173,7 @@ describe('PieVisualization component', () => {
         {
           maxDepth: 2,
           totalSeries: 5,
+          syncColors: false,
           behindText: true,
         },
         undefined

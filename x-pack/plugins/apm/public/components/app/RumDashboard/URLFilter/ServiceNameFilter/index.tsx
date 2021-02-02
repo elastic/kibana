@@ -28,7 +28,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   }));
 
   const updateServiceName = useCallback(
-    (serviceN: string) => {
+    (serviceN: string, replaceHistory?: boolean) => {
       const newLocation = {
         ...history.location,
         search: fromQuery({
@@ -36,7 +36,11 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
           serviceName: serviceN,
         }),
       };
-      history.push(newLocation);
+      if (replaceHistory) {
+        history.replace(newLocation);
+      } else {
+        history.push(newLocation);
+      }
     },
     [history]
   );
@@ -45,12 +49,12 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     if (serviceNames?.length > 0) {
       // select first from the list
       if (!selectedServiceName) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
 
       // in case serviceName is cached from url and isn't present in current list
       if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
     }
 

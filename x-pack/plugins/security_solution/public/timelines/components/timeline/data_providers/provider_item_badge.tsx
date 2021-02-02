@@ -28,16 +28,19 @@ interface ProviderItemBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isPopoverOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
   register?: DataProvidersAnd;
+  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   val: string | number;
   type?: DataProviderType;
+  wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -49,16 +52,19 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     kqlQuery,
     isEnabled,
     isExcluded,
+    isPopoverOpen,
     onDataProviderEdited,
     operator,
     providerId,
     register,
+    setIsPopoverOpen,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
     toggleTypeProvider,
     val,
     type = DataProviderType.default,
+    wrapperRef,
   }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineType = useShallowEqualSelector((state) => {
@@ -73,15 +79,15 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       getManageTimelineById,
       timelineId,
     ]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
-    }, [isPopoverOpen]);
+    }, [isPopoverOpen, setIsPopoverOpen]);
 
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    }, []);
+      wrapperRef?.current?.focus();
+    }, [wrapperRef, setIsPopoverOpen]);
 
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();

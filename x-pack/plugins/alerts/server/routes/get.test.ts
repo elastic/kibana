@@ -22,7 +22,9 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Alert = {
+  const mockedAlert: Alert<{
+    bar: true;
+  }> = {
     id: '1',
     alertTypeId: '1',
     schedule: { interval: '10s' },

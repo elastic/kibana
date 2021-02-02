@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -318,7 +318,7 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -382,7 +382,7 @@ async function fetchBeatsByType(
 }
 
 export async function fetchBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -392,7 +392,7 @@ export async function fetchBeatsStats(
 }
 
 export async function fetchBeatsStates(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -410,7 +410,7 @@ export interface BeatsStatsByClusterUuid {
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string

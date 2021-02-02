@@ -1,9 +1,7 @@
+import co.elastic.teamcity.common.requireAgent
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.ScriptBuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
-import jetbrains.buildServer.configs.kotlin.v2019_2.ui.insert
-import projects.kibanaConfiguration
 
 fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   feature {
@@ -13,40 +11,8 @@ fun BuildFeatures.junit(dirs: String = "target/**/TEST-*.xml") {
   }
 }
 
-fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
-  feature {
-    type = "CloudImage"
-    param("network", kibanaConfiguration.agentNetwork)
-    param("subnet", kibanaConfiguration.agentSubnet)
-    param("growingId", "true")
-    param("agent_pool_id", "-2")
-    param("preemptible", "false")
-    param("sourceProject", "elastic-images-prod")
-    param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
-    param("zone", "us-central1-a")
-    param("profileId", "kibana")
-    param("diskType", "pd-ssd")
-    param("machineCustom", "false")
-    param("maxInstances", "200")
-    param("imageType", "ImageFamily")
-    param("diskSizeGb", "75") // TODO
-    init()
-  }
-}
-
-fun ProjectFeatures.kibanaAgent(size: String, init: ProjectFeature.() -> Unit = {}) {
-  kibanaAgent {
-    id = "KIBANA_STANDARD_$size"
-    param("source-id", "kibana-standard-$size-")
-    param("machineType", "n2-standard-$size")
-    init()
-  }
-}
-
 fun BuildType.kibanaAgent(size: String) {
-  requirements {
-    startsWith("teamcity.agent.name", "kibana-standard-$size-", "RQ_AGENT_NAME")
-  }
+  requireAgent(StandardAgents[size]!!)
 }
 
 fun BuildType.kibanaAgent(size: Int) {
@@ -73,7 +39,9 @@ val testArtifactRules = """
 fun BuildType.addTestSettings() {
   artifactRules += "\n" + testArtifactRules
   steps {
-    failedTestReporter()
+    if(isReportingEnabled()) {
+       failedTestReporter()
+    }
   }
   features {
     junit()
@@ -82,7 +50,7 @@ fun BuildType.addTestSettings() {
 
 fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
   params {
-    param("elastic.slack.enabled", "true")
+    param("elastic.slack.enabled", isReportingEnabled().toString())
     param("elastic.slack.channels", to)
   }
 }

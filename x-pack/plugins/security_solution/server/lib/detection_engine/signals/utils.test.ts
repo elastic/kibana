@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -28,6 +29,7 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  hasTimestampFields,
   wrapBuildingBlocks,
   generateSignalId,
   createErrorsFromShard,
@@ -36,6 +38,7 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  calculateThresholdSignalUuid,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -59,6 +62,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const ruleStatusServiceMock = {
+  success: jest.fn(),
+  find: jest.fn(),
+  goingToRun: jest.fn(),
+  error: jest.fn(),
+  partialFailure: jest.fn(),
+};
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -802,6 +813,89 @@ describe('utils', () => {
     });
   });
 
+  describe('hasTimestampFields', () => {
+    test('returns true when missing timestamp override field', async () => {
+      const timestampField = 'event.ingested';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+    test('returns true when missing timestamp field', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+  });
+
   describe('wrapBuildingBlocks', () => {
     it('should generate a unique id for each building block', () => {
       const wrappedBlocks = wrapBuildingBlocks(
@@ -878,7 +972,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
       ]);
     });
 
@@ -917,8 +1011,8 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
-        'reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-345" reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
       ]);
     });
 
@@ -932,7 +1026,7 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['']);
+      expect(createdErrors).toEqual(['index: "index-123"']);
     });
 
     test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
@@ -947,7 +1041,9 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['reason: "some reason something went wrong"']);
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong"',
+      ]);
     });
 
     test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
@@ -964,7 +1060,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason something went wrong" caused by type: "some type"',
+        'index: "index-123" reason: "some reason something went wrong" caused by type: "some type"',
       ]);
     });
   });
@@ -1009,6 +1105,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1019,6 +1116,21 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if mixed reasons for shard failures', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'Not a sort failure' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1032,6 +1144,20 @@ describe('utils', () => {
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
+      });
+      expect(success).toEqual(true);
+    });
+
+    test('result with error will create success: true within the result set if shard failure reasons are sorting on timestamp field', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: 'event.ingested',
       });
       expect(success).toEqual(true);
     });
@@ -1301,6 +1427,20 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('calculateThresholdSignalUuid', () => {
+    it('should generate a uuid without key', () => {
+      const startedAt = new Date('2020-12-17T16:27:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'agent.name');
+      expect(signalUuid).toEqual('c0cbe4b7-48de-5734-ae81-d8de3e79839d');
+    });
+
+    it('should generate a uuid with key', () => {
+      const startedAt = new Date('2019-11-18T13:32:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'host.ip', '1.2.3.4');
+      expect(signalUuid).toEqual('f568509e-b570-5d3c-a7ed-7c73fd29ddaf');
     });
   });
 });

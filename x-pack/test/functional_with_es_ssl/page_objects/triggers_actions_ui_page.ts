@@ -78,7 +78,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('connectors-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           return {
             name: $(row)
               .findTestSubject('connectorsTableCell-name')
@@ -96,7 +96,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           return getRowItemData(row, $);
         });
     },
@@ -105,7 +105,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('alert-row')
         .toArray()
-        .map((row) => {
+        .map((row: CheerioElement) => {
           const rowItem = getRowItemData(row, $);
           return {
             ...rowItem,

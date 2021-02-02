@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionSpecs } from '../../__tests__/fixtures/function_specs';
+import { functionSpecs } from '../../__fixtures__/function_specs';
 
 import {
   FunctionSuggestion,
@@ -17,7 +17,7 @@ describe('autocomplete', () => {
     it('should return function definition for plot', () => {
       const expression = 'plot ';
       const def = getFnArgDefAtPosition(functionSpecs, expression, expression.length);
-      const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
+      const plotFn = functionSpecs.find((spec: any) => spec.name === 'plot');
       expect(def.fnDef).toBe(plotFn);
     });
   });
@@ -33,7 +33,7 @@ describe('autocomplete', () => {
     it('should suggest arguments', () => {
       const expression = 'plot ';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
+      const plotFn = functionSpecs.find((spec: any) => spec.name === 'plot');
       expect(suggestions.length).toBe(Object.keys(plotFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
@@ -42,7 +42,7 @@ describe('autocomplete', () => {
     it('should suggest values', () => {
       const expression = 'shape shape=';
       const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec: any) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length);
       expect(suggestions[0].end).toBe(expression.length);
@@ -110,7 +110,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const ltFn = functionSpecs.find((spec) => spec.name === 'lt');
+      const ltFn = functionSpecs.find((spec: any) => spec.name === 'lt');
       expect(suggestions.length).toBe(Object.keys(ltFn!.args).length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
@@ -123,7 +123,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec: any) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - 1);
       expect(suggestions[0].end).toBe(expression.length - 1);
@@ -136,7 +136,7 @@ describe('autocomplete', () => {
         expression,
         expression.length - 1
       );
-      const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
+      const shapeFn = functionSpecs.find((spec: any) => spec.name === 'shape');
       expect(suggestions.length).toBe(shapeFn!.args.shape.options.length);
       expect(suggestions[0].start).toBe(expression.length - '"ar"'.length);
       expect(suggestions[0].end).toBe(expression.length);

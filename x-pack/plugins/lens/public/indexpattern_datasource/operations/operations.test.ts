@@ -295,6 +295,11 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
+                "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "last_value",
                 "type": "field",
               },

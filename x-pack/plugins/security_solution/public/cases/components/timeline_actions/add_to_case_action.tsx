@@ -17,28 +17,49 @@ import {
 import { CommentType } from '../../../../../case/common/api';
 import { Ecs } from '../../../../common/ecs';
 import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import * as i18n from './translations';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { displaySuccessToast, useStateToaster } from '../../../common/components/toasters';
+import { useStateToaster } from '../../../common/components/toasters';
+import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { SecurityPageName } from '../../../app/types';
 import { useCreateCaseModal } from '../use_create_case_modal';
 import { useAllCasesModal } from '../use_all_cases_modal';
+import { createUpdateSuccessToaster } from './helpers';
+import * as i18n from './translations';
 
 interface AddToCaseActionProps {
+  ariaLabel?: string;
   ecsRowData: Ecs;
   disabled: boolean;
 }
 
-const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, disabled }) => {
+const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
+  ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
+  ecsRowData,
+  disabled,
+}) => {
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
 
+  const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const { postComment } = usePostComment();
+
+  const onViewCaseClick = useCallback(
+    (id) => {
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCaseDetailsUrl({ id }),
+      });
+    },
+    [navigateToApp]
+  );
+
   const attachAlertToCase = useCallback(
     (theCase: Case) => {
       postComment(
@@ -48,10 +69,14 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () => displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster)
+        () =>
+          dispatchToaster({
+            type: 'addToaster',
+            toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
+          })
       );
     },
-    [postComment, eventId, eventIndex, dispatchToaster]
+    [postComment, eventId, eventIndex, dispatchToaster, onViewCaseClick]
   );
 
   const { modal: createCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({
@@ -120,7 +145,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
         content={i18n.ACTION_ADD_TO_CASE_TOOLTIP}
       >
         <EuiButtonIcon
-          aria-label={i18n.ACTION_ADD_TO_CASE_ARIA_LABEL}
+          aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
           size="s"
           iconType="folderClosed"
@@ -129,7 +154,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({ ecsRowData, 
         />
       </EuiToolTip>
     ),
-    [disabled, openPopover]
+    [ariaLabel, disabled, openPopover]
   );
 
   return (

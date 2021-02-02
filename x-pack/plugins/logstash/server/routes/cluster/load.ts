@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { Cluster } from '../../models/cluster';
 import { checkLicense } from '../../lib/check_license';
+import type { LogstashPluginRouter } from '../../types';
 
-export function registerClusterLoadRoute(router: IRouter) {
+export function registerClusterLoadRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/cluster',

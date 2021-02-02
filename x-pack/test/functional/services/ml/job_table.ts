@@ -316,7 +316,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async confirmDeleteJobModal() {
-      await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
+      await testSubjects.click('mlDeleteJobConfirmModal > mlDeleteJobConfirmModalButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
     }
 

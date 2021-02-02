@@ -16,10 +16,10 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 
-const alertType: NormalizedAlertType = {
+const alertType: UntypedNormalizedAlertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],

@@ -9,7 +9,7 @@ Represents something that can be displayed to user in UI.
 <b>Signature:</b>
 
 ```typescript
-export interface Presentable<Context extends object = object> 
+export interface Presentable<Context = unknown> 
 ```
 
 ## Properties

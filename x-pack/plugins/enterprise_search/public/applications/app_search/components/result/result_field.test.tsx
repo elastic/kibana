@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { shallow } from 'enzyme';
 
 import { ResultField } from './result_field';

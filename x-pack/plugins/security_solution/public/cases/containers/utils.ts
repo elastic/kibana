@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
 import { camelCase, isArray, isObject } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
@@ -26,9 +27,12 @@ import {
   CaseUserActionsResponseRt,
   ServiceConnectorCaseResponseRt,
   ServiceConnectorCaseResponse,
+  CommentType,
+  CasePatchRequest,
 } from '../../../../case/common/api';
-import { ToasterError } from '../../common/components/toasters';
-import { AllCases, Case } from './types';
+import { AppToast, ToasterError } from '../../common/components/toasters';
+import { AllCases, Case, UpdateByKey } from './types';
+import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -107,3 +111,47 @@ export const decodeServiceConnectorCaseResponse = (respPushCase?: ServiceConnect
     ServiceConnectorCaseResponseRt.decode(respPushCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
+
+export const valueToUpdateIsSettings = (
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): value is CasePatchRequest['settings'] => key === 'settings';
+
+export const valueToUpdateIsStatus = (
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): value is CasePatchRequest['status'] => key === 'status';
+
+export const createUpdateSuccessToaster = (
+  caseBeforeUpdate: Case,
+  caseAfterUpdate: Case,
+  key: UpdateByKey['updateKey'],
+  value: UpdateByKey['updateValue']
+): AppToast => {
+  const caseHasAlerts = caseBeforeUpdate.comments.some(
+    (comment) => comment.type === CommentType.alert
+  );
+
+  const toast: AppToast = {
+    id: uuid.v4(),
+    color: 'success',
+    iconType: 'check',
+    title: i18n.UPDATED_CASE(caseAfterUpdate.title),
+  };
+
+  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
+    return {
+      ...toast,
+      title: i18n.SYNC_CASE(caseAfterUpdate.title),
+    };
+  }
+
+  if (valueToUpdateIsStatus(key, value) && caseHasAlerts && caseBeforeUpdate.settings.syncAlerts) {
+    return {
+      ...toast,
+      text: i18n.STATUS_CHANGED_TOASTER_TEXT,
+    };
+  }
+
+  return toast;
+};

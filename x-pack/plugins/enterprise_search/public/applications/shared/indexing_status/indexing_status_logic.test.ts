@@ -4,35 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
 
-jest.mock('../http', () => ({
-  HttpLogic: {
-    values: { http: { get: jest.fn() } },
-  },
-}));
-import { HttpLogic } from '../http';
-
-jest.mock('../flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../flash_messages';
+import { nextTick } from '@kbn/test/jest';
 
 import { IndexingStatusLogic } from './indexing_status_logic';
 
 describe('IndexingStatusLogic', () => {
-  let unmount: any;
+  const { mount, unmount } = new LogicMounter(IndexingStatusLogic);
+  const { http } = mockHttpValues;
+  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const mockStatusResponse = {
     percentageComplete: 50,
     numDocumentsWithErrors: 3,
-    activeReindexJobId: 1,
+    activeReindexJobId: '1',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    unmount = IndexingStatusLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {
@@ -63,40 +54,34 @@ describe('IndexingStatusLogic', () => {
 
     it('calls API and sets values', async () => {
       const setIndexingStatusSpy = jest.spyOn(IndexingStatusLogic.actions, 'setIndexingStatus');
-      const promise = Promise.resolve(mockStatusResponse);
-      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.resolve(mockStatusResponse));
 
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      expect(HttpLogic.values.http.get).toHaveBeenCalledWith(statusPath);
-      await promise;
+      expect(http.get).toHaveBeenCalledWith(statusPath);
+      await nextTick();
 
       expect(setIndexingStatusSpy).toHaveBeenCalledWith(mockStatusResponse);
     });
 
     it('handles error', async () => {
-      const promise = Promise.reject('An error occured');
-      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.reject('An error occured'));
 
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      try {
-        await promise;
-      } catch {
-        // Do nothing
-      }
+      await nextTick();
+
       expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
     });
 
     it('handles indexing complete state', async () => {
-      const promise = Promise.resolve({ ...mockStatusResponse, percentageComplete: 100 });
-      (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+      http.get.mockReturnValue(Promise.resolve({ ...mockStatusResponse, percentageComplete: 100 }));
       IndexingStatusLogic.actions.fetchIndexingStatus({ statusPath, onComplete });
       jest.advanceTimersByTime(TIMEOUT);
 
-      await promise;
+      await nextTick();
 
       expect(clearInterval).toHaveBeenCalled();
       expect(onComplete).toHaveBeenCalledWith(mockStatusResponse.numDocumentsWithErrors);

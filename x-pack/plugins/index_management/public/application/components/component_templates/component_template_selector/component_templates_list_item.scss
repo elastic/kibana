@@ -1,5 +1,5 @@
 .componentTemplatesListItem {
-  background-color: white;
+  background-color: $euiColorGhost;
   padding: $euiSizeM;
   border-bottom: $euiBorderThin;
   position: relative;
@@ -8,7 +8,7 @@
   &--selected {
     &::before {
       content: '';
-      background-color: rgba(255, 255, 255, 0.7);
+      background-color: rgba(255, 255, 255, .7);
       height: 100%;
       left: 0;
       position: absolute;

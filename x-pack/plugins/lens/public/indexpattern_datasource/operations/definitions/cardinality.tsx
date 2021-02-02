@@ -10,7 +10,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -21,7 +21,9 @@ const IS_BUCKETED = false;
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
     defaultMessage: 'Unique count of {name}',
-    values: { name },
+    values: {
+      name,
+    },
   });
 }
 
@@ -58,8 +60,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),

@@ -14,7 +14,9 @@ import { useKibana } from '../../../common/lib/kibana';
 export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
+  hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
@@ -26,7 +28,9 @@ export interface State {
 export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
+  hasIndexMaintenance: null,
   hasIndexWrite: null,
+  hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   hasEncryptionKey: null,
@@ -42,8 +46,16 @@ export type Action =
       hasIndexManage: boolean | null;
     }
   | {
+      type: 'updateHasIndexMaintenance';
+      hasIndexMaintenance: boolean | null;
+    }
+  | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexUpdateDelete';
+      hasIndexUpdateDelete: boolean | null;
     }
   | {
       type: 'updateIsSignalIndexExists';
@@ -84,10 +96,22 @@ export const userInfoReducer = (state: State, action: Action): State => {
         hasIndexManage: action.hasIndexManage,
       };
     }
+    case 'updateHasIndexMaintenance': {
+      return {
+        ...state,
+        hasIndexMaintenance: action.hasIndexMaintenance,
+      };
+    }
     case 'updateHasIndexWrite': {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexUpdateDelete': {
+      return {
+        ...state,
+        hasIndexUpdateDelete: action.hasIndexUpdateDelete,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -150,7 +174,9 @@ export const useUserInfo = (): State => {
     {
       canUserCRUD,
       hasIndexManage,
+      hasIndexMaintenance,
       hasIndexWrite,
+      hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
@@ -165,7 +191,9 @@ export const useUserInfo = (): State => {
     isAuthenticated: isApiAuthenticated,
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
+    hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexWrite: hasApiIndexWrite,
+    hasIndexUpdateDelete: hasApiIndexUpdateDelete,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
@@ -196,6 +224,29 @@ export const useUserInfo = (): State => {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
   }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexUpdateDelete !== hasApiIndexUpdateDelete &&
+      hasApiIndexUpdateDelete != null
+    ) {
+      dispatch({
+        type: 'updateHasIndexUpdateDelete',
+        hasIndexUpdateDelete: hasApiIndexUpdateDelete,
+      });
+    }
+  }, [dispatch, loading, hasIndexUpdateDelete, hasApiIndexUpdateDelete]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexMaintenance !== hasApiIndexMaintenance &&
+      hasApiIndexMaintenance != null
+    ) {
+      dispatch({ type: 'updateHasIndexMaintenance', hasIndexMaintenance: hasApiIndexMaintenance });
+    }
+  }, [dispatch, loading, hasIndexMaintenance, hasApiIndexMaintenance]);
 
   useEffect(() => {
     if (
@@ -271,7 +322,9 @@ export const useUserInfo = (): State => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexManage,
+    hasIndexMaintenance,
     hasIndexWrite,
+    hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,
   };

@@ -30,7 +30,7 @@ describe('EMSSettings', () => {
     test('should validate defaults', () => {
       const emsSettings = new EMSSettings(mockConfig, IS_ENTERPRISE_PLUS);
       expect(emsSettings.isEMSEnabled()).toBe(true);
-      expect(emsSettings.isOnPrem()).toBe(false);
+      expect(emsSettings.isEMSUrlSet()).toBe(false);
     });
 
     test('should validate if on-prem is turned on', () => {
@@ -44,7 +44,7 @@ describe('EMSSettings', () => {
         IS_ENTERPRISE_PLUS
       );
       expect(emsSettings.isEMSEnabled()).toBe(true);
-      expect(emsSettings.isOnPrem()).toBe(true);
+      expect(emsSettings.isEMSUrlSet()).toBe(true);
     });
 
     test('should not validate if ems turned off', () => {
@@ -58,7 +58,7 @@ describe('EMSSettings', () => {
         IS_ENTERPRISE_PLUS
       );
       expect(emsSettings.isEMSEnabled()).toBe(false);
-      expect(emsSettings.isOnPrem()).toBe(false);
+      expect(emsSettings.isEMSUrlSet()).toBe(false);
     });
 
     test('should work if ems is turned off, but on-prem is turned on', () => {
@@ -73,7 +73,7 @@ describe('EMSSettings', () => {
         IS_ENTERPRISE_PLUS
       );
       expect(emsSettings.isEMSEnabled()).toBe(true);
-      expect(emsSettings.isOnPrem()).toBe(true);
+      expect(emsSettings.isEMSUrlSet()).toBe(true);
     });
 
     describe('when license is turned off', () => {
@@ -88,7 +88,7 @@ describe('EMSSettings', () => {
           () => false
         );
         expect(emsSettings.isEMSEnabled()).toBe(false);
-        expect(emsSettings.isOnPrem()).toBe(true);
+        expect(emsSettings.isEMSUrlSet()).toBe(true);
       });
     });
   });

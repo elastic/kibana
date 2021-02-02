@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Subject, Observable } from 'rxjs';
@@ -30,7 +19,6 @@ import { CoreContext } from '../core_context';
 import { CoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
-  IClusterClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
@@ -50,10 +38,13 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
+import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
+import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
-import { createMigrationEsClient } from './migrations/core/';
+import { registerCoreObjectTypes } from './object_types';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -151,11 +142,6 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: (type: SavedObjectsType) => void;
-
-  /**
-   * Returns the maximum number of objects allowed for import or export operations.
-   */
-  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -214,6 +200,14 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Creates an {@link ISavedObjectsExporter | exporter} bound to given client.
+   */
+  createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+  /**
+   * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
+   */
+  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
@@ -312,6 +306,8 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
+    registerCoreObjectTypes(this.typeRegistry);
+
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
@@ -342,7 +338,6 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
-      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
@@ -365,7 +360,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       kibanaConfig,
       this.config.migration,
-      elasticsearch.client,
+      elasticsearch.client.asInternalUser,
       migrationsRetryDelay
     );
 
@@ -385,6 +380,12 @@ export class SavedObjectsService
      * not plugin migrations won't be registered.
      */
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
+
+    /**
+     * Note: Prepares all migrations maps. If a saved object type was registered with property `migrations`
+     * of type function; this function will be called to get the type's SavedObjectMigrationMap.
+     */
+    migrator.prepareMigrations();
 
     if (skipMigrations) {
       this.logger.warn(
@@ -453,6 +454,18 @@ export class SavedObjectsService
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      createExporter: (savedObjectsClient) =>
+        new SavedObjectsExporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          exportSizeLimit: this.config!.maxImportExportSize,
+        }),
+      createImporter: (savedObjectsClient) =>
+        new SavedObjectsImporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          importSizeLimit: this.config!.maxImportExportSize,
+        }),
       getTypeRegistry: () => this.typeRegistry,
     };
   }
@@ -462,7 +475,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
-    client: IClusterClient,
+    client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
     return new KibanaMigrator({
@@ -471,7 +484,8 @@ export class SavedObjectsService
       kibanaVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
       kibanaConfig,
-      client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
+      client,
+      migrationsRetryDelay,
     });
   }
 }

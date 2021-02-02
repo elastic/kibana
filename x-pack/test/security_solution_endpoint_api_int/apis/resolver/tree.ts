@@ -5,10 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { getNameField } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils/fetch';
-import {
-  ResolverNode,
-  ResolverSchema,
-} from '../../../../plugins/security_solution/common/endpoint/types';
+import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
   timestampSafeVersion,
@@ -19,7 +16,7 @@ import {
   RelatedEventCategory,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { Options, GeneratedTrees } from '../../services/resolver';
-import { verifyTree } from './common';
+import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -44,23 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
     numTrees: 1,
     alwaysGenMaxChildrenPerNode: true,
     ancestryArraySize: 2,
-  };
-
-  const schemaWithAncestry: ResolverSchema = {
-    ancestry: 'process.Ext.ancestry',
-    id: 'process.entity_id',
-    parent: 'process.parent.entity_id',
-  };
-
-  const schemaWithoutAncestry: ResolverSchema = {
-    id: 'process.entity_id',
-    parent: 'process.parent.entity_id',
-  };
-
-  const schemaWithName: ResolverSchema = {
-    id: 'process.entity_id',
-    parent: 'process.parent.entity_id',
-    name: 'process.name',
   };
 
   describe('Resolver tree', () => {
@@ -281,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
               from: tree.startTime.toISOString(),
               to: tree.endTime.toISOString(),
             },
-            indexPatterns: ['metrics-*'],
+            indexPatterns: ['doesnotexist-*'],
           })
           .expect(200);
         expect(body).to.be.empty();

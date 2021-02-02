@@ -22,7 +22,7 @@ export const getFindExceptionListSchemaMock = (): FindExceptionListSchema => ({
 
 export const getFindExceptionListSchemaDecodedMock = (): FindExceptionListSchemaDecoded => ({
   filter: FILTER,
-  namespace_type: NAMESPACE_TYPE,
+  namespace_type: [NAMESPACE_TYPE],
   page: 1,
   per_page: 25,
   sort_field: undefined,

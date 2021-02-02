@@ -166,7 +166,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
-      expandedEvent,
+      expandedEvent: expandedEvent?.query ?? {},
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,

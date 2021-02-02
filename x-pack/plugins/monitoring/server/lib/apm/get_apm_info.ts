@@ -14,7 +14,8 @@ import { getDiffCalculation } from '../beats/_beats_stats';
 // @ts-ignore
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, apmUuid: string) {
   if (!response.hits || response.hits.hits.length === 0) {

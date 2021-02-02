@@ -27,6 +27,7 @@ import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 function getErrorInfo(fileId: string) {
   return i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {
@@ -212,6 +213,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     return [VECTOR_SHAPE_TYPE.POLYGON];
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
 

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea.mock';
-import { rerender } from '../../../../../__mocks__';
+import { setMockValues, setMockActions, rerender } from '../../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';

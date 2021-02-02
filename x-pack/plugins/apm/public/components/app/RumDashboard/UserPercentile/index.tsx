@@ -22,7 +22,7 @@ export function UserPercentile() {
   } = useUrlParams();
 
   const updatePercentile = useCallback(
-    (percentileN?: number) => {
+    (percentileN?: number, replaceHistory?: boolean) => {
       const newLocation = {
         ...history.location,
         search: fromQuery({
@@ -30,14 +30,18 @@ export function UserPercentile() {
           percentile: percentileN,
         }),
       };
-      history.push(newLocation);
+      if (replaceHistory) {
+        history.replace(newLocation);
+      } else {
+        history.push(newLocation);
+      }
     },
     [history]
   );
 
   useEffect(() => {
     if (!percentile) {
-      updatePercentile(DEFAULT_P);
+      updatePercentile(DEFAULT_P, true);
     }
   });
 

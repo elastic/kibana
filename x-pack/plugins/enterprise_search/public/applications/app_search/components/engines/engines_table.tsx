@@ -6,32 +6,26 @@
 
 import React from 'react';
 import { useActions } from 'kea';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
-import { getEngineRoute } from '../../routes';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+import { ENGINE_PATH } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
+import { EngineDetails } from '../engine/types';
 
-interface EnginesTableData {
-  name: string;
-  created_at: string;
-  document_count: number;
-  field_count: number;
-  language: string | null;
-  isMeta: boolean;
-}
 interface EnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
 interface EnginesTableProps {
-  data: EnginesTableData[];
+  data: EngineDetails[];
   pagination: EnginesTablePagination;
 }
 interface OnChange {
@@ -46,9 +40,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
-  const engineLinkProps = (name: string) => ({
-    href: getAppSearchUrl(getEngineRoute(name)),
-    target: '_blank',
+  const engineLinkProps = (engineName: string) => ({
+    to: generateEncodedPath(ENGINE_PATH, { engineName }),
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',
@@ -56,16 +49,16 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<EnginesTableData>> = [
+  const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
-        </EuiLink>
+        </EuiLinkTo>
       ),
       width: '30%',
       truncateText: true,
@@ -101,7 +94,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (language: string, engine: EnginesTableData) =>
+      render: (language: string, engine: EngineDetails) =>
         engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
     },
     {
@@ -138,12 +131,12 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (name: string) => (
-        <EuiLink {...engineLinkProps(name)}>
+        <EuiLinkTo {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
             defaultMessage="Manage"
           />
-        </EuiLink>
+        </EuiLinkTo>
       ),
       align: 'right',
       width: '100px',

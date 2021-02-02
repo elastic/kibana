@@ -129,23 +129,27 @@ const importListWithValidation = async ({
 export { importListWithValidation as importList };
 
 const deleteList = async ({
+  deleteReferences = false,
   http,
   id,
+  ignoreReferences = false,
   signal,
 }: ApiParams & DeleteListSchemaEncoded): Promise<ListSchema> =>
   http.fetch<ListSchema>(LIST_URL, {
     method: 'DELETE',
-    query: { id },
+    query: { deleteReferences, id, ignoreReferences },
     signal,
   });
 
 const deleteListWithValidation = async ({
+  deleteReferences,
   http,
   id,
+  ignoreReferences,
   signal,
 }: DeleteListParams): Promise<ListSchema> =>
   pipe(
-    { id },
+    { deleteReferences, id, ignoreReferences },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
     chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),

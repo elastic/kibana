@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { IUiSettingsClient } from 'kibana/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
@@ -20,10 +21,12 @@ import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  uiSettings: IUiSettingsClient
 ): ExpressionAstExpression | null {
   const { columns, columnOrder } = layer;
   if (columnOrder.length === 0) {
@@ -41,15 +44,20 @@ function getExpressionForLayer(
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
         aggs.push(
-          buildExpression({ type: 'expression', chain: [def.toEsAggsFn(col, colId, indexPattern)] })
+          buildExpression({
+            type: 'expression',
+            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
+          })
         );
       }
     });
 
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : index}-${colId}`]: {
+        [`${esAggsId}${suffix}`]: {
           ...column,
           id: colId,
         },
@@ -121,6 +129,7 @@ function getExpressionForLayer(
             dateColumnId: [firstDateHistogramColumn![0]],
             inputColumnId: [id],
             outputColumnId: [id],
+            outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
           },
         };
@@ -177,11 +186,16 @@ function getExpressionForLayer(
   return null;
 }
 
-export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+export function toExpression(
+  state: IndexPatternPrivateState,
+  layerId: string,
+  uiSettings: IUiSettingsClient
+) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId]
+      state.indexPatterns[state.layers[layerId].indexPatternId],
+      uiSettings
     );
   }
 

@@ -90,7 +90,7 @@ export const exceptionListItemToTrustedApp = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
   if (exceptionListItem.os_types[0]) {
-    const os = OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
+    const os = osFromExceptionItem(exceptionListItem);
     const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
     return {
@@ -119,6 +119,12 @@ export const exceptionListItemToTrustedApp = (
   } else {
     throw new Error('Unknown Operating System assigned to trusted application.');
   }
+};
+
+export const osFromExceptionItem = (
+  exceptionListItem: ExceptionListItemSchema
+): TrustedApp['os'] => {
+  return OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
 };
 
 const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {

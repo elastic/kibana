@@ -100,6 +100,8 @@ export function IndexPatternDataPanel({
   changeIndexPattern,
   charts,
   showNoDataPopover,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -193,6 +195,8 @@ export function IndexPatternDataPanel({
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
         />
       )}
     </>
@@ -241,6 +245,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   data,
   existingFields,
   charts,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -335,7 +341,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
               defaultMessage: 'Available fields',
             }),
-
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+          defaultMessage:
+            'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+        }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         hideDetails: fieldInfoUnavailable,
@@ -356,6 +365,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
           defaultMessage: `There are no empty fields.`,
+        }),
+        helpText: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabelHelp', {
+          defaultMessage:
+            'Empty fields did not contain any values in the first 500 documents based on your filters.',
         }),
       },
       MetaFields: {
@@ -412,6 +425,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       ])
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
+
+  const checkFieldExists = useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
 
   const fieldProps = useMemo(
     () => ({
@@ -491,8 +521,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onChange={(e) => {
                 setLocalState({ ...localState, nameFilter: e.target.value });
               }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                defaultMessage: 'Search fields',
+              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search field names',
+                description: 'Search the list of fields in the index pattern for the provided text',
               })}
               aria-describedby={fieldSearchDescriptionId}
             />
@@ -572,20 +603,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}
+            dropOntoWorkspace={dropOntoWorkspace}
+            hasSuggestionForField={hasSuggestionForField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

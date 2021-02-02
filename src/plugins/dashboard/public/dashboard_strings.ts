@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -92,7 +81,7 @@ export const dashboardFeatureCatalog = {
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
-      defaultMessage: 'Add to library',
+      defaultMessage: 'Save to library',
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.successMessage', {
@@ -134,7 +123,7 @@ export const dashboardExportCsvAction = {
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
-      defaultMessage: 'unsaved',
+      defaultMessage: 'untitled',
     }),
 };
 
@@ -285,25 +274,13 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
       defaultMessage: 'Edit dashboard',
     }),
-  getAddExistingVisualizationLinkText: () =>
-    i18n.translate('dashboard.addExistingVisualizationLinkText', {
-      defaultMessage: 'Add an existing',
+  getEmptyWidgetTitle: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelTitle', {
+      defaultMessage: 'Add your first panel',
     }),
-  getAddExistingVisualizationLinkAriaLabel: () =>
-    i18n.translate('dashboard.addVisualizationLinkAriaLabel', {
-      defaultMessage: 'Add an existing visualization',
-    }),
-  getAddNewVisualizationDescription: () =>
-    i18n.translate('dashboard.addNewVisualizationText', {
-      defaultMessage: 'or new object to this dashboard',
-    }),
-  getCreateNewVisualizationButton: () =>
-    i18n.translate('dashboard.createNewVisualizationButton', {
-      defaultMessage: 'Create new',
-    }),
-  getCreateNewVisualizationButtonAriaLabel: () =>
-    i18n.translate('dashboard.createNewVisualizationButtonAriaLabel', {
-      defaultMessage: 'Create new visualization button',
+  getEmptyWidgetDescription: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelDescription', {
+      defaultMessage: 'Create content that tells a story about your data.',
     }),
 };
 

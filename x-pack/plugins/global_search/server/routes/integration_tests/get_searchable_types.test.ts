@@ -24,13 +24,14 @@ describe('GET /internal/global_search/searchable_types', () => {
     ({ server, httpSetup } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
-    httpSetup.registerRouteHandlerContext(
-      pluginId,
-      'globalSearch',
-      () => globalSearchHandlerContext
-    );
+    httpSetup.registerRouteHandlerContext<
+      ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>,
+      'globalSearch'
+    >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter<
+      ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>
+    >('/');
 
     registerInternalSearchableTypesRoute(router);
 

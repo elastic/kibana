@@ -16,6 +16,7 @@ import {
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
+import { GetStatsResponse } from '../../../../../common';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
@@ -43,6 +44,13 @@ export const useGetLimitedPackages = () => {
 export const useGetPackageInfoByKey = (pkgkey: string) => {
   return useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgkey),
+    method: 'get',
+  });
+};
+
+export const useGetPackageStats = (pkgName: string) => {
+  return useRequest<GetStatsResponse>({
+    path: epmRouteService.getStatsPath(pkgName),
     method: 'get',
   });
 };

@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-
+import { logEntryExampleRT } from '../../../log_analysis';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
@@ -45,16 +45,6 @@ export type GetLogEntryExamplesRequestPayload = rt.TypeOf<
 /**
  * response
  */
-
-const logEntryExampleRT = rt.type({
-  id: rt.string,
-  dataset: rt.string,
-  message: rt.string,
-  timestamp: rt.number,
-  tiebreaker: rt.number,
-});
-
-export type LogEntryExample = rt.TypeOf<typeof logEntryExampleRT>;
 
 export const getLogEntryExamplesSuccessReponsePayloadRT = rt.intersection([
   rt.type({

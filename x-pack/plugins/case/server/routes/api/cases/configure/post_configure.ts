@@ -13,6 +13,7 @@ import {
   CasesConfigureRequestRt,
   CaseConfigureResponseRt,
   throwErrors,
+  ConnectorMappingsAttributes,
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
@@ -32,6 +33,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
     },
     async (context, request, response) => {
       try {
+        let error = null;
         if (!context.case) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
@@ -58,12 +60,19 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         const { email, full_name, username } = await caseService.getUser({ request, response });
 
         const creationDate = new Date().toISOString();
-        const mappings = await caseClient.getMappings({
-          actionsClient,
-          caseClient,
-          connectorId: query.connector.id,
-          connectorType: query.connector.type,
-        });
+        let mappings: ConnectorMappingsAttributes[] = [];
+        try {
+          mappings = await caseClient.getMappings({
+            actionsClient,
+            caseClient,
+            connectorId: query.connector.id,
+            connectorType: query.connector.type,
+          });
+        } catch (e) {
+          error = e.isBoom
+            ? e.output.payload.message
+            : `Error connecting to ${query.connector.name} instance`;
+        }
         const post = await caseConfigureService.post({
           client,
           attributes: {
@@ -83,6 +92,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             connector: transformESConnectorToCaseConnector(post.attributes.connector),
             mappings,
             version: post.version ?? '',
+            error,
           }),
         });
       } catch (error) {

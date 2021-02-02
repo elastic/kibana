@@ -63,10 +63,8 @@ export class LicenseManagementUIPlugin
           docLinks,
           chrome: { docTitle },
         } = coreStart;
-        const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-        const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
         const appDocLinks = {
-          security: `${esBase}/security-settings.html`,
+          security: docLinks.links.security.elasticsearchSettings,
         };
 
         docTitle.change(PLUGIN.title);

@@ -251,6 +251,7 @@ export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
 export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
 export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
 export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
+export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
 
 /**
  * Legacy alerts details/label for server and public use
@@ -451,6 +452,25 @@ export const ALERT_DETAILS = {
         'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
   },
+  [ALERT_CCR_READ_EXCEPTIONS]: {
+    paramDetails: {
+      duration: {
+        label: i18n.translate(
+          'xpack.monitoring.alerts.ccrReadExceptions.paramDetails.duration.label',
+          {
+            defaultMessage: `In the last`,
+          }
+        ),
+        type: AlertParamType.Duration,
+      },
+    },
+    label: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.label', {
+      defaultMessage: 'CCR read exceptions',
+    }),
+    description: i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.description', {
+      defaultMessage: 'Alert if any CCR read exceptions have been detected.',
+    }),
+  },
 };
 
 export const ALERT_PANEL_MENU = [
@@ -485,6 +505,7 @@ export const ALERT_PANEL_MENU = [
       { alertName: ALERT_LICENSE_EXPIRATION },
       { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
       { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
+      { alertName: ALERT_CCR_READ_EXCEPTIONS },
     ],
   },
 ];
@@ -505,6 +526,7 @@ export const ALERTS = [
   ALERT_MISSING_MONITORING_DATA,
   ALERT_THREAD_POOL_SEARCH_REJECTIONS,
   ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_CCR_READ_EXCEPTIONS,
 ];
 
 /**

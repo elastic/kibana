@@ -22,7 +22,6 @@ import {
   EuiFormLabel,
   EuiFormControlLayout,
   EuiSuperSelect,
-  EuiLoadingSpinner,
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
@@ -204,7 +203,7 @@ export const ActionTypeForm = ({
                   >
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run When"
+                      defaultMessage="Run when"
                     />
                   </EuiFormLabel>
                 }
@@ -280,15 +279,7 @@ export const ActionTypeForm = ({
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
+          <Suspense fallback={null}>
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}

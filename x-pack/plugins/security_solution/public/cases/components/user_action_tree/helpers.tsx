@@ -31,9 +31,13 @@ interface LabelTitle {
   field: string;
 }
 
-const getStatusTitle = (status: CaseStatuses) => {
+const getStatusTitle = (id: string, status: CaseStatuses) => {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems={'center'}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems={'center'}
+      data-test-subj={`${id}-user-action-status-title`}
+    >
       <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Status type={status} />
@@ -41,6 +45,9 @@ const getStatusTitle = (status: CaseStatuses) => {
     </EuiFlexGroup>
   );
 };
+
+const isStatusValid = (status: string): status is CaseStatuses =>
+  Object.prototype.hasOwnProperty.call(statuses, status);
 
 export const getLabelTitle = ({ action, field }: LabelTitle) => {
   if (field === 'tags') {
@@ -52,12 +59,12 @@ export const getLabelTitle = ({ action, field }: LabelTitle) => {
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (field === 'status' && action.action === 'update') {
-    if (!Object.prototype.hasOwnProperty.call(statuses, action.newValue ?? '')) {
-      return '';
+    const status = action.newValue ?? '';
+    if (isStatusValid(status)) {
+      return getStatusTitle(action.actionId, status);
     }
 
-    // The above check ensures that the newValue is of type CaseStatuses.
-    return getStatusTitle(action.newValue as CaseStatuses);
+    return '';
   } else if (field === 'comment' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineFilter } from '../objects/timeline';
+import { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 
@@ -18,7 +18,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  HEADER,
+  DRAGGABLE_HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -58,7 +58,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(`${description}{enter}`);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -68,6 +68,16 @@ export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
+  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
@@ -140,7 +150,7 @@ export const markAsFavorite = () => {
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
 };
 
 export const openTimelineInspectButton = () => {
@@ -165,12 +175,7 @@ export const pinFirstEvent = () => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT)
-    .invoke('text')
-    .then((strCount) => {
-      const intCount = +strCount;
-      cy.wrap(intCount).should('be.above', 0);
-    });
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
 export const unpinFirstEvent = () => {
@@ -188,14 +193,17 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 
   cy.get(ID_FIELD).then((field) => drag(field));
 
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
-    drop(headersDropArea)
-  );
+  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`)
+    .first()
+    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(HEADER).eq(column).click();
-  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+  cy.get(DRAGGABLE_HEADER)
+    .eq(column)
+    .within(() => {
+      cy.get(REMOVE_COLUMN).click({ force: true });
+    });
 };
 
 export const resetFields = () => {

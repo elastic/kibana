@@ -13,7 +13,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function ServiceOverviewThroughputChart({
@@ -27,31 +26,34 @@ export function ServiceOverviewThroughputChart({
   const { transactionType } = useApmServiceContext();
   const { start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (serviceName && transactionType && start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-        params: {
-          path: {
-            serviceName,
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && transactionType && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters, transactionType]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters, transactionType]
+  );
 
   return (
     <EuiPanel>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Traffic',
+            defaultMessage: 'Throughput',
           })}
         </h2>
       </EuiTitle>
@@ -66,10 +68,8 @@ export function ServiceOverviewThroughputChart({
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
-              'xpack.apm.serviceOverview.throughputChart.currentPeriodLabel',
-              {
-                defaultMessage: 'Current period',
-              }
+              'xpack.apm.serviceOverview.throughtputChartTitle',
+              { defaultMessage: 'Throughput' }
             ),
           },
         ]}

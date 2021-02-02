@@ -185,4 +185,16 @@ describe('removeOrphanedSourcesAndLayers', () => {
     removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
     expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
   });
+
+  test('should not remove mapbox gl draw layers and sources', async () => {
+    const fooLayer = makeMultiSourceMockLayer('foo');
+    const layerList = [fooLayer];
+
+    const currentStyle = getMockStyle(layerList);
+    currentStyle.layers.push({ id: 'gl-draw-points' });
+    const mockMbMap = new MockMbMap(currentStyle);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, layerList, spatialFilterLayer);
+    expect(mockMbMap.getStyle()).toEqual(currentStyle);
+  });
 });

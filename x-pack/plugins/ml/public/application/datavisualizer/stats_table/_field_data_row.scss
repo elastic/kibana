@@ -1,0 +1,86 @@
+.mlFieldDataCard {
+  height: 420px;
+  box-shadow: none;
+  border-color: $euiBorderColor;
+
+  // Note the names of these styles need to match the type of the field they are displaying.
+  .boolean {
+    color: $euiColorVis5;
+    border-color: $euiColorVis5;
+  }
+
+  .date {
+    color: $euiColorVis7;
+    border-color: $euiColorVis7;
+  }
+
+  .document_count {
+    color: $euiColorVis2;
+    border-color: $euiColorVis2;
+  }
+
+  .geo_point {
+    color: $euiColorVis8;
+    border-color: $euiColorVis8;
+  }
+
+  .ip {
+    color: $euiColorVis3;
+    border-color: $euiColorVis3;
+  }
+
+  .keyword {
+    color: $euiColorVis0;
+    border-color: $euiColorVis0;
+  }
+
+  .number {
+    color: $euiColorVis1;
+    border-color: $euiColorVis1;
+  }
+
+  .text {
+    color: $euiColorVis9;
+    border-color: $euiColorVis9;
+  }
+
+  .type-other,
+  .unknown {
+    color: $euiColorVis6;
+    border-color: $euiColorVis6;
+  }
+
+  .mlFieldDataCard__content {
+    @include euiFontSizeS;
+    height: 385px;
+    overflow: hidden;
+  }
+
+  .mlFieldDataCard__codeContent {
+    @include euiCodeFont;
+  }
+
+  .mlFieldDataCard__geoContent {
+    z-index: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    .embPanel__content {
+      display: flex;
+      flex: 1 1 100%;
+      z-index: 1;
+      min-height: 0; // Absolute must for Firefox to scroll contents
+    }
+  }
+
+  .mlFieldDataCard__stats {
+    padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+    text-align: center;
+  }
+
+  .mlFieldDataCard__valuesTitle {
+    text-transform: uppercase;
+  }
+}

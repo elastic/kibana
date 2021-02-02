@@ -5,13 +5,12 @@
  */
 
 import {
-  ResolverRelatedEvents,
   NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
   ResolverSchema,
 } from '../../../../common/endpoint/types';
-import { TreeFetcherParameters } from '../../types';
+import { TreeFetcherParameters, PanelViewAndParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -35,6 +34,12 @@ interface ServerReturnedResolverData {
   };
 }
 
+interface AppRequestedNodeEventsInCategory {
+  readonly type: 'appRequestedNodeEventsInCategory';
+  readonly payload: {
+    parameters: PanelViewAndParameters;
+  };
+}
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
   /**
@@ -79,14 +84,6 @@ interface AppAbortedResolverDataRequest {
    * entity ID used to make the aborted request
    */
   readonly payload: TreeFetcherParameters;
-}
-
-/**
- * When related events are returned from the server
- */
-interface ServerReturnedRelatedEventData {
-  readonly type: 'serverReturnedRelatedEventData';
-  readonly payload: ResolverRelatedEvents;
 }
 
 interface ServerReturnedNodeEventsInCategory {
@@ -194,7 +191,6 @@ export type DataAction =
   | AppRequestedCurrentRelatedEventData
   | ServerReturnedCurrentRelatedEventData
   | ServerFailedToReturnCurrentRelatedEventData
-  | ServerReturnedRelatedEventData
   | ServerReturnedNodeEventsInCategory
   | AppRequestedResolverData
   | UserRequestedAdditionalRelatedEvents
@@ -203,4 +199,5 @@ export type DataAction =
   | ServerReturnedNodeData
   | ServerFailedToReturnNodeData
   | AppRequestingNodeData
-  | UserReloadedResolverNode;
+  | UserReloadedResolverNode
+  | AppRequestedNodeEventsInCategory;

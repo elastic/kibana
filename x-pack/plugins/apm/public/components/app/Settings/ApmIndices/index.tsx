@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { clearCache } from '../../../../services/rest/callApi';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { clearCache } from '../../../../services/rest/callApi';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {
@@ -73,6 +74,7 @@ async function saveApmIndices({
 }) {
   await callApmApi({
     endpoint: 'POST /api/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },
@@ -85,17 +87,22 @@ async function saveApmIndices({
 const INITIAL_STATE = [] as [];
 
 export function ApmIndices() {
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { core } = useApmPluginContext();
+  const { notifications, application } = core;
+  const canSave = application.capabilities.apm.save;
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, status, refetch } = useFetcher(
-    (_callApmApi) =>
-      _callApmApi({
-        endpoint: `GET /api/apm/settings/apm-index-settings`,
-      }),
-    []
+  const { data = INITIAL_STATE, refetch } = useFetcher(
+    (_callApmApi) => {
+      if (canSave) {
+        return _callApmApi({
+          endpoint: `GET /api/apm/settings/apm-index-settings`,
+        });
+      }
+    },
+    [canSave]
   );
 
   useEffect(() => {
@@ -119,7 +126,7 @@ export function ApmIndices() {
     setIsSaving(true);
     try {
       await saveApmIndices({ apmIndices });
-      toasts.addSuccess({
+      notifications.toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.title',
           { defaultMessage: 'Indices applied' }
@@ -133,7 +140,7 @@ export function ApmIndices() {
         ),
       });
     } catch (error) {
-      toasts.addDanger({
+      notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',
           { defaultMessage: 'Indices could not be applied.' }
@@ -205,6 +212,7 @@ export function ApmIndices() {
                     fullWidth
                   >
                     <EuiFieldText
+                      disabled={!canSave}
                       fullWidth
                       name={configurationName}
                       placeholder={defaultValue}
@@ -225,17 +233,30 @@ export function ApmIndices() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={handleApplyChangesEvent}
-                    isLoading={isSaving}
-                    disabled={status !== 'success'}
+                  <EuiToolTip
+                    content={
+                      !canSave &&
+                      i18n.translate(
+                        'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
+                        {
+                          defaultMessage:
+                            "Your user role doesn't have permissions to change APM indices",
+                        }
+                      )
+                    }
                   >
-                    {i18n.translate(
-                      'xpack.apm.settings.apmIndices.applyButton',
-                      { defaultMessage: 'Apply changes' }
-                    )}
-                  </EuiButton>
+                    <EuiButton
+                      fill
+                      onClick={handleApplyChangesEvent}
+                      isLoading={isSaving}
+                      isDisabled={!canSave}
+                    >
+                      {i18n.translate(
+                        'xpack.apm.settings.apmIndices.applyButton',
+                        { defaultMessage: 'Apply changes' }
+                      )}
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiForm>

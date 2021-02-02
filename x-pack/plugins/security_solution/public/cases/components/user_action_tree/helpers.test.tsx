@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
+import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../../../case/common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
-import { mount } from 'enzyme';
 import { connectorsMock } from '../../containers/configure/mock';
 import * as i18n from './translations';
 
@@ -56,24 +56,52 @@ describe('User action tree helpers', () => {
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
   });
 
-  it.skip('label title generated for update status to open', () => {
+  it('label title generated for update status to open', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.REOPEN_CASE.toLowerCase()} ${i18n.CASE}`);
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-open"]`).first().text()).toEqual('Open');
   });
 
-  it.skip('label title generated for update status to closed', () => {
+  it('label title generated for update status to in-progress', () => {
+    const action = {
+      ...getUserAction(['status'], 'update'),
+      newValue: CaseStatuses['in-progress'],
+    };
+    const result: string | JSX.Element = getLabelTitle({
+      action,
+      field: 'status',
+    });
+
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-in-progress"]`).first().text()).toEqual(
+      'In progress'
+    );
+  });
+
+  it('label title generated for update status to closed', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.CLOSE_CASE.toLowerCase()} ${i18n.CASE}`);
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-closed"]`).first().text()).toEqual('Closed');
+  });
+
+  it('label title is empty when status is not valid', () => {
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
+    const result: string | JSX.Element = getLabelTitle({
+      action: { ...action, newValue: 'not-exist' },
+      field: 'status',
+    });
+
+    expect(result).toEqual('');
   });
 
   it('label title generated for update comment', () => {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactWrapper } from 'enzyme';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -13,7 +14,6 @@ import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
-import { ReactWrapper } from 'enzyme';
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 let simulator: Simulator;
@@ -43,6 +43,8 @@ describe("Resolver, when rendered with the `indices` prop set to `[]` and the `d
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 
@@ -96,6 +98,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 
@@ -229,25 +233,22 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     loadingNode.simulate('click', { button: 0 });
     // the time here is equivalent to the animation duration in the camera reducer
     graphSimulator.runAnimationFramesTimeFromNow(1000);
+    return loadingNode.prop('data-test-node-id');
   };
 
-  const firstLoadingNodeInListID = '2kt059pl3i';
-
   const identifiedLoadingNodeInGraph: (
-    graphSimulator: Simulator
-  ) => Promise<ReactWrapper | undefined> = async (graphSimulator: Simulator) =>
-    graphSimulator.resolveWrapper(() =>
-      graphSimulator.selectedProcessNode(firstLoadingNodeInListID)
-    );
+    graphSimulator: Simulator,
+    nodeIDToFind: string
+  ) => Promise<ReactWrapper | undefined> = async (
+    graphSimulator: Simulator,
+    nodeIDToFind: string
+  ) => graphSimulator.resolveWrapper(() => graphSimulator.selectedProcessNode(nodeIDToFind));
 
   const identifiedLoadingNodeInGraphState: (
-    graphSimulator: Simulator
-  ) => Promise<string | undefined> = async (graphSimulator: Simulator) =>
-    (
-      await graphSimulator.resolveWrapper(() =>
-        graphSimulator.selectedProcessNode(firstLoadingNodeInListID)
-      )
-    )
+    graphSimulator: Simulator,
+    nodeIDToFind: string
+  ) => Promise<string | undefined> = async (graphSimulator: Simulator, nodeIDToFind: string) =>
+    (await graphSimulator.resolveWrapper(() => graphSimulator.selectedProcessNode(nodeIDToFind)))
       ?.find('[data-test-subj="resolver:node:description"]')
       .first()
       .text();
@@ -268,6 +269,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 
   describe('when clicking on a node in the panel whose node data has not yet been loaded and using a data access layer that returns an error for the clicked node', () => {
     let throwError: boolean;
+    let foundLoadingNodeInList: string;
     beforeEach(async () => {
       // all the tests in this describe block will receive an error when loading data for the firstLoadingNodeInListID
       // unless the tests explicitly sets this flag to false
@@ -283,7 +285,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> => {
-        if (throwError && ids.includes(firstLoadingNodeInListID)) {
+        if (throwError) {
           throw new Error(
             'simulated error for retrieving first loading node in the process node list'
           );
@@ -299,9 +301,11 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         dataAccessLayer: { ...generatorDAL, nodeData: nodeDataError },
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
 
-      await findAndClickFirstLoadingNodeInPanel(simulator);
+      foundLoadingNodeInList = await findAndClickFirstLoadingNodeInPanel(simulator);
     });
 
     it('should receive an error while loading the node data', async () => {
@@ -309,7 +313,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 
       await expect(
         simulator.map(async () => ({
-          nodeState: await identifiedLoadingNodeInGraphState(simulator),
+          nodeState: await identifiedLoadingNodeInGraphState(simulator, foundLoadingNodeInList),
         }))
       ).toYieldEqualTo({
         nodeState: 'Error Process',
@@ -320,13 +324,13 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
       beforeEach(async () => {
         throwError = true;
         // ensure that the node is in view
-        await identifiedLoadingNodeInGraph(simulator);
+        await identifiedLoadingNodeInGraph(simulator, foundLoadingNodeInList);
         // at this point the node's state should be error
 
         // don't throw an error now, so we can test that the reload button actually loads the data correctly
         throwError = false;
         const firstLoadingNodeInListButton = await simulator.resolveWrapper(() =>
-          simulator.processNodePrimaryButton(firstLoadingNodeInListID)
+          simulator.processNodePrimaryButton(foundLoadingNodeInList)
         );
         // Click the primary button to reload the node's data
         if (firstLoadingNodeInListButton) {
@@ -338,7 +342,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         // we should receive the node's data now so we'll know that it is terminated
         await expect(
           simulator.map(async () => ({
-            nodeState: await identifiedLoadingNodeInGraphState(simulator),
+            nodeState: await identifiedLoadingNodeInGraphState(simulator, foundLoadingNodeInList),
           }))
         ).toYieldEqualTo({
           nodeState: 'Terminated Process',
@@ -348,21 +352,24 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
   });
 
   describe('when clicking on a node in the process panel that is not loaded', () => {
+    let foundLoadingNodeInList: string;
     beforeEach(async () => {
       simulator = new Simulator({
         databaseDocumentID,
         dataAccessLayer: generatorDAL,
         resolverComponentInstanceID,
         indices: [],
+        shouldUpdate: false,
+        filters: {},
       });
 
-      await findAndClickFirstLoadingNodeInPanel(simulator);
+      foundLoadingNodeInList = await findAndClickFirstLoadingNodeInPanel(simulator);
     });
 
     it('should load the node data for the process and mark the process node as terminated in the graph', async () => {
       await expect(
         simulator.map(async () => ({
-          nodeState: await identifiedLoadingNodeInGraphState(simulator),
+          nodeState: await identifiedLoadingNodeInGraphState(simulator, foundLoadingNodeInList),
         }))
       ).toYieldEqualTo({
         nodeState: 'Terminated Process',
@@ -372,7 +379,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
     describe('when finishing the navigation to the node that is not loaded and navigating back to the process list in the panel', () => {
       beforeEach(async () => {
         // make sure the node is in view
-        await identifiedLoadingNodeInGraph(simulator);
+        await identifiedLoadingNodeInGraph(simulator, foundLoadingNodeInList);
 
         const breadcrumbs = await simulator.resolve(
           'resolver:node-detail:breadcrumbs:node-list-link'
@@ -389,9 +396,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
           // grab the node in the list that has the ID that we're looking for
           return (
             (await simulator.resolve('resolver:node-list:node-link'))
-              ?.findWhere(
-                (wrapper) => wrapper.prop('data-test-node-id') === firstLoadingNodeInListID
-              )
+              ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === foundLoadingNodeInList)
               ?.first()
               // grab the description tag so we can determine the state of the process
               .find('desc')
@@ -432,6 +437,8 @@ describe('Resolver, when analyzing a tree that has 2 related registry and 1 rela
       dataAccessLayer,
       resolverComponentInstanceID,
       indices: [],
+      shouldUpdate: false,
+      filters: {},
     });
   });
 

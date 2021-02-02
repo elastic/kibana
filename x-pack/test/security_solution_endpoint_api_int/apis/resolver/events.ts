@@ -277,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
-          indexPatterns: ['metrics-*'],
+          indexPatterns: ['doesnotexist-*'],
           timeRange: {
             from: tree.startTime,
             to: tree.endTime,

@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiOverlayMask,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiImage, EuiPopover, EuiText } from '@elastic/eui';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
@@ -30,6 +24,18 @@ const THUMBNAIL_HEIGHT = 180;
 const POPOVER_IMG_WIDTH = 640;
 const POPOVER_IMG_HEIGHT = 360;
 
+const StepImage = styled(EuiImage)`
+  &&& {
+    figcaption {
+      display: none;
+    }
+    width: ${THUMBNAIL_WIDTH},
+    height: ${THUMBNAIL_HEIGHT},
+    objectFit: 'cover',
+    objectPosition: 'center top',
+  }
+`;
+
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   checkGroup,
   screenshotExists,
@@ -44,7 +50,6 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   const { basePath } = useContext(UptimeSettingsContext);
 
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState<boolean>(false);
-  const [isOverlayOpen, setIsOverlayOpen] = useState<boolean>(false);
 
   const intersection = useIntersection(containerRef, {
     root: null,
@@ -62,49 +67,15 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
 
   let content: JSX.Element | null = null;
   const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
+
   if (hasIntersected && screenshotExists) {
     content = (
       <>
-        {isOverlayOpen && (
-          <EuiOverlayMask onClick={() => setIsOverlayOpen(false)}>
-            <input
-              type="image"
-              src={imgSrc}
-              alt={
-                stepName
-                  ? i18n.translate(
-                      'xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltText',
-                      {
-                        defaultMessage: 'Full screenshot for step with name "{stepName}"',
-                        values: {
-                          stepName,
-                        },
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.uptime.synthetics.screenshotDisplay.fullScreenshotAltTextWithoutName',
-                      {
-                        defaultMessage: 'Full screenshot',
-                      }
-                    )
-              }
-              style={{ objectFit: 'contain' }}
-              onClick={() => setIsOverlayOpen(false)}
-            />
-          </EuiOverlayMask>
-        )}
         <EuiPopover
           anchorPosition="rightCenter"
           button={
-            <input
-              type="image"
-              style={{
-                width: THUMBNAIL_WIDTH,
-                height: THUMBNAIL_HEIGHT,
-                objectFit: 'cover',
-                objectPosition: 'center top',
-              }}
-              src={imgSrc}
+            <StepImage
+              allowFullScreen={true}
               alt={
                 stepName
                   ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.altText', {
@@ -117,7 +88,9 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                       defaultMessage: 'Screenshot',
                     })
               }
-              onClick={() => setIsOverlayOpen(true)}
+              caption={`Step:${stepIndex} ${stepName}`}
+              hasShadow
+              url={imgSrc}
               onMouseEnter={() => setIsImagePopoverOpen(true)}
               onMouseLeave={() => setIsImagePopoverOpen(false)}
             />
@@ -125,7 +98,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
           closePopover={() => setIsImagePopoverOpen(false)}
           isOpen={isImagePopoverOpen}
         >
-          <img
+          <EuiImage
             alt={
               stepName
                 ? i18n.translate('xpack.uptime.synthetics.screenshotDisplay.thumbnailAltText', {
@@ -141,7 +114,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
                     }
                   )
             }
-            src={imgSrc}
+            url={imgSrc}
             style={{ width: POPOVER_IMG_WIDTH, height: POPOVER_IMG_HEIGHT, objectFit: 'contain' }}
           />
         </EuiPopover>
@@ -149,7 +122,12 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     );
   } else if (screenshotExists === false) {
     content = (
-      <EuiFlexGroup alignItems="center" direction="column" style={{ paddingTop: '32px' }}>
+      <EuiFlexGroup
+        alignItems="center"
+        direction="column"
+        style={{ paddingTop: '32px' }}
+        data-test-subj="stepScreenshotImageUnavailable"
+      >
         <EuiFlexItem grow={false}>
           <EuiIcon color="subdued" size="xxl" type="image" />
         </EuiFlexItem>
