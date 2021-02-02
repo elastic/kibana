@@ -31,24 +31,25 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async 
     priority = null,
   } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
 
-  const destinationIps: string[] = [];
-  const sourceIps: string[] = [];
+  // Set to avoid duplicates
+  const destinationIps = new Set();
+  const sourceIps = new Set();
 
   if (destIp != null || sourceIp != null) {
     alerts.forEach((alert) => {
       if (alert.destination) {
-        destinationIps.push(alert.destination.ip);
+        destinationIps.add(alert.destination.ip);
       }
 
       if (alert.source) {
-        sourceIps.push(alert.source.ip);
+        sourceIps.add(alert.source.ip);
       }
     });
   }
 
   return {
-    dest_ip: destinationIps.length > 0 ? destinationIps.join(',') : null,
-    source_ip: sourceIps.length > 0 ? sourceIps.join(',') : null,
+    dest_ip: destinationIps.size > 0 ? Array.from(destinationIps).join(',') : null,
+    source_ip: sourceIps.size > 0 ? Array.from(sourceIps).join(',') : null,
     category,
     subcategory,
     malware_hash: malwareHash,
