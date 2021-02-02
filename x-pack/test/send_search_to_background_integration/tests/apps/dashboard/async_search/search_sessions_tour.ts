@@ -23,6 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return;
       }
       await kibanaServer.uiSettings.replace({ 'search:timeout': 30000 });
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await searchSessions.markTourUndone();
     });
