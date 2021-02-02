@@ -66,6 +66,7 @@
     { "path": "../plugins/license_management/tsconfig.json" },
     { "path": "../plugins/grokdebugger/tsconfig.json" },
     { "path": "../plugins/painless_lab/tsconfig.json" },
+    { "path": "../plugins/upgrade_assistant/tsconfig.json" },
     { "path": "../plugins/watcher/tsconfig.json" }
   ]
 }
