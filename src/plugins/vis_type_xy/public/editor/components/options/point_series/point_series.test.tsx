@@ -15,7 +15,7 @@ import { act } from 'react-dom/test-utils';
 import { ChartType } from '../../../../../common';
 import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
-import { getAggs, getVis, getStateParams } from './point_series.tests.mocks';
+import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 jest.mock('../../../../services', () => ({
   getTrackUiMetric: jest.fn(() => null),
