@@ -44,13 +44,12 @@
     { "path": "./plugins/cloud/tsconfig.json" },
     { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "./plugins/global_search_bar/tsconfig.json" },
-    { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/runtime_fields/tsconfig.json" },
     { "path": "./plugins/index_management/tsconfig.json" },
+    { "path": "./plugins/snapshot_restore/tsconfig.json" },
     { "path": "./plugins/grokdebugger/tsconfig.json" },
     { "path": "./plugins/ingest_pipelines/tsconfig.json" },
     { "path": "./plugins/license_management/tsconfig.json" },
-    { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/watcher/tsconfig.json" }
   ]
