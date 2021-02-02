@@ -542,6 +542,9 @@ describe('suggestion helpers', () => {
         mockDatasourceState,
         {
           id: 'myfield',
+          humanData: {
+            label: 'myfieldLabel',
+          },
         }
       );
     });

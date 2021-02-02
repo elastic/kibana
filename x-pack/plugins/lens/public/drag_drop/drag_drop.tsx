@@ -291,7 +291,7 @@ const DragInner = memo(function DragInner({
       trackUiEvent('drop_total');
       const onTargetDrop = getTargetOnDrop(activeDropTarget);
       const { dropType, humanData } = activeDropTarget?.activeDropTarget;
-      setTimeout(() => setA11yMessage(announce.dropped(dropType, value.humanData, humanData)));
+      setTimeout(() => setA11yMessage(announce.dropped(value.humanData, humanData, dropType)));
       onTargetDrop?.(value, dropType);
     }
   };
@@ -310,7 +310,7 @@ const DragInner = memo(function DragInner({
     if (nextTarget) {
       setActiveDropTarget(nextTarget);
       setA11yMessage(
-        announce.selectedTarget(nextTarget.dropType, value.humanData, nextTarget.humanData)
+        announce.selectedTarget(value.humanData, nextTarget.humanData, nextTarget.dropType)
       );
     }
   };
@@ -435,10 +435,9 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     e.preventDefault();
 
     // An optimization to prevent a bunch of React churn.
-    // todo: replace with custom function ?
     if (!activeDropTargetMatches && dragging) {
       setActiveDropTarget(value);
-      setA11yMessage(announce.selectedTarget(dropType, dragging.humanData, value.humanData));
+      setA11yMessage(announce.selectedTarget(dragging.humanData, value.humanData, dropType));
     }
   };
 
@@ -454,12 +453,12 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
       trackUiEvent('drop_total');
       onDrop(dragging, dropType);
       setTimeout(() =>
-        setA11yMessage(announce.dropped(dropType, dragging.humanData, value.humanData))
+        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, dropType))
       );
-      setDragging(undefined);
-      setActiveDropTarget(undefined);
-      setKeyboardMode(false);
     }
+    setDragging(undefined);
+    setActiveDropTarget(undefined);
+    setKeyboardMode(false);
   };
   return (
     <>
@@ -572,7 +571,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         reorderedItems: [],
       }));
     }
-    setA11yMessage(announce.selectedTarget('reorder', value.humanData, target.humanData));
+    setA11yMessage(announce.selectedTarget(value.humanData, target.humanData, 'reorder'));
 
     setReorderState((s: ReorderState) =>
       draggingIndex < droppingIndex
@@ -676,7 +675,6 @@ const ReorderableDrop = memo(function ReorderableDrop(
     e.preventDefault();
 
     // An optimization to prevent a bunch of React churn.
-    // todo: replace with custom function ?
     if (!activeDropTargetMatches) {
       setActiveDropTarget(value);
     }
@@ -722,7 +720,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>
-        setA11yMessage(announce.dropped('reorder', dragging.humanData, value.humanData))
+        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, 'reorder'))
       );
     }
   };

@@ -14,12 +14,6 @@ import {
 } from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
-const isFromTheSameGroup = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
-  el2 && isDraggedOperation(el2) && el1.groupId === el2.groupId && el1.columnId !== el2.columnId;
-
-const isSelf = (el1: DragDropIdentifier, el2?: DragDropIdentifier) =>
-  isDraggedOperation(el2) && el1.columnId === el2.columnId;
-
 const getAdditionalClassesOnEnter = (dropType?: string) => {
   if (
     dropType === 'field_replace' ||
@@ -90,31 +84,28 @@ export function DraggableDimensionButton({
     [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel]
   );
 
-  // todo: simplify by id?
+  // todo: simplify by id and use drop targets?
   const reorderableGroup = useMemo(
     () =>
       group.accessors.map((g, index) => ({
         columnId: g.columnId,
-        id: g.columnId,
+        layerId,
         groupId: group.groupId,
+        id: g.columnId,
         dropType: 'reorder' as DropType,
         humanData: {
           label: `item ${index + 1}`,
           groupLabel: group.groupLabel,
           position: index + 1,
         },
-        layerId,
       })),
     [group, layerId]
   );
 
-  const { dragging } = dragDropContext;
-
   const filterSameGroup = useMemo(
-    () => (el?: DragDropIdentifier) => {
-      return !!(!el || !isFromTheSameGroup(value, el) || el.isNew);
-    },
-    [value]
+    () => (el?: DragDropIdentifier) =>
+      !!(!el || !reorderableGroup.some((el2) => el2.id === el.id && el.id !== value.id)),
+    [value, reorderableGroup]
   );
 
   return (
@@ -124,12 +115,12 @@ export function DraggableDimensionButton({
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
-        dragType={isSelf(value, dragging) ? 'move' : 'copy'}
+        dragType={isDraggedOperation(dragDropContext.dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         dropTargetsFilter={filterSameGroup}
         value={value}
-        droppable={!!(dragging && dropType)}
+        droppable={!!dropType}
         onDrop={(drag, selectedDropType) => onDrop(drag, value, selectedDropType)}
       >
         {children}

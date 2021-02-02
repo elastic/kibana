@@ -12,7 +12,7 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { ChildDragDropProvider, DroppableEvent, DragDrop } from '../../../drag_drop';
+import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import { Visualization } from '../../../types';
@@ -224,7 +224,7 @@ describe('LayerPanel', () => {
     });
 
     it('should not update the visualization if the datasource is incomplete', () => {
-      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      (generateId as jest.Mock).mockReturnValue(`newid`);
       const updateAll = jest.fn();
       const updateDatasource = jest.fn();
 
@@ -623,7 +623,7 @@ describe('LayerPanel', () => {
       component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          groupId: 'a',
+          dropType: 'reorder',
           droppedItem: draggingOperation,
         })
       );
@@ -656,15 +656,11 @@ describe('LayerPanel', () => {
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
-
-      component.find('[data-test-subj="lnsGroup"] DragDrop').at(2).prop('onDrop')!(
-        (draggingOperation as unknown) as DroppableEvent
-      );
+      component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          groupId: 'a',
+          dropType: 'duplicate_in_group',
           droppedItem: draggingOperation,
-          isNew: true,
         })
       );
     });

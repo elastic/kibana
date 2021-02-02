@@ -202,9 +202,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     })
   );
 
-  return { deleted: droppedItem.columnId }; // -> to do for removing the old one
-
-  return true; // duplicating
+  return { deleted: droppedItem.columnId };
 }
 
 function onSameGroupDuplicateDrop({

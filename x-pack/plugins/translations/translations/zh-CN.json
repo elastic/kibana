@@ -11213,8 +11213,6 @@
     "xpack.lens.dimensionContainer.close": "关闭",
     "xpack.lens.dimensionContainer.closeConfiguration": "关闭配置",
     "xpack.lens.discover.visualizeFieldLegend": "可视化字段",
-    "xpack.lens.dragDrop.elementLifted": "您已将项目 {itemLabel} 提升到位置 {position}",
-    "xpack.lens.dragDrop.elementMoved": "您已将项目 {itemLabel} 从位置 {prevPosition} 移到位置 {position}",
     "xpack.lens.editLayerSettings": "编辑图层设置",
     "xpack.lens.editLayerSettingsChartType": "编辑图层设置 {chartType}",
     "xpack.lens.editorFrame.buildExpressionError": "准备图表时发生意外错误",

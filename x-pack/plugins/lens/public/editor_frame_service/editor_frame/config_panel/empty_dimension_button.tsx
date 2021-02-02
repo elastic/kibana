@@ -60,12 +60,11 @@ export function EmptyDimensionButton({
     groupId: group.groupId,
   });
 
-  const value = useMemo(() => {
-    return {
+  const value = useMemo(
+    () => ({
       columnId: newColumnId,
       groupId: group.groupId,
       layerId,
-      isNew: true,
       id: newColumnId,
       dropType,
       humanData: {
@@ -73,8 +72,9 @@ export function EmptyDimensionButton({
         groupLabel: group.groupLabel,
         position: itemIndex + 1,
       },
-    };
-  }, [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]);
+    }),
+    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex]
+  );
 
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
