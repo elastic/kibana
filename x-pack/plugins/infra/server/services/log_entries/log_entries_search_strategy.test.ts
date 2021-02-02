@@ -17,13 +17,14 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
-  logEntrySearchRequestStateRT,
-  logEntrySearchStrategyProvider,
-} from './log_entry_search_strategy';
+  logEntriesSearchRequestStateRT,
+  logEntriesSearchStrategyProvider,
+} from './log_entries_search_strategy';
 
-describe('LogEntry search strategy', () => {
+describe('LogEntries search strategy', () => {
   it('handles initial search requests', async () => {
     const esSearchStrategyMock = createEsSearchStrategyMock({
       id: 'ASYNC_REQUEST_ID',
@@ -41,15 +42,20 @@ describe('LogEntry search strategy', () => {
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
 
-    const logEntrySearchStrategy = logEntrySearchStrategyProvider({
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
     });
 
-    const response = await logEntrySearchStrategy
+    const response = await logEntriesSearchStrategy
       .search(
         {
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            sourceId: 'SOURCE_ID',
+            startTimestamp: 100,
+            endTimestamp: 200,
+            size: 3,
+          },
         },
         {},
         mockDependencies
@@ -57,7 +63,18 @@ describe('LogEntry search strategy', () => {
       .toPromise();
 
     expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
-    expect(esSearchStrategyMock.search).toHaveBeenCalled();
+    expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          index: 'log-indices-*',
+          body: expect.objectContaining({
+            fields: expect.arrayContaining(['event.dataset', 'message']),
+          }),
+        }),
+      }),
+      expect.anything(),
+      expect.anything()
+    );
     expect(response.id).toEqual(expect.any(String));
     expect(response.isRunning).toBe(true);
   });
@@ -82,7 +99,9 @@ describe('LogEntry search strategy', () => {
               _source: null,
               fields: {
                 '@timestamp': [1605116827143],
-                message: ['HIT_MESSAGE'],
+                'event.dataset': ['HIT_DATASET'],
+                MESSAGE_FIELD: ['HIT_MESSAGE'],
+                'container.id': ['HIT_CONTAINER_ID'],
               },
               sort: [1605116827143 as any, 1 as any], // incorrectly typed as string upstream
             },
@@ -95,41 +114,69 @@ describe('LogEntry search strategy', () => {
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
 
-    const logEntrySearchStrategy = logEntrySearchStrategyProvider({
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
     });
-    const requestId = logEntrySearchRequestStateRT.encode({
+    const requestId = logEntriesSearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
     });
 
-    const response = await logEntrySearchStrategy
+    const response = await logEntriesSearchStrategy
       .search(
         {
           id: requestId,
-          params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+          params: {
+            sourceId: 'SOURCE_ID',
+            startTimestamp: 100,
+            endTimestamp: 200,
+            size: 3,
+          },
         },
         {},
         mockDependencies
       )
       .toPromise();
 
-    expect(sourcesMock.getSourceConfiguration).not.toHaveBeenCalled();
+    expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
     expect(esSearchStrategyMock.search).toHaveBeenCalled();
     expect(response.id).toEqual(requestId);
     expect(response.isRunning).toBe(false);
-    expect(response.rawResponse.data).toEqual({
-      id: 'HIT_ID',
-      index: 'HIT_INDEX',
-      cursor: {
-        time: 1605116827143,
-        tiebreaker: 1,
+    expect(response.rawResponse.data.entries).toEqual([
+      {
+        id: 'HIT_ID',
+        index: 'HIT_INDEX',
+        cursor: {
+          time: 1605116827143,
+          tiebreaker: 1,
+        },
+        columns: [
+          {
+            columnId: 'TIMESTAMP_COLUMN_ID',
+            timestamp: 1605116827143,
+          },
+          {
+            columnId: 'DATASET_COLUMN_ID',
+            field: 'event.dataset',
+            value: ['HIT_DATASET'],
+            highlights: [],
+          },
+          {
+            columnId: 'MESSAGE_COLUMN_ID',
+            message: [
+              {
+                field: 'MESSAGE_FIELD',
+                value: ['HIT_MESSAGE'],
+                highlights: [],
+              },
+            ],
+          },
+        ],
+        context: {
+          'container.id': 'HIT_CONTAINER_ID',
+        },
       },
-      fields: [
-        { field: '@timestamp', value: [1605116827143] },
-        { field: 'message', value: ['HIT_MESSAGE'] },
-      ],
-    });
+    ]);
   });
 
   it('forwards errors from the underlying search strategy', async () => {
@@ -148,15 +195,20 @@ describe('LogEntry search strategy', () => {
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
 
-    const logEntrySearchStrategy = logEntrySearchStrategyProvider({
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
     });
 
-    const response = logEntrySearchStrategy.search(
+    const response = logEntriesSearchStrategy.search(
       {
-        id: logEntrySearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
-        params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
+        id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'UNKNOWN_ID' }),
+        params: {
+          sourceId: 'SOURCE_ID',
+          startTimestamp: 100,
+          endTimestamp: 200,
+          size: 3,
+        },
       },
       {},
       mockDependencies
@@ -181,21 +233,21 @@ describe('LogEntry search strategy', () => {
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
 
-    const logEntrySearchStrategy = logEntrySearchStrategyProvider({
+    const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
     });
-    const requestId = logEntrySearchRequestStateRT.encode({
+    const requestId = logEntriesSearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
     });
 
-    await logEntrySearchStrategy.cancel?.(requestId, {}, mockDependencies);
+    await logEntriesSearchStrategy.cancel?.(requestId, {}, mockDependencies);
 
     expect(esSearchStrategyMock.cancel).toHaveBeenCalled();
   });
 });
 
-const createSourceConfigurationMock = () => ({
+const createSourceConfigurationMock = (): InfraSource => ({
   id: 'SOURCE_ID',
   origin: 'stored' as const,
   configuration: {
@@ -205,7 +257,18 @@ const createSourceConfigurationMock = () => ({
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',
-    logColumns: [],
+    logColumns: [
+      { timestampColumn: { id: 'TIMESTAMP_COLUMN_ID' } },
+      {
+        fieldColumn: {
+          id: 'DATASET_COLUMN_ID',
+          field: 'event.dataset',
+        },
+      },
+      {
+        messageColumn: { id: 'MESSAGE_COLUMN_ID' },
+      },
+    ],
     fields: {
       pod: 'POD_FIELD',
       host: 'HOST_FIELD',
