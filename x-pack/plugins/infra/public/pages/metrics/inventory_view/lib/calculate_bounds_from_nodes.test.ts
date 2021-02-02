@@ -37,14 +37,14 @@ describe('calculateBoundsFromNodes', () => {
     const bounds = calculateBoundsFromNodes(nodes);
     expect(bounds).toEqual({
       min: 0.2,
-      max: 1.5,
+      max: 0.5,
     });
   });
   it('should have a minimum of 0 for only a single node', () => {
     const bounds = calculateBoundsFromNodes([nodes[0]]);
     expect(bounds).toEqual({
       min: 0,
-      max: 1.5,
+      max: 0.5,
     });
   });
   it('should return zero for empty nodes', () => {
