@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initMlTelemetry } from './ml_usage_collector';
-export { updateTelemetry } from './telemetry';
+export default function loadTests({ loadTestFile }) {
+  describe('Data Stream Endpoints', () => {
+    loadTestFile(require.resolve('./list'));
+  });
+}

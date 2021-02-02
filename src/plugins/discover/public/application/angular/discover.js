@@ -414,18 +414,9 @@ function discoverController($route, $scope, Promise) {
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
-  function removeSourceFromColumns(columns) {
-    return columns.filter((col) => col !== '_source');
-  }
-
   function getDefaultColumns() {
-    const columns = [...savedSearch.columns];
-
-    if ($scope.useNewFieldsApi) {
-      return removeSourceFromColumns(columns);
-    }
-    if (columns.length > 0) {
-      return columns;
+    if (savedSearch.columns.length > 0) {
+      return [...savedSearch.columns];
     }
     return [...config.get(DEFAULT_COLUMNS_SETTING)];
   }
