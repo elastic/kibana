@@ -181,8 +181,7 @@ export function insertNewColumn({
         addMetric(
           layer,
           operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
-          columnId,
-          visualizationGroups
+          columnId
         ),
         indexPattern
       );
@@ -284,7 +283,6 @@ export function replaceColumn({
             layer: tempLayer,
             columnId: previousReferenceId,
             indexPattern,
-            visualizationGroups,
           });
 
           tempLayer = {
@@ -324,7 +322,6 @@ export function replaceColumn({
           layer: tempLayer,
           columnId: id,
           indexPattern,
-          visualizationGroups,
         });
       });
     }
@@ -347,7 +344,7 @@ export function replaceColumn({
     if (!field) {
       // if no field is available perform a full clean of the column from the layer
       if (previousDefinition.input === 'fullReference') {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern, visualizationGroups });
+        tempLayer = deleteColumn({ layer: tempLayer, columnId, indexPattern });
       }
       return {
         ...tempLayer,
@@ -636,7 +633,6 @@ function applyReferenceTransition({
         layer,
         columnId: id,
         indexPattern,
-        visualizationGroups,
       });
     });
   }
@@ -715,11 +711,12 @@ export function reorderByGroups(
   updatedColumnOrder: string[],
   addedColumnId: string
 ) {
-  const hidesColumnGrouping = visualizationGroups.some((group) => group.hideGrouping);
+  const hidesColumnGrouping =
+    targetGroup && visualizationGroups.find((group) => group.groupId === targetGroup)?.hideGrouping;
 
   // if column grouping is disabled, keep bucket aggregations in the same order as the groups
   // if grouping is known
-  if (hidesColumnGrouping && targetGroup) {
+  if (hidesColumnGrouping) {
     const columnGroupIndex: Record<string, number> = {};
     updatedColumnOrder.forEach((columnId) => {
       columnGroupIndex[columnId] = visualizationGroups.findIndex(
@@ -738,8 +735,7 @@ export function reorderByGroups(
 function addMetric(
   layer: IndexPatternLayer,
   column: IndexPatternColumn,
-  addedColumnId: string,
-  visualizationGroups: VisualizationDimensionGroupConfig[]
+  addedColumnId: string
 ): IndexPatternLayer {
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
@@ -807,12 +803,10 @@ export function deleteColumn({
   layer,
   columnId,
   indexPattern,
-  visualizationGroups,
 }: {
   layer: IndexPatternLayer;
   columnId: string;
   indexPattern: IndexPattern;
-  visualizationGroups: VisualizationDimensionGroupConfig[];
 }): IndexPatternLayer {
   const column = layer.columns[columnId];
   if (!column) {
@@ -839,7 +833,7 @@ export function deleteColumn({
   };
 
   extraDeletions.forEach((id) => {
-    newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern, visualizationGroups });
+    newLayer = deleteColumn({ layer: newLayer, columnId: id, indexPattern });
   });
 
   const newIncomplete = { ...(newLayer.incompleteColumns || {}) };
