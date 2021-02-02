@@ -7,4 +7,4 @@
  */
 
 export * from './use';
-export * from './export_as_csv';
+export * from './table_vis_response_handler';
