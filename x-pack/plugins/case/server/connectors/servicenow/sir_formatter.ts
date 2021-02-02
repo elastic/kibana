@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash/fp';
 import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
@@ -16,6 +17,11 @@ interface ExternalServiceParams {
   malware_url: string | null;
   priority: string | null;
 }
+
+type AlertFieldMappingAndValues = Record<
+  string,
+  { alertPath: string; values: Set<string>; sirFieldKey: string }
+>;
 
 const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (
   theCase,
@@ -30,30 +36,42 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async 
     malwareUrl = null,
     priority = null,
   } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
+  const alertFieldsVariables = [destIp, sourceIp, malwareHash, malwareUrl];
 
-  // Set to avoid duplicates
-  const destinationIps = new Set();
-  const sourceIps = new Set();
+  // Set is used to avoid duplicates
+  const alertFieldMappingAndValues: AlertFieldMappingAndValues = {
+    destIp: { alertPath: 'destination.ip', values: new Set(), sirFieldKey: 'dest_ip' },
+    sourceIp: { alertPath: 'source.ip', values: new Set(), sirFieldKey: 'source_ip' },
+    malwareHash: { alertPath: 'file.hash.sha256', values: new Set(), sirFieldKey: 'malware_hash' },
+    malwareUrl: { alertPath: 'url.full', values: new Set(), sirFieldKey: 'malware_url' },
+  };
 
-  if (destIp != null || sourceIp != null) {
+  if (alertFieldsVariables.some((field) => field != null)) {
     alerts.forEach((alert) => {
-      if (alert.destination) {
-        destinationIps.add(alert.destination.ip);
-      }
-
-      if (alert.source) {
-        sourceIps.add(alert.source.ip);
-      }
+      Object.keys(alertFieldMappingAndValues).forEach((alertField) => {
+        const field = get(alertFieldMappingAndValues[alertField].alertPath, alert);
+        if (field) {
+          alertFieldMappingAndValues[alertField].values.add(field);
+        }
+      });
     });
   }
 
+  const alertFields = Object.keys(alertFieldMappingAndValues).reduce(
+    (acc, field) => ({
+      ...acc,
+      [alertFieldMappingAndValues[field].sirFieldKey]:
+        alertFieldMappingAndValues[field].values.size > 0
+          ? Array.from(alertFieldMappingAndValues[field].values).join(',')
+          : null,
+    }),
+    { dest_ip: null, source_ip: null, malware_hash: null, malware_url: null }
+  );
+
   return {
-    dest_ip: destinationIps.size > 0 ? Array.from(destinationIps).join(',') : null,
-    source_ip: sourceIps.size > 0 ? Array.from(sourceIps).join(',') : null,
+    ...alertFields,
     category,
     subcategory,
-    malware_hash: malwareHash,
-    malware_url: malwareUrl,
     priority,
   };
 };

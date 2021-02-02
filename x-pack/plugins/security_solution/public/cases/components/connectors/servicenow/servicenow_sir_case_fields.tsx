@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectOption,
-  EuiFieldText,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import {
@@ -41,11 +41,11 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
 > = ({ isEdit = true, fields, connector, onChange }) => {
   const {
     category = null,
-    destIp = null,
-    malwareHash = null,
-    malwareUrl = null,
+    destIp = true,
+    malwareHash = true,
+    malwareUrl = true,
     priority = null,
-    sourceIp = null,
+    sourceIp = true,
     subcategory = null,
   } = fields ?? {};
 
@@ -96,35 +96,35 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
 
   const listItems = useMemo(
     () => [
-      ...(destIp != null && destIp.length > 0
+      ...(destIp != null && destIp
         ? [
             {
               title: i18n.DEST_IP,
-              description: destIp,
+              description: i18n.ALERT_FIELD_ENABLED_TEXT,
             },
           ]
         : []),
-      ...(sourceIp != null && sourceIp.length > 0
+      ...(sourceIp != null && sourceIp
         ? [
             {
               title: i18n.SOURCE_IP,
-              description: sourceIp,
+              description: i18n.ALERT_FIELD_ENABLED_TEXT,
             },
           ]
         : []),
-      ...(malwareUrl != null && malwareUrl.length > 0
+      ...(malwareUrl != null && malwareUrl
         ? [
             {
               title: i18n.MALWARE_URL,
-              description: malwareUrl,
+              description: i18n.ALERT_FIELD_ENABLED_TEXT,
             },
           ]
         : []),
-      ...(malwareHash != null && malwareHash.length > 0
+      ...(malwareHash != null && malwareHash
         ? [
             {
               title: i18n.MALWARE_HASH,
-              description: malwareHash,
+              description: i18n.ALERT_FIELD_ENABLED_TEXT,
             },
           ]
         : []),
@@ -175,48 +175,52 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   }, []);
 
   return isEdit ? (
-    <span data-test-subj={'connector-fields-sn'}>
+    <div data-test-subj={'connector-fields-sn'}>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.DEST_IP}>
-            <EuiFieldText
-              fullWidth
-              value={destIp ?? ''}
-              data-test-subj="destIpInput"
-              onChange={(e) => onChangeCb('destIp', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SOURCE_IP}>
-            <EuiFieldText
-              fullWidth
-              value={sourceIp ?? ''}
-              data-test-subj="sourceIpInput"
-              onChange={(e) => onChangeCb('sourceIp', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.MALWARE_URL}>
-            <EuiFieldText
-              fullWidth
-              value={malwareUrl ?? ''}
-              data-test-subj="malwareUrlInput"
-              onChange={(e) => onChangeCb('malwareUrl', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.MALWARE_HASH}>
-            <EuiFieldText
-              fullWidth
-              value={malwareHash ?? ''}
-              data-test-subj="malwareHashInput"
-              onChange={(e) => onChangeCb('malwareHash', e.target.value)}
-            />
+          <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCheckbox
+                    id="destIpCheckbox"
+                    label={i18n.DEST_IP}
+                    checked={destIp ?? false}
+                    compressed
+                    onChange={(e) => onChangeCb('destIp', e.target.checked)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiCheckbox
+                    id="sourceIpCheckBox"
+                    label={i18n.SOURCE_IP}
+                    checked={sourceIp ?? false}
+                    compressed
+                    onChange={(e) => onChangeCb('sourceIp', e.target.checked)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCheckbox
+                    id="malwareUrlCheckbox"
+                    label={i18n.MALWARE_HASH}
+                    checked={malwareUrl ?? false}
+                    compressed
+                    onChange={(e) => onChangeCb('malwareUrl', e.target.checked)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiCheckbox
+                    id="malwareHashCheckbox"
+                    label={i18n.MALWARE_URL}
+                    checked={malwareHash ?? false}
+                    compressed
+                    onChange={(e) => onChangeCb('malwareHash', e.target.checked)}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -266,7 +270,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </span>
+    </div>
   ) : (
     <ConnectorCard
       connectorType={ConnectorTypes.serviceNowITSM}
