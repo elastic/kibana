@@ -62,7 +62,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
               hasEncryptionKey: privilege.has_encryption_key,
-              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
               hasIndexMaintenance: privilege.index[indexName].maintenance,
               hasIndexWrite:
                 privilege.index[indexName].create ||
