@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { generatePath } from 'react-router-dom';
+import { generateEncodedPath } from '../utils/encode_path_params';
 
 export const mockEngineValues = {
   engineName: 'some-engine',
@@ -12,7 +12,7 @@ export const mockEngineValues = {
 };
 
 export const mockGenerateEnginePath = jest.fn((path, pathParams = {}) =>
-  generatePath(path, { engineName: mockEngineValues.engineName, ...pathParams })
+  generateEncodedPath(path, { engineName: mockEngineValues.engineName, ...pathParams })
 );
 
 jest.mock('../components/engine', () => ({
