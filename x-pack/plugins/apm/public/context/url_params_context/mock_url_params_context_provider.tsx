@@ -30,7 +30,6 @@ export function MockUrlParamsContextProvider({
   return (
     <UrlParamsContext.Provider
       value={{
-        incrementRangeId: () => {},
         rangeId: 0,
         refreshTimeRange,
         urlParams,
