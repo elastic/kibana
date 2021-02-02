@@ -57,14 +57,14 @@ export async function maybeCompressArtifact(
 ): Promise<InternalArtifactSchema> {
   const compressedArtifact = { ...uncompressedArtifact };
   if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
-    const compressedExceptionList = await compressExceptionList(
+    const compressedArtifactBody = await compressExceptionList(
       Buffer.from(uncompressedArtifact.body, 'base64')
     );
-    compressedArtifact.body = compressedExceptionList.toString('base64');
-    compressedArtifact.encodedSize = compressedExceptionList.byteLength;
+    compressedArtifact.body = compressedArtifactBody.toString('base64');
+    compressedArtifact.encodedSize = compressedArtifactBody.byteLength;
     compressedArtifact.compressionAlgorithm = 'zlib';
     compressedArtifact.encodedSha256 = createHash('sha256')
-      .update(compressedExceptionList)
+      .update(compressedArtifactBody)
       .digest('hex');
   }
   return compressedArtifact;
