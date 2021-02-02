@@ -670,6 +670,21 @@ export const signalRulesAlertType = ({
               lastLookBackDate: result.lastLookBackDate?.toISOString(),
             });
           }
+
+          // adding this log line so we can get some information from cloud
+          logger.info(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount}  ${
+                !isEmpty(result.totalToFromTuples)
+                  ? `signals searched between date ranges ${JSON.stringify(
+                      result.totalToFromTuples,
+                      null,
+                      2
+                    )}`
+                  : ''
+              }`
+            )
+          );
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',

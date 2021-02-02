@@ -316,6 +316,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -352,6 +353,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.isBucketed,
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -387,6 +389,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -438,6 +441,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -473,6 +477,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       columnId: 'col2',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -538,6 +543,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       state: testState,
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -600,6 +606,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       state: testState,
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: 'a',
     };
 
     const stateWithColumnOrder = (columnOrder: string[]) => {
