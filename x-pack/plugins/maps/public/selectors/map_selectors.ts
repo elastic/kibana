@@ -169,6 +169,9 @@ export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.ma
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
+export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.searchSessionId;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -220,7 +223,17 @@ export const getDataFilters = createSelector(
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query, filters) => {
+  getSearchSessionId,
+  (
+    mapExtent,
+    mapBuffer,
+    mapZoom,
+    timeFilters,
+    refreshTimerLastTriggeredAt,
+    query,
+    filters,
+    searchSessionId
+  ) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
@@ -229,6 +242,7 @@ export const getDataFilters = createSelector(
       refreshTimerLastTriggeredAt,
       query,
       filters,
+      searchSessionId,
     };
   }
 );

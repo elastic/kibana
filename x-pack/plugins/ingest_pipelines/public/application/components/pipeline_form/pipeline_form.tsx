@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
+import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';

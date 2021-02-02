@@ -5,6 +5,8 @@
  */
 import {
   ExternalServiceApi,
+  GetChoicesHandlerArgs,
+  GetChoicesResponse,
   GetCommonFieldsHandlerArgs,
   GetCommonFieldsResponse,
   GetIncidentApiHandlerArgs,
@@ -71,7 +73,16 @@ const getFieldsHandler = async ({
   return res;
 };
 
+const getChoicesHandler = async ({
+  externalService,
+  params,
+}: GetChoicesHandlerArgs): Promise<GetChoicesResponse> => {
+  const res = await externalService.getChoices(params.fields);
+  return res;
+};
+
 export const api: ExternalServiceApi = {
+  getChoices: getChoicesHandler,
   getFields: getFieldsHandler,
   getIncident: getIncidentHandler,
   handshake: handshakeHandler,

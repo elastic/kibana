@@ -84,4 +84,8 @@ $ilmDeletePhaseColor: shadeOrTint($euiColorVis5, 40%, 40%);
       background-color: $euiColorVis1;
     }
   }
+
+  &__rolloverIcon {
+    display: inline-block;
+  }
 }

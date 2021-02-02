@@ -393,6 +393,7 @@
     "@storybook/addon-essentials": "^6.0.26",
     "@storybook/addon-knobs": "^6.0.26",
     "@storybook/addon-storyshots": "^6.0.26",
+    "@storybook/addon-docs": "^6.0.26",
     "@storybook/components": "^6.0.26",
     "@storybook/core": "^6.0.26",
     "@storybook/core-events": "^6.0.26",

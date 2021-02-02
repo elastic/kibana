@@ -17,17 +17,16 @@ export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
 
   useEffect(() => {
     if (data.length > 0) {
-      let chartIndex = 1;
+      let chartIndex = 0;
 
-      const firstCanvasItems = data.filter((item) => item.x <= CANVAS_MAX_ITEMS);
-
-      const chartsN: Array<IWaterfallContext['data']> = [firstCanvasItems];
+      const chartsN: Array<IWaterfallContext['data']> = [];
 
       data.forEach((item) => {
         // Subtract 1 to account for x value starting from 0
         if (item.x === CANVAS_MAX_ITEMS * chartIndex && !chartsN[item.x / CANVAS_MAX_ITEMS]) {
-          chartsN.push([]);
+          chartsN.push([item]);
           chartIndex++;
+          return;
         }
         chartsN[chartIndex - 1].push(item);
       });

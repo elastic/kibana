@@ -12,7 +12,7 @@ import { Popover } from '../../../public/components/popover';
 import { RendererStrings } from '../../../i18n';
 import { RendererFactory } from '../../../types';
 
-interface Config {
+export interface Config {
   error: Error;
 }
 
