@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getTraceUrl = ({
+export function getApmTraceUrl({
   traceId,
   rangeFrom,
   rangeTo,
@@ -12,9 +12,6 @@ export const getTraceUrl = ({
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
-}) => {
-  return (
-    `/link-to/trace/${traceId}?` +
-    new URLSearchParams({ rangeFrom, rangeTo }).toString()
-  );
-};
+}) {
+  return `/link-to/trace/${traceId}?` + new URLSearchParams({ rangeFrom, rangeTo }).toString();
+}

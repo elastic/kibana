@@ -8,7 +8,6 @@
 
 import { IRouter } from '../../http';
 import { IKibanaMigrator } from '../migrations';
-import { catchAndReturnBoomErrors } from './utils';
 
 export const registerMigrateRoute = (
   router: IRouter,
@@ -22,7 +21,7 @@ export const registerMigrateRoute = (
         tags: ['access:migrateSavedObjects'],
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, req, res) => {
       const migrator = await migratorPromise;
       await migrator.runMigrations({ rerun: true });
       return res.ok({
