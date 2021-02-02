@@ -289,29 +289,15 @@ describe('<UseField />', () => {
   });
 
   describe('change handlers', () => {
-    interface MyForm {
-      name: string;
-    }
-
     const onError = jest.fn();
-    let formHook: FormHook<MyForm> | null = null;
 
     beforeEach(() => {
       jest.resetAllMocks();
-      formHook = null;
     });
 
-    const onFormHook = (_form: FormHook<MyForm>) => {
-      formHook = _form;
-    };
-
     const getTestComp = (fieldConfig: FieldConfig) => {
-      const TestComp = ({ onForm }: { onForm: (form: FormHook) => void }) => {
+      const TestComp = () => {
         const { form } = useForm<any>();
-
-        useEffect(() => {
-          onForm(form);
-        }, [onForm, form]);
 
         return (
           <Form form={form}>
@@ -325,7 +311,6 @@ describe('<UseField />', () => {
     const setup = (fieldConfig: FieldConfig) => {
       return registerTestBed(getTestComp(fieldConfig), {
         memoryRouter: { wrapComponent: false },
-        defaultProps: { onForm: onFormHook },
       })() as TestBed;
     };
 
