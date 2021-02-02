@@ -137,6 +137,13 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
+export const ACTION_ADD_RANSOMWARE_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addRansomwareException',
+  {
+    defaultMessage: 'Add Ransomware exception',
+  }
+);
+
 export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
     values: { totalAlerts },

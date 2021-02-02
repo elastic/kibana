@@ -61,6 +61,7 @@ const fields = [
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
+  { id: 'Ransomware.files.path', label: 'Impacted Files' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

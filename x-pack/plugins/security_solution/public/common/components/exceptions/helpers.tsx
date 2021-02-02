@@ -358,14 +358,35 @@ export const entryHasListType = (
  * Returns the value for `file.Ext.code_signature` which
  * can be an object or array of objects
  */
-export const getCodeSignatureValue = (
+export const getFileCodeSignature = (
   alertData: Ecs
 ): Array<{ subjectName: string; trusted: string }> => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
-  // Pre 7.10 file.Ext.code_signature was mistakenly populated as
-  // a single object with subject_name and trusted.
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Returns the value for `process.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getProcessCodeSignature = (
+  alertData: Ecs
+): Array<{ subjectName: string; trusted: string }> => {
+  const { process } = alertData;
+  const codeSignature = process && process.Ext && process.Ext.code_signature;
+
+  return getCodeSignatureValue(codeSignature);
+};
+
+/**
+ * Pre 7.10 `Ext.code_signature` fields were mistakenly populated as
+ * a single object with subject_name and trusted.
+ */
+export const getCodeSignatureValue = (
+  codeSignature: CodeSignature | CodeSignature[] | undefined
+): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => ({
       subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
@@ -391,7 +412,7 @@ export const getCodeSignatureValue = (
 /**
  * Returns the default values from the alert data to autofill new endpoint exceptions
  */
-export const getPrepopulatedItem = ({
+export const getPrepopulatedEndpointException = ({
   listId,
   ruleName,
   codeSignature,
@@ -452,6 +473,77 @@ export const getPrepopulatedItem = ({
 };
 
 /**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedRansomwareException = ({
+  listId,
+  ruleName,
+  codeSignature,
+  executable,
+  sha256Hash,
+  ransomwareFeature,
+  eventCode,
+  listNamespace = 'agnostic',
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string };
+  executable: string;
+  sha256Hash: string;
+  ransomwareFeature: string;
+  eventCode: string;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: [
+      {
+        field: 'process.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.trusted : '',
+          },
+        ],
+      },
+      {
+        field: 'process.executable',
+        operator: 'included',
+        type: 'match',
+        value: executable ?? '',
+      },
+      {
+        field: 'process.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: sha256Hash ?? '',
+      },
+      {
+        field: 'Ransomware.feature',
+        operator: 'included',
+        type: 'match',
+        value: ransomwareFeature ?? '',
+      },
+      {
+        field: 'event.code',
+        operator: 'included',
+        type: 'match',
+        value: eventCode ?? '',
+      },
+    ],
+  };
+};
+
+/**
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
@@ -489,15 +581,31 @@ export const defaultEndpointExceptionItems = (
   ruleName: string,
   alertEcsData: Ecs
 ): ExceptionsBuilderExceptionItem[] => {
-  const { file, event: alertEvent } = alertEcsData;
+  const { file, process, Ransomware, event: alertEvent } = alertEcsData;
+  const eventCode = alertEvent && alertEvent.code ? alertEvent.code[0] : '';
 
-  return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
-    getPrepopulatedItem({
+  if (eventCode === 'ransomware') {
+    return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
+      getPrepopulatedRansomwareException({
+        listId,
+        ruleName,
+        sha256Hash: process && process.hash && process.hash.sha256 ? process.hash.sha256[0] : '',
+        executable: process && process.executable ? process.executable[0] : '',
+        ransomwareFeature: Ransomware && Ransomware.feature ? Ransomware.feature[0] : '',
+        eventCode,
+        codeSignature,
+      })
+    );
+  }
+
+  // By default return the standard prepopulated Endpoint Exception fields
+  return getFileCodeSignature(alertEcsData).map((codeSignature) =>
+    getPrepopulatedEndpointException({
       listId,
       ruleName,
       filePath: file && file.path ? file.path[0] : '',
       sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
-      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
+      eventCode,
       codeSignature,
     })
   );
