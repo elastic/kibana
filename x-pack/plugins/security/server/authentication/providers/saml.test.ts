@@ -15,12 +15,11 @@ import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } 
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
-import { AuthenticatedUser } from '../../../common/model';
 
 describe('SAMLAuthenticationProvider', () => {
   let provider: SAMLAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
-  let mockUser: AuthenticatedUser;
+  let mockUser: ReturnType<typeof mockAuthenticatedUser>;
   let mockScopedClusterClient: ReturnType<
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;

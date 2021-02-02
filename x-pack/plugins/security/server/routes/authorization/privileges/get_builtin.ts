@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BuiltinESPrivileges } from '../../../../common/model';
 import { RouteDefinitionParams } from '../..';
 
 export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionParams) {
@@ -13,7 +12,7 @@ export function defineGetBuiltinPrivilegesRoutes({ router }: RouteDefinitionPara
     async (context, request, response) => {
       const {
         body: privileges,
-      } = await context.core.elasticsearch.client.asCurrentUser.security.getBuiltinPrivileges<BuiltinESPrivileges>();
+      } = await context.core.elasticsearch.client.asCurrentUser.security.getBuiltinPrivileges();
 
       // Exclude the `none` privilege, as it doesn't make sense as an option within the Kibana UI
       privileges.cluster = privileges.cluster.filter((privilege) => privilege !== 'none');

@@ -16,12 +16,11 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
-import { AuthenticatedUser } from '../../../common/model';
 
 describe('OIDCAuthenticationProvider', () => {
   let provider: OIDCAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
-  let mockUser: AuthenticatedUser;
+  let mockUser: ReturnType<typeof mockAuthenticatedUser>;
   let mockScopedClusterClient: ReturnType<
     typeof elasticsearchServiceMock.createScopedClusterClient
   >;

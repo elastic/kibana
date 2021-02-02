@@ -151,9 +151,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       authentication: AuthenticationInfo;
     };
     try {
+      // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `refresh_token`, `authentication` and
+      // `kerberos_authentication_response_token`.
       tokens = (
-        await this.options.client.asInternalUser.security.getToken<typeof tokens>({
-          body: { grant_type: '_kerberos', kerberos_ticket: kerberosTicket },
+        await this.options.client.asInternalUser.security.getToken({
+          body: {
+            // @ts-expect-error `GetUserAccessTokenRequest['grant_type']` doesn't support `_kerberos` grant.
+            grant_type: '_kerberos',
+            kerberos_ticket: kerberosTicket,
+          },
         })
       ).body;
     } catch (err) {

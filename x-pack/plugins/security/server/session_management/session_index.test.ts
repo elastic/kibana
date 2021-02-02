@@ -39,7 +39,7 @@ describe('Session index', () => {
         name: indexTemplateName,
       });
       expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexName).index_patterns,
+        index: getSessionIndexTemplate(indexName).index_patterns[0],
       });
     }
 
@@ -91,7 +91,7 @@ describe('Session index', () => {
         body: expectedIndexTemplate,
       });
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: expectedIndexTemplate.index_patterns,
+        index: expectedIndexTemplate.index_patterns[0],
       });
     });
 
@@ -124,7 +124,7 @@ describe('Session index', () => {
 
       assertExistenceChecksPerformed();
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledWith({
-        index: getSessionIndexTemplate(indexName).index_patterns,
+        index: getSessionIndexTemplate(indexName).index_patterns[0],
       });
     });
 
@@ -164,7 +164,7 @@ describe('Session index', () => {
     const now = 123456;
     beforeEach(() => {
       mockElasticsearchClient.deleteByQuery.mockResolvedValue(
-        securityMock.createApiResponse({ body: {} })
+        securityMock.createApiResponse({ body: {} as any })
       );
       jest.spyOn(Date, 'now').mockImplementation(() => now);
     });
@@ -598,7 +598,10 @@ describe('Session index', () => {
 
     it('returns `null` if index is not found', async () => {
       mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({ statusCode: 404, body: { status: 404 } })
+        securityMock.createApiResponse({
+          statusCode: 404,
+          body: { _index: 'my-index', _type: '_doc', _id: '0', found: false },
+        })
       );
 
       await expect(sessionIndex.get('some-sid')).resolves.toBeNull();
@@ -606,7 +609,10 @@ describe('Session index', () => {
 
     it('returns `null` if session index value document is not found', async () => {
       mockElasticsearchClient.get.mockResolvedValue(
-        securityMock.createApiResponse({ body: { status: 200, found: false } })
+        securityMock.createApiResponse({
+          statusCode: 200,
+          body: { _index: 'my-index', _type: '_doc', _id: '0', found: false },
+        })
       );
 
       await expect(sessionIndex.get('some-sid')).resolves.toBeNull();
@@ -623,9 +629,12 @@ describe('Session index', () => {
 
       mockElasticsearchClient.get.mockResolvedValue(
         securityMock.createApiResponse({
+          statusCode: 200,
           body: {
             found: true,
-            status: 200,
+            _index: 'my-index',
+            _type: '_doc',
+            _id: '0',
             _source: indexDocumentSource,
             _primary_term: 1,
             _seq_no: 456,
@@ -668,7 +677,17 @@ describe('Session index', () => {
 
     it('properly stores session value in the index', async () => {
       mockElasticsearchClient.create.mockResolvedValue(
-        securityMock.createApiResponse({ body: { _primary_term: 321, _seq_no: 654 } })
+        securityMock.createApiResponse({
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+        })
       );
 
       const sid = 'some-long-sid';
@@ -706,7 +725,7 @@ describe('Session index', () => {
       await expect(sessionIndex.update(sessionIndexMock.createValue())).rejects.toBe(failureReason);
     });
 
-    it('refetches latest session value if update fails due to conflict', async () => {
+    it('re-fetches latest session value if update fails due to conflict', async () => {
       const latestSessionValue = {
         usernameHash: 'some-username-hash',
         provider: { type: 'basic', name: 'basic1' },
@@ -717,17 +736,31 @@ describe('Session index', () => {
 
       mockElasticsearchClient.get.mockResolvedValue(
         securityMock.createApiResponse({
+          statusCode: 200,
           body: {
-            found: true,
-            status: 200,
+            _index: 'my-index',
+            _type: '_doc',
+            _id: '0',
             _source: latestSessionValue,
             _primary_term: 321,
             _seq_no: 654,
+            found: true,
           },
         })
       );
       mockElasticsearchClient.index.mockResolvedValue(
-        securityMock.createApiResponse({ statusCode: 409, body: { status: 409 } })
+        securityMock.createApiResponse({
+          statusCode: 409,
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'updated',
+          },
+        })
       );
 
       const sid = 'some-long-sid';
@@ -761,7 +794,18 @@ describe('Session index', () => {
 
     it('properly stores session value in the index', async () => {
       mockElasticsearchClient.index.mockResolvedValue(
-        securityMock.createApiResponse({ body: { _primary_term: 321, _seq_no: 654, status: 200 } })
+        securityMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+        })
       );
 
       const sid = 'some-long-sid';

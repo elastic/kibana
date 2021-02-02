@@ -9,11 +9,7 @@ import { KibanaFeature } from '../../../../../features/common';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import {
-  ElasticsearchRole,
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-} from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],
@@ -65,13 +61,15 @@ export function definePutRolesRoutes({
       try {
         const {
           body: rawRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name }, { ignore: [404] });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole(
+          { name: request.params.name },
+          { ignore: [404] }
+        );
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
+          // @ts-expect-error `XPackRole` type doesn't define `applications`.
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
@@ -79,6 +77,7 @@ export function definePutRolesRoutes({
           getFeatures(),
           context.core.elasticsearch.client.asCurrentUser.security.putRole({
             name: request.params.name,
+            // @ts-expect-error `IndicesPrivileges` in `PutRoleRequest` type shouldn't require `field_security` and `query`.
             body,
           }),
         ]);

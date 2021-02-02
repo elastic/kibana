@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { RoleMapping } from '../../../common/model';
+import { RoleMapping, RoleTemplate } from '../../../common/model';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
-
-interface RoleMappingsResponse {
-  [roleMappingName: string]: Omit<RoleMapping, 'name'>;
-}
 
 export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
   const { logger, router } = params;
@@ -29,7 +25,7 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       const expectSingleEntity = typeof request.params.name === 'string';
 
       try {
-        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping<RoleMappingsResponse>(
+        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping(
           { name: request.params.name }
         );
 
@@ -37,7 +33,8 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
           return {
             name,
             ...mapping,
-            role_templates: (mapping.role_templates || []).map((entry) => {
+            // @ts-expect-error `XPackRoleMapping` type doesn't define `role_templates` property.
+            role_templates: (mapping.role_templates || []).map((entry: RoleTemplate) => {
               return {
                 ...entry,
                 template: tryParseRoleTemplate(entry.template as string),

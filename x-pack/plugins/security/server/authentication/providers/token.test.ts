@@ -48,6 +48,7 @@ describe('TokenAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+        // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `refresh_token` and `authentication`.
         securityMock.createApiResponse({
           body: {
             access_token: tokenPair.accessToken,

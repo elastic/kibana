@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
+import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
@@ -22,14 +22,15 @@ export function defineGetRolesRoutes({ router, authz }: RouteDefinitionParams) {
       try {
         const {
           body: elasticsearchRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole({
+          name: request.params.name,
+        });
 
         const elasticsearchRole = elasticsearchRoles[request.params.name];
         if (elasticsearchRole) {
           return response.ok({
             body: transformElasticsearchRoleToRole(
+              // @ts-expect-error `XPackRole` type doesn't define `applications` and `transient_metadata`.
               elasticsearchRole,
               request.params.name,
               authz.applicationName
