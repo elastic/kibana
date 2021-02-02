@@ -12,4 +12,4 @@ node scripts/es snapshot \
 
 TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601 \
 TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200 \
-  node scripts/functional_test_runner.js --config x-pack/test/packaging/config.ts
+  node scripts/functional_test_runner.js --include-tags=smoke
