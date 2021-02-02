@@ -1,14 +1,30 @@
 [[troubleshooting]]
-== Troubleshoot common problems
+== Troubleshooting
 
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-If you have something to add to this section, please consider creating a pull request with
-your proposed changes at https://github.com/elastic/kibana.
+This section describes common problems you might encounter with the APM app.
+To add to this page, please consider opening a
+https://github.com/elastic/kibana/pulls[pull request] with your proposed changes.
 
-Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
+If your issue is potentially related to other components of the APM ecosystem,
+don't forget to check our other troubleshooting guides or discussion forum:
+
+* {apm-server-ref}/troubleshooting.html[APM Server troubleshooting]
+* {apm-dotnet-ref}/troubleshooting.html[.NET agent troubleshooting]
+* {apm-go-ref}/troubleshooting.html[Go agent troubleshooting]
+* {apm-java-ref}/trouble-shooting.html[Java agent troubleshooting]
+* {apm-node-ref}/troubleshooting.html[Node.js agent troubleshooting]
+* {apm-py-ref}/troubleshooting.html[Python agent troubleshooting]
+* {apm-ruby-ref}/debugging.html[Ruby agent troubleshooting]
+* {apm-rum-ref/troubleshooting.html[RUM troubleshooting]
+* https://discuss.elastic.co/c/apm[APM discussion forum].
+
+[discrete]
+[[troubleshooting-apm-app]]
+== Troubleshoot common APM app problems
 
 * <<no-apm-data-found>>
 * <<troubleshooting-too-many-transactions>>
