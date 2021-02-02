@@ -6,6 +6,7 @@
     { "path": "./plugins/beats_management/tsconfig.json" },
     { "path": "./plugins/canvas/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
+    { "path": "./plugins/code/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/dashboard_enhanced/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
