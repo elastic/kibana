@@ -48,6 +48,7 @@ export default function ({ getService }) {
 
     it('should return vector tile containing bounds when count exceeds size', async () => {
       const resp = await supertest
+        // requestBody sets size=1 to force count exceeded
         .get(
           `/api/maps/mvt/getTile\
 ?x=1\
