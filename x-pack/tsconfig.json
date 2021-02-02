@@ -9,6 +9,7 @@
     "plugins/apm/scripts/**/*",
     "plugins/canvas/**/*",
     "plugins/console_extensions/**/*",
+    "plugins/code/**/*",
     "plugins/data_enhanced/**/*",
     "plugins/discover_enhanced/**/*",
     "plugins/dashboard_enhanced/**/*",
@@ -46,6 +47,7 @@
     "plugins/painless_lab/**/*",
     "plugins/watcher/**/*",
     "plugins/grokdebugger/**/*",
+    "plugins/xpack_legacy/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -67,6 +69,7 @@
     { "path": "../src/plugins/home/tsconfig.json" },
     { "path": "../src/plugins/inspector/tsconfig.json" },
     { "path": "../src/plugins/kibana_legacy/tsconfig.json" },
+    { "path": "../src/plugins/kibana_overview/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../src/plugins/kibana_utils/tsconfig.json" },
@@ -92,6 +95,7 @@
     { "path": "./plugins/beats_management/tsconfig.json" },
     { "path": "./plugins/canvas/tsconfig.json" },
     { "path": "./plugins/cloud/tsconfig.json" },
+    { "path": "./plugins/code/tsconfig.json" },
     { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
@@ -128,6 +132,7 @@
     { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/watcher/tsconfig.json" }
+    { "path": "./plugins/watcher/tsconfig.json" },
+    { "path": "./plugins/xpack_legacy/tsconfig.json" }
   ]
 }
