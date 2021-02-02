@@ -33,7 +33,7 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change: { id: string; params: { [key: string]: any } } | undefined) => void;
+  onChange: (change?: { id: string; params?: { [key: string]: any } } | undefined) => void;
   onError: (error?: string) => void;
 }
 
@@ -122,11 +122,23 @@ export class FormatSelectEditor extends PureComponent<
 
     const newFormat = new FieldFormatClass(params, (key: string) => uiSettings.get(key));
 
-    this.setState({
-      fieldFormatId: formatId,
-      fieldFormatParams: params,
-      format: newFormat,
-    });
+    this.setState(
+      {
+        fieldFormatId: formatId,
+        fieldFormatParams: params,
+        format: newFormat,
+      },
+      () => {
+        this.props.onChange(
+          formatId
+            ? {
+                id: formatId,
+                params: params || {},
+              }
+            : undefined
+        );
+      }
+    );
   };
   onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
     const { fieldFormatId } = this.state;
@@ -136,7 +148,6 @@ export class FormatSelectEditor extends PureComponent<
   render() {
     const {
       fieldFormatEditors,
-      onChange,
       onError,
       fieldAttrs: { type },
     } = this.props;
@@ -187,12 +198,6 @@ export class FormatSelectEditor extends PureComponent<
             fieldFormatParams={fieldFormatParams || {}}
             fieldFormatEditors={fieldFormatEditors}
             onChange={(params) => {
-              onChange(
-                params && {
-                  id: fieldFormatId,
-                  params,
-                }
-              );
               this.onFormatChange(fieldFormatId, params);
             }}
             onError={onError}

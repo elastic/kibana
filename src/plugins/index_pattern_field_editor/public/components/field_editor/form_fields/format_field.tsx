@@ -28,10 +28,12 @@ export const FormatField = ({
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
             onChange={setValue}
-            onError={(error) => setErrors(error ? [{ message: error }] : [])}
+            onError={(err) => {}}
           />
         );
       }}
     </UseField>
   );
 };
+
+// onError={(error) => setErrors(error ? [{ message: error }] : [])}
