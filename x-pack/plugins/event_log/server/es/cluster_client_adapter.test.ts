@@ -702,6 +702,10 @@ describe('queryEventsBySavedObject', () => {
   });
 });
 
+describe('queryEventsSummaryBySavedObjectIds', () => {
+
+});
+
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

@@ -47,8 +47,10 @@ import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_reg
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../../event_log/server';
+import {
+  alertInstancesSummaryEventLogQueryAggregation,
+  alertInstanceSummaryFromEventLog,
+} from '../lib/alert_instance_summary_from_event_log';
 import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -410,26 +412,32 @@ export class AlertsClient {
     const eventLogClient = await this.getEventLogClient();
 
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
-    let events: IEvent[];
+    let alertEventsSummary: {
+      instances: Record<string, unknown>;
+      last_execution_state: Record<string, unknown>;
+    };
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-        page: 1,
-        per_page: 10000,
-        start: parsedDateStart.toISOString(),
-        end: dateNow.toISOString(),
-        sort_order: 'desc',
-      });
-      events = queryResults.data;
+      const queryResults = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+      }>(
+        'alert',
+        [id],
+        alertInstancesSummaryEventLogQueryAggregation,
+        parsedDateStart.toISOString(),
+        dateNow.toISOString()
+      );
+      alertEventsSummary = queryResults[0].summary;
     } catch (err) {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log for alert ${id}: ${err.message}`
       );
-      events = [];
+      alertEventsSummary = { instances: {}, last_execution_state: {} };
     }
 
     return alertInstanceSummaryFromEventLog({
       alert,
-      events,
+      alertEventsSummary,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });

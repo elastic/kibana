@@ -5,12 +5,12 @@
  */
 
 import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
-import { IEvent } from '../../../event_log/server';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
+
+const MAX_BUCKETS_LIMIT = 65535;
 
 export interface AlertInstanceSummaryFromEventLogParams {
   alert: SanitizedAlert<{ bar: boolean }>;
-  events: IEvent[];
+  summary: RawEventLogAlertsSummary;
   dateStart: string;
   dateEnd: string;
 }
@@ -19,7 +19,7 @@ export function alertInstanceSummaryFromEventLog(
   params: AlertInstanceSummaryFromEventLogParams
 ): AlertInstanceSummary {
   // initialize the  result
-  const { alert, events, dateStart, dateEnd } = params;
+  const { alert, summary, dateStart, dateEnd } = params;
   const alertInstanceSummary: AlertInstanceSummary = {
     id: alert.id,
     name: alert.name,
@@ -39,57 +39,32 @@ export function alertInstanceSummaryFromEventLog(
 
   const instances = new Map<string, AlertInstanceStatus>();
 
-  // loop through the events
-  // should be sorted newest to oldest, we want oldest to newest, so reverse
-  for (const event of events.reverse()) {
-    const timeStamp = event?.['@timestamp'];
-    if (timeStamp === undefined) continue;
-
-    const provider = event?.event?.provider;
-    if (provider !== EVENT_LOG_PROVIDER) continue;
-
-    const action = event?.event?.action;
-    if (action === undefined) continue;
-
-    if (action === EVENT_LOG_ACTIONS.execute) {
-      alertInstanceSummary.lastRun = timeStamp;
-
-      const errorMessage = event?.error?.message;
-      if (errorMessage !== undefined) {
-        alertInstanceSummary.status = 'Error';
-        alertInstanceSummary.errorMessages.push({
-          date: timeStamp,
-          message: errorMessage,
-        });
-      } else {
-        alertInstanceSummary.status = 'OK';
-      }
-
-      continue;
-    }
-
-    const instanceId = event?.kibana?.alerting?.instance_id;
-    if (instanceId === undefined) continue;
-
+  for (const instance of summary.instances.buckets) {
+    const instanceId = instance.key;
     const status = getAlertInstanceStatus(instances, instanceId);
-    switch (action) {
-      case EVENT_LOG_ACTIONS.newInstance:
-        status.activeStartDate = timeStamp;
-      // intentionally no break here
-      case EVENT_LOG_ACTIONS.activeInstance:
+    status.activeStartDate = instance.instance_created.max_timestampt.value_as_string;
+
+    const actionActivityResult = instance.last_state.action.hits.hits;
+    if (actionActivityResult.length > 0) {
+      const actionData = actionActivityResult[0]._source;
+      if (actionData.event.action === 'active-instance') {
         status.status = 'Active';
-        status.actionGroupId = event?.kibana?.alerting?.action_group_id;
-        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
-        break;
-      case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
-      case EVENT_LOG_ACTIONS.recoveredInstance:
-        status.status = 'OK';
-        status.activeStartDate = undefined;
-        status.actionGroupId = undefined;
-        status.actionSubgroup = undefined;
+        status.actionGroupId = actionData.kibana.alerting.action_group_id;
+        status.actionSubgroup = actionData.kibana.alerting.action_subgroup;
+      }
     }
   }
 
+  const executionSummary = summary.last_execution_state.action.hits.hits[0]._source;
+  alertInstanceSummary.lastRun = executionSummary['@timestamp'];
+
+  if (executionSummary.error !== undefined) {
+    alertInstanceSummary.status = 'Error';
+    alertInstanceSummary.errorMessages.push({
+      date: executionSummary['@timestamp'],
+      message: executionSummary.error.message,
+    });
+  }
   // set the muted status of instances
   for (const instanceId of alert.mutedInstanceIds) {
     getAlertInstanceStatus(instances, instanceId).muted = true;
@@ -112,6 +87,88 @@ export function alertInstanceSummaryFromEventLog(
 
   return alertInstanceSummary;
 }
+
+export interface RawEventLogAlertsSummary {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  instances: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  last_execution_state: Record<string, any>;
+}
+
+export const alertInstancesSummaryEventLogQueryAggregation = {
+  instances: {
+    // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
+    terms: {
+      field: 'kibana.alerting.instance_id',
+      order: { _key: 'asc' },
+      size: MAX_BUCKETS_LIMIT,
+    },
+    aggs: {
+      last_state: {
+        filter: {
+          bool: {
+            should: [
+              { term: { 'event.action': 'active-instance' } },
+              { term: { 'event.action': 'recovered-instance' } },
+            ],
+          },
+        },
+        aggs: {
+          action: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: [
+                  '@timestamp',
+                  'event.action',
+                  'kibana.alerting.action_group_id',
+                  'kibana.alerting.action_subgroup',
+                ],
+              },
+              size: 1,
+            },
+          },
+        },
+      },
+      instance_created: {
+        filter: {
+          term: { 'event.action': 'new-instance' },
+        },
+        aggs: {
+          max_timestampt: { max: { field: '@timestamp' } },
+        },
+      },
+    },
+  },
+  last_execution_state: {
+    filter: {
+      term: { 'event.action': 'execute' },
+    },
+    aggs: {
+      action: {
+        top_hits: {
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+          _source: {
+            includes: ['@timestamp', 'error.message'],
+          },
+          size: 1,
+        },
+      },
+    },
+  },
+};
 
 // return an instance status object, creating and adding to the map if needed
 function getAlertInstanceStatus(

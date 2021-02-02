@@ -274,6 +274,10 @@ describe('EventLogStart', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: [end]: Invalid Date]`);
     });
   });
+
+  describe('getEventsSummaryBySavedObjectIds', () => {
+
+  });
 });
 
 function fakeEvent(overrides = {}) {

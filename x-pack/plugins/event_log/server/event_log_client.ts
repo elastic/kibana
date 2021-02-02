@@ -10,7 +10,7 @@ import { IClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
-import { AlertInstanceSummary, IEventLogClient } from './types';
+import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
@@ -101,21 +101,30 @@ export class EventLogClient implements IEventLogClient {
     );
   }
 
-  async getEventsForAlertInstancesSummary(
+  async getEventsSummaryBySavedObjectIds<T>(
+    type: string,
     ids: string[],
+    aggs: Record<string, unknown>,
     start?: string,
     end?: string
-  ): Promise<Array<{ alertId: string; instances: AlertInstanceSummary[] }>> {
+  ): Promise<
+    Array<{
+      savedObjectId: string;
+      summary: T;
+    }>
+  > {
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
     // verify the user has the required permissions to view this saved objects
-    await this.savedObjectGetter('alert', ids);
+    await this.savedObjectGetter(type, ids);
 
-    return await this.esContext.esAdapter.queryEventsForAlertInstancesSummaryAggregation(
+    return await this.esContext.esAdapter.queryEventsSummaryBySavedObjectIds<T>(
       this.esContext.esNames.indexPattern,
       namespace,
+      type,
       ids,
+      aggs,
       start,
       end
     );

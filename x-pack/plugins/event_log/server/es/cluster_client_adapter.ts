@@ -10,7 +10,7 @@ import { reject, isUndefined } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
 import { EsContext } from '.';
-import { AlertInstanceSummary, IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
 
@@ -296,17 +296,18 @@ export class ClusterClientAdapter {
     }
   }
 
-  public async queryEventsForAlertInstancesSummaryAggregation(
+  public async queryEventsSummaryBySavedObjectIds<T>(
     index: string,
     namespace: string | undefined,
+    type: string,
     ids: string[],
+    aggs: Record<string, unknown>,
     start?: string,
     end?: string
   ): Promise<
     Array<{
-      alertId: string;
-      instances: AlertInstanceSummary[];
-      last_execution_state: Record<string, unknown>;
+      savedObjectId: string;
+      summary: T;
     }>
   > {
     const namespaceQuery = getNamespaceQuery(namespace);
@@ -346,7 +347,7 @@ export class ClusterClientAdapter {
                 path: 'kibana.saved_objects',
               },
               aggs: {
-                alerts: {
+                saved_object_type: {
                   filter: {
                     bool: {
                       must: reject(
@@ -364,7 +365,7 @@ export class ClusterClientAdapter {
                                 {
                                   term: {
                                     'kibana.saved_objects.type': {
-                                      value: 'alert',
+                                      value: type,
                                     },
                                   },
                                 },
@@ -392,80 +393,7 @@ export class ClusterClientAdapter {
                       aggs: {
                         summary: {
                           reverse_nested: {},
-                          aggs: {
-                            instances: {
-                              // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
-                              terms: {
-                                field: 'kibana.alerting.instance_id',
-                                order: { _key: 'asc' },
-                                size: MAX_BUCKETS_LIMIT,
-                              },
-                              aggs: {
-                                last_state: {
-                                  filter: {
-                                    bool: {
-                                      should: [
-                                        { term: { 'event.action': 'active-instance' } },
-                                        { term: { 'event.action': 'recovered-instance' } },
-                                      ],
-                                    },
-                                  },
-                                  aggs: {
-                                    action: {
-                                      top_hits: {
-                                        sort: [
-                                          {
-                                            '@timestamp': {
-                                              order: 'desc',
-                                            },
-                                          },
-                                        ],
-                                        _source: {
-                                          includes: [
-                                            '@timestamp',
-                                            'event.action',
-                                            'kibana.alerting.action_group_id',
-                                            'kibana.alerting.action_subgroup',
-                                          ],
-                                        },
-                                        size: 1,
-                                      },
-                                    },
-                                  },
-                                },
-                                instance_created: {
-                                  filter: {
-                                    term: { 'event.action': 'active-instance' },
-                                  },
-                                  aggs: {
-                                    max_timestampt: { max: { field: '@timestamp' } },
-                                  },
-                                },
-                              },
-                            },
-                            last_execution_state: {
-                              filter: {
-                                term: { 'event.action': 'execute' },
-                              },
-                              aggs: {
-                                action: {
-                                  top_hits: {
-                                    sort: [
-                                      {
-                                        '@timestamp': {
-                                          order: 'desc',
-                                        },
-                                      },
-                                    ],
-                                    _source: {
-                                      includes: ['@timestamp', 'error.message'],
-                                    },
-                                    size: 1,
-                                  },
-                                },
-                              },
-                            },
-                          },
+                          aggs,
                         },
                       },
                     },
@@ -483,38 +411,10 @@ export class ClusterClientAdapter {
         index,
         body,
       });
-      return result.body.aggregations.events.saved_objects.alerts.ids.buckets.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (alertSummary: Record<string, any>) => ({
-          alertId: alertSummary.key,
-          instances: alertSummary.summary.instances
-            ? alertSummary.summary.instances.buckets.map(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (instance: Record<string, any>) => {
-                  const actionActivityResult = instance.last_state.action.hits.hits;
-                  if (actionActivityResult.length > 0) {
-                    const actionData = actionActivityResult[0]._source;
-                    const actionSummary: AlertInstanceSummary = {
-                      instance_id: instance.key,
-                      lastAction: actionData.event.action,
-                    };
-                    if (actionData.event.action === 'active-instance') {
-                      actionSummary.actionGroupId = actionData.kibana.alerting.action_group_id;
-                      actionSummary.actionSubgroup = actionData.kibana.alerting.action_subgroup;
-
-                      actionSummary.activeStartDate =
-                        instance.instance_created.max_timestampt.value_as_string;
-                    }
-                    return actionSummary;
-                  }
-                  return {
-                    instance_id: instance.key,
-                  };
-                }
-              )
-            : [],
-          last_execution_state:
-            alertSummary.summary.last_execution_state.action.hits.hits[0]._source,
+      return result.body.aggregations.events.saved_objects.saved_object_type.ids.buckets.map(
+        (savedObject: Record<string, unknown>) => ({
+          savedObjectId: savedObject.key,
+          summary: savedObject.summary,
         })
       );
     } catch (err) {
