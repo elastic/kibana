@@ -29,7 +29,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
       >
         <div>
           <FormattedMessage
-            id="xpack.ml.jobsAwaitingNodeWarning.noMLNodesAvailableDescription"
+            id="xpack.ml.newJobAwaitingNodeWarning.noMLNodesAvailableDescription"
             defaultMessage="Job cannot be started straight away, an ML node needs to be started. This will happen automatically."
           />
         </div>
