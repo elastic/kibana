@@ -21246,10 +21246,10 @@ traverse@0.6.6:
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
   integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
-tree-kill@^1.1.0, tree-kill@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.0.tgz#5846786237b4239014f05db156b643212d4c6f36"
-  integrity sha512-DlX6dR0lOIRDFxI0mjL9IYg6OTncLm/Zt+JiBhE5OlFcAR8yc9S7FFXU9so0oda47frdM/JFsk7UjNt9vscKcg==
+tree-kill@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.2.tgz#4ca09a9092c88b73a7cdc5e8a01b507b0790a0cc"
+  integrity sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==
 
 treeify@^1.0.1:
   version "1.1.0"
