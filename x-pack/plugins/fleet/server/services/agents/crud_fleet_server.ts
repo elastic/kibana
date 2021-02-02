@@ -215,6 +215,7 @@ export async function updateAgent(
     id: agentId,
     index: AGENTS_INDEX,
     body: { doc: agentSOAttributesToFleetServerAgentDoc(data) },
+    refresh: 'wait_for',
   });
 }
 
@@ -239,6 +240,7 @@ export async function bulkUpdateAgents(
   await esClient.bulk({
     body,
     index: AGENTS_INDEX,
+    refresh: 'wait_for',
   });
 }
 

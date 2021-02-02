@@ -26,7 +26,7 @@ export function agentSOAttributesToFleetServerAgentDoc(
 
   const doc: Partial<Omit<FleetServerAgent, 'id'>> = { ...rest };
 
-  if (policyRevison) {
+  if (policyRevison !== undefined) {
     doc.policy_revision_idx = policyRevison;
   }
 
