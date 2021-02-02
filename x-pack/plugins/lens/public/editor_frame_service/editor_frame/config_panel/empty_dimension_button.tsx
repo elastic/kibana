@@ -16,6 +16,7 @@ import { LayerDatasourceDropProps } from './types';
 export function EmptyDimensionButton({
   dragDropContext,
   group,
+  groups,
   layerDatasource,
   layerDatasourceDropProps,
   layerId,
@@ -31,6 +32,7 @@ export function EmptyDimensionButton({
   onClick: (id: string) => void;
   onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
   group: VisualizationDimensionGroupConfig;
+  groups: VisualizationDimensionGroupConfig[];
 
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
@@ -64,6 +66,8 @@ export function EmptyDimensionButton({
             ...layerDatasourceDropProps,
             columnId: value.columnId,
             filterOperations: group.filterOperations,
+            groupId: group.groupId,
+            visualizationGroupConfig: groups,
           })
         }
       >

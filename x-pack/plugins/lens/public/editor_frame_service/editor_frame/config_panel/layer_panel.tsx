@@ -133,16 +133,15 @@ export function LayerPanel(
         layerId: targetLayerId,
         isNew,
         filterOperations,
+        visualizationGroupConfig: groups,
       });
       if (dropResult) {
-        updateVisualization(
-          setDimension({
-            columnId,
-            groupId,
-            layerId: targetLayerId,
-            prevState: props.visualizationState,
-          })
-        );
+        const newVisState = setDimension({
+          columnId,
+          groupId,
+          layerId: targetLayerId,
+          prevState: props.visualizationState,
+        });
 
         if (typeof dropResult === 'object') {
           // When a column is moved, we delete the reference to the old
@@ -150,9 +149,11 @@ export function LayerPanel(
             removeDimension({
               columnId: dropResult.deleted,
               layerId: targetLayerId,
-              prevState: props.visualizationState,
+              prevState: newVisState,
             })
           );
+        } else {
+          updateVisualization(newVisState);
         }
       }
     };
@@ -261,6 +262,7 @@ export function LayerPanel(
                           columnId={columnId}
                           dragDropContext={dragDropContext}
                           group={group}
+                          groups={groups}
                           groupIndex={groupIndex}
                           key={columnId}
                           layerDatasourceDropProps={layerDatasourceDropProps}
@@ -305,6 +307,7 @@ export function LayerPanel(
                                   ...layerDatasourceConfigProps,
                                   columnId: accessorConfig.columnId,
                                   filterOperations: group.filterOperations,
+                                  groupId: group.groupId,
                                 }}
                               />
                             </DimensionButton>
@@ -330,6 +333,7 @@ export function LayerPanel(
                         });
                       }}
                       onDrop={onDrop}
+                      groups={groups}
                     />
                   ) : null}
                 </>

@@ -23,6 +23,7 @@ export function DraggableDimensionButton({
   layerIndex,
   columnId,
   group,
+  groups,
   onDrop,
   children,
   dragDropContext,
@@ -35,6 +36,7 @@ export function DraggableDimensionButton({
   layerIndex: number;
   onDrop: (droppedItem: DragDropIdentifier, dropTarget: DragDropIdentifier) => void;
   group: VisualizationDimensionGroupConfig;
+  groups: VisualizationDimensionGroupConfig[];
   label: string;
   children: React.ReactElement;
   layerDatasource: Datasource<unknown, unknown>;
@@ -61,6 +63,8 @@ export function DraggableDimensionButton({
       ...layerDatasourceDropProps,
       columnId,
       filterOperations: group.filterOperations,
+      groupId: group.groupId,
+      visualizationGroupConfig: groups,
     });
 
   const dragType = isSelf(value, dragging)
