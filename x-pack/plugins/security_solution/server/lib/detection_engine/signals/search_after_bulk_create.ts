@@ -70,6 +70,7 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     buildRuleMessage,
   });
+  const tuplesToBeLogged = [...totalToFromTuples];
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
 
   while (totalToFromTuples.length > 0) {
@@ -294,5 +295,6 @@ export const searchAfterAndBulkCreate = async ({
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
+  toReturn.totalToFromTuples = tuplesToBeLogged;
   return toReturn;
 };

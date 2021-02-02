@@ -15,7 +15,7 @@ import { useKibana } from '../../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../../use_is_mounted';
 import { AddDocumentForm } from '../add_document_form';
 
-import './add_documents_accordion.scss';
+import './add_docs_accordion.scss';
 
 const DISCOVER_URL_GENERATOR_ID = 'DISCOVER_APP_URL_GENERATOR';
 

@@ -18,7 +18,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
-import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
+import { validateTypes, validateObjects } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -163,7 +163,7 @@ export const registerExportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
