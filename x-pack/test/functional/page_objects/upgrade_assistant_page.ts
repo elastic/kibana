@@ -33,7 +33,6 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
     async toggleDeprecationLogging() {
       log.debug('toggleDeprecationLogging()');
       await testSubjects.click('upgradeAssistantDeprecationToggle');
-      const newState = await this.isDeprecationLoggingEnabled();
     }
 
     async isDeprecationLoggingEnabled() {
