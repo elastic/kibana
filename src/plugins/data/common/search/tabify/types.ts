@@ -45,9 +45,3 @@ export interface TabbedAggColumn {
 
 /** @public **/
 export type TabbedAggRow = Record<TabbedAggColumn['id'], string | number>;
-
-/** @public **/
-export interface TabbedTable {
-  columns: TabbedAggColumn[];
-  rows: TabbedAggRow[];
-}

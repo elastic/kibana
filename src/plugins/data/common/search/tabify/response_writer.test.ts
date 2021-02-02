@@ -137,6 +137,7 @@ describe('TabbedAggResponseWriter class', () => {
 
         const response = responseWriter.response();
 
+        expect(response).toHaveProperty('type', 'datatable');
         expect(response).toHaveProperty('rows');
         expect(response.rows).toEqual([{ 'col-0-1': 'US', 'col-1-2': 5 }]);
         expect(response).toHaveProperty('columns');
@@ -149,7 +150,7 @@ describe('TabbedAggResponseWriter class', () => {
 
       test('produces correct response for no data', () => {
         const response = responseWriter.response();
-
+        expect(response).toHaveProperty('type', 'datatable');
         expect(response).toHaveProperty('rows');
         expect(response.rows.length).toBe(0);
         expect(response).toHaveProperty('columns');
