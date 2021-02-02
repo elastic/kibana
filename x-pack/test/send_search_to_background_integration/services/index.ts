@@ -5,9 +5,9 @@
  */
 
 import { services as functionalServices } from '../../functional/services';
-import { SendToBackgroundProvider } from './send_to_background';
+import { SearchSessionsProvider } from './search_sessions';
 
 export const services = {
   ...functionalServices,
-  searchSessions: SendToBackgroundProvider,
+  searchSessions: SearchSessionsProvider,
 };

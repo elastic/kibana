@@ -376,7 +376,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast', 2 * defaultFindTimeout);
+      const toast = await find.byCssSelector('.euiToast', 6 * defaultFindTimeout);
       await toast.moveMouseTo();
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
 

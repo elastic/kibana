@@ -134,37 +134,42 @@ export function LayerPanels(
     [dispatch]
   );
 
+  const datasourcePublicAPIs = props.framePublicAPI.datasourceLayers;
+
   return (
     <EuiForm className="lnsConfigPanel">
-      {layerIds.map((layerId, index) => (
-        <LayerPanel
-          {...props}
-          setLayerRef={setLayerRef}
-          key={layerId}
-          layerId={layerId}
-          index={index}
-          visualizationState={visualizationState}
-          updateVisualization={setVisualizationState}
-          updateDatasource={updateDatasource}
-          updateAll={updateAll}
-          isOnlyLayer={layerIds.length === 1}
-          onRemoveLayer={() => {
-            dispatch({
-              type: 'UPDATE_STATE',
-              subType: 'REMOVE_OR_CLEAR_LAYER',
-              updater: (state) =>
-                removeLayer({
-                  activeVisualization,
-                  layerId,
-                  trackUiEvent,
-                  datasourceMap,
-                  state,
-                }),
-            });
-            removeLayerRef(layerId);
-          }}
-        />
-      ))}
+      {layerIds.map((layerId, layerIndex) =>
+        datasourcePublicAPIs[layerId] ? (
+          <LayerPanel
+            {...props}
+            activeVisualization={activeVisualization}
+            setLayerRef={setLayerRef}
+            key={layerId}
+            layerId={layerId}
+            layerIndex={layerIndex}
+            visualizationState={visualizationState}
+            updateVisualization={setVisualizationState}
+            updateDatasource={updateDatasource}
+            updateAll={updateAll}
+            isOnlyLayer={layerIds.length === 1}
+            onRemoveLayer={() => {
+              dispatch({
+                type: 'UPDATE_STATE',
+                subType: 'REMOVE_OR_CLEAR_LAYER',
+                updater: (state) =>
+                  removeLayer({
+                    activeVisualization,
+                    layerId,
+                    trackUiEvent,
+                    datasourceMap,
+                    state,
+                  }),
+              });
+              removeLayerRef(layerId);
+            }}
+          />
+        ) : null
+      )}
       {activeVisualization.appendLayer && visualizationState && (
         <EuiFlexItem grow={true}>
           <EuiToolTip

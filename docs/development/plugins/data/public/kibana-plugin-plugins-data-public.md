@@ -125,6 +125,7 @@
 |  [isPartialResponse](./kibana-plugin-plugins-data-public.ispartialresponse.md) |  |
 |  [isQuery](./kibana-plugin-plugins-data-public.isquery.md) |  |
 |  [isTimeRange](./kibana-plugin-plugins-data-public.istimerange.md) |  |
+|  [noSearchSessionStorageCapabilityMessage](./kibana-plugin-plugins-data-public.nosearchsessionstoragecapabilitymessage.md) | Message to display in case storing session session is disabled due to turned off capability |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |

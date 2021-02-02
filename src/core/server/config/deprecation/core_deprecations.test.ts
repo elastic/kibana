@@ -236,4 +236,24 @@ describe('core deprecations', () => {
       ).toEqual([`worker-src blob:`]);
     });
   });
+
+  describe('logging.events.ops', () => {
+    it('warns when ops events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { ops: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration.",
+        ]
+      `);
+    });
+
+    it('does not warn when other events are configured', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: '*' } },
+      });
+      expect(messages).toEqual([]);
+    });
+  });
 });

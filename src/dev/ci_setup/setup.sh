@@ -65,3 +65,8 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
+
+###
+### copy .bazelrc-ci into $HOME/.bazelrc
+###
+cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";

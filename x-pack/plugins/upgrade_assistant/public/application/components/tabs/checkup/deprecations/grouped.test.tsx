@@ -9,9 +9,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GroupByOption, LevelFilterOption } from '../../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';
 

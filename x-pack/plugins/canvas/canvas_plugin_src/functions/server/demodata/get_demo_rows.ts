@@ -5,8 +5,10 @@
  */
 
 import { cloneDeep } from 'lodash';
+// @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
 import ci from './ci.json';
 import { DemoRows } from './demo_rows_types';
+// @ts-ignore this file is too large for TypeScript, so it is excluded from our project config
 import shirts from './shirts.json';
 import { getFunctionErrors } from '../../../../i18n';
 

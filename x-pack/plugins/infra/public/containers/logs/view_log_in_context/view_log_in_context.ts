@@ -5,7 +5,7 @@
  */
 import { useState } from 'react';
 import createContainer from 'constate';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 
 interface ViewLogInContextProps {
   sourceId: string;

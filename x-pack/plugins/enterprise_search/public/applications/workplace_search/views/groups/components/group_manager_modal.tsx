@@ -29,6 +29,7 @@ import {
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { Group } from '../../../types';
+import { CANCEL_BUTTON } from '../../../constants';
 import { SOURCES_PATH } from '../../../routes';
 
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
@@ -36,12 +37,6 @@ import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
-const CANCEL_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerCancel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
 const UPDATE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdate',
   {
@@ -153,7 +148,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty data-test-subj="CloseGroupsModal" onClick={handleClose}>
-                  {CANCEL_BUTTON_TEXT}
+                  {CANCEL_BUTTON}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

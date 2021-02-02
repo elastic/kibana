@@ -5,14 +5,13 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
+import { get } from 'lodash';
+import { RequestFacade, SearchStrategyRegistry } from './search_strategy_registry';
+import { AbstractSearchStrategy, DefaultSearchStrategy } from './strategies';
+import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
 
-import { SearchStrategyRegistry } from './search_strategy_registry';
-// @ts-ignore
-import { AbstractSearchStrategy } from './strategies/abstract_search_strategy';
-// @ts-ignore
-import { DefaultSearchStrategy } from './strategies/default_search_strategy';
-// @ts-ignore
-import { DefaultSearchCapabilities } from './default_search_capabilities';
+const getPrivateField = <T>(registry: SearchStrategyRegistry, field: string) =>
+  get(registry, field) as T;
 
 class MockSearchStrategy extends AbstractSearchStrategy {
   checkForViability() {
@@ -28,23 +27,21 @@ describe('SearchStrategyRegister', () => {
 
   beforeAll(() => {
     registry = new SearchStrategyRegistry();
+    registry.addStrategy(new DefaultSearchStrategy());
   });
 
   test('should init strategies register', () => {
-    expect(
-      registry.addStrategy({} as AbstractSearchStrategy)[0] instanceof DefaultSearchStrategy
-    ).toBe(true);
+    expect(getPrivateField(registry, 'strategies')).toHaveLength(1);
   });
 
   test('should not add a strategy if it is not an instance of AbstractSearchStrategy', () => {
     const addedStrategies = registry.addStrategy({} as AbstractSearchStrategy);
 
     expect(addedStrategies.length).toEqual(1);
-    expect(addedStrategies[0] instanceof DefaultSearchStrategy).toBe(true);
   });
 
   test('should return a DefaultSearchStrategy instance', async () => {
-    const req = {};
+    const req = {} as RequestFacade;
     const indexPattern = '*';
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(req, indexPattern))!;
@@ -62,7 +59,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should return a MockSearchStrategy instance', async () => {
-    const req = {};
+    const req = {} as RequestFacade;
     const indexPattern = '*';
     const anotherSearchStrategy = new MockSearchStrategy();
     registry.addStrategy(anotherSearchStrategy);

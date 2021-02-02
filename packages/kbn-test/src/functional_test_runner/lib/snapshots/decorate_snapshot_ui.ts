@@ -16,9 +16,8 @@ import path from 'path';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { once } from 'lodash';
-import callsites from 'callsites';
 import { Lifecycle } from '../lifecycle';
-import { Test } from '../../fake_mocha_types';
+import { Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -33,12 +32,12 @@ const globalState: {
   updateSnapshot: SnapshotUpdateState;
   registered: boolean;
   currentTest: Test | null;
-  snapshots: Array<{ tests: Test[]; file: string; snapshotState: ISnapshotState }>;
+  snapshotStates: Record<string, ISnapshotState>;
 } = {
   updateSnapshot: 'none',
   registered: false,
   currentTest: null,
-  snapshots: [],
+  snapshotStates: {},
 };
 
 const modifyStackTracePrepareOnce = once(() => {
@@ -73,7 +72,7 @@ export function decorateSnapshotUi({
   isCi: boolean;
 }) {
   globalState.registered = true;
-  globalState.snapshots.length = 0;
+  globalState.snapshotStates = {};
   globalState.currentTest = null;
 
   if (isCi) {
@@ -102,32 +101,36 @@ export function decorateSnapshotUi({
     globalState.currentTest = test;
   });
 
-  lifecycle.afterTestSuite.add(function (testSuite) {
+  lifecycle.afterTestSuite.add(function (testSuite: Suite) {
     // save snapshot & check unused after top-level test suite completes
-    if (testSuite.parent?.parent) {
+    if (!testSuite.root) {
       return;
     }
 
-    const unused: string[] = [];
+    testSuite.eachTest((test) => {
+      const file = test.file;
 
-    globalState.snapshots.forEach((snapshot) => {
-      const { tests, snapshotState } = snapshot;
-      tests.forEach((test) => {
-        const title = test.fullTitle();
-        // If test is failed or skipped, mark snapshots as used. Otherwise,
-        // running a test in isolation will generate false positives.
-        if (!test.isPassed()) {
-          snapshotState.markSnapshotsAsCheckedForTest(title);
-        }
-      });
-
-      if (globalState.updateSnapshot !== 'all') {
-        unused.push(...snapshotState.getUncheckedKeys());
-      } else {
-        snapshotState.removeUncheckedKeys();
+      if (!file) {
+        return;
       }
 
-      snapshotState.save();
+      const snapshotState = globalState.snapshotStates[file];
+
+      if (snapshotState && !test.isPassed()) {
+        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+      }
+    });
+
+    const unused: string[] = [];
+
+    Object.values(globalState.snapshotStates).forEach((state) => {
+      if (globalState.updateSnapshot === 'all') {
+        state.removeUncheckedKeys();
+      }
+
+      unused.push(...state.getUncheckedKeys());
+
+      state.save();
     });
 
     if (unused.length) {
@@ -138,7 +141,7 @@ export function decorateSnapshotUi({
       );
     }
 
-    globalState.snapshots.length = 0;
+    globalState.snapshotStates = {};
   });
 }
 
@@ -161,43 +164,29 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
 
 export function expectSnapshot(received: any) {
   if (!globalState.registered) {
-    throw new Error(
-      'Mocha hooks were not registered before expectSnapshot was used. Call `registerMochaHooksForSnapshots` in your top-level describe().'
-    );
+    throw new Error('expectSnapshot UI was not initialized before calling expectSnapshot()');
   }
 
-  if (!globalState.currentTest) {
+  const test = globalState.currentTest;
+
+  if (!test) {
     throw new Error('expectSnapshot can only be called inside of an it()');
   }
 
-  const [, fileOfTest] = callsites().map((site) => site.getFileName());
-
-  if (!fileOfTest) {
-    throw new Error("Couldn't infer a filename for the current test");
+  if (!test.file) {
+    throw new Error('File for test not found');
   }
 
-  let snapshot = globalState.snapshots.find(({ file }) => file === fileOfTest);
+  let snapshotState = globalState.snapshotStates[test.file];
 
-  if (!snapshot) {
-    snapshot = {
-      file: fileOfTest,
-      tests: [],
-      snapshotState: getSnapshotState(fileOfTest, globalState.updateSnapshot),
-    };
-    globalState.snapshots.unshift(snapshot!);
-  }
-
-  if (!snapshot) {
-    throw new Error('Snapshot is undefined');
-  }
-
-  if (!snapshot.tests.includes(globalState.currentTest)) {
-    snapshot.tests.push(globalState.currentTest);
+  if (!snapshotState) {
+    snapshotState = getSnapshotState(test.file, globalState.updateSnapshot);
+    globalState.snapshotStates[test.file] = snapshotState;
   }
 
   const context: SnapshotContext = {
-    snapshotState: snapshot.snapshotState,
-    currentTestName: globalState.currentTest.fullTitle(),
+    snapshotState,
+    currentTestName: test.fullTitle(),
   };
 
   return {

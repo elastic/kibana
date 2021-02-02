@@ -6,11 +6,13 @@
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { renderApp } from './render_app';
+import { KibanaVersionContext } from './app_context';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
   isCloudEnabled: boolean,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  kibanaVersionInfo: KibanaVersionContext
 ) {
   const [{ i18n, docLinks }] = await coreSetup.getStartServices();
   return renderApp({
@@ -19,5 +21,6 @@ export async function mountManagementSection(
     http: coreSetup.http,
     i18n,
     docLinks,
+    kibanaVersionInfo,
   });
 }

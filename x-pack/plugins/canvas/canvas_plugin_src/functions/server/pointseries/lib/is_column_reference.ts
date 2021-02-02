@@ -5,7 +5,7 @@
  */
 
 // @ts-expect-error untyped library
-import { parse } from 'tinymath';
+import { parse } from '@kbn/tinymath';
 
 export function isColumnReference(mathExpression: string | null): boolean {
   if (mathExpression == null) {

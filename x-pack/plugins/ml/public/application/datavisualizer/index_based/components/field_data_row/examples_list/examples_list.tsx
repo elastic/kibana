@@ -15,25 +15,29 @@ interface Props {
 }
 
 export const ExamplesList: FC<Props> = ({ examples }) => {
-  if (
-    examples === undefined ||
-    examples === null ||
-    !Array.isArray(examples) ||
-    examples.length === 0
-  ) {
+  if (examples === undefined || examples === null || !Array.isArray(examples)) {
     return null;
   }
-
-  const examplesContent = examples.map((example, i) => {
-    return (
-      <EuiListGroupItem
-        className="mlFieldDataCard__codeContent"
-        size="s"
-        key={`example_${i}`}
-        label={typeof example === 'string' ? example : JSON.stringify(example)}
+  let examplesContent;
+  if (examples.length === 0) {
+    examplesContent = (
+      <FormattedMessage
+        id="xpack.ml.fieldDataCard.examplesList.noExamplesMessage"
+        defaultMessage="No examples were obtained for this field"
       />
     );
-  });
+  } else {
+    examplesContent = examples.map((example, i) => {
+      return (
+        <EuiListGroupItem
+          className="mlFieldDataCard__codeContent"
+          size="s"
+          key={`example_${i}`}
+          label={typeof example === 'string' ? example : JSON.stringify(example)}
+        />
+      );
+    });
+  }
 
   return (
     <div data-test-subj="mlFieldDataExamplesList">

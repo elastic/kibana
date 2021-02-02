@@ -11,55 +11,7 @@ import {
   LogFieldColumn,
   LogMessagePart,
   LogMessageFieldPart,
-} from '../../../common/http_api';
-
-export interface InfraLogMessageFieldSegmentInlineFragment {
-  field: string;
-  value: string;
-}
-
-export interface InfraLogMessageConstantSegmentInlineFragment {
-  constant: string;
-}
-
-type Message =
-  | InfraLogMessageFieldSegmentInlineFragment
-  | InfraLogMessageConstantSegmentInlineFragment;
-
-export interface InfraLogEntryTimestampColumnInlineFragment {
-  columnId: string;
-  timestamp: number;
-}
-
-export interface InfraLogEntryMessageColumnInlineFragment {
-  columnId: string;
-  message: Message[];
-}
-
-export interface InfraLogEntryFieldColumnInlineFragment {
-  columnId: string;
-  field: string;
-  value: string;
-}
-
-export type LogEntryHighlightColumn =
-  | InfraLogEntryTimestampColumnInlineFragment
-  | InfraLogEntryMessageColumnInlineFragment
-  | InfraLogEntryFieldColumnInlineFragment;
-
-export interface LogEntryHighlightMessageColumn {
-  columnId: string;
-  message: Message[];
-}
-
-export interface LogEntryHighlightFieldColumn {
-  columnId: string;
-  field: string;
-  value: string;
-}
-
-export type LogEntryHighlightMessageSegment = Message | {};
-export type LogEntryHighlightFieldMessageSegment = InfraLogMessageFieldSegmentInlineFragment;
+} from '../../../common/log_entry';
 
 export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];

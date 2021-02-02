@@ -10,6 +10,8 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { Redirect, useLocation } from 'react-router-dom';
 
+import { i18n } from '@kbn/i18n';
+
 import { setErrorMessage } from '../../../../shared/flash_messages';
 
 import { parseQueryParams } from '../../../../../applications/shared/query_params';
@@ -37,7 +39,13 @@ export const SourceAdded: React.FC = () => {
   const decodedName = decodeURIComponent(name);
 
   if (hasError) {
-    const defaultError = `${decodedName} failed to connect.`;
+    const defaultError = i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.sources.sourceAdded.error',
+      {
+        defaultMessage: '{decodedName} failed to connect.',
+        values: { decodedName },
+      }
+    );
     setErrorMessage(errorMessages ? errorMessages.join(' ') : defaultError);
   } else {
     setAddedSource(decodedName, indexPermissions, serviceType);

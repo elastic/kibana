@@ -35,6 +35,7 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
         },
       }),
       category: ['notifications'],
+      sensitive: true,
       schema: schema.string(),
     },
     'notifications:lifetime:banner': {

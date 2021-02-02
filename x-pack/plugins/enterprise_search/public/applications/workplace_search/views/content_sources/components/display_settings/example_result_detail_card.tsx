@@ -11,6 +11,8 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
+import { URL_LABEL } from '../../../../constants';
+
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 import { CustomSourceIcon } from './custom_source_icon';
@@ -50,7 +52,7 @@ export const ExampleResultDetailCard: React.FC = () => {
               <div className="eui-textTruncate">{result[urlField]}</div>
             ) : (
               <span className="example-result-content-placeholder" data-test-subj="DefaultUrlLabel">
-                URL
+                {URL_LABEL}
               </span>
             )}
           </div>

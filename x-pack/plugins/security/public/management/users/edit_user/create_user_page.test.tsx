@@ -89,6 +89,12 @@ describe('CreateUserPage', () => {
     await findAllByText(/Username must not contain leading or trailing spaces/i);
 
     fireEvent.change(await findByLabelText('Username'), {
+      target: { value: 'username_with_trailing_space ' },
+    });
+
+    await findAllByText(/Username must not contain leading or trailing spaces/i);
+
+    fireEvent.change(await findByLabelText('Username'), {
       target: { value: '€' },
     });
 

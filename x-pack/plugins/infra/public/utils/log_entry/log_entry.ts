@@ -5,7 +5,6 @@
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
 import {
   LogEntry,
@@ -16,18 +15,7 @@ import {
   LogMessagePart,
   LogMessageFieldPart,
   LogMessageConstantPart,
-} from '../../../common/http_api';
-import {
-  InfraLogMessageConstantSegmentInlineFragment,
-  InfraLogMessageFieldSegmentInlineFragment,
-} from './log_entry_highlight';
-
-export type LogEntryMessageSegment =
-  | InfraLogMessageFieldSegmentInlineFragment
-  | InfraLogMessageConstantSegmentInlineFragment;
-
-export type LogEntryConstantMessageSegment = InfraLogMessageConstantSegmentInlineFragment;
-export type LogEntryFieldMessageSegment = InfraLogMessageFieldSegmentInlineFragment;
+} from '../../../common/log_entry';
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 

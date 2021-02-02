@@ -22,6 +22,8 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { CANCEL_BUTTON } from '../../../constants';
+
 import { AppLogic } from '../../../app_logic';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -97,12 +99,6 @@ const REMOVE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.removeButtonText',
   {
     defaultMessage: 'Remove group',
-  }
-);
-const CANCEL_REMOVE_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.cancelRemoveButtonText',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 const CONFIRM_TITLE_TEXT = i18n.translate(
@@ -238,7 +234,7 @@ export const GroupOverview: React.FC = () => {
               onConfirm={deleteGroup}
               confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
               title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_REMOVE_BUTTON_TEXT}
+              cancelButtonText={CANCEL_BUTTON}
               defaultFocusedButton="confirm"
             >
               {CONFIRM_REMOVE_DESCRIPTION}

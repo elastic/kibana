@@ -7,6 +7,7 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { InsecureClusterServiceStart } from './insecure_cluster_service';
 import { mockInsecureClusterService } from './insecure_cluster_service/insecure_cluster_service.mock';
 import { SecurityOssPluginSetup, SecurityOssPluginStart } from './plugin';
 
@@ -18,7 +19,11 @@ export const mockSecurityOssPlugin = {
   },
   createStart: () => {
     return {
-      insecureCluster: mockInsecureClusterService.createStart(),
+      insecureCluster: mockInsecureClusterService.createStart() as jest.Mocked<InsecureClusterServiceStart>,
+      anonymousAccess: {
+        getAccessURLParameters: jest.fn().mockResolvedValue(null),
+        getCapabilities: jest.fn().mockResolvedValue({}),
+      },
     } as DeeplyMockedKeys<SecurityOssPluginStart>;
   },
 };

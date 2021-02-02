@@ -41,6 +41,9 @@ function help() {
         --debug                 Set log level to debug
         --quiet                 Set log level to error
         --silent                Disable log output
+
+      "run" options:
+        --skip-missing          Ignore packages which don't have the requested script
     ` + '\n'
   );
 }
@@ -49,7 +52,7 @@ export async function run(argv: string[]) {
   log.setLogLevel(
     pickLevelFromFlags(
       getopts(argv, {
-        boolean: ['verbose', 'debug', 'quiet', 'silent'],
+        boolean: ['verbose', 'debug', 'quiet', 'silent', 'skip-missing'],
       })
     )
   );

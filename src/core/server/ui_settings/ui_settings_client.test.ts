@@ -644,6 +644,38 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#isSensitive()', () => {
+    it('returns false if sensitive config is not set', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(false);
+    });
+
+    it('returns false if key is not in the settings', () => {
+      const { uiSettings } = setup();
+      expect(uiSettings.isSensitive('baz')).toBe(false);
+    });
+
+    it('returns true if overrides defined and key is overridden', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          sensitive: true,
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(true);
+    });
+  });
+
   describe('#isOverridden()', () => {
     it('returns false if no overrides defined', () => {
       const { uiSettings } = setup();

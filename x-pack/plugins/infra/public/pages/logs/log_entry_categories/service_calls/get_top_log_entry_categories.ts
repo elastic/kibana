@@ -10,8 +10,8 @@ import {
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
-  CategorySort,
 } from '../../../../../common/http_api/log_analysis';
+import { CategoriesSort } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
@@ -20,7 +20,7 @@ interface RequestArgs {
   endTime: number;
   categoryCount: number;
   datasets?: string[];
-  sort: CategorySort;
+  sort: CategoriesSort;
 }
 
 export const callGetTopLogEntryCategoriesAPI = async (

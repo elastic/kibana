@@ -65,6 +65,10 @@ export interface IUiSettingsClient {
    * Shows whether the uiSettings value set by the user.
    */
   isOverridden: (key: string) => boolean;
+  /**
+   * Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values.
+   */
+  isSensitive: (key: string) => boolean;
 }
 
 /** @internal */

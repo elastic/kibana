@@ -24,6 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       resolve(__dirname, './tests/apps/dashboard/async_search'),
       resolve(__dirname, './tests/apps/discover'),
       resolve(__dirname, './tests/apps/management/search_sessions'),
+      resolve(__dirname, './tests/apps/lens'),
     ],
 
     kbnTestServer: {

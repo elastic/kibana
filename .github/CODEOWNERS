@@ -9,11 +9,9 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
-/x-pack/plugins/vis_type_timeseries_enhanced/ @elastic/kibana-app
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
-/src/plugins/lens_oss/ @elastic/kibana-app
 /src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
@@ -68,6 +66,7 @@
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
+/x-pack/test/apm_api_integration/ @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
@@ -82,6 +81,7 @@
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
+/x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Beats
 /x-pack/plugins/beats_management/  @elastic/beats
@@ -101,7 +101,7 @@
 
 # Observability UIs
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/fleet/ @elastic/ingest-management
+/x-pack/plugins/fleet/ @elastic/fleet
 /x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
@@ -127,7 +127,6 @@
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
-#CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
@@ -331,6 +330,9 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
+
+# Security Asset Management
+/x-pack/plugins/osquery @elastic/security-asset-management
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design

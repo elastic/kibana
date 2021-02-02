@@ -7,7 +7,6 @@
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
@@ -17,7 +16,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
-import { LogEntry, LogColumn } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/log_entry';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import {
   LogColumnRenderConfiguration,

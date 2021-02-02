@@ -49,7 +49,7 @@ import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-interface Props {
+export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
   layerList: ILayer[];

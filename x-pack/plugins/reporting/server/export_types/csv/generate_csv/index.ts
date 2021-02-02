@@ -12,7 +12,7 @@ import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
-import { IndexPatternSavedObject, SavedSearchGeneratorResult } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV, SavedSearchGeneratorResult } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { createEscapeValue } from './escape_value';
 import { fieldFormatMapFactory } from './field_format_map';
@@ -39,7 +39,7 @@ interface SearchRequest {
 export interface GenerateCsvParams {
   browserTimezone?: string;
   searchRequest: SearchRequest;
-  indexPatternSavedObject: IndexPatternSavedObject;
+  indexPatternSavedObject: IndexPatternSavedObjectDeprecatedCSV;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];

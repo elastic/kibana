@@ -2147,14 +2147,17 @@ describe('state_helpers', () => {
     it('should collect errors from metric-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.avg.getErrorMessage = mock;
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          // @ts-expect-error invalid column
-          col1: { operationType: 'avg' },
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            // @ts-expect-error invalid column
+            col1: { operationType: 'avg' },
+          },
         },
-      });
+        indexPattern
+      );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
     });
@@ -2162,20 +2165,23 @@ describe('state_helpers', () => {
     it('should collect errors from reference-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = mock;
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          col1:
-            // @ts-expect-error not statically analyzed
-            { operationType: 'testReference', references: [] },
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
         },
-      });
+        indexPattern
+      );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
     });
 
-    it('should consider incompleteColumns before layer columns', () => {
+    it('should ignore incompleteColumns when checking for errors', () => {
       const savedRef = jest.fn().mockReturnValue(['error 1']);
       const incompleteRef = jest.fn();
       operationDefinitionMap.testReference.getErrorMessage = savedRef;
@@ -2184,24 +2190,55 @@ describe('state_helpers', () => {
         getErrorMessage: incompleteRef,
       };
 
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          col1:
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
+          incompleteColumns: {
             // @ts-expect-error not statically analyzed
-            { operationType: 'testReference', references: [] },
+            col1: { operationType: 'testIncompleteReference' },
+          },
         },
-        incompleteColumns: {
-          // @ts-expect-error not statically analyzed
-          col1: { operationType: 'testIncompleteReference' },
-        },
-      });
-      expect(savedRef).not.toHaveBeenCalled();
-      expect(incompleteRef).toHaveBeenCalled();
-      expect(errors).toBeUndefined();
+        indexPattern
+      );
+      expect(savedRef).toHaveBeenCalled();
+      expect(incompleteRef).not.toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
 
       delete operationDefinitionMap.testIncompleteReference;
+    });
+
+    it('should forward the indexpattern when available', () => {
+      const mock = jest.fn();
+      operationDefinitionMap.testReference.getErrorMessage = mock;
+      getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
+        },
+        indexPattern
+      );
+      expect(mock).toHaveBeenCalledWith(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1: { operationType: 'testReference', references: [] },
+          },
+        },
+        'col1',
+        indexPattern
+      );
     });
   });
 });

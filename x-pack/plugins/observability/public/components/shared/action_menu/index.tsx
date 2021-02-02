@@ -26,7 +26,7 @@ export function SectionTitle({ children }: { children?: ReactNode }) {
       <EuiText size={'s'} grow={false}>
         <h5>{children}</h5>
       </EuiText>
-      <EuiSpacer size={'s'} />
+      <EuiSpacer size={'xs'} />
     </>
   );
 }
@@ -55,7 +55,7 @@ export function SectionSpacer() {
 }
 
 export const Section = styled.div`
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   &:last-of-type {
     margin-bottom: 0;
   }
@@ -63,7 +63,7 @@ export const Section = styled.div`
 
 export type SectionLinkProps = EuiListGroupItemProps;
 export function SectionLink(props: SectionLinkProps) {
-  return <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />;
+  return <EuiListGroupItem style={{ padding: 0 }} size={'xs'} {...props} />;
 }
 
 export function ActionMenuDivider() {

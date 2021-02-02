@@ -160,11 +160,55 @@ export function datafeedsProvider(mlClient: MlClient) {
     }, {} as { [id: string]: string });
   }
 
+  async function getDatafeedByJobId(
+    jobId: string,
+    excludeGenerated?: boolean
+  ): Promise<Datafeed | undefined> {
+    async function findDatafeed() {
+      // if the job was doesn't use the standard datafeedId format
+      // get all the datafeeds and match it with the jobId
+      const {
+        body: { datafeeds },
+      } = await mlClient.getDatafeeds<MlDatafeedsResponse>(
+        excludeGenerated ? { exclude_generated: true } : {}
+      );
+      for (const result of datafeeds) {
+        if (result.job_id === jobId) {
+          return result;
+        }
+      }
+    }
+    // if the job was created by the wizard,
+    // then we can assume it uses the standard format of the datafeedId
+    const assumedDefaultDatafeedId = `datafeed-${jobId}`;
+    try {
+      const {
+        body: { datafeeds: datafeedsResults },
+      } = await mlClient.getDatafeeds<MlDatafeedsResponse>({
+        datafeed_id: assumedDefaultDatafeedId,
+        ...(excludeGenerated ? { exclude_generated: true } : {}),
+      });
+      if (
+        Array.isArray(datafeedsResults) &&
+        datafeedsResults.length === 1 &&
+        datafeedsResults[0].job_id === jobId
+      ) {
+        return datafeedsResults[0];
+      } else {
+        return await findDatafeed();
+      }
+    } catch (e) {
+      // if assumedDefaultDatafeedId does not exist, ES will throw an error
+      return await findDatafeed();
+    }
+  }
+
   return {
     forceStartDatafeeds,
     stopDatafeeds,
     forceDeleteDatafeed,
     getDatafeedIdsByJobId,
     getJobIdsByDatafeedId,
+    getDatafeedByJobId,
   };
 }

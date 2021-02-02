@@ -17,7 +17,7 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,

@@ -11,4 +11,5 @@ export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
   license: 'trial',
   enableActionsProxy: false,
+  rejectUnauthorized: false,
 });

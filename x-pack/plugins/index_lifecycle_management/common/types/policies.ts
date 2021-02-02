@@ -20,6 +20,8 @@ export interface Phases {
   delete?: SerializedDeletePhase;
 }
 
+export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
+
 export interface PolicyFromES {
   modified_date: string;
   name: string;

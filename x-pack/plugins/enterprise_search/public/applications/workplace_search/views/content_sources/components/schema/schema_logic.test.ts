@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-} from '../../../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
@@ -198,14 +195,13 @@ describe('SchemaLogic', () => {
     describe('initializeSchema', () => {
       it('calls API and sets values (org)', async () => {
         const onInitializeSchemaSpy = jest.spyOn(SchemaLogic.actions, 'onInitializeSchema');
-        const promise = Promise.resolve(serverResponse);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverResponse));
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/org/sources/source123/schemas'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
@@ -213,22 +209,20 @@ describe('SchemaLogic', () => {
         AppLogic.values.isOrganization = false;
 
         const onInitializeSchemaSpy = jest.spyOn(SchemaLogic.actions, 'onInitializeSchema');
-        const promise = Promise.resolve(serverResponse);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverResponse));
         SchemaLogic.actions.initializeSchema();
 
         expect(http.get).toHaveBeenCalledWith(
           '/api/workplace_search/account/sources/source123/schemas'
         );
-        await promise;
+        await nextTick();
         expect(onInitializeSchemaSpy).toHaveBeenCalledWith(serverResponse);
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
         SchemaLogic.actions.initializeSchema();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -297,13 +291,12 @@ describe('SchemaLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject({ error: 'this is an error' });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject({ error: 'this is an error' }));
         SchemaLogic.actions.initializeSchemaFieldErrors(
           mostRecentIndexJob.activeReindexJobId,
           contentSource.id
         );
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith({
           error: 'this is an error',
@@ -352,8 +345,7 @@ describe('SchemaLogic', () => {
         it('calls API and sets values (org)', async () => {
           AppLogic.values.isOrganization = true;
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
@@ -362,7 +354,7 @@ describe('SchemaLogic', () => {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
@@ -371,8 +363,7 @@ describe('SchemaLogic', () => {
           AppLogic.values.isOrganization = false;
 
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, ADD);
 
           expect(http.post).toHaveBeenCalledWith(
@@ -381,16 +372,15 @@ describe('SchemaLogic', () => {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
         it('handles error', async () => {
           const onSchemaSetFormErrorsSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetFormErrors');
-          const promise = Promise.reject({ message: 'this is an error' });
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.reject({ message: 'this is an error' }));
           SchemaLogic.actions.setServerField(schema, ADD);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(onSchemaSetFormErrorsSpy).toHaveBeenCalledWith('this is an error');
         });
@@ -400,8 +390,7 @@ describe('SchemaLogic', () => {
         it('calls API and sets values (org)', async () => {
           AppLogic.values.isOrganization = true;
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
@@ -410,7 +399,7 @@ describe('SchemaLogic', () => {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
@@ -419,8 +408,7 @@ describe('SchemaLogic', () => {
           AppLogic.values.isOrganization = false;
 
           const onSchemaSetSuccessSpy = jest.spyOn(SchemaLogic.actions, 'onSchemaSetSuccess');
-          const promise = Promise.resolve(serverResponse);
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve(serverResponse));
           SchemaLogic.actions.setServerField(schema, UPDATE);
 
           expect(http.post).toHaveBeenCalledWith(
@@ -429,15 +417,14 @@ describe('SchemaLogic', () => {
               body: JSON.stringify({ ...schema }),
             }
           );
-          await promise;
+          await nextTick();
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.reject('this is an error'));
           SchemaLogic.actions.setServerField(schema, UPDATE);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });

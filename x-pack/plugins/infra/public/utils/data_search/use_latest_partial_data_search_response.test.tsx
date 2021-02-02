@@ -5,12 +5,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { Observable, of, Subject } from 'rxjs';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../../src/plugins/data/public';
-import { DataSearchRequestDescriptor } from './types';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
+import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 import { useLatestPartialDataSearchResponse } from './use_latest_partial_data_search_response';
 
 describe('useLatestPartialDataSearchResponse hook', () => {
@@ -19,25 +16,31 @@ describe('useLatestPartialDataSearchResponse hook', () => {
       abortController: new AbortController(),
       options: {},
       request: { params: 'firstRequestParam' },
-      response$: new Subject<IKibanaSearchResponse<string>>(),
+      response$: new BehaviorSubject<ParsedKibanaSearchResponse<string>>({
+        data: 'initial',
+        isRunning: true,
+        isPartial: true,
+        errors: [],
+      }),
     };
 
     const secondRequest = {
       abortController: new AbortController(),
       options: {},
       request: { params: 'secondRequestParam' },
-      response$: new Subject<IKibanaSearchResponse<string>>(),
+      response$: new BehaviorSubject<ParsedKibanaSearchResponse<string>>({
+        data: 'initial',
+        isRunning: true,
+        isPartial: true,
+        errors: [],
+      }),
     };
 
     const requests$ = new Subject<
-      DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>
+      ParsedDataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>
     >();
 
-    const { result } = renderHook(() =>
-      useLatestPartialDataSearchResponse(requests$, 'initial', (response) => ({
-        data: `projection of ${response}`,
-      }))
-    );
+    const { result } = renderHook(() => useLatestPartialDataSearchResponse(requests$));
 
     expect(result).toHaveProperty('current.isRequestRunning', false);
     expect(result).toHaveProperty('current.latestResponseData', undefined);
@@ -52,37 +55,43 @@ describe('useLatestPartialDataSearchResponse hook', () => {
 
     // first response of the first request arrives
     act(() => {
-      firstRequest.response$.next({ rawResponse: 'request-1-response-1', isRunning: true });
+      firstRequest.response$.next({
+        data: 'request-1-response-1',
+        isRunning: true,
+        isPartial: true,
+        errors: [],
+      });
     });
 
     expect(result).toHaveProperty('current.isRequestRunning', true);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-1-response-1'
-    );
+    expect(result).toHaveProperty('current.latestResponseData', 'request-1-response-1');
 
     // second request is started before the second response of the first request arrives
     act(() => {
       requests$.next(secondRequest);
-      secondRequest.response$.next({ rawResponse: 'request-2-response-1', isRunning: true });
+      secondRequest.response$.next({
+        data: 'request-2-response-1',
+        isRunning: true,
+        isPartial: true,
+        errors: [],
+      });
     });
 
     expect(result).toHaveProperty('current.isRequestRunning', true);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-2-response-1'
-    );
+    expect(result).toHaveProperty('current.latestResponseData', 'request-2-response-1');
 
     // second response of the second request arrives
     act(() => {
-      secondRequest.response$.next({ rawResponse: 'request-2-response-2', isRunning: false });
+      secondRequest.response$.next({
+        data: 'request-2-response-2',
+        isRunning: false,
+        isPartial: false,
+        errors: [],
+      });
     });
 
     expect(result).toHaveProperty('current.isRequestRunning', false);
-    expect(result).toHaveProperty(
-      'current.latestResponseData',
-      'projection of request-2-response-2'
-    );
+    expect(result).toHaveProperty('current.latestResponseData', 'request-2-response-2');
   });
 
   it("unsubscribes from the latest request's response observable on unmount", () => {
@@ -92,20 +101,16 @@ describe('useLatestPartialDataSearchResponse hook', () => {
       abortController: new AbortController(),
       options: {},
       request: { params: 'firstRequestParam' },
-      response$: new Observable<IKibanaSearchResponse<string>>(() => {
+      response$: new Observable<ParsedKibanaSearchResponse<string>>(() => {
         return onUnsubscribe;
       }),
     };
 
-    const requests$ = of<DataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(
+    const requests$ = of<ParsedDataSearchRequestDescriptor<IKibanaSearchRequest<string>, string>>(
       firstRequest
     );
 
-    const { unmount } = renderHook(() =>
-      useLatestPartialDataSearchResponse(requests$, 'initial', (response) => ({
-        data: `projection of ${response}`,
-      }))
-    );
+    const { unmount } = renderHook(() => useLatestPartialDataSearchResponse(requests$));
 
     expect(onUnsubscribe).not.toHaveBeenCalled();
 

@@ -8,7 +8,8 @@
 
 import moment from 'moment';
 import { getTimerange } from './get_timerange';
-import { ReqFacade, VisPayload } from '../../..';
+import type { ReqFacade } from '../../search_strategies';
+import type { VisPayload } from '../../../../common/types';
 
 describe('getTimerange(req)', () => {
   test('should return a moment object for to and from', () => {
