@@ -165,7 +165,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   helpText={
                     <FormattedMessage
                       id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
-                      defaultMessage="Can't find a metric? {documentationLink}"
+                      defaultMessage="Can't find a metric? {documentationLink}."
                       values={{
                         documentationLink: (
                           <EuiLink

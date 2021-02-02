@@ -82,7 +82,7 @@ describe('ExpressionRow', () => {
     expect(valueMatch).toBeTruthy();
   });
 
-  it('should render a helpTExt for the of expression', async () => {
+  it('should render a helpText for the of expression', async () => {
     const expression = {
       metric: 'system.load.1',
       comparator: Comparator.GT,

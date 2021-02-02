@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExpressionRow should render a helpTExt for the of expression 1`] = `
+exports[`ExpressionRow should render a helpText for the of expression 1`] = `
 <FormattedMessage
-  defaultMessage="Can't find a metric? {documentationLink}"
+  defaultMessage="Can't find a metric? {documentationLink}."
   id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
   values={
     Object {
