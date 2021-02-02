@@ -10,7 +10,7 @@ import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/publi
 
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../kibana_utils/public';
-import { MapsLegacyConfig } from '../../maps_legacy/config';
+import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
@@ -24,13 +24,14 @@ export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
   CoreStart['injectedMetadata']
 >('InjectedMetadata');
 
+export const [
+  getMapServiceSettings,
+  setMapServiceSettings,
+] = createGetterSetter<MapServiceSettings>('MapServiceSettings');
+
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
-
-export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<MapsLegacyConfig>(
-  'MapsLegacyConfig'
-);
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;

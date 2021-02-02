@@ -78,7 +78,7 @@ export const createVegaVisualization = ({
         };
 
         if (vegaParser.useMap) {
-          const { VegaMapView } = await import('./vega_view/vega_map_view');
+          const { VegaMapView } = await import('./vega_view/vega_map_view/view');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {
           const { VegaView: VegaViewClass } = await import('./vega_view/vega_view');

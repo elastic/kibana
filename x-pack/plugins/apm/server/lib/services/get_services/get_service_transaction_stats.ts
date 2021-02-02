@@ -22,6 +22,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -35,32 +36,15 @@ interface AggregationParams {
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
-function calculateAvgDuration({
-  value,
-  deltaAsMinutes,
-}: {
-  value: number;
-  deltaAsMinutes: number;
-}) {
-  return value / deltaAsMinutes;
-}
-
 export async function getServiceTransactionStats({
   setup,
   searchAggregatedTransactions,
 }: AggregationParams) {
   const { apmEventClient, start, end, esFilter } = setup;
 
-  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+  const outcomes = getOutcomeAggregation();
 
   const metrics = {
-    real_document_count: {
-      value_count: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      },
-    },
     avg_duration: {
       avg: {
         field: getTransactionDurationFieldForAggregatedTransactions(
@@ -102,7 +86,6 @@ export async function getServiceTransactionStats({
             transactionType: {
               terms: {
                 field: TRANSACTION_TYPE,
-                order: { real_document_count: 'desc' },
               },
               aggs: {
                 ...metrics,
@@ -138,8 +121,6 @@ export async function getServiceTransactionStats({
       },
     },
   });
-
-  const deltaAsMinutes = (setup.end - setup.start) / 1000 / 60;
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
@@ -179,16 +160,18 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionsPerMinute: {
-          value: calculateAvgDuration({
-            value: topTransactionTypeBucket.real_document_count.value,
-            deltaAsMinutes,
+          value: calculateThroughput({
+            start,
+            end,
+            value: topTransactionTypeBucket.doc_count,
           }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: calculateAvgDuration({
-                value: dateBucket.real_document_count.value,
-                deltaAsMinutes,
+              y: calculateThroughput({
+                start,
+                end,
+                value: dateBucket.doc_count,
               }),
             })
           ),
