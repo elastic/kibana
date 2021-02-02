@@ -26,32 +26,15 @@ Object {
       "name": "invalidMapping",
     },
     Object {
-      "id": "nested.field",
+      "id": "nested",
       "meta": Object {
-        "field": "nested.field",
+        "field": "nested",
         "index": "test-index",
-        "params": Object {
-          "id": "number",
-        },
-        "type": "number",
+        "params": undefined,
+        "type": "object",
       },
-      "name": "nested.field",
+      "name": "nested",
     },
-  ],
-  "rows": Array [
-    Object {
-      "fieldTest": 123,
-      "invalidMapping": 345,
-      "nested.field": 123,
-    },
-  ],
-  "type": "datatable",
-}
-`;
-
-exports[`tabifyDocs converts source if option is set 1`] = `
-Object {
-  "columns": Array [
     Object {
       "id": "sourceTest",
       "meta": Object {
@@ -67,6 +50,77 @@ Object {
   ],
   "rows": Array [
     Object {
+      "fieldTest": 123,
+      "invalidMapping": 345,
+      "nested": Array [
+        Object {
+          "field": 123,
+        },
+      ],
+      "sourceTest": 123,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`tabifyDocs converts source if option is set 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "fieldTest",
+      "meta": Object {
+        "field": "fieldTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "fieldTest",
+    },
+    Object {
+      "id": "invalidMapping",
+      "meta": Object {
+        "field": "invalidMapping",
+        "index": "test-index",
+        "params": undefined,
+        "type": "number",
+      },
+      "name": "invalidMapping",
+    },
+    Object {
+      "id": "nested",
+      "meta": Object {
+        "field": "nested",
+        "index": "test-index",
+        "params": undefined,
+        "type": "object",
+      },
+      "name": "nested",
+    },
+    Object {
+      "id": "sourceTest",
+      "meta": Object {
+        "field": "sourceTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "sourceTest",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "fieldTest": 123,
+      "invalidMapping": 345,
+      "nested": Array [
+        Object {
+          "field": 123,
+        },
+      ],
       "sourceTest": 123,
     },
   ],
@@ -109,6 +163,18 @@ Object {
       },
       "name": "nested",
     },
+    Object {
+      "id": "sourceTest",
+      "meta": Object {
+        "field": "sourceTest",
+        "index": "test-index",
+        "params": Object {
+          "id": "number",
+        },
+        "type": "number",
+      },
+      "name": "sourceTest",
+    },
   ],
   "rows": Array [
     Object {
@@ -119,6 +185,7 @@ Object {
           "field": 123,
         },
       ],
+      "sourceTest": 123,
     },
   ],
   "type": "datatable",
@@ -149,21 +216,36 @@ Object {
       "name": "invalidMapping",
     },
     Object {
-      "id": "nested.field",
+      "id": "nested",
       "meta": Object {
-        "field": "nested.field",
+        "field": "nested",
+        "index": undefined,
+        "params": undefined,
+        "type": "object",
+      },
+      "name": "nested",
+    },
+    Object {
+      "id": "sourceTest",
+      "meta": Object {
+        "field": "sourceTest",
         "index": undefined,
         "params": undefined,
         "type": "number",
       },
-      "name": "nested.field",
+      "name": "sourceTest",
     },
   ],
   "rows": Array [
     Object {
       "fieldTest": 123,
       "invalidMapping": 345,
-      "nested.field": 123,
+      "nested": Array [
+        Object {
+          "field": 123,
+        },
+      ],
+      "sourceTest": 123,
     },
   ],
   "type": "datatable",

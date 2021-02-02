@@ -64,6 +64,13 @@ export const analyticsIdSchema = schema.object({
   analyticsId: schema.string(),
 });
 
+export const analyticsQuerySchema = schema.object({
+  /**
+   * Analytics Query
+   */
+  excludeGenerated: schema.maybe(schema.boolean()),
+});
+
 export const deleteDataFrameAnalyticsJobSchema = schema.object({
   /**
    * Analytics Destination Index

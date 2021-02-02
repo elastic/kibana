@@ -30,8 +30,9 @@ export function MockUrlParamsContextProvider({
   return (
     <UrlParamsContext.Provider
       value={{
-        urlParams,
+        rangeId: 0,
         refreshTimeRange,
+        urlParams,
         uiFilters: useUiFilters(urlParams),
       }}
       children={children}
