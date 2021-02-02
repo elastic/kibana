@@ -51,6 +51,7 @@ export interface OauthParams {
   code: string;
   state: string;
   session_state: string;
+  oauth_verifier?: string;
 }
 
 export interface AddSourceActions {
