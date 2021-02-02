@@ -306,7 +306,7 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(asApiResponse({}));
+      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
     });
   });
