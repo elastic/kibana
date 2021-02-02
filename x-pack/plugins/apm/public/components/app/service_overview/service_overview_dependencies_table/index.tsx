@@ -26,7 +26,6 @@ import {
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -167,26 +166,29 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     },
   ];
 
-  const { data = [], status } = useFetcher(() => {
-    if (!start || !end) {
-      return;
-    }
+  const { data = [], status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
 
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-      params: {
-        path: {
-          serviceName,
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: {
+            serviceName,
+          },
+          query: {
+            start,
+            end,
+            environment: environment || ENVIRONMENT_ALL.value,
+            numBuckets: 20,
+          },
         },
-        query: {
-          start,
-          end,
-          environment: environment || ENVIRONMENT_ALL.value,
-          numBuckets: 20,
-        },
-      },
-    });
-  }, [start, end, serviceName, environment]);
+      });
+    },
+    [start, end, serviceName, environment]
+  );
 
   // need top-level sortable fields for the managed table
   const items = data.map((item) => ({

@@ -26,7 +26,7 @@ export function RelatedEventsFetcher(
 
     const newParams = selectors.panelViewAndParameters(state);
     const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     const oldParams = last;
     const timeRangeFilters = selectors.timeRangeFilters(state);

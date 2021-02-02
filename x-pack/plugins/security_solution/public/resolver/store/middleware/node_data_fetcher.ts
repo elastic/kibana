@@ -37,7 +37,7 @@ export function NodeDataFetcher(
      * This gets the visible nodes that we haven't already requested or received data for
      */
     const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     if (newIDsToRequest.size <= 0) {
       return;

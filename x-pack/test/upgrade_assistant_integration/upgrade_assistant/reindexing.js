@@ -71,6 +71,8 @@ export default function ({ getService }) {
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
       expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings.properties).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect((await es.count({ index: lastState.newIndexName })).body.count).to.be(3);
 

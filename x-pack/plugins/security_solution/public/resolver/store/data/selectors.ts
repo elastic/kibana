@@ -70,7 +70,7 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
-const currentIndices = (state: DataState): string[] | undefined => {
+const lastResponseIndices = (state: DataState): string[] | undefined => {
   return state.tree?.lastResponse?.parameters?.indices;
 };
 
@@ -339,13 +339,17 @@ export const timeRangeFilters = createSelector(
 /**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(
-  treeParametersToFetch,
-  currentIndices,
-  (parameters, indices) => {
-    return parameters?.indices ?? indices ?? [];
-  }
-);
+export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+  return parameters?.indices ?? [];
+});
+
+/**
+ * Because the middlewares run in order, panel requests should use the indices
+ * from the most recent tree response.
+ */
+export const eventIndices = createSelector(lastResponseIndices, (lastIndices): string[] => {
+  return lastIndices ?? [];
+});
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
