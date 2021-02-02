@@ -212,7 +212,7 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
-      showSaveQuery={services.visualizeCapabilities.saveQuery}
+      showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
     />
