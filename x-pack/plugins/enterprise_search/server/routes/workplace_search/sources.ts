@@ -30,9 +30,9 @@ const oAuthConfigSchema = schema.object({
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
   service_type: schema.string(),
-  private_key: schema.string(),
-  public_key: schema.string(),
-  consumer_key: schema.string(),
+  private_key: schema.maybe(schema.string()),
+  public_key: schema.maybe(schema.string()),
+  consumer_key: schema.maybe(schema.string()),
 });
 
 const displayFieldSchema = schema.object({
@@ -251,6 +251,11 @@ export function registerAccountPrepareSourcesRoute({
       validate: {
         params: schema.object({
           serviceType: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          index_permissions: schema.boolean(),
+          subdomain: schema.maybe(schema.string()),
         }),
       },
     },
@@ -592,6 +597,11 @@ export function registerOrgPrepareSourcesRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          index_permissions: schema.boolean(),
+          subdomain: schema.maybe(schema.string()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -738,6 +748,30 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/api/workplace_search/org/settings/connectors',
       validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oAuthConfigSchema,
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oAuthConfigSchema,
+      },
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/settings/connectors',

@@ -39,6 +39,7 @@ import {
   registerOrgSourceReindexJobStatusRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
+  registerOauthConnectorParamsRoute,
 } from './sources';
 
 const mockConfig = {
@@ -1092,6 +1093,68 @@ describe('sources routes', () => {
     });
   });
 
+  describe('POST /api/workplace_search/org/settings/connectors', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/settings/connectors',
+        payload: 'body',
+      });
+
+      registerOrgSourceOauthConfigurationsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/settings/connectors',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: mockConfig };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('PUT /api/workplace_search/org/settings/connectors', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/workplace_search/org/settings/connectors',
+        payload: 'body',
+      });
+
+      registerOrgSourceOauthConfigurationsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/settings/connectors',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: mockConfig };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/settings/connectors/{serviceType}', () => {
     let mockRouter: MockRouter;
 
@@ -1196,6 +1259,43 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/settings/connectors/:serviceType',
+      });
+    });
+  });
+
+  describe('GET /api/workplace_search/sources/create', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/sources/create',
+        payload: 'query',
+      });
+
+      registerOauthConnectorParamsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    const query = {
+      code: 'foo',
+      state: '{foo:"bar"}',
+      session_state: 'baz',
+    };
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/create',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { query };
+        mockRouter.shouldValidate(request);
       });
     });
   });
