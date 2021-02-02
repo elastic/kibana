@@ -41,7 +41,7 @@ export class IndexMgmtUIPlugin {
           usageCollection,
           params,
           this.extensionsService,
-          fleet
+          Boolean(fleet)
         );
       },
     });
