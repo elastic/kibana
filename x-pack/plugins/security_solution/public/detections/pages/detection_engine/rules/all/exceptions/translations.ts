@@ -137,3 +137,10 @@ export const referenceErrorMessage = (referenceCount: number) =>
       'This exception list is associated with ({referenceCount}) {referenceCount, plural, =1 {rule} other {rules}}. Removing this exception list will also remove its reference from the associated rules.',
     values: { referenceCount },
   });
+
+export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.searchPlaceholder',
+  {
+    defaultMessage: 'e.g. Example List Name',
+  }
+);

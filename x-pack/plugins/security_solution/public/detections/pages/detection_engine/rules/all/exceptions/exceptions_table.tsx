@@ -31,6 +31,7 @@ import { useAllExceptionLists } from './use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
+import { getSearchFilters } from '../helpers';
 
 // Known lost battle with Eui :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -228,33 +229,24 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     }, []);
 
     const handleSearch = useCallback(
-      ({ query, queryText }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): void => {
-        try {
-          const fieldClauses = query?.ast.getFieldClauses();
-          const filterOptions = {
-            name: null,
-            list_id: null,
-            created_by: null,
-            type: null,
-            tags: null,
-          };
-          if (fieldClauses != null && fieldClauses.length > 0) {
-            const filtersReduced = fieldClauses.reduce<Record<string, string | null>>(
-              (acc, { field, value }) => {
-                acc[field] = `${value}`;
-
-                return acc;
-              },
-              filterOptions
-            );
-
-            setFilters(filtersReduced);
-          } else {
-            setFilters({ name: queryText });
-          }
-        } catch {
-          setFilters({ name: queryText });
-        }
+      async ({
+        query,
+        queryText,
+      }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+        const filterOptions = {
+          name: null,
+          list_id: null,
+          created_by: null,
+          type: null,
+          tags: null,
+        };
+        const searchTerms = getSearchFilters({
+          defaultSearchTerm: 'name',
+          filterOptions,
+          query,
+          searchValue: queryText,
+        });
+        setFilters(searchTerms);
       },
       []
     );

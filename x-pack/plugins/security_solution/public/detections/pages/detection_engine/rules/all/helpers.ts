@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Query } from '@elastic/eui';
 import {
   BulkRuleResponse,
   RuleResponseBuckets,
@@ -36,4 +37,37 @@ export const showRulesTable = ({
 
 export const caseInsensitiveSort = (tags: string[]): string[] => {
   return tags.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase())); // Case insensitive
+};
+
+export const getSearchFilters = ({
+  query,
+  searchValue,
+  filterOptions,
+  defaultSearchTerm,
+}: {
+  query: Query | null;
+  searchValue: string;
+  filterOptions: Record<string, string | null>;
+  defaultSearchTerm: string;
+}): Record<string, string | null> => {
+  try {
+    const fieldClauses = query?.ast.getFieldClauses();
+
+    if (fieldClauses != null && fieldClauses.length > 0) {
+      const filtersReduced = fieldClauses.reduce<Record<string, string | null>>(
+        (acc, { field, value }) => {
+          acc[field] = `${value}`;
+
+          return acc;
+        },
+        filterOptions
+      );
+
+      return filtersReduced;
+    }
+
+    return { [defaultSearchTerm]: searchValue };
+  } catch {
+    return { [defaultSearchTerm]: searchValue };
+  }
 };

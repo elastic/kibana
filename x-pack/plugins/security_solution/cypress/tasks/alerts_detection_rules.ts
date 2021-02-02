@@ -82,10 +82,6 @@ export const goToRuleDetails = () => {
   cy.get(RULE_NAME).click({ force: true });
 };
 
-export const goToRuleDetailsByRuleName = (name: string) => {
-  cy.get(RULE_NAME).contains(name).click({ force: true });
-};
-
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
 };

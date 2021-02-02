@@ -13,37 +13,37 @@ interface ExceptionListsTableSearchProps {
   onSearch: (args: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => void;
 }
 
-export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
-  const schema = {
-    strict: true,
-    fields: {
-      created_by: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      type: {
-        type: 'string',
-      },
-      list_id: {
-        type: 'string',
-      },
-      tags: {
-        type: 'string',
-      },
+export const EXCEPTIONS_SEARCH_SCHEMA = {
+  strict: true,
+  fields: {
+    created_by: {
+      type: 'string',
     },
-  };
+    name: {
+      type: 'string',
+    },
+    type: {
+      type: 'string',
+    },
+    list_id: {
+      type: 'string',
+    },
+    tags: {
+      type: 'string',
+    },
+  },
+};
 
+export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
   return (
     <EuiSearchBar
       data-test-subj="exceptionsHeaderSearch"
       aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
       onChange={onSearch}
       box={{
-        placeholder: 'e.g. Example List Name',
+        placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
         incremental: false,
-        schema,
+        schema: EXCEPTIONS_SEARCH_SCHEMA,
       }}
     />
   );
