@@ -15,7 +15,7 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
         defaultMessage:
-          'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
+          'how long it takes to reach the rollover criteria in the hot phase can vary.',
       }
     ),
     searchableSnapshotInHotPhase: {

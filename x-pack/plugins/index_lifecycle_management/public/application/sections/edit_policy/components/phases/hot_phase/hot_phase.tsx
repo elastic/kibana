@@ -16,7 +16,6 @@ import {
   EuiTextColor,
   EuiSwitch,
   EuiIconTip,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
@@ -68,7 +67,19 @@ export const HotPhase: FunctionComponent = () => {
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
                   defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
-                />{' '}
+                />
+              </p>
+            </EuiTextColor>
+            <EuiSpacer />
+            <EuiTextColor color="subdued">
+              <p>
+                <strong>
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescriptionNote',
+                    { defaultMessage: 'Note: ' }
+                  )}
+                </strong>
+                {i18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}{' '}
                 <LearnMoreLink
                   text={
                     <FormattedMessage
@@ -80,10 +91,6 @@ export const HotPhase: FunctionComponent = () => {
                 />
               </p>
             </EuiTextColor>
-            <EuiSpacer />
-            <EuiIcon type="iInCircle" />
-            &nbsp;
-            {i18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}
             <EuiSpacer />
             <UseField<boolean> path={isUsingDefaultRolloverPath}>
               {(field) => (
