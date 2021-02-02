@@ -94,6 +94,7 @@
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/cypress/lodash": "4.17.13",
     "**/geojson-rewind/minimist": "^1.2.5",
+    "**/growl": "1.10.5",
     "**/grunt/js-yaml": "^3.13.1",
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
     "**/istanbul-instrumenter-loader/schema-utils": "1.0.0",
