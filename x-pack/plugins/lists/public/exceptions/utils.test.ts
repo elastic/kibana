@@ -134,28 +134,28 @@ describe('Exceptions utils', () => {
     test('it returns filter to search for "exception-list" namespace trusted apps', () => {
       const filter = getTrustedAppsFilter(true, ['exception-list']);
 
-      expect(filter).toEqual('(exception-list.attributes.list_id: endpoint_trusted_apps)');
+      expect(filter).toEqual('(exception-list.attributes.list_id: endpoint_trusted_apps*)');
     });
 
     test('it returns filter to search for "exception-list" and "agnostic" namespace trusted apps', () => {
       const filter = getTrustedAppsFilter(true, ['exception-list', 'exception-list-agnostic']);
 
       expect(filter).toEqual(
-        '(exception-list.attributes.list_id: endpoint_trusted_apps OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+        '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
       );
     });
 
     test('it returns filter to exclude "exception-list" namespace trusted apps', () => {
       const filter = getTrustedAppsFilter(false, ['exception-list']);
 
-      expect(filter).toEqual('(not exception-list.attributes.list_id: endpoint_trusted_apps)');
+      expect(filter).toEqual('(not exception-list.attributes.list_id: endpoint_trusted_apps*)');
     });
 
     test('it returns filter to exclude "exception-list" and "agnostic" namespace trusted apps', () => {
       const filter = getTrustedAppsFilter(false, ['exception-list', 'exception-list-agnostic']);
 
       expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+        '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
       );
     });
   });
@@ -165,20 +165,20 @@ describe('Exceptions utils', () => {
       test('it properly formats when no filters passed and "showTrustedApps" is false', () => {
         const filter = getFilters({}, ['single'], false);
 
-        expect(filter).toEqual('(not exception-list.attributes.list_id: endpoint_trusted_apps)');
+        expect(filter).toEqual('(not exception-list.attributes.list_id: endpoint_trusted_apps*)');
       });
 
       test('it properly formats when no filters passed and "showTrustedApps" is true', () => {
         const filter = getFilters({}, ['single'], true);
 
-        expect(filter).toEqual('(exception-list.attributes.list_id: endpoint_trusted_apps)');
+        expect(filter).toEqual('(exception-list.attributes.list_id: endpoint_trusted_apps*)');
       });
 
       test('it properly formats when filters passed and "showTrustedApps" is false', () => {
         const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['single'], false);
 
         expect(filter).toEqual(
-          '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -186,7 +186,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['single'], true);
 
         expect(filter).toEqual(
-          '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
     });
@@ -196,7 +196,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({}, ['agnostic'], false);
 
         expect(filter).toEqual(
-          '(not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -204,7 +204,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({}, ['agnostic'], true);
 
         expect(filter).toEqual(
-          '(exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -212,7 +212,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['agnostic'], false);
 
         expect(filter).toEqual(
-          '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -220,7 +220,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['agnostic'], true);
 
         expect(filter).toEqual(
-          '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
     });
@@ -230,7 +230,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({}, ['single', 'agnostic'], false);
 
         expect(filter).toEqual(
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -238,7 +238,7 @@ describe('Exceptions utils', () => {
         const filter = getFilters({}, ['single', 'agnostic'], true);
 
         expect(filter).toEqual(
-          '(exception-list.attributes.list_id: endpoint_trusted_apps OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -250,7 +250,7 @@ describe('Exceptions utils', () => {
         );
 
         expect(filter).toEqual(
-          '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name:Sample OR exception-list-agnostic.attributes.name:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name:Sample OR exception-list-agnostic.attributes.name:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
 
@@ -262,7 +262,7 @@ describe('Exceptions utils', () => {
         );
 
         expect(filter).toEqual(
-          '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name:Sample OR exception-list-agnostic.attributes.name:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps)'
+          '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name:Sample OR exception-list-agnostic.attributes.name:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
         );
       });
     });
