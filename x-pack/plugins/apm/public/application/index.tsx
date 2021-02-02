@@ -12,7 +12,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
@@ -35,7 +36,7 @@ import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
 
-const MainContainer = styled.div`
+const MainContainer = euiStyled.div`
   height: 100%;
 `;
 

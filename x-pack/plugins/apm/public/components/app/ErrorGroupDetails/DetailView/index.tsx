@@ -20,7 +20,7 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
@@ -42,14 +42,14 @@ import {
 } from './ErrorTabs';
 import { ExceptionStacktrace } from './ExceptionStacktrace';
 
-const HeaderContainer = styled.div`
+const HeaderContainer = euiStyled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: ${px(unit)};
 `;
 
-const TransactionLinkName = styled.div`
+const TransactionLinkName = euiStyled.div`
   margin-left: ${px(units.half)};
   display: inline-block;
   vertical-align: middle;

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 
-const Button = styled(EuiButtonEmpty).attrs(() => ({
+const Button = euiStyled(EuiButtonEmpty).attrs(() => ({
   contentProps: {
     className: 'alignLeft',
   },

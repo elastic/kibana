@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -17,23 +17,23 @@ import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
-const ControlsContainer = styled('div')`
+const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
   position: absolute;
   top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
-const Button = styled(EuiButtonIcon)`
+const Button = euiStyled(EuiButtonIcon)`
   display: block;
   margin: ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 
-const ZoomInButton = styled(Button)`
+const ZoomInButton = euiStyled(Button)`
   margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const Panel = styled(EuiPanel)`
+const Panel = euiStyled(EuiPanel)`
   margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 

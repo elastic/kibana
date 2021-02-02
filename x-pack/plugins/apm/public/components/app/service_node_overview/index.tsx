@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
@@ -26,7 +26,7 @@ const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
 
-const ServiceNodeName = styled.div`
+const ServiceNodeName = euiStyled.div`
   ${truncate(px(8 * unit))}
 `;
 

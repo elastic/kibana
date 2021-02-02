@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../../../../../../style/variables';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 
-const ContextUrl = styled.div`
+const ContextUrl = euiStyled.div`
   padding: ${px(units.half)} ${px(unit)};
   background: ${({ theme }) => theme.eui.euiColorLightestShade};
   border-radius: ${borderRadius};

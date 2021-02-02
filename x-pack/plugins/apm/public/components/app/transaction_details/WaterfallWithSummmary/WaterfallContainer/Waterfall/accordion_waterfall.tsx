@@ -9,7 +9,7 @@ import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { Location } from 'history';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './WaterfallItem';
 import {
@@ -32,7 +32,7 @@ interface AccordionWaterfallProps {
   onClickWaterfallItem: (item: IWaterfallItem) => void;
 }
 
-const StyledAccordion = styled(EuiAccordion).withConfig({
+const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   shouldForwardProp: (prop) =>
     !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
 })<
@@ -86,7 +86,7 @@ const StyledAccordion = styled(EuiAccordion).withConfig({
   }}
 `;
 
-const WaterfallItemContainer = styled.div`
+const WaterfallItemContainer = euiStyled.div`
   position: absolute;
   width: 100%;
   left: 0;

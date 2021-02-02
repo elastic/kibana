@@ -8,7 +8,7 @@
 import { EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -46,12 +46,12 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(ServiceOrTransactionsOverviewLink)`
+const AppLink = euiStyled(ServiceOrTransactionsOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-const ToolTipWrapper = styled.span`
+const ToolTipWrapper = euiStyled.span`
   width: 100%;
   .apmServiceList__serviceNameTooltip {
     width: 100%;

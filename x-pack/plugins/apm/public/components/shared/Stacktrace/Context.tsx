@@ -13,7 +13,7 @@ import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 
@@ -21,13 +21,13 @@ SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);
 SyntaxHighlighter.registerLanguage('ruby', ruby);
 
-const ContextContainer = styled.div`
+const ContextContainer = euiStyled.div`
   position: relative;
   border-radius: ${borderRadius};
 `;
 
 const LINE_HEIGHT = units.eighth * 9;
-const LineHighlight = styled.div<{ lineNumber: number }>`
+const LineHighlight = euiStyled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
   height: ${px(units.eighth * 9)};
@@ -36,7 +36,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   background-color: ${({ theme }) => tint(0.1, theme.eui.euiColorWarning)};
 `;
 
-const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
+const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -47,7 +47,7 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
       : theme.eui.euiColorLightestShade};
 `;
 
-const LineNumber = styled.div<{ highlight: boolean }>`
+const LineNumber = euiStyled.div<{ highlight: boolean }>`
   position: relative;
   min-width: ${px(units.eighth * 21)};
   padding-left: ${px(units.half)};
@@ -64,7 +64,7 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   }
 `;
 
-const LineContainer = styled.div`
+const LineContainer = euiStyled.div`
   overflow: auto;
   margin: 0 0 0 ${px(units.eighth * 21)};
   padding: 0;
@@ -75,7 +75,7 @@ const LineContainer = styled.div`
   }
 `;
 
-const Line = styled.pre`
+const Line = euiStyled.pre`
   // Override all styles
   margin: 0;
   color: inherit;
@@ -87,7 +87,7 @@ const Line = styled.pre`
   line-height: ${px(LINE_HEIGHT)};
 `;
 
-const Code = styled.code`
+const Code = euiStyled.code`
   position: relative;
   padding: 0;
   margin: 0;

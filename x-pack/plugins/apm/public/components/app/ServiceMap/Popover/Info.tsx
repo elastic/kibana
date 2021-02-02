@@ -13,24 +13,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
-const ItemRow = styled.div`
+const ItemRow = euiStyled.div`
   line-height: 2;
 `;
 
-const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
+const SubduedDescriptionListTitle = euiStyled(EuiDescriptionListTitle)`
   &&& {
     color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   }
 `;
 
-const ExternalResourcesList = styled.section`
+const ExternalResourcesList = euiStyled.section`
   max-height: 360px;
   overflow: auto;
 `;

@@ -7,12 +7,12 @@
 
 import { EuiTabs } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 
 // Since our `EuiTab` components have `APMLink`s inside of them and not just
 // `href`s, we need to override the color of the links inside or they will all
 // be the primary color.
-const StyledTabs = styled(EuiTabs)`
+const StyledTabs = euiStyled(EuiTabs)`
   padding: ${({ theme }) => `${theme.eui.gutterTypes.gutterMedium}`};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
 `;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { px } from '../../../../../style/variables';
 import { AgentMarker } from './AgentMarker';
 import { ErrorMarker } from './ErrorMarker';
@@ -18,7 +18,7 @@ interface Props {
   x: number;
 }
 
-const MarkerContainer = styled.div`
+const MarkerContainer = euiStyled.div`
   position: absolute;
   bottom: 0;
 `;

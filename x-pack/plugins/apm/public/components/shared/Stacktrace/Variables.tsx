@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -14,7 +14,7 @@ import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe
 import { KeyValueTable } from '../KeyValueTable';
 import { flattenObject } from '../../../utils/flattenObject';
 
-const VariablesContainer = styled.div`
+const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: 0 0 ${borderRadius} ${borderRadius};
   padding: ${px(units.half)} ${px(unit)};

@@ -7,7 +7,7 @@
 
 import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import {
   Stackframe as StackframeType,
   StackframeWithLineContext,
@@ -22,7 +22,7 @@ import { FrameHeading } from './FrameHeading';
 import { Variables } from './Variables';
 import { px, units } from '../../../style/variables';
 
-const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
+const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
@@ -35,7 +35,7 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
 `;
 
 // Indent the non-context frames the same amount as the accordion control
-const NoContextFrameHeadingWrapper = styled.div`
+const NoContextFrameHeadingWrapper = euiStyled.div`
   margin-left: ${px(units.unit + units.half + units.quarter)};
 `;
 

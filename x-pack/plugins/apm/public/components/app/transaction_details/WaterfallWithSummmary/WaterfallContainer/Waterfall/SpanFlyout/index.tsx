@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
@@ -72,12 +72,12 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const SpanBadge = (styled(EuiBadge)`
+const SpanBadge = (euiStyled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
 ` as unknown) as typeof EuiBadge;
 
-const HttpInfoContainer = styled('div')`
+const HttpInfoContainer = euiStyled('div')`
   margin-right: ${px(units.quarter)};
 `;
 

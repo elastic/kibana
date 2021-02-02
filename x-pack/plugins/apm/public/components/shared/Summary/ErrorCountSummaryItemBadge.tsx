@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { EuiBadge } from '@elastic/eui';
 import { useTheme } from '../../../hooks/use_theme';
 import { px } from '../../../../public/style/variables';
@@ -17,7 +17,7 @@ interface Props {
   count: number;
 }
 
-const Badge = (styled(EuiBadge)`
+const Badge = (euiStyled(EuiBadge)`
   margin-top: ${px(units.eighth)};
 ` as unknown) as typeof EuiBadge;
 

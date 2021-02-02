@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +33,7 @@ interface IBarStyleProps {
   color: string;
 }
 
-const Container = styled.div<IContainerStyleProps>`
+const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
@@ -50,7 +50,7 @@ const Container = styled.div<IContainerStyleProps>`
   }
 `;
 
-const ItemBar = styled.div<IBarStyleProps>`
+const ItemBar = euiStyled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
   height: ${px(unit)};
@@ -58,7 +58,7 @@ const ItemBar = styled.div<IBarStyleProps>`
   background-color: ${(props) => props.color};
 `;
 
-const ItemText = styled.span`
+const ItemText = euiStyled.span`
   position: absolute;
   right: 0;
   display: flex;

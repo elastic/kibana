@@ -8,10 +8,10 @@
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { px, units } from '../../../../../../../style/variables';
 
-const ToggleButtonContainer = styled.div`
+const ToggleButtonContainer = euiStyled.div`
   margin-top: ${px(units.half)};
   user-select: none;
 `;

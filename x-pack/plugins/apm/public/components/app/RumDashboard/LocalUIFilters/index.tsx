@@ -13,7 +13,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { Filter } from './Filter';
 import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
@@ -26,7 +26,7 @@ interface Props {
   shouldFetch?: boolean;
 }
 
-const ButtonWrapper = styled.div`
+const ButtonWrapper = euiStyled.div`
   display: inline-block;
 `;
 

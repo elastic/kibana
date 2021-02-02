@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { i18n } from '@kbn/i18n';
 import { unit, px, truncate } from '../../../../../style/variables';
 
-const BadgeText = styled.div`
+const BadgeText = euiStyled.div`
   display: inline-block;
   ${truncate(px(unit * 8))};
   vertical-align: middle;

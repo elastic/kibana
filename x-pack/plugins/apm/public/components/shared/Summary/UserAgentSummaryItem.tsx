@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from 'src/plugins/kibana_react/common';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
 
 type UserAgentSummaryItemProps = UserAgent;
 
-const Version = styled('span')`
+const Version = euiStyled('span')`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
