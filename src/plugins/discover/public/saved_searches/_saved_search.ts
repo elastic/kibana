@@ -19,6 +19,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       grid: 'object',
       sort: 'keyword',
       version: 'integer',
+      pre712: 'boolean',
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];

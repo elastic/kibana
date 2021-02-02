@@ -122,7 +122,7 @@ const migrateExistingSavedSearch: SavedObjectMigrationFn<any, any> = (doc) => {
     return doc;
   }
   const pre712 = doc.attributes.pre712;
-  // visible already has a value
+  // pre712 already has a value
   if (pre712 !== undefined) {
     return doc;
   }
