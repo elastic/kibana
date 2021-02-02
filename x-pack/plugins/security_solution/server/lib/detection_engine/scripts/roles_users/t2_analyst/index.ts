@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Kubernetes {
-  pod?: { uid: string; [key: string]: unknown };
-}
+import * as t2AnalystUser from './detections_user.json';
+import * as t2AnalystRole from './detections_role.json';
+export { t2AnalystUser, t2AnalystRole };
