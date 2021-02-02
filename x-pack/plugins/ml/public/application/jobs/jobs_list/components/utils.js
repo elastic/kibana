@@ -372,11 +372,11 @@ export function filterJobs(jobs, clauses) {
 // start datafeed modal.
 export function checkForAutoStartDatafeed() {
   const job = mlJobService.tempJobCloningObjects.job;
+  const datafeed = mlJobService.tempJobCloningObjects.datafeed;
   if (job !== undefined) {
     mlJobService.tempJobCloningObjects.job = undefined;
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    const hasDatafeed = typeof datafeed === 'object' && Object.keys(datafeed).length > 0;
+    const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,
       hasDatafeed,

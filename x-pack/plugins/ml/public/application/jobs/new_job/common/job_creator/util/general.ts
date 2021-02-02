@@ -233,12 +233,8 @@ function stashCombinedJob(
   skipTimeRangeStep: boolean = false,
   includeTimeRange: boolean = false
 ) {
-  const combinedJob = {
-    ...jobCreator.jobConfig,
-    datafeed_config: jobCreator.datafeedConfig,
-  };
-
-  mlJobService.tempJobCloningObjects.job = combinedJob;
+  mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
+  mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
 
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
