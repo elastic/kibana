@@ -22872,14 +22872,16 @@ class CliError extends Error {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return Project; });
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(112);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(249);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(246);
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(251);
-/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(318);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(134);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(112);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(249);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(246);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(251);
+/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(318);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -22899,9 +22901,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 class Project {
   static async fromPath(path) {
-    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["readPackageJson"])(path);
+    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path);
     return new Project(pkgJson, path);
   }
   /** parsed package.json */
@@ -22928,19 +22931,22 @@ class Project {
 
     _defineProperty(this, "scripts", void 0);
 
+    _defineProperty(this, "bazelPackage", void 0);
+
     _defineProperty(this, "isSinglePackageJsonProject", false);
 
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
-    this.packageJsonLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'node_modules');
-    this.targetLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'target');
+    this.packageJsonLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'package.json');
+    this.nodeModulesLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'node_modules');
+    this.targetLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'target');
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
     this.allDependencies = _objectSpread(_objectSpread({}, this.devDependencies), this.productionDependencies);
     this.isSinglePackageJsonProject = this.json.name === 'kibana';
     this.scripts = this.json.scripts || {};
+    this.bazelPackage = !this.isSinglePackageJsonProject && fs__WEBPACK_IMPORTED_MODULE_0___default.a.existsSync(path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'BUILD.bazel'));
   }
 
   get name() {
@@ -22948,8 +22954,8 @@ class Project {
   }
 
   ensureValidProjectDependency(project) {
-    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.path, `bazel-dist/bin/packages/${path__WEBPACK_IMPORTED_MODULE_0___default.a.basename(project.path)}`));
+    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel-dist/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
@@ -22966,11 +22972,11 @@ class Project {
       package: `${this.name} (${this.packageJsonLocation})`
     };
 
-    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(versionInPackageJson)) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
+    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson)) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
   }
 
   getBuildConfig() {
@@ -22984,7 +22990,7 @@ class Project {
 
 
   getIntermediateBuildDirectory() {
-    return path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   getCleanConfig() {
@@ -22992,7 +22998,7 @@ class Project {
   }
 
   isBazelPackage() {
-    return !!(this.json.kibana && this.json.kibana.bazelPackage);
+    return this.bazelPackage;
   }
 
   isFlaggedAsDevOnly() {
@@ -23012,7 +23018,7 @@ class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, raw)
+        [this.name]: path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, raw)
       };
     }
 
@@ -23020,25 +23026,25 @@ class Project {
       const binsConfig = {};
 
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, raw[binName]);
+        binsConfig[binName] = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, raw[binName]);
       }
 
       return binsConfig;
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
-      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_1__["inspect"])(raw),
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
+      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_2__["inspect"])(raw),
       package: `${this.name} (${this.packageJsonLocation})`
     });
   }
 
   async runScript(scriptName, args = []) {
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`Running script [${scriptName}] in [${this.name}]:`);
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["runScriptInPackage"])(scriptName, args, this);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`Running script [${scriptName}] in [${this.name}]:`);
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackage"])(scriptName, args, this);
   }
 
   runScriptStreaming(scriptName, options = {}) {
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["runScriptInPackageStreaming"])({
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackageStreaming"])({
       script: scriptName,
       args: options.args || [],
       pkg: this,
@@ -23051,16 +23057,16 @@ class Project {
   }
 
   isEveryDependencyLocal() {
-    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(dep));
+    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(dep));
   }
 
   async installDependencies({
     extraArgs
   }) {
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`[${this.name}] running yarn`);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].write('');
-    await Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["installInDir"])(this.path, extraArgs);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].write('');
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[${this.name}] running yarn`);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
+    await Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, extraArgs);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
   }
 
 } // We normalize all path separators to `/` in generated files

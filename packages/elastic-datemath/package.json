@@ -7,8 +7,5 @@
   "typings": "index.d.ts",
   "scripts": {
     "build": "bazel build //packages/elastic-datemath:build"
-  },
-  "kibana": {
-    "bazelPackage": true
   }
 }

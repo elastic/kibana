@@ -6,6 +6,7 @@
  * Public License, v 1.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -56,6 +57,8 @@ export class Project {
   public readonly devDependencies: IPackageDependencies;
   /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+  /** states if this project is a Bazel package */
+  public readonly bazelPackage: boolean;
 
   public isSinglePackageJsonProject = false;
 
@@ -77,6 +80,9 @@ export class Project {
     this.isSinglePackageJsonProject = this.json.name === 'kibana';
 
     this.scripts = this.json.scripts || {};
+
+    this.bazelPackage =
+      !this.isSinglePackageJsonProject && Fs.existsSync(Path.resolve(this.path, 'BUILD.bazel'));
   }
 
   public get name(): string {
@@ -140,7 +146,7 @@ export class Project {
   }
 
   public isBazelPackage() {
-    return !!(this.json.kibana && this.json.kibana.bazelPackage);
+    return this.bazelPackage;
   }
 
   public isFlaggedAsDevOnly() {
