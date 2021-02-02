@@ -18,6 +18,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    beforeEach(async () => {
       await searchSessions.markTourDone();
     });
 

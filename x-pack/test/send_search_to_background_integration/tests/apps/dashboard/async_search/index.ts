@@ -20,6 +20,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       await PageObjects.common.navigateToApp('dashboard');
+    });
+
+    beforeEach(async () => {
       await searchSessions.markTourDone();
     });
 
