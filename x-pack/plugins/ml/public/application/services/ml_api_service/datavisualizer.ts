@@ -7,7 +7,7 @@
 import { http } from '../http_service';
 
 import { basePath } from './index';
-import { ImportResponse } from '../../../../common/types/file_datavisualizer';
+import { ImportResponse } from '../../../../../file_upload/common';
 
 export const fileDatavisualizer = {
   analyzeFile(file: string, params: Record<string, string> = {}) {
@@ -45,7 +45,7 @@ export const fileDatavisualizer = {
     });
 
     return http<ImportResponse>({
-      path: `${basePath()}/file_data_visualizer/import`,
+      path: `/api/file_upload/import`,
       method: 'POST',
       query,
       body,
