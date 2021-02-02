@@ -47961,11 +47961,13 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "installBazelTools", function() { return installBazelTools; });
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(319);
-/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(131);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(246);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(319);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(131);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(246);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -47978,8 +47980,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 async function readBazelToolsVersionFile(repoRootPath, versionFilename) {
-  const version = (await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["readFile"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(repoRootPath, versionFilename))).toString().split('\n')[0];
+  const version = (await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["readFile"])(Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(repoRootPath, versionFilename))).toString().split('\n')[0];
 
   if (!version) {
     throw new Error(`[bazel_tools] Failed on reading bazel tools versions\n ${versionFilename} file do not contain any version set`);
@@ -47988,30 +47991,49 @@ async function readBazelToolsVersionFile(repoRootPath, versionFilename) {
   return version;
 }
 
+async function isBazelBinAvailable() {
+  try {
+    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('bazel', ['--version'], {
+      stdio: 'pipe'
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function installBazelTools(repoRootPath) {
-  _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] reading bazel tools versions from version files`);
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
   const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
-  _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] verify if bazelisk is installed`);
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`);
   const {
-    stdout
-  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_1__["spawn"])('yarn', ['global', 'list'], {
+    stdout: bazeliskPkgInstallStdout
+  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'list'], {
     stdio: 'pipe'
-  }); // Install bazelisk if not installed
+  });
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
 
-  if (!stdout.includes(`@bazel/bazelisk@${bazeliskVersion}`)) {
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`[bazel_tools] installing Bazel tools`);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_1__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
+  if (!bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`) || !isBazelBinAlreadyAvailable) {
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
+    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
       env: {
         USE_BAZEL_VERSION: bazelVersion
       },
       stdio: 'pipe'
     });
+    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable();
+
+    if (!isBazelBinAvailableAfterInstall) {
+      throw new Error(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
+        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure 'yarn global bin' is on your $PATH, otherwise just add it there
+      `);
+    }
   }
 
-  _log__WEBPACK_IMPORTED_MODULE_3__["log"].success(`[bazel_tools] all bazel tools are correctly installed`);
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].success(`[bazel_tools] all bazel tools are correctly installed`);
 }
 
 /***/ }),
