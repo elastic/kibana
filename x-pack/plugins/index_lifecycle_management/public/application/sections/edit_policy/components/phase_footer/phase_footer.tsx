@@ -10,27 +10,30 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiIcon, EuiText, EuiLink, EuiPanel } from '@elastic/eui';
 
+import { usePhaseTimings } from '../../form';
+
 import { InfinityIcon } from '../infinity_icon';
 
-import './timing_footer.scss';
+import './phase_footer.scss';
 
 interface Props {
-  timingInMs?: number;
-  timingLabel?: string;
-  isLastActivePhase: boolean;
-  setValue: (value: boolean) => void;
+  phase: 'hot' | 'warm' | 'cold';
 }
-export const TimingFooter: FunctionComponent<Props> = ({
-  timingInMs,
-  timingLabel,
-  isLastActivePhase,
-  setValue,
-}) => {
-  if (timingInMs === undefined) {
-    return null;
+
+export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
+  const phaseTimings = usePhaseTimings();
+  const phaseConfiguration = phaseTimings[phase];
+  const setValue = phaseTimings.setDeletePhaseEnabled;
+
+  if (phaseConfiguration === 'disabled' || phaseConfiguration === 'enabled') {
+    return (
+      <EuiPanel className={'ilmPhaseFooter'}>
+        <EuiText size={'s'}>&nbsp;</EuiText>
+      </EuiPanel>
+    );
   }
 
-  if (timingInMs === Infinity) {
+  if (phaseConfiguration === 'forever') {
     return (
       <EuiPanel color={'warning'} className={'ilmPhaseFooter ilmPhaseFooter--warning'}>
         <InfinityIcon size={'s'} />{' '}
@@ -55,23 +58,15 @@ export const TimingFooter: FunctionComponent<Props> = ({
       <EuiIcon type={'storage'} size={'s'} />{' '}
       <EuiText size={'s'} grow={false} className={'eui-displayInlineBlock'}>
         <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.phaseTiming.daysTimingDescription"
-          defaultMessage="Data remains in this phase for {timingLabel}."
-          values={{
-            timingLabel,
-          }}
-        />
-        {isLastActivePhase && (
-          <>
-            {' '}
-            <EuiLink onClick={() => setValue(false)} data-test-subj={'disableDeletePhaseLink'}>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.disablePhaseButtonLabel"
-                defaultMessage="Disable data deletion"
-              />
-            </EuiLink>
-          </>
-        )}
+          id="xpack.indexLifecycleMgmt.editPolicy.phaseTiming.beforeDeleteDescription"
+          defaultMessage="Data will be deleted after this phase."
+        />{' '}
+        <EuiLink onClick={() => setValue(false)} data-test-subj={'disableDeletePhaseLink'}>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.disablePhaseButtonLabel"
+            defaultMessage="Disable data deletion"
+          />
+        </EuiLink>
       </EuiText>
     </EuiPanel>
   );

@@ -25,7 +25,7 @@ import { FormInternal } from '../../types';
 import { ActiveHighlight } from '../active_highlight';
 import { MinAgeField } from './shared_fields';
 
-import { useTimingFooters } from '../timing_footers';
+import { PhaseFooter } from '../phase_footer';
 
 import './phase.scss';
 
@@ -38,7 +38,6 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
   });
-  const footers = useTimingFooters();
 
   // hot phase is always enabled
   const enabled = get(formData, enabledPath) || phase === 'hot';
@@ -124,7 +123,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
               </div>
             )}
           </div>
-          {footers[phase]}
+          <PhaseFooter phase={phase} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

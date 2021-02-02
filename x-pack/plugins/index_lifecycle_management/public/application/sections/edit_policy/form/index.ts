@@ -18,3 +18,9 @@ export {
   ConfigurationIssuesProvider,
   useConfigurationIssues,
 } from './configuration_issues_context';
+
+export {
+  PhaseTimingsProvider,
+  usePhaseTimings,
+  PhaseTimingConfiguration,
+} from './phase_timings_context';

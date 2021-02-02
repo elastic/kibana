@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TimingFootersProvider, useTimingFooters } from './timing_footers_context';
+export { PhaseFooter } from './phase_footer';

@@ -22,9 +22,9 @@ import { useFormData } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
+import { usePhaseTimings } from '../../../form';
 
-import { useTimingFooters } from '../../timing_footers';
+import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 import './delete_phase.scss';
 
 const formFieldPaths = {
@@ -32,7 +32,7 @@ const formFieldPaths = {
 };
 
 export const DeletePhase: FunctionComponent = () => {
-  const { setDeletePhaseEnabled } = useTimingFooters();
+  const { setDeletePhaseEnabled } = usePhaseTimings();
   const [formData] = useFormData({
     watch: formFieldPaths.enabled,
   });
