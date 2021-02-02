@@ -1771,6 +1771,17 @@
         }
       }
     },
+    "fileUpload": {
+      "properties": {
+        "file_upload": {
+          "properties": {
+            "index_creation_count": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "fleet": {
       "properties": {
         "agents_enabled": {
@@ -2303,17 +2314,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "mlTelemetry": {
-      "properties": {
-        "file_data_visualizer": {
-          "properties": {
-            "index_creation_count": {
-              "type": "long"
             }
           }
         }

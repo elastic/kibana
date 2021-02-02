@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { fileDataVisualizerProvider, InputData } from './file_data_visualizer';
+export * from './constants';
+export * from './types';

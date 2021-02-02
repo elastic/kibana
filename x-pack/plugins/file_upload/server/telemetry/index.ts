@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { fileDataVisualizerProvider, InputData } from './file_data_visualizer';
+export { initFileUploadTelemetry } from './usage_collector';
+export { updateTelemetry } from './telemetry';

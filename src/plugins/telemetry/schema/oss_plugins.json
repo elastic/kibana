@@ -4100,9 +4100,6 @@
         "securitySolution:ipReputationLinks": {
           "type": "keyword"
         },
-        "xPack:defaultAdminEmail": {
-          "type": "keyword"
-        },
         "visualize:enableLabs": {
           "type": "boolean"
         },
