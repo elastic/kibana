@@ -37,5 +37,5 @@ export function reconfigureLogging(
   opsInterval: number
 ) {
   const loggingOptions = getLoggingConfiguration(config, opsInterval);
-  (server.plugins as any)['@elastic/good'].reconfigure(loggingOptions);
+  (server.plugins as any).good.reconfigure(loggingOptions);
 }

@@ -7,12 +7,16 @@
 import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
 import { xpackMocks } from '../../../../mocks';
-import { CURRENT_VERSION } from '../../common/version';
+import { MOCK_VERSION_STRING, getMockVersionInfo } from './__fixtures__/version';
+
 import {
   esVersionCheck,
   getAllNodeVersions,
   verifyAllMatchKibanaVersion,
 } from './es_version_precheck';
+import { versionService } from './version';
+
+const { currentMajor, currentVersion } = getMockVersionInfo();
 
 describe('getAllNodeVersions', () => {
   it('returns a list of unique node versions', async () => {
@@ -41,25 +45,25 @@ describe('getAllNodeVersions', () => {
 
 describe('verifyAllMatchKibanaVersion', () => {
   it('detects higher version nodes', () => {
-    const result = verifyAllMatchKibanaVersion([new SemVer('99999.0.0')]);
+    const result = verifyAllMatchKibanaVersion([new SemVer('99999.0.0')], currentMajor);
     expect(result.allNodesMatch).toBe(false);
     expect(result.allNodesUpgraded).toBe(true);
   });
 
   it('detects lower version nodes', () => {
-    const result = verifyAllMatchKibanaVersion([new SemVer('0.0.0')]);
+    const result = verifyAllMatchKibanaVersion([new SemVer('0.0.0')], currentMajor);
     expect(result.allNodesMatch).toBe(false);
     expect(result.allNodesUpgraded).toBe(true);
   });
 
   it('detects if all are on same major correctly', () => {
     const versions = [
-      CURRENT_VERSION,
-      CURRENT_VERSION.inc('minor'),
-      CURRENT_VERSION.inc('minor').inc('minor'),
+      currentVersion,
+      currentVersion.inc('minor'),
+      currentVersion.inc('minor').inc('minor'),
     ];
 
-    const result = verifyAllMatchKibanaVersion(versions);
+    const result = verifyAllMatchKibanaVersion(versions, currentMajor);
     expect(result.allNodesMatch).toBe(true);
     expect(result.allNodesUpgraded).toBe(false);
   });
@@ -67,17 +71,21 @@ describe('verifyAllMatchKibanaVersion', () => {
   it('detects partial matches', () => {
     const versions = [
       new SemVer('0.0.0'),
-      CURRENT_VERSION.inc('minor'),
-      CURRENT_VERSION.inc('minor').inc('minor'),
+      currentVersion.inc('minor'),
+      currentVersion.inc('minor').inc('minor'),
     ];
 
-    const result = verifyAllMatchKibanaVersion(versions);
+    const result = verifyAllMatchKibanaVersion(versions, currentMajor);
     expect(result.allNodesMatch).toBe(false);
     expect(result.allNodesUpgraded).toBe(false);
   });
 });
 
 describe('EsVersionPrecheck', () => {
+  beforeEach(() => {
+    versionService.setup(MOCK_VERSION_STRING);
+  });
+
   it('returns a 403 when callCluster fails with a 403', async () => {
     const fakeCall = jest.fn().mockRejectedValue({ statusCode: 403 });
 
@@ -107,8 +115,8 @@ describe('EsVersionPrecheck', () => {
           info: jest.fn().mockResolvedValue({
             body: {
               nodes: {
-                node1: { version: CURRENT_VERSION.raw },
-                node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
+                node1: { version: currentVersion.raw },
+                node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
               },
             },
           }),
@@ -132,8 +140,8 @@ describe('EsVersionPrecheck', () => {
           info: jest.fn().mockResolvedValue({
             body: {
               nodes: {
-                node1: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
-                node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
+                node1: { version: new SemVer(currentVersion.raw).inc('major').raw },
+                node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
               },
             },
           }),
@@ -157,8 +165,8 @@ describe('EsVersionPrecheck', () => {
           info: jest.fn().mockResolvedValue({
             body: {
               nodes: {
-                node1: { version: CURRENT_VERSION.raw },
-                node2: { version: CURRENT_VERSION.raw },
+                node1: { version: currentVersion.raw },
+                node2: { version: currentVersion.raw },
               },
             },
           }),

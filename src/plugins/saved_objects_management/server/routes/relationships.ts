@@ -38,7 +38,7 @@ export const registerRelationshipsRoute = (
         ? req.query.savedObjectTypes
         : [req.query.savedObjectTypes];
 
-      const relations = await findRelationships({
+      const findRelationsResponse = await findRelationships({
         type,
         id,
         client,
@@ -48,7 +48,7 @@ export const registerRelationshipsRoute = (
       });
 
       return res.ok({
-        body: relations,
+        body: findRelationsResponse,
       });
     })
   );

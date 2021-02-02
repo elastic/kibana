@@ -17,9 +17,11 @@ import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -72,7 +74,8 @@ describe('percentile', () => {
         percentileColumn,
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

@@ -4,27 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Query {
-  doc_count: number;
+export interface Query {
   key: string;
-  clicks?: { doc_count: number };
-  searches?: { doc_count: number };
   tags?: string[];
+  searches?: { doc_count: number };
+  clicks?: { doc_count: number };
 }
 
-interface QueryClick extends Query {
+export interface QueryClick extends Query {
   document?: {
     id: string;
     engine: string;
-    tags?: string[];
   };
 }
 
-interface RecentQuery {
-  document_ids: string[];
+export interface RecentQuery {
   query_string: string;
-  tags: string[];
   timestamp: string;
+  tags: string[];
+  document_ids: string[];
 }
 
 /**

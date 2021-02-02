@@ -64,8 +64,7 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, dispatchToaster]);
 
   return [loading, ruleStatus, fetchRuleStatus.current];
 };
@@ -122,8 +121,7 @@ export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rules]);
+  }, [rules, dispatchToaster]);
 
   return { loading, rulesStatuses };
 };

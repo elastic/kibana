@@ -511,6 +511,7 @@ export async function loadAnomaliesTableData(
             const entityFields = getEntityFieldList(anomaly.source);
             isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
           }
+
           anomaly.isTimeSeriesViewRecord = isChartable;
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
