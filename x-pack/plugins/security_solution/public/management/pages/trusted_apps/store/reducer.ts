@@ -111,7 +111,7 @@ const trustedAppCreationDialogStarted: CaseReducer<TrustedAppCreationDialogStart
     ...state,
     creationDialog: {
       ...initialCreationDialogState(),
-      formState: { ...action.payload, isValid: true },
+      formState: { ...action.payload, isValid: false },
     },
   };
 };

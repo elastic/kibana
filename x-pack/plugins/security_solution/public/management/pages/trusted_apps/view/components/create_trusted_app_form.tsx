@@ -207,12 +207,16 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
 
     const notifyOfChange = useCallback(
       (updatedFormValues: TrustedAppFormState['item']) => {
+        const updatedValidationResult = validateFormValues(updatedFormValues);
+
+        setValidationResult(updatedValidationResult);
+
         onChange({
           item: updatedFormValues,
-          isValid: validationResult.isValid,
+          isValid: updatedValidationResult.isValid,
         });
       },
-      [onChange, validationResult.isValid]
+      [onChange]
     );
 
     const handleAndClick = useCallback(() => {
@@ -366,12 +370,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     useEffect(() => {
       setValidationResult((prevState) => {
         const newResults = validateFormValues(trustedApp);
+
+        // Only notify if the overall validation result is different
         if (newResults.isValid !== prevState.isValid) {
-          return newResults;
+          notifyOfChange(trustedApp);
         }
-        return prevState;
+
+        return newResults;
       });
-    }, [trustedApp]);
+    }, [notifyOfChange, trustedApp]);
 
     // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
     // those polices are selected in the UI while at teh same time preserving prior
