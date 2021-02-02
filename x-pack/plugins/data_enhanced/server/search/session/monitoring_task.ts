@@ -45,7 +45,6 @@ function searchSessionRunner(core: CoreSetup, { logger, config$ }: SearchSession
         );
 
         return {
-          runAt: new Date(Date.now() + sessionConfig.trackingInterval.asMilliseconds()),
           state: {},
         };
       },
