@@ -10,15 +10,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const deployment = getService('deployment');
-  let isOss = true;
 
   describe('management', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
-      isOss = await deployment.isOss();
     });
 
     after(async () => {
