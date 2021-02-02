@@ -251,7 +251,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       setWaitForSnapshotPolicy,
       savePolicy,
       timeline: {
-        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
