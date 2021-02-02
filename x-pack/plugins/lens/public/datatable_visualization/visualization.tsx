@@ -23,6 +23,11 @@ export interface ColumnState {
   width?: number;
   hidden?: boolean;
   isTransposed?: boolean;
+  // These flags are necessary to transpose columns and map them back later
+  // They are set automatically and are not user-editable
+  transposable?: boolean;
+  originalColumnId?: string;
+  originalName?: string;
 }
 
 export interface SortingState {
@@ -272,6 +277,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    isTransposed:
+                      typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                    transposable: [
+                      !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                    ],
                   },
                 },
               ],

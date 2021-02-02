@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { cloneDeep } from 'lodash';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -12,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import type { IAggType } from 'src/plugins/data/public';
 import type {
   DatatableColumnMeta,
+  DatatableRow,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
@@ -38,6 +40,19 @@ export interface DatatableProps {
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
   return meta?.params?.id === 'range';
+}
+
+const TRANSPOSE_SEPARATOR = 'xxx';
+
+export function getTransposeId(value: string, columnId: string) {
+  return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
+}
+
+export function getOriginalId(id: string) {
+  if (id.includes(TRANSPOSE_SEPARATOR)) {
+    return id.split(TRANSPOSE_SEPARATOR)[1];
+  }
+  return id;
 }
 
 export const getDatatable = ({
@@ -85,6 +100,76 @@ export const getDatatable = ({
     firstTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
+
+    const transposedArgs = cloneDeep(args);
+    args.columns.forEach((column) => {
+      if (column.isTransposed) {
+        const datatableColumnIndex = firstTable.columns.findIndex((c) => c.id === column.columnId);
+        const datatableColumn = firstTable.columns[datatableColumnIndex];
+        const formatter = formatFactory(datatableColumn.meta?.params);
+        const values = new Set<string>();
+        firstTable.rows.forEach((row) => {
+          values.add(formatter.convert(row[column.columnId]));
+        });
+        const uniqueValues = [...values.values()];
+        const metricColumns = transposedArgs.columns.filter((c) => c.transposable);
+        const bucketColumns = transposedArgs.columns.filter(
+          (c) => !c.transposable && c.columnId !== column.columnId
+        );
+        firstTable.columns.splice(datatableColumnIndex, 1);
+        const transposedColumns = metricColumns.flatMap((metricColumn) => {
+          const originalDatatableColumn = firstTable.columns.find(
+            (c) => c.id === metricColumn.columnId
+          )!;
+          const datatableColumns = uniqueValues.map((uniqueValue) => {
+            return {
+              ...originalDatatableColumn,
+              id: getTransposeId(uniqueValue, metricColumn.columnId),
+              name: `${uniqueValue} ${originalDatatableColumn.name}`,
+            };
+          });
+          firstTable.columns.splice(
+            firstTable.columns.findIndex((c) => c.id === metricColumn.columnId),
+            1,
+            ...datatableColumns
+          );
+          return uniqueValues.map((uniqueValue) => {
+            return {
+              ...metricColumn,
+              columnId: getTransposeId(uniqueValue, metricColumn.columnId),
+              originalColumnId: metricColumn.columnId,
+              originalName: originalDatatableColumn.name,
+            };
+          });
+        });
+        transposedArgs.columns = [...bucketColumns, ...transposedColumns];
+        const rowsByOtherBuckets: Record<string, DatatableRow[]> = {};
+        firstTable.rows.forEach((row) => {
+          const key = bucketColumns
+            .map((c) => formatters[c.columnId].convert(row[c.columnId]))
+            .join(',');
+          if (!rowsByOtherBuckets[key]) {
+            rowsByOtherBuckets[key] = [];
+          }
+          rowsByOtherBuckets[key].push(row);
+        });
+        firstTable.rows = Object.values(rowsByOtherBuckets).map((rows) => {
+          const mergedRow: DatatableRow = {};
+          bucketColumns.forEach((c) => {
+            // they have the same value
+            mergedRow[c.columnId] = rows[0][c.columnId];
+          });
+          rows.forEach((row) => {
+            const transposalValue = formatter.convert(row[column.columnId]);
+            metricColumns.forEach((c) => {
+              mergedRow[getTransposeId(transposalValue, c.columnId)] = row[c.columnId];
+            });
+          });
+          return mergedRow;
+        });
+      }
+    });
+
     const { sortingColumnId: sortBy, sortingDirection: sortDirection } = args;
 
     const columnsReverseLookup = firstTable.columns.reduce<
@@ -94,7 +179,7 @@ export const getDatatable = ({
       return memo;
     }, {});
 
-    if (sortBy && sortDirection !== 'none') {
+    if (sortBy && columnsReverseLookup[sortBy] && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
       const sortingCriteria = getSortingCriteria(
         isRange(columnsReverseLookup[sortBy]?.meta)
@@ -110,13 +195,16 @@ export const getDatatable = ({
         .sort(sortingCriteria);
       // replace also the local copy
       firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
+    } else {
+      transposedArgs.sortingColumnId = undefined;
+      transposedArgs.sortingDirection = 'none';
     }
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
         data,
-        args,
+        args: transposedArgs,
       },
     };
   },
@@ -139,6 +227,8 @@ export const datatableColumn: ExpressionFunctionDefinition<
     columnId: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
+    isTransposed: { types: ['boolean'], help: '' },
+    transposable: { types: ['boolean'], help: '' },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {

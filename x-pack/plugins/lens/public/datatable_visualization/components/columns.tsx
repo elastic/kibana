@@ -134,7 +134,10 @@ export const createGridColumns = (
         ]
       : undefined;
 
+    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
     const initialWidth = columnConfig.columns.find(({ columnId }) => columnId === field)?.width;
+    const originalColumnId = columnArgs?.originalColumnId;
+    const originalName = columnArgs?.originalName;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
@@ -165,7 +168,8 @@ export const createGridColumns = (
               {
                 color: 'text',
                 size: 'xs',
-                onClick: () => onColumnResize({ columnId: field, width: undefined }),
+                onClick: () =>
+                  onColumnResize({ columnId: originalColumnId || field, width: undefined }),
                 iconType: 'empty',
                 label: i18n.translate('xpack.lens.table.resize.reset', {
                   defaultMessage: 'Reset width',
@@ -176,10 +180,13 @@ export const createGridColumns = (
               {
                 color: 'text',
                 size: 'xs',
-                onClick: () => onColumnHide({ columnId: field }),
+                onClick: () => onColumnHide({ columnId: originalColumnId || field }),
                 iconType: 'empty',
                 label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-                  defaultMessage: 'Hide',
+                  defaultMessage: 'Hide {name}',
+                  values: {
+                    name: originalName || name,
+                  },
                 }),
                 'data-test-subj': 'lensDatatableHide',
               },

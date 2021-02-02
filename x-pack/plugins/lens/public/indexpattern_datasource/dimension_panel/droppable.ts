@@ -112,9 +112,12 @@ const onMoveDropToCompatibleGroup = ({
   const newIndex = newColumnOrder.findIndex((c) => c === columnId);
 
   if (newIndex === -1) {
-    newColumnOrder[oldIndex] = columnId;
-  } else {
+    // for newly created columns, remove the old entry and add the last one to the end
     newColumnOrder.splice(oldIndex, 1);
+    newColumnOrder.push(columnId);
+  } else {
+    // for drop to replace, reuse the same index
+    newColumnOrder[oldIndex] = columnId;
   }
 
   reorderByGroups(visualizationGroupConfig, groupId, newColumnOrder, columnId);

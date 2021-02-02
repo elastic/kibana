@@ -32,6 +32,7 @@ export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualiza
           {datasourceLayer.getTableSpec().map(({ columnId }) => {
             const label = datasourceLayer.getOperationForColumnId(columnId)?.label;
             const isHidden = columnMap[columnId].hidden;
+            const isTransposed = columnMap[columnId].isTransposed;
             return (
               <EuiFlexItem key={columnId}>
                 <EuiSwitch
@@ -39,6 +40,7 @@ export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualiza
                   label={label}
                   checked={!isHidden}
                   data-test-subj={`lnsColumns-toggle-${label?.replace(/ /g, '-')}`}
+                  disabled={isTransposed}
                   compressed
                   onChange={(e) => {
                     e.preventDefault();

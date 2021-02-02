@@ -15,18 +15,20 @@ import type {
 import { ColumnConfig } from './table_basic';
 
 import { desanitizeFilterContext } from '../../utils';
+import { getOriginalId } from '../expression';
 
 export const createGridResizeHandler = (
   columnConfig: ColumnConfig,
   setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
   onEditAction: (data: LensResizeAction['data']) => void
 ) => (eventData: { columnId: string; width: number | undefined }) => {
+  const originalColumnId = getOriginalId(eventData.columnId);
   // directly set the local state of the component to make sure the visualization re-renders immediately,
   // re-layouting and taking up all of the available space.
   setColumnConfig({
     ...columnConfig,
     columns: columnConfig.columns.map((column) => {
-      if (column.columnId === eventData.columnId) {
+      if (column.columnId === eventData.columnId || column.originalColumnId === originalColumnId) {
         return { ...column, width: eventData.width };
       }
       return column;
@@ -34,7 +36,7 @@ export const createGridResizeHandler = (
   });
   return onEditAction({
     action: 'resize',
-    columnId: eventData.columnId,
+    columnId: originalColumnId,
     width: eventData.width,
   });
 };
@@ -44,11 +46,12 @@ export const createGridHideHandler = (
   setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
   onEditAction: (data: LensToggleAction['data']) => void
 ) => (eventData: { columnId: string }) => {
+  const originalColumnId = getOriginalId(eventData.columnId);
   // directly set the local state of the component to make sure the visualization re-renders immediately
   setColumnConfig({
     ...columnConfig,
     columns: columnConfig.columns.map((column) => {
-      if (column.columnId === eventData.columnId) {
+      if (column.columnId === eventData.columnId || column.originalColumnId === originalColumnId) {
         return { ...column, hidden: true };
       }
       return column;
@@ -56,7 +59,7 @@ export const createGridHideHandler = (
   });
   return onEditAction({
     action: 'toggle',
-    columnId: eventData.columnId,
+    columnId: originalColumnId,
   });
 };
 

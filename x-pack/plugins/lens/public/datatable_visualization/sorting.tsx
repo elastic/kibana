@@ -71,8 +71,20 @@ export function getSortingCriteria(
   const directionFactor = direction === 'asc' ? 1 : -1;
 
   if (['number', 'date'].includes(type || '')) {
-    return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) =>
-      directionFactor * ((rowA[sortBy] as number) - (rowB[sortBy] as number));
+    return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
+      let a = rowA[sortBy];
+      let b = rowB[sortBy];
+
+      if (isNaN(Number(a))) {
+        a = directionFactor * Number.POSITIVE_INFINITY;
+      }
+
+      if (isNaN(Number(b))) {
+        b = directionFactor * Number.POSITIVE_INFINITY;
+      }
+
+      return directionFactor * ((a as number) - (b as number));
+    };
   }
   // this is a custom type, and can safely assume the gte and lt fields are all numbers or undefined
   if (type === 'range') {
