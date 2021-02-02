@@ -92,7 +92,8 @@ export const formulaOperation: OperationDefinition<
         type: 'function',
         function: 'mapColumn',
         arguments: {
-          name: [columnId],
+          id: [columnId],
+          name: [layer.columns[columnId].label],
           exp: [
             {
               type: 'expression',
@@ -217,6 +218,7 @@ export function regenerateLayerFromAst(
 
   columns[columnId] = {
     ...currentColumn,
+    label: text,
     params: {
       ...currentColumn.params,
       ast: text,
@@ -348,7 +350,7 @@ function extractColumns(
       newCol.label = newColId;
       columns.push(newCol);
       // replace by new column id
-      return `${idPrefix}X${columns.length - 1}`;
+      return newColId;
     }
 
     return;
