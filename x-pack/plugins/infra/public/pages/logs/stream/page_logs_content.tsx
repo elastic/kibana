@@ -51,7 +51,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoadingMore,
     lastLoadedTime,
   } = logEntriesState;
-  const { fetchNewerEntries, checkForNewEntries } = logEntriesCallbacks;
+  const { checkForNewEntries } = logEntriesCallbacks;
   const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
     LogHighlightsState.Context
   );
@@ -123,7 +123,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           items={items}
           jumpToTarget={jumpToTargetPosition}
           lastLoadedTime={lastLoadedTime}
-          loadNewerItems={fetchNewerEntries}
           reloadItems={checkForNewEntries}
           reportVisibleInterval={reportVisiblePositions}
           scale={textScale}

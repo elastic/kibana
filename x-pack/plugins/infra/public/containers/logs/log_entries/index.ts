@@ -8,7 +8,7 @@
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import createContainer from 'constate';
-import { pick, throttle } from 'lodash';
+import { pick } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import {
   LogEntriesResponse,
@@ -82,7 +82,6 @@ export interface LogEntriesStateParams {
 }
 
 export interface LogEntriesCallbacks {
-  fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
   checkForNewEntries: () => Promise<void>;
 }
 export const logEntriesInitialCallbacks = {
@@ -281,12 +280,6 @@ const useFetchEntriesEffect = (
     }
   };
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const fetchNewerEntries = useCallback(
-    throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
-    [props, state.bottomCursor]
-  );
-
   const streamEntriesEffectDependencies = [
     props.isStreaming,
     state.isLoadingMore,
@@ -350,7 +343,7 @@ const useFetchEntriesEffect = (
   useEffect(expandRangeEffect, expandRangeEffectDependencies);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
+  return { checkForNewEntries: runFetchNewEntriesRequest };
 };
 
 export const useLogEntriesState: (
@@ -358,8 +351,8 @@ export const useLogEntriesState: (
 ) => [LogEntriesStateParams, LogEntriesCallbacks] = (props) => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
-  const { fetchNewerEntries, checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);
-  const callbacks = { fetchNewerEntries, checkForNewEntries };
+  const { checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);
+  const callbacks = { checkForNewEntries };
 
   return [state, callbacks];
 };

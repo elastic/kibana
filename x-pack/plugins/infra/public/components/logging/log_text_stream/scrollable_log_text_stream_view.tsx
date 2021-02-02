@@ -50,7 +50,6 @@ interface ScrollableLogTextStreamViewProps {
     endKey: TimeKey | null;
     fromScroll: boolean;
   }) => any;
-  loadNewerItems: () => void;
   reloadItems: () => void;
   onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;
