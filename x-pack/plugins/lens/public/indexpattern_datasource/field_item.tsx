@@ -280,6 +280,9 @@ function FieldPanelHeader({
     indexPatternId,
     id: field.name,
     field,
+    humanData: {
+      label: field.displayName
+    }
   };
 
   return (

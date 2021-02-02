@@ -16,7 +16,7 @@ export interface HumanData {
 
 export interface AnnouncementProps {
   draggedElement: HumanData;
-  dropElement: HumanData;
+  dropElement?: HumanData;
 }
 
 const defaultAnnouncements = {
@@ -93,6 +93,12 @@ const defaultAnnouncements = {
 };
 
 export const announcements = {
+  field_add: defaultAnnouncements,
+  field_replace: defaultAnnouncements,
+  move_compatible: defaultAnnouncements,
+  replace_compatible: defaultAnnouncements,
+  move_incompatible: defaultAnnouncements,
+  replace_incompatible: defaultAnnouncements,
   reorder: {
     ...defaultAnnouncements,
     selectedTarget: ({ draggedElement, dropElement }: AnnouncementProps) => {
@@ -167,9 +173,9 @@ export const announce = (
   draggedElement: HumanData,
   dropElement?: HumanData
 ) => {
-  const announcementType =
-    dropType && dropType in announcements ? announcements[dropType] : defaultAnnouncements;
-  const announcement = announcementType?.[actionType] || defaultAnnouncements[actionType];
+  const announcement =
+    dropType ? announcements[dropType][actionType]  : defaultAnnouncements[actionType];
+
   console.log(
     `%c ${announcement({ draggedElement, dropElement })}`,
     'background: #251e3e; color: #eee3e7'
