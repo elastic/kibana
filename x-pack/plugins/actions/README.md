@@ -70,12 +70,14 @@ Table of Contents
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
       - [`subActionParams (getFields)`](#subactionparams-getfields)
+      - [`subActionParams (getIncident)`](#subactionparams-getincident)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
-      - [`subActionParams (getIncident)`](#subactionparams-getincident)
+      - [`subActionParams (getIncident)`](#subactionparams-getincident-1)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
       - [`subActionParams (fieldsByIssueType)`](#subactionparams-fieldsbyissuetype)
       - [`subActionParams (issues)`](#subactionparams-issues)
@@ -347,17 +349,18 @@ const result = await actionsClient.execute({
 
 Kibana ships with a set of built-in action types:
 
-| Type                            | Id            | Description                                                        |
-| ------------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log)       | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
-| [Email](#email)                 | `.email`      | Sends an email using SMTP                                          |
-| [Slack](#slack)                 | `.slack`      | Posts a message to a slack channel                                 |
-| [Index](#index)                 | `.index`      | Indexes document(s) into Elasticsearch                             |
-| [Webhook](#webhook)             | `.webhook`    | Send a payload to a web service using HTTP POST or PUT             |
-| [PagerDuty](#pagerduty)         | `.pagerduty`  | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
-| [ServiceNow](#servicenow)       | `.servicenow` | Create or update an incident to a ServiceNow instance              |
-| [Jira](#jira)                   | `.jira`       | Create or update an issue to a Jira instance                       |
-| [IBM Resilient](#ibm-resilient) | `.resilient`  | Create or update an incident to a IBM Resilient instance           |
+| Type                            | Id                | Description                                                        |
+| ------------------------------- | ----------------- | ------------------------------------------------------------------ |
+| [Server log](#server-log)       | `.server-log`     | Logs messages to the Kibana log using Kibana's logger              |
+| [Email](#email)                 | `.email`          | Sends an email using SMTP                                          |
+| [Slack](#slack)                 | `.slack`          | Posts a message to a slack channel                                 |
+| [Index](#index)                 | `.index`          | Indexes document(s) into Elasticsearch                             |
+| [Webhook](#webhook)             | `.webhook`        | Send a payload to a web service using HTTP POST or PUT             |
+| [PagerDuty](#pagerduty)         | `.pagerduty`      | Trigger, resolve, or acknowlege an incident to a PagerDuty service |
+| [ServiceNow ITSM](#servicenow)  | `.servicenow`     | Create or update an incident to a ServiceNow ITSM instance         |
+| [ServiceNow SIR](#servicenow)   | `.servicenow-sir` | Create or update an incident to a ServiceNow SIR instance          |
+| [Jira](#jira)                   | `.jira`           | Create or update an issue to a Jira instance                       |
+| [IBM Resilient](#ibm-resilient) | `.resilient`      | Create or update an incident to a IBM Resilient instance           |
 
 ---
 
@@ -549,9 +552,11 @@ For more details see [PagerDuty v2 event parameters](https://v2.developer.pagerd
 
 ## ServiceNow
 
-ID: `.servicenow`
+ServiceNow ITSM ID: `.servicenow`
 
-The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI) to create and update ServiceNow incidents.
+ServiceNow SIR ID: `.servicenow-sir`
+
+The ServiceNow actions use the [V2 Table API](https://developer.servicenow.com/app.do#!/rest_api_doc?v=orlando&id=c_TableAPI) to create and update ServiceNow incidents. Both action types use the same `config`, `secrets`, and `params` schema.
 
 ### `config`
 
@@ -568,10 +573,10 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `params`
 
-| Property        | Description                                                           | Type   |
-| --------------- | --------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `getFields`, and `pushToService` | string |
-| subActionParams | The parameters of the sub action                                      | object |
+| Property        | Description                                                                                        | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices` | string |
+| subActionParams | The parameters of the sub action                                                                   | object |
 
 #### `subActionParams (pushToService)`
 
@@ -594,6 +599,19 @@ The following table describes the properties of the `incident` object.
 #### `subActionParams (getFields)`
 
 No parameters for `getFields` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (getIncident)`
+
+| Property   | Description                           | Type   |
+| ---------- | ------------------------------------- | ------ |
+| externalId | The id of the incident in ServiceNow. | string |
+
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                                  | Type     |
+| -------- | ------------------------------------------------------------ | -------- |
+| fields   | An array of fields. Example: `[priority, category, impact]`. | string[] |
 
 ---
 
