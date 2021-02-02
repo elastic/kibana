@@ -25,7 +25,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import { setIndexPatterns, setSavedObjectsClient, setDataSearch } from './helpers/plugin_services';
+import { setIndexPatterns, setDataSearch } from './helpers/plugin_services';
 import { ConfigSchema } from '../config';
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
@@ -92,7 +92,6 @@ export class TimelionVisPlugin
 
   public start(core: CoreStart, plugins: TimelionVisStartDependencies) {
     setIndexPatterns(plugins.data.indexPatterns);
-    setSavedObjectsClient(core.savedObjects.client);
     setDataSearch(plugins.data.search);
 
     return {

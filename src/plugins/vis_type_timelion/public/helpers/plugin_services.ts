@@ -7,7 +7,6 @@
  */
 
 import type { IndexPatternsContract, ISearchStart } from 'src/plugins/data/public';
-import type { SavedObjectsClientContract } from 'kibana/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
@@ -15,8 +14,3 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 );
 
 export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
-
-export const [
-  getSavedObjectsClient,
-  setSavedObjectsClient,
-] = createGetterSetter<SavedObjectsClientContract>('SavedObjectsClient');

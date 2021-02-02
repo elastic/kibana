@@ -22,16 +22,12 @@ import { UI_SETTINGS } from '../../../../data/server';
 describe('es', () => {
   let tlConfig;
 
-  function stubRequestAndServer(response, indexPatternSavedObjects = []) {
+  function stubRequestAndServer(response) {
     return {
       context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
-      savedObjectsClient: {
-        find: function () {
-          return Promise.resolve({
-            saved_objects: indexPatternSavedObjects,
-          });
-        },
-      },
+      getIndexPatternsService: () => ({
+        find: async () => [],
+      }),
     };
   }
 

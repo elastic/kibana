@@ -46,7 +46,9 @@ export interface TimelionPluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(
+    core: CoreSetup<TimelionPluginStartDeps>
+  ): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()
       .pipe(first())
