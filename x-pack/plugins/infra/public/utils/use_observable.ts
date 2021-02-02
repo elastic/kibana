@@ -5,7 +5,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable, PartialObserver, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {
   const valueRef = useRef(value);
@@ -62,7 +63,9 @@ export const useSubscription = <InputValue>(
     const fixedUnsubscribe = latestUnsubscribe.current;
 
     const subscription = input$.subscribe({
-      next: (value) => latestNext.current?.(value),
+      next: (value) => {
+        return latestNext.current?.(value);
+      },
       error: (value) => latestError.current?.(value),
       complete: () => latestComplete.current?.(),
     });
@@ -76,6 +79,19 @@ export const useSubscription = <InputValue>(
   }, [input$, latestNext, latestError, latestComplete, latestUnsubscribe]);
 
   return latestSubscription.current;
+};
+
+export const useOperator = <InputValue, OutputValue>(
+  input$: Observable<InputValue>,
+  operator: OperatorFunction<InputValue, OutputValue>
+) => {
+  const latestOperator = useLatest(operator);
+
+  return useObservable(
+    (inputs$) =>
+      inputs$.pipe(switchMap(([currentInput$]) => latestOperator.current(currentInput$))),
+    [input$] as const
+  );
 };
 
 export const tapUnsubscribe = (onUnsubscribe: () => void) => <T>(source$: Observable<T>) => {
