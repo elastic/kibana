@@ -37,7 +37,7 @@ test('Completed state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Search session saved'));
+  await userEvent.click(screen.getByLabelText('Search session complete'));
   await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
