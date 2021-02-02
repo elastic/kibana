@@ -17,7 +17,7 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { once } from 'lodash';
 import { Lifecycle } from '../lifecycle';
-import { Test } from '../../fake_mocha_types';
+import { Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -97,48 +97,56 @@ export function decorateSnapshotUi({
   // @ts-expect-error
   global.expectSnapshot = expectSnapshot;
 
+  let rootSuite: Suite | undefined;
+
   lifecycle.beforeEachTest.add((test: Test) => {
     globalState.currentTest = test;
   });
 
   lifecycle.beforeTests.add((root) => {
-    lifecycle.cleanup.add(() => {
-      root.eachTest((test) => {
-        const file = test.file;
+    rootSuite = root;
+  });
 
-        if (!file) {
-          return;
-        }
+  lifecycle.cleanup.add(() => {
+    if (!rootSuite) {
+      throw new Error('Snapshots could not be saved, root suite was not found');
+    }
 
-        const snapshotState = globalState.snapshotStates[file];
+    rootSuite.eachTest((test) => {
+      const file = test.file;
 
-        if (snapshotState && !test.isPassed()) {
-          snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
-        }
-      });
-
-      const unused: string[] = [];
-
-      Object.values(globalState.snapshotStates).forEach((state) => {
-        if (globalState.updateSnapshot === 'all') {
-          state.removeUncheckedKeys();
-        }
-
-        unused.push(...state.getUncheckedKeys());
-
-        state.save();
-      });
-
-      if (unused.length) {
-        throw new Error(
-          `${unused.length} obsolete snapshot(s) found:\n${unused.join(
-            '\n\t'
-          )}.\n\nRun tests again with \`--updateSnapshots\` to remove them.`
-        );
+      if (!file) {
+        return;
       }
 
-      globalState.snapshotStates = {};
+      const snapshotState = globalState.snapshotStates[file];
+
+      if (snapshotState && !test.isPassed()) {
+        snapshotState.markSnapshotsAsCheckedForTest(test.fullTitle());
+      }
     });
+
+    const unused: string[] = [];
+
+    Object.values(globalState.snapshotStates).forEach((state) => {
+      if (globalState.updateSnapshot === 'all') {
+        state.removeUncheckedKeys();
+      }
+
+      unused.push(...state.getUncheckedKeys());
+
+      state.save();
+    });
+
+    if (unused.length) {
+      throw new Error(
+        `${unused.length} obsolete snapshot(s) found:\n${unused.join(
+          '\n\t'
+        )}.\n\nRun tests again with \`--updateSnapshots\` to remove them.`
+      );
+    }
+
+    globalState.snapshotStates = {};
   });
 }
 

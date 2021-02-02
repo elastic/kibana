@@ -12,6 +12,19 @@ import { decorateSnapshotUi, expectSnapshot } from './decorate_snapshot_ui';
 import path from 'path';
 import fs from 'fs';
 
+const createRootSuite = () => {
+  const suite = {
+    tests: [] as Test[],
+    root: true,
+    eachTest: (cb) => {
+      suite.tests.forEach((test) => cb(test));
+    },
+    parent: undefined,
+  } as Suite;
+
+  return suite;
+};
+
 const createMockSuite = ({ tests, root = true }: { tests: Test[]; root?: boolean }) => {
   const suite = {
     tests,
@@ -31,24 +44,23 @@ const createMockSuite = ({ tests, root = true }: { tests: Test[]; root?: boolean
   return suite;
 };
 
-const createMockTest = ({
+const registerTest = ({
+  parent,
   title = 'Test',
   passed = true,
-  filename = __filename,
-  parent,
-}: { title?: string; passed?: boolean; filename?: string; parent?: Suite } = {}) => {
+}: {
+  parent: Suite;
+  title?: string;
+  passed?: boolean;
+}) => {
   const test = ({
-    file: filename,
+    file: __filename,
     fullTitle: () => title,
     isPassed: () => passed,
   } as unknown) as Test;
 
-  if (parent) {
-    parent.tests.push(test);
-    test.parent = parent;
-  } else {
-    test.parent = createMockSuite({ tests: [test] });
-  }
+  parent.tests.push(test);
+  test.parent = parent;
 
   return test;
 };
@@ -70,34 +82,41 @@ describe('decorateSnapshotUi', () => {
 
   describe('when running a test', () => {
     let lifecycle: Lifecycle;
-    beforeEach(() => {
+    let rootSuite: Suite;
+    beforeEach(async () => {
       lifecycle = new Lifecycle();
+      rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: false });
+
+      await lifecycle.beforeTests.trigger(rootSuite);
     });
 
     it('passes when the snapshot matches the actual value', async () => {
-      const test = createMockTest();
+      const test = registerTest({ parent: rootSuite });
 
       await lifecycle.beforeEachTest.trigger(test);
 
       expect(() => {
         expectSnapshot('foo').toMatchInline(`"foo"`);
       }).not.toThrow();
+
+      await lifecycle.cleanup.trigger();
     });
 
     it('throws when the snapshot does not match the actual value', async () => {
-      const test = createMockTest();
+      const test = registerTest({ parent: rootSuite });
 
       await lifecycle.beforeEachTest.trigger(test);
 
       expect(() => {
         expectSnapshot('foo').toMatchInline(`"bar"`);
       }).toThrow();
+
+      await lifecycle.cleanup.trigger();
     });
 
     it('writes a snapshot to an external file if it does not exist', async () => {
-      const test: Test = createMockTest();
-
+      const test = registerTest({ parent: rootSuite });
       await lifecycle.beforeEachTest.trigger(test);
 
       expect(fs.existsSync(snapshotFile)).toBe(false);
@@ -106,7 +125,7 @@ describe('decorateSnapshotUi', () => {
         expectSnapshot('foo').toMatch();
       }).not.toThrow();
 
-      await lifecycle.afterTestSuite.trigger(test.parent);
+      await lifecycle.cleanup.trigger();
 
       expect(fs.existsSync(snapshotFile)).toBe(true);
     });
@@ -114,9 +133,13 @@ describe('decorateSnapshotUi', () => {
 
   describe('when writing multiple snapshots to a single file', () => {
     let lifecycle: Lifecycle;
-    beforeEach(() => {
+    let rootSuite: Suite;
+    beforeEach(async () => {
       lifecycle = new Lifecycle();
+      rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: false });
+
+      await lifecycle.beforeTests.trigger(rootSuite);
     });
 
     beforeEach(() => {
@@ -134,7 +157,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
     });
 
     it('compares to an existing snapshot', async () => {
-      const test1 = createMockTest({ title: 'Test1' });
+      const test1 = registerTest({ parent: rootSuite, title: 'Test1' });
 
       await lifecycle.beforeEachTest.trigger(test1);
 
@@ -142,7 +165,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
         expectSnapshot('foo').toMatch();
       }).not.toThrow();
 
-      const test2 = createMockTest({ title: 'Test2' });
+      const test2 = registerTest({ parent: rootSuite, title: 'Test2' });
 
       await lifecycle.beforeEachTest.trigger(test2);
 
@@ -150,19 +173,23 @@ exports[\`Test2 1\`] = \`"bar"\`;
         expectSnapshot('foo').toMatch();
       }).toThrow();
 
-      await lifecycle.afterTestSuite.trigger(test1.parent);
+      await lifecycle.cleanup.trigger();
     });
   });
 
   describe('when updating snapshots', () => {
     let lifecycle: Lifecycle;
-    beforeEach(() => {
+    let rootSuite: Suite;
+    beforeEach(async () => {
       lifecycle = new Lifecycle();
+      rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: true, isCi: false });
+
+      await lifecycle.beforeTests.trigger(rootSuite);
     });
 
     it("doesn't throw if the value does not match", async () => {
-      const test = createMockTest();
+      const test = registerTest({ parent: rootSuite });
 
       await lifecycle.beforeEachTest.trigger(test);
 
@@ -185,7 +212,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
       });
 
       it('updates existing external snapshots', async () => {
-        const test = createMockTest();
+        const test = registerTest({ parent: rootSuite });
 
         await lifecycle.beforeEachTest.trigger(test);
 
@@ -193,7 +220,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('bar').toMatch();
         }).not.toThrow();
 
-        await lifecycle.afterTestSuite.trigger(test.parent);
+        await lifecycle.cleanup.trigger();
 
         const file = fs.readFileSync(snapshotFile, { encoding: 'utf-8' });
 
@@ -209,19 +236,25 @@ exports[\`Test2 1\`] = \`"bar"\`;
 
   describe('when running on ci', () => {
     let lifecycle: Lifecycle;
-    beforeEach(() => {
+    let rootSuite: Suite;
+    beforeEach(async () => {
       lifecycle = new Lifecycle();
+      rootSuite = createRootSuite();
       decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: true });
+
+      await lifecycle.beforeTests.trigger(rootSuite);
     });
 
     it('throws on new snapshots', async () => {
-      const test = createMockTest();
+      const test = registerTest({ parent: rootSuite });
 
       await lifecycle.beforeEachTest.trigger(test);
 
       expect(() => {
         expectSnapshot('bar').toMatchInline();
       }).toThrow();
+
+      await lifecycle.cleanup.trigger();
     });
 
     describe('when adding to an existing file', () => {
@@ -240,17 +273,27 @@ exports[\`Test2 1\`] = \`"bar"\`;
       });
 
       it('does not throw on an existing test', async () => {
-        const test = createMockTest({ title: 'Test' });
+        const test = registerTest({ parent: rootSuite });
 
         await lifecycle.beforeEachTest.trigger(test);
 
         expect(() => {
           expectSnapshot('foo').toMatch();
         }).not.toThrow();
+
+        const test2 = registerTest({ parent: rootSuite, title: 'Test2' });
+
+        await lifecycle.beforeEachTest.trigger(test2);
+
+        expect(() => {
+          expectSnapshot('bar').toMatch();
+        }).not.toThrow();
+
+        await lifecycle.cleanup.trigger();
       });
 
       it('throws on a new test', async () => {
-        const test = createMockTest({ title: 'New test' });
+        const test = registerTest({ parent: rootSuite, title: 'New test' });
 
         await lifecycle.beforeEachTest.trigger(test);
 
@@ -259,8 +302,8 @@ exports[\`Test2 1\`] = \`"bar"\`;
         }).toThrow();
       });
 
-      it('does not throw when all snapshots are used ', async () => {
-        const test = createMockTest({ title: 'Test' });
+      it('does not throw when all snapshots are used', async () => {
+        const test = registerTest({ parent: rootSuite });
 
         await lifecycle.beforeEachTest.trigger(test);
 
@@ -268,7 +311,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('foo').toMatch();
         }).not.toThrow();
 
-        const test2 = createMockTest({ title: 'Test2' });
+        const test2 = registerTest({ parent: rootSuite, title: 'Test2' });
 
         await lifecycle.beforeEachTest.trigger(test2);
 
@@ -276,13 +319,13 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('bar').toMatch();
         }).not.toThrow();
 
-        const afterTestSuite = lifecycle.afterTestSuite.trigger(test.parent);
+        const afterCleanup = lifecycle.cleanup.trigger();
 
-        await expect(afterTestSuite).resolves.toBe(undefined);
+        await expect(afterCleanup).resolves.toBe(undefined);
       });
 
       it('throws on unused snapshots', async () => {
-        const test = createMockTest({ title: 'Test' });
+        const test = registerTest({ parent: rootSuite });
 
         await lifecycle.beforeEachTest.trigger(test);
 
@@ -290,9 +333,9 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('foo').toMatch();
         }).not.toThrow();
 
-        const afterTestSuite = lifecycle.afterTestSuite.trigger(test.parent);
+        const afterCleanup = lifecycle.cleanup.trigger();
 
-        await expect(afterTestSuite).rejects.toMatchInlineSnapshot(`
+        await expect(afterCleanup).rejects.toMatchInlineSnapshot(`
                 [Error: 1 obsolete snapshot(s) found:
                 Test2 1.
 
@@ -301,17 +344,11 @@ exports[\`Test2 1\`] = \`"bar"\`;
       });
 
       it('does not throw on unused when some tests are skipped', async () => {
-        const root = createMockSuite({ tests: [] });
+        const test = registerTest({ parent: rootSuite, passed: true });
 
-        const test = createMockTest({
-          title: 'Test',
-          parent: root,
-          passed: true,
-        });
-
-        createMockTest({
+        registerTest({
           title: 'Test2',
-          parent: root,
+          parent: rootSuite,
           passed: false,
         });
 
@@ -321,9 +358,9 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('foo').toMatch();
         }).not.toThrow();
 
-        const afterTestSuite = lifecycle.afterTestSuite.trigger(root);
+        const afterCleanup = lifecycle.cleanup.trigger();
 
-        await expect(afterTestSuite).resolves.toBeUndefined();
+        await expect(afterCleanup).resolves.toBeUndefined();
       });
     });
   });
