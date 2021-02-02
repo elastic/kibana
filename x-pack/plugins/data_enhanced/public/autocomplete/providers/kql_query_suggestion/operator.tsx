@@ -66,7 +66,18 @@ const operators = {
         'xpack.data.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
       />
     ),
-    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape', 'boolean'],
+    fieldTypes: [
+      'string',
+      'number',
+      'number_range',
+      'date',
+      'date_range',
+      'ip',
+      'ip_range',
+      'geo_point',
+      'geo_shape',
+      'boolean',
+    ],
   },
   '<=': {
     description: (
@@ -82,7 +93,7 @@ const operators = {
         'xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
       />
     ),
-    fieldTypes: ['number', 'date', 'ip'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
   },
   '>=': {
     description: (
@@ -98,7 +109,7 @@ const operators = {
         'xpack.data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
       />
     ),
-    fieldTypes: ['number', 'date', 'ip'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
   },
   '<': {
     description: (
@@ -110,7 +121,7 @@ const operators = {
         'xpack.data.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
       />
     ),
-    fieldTypes: ['number', 'date', 'ip'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
   },
   '>': {
     description: (
@@ -124,7 +135,7 @@ const operators = {
         'xpack.data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
       />
     ),
-    fieldTypes: ['number', 'date', 'ip'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
   },
   ': *': {
     description: (

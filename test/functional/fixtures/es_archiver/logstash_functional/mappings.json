@@ -127,6 +127,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long"
             }
           }
         },
@@ -500,6 +503,9 @@
             },
             "ram": {
               "type": "long"
+            },
+            "ram_range": {
+              "type": "long_range"
             }
           }
         },
@@ -872,6 +878,9 @@
               "type": "text"
             },
             "ram": {
+              "type": "long"
+            },
+            "ram_range": {
               "type": "long"
             }
           }

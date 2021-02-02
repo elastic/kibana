@@ -68,6 +68,36 @@ describe('Kuery operator suggestions', () => {
     expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
   });
 
+  test('should return numeric operators for numeric range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'bytes_range' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
+  test('should return range operators for date range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'date_range' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
+  test('should return range operators for ip range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'ip_range' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
   test('should have descriptions', async () => {
     const suggestions = await getSuggestions(
       querySuggestionsArgs,

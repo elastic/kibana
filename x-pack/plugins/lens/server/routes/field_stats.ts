@@ -153,14 +153,12 @@ export async function getNumberHistogram(
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
   const terms = minMaxResult.aggregations!.sample.top_values;
-  const topValuesBuckets = !skipTopValues
-    ? {
-        buckets: terms.buckets.map((bucket) => ({
-          count: bucket.doc_count,
-          key: bucket.key,
-        })),
-      }
-    : { buckets: [] };
+  const topValuesBuckets = {
+    buckets: terms.buckets.map((bucket) => ({
+      count: bucket.doc_count,
+      key: bucket.key,
+    })),
+  };
 
   let histogramInterval = (maxValue! - minValue!) / 10;
 

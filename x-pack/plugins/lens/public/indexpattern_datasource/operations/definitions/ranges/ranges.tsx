@@ -82,7 +82,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
-      (type === 'number' || type === 'number_range') &&
+      type === 'number' &&
       aggregatable &&
       (!aggregationRestrictions || aggregationRestrictions.range)
     ) {
@@ -99,25 +99,6 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       defaultMessage: 'Missing field',
     }),
   buildColumn({ field }) {
-    if (field.type === 'number_range') {
-      // Can't do auto histogram on number ranges
-      return {
-        label: field.displayName,
-        dataType: 'number', // string for Range
-        operationType: 'range',
-        sourceField: field.name,
-        isBucketed: true,
-        scale: 'ordinal', // interval for Range
-        params: {
-          type: MODES.Range,
-          ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-          maxBars: AUTO_BARS,
-          parentFormat: { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } },
-          format: undefined,
-        },
-      };
-    }
-
     return {
       label: field.displayName,
       dataType: 'number', // string for Range

@@ -103,6 +103,11 @@ export const getHistogramBucketAgg = ({
           options: any
         ) {
           const field = aggConfig.getField();
+          if (field?.type === 'number_range') {
+            // Can't scale number_histogram requests
+            return;
+          }
+
           const aggBody = field.scripted
             ? { script: { source: field.script, lang: field.lang } }
             : { field: field.name };
@@ -156,7 +161,9 @@ export const getHistogramBucketAgg = ({
       {
         name: 'maxBars',
         shouldShow(agg) {
-          return isAutoInterval(get(agg, 'params.interval'));
+          const field = agg.getField();
+          // Show this for empty field and number field, but not range
+          return field?.type !== 'number_range' && isAutoInterval(get(agg, 'params.interval'));
         },
         write: () => {},
       },

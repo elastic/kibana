@@ -69,6 +69,13 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        },
       ],
     } as IndexPattern;
 
@@ -261,5 +268,26 @@ describe('IndexPattern Field Item', () => {
         }),
       }
     );
+  });
+
+  it('should not request field stats for range fields', async () => {
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={{
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        }}
+      />
+    );
+
+    await act(async () => {
+      clickField(wrapper, 'ip_range');
+    });
+
+    expect(core.http.post).not.toHaveBeenCalled();
   });
 });
