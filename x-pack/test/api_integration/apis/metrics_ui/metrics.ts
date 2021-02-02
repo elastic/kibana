@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {
