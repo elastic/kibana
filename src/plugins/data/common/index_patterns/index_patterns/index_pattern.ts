@@ -423,7 +423,6 @@ export class IndexPattern implements IIndexPattern {
 
     if (fieldObject) {
       fieldObject.customLabel = newCustomLabel;
-      return;
     }
 
     this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);

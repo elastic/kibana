@@ -100,7 +100,7 @@ export const FieldEditorFlyoutContentContainer = ({
         indexPattern.removeRuntimeField(updatedField.name);
       }
 
-      const editedField = field || indexPattern.getFieldByName(updatedField.name);
+      const editedField = indexPattern.getFieldByName(updatedField.name);
 
       try {
         if (!editedField) {
@@ -109,7 +109,7 @@ export const FieldEditorFlyoutContentContainer = ({
           );
         }
 
-        editedField.customLabel = updatedField.customLabel;
+        indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
         editedField.count = updatedField.popularity || 0;
         if (updatedField.format) {
           indexPattern.setFieldFormat(updatedField.name, updatedField.format);
@@ -127,7 +127,7 @@ export const FieldEditorFlyoutContentContainer = ({
         notifications.toasts.addError(e, { title });
       }
     },
-    [onSave, indexPattern, indexPatternService, field, notifications]
+    [onSave, indexPattern, indexPatternService, notifications]
   );
 
   const loadEditor = useCallback(async () => {
