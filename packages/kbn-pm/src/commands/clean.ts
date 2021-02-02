@@ -24,7 +24,7 @@ export const CleanCommand: ICommand = {
     log.warning(dedent`
       This command is only necessary for the rare circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
-      filling out this form: https://ela.st/yarn-kbn-clean.
+      filling out this form: https://ela.st/yarn-kbn-clean
     `);
 
     const toDelete = [];
