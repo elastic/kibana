@@ -116,6 +116,9 @@ export const useTimelineKpis = ({
   useEffect(() => {
     if (!isBlankTimeline) {
       timelineKpiSearch(timelineKpiRequest);
+    } else {
+      setLoading(false);
+      setTimelineKpiResponse(null);
     }
     return () => {
       didCancel.current = true;
