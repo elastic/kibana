@@ -90,7 +90,7 @@ describe('updateSearchSource', () => {
     });
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
+    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(result.getField('fieldsFromSource')).toBe(undefined);
   });
 
@@ -117,7 +117,7 @@ describe('updateSearchSource', () => {
     });
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);
-    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: true }]);
+    expect(result.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(result.getField('fieldsFromSource')).toBe(undefined);
   });
 });
