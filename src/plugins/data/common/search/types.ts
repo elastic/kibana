@@ -84,10 +84,17 @@ export interface ISearchOptions {
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
    */
   abortSignal?: AbortSignal;
+
   /**
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  /**
+   * Request the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to
+   * something other than `true`, this should be set to `false`.
+   */
+  legacyHitsTotal?: boolean;
 
   /**
    * A session ID, grouping multiple search requests into a single session.
