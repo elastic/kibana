@@ -7,14 +7,14 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import {
-  ServiceNowConnectorConfiguration,
+  ServiceNowITSMConnectorConfiguration,
   JiraConnectorConfiguration,
   ResilientConnectorConfiguration,
 } from '../../../../../triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': ServiceNowConnectorConfiguration as ConnectorConfiguration,
+  '.servicenow': ServiceNowITSMConnectorConfiguration as ConnectorConfiguration,
   '.jira': JiraConnectorConfiguration as ConnectorConfiguration,
   '.resilient': ResilientConnectorConfiguration as ConnectorConfiguration,
 };
