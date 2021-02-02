@@ -26,7 +26,7 @@ export function EsDeleteIndicesProvider({ getService }: FtrProviderContext) {
     for (const pattern of [patterns].flat()) {
       for (let attempt = 1; ; attempt++) {
         if (attempt > 5) {
-          throw new Error(`Failed to delete app indexes with pattern [${pattern}]`);
+          throw new Error(`Failed to delete all indices with pattern [${pattern}]`);
         }
 
         // resolve pattern to concrete index names
