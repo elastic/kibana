@@ -16,14 +16,13 @@ import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
 
-export const DestroyCommand: ICommand = {
-  description:
-    'Deletes node_modules and output directories, resets caches, and stops Bazel server',
-  name: 'destroy',
+export const ResetCommand: ICommand = {
+  description: 'Deletes node_modules and output directories, resets caches, and stops Bazel server',
+  name: 'reset',
 
   async run(projects) {
     log.warning(dedent`
-      In most cases, `yarn kbn clean` is all that should be needed to recover a consistent state when
+      In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. If you need to use this command, please let us know, as it should not be necessary.
     `);
 

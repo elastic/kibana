@@ -8828,7 +8828,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "commands", function() { return commands; });
 /* harmony import */ var _bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(129);
 /* harmony import */ var _clean__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(475);
-/* harmony import */ var _destroy__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(506);
+/* harmony import */ var _reset__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(506);
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(507);
 /* harmony import */ var _watch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(508);
 /*
@@ -8846,7 +8846,7 @@ __webpack_require__.r(__webpack_exports__);
 const commands = {
   bootstrap: _bootstrap__WEBPACK_IMPORTED_MODULE_0__["BootstrapCommand"],
   clean: _clean__WEBPACK_IMPORTED_MODULE_1__["CleanCommand"],
-  destroy: _destroy__WEBPACK_IMPORTED_MODULE_2__["DestroyCommand"],
+  reset: _reset__WEBPACK_IMPORTED_MODULE_2__["ResetCommand"],
   run: _run__WEBPACK_IMPORTED_MODULE_3__["RunCommand"],
   watch: _watch__WEBPACK_IMPORTED_MODULE_4__["WatchCommand"]
 };
@@ -54240,15 +54240,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const CleanCommand = {
-  description: 'Remove target directories from all projects, remove extra patterns and runs a Bazel state soft clean.',
+  description: 'Deletes output directories and resets caches.',
   name: 'clean',
 
   async run(projects) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-
-      'yarn kbn clean' does not remove node_modules now. It runs a more soft clean and should be used as the way to go between branches using Bazel.
-      When switching between a non Bazel branch and a Bazel branch or for situations where you need a deeper clean, run 'yarn kbn destroy' instead.
-
+      NOTICE: When switching between Bazel and non-Bazel branches, you might want to instead
+      run 'yarn kbn reset', which also removes node_module directories.
     `);
     const toDelete = [];
 
@@ -58886,7 +58884,7 @@ MuteStream.prototype.close = proxy('close')
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DestroyCommand", function() { return DestroyCommand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ResetCommand", function() { return ResetCommand; });
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
@@ -58912,17 +58910,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const DestroyCommand = {
-  description: 'Remove the node_modules, remove target directories from all projects, remove extra patterns and runs a Bazel state hard clean.',
-  name: 'destroy',
+const ResetCommand = {
+  description: 'Deletes node_modules and output directories, resets caches, and stops Bazel server',
+  name: 'reset',
 
   async run(projects) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-
-      'yarn kbn destroy' is the most deeper and destroying clean command. Use it only when switching between a non Bazel branch into a
-      Bazel branch or when you are having problems with node_modules.
-      Otherwise please just run 'yarn kbn clean'.
-
+      In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
+      problems arise. If you need to use this command, please let us know, as it should not be necessary.
     `);
     const toDelete = [];
 

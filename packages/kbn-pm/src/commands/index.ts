@@ -24,7 +24,7 @@ export interface ICommand {
 
 import { BootstrapCommand } from './bootstrap';
 import { CleanCommand } from './clean';
-import { DestroyCommand } from './destroy';
+import { ResetCommand } from './reset';
 import { RunCommand } from './run';
 import { WatchCommand } from './watch';
 import { Kibana } from '../utils/kibana';
@@ -32,7 +32,7 @@ import { Kibana } from '../utils/kibana';
 export const commands: { [key: string]: ICommand } = {
   bootstrap: BootstrapCommand,
   clean: CleanCommand,
-  destroy: DestroyCommand,
+  reset: ResetCommand,
   run: RunCommand,
   watch: WatchCommand,
 };

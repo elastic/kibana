@@ -17,14 +17,13 @@ import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description:
-    'Deletes output directories and resets caches.',
+  description: 'Deletes output directories and resets caches.',
   name: 'clean',
 
   async run(projects) {
     log.warning(dedent`
       NOTICE: When switching between Bazel and non-Bazel branches, you might want to instead
-      run 'yarn kbn destroy', which also removes node_module directories.
+      run 'yarn kbn reset', which also removes node_module directories.
     `);
 
     const toDelete = [];
