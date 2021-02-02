@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
-import { TableVisConfig } from './types';
+import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
+import { tableVisResponseHandler } from './utils';
 
 export type Input = Datatable;
 
@@ -19,7 +19,7 @@ interface Arguments {
 }
 
 export interface TableVisRenderValue {
-  visData: TableContext;
+  visData: TableVisData;
   visType: typeof VIS_TYPE_TABLE;
   visConfig: TableVisConfig;
 }
@@ -47,7 +47,7 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
   },
   fn(input, args, handlers) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const convertedData = tableVisResponseHandler(input, visConfig.dimensions);
+    const convertedData = tableVisResponseHandler(input, visConfig);
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.logDatatable('default', input);
