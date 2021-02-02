@@ -13,14 +13,14 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
-  const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+  const EDIT_USERS_PATH = `${USERS_PATH}/create`;
 
   const ROLES_PATH = 'security/roles';
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
   // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.skip('Management', function () {
+  describe.only('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -46,9 +46,13 @@ export default function ({ getService, getPageObjects }) {
       describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
+          await PageObjects.common.sleep(5000);
           await PageObjects.security.clickCreateNewUser();
+          await PageObjects.common.sleep(5000);
           const currentUrl = await browser.getCurrentUrl();
+          await PageObjects.common.sleep(5000);
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
+          await PageObjects.common.sleep(5000);
         });
 
         it('Clicking cancel in create user section brings user back to listing', async () => {
@@ -79,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
           // allow time for user to load
-          await PageObjects.common.sleep(500);
+          await PageObjects.common.sleep(5000);
           const userName = await testSubjects.getAttribute('userFormUserNameInput', 'value');
           expect(userName).to.equal('new-user');
         });
@@ -149,6 +153,8 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.settings.navigateTo();
           await testSubjects.click('users');
+          await testSubjects.click('tablePaginationPopoverButton');
+          await testSubjects.click('tablePagination-100-rows');
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
