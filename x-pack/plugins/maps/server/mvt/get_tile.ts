@@ -9,6 +9,7 @@ import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
 import { Logger, RequestHandlerContext } from 'src/core/server';
+import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
@@ -44,7 +45,7 @@ export async function getGridTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  context: RequestHandlerContext;
+  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
@@ -124,7 +125,7 @@ export async function getTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  context: RequestHandlerContext;
+  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
@@ -160,7 +161,6 @@ export async function getTile({
       )
       .toPromise();
 
-    // @ts-expect-error
     if (countResponse.rawResponse.hits.total > requestBody.size) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
@@ -191,7 +191,6 @@ export async function getTile({
           properties: {
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
-          // @ts-expect-error
           geometry: esBboxToGeoJsonPolygon(
             bboxResponse.rawResponse.aggregations.data_bounds.bounds
           ),
@@ -212,7 +211,6 @@ export async function getTile({
 
       // Todo: pass in epochMillies-fields
       const featureCollection = hitsToGeoJson(
-        // @ts-expect-error
         documentsResponse.rawResponse.hits.hits,
         (hit: Record<string, unknown>) => {
           return flattenHit(geometryFieldName, hit);

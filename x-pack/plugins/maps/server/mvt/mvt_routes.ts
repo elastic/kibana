@@ -13,6 +13,7 @@ import {
   RequestHandlerContext,
 } from 'src/core/server';
 import { IRouter } from 'src/core/server';
+import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -24,7 +25,13 @@ import { getGridTile, getTile } from './get_tile';
 
 const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
 
-export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRouter }) {
+export function initMVTRoutes({
+  router,
+  logger,
+}: {
+  router: IRouter<RequestHandlerContext & { search: DataApiRequestHandlerContext }>;
+  logger: Logger;
+}) {
   router.get(
     {
       path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}`,
@@ -42,7 +49,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
       },
     },
     async (
-      context: RequestHandlerContext,
+      context: RequestHandlerContext & { search: DataApiRequestHandlerContext },
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
@@ -84,7 +91,7 @@ export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRou
       },
     },
     async (
-      context: RequestHandlerContext,
+      context: RequestHandlerContext & { search: DataApiRequestHandlerContext },
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
