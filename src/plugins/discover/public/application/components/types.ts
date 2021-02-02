@@ -20,7 +20,7 @@ import {
   TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 import { TopNavMenuData } from '../../../../navigation/public';
 
 export interface DiscoverProps {
@@ -131,6 +131,10 @@ export interface DiscoverProps {
      * Function to set the current state
      */
     setAppState: (state: Partial<AppState>) => void;
+    /**
+     * State container providing globalState, appState and functions
+     */
+    stateContainer: GetStateReturn;
   };
   /**
    * Function to reset the current query

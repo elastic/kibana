@@ -7,7 +7,7 @@
  */
 
 import './discover.scss';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -87,8 +87,12 @@ export function Discover({
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
   };
+  const toggleHideChart = useCallback(() => {
+    const newState = { ...state, hideChart: !state.hideChart };
+    opts.stateContainer.setAppState(newState);
+  }, [state, opts]);
+  const hideChart = useMemo(() => state.hideChart, [state]);
 
-  const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
   const { TopNavMenu } = services.navigation.ui;
@@ -198,7 +202,7 @@ export function Discover({
                             onResetQuery={resetQuery}
                           />
                         </EuiFlexItem>
-                        {toggleOn && (
+                        {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
                             <TimechartHeader
                               dateFormat={opts.config.get('dateFormat')}
@@ -214,13 +218,13 @@ export function Discover({
                           <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                             <EuiButtonEmpty
                               size="xs"
-                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                              iconType={!hideChart ? 'eyeClosed' : 'eye'}
                               onClick={() => {
-                                toggleChart(!toggleOn);
+                                toggleHideChart();
                               }}
                               data-test-subj="discoverChartToggle"
                             >
-                              {toggleOn
+                              {!hideChart
                                 ? i18n.translate('discover.hideChart', {
                                     defaultMessage: 'Hide chart',
                                   })
@@ -233,7 +237,7 @@ export function Discover({
                       </EuiFlexGroup>
                       {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
-                    {toggleOn && opts.timefield && (
+                    {!hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(
