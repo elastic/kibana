@@ -320,14 +320,12 @@ describe('Create case', () => {
         });
         expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'jira-1',
             name: 'Jira',
             type: '.jira',
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
-          alerts: {},
           updateCase: noop,
         });
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
@@ -390,14 +388,12 @@ describe('Create case', () => {
 
         expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'resilient-2',
             name: 'My Connector 2',
             type: '.resilient',
             fields: { incidentTypes: ['19'], severityCode: '4' },
           },
-          alerts: {},
           updateCase: noop,
         });
 
@@ -453,14 +449,12 @@ describe('Create case', () => {
 
         expect(postPushToService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'servicenow-1',
             name: 'My Connector',
             type: '.servicenow',
             fields: { impact: '2', severity: '2', urgency: '2' },
           },
-          alerts: {},
           updateCase: noop,
         });
 

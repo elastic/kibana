@@ -45,7 +45,7 @@ import {
   reporters,
   respReporters,
   serviceConnector,
-  casePushParams,
+  basicCaseId,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
@@ -84,11 +84,13 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual('');
     });
   });
+
   describe('getActionLicense', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(actionLicenses);
     });
+
     test('check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/actions/list_action_types`, {
@@ -102,6 +104,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(actionLicenses);
     });
   });
+
   describe('getCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -123,6 +126,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('getCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -145,6 +149,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
     });
+
     test('correctly applies filters', async () => {
       await getCases({
         filterOptions: {
@@ -169,6 +174,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
     });
+
     test('tags with weird chars get handled gracefully', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
@@ -205,6 +211,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...allCases });
     });
   });
+
   describe('getCasesStatus', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -223,6 +230,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(casesStatus);
     });
   });
+
   describe('getCaseUserActions', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -242,6 +250,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(caseUserActions);
     });
   });
+
   describe('getReporters', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -261,6 +270,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(respReporters);
     });
   });
+
   describe('getTags', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -280,6 +290,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(tags);
     });
   });
+
   describe('patchCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -307,6 +318,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...[basicCase] });
     });
   });
+
   describe('patchCasesStatus', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -334,6 +346,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual({ ...cases });
     });
   });
+
   describe('patchComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -371,6 +384,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('postCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -405,6 +419,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('postComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -429,6 +444,7 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(basicCase);
     });
   });
+
   describe('pushCase', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -449,31 +465,31 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual(pushedCase);
     });
   });
+
   describe('pushToService', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(actionTypeExecutorResult);
     });
+
     const connectorId = 'connectorId';
+
     test('check url, method, signal', async () => {
-      await pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal);
+      await pushToService(connectorId, basicCaseId, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${getCaseConfigurePushUrl(connectorId)}`, {
         method: 'POST',
         body: JSON.stringify({
           connector_type: ConnectorTypes.jira,
-          params: casePushParams,
+          params: {
+            case_id: basicCaseId,
+          },
         }),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await pushToService(
-        connectorId,
-        ConnectorTypes.jira,
-        casePushParams,
-        abortCtrl.signal
-      );
+      const resp = await pushToService(connectorId, basicCaseId, abortCtrl.signal);
       expect(resp).toEqual(serviceConnector);
     });
 
@@ -486,7 +502,7 @@ describe('Case Configuration API', () => {
         message: 'not it',
       });
       await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
+        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -498,7 +514,7 @@ describe('Case Configuration API', () => {
         message: theError,
       });
       await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
+        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -509,7 +525,7 @@ describe('Case Configuration API', () => {
         status: 'error',
       });
       await expect(
-        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
+        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
   });

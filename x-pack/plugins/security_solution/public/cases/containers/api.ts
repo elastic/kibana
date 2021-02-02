@@ -17,7 +17,6 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
-  ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   User,
 } from '../../../../case/common/api';

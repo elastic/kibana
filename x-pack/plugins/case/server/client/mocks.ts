@@ -26,8 +26,11 @@ export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
+  get: jest.fn(),
+  getAlerts: jest.fn(),
   getFields: jest.fn(),
   getMappings: jest.fn(),
+  getUserActions: jest.fn(),
   update: jest.fn(),
   updateAlertsStatus: jest.fn(),
 });
@@ -67,7 +70,11 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     getUserActions: jest.fn(),
   };
 
-  const alertsService = { initialize: jest.fn(), updateAlertsStatus: jest.fn() };
+  const alertsService = {
+    initialize: jest.fn(),
+    updateAlertsStatus: jest.fn(),
+    getAlerts: jest.fn(),
+  };
 
   const context = {
     core: {

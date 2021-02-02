@@ -6,68 +6,52 @@
  */
 
 import {
-  ServiceConnectorCaseParams,
-  ServiceConnectorCommentParams,
+  BasicParams,
+  CommentResponse,
+  CommentType,
   ConnectorMappingsAttributes,
-  ConnectorTypes,
-} from '../../../../../common/api/connectors';
+} from '../../../../../common/api';
+
 export const updateUser = {
   updatedAt: '2020-03-13T08:34:53.450Z',
-  updatedBy: { fullName: 'Another User', username: 'another' },
+  updatedBy: { full_name: 'Another User', username: 'another' },
 };
+
 const entity = {
   createdAt: '2020-03-13T08:34:53.450Z',
-  createdBy: { fullName: 'Elastic User', username: 'elastic' },
+  createdBy: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
   updatedAt: null,
   updatedBy: null,
 };
-export const comment: ServiceConnectorCommentParams = {
-  comment: 'first comment',
-  commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-  ...entity,
+
+export const comment: CommentResponse = {
+  id: 'mock-comment-1',
+  comment: 'Wow, good luck catching that bad meanie!',
+  type: CommentType.user as const,
+  created_at: '2019-11-25T21:55:00.177Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
 };
+
 export const defaultPipes = ['informationCreated'];
-const basicParams = {
-  comments: [comment],
+export const basicParams: BasicParams = {
   description: 'a description',
   title: 'a title',
-  savedObjectId: '1231231231232',
-  externalId: null,
+  ...entity,
 };
-export const params = {
-  [ConnectorTypes.jira]: {
-    ...basicParams,
-    issueType: '10003',
-    priority: 'Highest',
-    parent: '5002',
-    ...entity,
-  } as ServiceConnectorCaseParams,
-  [ConnectorTypes.resilient]: {
-    ...basicParams,
-    incidentTypes: ['10003'],
-    severityCode: '1',
-    ...entity,
-  } as ServiceConnectorCaseParams,
-  [ConnectorTypes.serviceNowITSM]: {
-    ...basicParams,
-    impact: '3',
-    severity: '1',
-    urgency: '2',
-    ...entity,
-  } as ServiceConnectorCaseParams,
-  [ConnectorTypes.serviceNowSIR]: {
-    ...basicParams,
-    category: 'Denial of Service',
-    destIp: '192.68.1.1',
-    sourceIp: '192.68.1.2',
-    malwareHash: '098f6bcd4621d373cade4e832627b4f6',
-    malwareUrl: 'https://attack.com',
-    priority: '1',
-    subcategory: '20',
-    ...entity,
-  } as ServiceConnectorCaseParams,
-  [ConnectorTypes.none]: {},
-};
+
 export const mappings: ConnectorMappingsAttributes[] = [
   {
     source: 'title',

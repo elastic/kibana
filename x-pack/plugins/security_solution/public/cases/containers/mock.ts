@@ -158,19 +158,6 @@ const basicAction = {
   commentId: null,
 };
 
-export const casePushParams = {
-  savedObjectId: basicCaseId,
-  createdAt: basicCreatedAt,
-  createdBy: elasticUser,
-  externalId: null,
-  title: 'what a cool value',
-  commentId: null,
-  updatedAt: basicCreatedAt,
-  updatedBy: elasticUser,
-  description: 'nice',
-  comments: null,
-};
-
 export const actionTypeExecutorResult = {
   actionId: 'string',
   status: 'ok',

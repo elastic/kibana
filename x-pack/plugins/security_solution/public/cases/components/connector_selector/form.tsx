@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];

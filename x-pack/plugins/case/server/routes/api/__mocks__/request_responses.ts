@@ -14,7 +14,6 @@ import {
 } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
-import { params } from '../cases/configure/mock';
 
 export const newCase: CasePostRequest = {
   title: 'My new case',
@@ -130,8 +129,7 @@ export const newConfiguration: CasesConfigureRequest = {
 };
 
 export const newPostPushRequest: PostPushRequest = {
-  params: params[ConnectorTypes.jira],
-  connector_type: ConnectorTypes.jira,
+  case_id: '123',
 };
 
 export const executePushResponse = {

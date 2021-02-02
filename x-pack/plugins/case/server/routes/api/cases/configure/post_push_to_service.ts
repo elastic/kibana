@@ -16,12 +16,10 @@ import { CASE_CONFIGURE_PUSH_URL } from '../../../../../common/constants';
 import {
   ActionConnector,
   ConnectorRequestParamsRt,
-  CommentResponseAlertsType,
   PostPushRequestRt,
   throwErrors,
-  CommentType,
 } from '../../../../../common/api';
-import { createIncident } from './utils';
+import { createIncident, isCommentAlertType } from './utils';
 
 export function initPostPushToService({ router }: RouteDeps) {
   router.post(
@@ -59,10 +57,7 @@ export function initPostPushToService({ router }: RouteDeps) {
         const theCase = await caseClient.get({ id: body.case_id, includeComments: true });
         const userActions = await caseClient.getUserActions({ caseId: body.case_id });
         const alerts = await caseClient.getAlerts({
-          ids:
-            theCase.comments
-              ?.filter<CommentResponseAlertsType>((comment) => comment.type === CommentType.alert)
-              .map((comment) => comment.alertId) ?? [],
+          ids: theCase.comments?.filter(isCommentAlertType).map((comment) => comment.alertId) ?? [],
         });
 
         const connectorMappings = await caseClient.getMappings({

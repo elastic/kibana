@@ -69,9 +69,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         if (updatedCase?.id && dataConnectorId !== 'none') {
           await postPushToService({
             caseId: updatedCase.id,
-            caseServices: {},
             connector: connectorToUpdate,
-            alerts: {},
             updateCase: noop,
           });
         }

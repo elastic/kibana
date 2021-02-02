@@ -25,13 +25,7 @@ import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
 import { JiraFieldsRT } from './jira';
 import { ServiceNowSIRFieldsRT } from './servicenow_sir';
-
-// Formerly imported from security_solution
-export interface ElasticUser {
-  readonly email?: string | null;
-  readonly fullName?: string | null;
-  readonly username?: string | null;
-}
+import { CaseResponse } from '../cases';
 
 export {
   JiraPushToServiceApiParams,
@@ -80,20 +74,33 @@ const ConnectorFieldRt = rt.type({
   required: rt.boolean,
   type: FieldTypeRT,
 });
+
 export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 export const ConnectorRequestParamsRt = rt.type({
   connector_id: rt.string,
 });
+
 export const GetFieldsRequestQueryRt = rt.type({
   connector_type: rt.string,
 });
+
 const GetFieldsResponseRt = rt.type({
   defaultMappings: rt.array(ConnectorMappingsAttributesRT),
   fields: rt.array(ConnectorFieldRt),
 });
+
 export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
 
 export type ExternalServiceParams = Record<string, unknown>;
+
+export interface BasicParams {
+  title: CaseResponse['title'];
+  description: CaseResponse['description'];
+  createdAt: CaseResponse['created_at'];
+  createdBy: CaseResponse['created_by'];
+  updatedAt: CaseResponse['updated_at'];
+  updatedBy: CaseResponse['updated_by'];
+}
 
 export interface PipedField {
   actionType: string;
@@ -107,10 +114,10 @@ export interface PrepareFieldsForTransformArgs {
   params: { title: string; description: string };
 }
 export interface EntityInformation {
-  createdAt: string;
-  createdBy: ElasticUser;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
+  createdAt: CaseResponse['created_at'];
+  createdBy: CaseResponse['created_by'];
+  updatedAt: CaseResponse['updated_at'];
+  updatedBy: CaseResponse['updated_by'];
 }
 export interface TransformerArgs {
   date?: string;

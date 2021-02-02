@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
+  BasicParams,
   CaseResponse,
   CaseFullExternalService,
   CaseUserActionsResponse,
   CommentResponse,
+  CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
@@ -131,7 +133,7 @@ export const createIncident = async ({
     params,
   });
 
-  const transformedFields = transformFields<typeof params, ExternalServiceParams, Incident>({
+  const transformedFields = transformFields<BasicParams, ExternalServiceParams, Incident>({
     params,
     fields,
     currentIncident,
@@ -164,12 +166,12 @@ export const createIncident = async ({
 
 export const getEntity = (entity: EntityInformation): string =>
   (entity.updatedBy != null
-    ? entity.updatedBy.fullName
-      ? entity.updatedBy.fullName
+    ? entity.updatedBy.full_name
+      ? entity.updatedBy.full_name
       : entity.updatedBy.username
     : entity.createdBy != null
-    ? entity.createdBy.fullName
-      ? entity.createdBy.fullName
+    ? entity.createdBy.full_name
+      ? entity.createdBy.full_name
       : entity.createdBy.username
     : '') ?? '';
 
@@ -285,3 +287,7 @@ export const transformComments = (
     }).value,
     commentId: c.id,
   }));
+
+export const isCommentAlertType = (
+  comment: CommentResponse
+): comment is CommentResponseAlertsType => comment.type === CommentType.alert;

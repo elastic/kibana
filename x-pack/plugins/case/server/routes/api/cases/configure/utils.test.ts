@@ -5,34 +5,37 @@
  * 2.0.
  */
 
+import { BasicParams, ExternalServiceParams, Incident } from '../../../../../common/api';
+
 import {
-  mapIncident,
+  createIncident,
   prepareFieldsForTransformation,
-  serviceFormatter,
   transformComments,
   transformers,
   transformFields,
 } from './utils';
 
-import { comment as commentObj, mappings, defaultPipes, params, updateUser } from './mock';
-import {
-  ConnectorTypes,
-  ExternalServiceParams,
-  Incident,
-  ServiceConnectorCaseParams,
-} from '../../../../../common/api/connectors';
+import { comment as commentObj, mappings, defaultPipes, basicParams, updateUser } from './mock';
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
-import { mappings as mappingsMock } from '../../../../client/configure/mock';
-const formatComment = { commentId: commentObj.commentId, comment: commentObj.comment };
-const serviceNowParams = params[ConnectorTypes.serviceNowITSM] as ServiceConnectorCaseParams;
+import { flattenCaseSavedObject } from '../../utils';
+import { mockCases } from '../../__fixtures__';
+
+const formatComment = {
+  commentId: commentObj.id,
+  comment: 'Wow, good luck catching that bad meanie!',
+};
+
+const params = { ...basicParams };
+
 describe('api/cases/configure/utils', () => {
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
       const res = prepareFieldsForTransformation({
         defaultPipes,
-        params: serviceNowParams,
+        params,
         mappings,
       });
+
       expect(res).toEqual([
         {
           actionType: 'overwrite',
@@ -53,8 +56,9 @@ describe('api/cases/configure/utils', () => {
       const res = prepareFieldsForTransformation({
         defaultPipes: ['myTestPipe'],
         mappings,
-        params: serviceNowParams,
+        params,
       });
+
       expect(res).toEqual([
         {
           actionType: 'overwrite',
@@ -71,16 +75,17 @@ describe('api/cases/configure/utils', () => {
       ]);
     });
   });
+
   describe('transformFields', () => {
     test('transform fields for creation correctly', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes,
         mappings,
-        params: serviceNowParams,
+        params,
       });
 
-      const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
-        params: serviceNowParams,
+      const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
+        params,
         fields,
       });
 
@@ -92,18 +97,19 @@ describe('api/cases/configure/utils', () => {
 
     test('transform fields for update correctly', () => {
       const fields = prepareFieldsForTransformation({
-        params: serviceNowParams,
+        params,
         mappings,
         defaultPipes: ['informationUpdated'],
       });
 
-      const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
+      const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
         params: {
-          ...serviceNowParams,
+          ...params,
           updatedAt: '2020-03-15T08:34:53.450Z',
           updatedBy: {
             username: 'anotherUser',
-            fullName: 'Another User',
+            full_name: 'Another User',
+            email: 'elastic@elastic.co',
           },
         },
         fields,
@@ -112,6 +118,7 @@ describe('api/cases/configure/utils', () => {
           description: 'first description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
         },
       });
+
       expect(res).toEqual({
         short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by Another User)',
         description:
@@ -121,13 +128,13 @@ describe('api/cases/configure/utils', () => {
 
     test('add newline character to description', () => {
       const fields = prepareFieldsForTransformation({
-        params: serviceNowParams,
+        params,
         mappings,
         defaultPipes: ['informationUpdated'],
       });
 
-      const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
-        params: serviceNowParams,
+      const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
+        params,
         fields,
         currentIncident: {
           short_description: 'first title',
@@ -141,13 +148,13 @@ describe('api/cases/configure/utils', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes,
         mappings,
-        params: serviceNowParams,
+        params,
       });
 
-      const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
+      const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
         params: {
-          ...serviceNowParams,
-          createdBy: { fullName: '', username: 'elastic' },
+          ...params,
+          createdBy: { full_name: '', username: 'elastic', email: 'elastic@elastic.co' },
         },
         fields,
       });
@@ -162,14 +169,14 @@ describe('api/cases/configure/utils', () => {
       const fields = prepareFieldsForTransformation({
         defaultPipes: ['informationUpdated'],
         mappings,
-        params: serviceNowParams,
+        params,
       });
 
-      const res = transformFields<ServiceConnectorCaseParams, ExternalServiceParams, Incident>({
+      const res = transformFields<BasicParams, ExternalServiceParams, Incident>({
         params: {
-          ...serviceNowParams,
+          ...params,
           updatedAt: '2020-03-15T08:34:53.450Z',
-          updatedBy: { username: 'anotherUser', fullName: '' },
+          updatedBy: { username: 'anotherUser', full_name: '', email: 'elastic@elastic.co' },
         },
         fields,
       });
@@ -187,7 +194,7 @@ describe('api/cases/configure/utils', () => {
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (created at ${comments[0].createdAt} by ${comments[0].createdBy.fullName})`,
+          comment: `${formatComment.comment} (created at ${comments[0].created_at} by ${comments[0].created_by.full_name})`,
         },
       ]);
     });
@@ -203,7 +210,7 @@ describe('api/cases/configure/utils', () => {
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (updated at ${updateUser.updatedAt} by ${updateUser.updatedBy.fullName})`,
+          comment: `${formatComment.comment} (updated at ${updateUser.updatedAt} by ${updateUser.updatedBy.full_name})`,
         },
       ]);
     });
@@ -214,19 +221,19 @@ describe('api/cases/configure/utils', () => {
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].createdAt} by ${comments[0].createdBy.fullName})`,
+          comment: `${formatComment.comment} (added at ${comments[0].created_at} by ${comments[0].created_by.full_name})`,
         },
       ]);
     });
 
     test('transform comments without fullname', () => {
-      const comments = [{ ...commentObj, createdBy: { username: commentObj.createdBy.username } }];
-      // @ts-ignore testing no fullName
+      const comments = [{ ...commentObj, createdBy: { username: commentObj.created_by.username } }];
+      // @ts-ignore testing no full_name
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].createdAt} by ${comments[0].createdBy.username})`,
+          comment: `${formatComment.comment} (added at ${comments[0].created_at} by ${comments[0].created_by.username})`,
         },
       ]);
     });
@@ -236,14 +243,14 @@ describe('api/cases/configure/utils', () => {
         {
           ...commentObj,
           updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { fullName: 'Elastic2', username: 'elastic' },
+          updatedBy: { full_name: 'Elastic2', username: 'elastic' },
         },
       ];
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.fullName})`,
+          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.full_name})`,
         },
       ]);
     });
@@ -253,7 +260,7 @@ describe('api/cases/configure/utils', () => {
         {
           ...commentObj,
           updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { fullName: '', username: 'elastic2' },
+          updatedBy: { full_name: '', username: 'elastic2' },
         },
       ];
       const res = transformComments(comments, ['informationAdded']);
@@ -389,16 +396,30 @@ describe('api/cases/configure/utils', () => {
       });
     });
   });
-  describe('mapIncident', () => {
+  describe('createIncident', () => {
     let actionsMock = actionsClientMock.create();
+    const theCase = flattenCaseSavedObject({
+      savedObject: mockCases[0],
+    });
+
     it('maps an external incident', async () => {
-      const res = await mapIncident(
-        actionsMock,
-        '123',
-        ConnectorTypes.serviceNowITSM,
-        mappingsMock[ConnectorTypes.serviceNowITSM],
-        serviceNowParams
-      );
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase,
+        userActions: [],
+        connector: {
+          id: '456',
+          actionTypeId: '.jira',
+          name: 'Connector without isCaseOwned',
+          config: {
+            apiUrl: 'https://elastic.jira.com',
+          },
+          isPreconfigured: false,
+        },
+        mappings: [],
+        alerts: [],
+      });
+
       expect(res).toEqual({
         incident: {
           description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -416,18 +437,29 @@ describe('api/cases/configure/utils', () => {
         ],
       });
     });
+
     it('throws error if invalid service', async () => {
-      await mapIncident(
-        actionsMock,
-        '123',
-        'invalid',
-        mappingsMock[ConnectorTypes.serviceNowITSM],
-        serviceNowParams
-      ).catch((e) => {
+      await createIncident({
+        actionsClient: actionsMock,
+        theCase,
+        userActions: [],
+        connector: {
+          id: '456',
+          actionTypeId: '.jira',
+          name: 'Connector without isCaseOwned',
+          config: {
+            apiUrl: 'https://elastic.jira.com',
+          },
+          isPreconfigured: false,
+        },
+        mappings: [],
+        alerts: [],
+      }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(new Error(`Invalid service`));
       });
     });
+
     it('updates an existing incident', async () => {
       const existingIncidentData = {
         description: 'fun description',
@@ -436,15 +468,27 @@ describe('api/cases/configure/utils', () => {
         short_description: 'fun title',
         urgency: '3',
       };
+
       const execute = jest.fn().mockReturnValue(existingIncidentData);
       actionsMock = { ...actionsMock, execute };
-      const res = await mapIncident(
-        actionsMock,
-        '123',
-        ConnectorTypes.serviceNowITSM,
-        mappingsMock[ConnectorTypes.serviceNowITSM],
-        { ...serviceNowParams, externalId: '123' }
-      );
+
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase,
+        userActions: [],
+        connector: {
+          id: '456',
+          actionTypeId: '.jira',
+          name: 'Connector without isCaseOwned',
+          config: {
+            apiUrl: 'https://elastic.jira.com',
+          },
+          isPreconfigured: false,
+        },
+        mappings: [],
+        alerts: [],
+      });
+
       expect(res).toEqual({
         incident: {
           description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -462,18 +506,29 @@ describe('api/cases/configure/utils', () => {
         ],
       });
     });
+
     it('throws error when existing incident throws', async () => {
       const execute = jest.fn().mockImplementation(() => {
         throw new Error('exception');
       });
+
       actionsMock = { ...actionsMock, execute };
-      await mapIncident(
-        actionsMock,
-        '123',
-        ConnectorTypes.serviceNowITSM,
-        mappingsMock[ConnectorTypes.serviceNowITSM],
-        { ...serviceNowParams, externalId: '123' }
-      ).catch((e) => {
+      await createIncident({
+        actionsClient: actionsMock,
+        theCase,
+        userActions: [],
+        connector: {
+          id: '456',
+          actionTypeId: '.jira',
+          name: 'Connector without isCaseOwned',
+          config: {
+            apiUrl: 'https://elastic.jira.com',
+          },
+          isPreconfigured: false,
+        },
+        mappings: [],
+        alerts: [],
+      }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
           new Error(
@@ -482,49 +537,5 @@ describe('api/cases/configure/utils', () => {
         );
       });
     });
-  });
-
-  const connectors = [
-    {
-      name: ConnectorTypes.jira,
-      result: {
-        incident: {
-          issueType: '10003',
-          parent: '5002',
-          priority: 'Highest',
-        },
-        thirdPartyName: 'Jira',
-      },
-    },
-    {
-      name: ConnectorTypes.resilient,
-      result: {
-        incident: {
-          incidentTypes: ['10003'],
-          severityCode: '1',
-        },
-        thirdPartyName: 'Resilient',
-      },
-    },
-    {
-      name: ConnectorTypes.serviceNowITSM,
-      result: {
-        incident: {
-          impact: '3',
-          severity: '1',
-          urgency: '2',
-        },
-        thirdPartyName: 'ServiceNow',
-      },
-    },
-  ];
-  describe('serviceFormatter', () => {
-    connectors.forEach((c) =>
-      it(`formats ${c.name}`, () => {
-        const caseParams = params[c.name] as ServiceConnectorCaseParams;
-        const res = serviceFormatter(c.name, caseParams);
-        expect(res).toEqual(c.result);
-      })
-    );
   });
 });
