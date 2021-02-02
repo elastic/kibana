@@ -848,10 +848,8 @@ export const calculateThresholdSignalUuid = (
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
   const startedAtString = startedAt.toISOString();
-  let baseString = `${ruleId}${startedAtString}${thresholdField}`;
-  if (key != null) {
-    baseString = `${baseString}${key}`;
-  }
+  const keyString = key ?? '';
+  const baseString = `${ruleId}${startedAtString}${thresholdField}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
 };
