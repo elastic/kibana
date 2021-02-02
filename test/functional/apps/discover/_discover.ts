@@ -31,9 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
@@ -79,14 +78,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show correct time range string in chart', async function () {
+      it('1234a should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
         const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.clickHistogramBar();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const time = await PageObjects.timePicker.getTimeConfig();
@@ -100,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
