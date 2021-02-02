@@ -104,7 +104,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
 
   const setAlert = async () => {
     history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
@@ -170,7 +170,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     onClick={requestRefresh}
                     name="refresh"
                     color="primary"
-                    disabled={!alertType.enabledInLicense}
                   >
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
@@ -276,7 +275,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {!dismissAlertErrors && alert.executionStatus.status === 'error' ? (
+            {!dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiCallOut
@@ -292,7 +291,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSpacer size="s" />
                     <EuiFlexGroup gutterSize="s" wrap={true}>
                       <EuiFlexItem grow={false}>
-                        <EuiButton color="danger" onClick={() => setDismissAlertErrors(true)}>
+                        <EuiButton color="danger" onClick={() => setDissmissAlertErrors(true)}>
                           <FormattedMessage
                             id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
                             defaultMessage="Dismiss"

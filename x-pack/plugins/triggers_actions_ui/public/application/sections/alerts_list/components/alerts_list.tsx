@@ -690,6 +690,7 @@ export const AlertsList: React.FunctionComponent = () => {
           message={manageLicenseMessage}
           onConfirm={() => {
             window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
+            setManageLicenseMessage(undefined);
           }}
           onCancel={() => setManageLicenseMessage(undefined)}
         />
