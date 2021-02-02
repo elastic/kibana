@@ -443,14 +443,14 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     );
 
     const geoField = await this._getGeoField();
-    const urlTemplate = `${mvtUrlServicePath}
-?x={x}
-&y={y}
-&z={z}
-&geometryFieldName=${this._descriptor.geoField}
-&index=${indexPattern.title}
-&requestBody=${risonDsl}
-&requestType=${this._descriptor.requestType}
+    const urlTemplate = `${mvtUrlServicePath}\
+?x={x}\
+&y={y}\
+&z={z}\
+&geometryFieldName=${this._descriptor.geoField}\
+&index=${indexPattern.title}\
+&requestBody=${risonDsl}\
+&requestType=${this._descriptor.requestType}\
 &geoFieldType=${geoField.type}`;
     return {
       layerName: this.getLayerName(),

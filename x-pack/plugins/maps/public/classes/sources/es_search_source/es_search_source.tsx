@@ -729,12 +729,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const geoField = await this._getGeoField();
 
-    const urlTemplate = `${mvtUrlServicePath}
-?x={x}&y={y}
-&z={z}
-&geometryFieldName=${this._descriptor.geoField}
-&index=${indexPattern.title}
-&requestBody=${risonDsl}
+    const urlTemplate = `${mvtUrlServicePath}\
+?x={x}\
+&y={y}\
+&z={z}\
+&geometryFieldName=${this._descriptor.geoField}\
+&index=${indexPattern.title}\
+&requestBody=${risonDsl}\
 &geoFieldType=${geoField.type}`;
     return {
       layerName: this.getLayerName(),
