@@ -1,18 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ExpressionRow should do something 1`] = `
-<Component
-  documentationLink={
-    <EuiLink
-      href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
-      target="BLANK"
-    >
-      <FormattedMessage
-        defaultMessage="Learn how to add more data"
-        id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
-        values={Object {}}
-      />
-    </EuiLink>
+exports[`ExpressionRow should render a helpTExt for the of expression 1`] = `
+<FormattedMessage
+  defaultMessage="Can't find a metric? {documentationLink}"
+  id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
+  values={
+    Object {
+      "documentationLink": <EuiLink
+        href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+        target="BLANK"
+      >
+        <FormattedMessage
+          defaultMessage="Learn how to add more data"
+          id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
+          values={Object {}}
+        />
+      </EuiLink>,
+    }
   }
 />
 `;

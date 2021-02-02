@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
-  useEuiI18n,
   EuiLink,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
@@ -130,24 +129,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     return threshold;
   }, [threshold, isMetricPct]);
 
-  const ofExpressionHelpText = useEuiI18n(
-    'xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail',
-    "Can't find a metric? {documentationLink}",
-    {
-      documentationLink: (
-        <EuiLink
-          href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
-          target="BLANK"
-        >
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
-            defaultMessage="Learn how to add more data"
-          />
-        </EuiLink>
-      ),
-    }
-  );
-
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
@@ -181,7 +162,25 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
-                  helpText={ofExpressionHelpText}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
+                      defaultMessage="Can't find a metric? {documentationLink}"
+                      values={{
+                        documentationLink: (
+                          <EuiLink
+                            href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+                            target="BLANK"
+                          >
+                            <FormattedMessage
+                              id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
+                              defaultMessage="Learn how to add more data"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
                   data-test-subj="ofExpression"
                 />
               </StyledExpression>
