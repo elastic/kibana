@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('1234a should show correct time range string in chart', async function () {
+      it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
         const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
@@ -99,11 +99,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.brushHistogram();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-
         await retry.waitFor('timepicker to show the right amount of hours', async () => {
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await PageObjects.discover.brushHistogram();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
           const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
           log.debug(`Number of hours: ${newDurationHours}`);
           return Math.round(newDurationHours) === 26;
