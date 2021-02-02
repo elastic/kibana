@@ -7,6 +7,7 @@
  */
 
 import { first } from 'rxjs/operators';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { StartServicesAccessor } from '../../../../../core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
@@ -20,22 +21,27 @@ export const createUsageCollector = (
     return application.currentAppId$.pipe(first()).toPromise();
   };
 
+  const getCollector = (metricType: UiCounterMetricType, eventType: SEARCH_EVENT_TYPE) => {
+    return async () => {
+      const currentApp = await getCurrentApp();
+      return usageCollection?.reportUiCounter(currentApp!, metricType, eventType);
+    };
+  };
+
   return {
-    trackQueryTimedOut: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiCounter(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.QUERY_TIMED_OUT
-      );
-    },
-    trackQueriesCancelled: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiCounter(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.QUERIES_CANCELLED
-      );
-    },
+    trackQueryTimedOut: getCollector(METRIC_TYPE.LOADED, SEARCH_EVENT_TYPE.QUERY_TIMED_OUT),
+    trackQueriesCancelled: getCollector(METRIC_TYPE.LOADED, SEARCH_EVENT_TYPE.QUERIES_CANCELLED),
+    trackSessionSentToBackground: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_SENT_TO_BACKGROUND
+    ),
+    trackSessionSavedResults: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_SAVED_RESULTS
+    ),
+    trackSessionRestored: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RESTORED),
+    trackSessionReloaded: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RELOADED),
+    trackSessionExtended: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_EXTENDED),
+    trackSessionCancelled: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_CANCELLED),
   };
 };

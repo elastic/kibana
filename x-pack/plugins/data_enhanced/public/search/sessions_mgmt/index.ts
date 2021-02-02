@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
 import { CoreSetup } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { ConfigSchema } from '../../../config';
@@ -16,6 +16,7 @@ import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 
 export interface IManagementSectionsPluginsSetup {
+  data: DataPublicPluginSetup;
   management: ManagementSetup;
 }
 

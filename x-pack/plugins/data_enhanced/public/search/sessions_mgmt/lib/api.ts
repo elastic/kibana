@@ -16,6 +16,7 @@ import type { SearchSessionSavedObjectAttributes } from '../../../../common';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
 import { UISession } from '../types';
+import { SearchUsageCollector } from '../../../../../../../src/plugins/data/public/search';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -82,17 +83,18 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
   };
 };
 
-interface SearcgSessuibManagementDeps {
+interface SearchSessionManagementDeps {
   urls: UrlGeneratorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
     private config: SessionsConfigSchema,
-    private deps: SearcgSessuibManagementDeps
+    private deps: SearchSessionManagementDeps
   ) {}
 
   public async fetchTableData(): Promise<UISession[]> {
@@ -147,6 +149,7 @@ export class SearchSessionsMgmtAPI {
   }
 
   public reloadSearchSession(reloadUrl: string) {
+    this.deps.usageCollector?.trackSessionReloaded();
     this.deps.application.navigateToUrl(reloadUrl);
   }
 
@@ -156,6 +159,7 @@ export class SearchSessionsMgmtAPI {
 
   // Cancel and expire
   public async sendCancel(id: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionCancelled();
     try {
       await this.sessionsClient.delete(id);
 
@@ -178,6 +182,7 @@ export class SearchSessionsMgmtAPI {
 
   // Extend
   public async sendExtend(id: string, ttl: string): Promise<void> {
+    this.deps.usageCollector?.trackSessionExtended();
     this.deps.notifications.toasts.addError(new Error('Not implemented'), {
       title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
         defaultMessage: 'Failed to extend the session expiration!',

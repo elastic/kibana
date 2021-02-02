@@ -53,4 +53,58 @@ describe('Search Usage Collector', () => {
       SEARCH_EVENT_TYPE.QUERIES_CANCELLED
     );
   });
+
+  test('tracks session sent to background', async () => {
+    await usageCollector.trackSessionSentToBackground();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_SENT_TO_BACKGROUND
+    );
+  });
+
+  test('tracks session saved results', async () => {
+    await usageCollector.trackSessionSavedResults();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_SAVED_RESULTS
+    );
+  });
+
+  test('tracks session restored', async () => {
+    await usageCollector.trackSessionRestored();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_RESTORED
+    );
+  });
+
+  test('tracks session reloaded', async () => {
+    await usageCollector.trackSessionReloaded();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_RELOADED
+    );
+  });
+
+  test('tracks session extended', async () => {
+    await usageCollector.trackSessionExtended();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_EXTENDED
+    );
+  });
+
+  test('tracks session cancelled', async () => {
+    await usageCollector.trackSessionCancelled();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_CANCELLED
+    );
+  });
 });

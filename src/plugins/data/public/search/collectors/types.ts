@@ -9,9 +9,21 @@
 export enum SEARCH_EVENT_TYPE {
   QUERY_TIMED_OUT = 'queryTimedOut',
   QUERIES_CANCELLED = 'queriesCancelled',
+  SESSION_SENT_TO_BACKGROUND = 'sessionSentToBackground',
+  SESSION_SAVED_RESULTS = 'sessionSavedResults',
+  SESSION_RESTORED = 'sessionRestored',
+  SESSION_RELOADED = 'sessionReloaded',
+  SESSION_EXTENDED = 'sessionExtended',
+  SESSION_CANCELLED = 'sessionCancelled',
 }
 
 export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
   trackQueriesCancelled: () => Promise<void>;
+  trackSessionSentToBackground: () => Promise<void>;
+  trackSessionSavedResults: () => Promise<void>;
+  trackSessionRestored: () => Promise<void>;
+  trackSessionReloaded: () => Promise<void>;
+  trackSessionExtended: () => Promise<void>;
+  trackSessionCancelled: () => Promise<void>;
 }

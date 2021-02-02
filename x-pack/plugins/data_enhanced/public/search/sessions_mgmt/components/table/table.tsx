@@ -12,7 +12,7 @@ import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react'
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
-import { SessionsConfigSchema } from '../..';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
@@ -27,6 +27,7 @@ interface Props {
   api: SearchSessionsMgmtAPI;
   timezone: string;
   config: SessionsConfigSchema;
+  plugins: IManagementSectionsPluginsSetup;
 }
 
 export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
