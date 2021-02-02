@@ -61,8 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // blocked by https://github.com/elastic/eui/issues/4474
-    it.skip('lens datatable', async () => {
+    it('lens datatable', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await a11y.testAppSnapshot();
     });
