@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
+import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { Globals } from '../../static_globals';
+
+interface SourceNode {
+  name: string;
+  uuid: string;
+}
+type TopHitType = ElasticsearchResponseHit & {
+  _source: { index_stats: Partial<ElasticsearchIndexStats>; source_node: SourceNode };
+};
 
 const memoizedIndexPatterns = (globPatterns: string) => {
   const createRegExPatterns = () => ESGlobPatterns.createRegExPatterns(globPatterns);
@@ -119,24 +127,29 @@ export async function fetchIndexShardSize(
 
     for (const indexBucket of indexBuckets) {
       const shardIndex = indexBucket.key;
-      if (!ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
+      const topHit = indexBucket.hits?.hits?.hits[0] as TopHitType;
+      if (
+        !topHit ||
+        shardIndex.charAt() === '.' ||
+        !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)
+      ) {
         continue;
       }
       const {
         _index: monitoringIndexName,
         _source: { source_node: sourceNode, index_stats: indexStats },
-      } = get(indexBucket, 'hits.hits.hits[0]');
+      } = topHit;
 
-      const { size_in_bytes: shardSizeBytes } = indexStats.primaries.store;
+      const { size_in_bytes: shardSizeBytes } = indexStats?.primaries?.store!;
       const { name: nodeName, uuid: nodeId } = sourceNode;
-      const shardSize = +(shardSizeBytes / gbMultiplier).toFixed(2);
+      const shardSize = +(shardSizeBytes! / gbMultiplier).toFixed(2);
       stats.push({
         shardIndex,
         shardSize,
         clusterUuid,
         nodeName,
         nodeId,
-        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : null,
+        ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : undefined,
       });
     }
   }

@@ -33,6 +33,7 @@ import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
+const MAX_INDICES_LIST = 10;
 export class LargeShardSizeAlert extends BaseAlert {
   constructor(public rawAlert?: SanitizedAlert) {
     super(rawAlert, {
@@ -163,9 +164,23 @@ export class LargeShardSizeAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const shardIndices = alertStates
-      .map((alertState) => (alertState.meta as IndexShardSizeUIMeta).shardIndex)
-      .join(', ');
+    let sortedAlertStates = alertStates.slice(0).sort((alertStateA, alertStateB) => {
+      const { meta: metaA } = alertStateA as { meta?: IndexShardSizeUIMeta };
+      const { meta: metaB } = alertStateB as { meta?: IndexShardSizeUIMeta };
+      return metaB!.shardSize - metaA!.shardSize;
+    });
+
+    let suffix = '';
+    if (sortedAlertStates.length > MAX_INDICES_LIST) {
+      const diff = sortedAlertStates.length - MAX_INDICES_LIST;
+      sortedAlertStates = sortedAlertStates.slice(0, MAX_INDICES_LIST);
+      suffix = `, and ${diff} more`;
+    }
+
+    const shardIndices =
+      sortedAlertStates
+        .map((alertState) => (alertState.meta as IndexShardSizeUIMeta).shardIndex)
+        .join(', ') + suffix;
 
     const shortActionText = i18n.translate('xpack.monitoring.alerts.shardSize.shortAction', {
       defaultMessage: 'Investigate indices with large shard sizes.',

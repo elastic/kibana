@@ -17,6 +17,7 @@ export class ESGlobPatterns {
       return { contains: valid, negate: valid };
     }
 
+    globPattern = globPattern.toLowerCase();
     globPattern = globPattern.replace(/[ \\\/?"<>|#]/g, '');
     const patternsArr = globPattern.split(',');
     const containPatterns: string[] = [];
