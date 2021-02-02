@@ -169,7 +169,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
-                            href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+                            href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
                             <FormattedMessage

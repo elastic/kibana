@@ -7,7 +7,7 @@ exports[`ExpressionRow should render a helpText for the of expression 1`] = `
   values={
     Object {
       "documentationLink": <EuiLink
-        href="https://www.elastic.co/guide/en/observability/current/analyze-metrics.html#infra-configure-source"
+        href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
         target="BLANK"
       >
         <FormattedMessage
