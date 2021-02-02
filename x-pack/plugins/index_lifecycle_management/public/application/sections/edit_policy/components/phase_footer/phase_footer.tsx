@@ -35,7 +35,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
 
   if (phaseConfiguration === 'forever') {
     return (
-      <EuiPanel color={'warning'} className={'ilmPhaseFooter ilmPhaseFooter--warning'}>
+      <EuiPanel color={'subdued'} className={'ilmPhaseFooter'}>
         <InfinityIcon size={'s'} />{' '}
         <EuiText size={'s'} grow={false} className={'eui-displayInlineBlock'}>
           <FormattedMessage
