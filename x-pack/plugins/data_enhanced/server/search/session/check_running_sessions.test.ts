@@ -313,15 +313,17 @@ describe('getSearchStatus', () => {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
               created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(5, 'm')),
+              touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
                 'map-key': {
                   strategy: ENHANCED_ES_SEARCH_STRATEGY,
                   id: 'async-id',
+                  status: SearchStatus.COMPLETE,
                 },
                 'eql-map-key': {
                   strategy: EQL_SEARCH_STRATEGY,
                   id: 'eql-async-id',
+                  status: SearchStatus.COMPLETE,
                 },
               },
             },
@@ -360,11 +362,12 @@ describe('getSearchStatus', () => {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
               created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(5, 'm')),
+              touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
                 'map-key': {
                   strategy: ENHANCED_ES_SEARCH_STRATEGY,
                   id: 'async-id',
+                  status: SearchStatus.COMPLETE,
                 },
               },
             },
@@ -480,6 +483,7 @@ describe('getSearchStatus', () => {
       const so = {
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
+          touched: '123',
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -515,6 +519,7 @@ describe('getSearchStatus', () => {
       const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
       const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);
+      expect(updatedAttributes.touched).not.toBe('123');
       expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.COMPLETE);
       expect(updatedAttributes.idMapping['search-hash'].error).toBeUndefined();
 
