@@ -23,6 +23,8 @@ const PrependContainer = styled.div`
   padding: 0 ${px(unit)};
 `;
 
+const weekDurationInHours = moment.duration(7, 'days').asHours();
+
 function formatPreviousPeriodDates({
   momentStart,
   momentEnd,
@@ -38,7 +40,6 @@ function formatPreviousPeriodDates({
 function getSelectOptions({ start, end }: { start?: string; end?: string }) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
-  const dateDiff = getDateDifference(momentStart, momentEnd, 'days');
 
   const yesterdayOption = {
     value: 'yesterday',
@@ -59,13 +60,15 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
     text: formatPreviousPeriodDates({ momentStart, momentEnd }),
   };
 
+  const dateDiffInHours = getDateDifference(momentStart, momentEnd, 'hours');
+
   // Less than one day
-  if (dateDiff < 1) {
+  if (dateDiffInHours <= 24) {
     return [yesterdayOption, aWeekAgoOption];
   }
 
   // Less than one week
-  if (dateDiff <= 7) {
+  if (dateDiffInHours <= weekDurationInHours) {
     return [aWeekAgoOption];
   }
 
