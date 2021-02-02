@@ -51,7 +51,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       const pr = urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      urlStateStorage.kbnUrlControls.cancel();
+      urlStateStorage.cancel();
       await pr;
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
       expect(urlStateStorage.get(key)).toEqual(null);
