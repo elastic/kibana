@@ -6,7 +6,7 @@
   @include kbnThemeStyle('v8') {
     overflow:hidden;
     .kbnQueryBar__textarea:not(:focus) {
-      margin-top: 1px;
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
     }
   }
 }

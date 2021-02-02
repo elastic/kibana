@@ -27,6 +27,7 @@
   }
   @include kbnThemeStyle('v8') {
     border-radius: 0;
+    margin: 0;
   }
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize

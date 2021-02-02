@@ -113,19 +113,19 @@
   }
 }
 
-@mixin kbnThemeStyle($theme, $type: 'both') {
-  @if ($type == 'both') {
+@mixin kbnThemeStyle($theme, $mode: 'both') {
+  @if ($mode == 'both') {
     $themeLight: $theme + 'light';
     $themeDark: $theme + 'dark';
     @if ($kbnThemeVersion == $themeLight or $kbnThemeVersion == $themeDark) {
       @content;
     }
-  } @else if ($type == 'light') {
+  } @else if ($mode == 'light') {
     $themeLight: $theme + 'light';
     @if ($kbnThemeVersion == $themeLight) {
       @content;
     }
-  } @else if ($type == 'dark') {
+  } @else if ($mode == 'dark') {
     $themeDark: $theme + 'dark';
     @if ($kbnThemeVersion == $themeDark) {
       @content;
