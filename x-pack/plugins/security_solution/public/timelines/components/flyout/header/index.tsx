@@ -328,7 +328,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       </EuiFlexItem>
 
       <EuiFlexItem grow={1}>
-        {activeTab === 'query' ? <TimelineKPIs kpis={kpis} isLoading={loading} /> : null}
+        {activeTab === TimelineTabs.query ? <TimelineKPIs kpis={kpis} isLoading={loading} /> : null}
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
