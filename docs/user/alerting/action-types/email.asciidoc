@@ -92,7 +92,7 @@ systems, refer to:
 * <<exchange>>
 * <<amazon-ses>>
 
-For other email servers, you can check the list of well-known services that Nodemailer supports in the JSON file https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json].  The properties of the objects in those files - `host`, `port`, and `secure` - correspond to the same email action configuration properties.  A missing `secure` property in the "well-known/services.json" file is considered `false`.
+For other email servers, you can check the list of well-known services that Nodemailer supports in the JSON file https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json].  The properties of the objects in those files - `host`, `port`, and `secure` - correspond to the same email action configuration properties.  A missing `secure` property in the "well-known/services.json" file is considered `false`.  Generally, `port: 465` uses `secure: true`, and `port: 25` and `port: 587` use `secure: false`.
 
 [float]
 [[gmail]]
