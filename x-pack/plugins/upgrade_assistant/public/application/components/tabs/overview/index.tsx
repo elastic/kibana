@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiFlexGroup,
@@ -17,54 +17,59 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { NEXT_MAJOR_VERSION } from '../../../../../common/version';
+import { useAppContext } from '../../../app_context';
 import { LoadingErrorBanner } from '../../error_banner';
 import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
-export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => (
-  <Fragment>
-    <EuiSpacer />
+export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
+  const { kibanaVersionInfo } = useAppContext();
+  const { nextMajor } = kibanaVersionInfo;
 
-    <EuiText grow={false}>
-      <p>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.overviewTab.tabDetail"
-          defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
+  return (
+    <>
+      <EuiSpacer />
+
+      <EuiText grow={false}>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overviewTab.tabDetail"
+            defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
            {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
-          values={{
-            nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
-          }}
-        />
-      </p>
-    </EuiText>
+            values={{
+              nextEsVersion: `${nextMajor}.x`,
+            }}
+          />
+        </p>
+      </EuiText>
 
-    <EuiSpacer />
+      <EuiSpacer />
 
-    {props.alertBanner && (
-      <Fragment>
-        {props.alertBanner}
+      {props.alertBanner && (
+        <>
+          {props.alertBanner}
 
-        <EuiSpacer />
-      </Fragment>
-    )}
+          <EuiSpacer />
+        </>
+      )}
 
-    <EuiPageContent>
-      <EuiPageContentBody>
-        {props.loadingState === LoadingState.Success && <Steps {...props} />}
+      <EuiPageContent>
+        <EuiPageContentBody>
+          {props.loadingState === LoadingState.Success && <Steps {...props} />}
 
-        {props.loadingState === LoadingState.Loading && (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+          {props.loadingState === LoadingState.Loading && (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
 
-        {props.loadingState === LoadingState.Error && (
-          <LoadingErrorBanner loadingError={props.loadingError} />
-        )}
-      </EuiPageContentBody>
-    </EuiPageContent>
-  </Fragment>
-);
+          {props.loadingState === LoadingState.Error && (
+            <LoadingErrorBanner loadingError={props.loadingError} />
+          )}
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </>
+  );
+};
