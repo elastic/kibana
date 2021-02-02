@@ -244,12 +244,11 @@ export const AlertsList: React.FunctionComponent = () => {
     const healthColor = getHealthColor(executionStatus.status);
     const tooltipMessage =
       executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-    const statusMessage =
-      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License
-        ? ALERT_STATUS_LICENSE_ERROR
-        : alertsStatusesTranslationsMapping[executionStatus.status];
-    const showLicenseLink =
+    const isLicenseError =
       executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    const statusMessage = isLicenseError
+      ? ALERT_STATUS_LICENSE_ERROR
+      : alertsStatusesTranslationsMapping[executionStatus.status];
 
     const health = (
       <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
@@ -258,7 +257,11 @@ export const AlertsList: React.FunctionComponent = () => {
     );
 
     const healthWithTooltip = tooltipMessage ? (
-      <EuiToolTip position="top" content={tooltipMessage}>
+      <EuiToolTip
+        data-test-subj="alertStatus-error-tooltip"
+        position="top"
+        content={tooltipMessage}
+      >
         {health}
       </EuiToolTip>
     ) : (
@@ -267,11 +270,12 @@ export const AlertsList: React.FunctionComponent = () => {
 
     return (
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={6}>{healthWithTooltip}</EuiFlexItem>
-        {showLicenseLink && (
+        <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
+        {isLicenseError && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
+              data-test-subj="alertStatus-error-license-fix"
               onClick={() => setManageLicenseMessage(executionStatus?.error?.message)}
             >
               <FormattedMessage
