@@ -61,7 +61,7 @@ export interface Props {
   onChange?: (state: FieldEditorFormState) => void;
   /** Context object */
   ctx: {
-    /** The internal field type we are dealing with (concrete|scripted|runtime)*/
+    /** The internal field type we are dealing with (concrete|runtime)*/
     fieldTypeToProcess: InternalFieldType;
     /**
      * An array of field names not allowed.
@@ -215,7 +215,7 @@ const FieldEditorComponent = ({
       </FormRow>
 
       {/* Set value */}
-      {fieldTypeToProcess !== 'concrete' && (
+      {fieldTypeToProcess === 'runtime' && (
         <FormRow
           title={i18nTexts.value.title}
           description={i18nTexts.value.description}

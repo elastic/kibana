@@ -68,7 +68,7 @@ export interface Props {
    * The Field editor component that contains the form to create or edit a field
    */
   FieldEditor: React.ComponentType<FieldEditorProps> | null;
-  /** The internal field type we are dealing with (concrete|scripted|runtime)*/
+  /** The internal field type we are dealing with (concrete|runtime)*/
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to process */
   field?: Field;

@@ -28,7 +28,7 @@ export interface SetupPlugins {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartPlugins {}
 
-export type InternalFieldType = 'concrete' | 'scripted' | 'runtime';
+export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field {
   name: string;

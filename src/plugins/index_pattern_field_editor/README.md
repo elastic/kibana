@@ -15,7 +15,7 @@ You will then receive in the start contract of the indexPatternFieldEditor plugi
 
 ### `openEditor(options: OpenFieldEditorOptions): CloseEditor`
 
-Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime | scripted) a field.  
+Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime) a field.  
 
 #### `options`
 
@@ -24,9 +24,6 @@ Use this method to open the index pattern field editor to either create (runtime
 This is the only required option. You need to provide the context in which the editor is being consumed. This object has the following properties:
 
 - `indexPattern: IndexPattern`: the index pattern you want to create/edit the field into.
-
-- `fieldTypeToCreate?: 'scripted'|'runtime'`: optionally you can provide the field type to create. When you edit a field you don't need to provide this prop as it is automatically detected.  
-**Default:** `runtime`.
 
 `onSave(field: IndexPatternField): void` (optional)
 

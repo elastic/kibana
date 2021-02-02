@@ -24,7 +24,6 @@ import {
 export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;
-    fieldTypeToCreate?: 'runtime' | 'scripted';
   };
   onSave?: (field: IndexPatternField) => void;
   field?: FieldEditorFlyoutContentContainerProps['field'];
@@ -41,8 +40,8 @@ export const getFieldEditorOpener = (coreStart: CoreStart) => (
   let overlayRef: OverlayRef | null = null;
 
   const openEditor = ({ onSave, field, ctx }: OpenFieldEditorOptions): CloseEditor => {
-    // TODO (Matt): here will come the logic to define the internal field type (concrete|scripted|runtime)
-    const fieldTypeToProcess: InternalFieldType = ctx.fieldTypeToCreate ?? 'runtime';
+    // TODO (Matt): here will come the logic to define the internal field type (concrete|runtime)
+    const fieldTypeToProcess: InternalFieldType = 'runtime';
 
     const closeEditor = () => {
       if (overlayRef) {
