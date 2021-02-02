@@ -94,8 +94,6 @@ export class FunctionalTestRunner {
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
 
-      await this.lifecycle.beforeTests.trigger(mocha.suite);
-
       const countTests = (suite: Suite): number =>
         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
 
