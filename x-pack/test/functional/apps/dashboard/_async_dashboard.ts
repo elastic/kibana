@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const log = getService('log');
   const pieChart = getService('pieChart');
   const find = getService('find');
@@ -30,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,

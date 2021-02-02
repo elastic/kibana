@@ -25,6 +25,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -64,8 +65,6 @@ export async function getTransactionGroupsForPage({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
@@ -121,7 +120,11 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.doc_count / deltaAsMinutes,
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
         errorRate,
       };
     }) ?? [];
