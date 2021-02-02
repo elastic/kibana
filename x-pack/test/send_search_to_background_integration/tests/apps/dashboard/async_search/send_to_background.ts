@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // load URL to restore a saved session
+      // TODO: replace with clicking on "Re-run link"
       const url = await browser.getCurrentUrl();
       const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
       await browser.get(savedSessionURL);
@@ -96,6 +97,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
+
+      // navigating to a listing page clears the session
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await searchSessions.missingOrFail();
     });
   });
 }

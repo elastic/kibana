@@ -19,7 +19,7 @@ import {
   DatasourcePublicAPI,
 } from '../../types';
 import { Action } from './state_management';
-import { Dragging } from '../../drag_drop';
+import { DragDropIdentifier } from '../../drag_drop';
 
 export interface Suggestion {
   visualizationId: string;
@@ -231,7 +231,7 @@ export function getTopSuggestionForField(
   visualizationState: unknown,
   datasource: Datasource,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  field: Dragging
+  field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
     (datasourceLayer) => datasourceLayer.getTableSpec().length > 0

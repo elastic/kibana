@@ -426,6 +426,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
+  const checkFieldExists = useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
+
   const fieldProps = useMemo(
     () => ({
       core,
@@ -586,17 +603,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}

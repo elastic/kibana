@@ -51,11 +51,11 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { Dragging } from '../drag_drop/providers';
+import { DragDropIdentifier } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
-export type DraggedField = Dragging & {
+export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;
   indexPatternId: string;
 };
@@ -167,7 +167,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    toExpression,
+    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
       domElement: Element,

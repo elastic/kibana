@@ -221,6 +221,7 @@ export class LoginForm extends Component<Props, State> {
             {...this.validator.validateUsername(this.state.username)}
           >
             <EuiFieldText
+              autoComplete="off"
               id="username"
               name="username"
               data-test-subj="loginUsername"
