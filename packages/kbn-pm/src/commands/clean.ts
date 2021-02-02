@@ -17,7 +17,7 @@ import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Deletes output directories, node_modules and resets caches.',
+  description: 'Deletes output directories, node_modules and resets internal caches.',
   name: 'clean',
 
   async run(projects) {

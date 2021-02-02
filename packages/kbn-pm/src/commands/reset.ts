@@ -11,13 +11,14 @@ import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
-import { runBazel } from '../utils/bazel';
+import { getBazelDiskCacheFolder, getBazelRepositoryCacheFolder, runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const ResetCommand: ICommand = {
-  description: 'Deletes node_modules and output directories, resets caches, and stops Bazel server',
+  description:
+    'Deletes node_modules and output directories, resets internal and disk caches, and stops Bazel server',
   name: 'reset',
 
   async run(projects) {
@@ -54,6 +55,12 @@ export const ResetCommand: ICommand = {
     // Runs Bazel hard clean
     await runBazel(['clean', '--expunge']);
     log.success('Hard cleaned bazel');
+
+    // Deletes Bazel Cache Folders
+    await del([await getBazelDiskCacheFolder(), await getBazelRepositoryCacheFolder()], {
+      force: true,
+    });
+    log.success('Removed disk caches');
 
     if (toDelete.length === 0) {
       return;
