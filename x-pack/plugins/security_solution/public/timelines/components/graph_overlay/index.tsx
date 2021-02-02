@@ -29,6 +29,8 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -170,13 +172,17 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
 
   const { signalIndexName } = useSignalIndex();
   const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const indices: string[] | null = useMemo(() => {
+  const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
+  const indices: string[] = useMemo(() => {
     if (signalIndexName === null) {
-      return null;
+      return [];
     } else {
       return [...siemDefaultIndices, signalIndexName];
     }
   }, [signalIndexName, siemDefaultIndices]);
+  const allIndices = useMemo(() => {
+    return [...new Set([...indices, ...selectedPatterns])];
+  }, [indices, selectedPatterns]);
 
   return (
     <OverlayContainer
@@ -201,7 +207,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
-          indices={indices}
+          indices={allIndices}
           shouldUpdate={shouldUpdate}
           filters={{ from, to }}
         />

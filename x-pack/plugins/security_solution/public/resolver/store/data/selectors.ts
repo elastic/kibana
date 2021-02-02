@@ -70,6 +70,10 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
+const currentIndices = (state: DataState): string[] | undefined => {
+  return state.tree?.lastResponse?.parameters?.indices;
+};
+
 /**
  * If we received a NewResolverTree, return the schema associated with that tree, otherwise return undefined.
  * As of writing, this is only used for the info popover in the graph_controls panel
@@ -335,9 +339,13 @@ export const timeRangeFilters = createSelector(
 /**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
-  return parameters?.indices ?? [];
-});
+export const treeParamterIndices = createSelector(
+  treeParametersToFetch,
+  currentIndices,
+  (parameters, indices) => {
+    return parameters?.indices ?? indices ?? [];
+  }
+);
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,

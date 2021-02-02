@@ -663,4 +663,54 @@ describe('data state', () => {
       `);
     });
   });
+  describe('when the resolver tree response is complete, still use non-default indices', () => {
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
+      });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['someNonDefaultIndex'],
+              filters: {},
+            },
+          },
+        },
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            parameters: {
+              databaseDocumentID: '',
+              indices: ['someNonDefaultIndex'],
+              filters: {},
+            },
+          },
+        },
+      ];
+    });
+    it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
+      const graphables = selectors.graphableNodes(state());
+      expect(graphables.length).toBe(3);
+      for (const node of graphables) {
+        expect(() => {
+          selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
+        }).not.toThrow();
+      }
+    });
+  });
 });
