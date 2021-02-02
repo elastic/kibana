@@ -127,6 +127,51 @@ export function initPlugin(router: IRouter, path: string) {
       });
     }
   );
+
+  router.get(
+    {
+      path: `${path}/api/now/v2/table/sys_choice`,
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return jsonResponse(res, 200, {
+        result: [
+          {
+            dependent_value: '',
+            label: '1 - Critical',
+            value: '1',
+          },
+          {
+            dependent_value: '',
+            label: '2 - High',
+            value: '2',
+          },
+          {
+            dependent_value: '',
+            label: '3 - Moderate',
+            value: '3',
+          },
+          {
+            dependent_value: '',
+            label: '4 - Low',
+            value: '4',
+          },
+          {
+            dependent_value: '',
+            label: '5 - Planning',
+            value: '5',
+          },
+        ],
+      });
+    }
+  );
 }
 
 function jsonResponse(res: KibanaResponseFactory, code: number, object?: Record<string, unknown>) {

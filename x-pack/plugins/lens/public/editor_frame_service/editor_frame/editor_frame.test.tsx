@@ -188,8 +188,12 @@ describe('editor_frame', () => {
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined, {
+        isFullEditor: true,
+      });
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined, {
+        isFullEditor: true,
+      });
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
@@ -1334,10 +1338,14 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="mockVisA"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+          },
+          { id: 'lnsWorkspace' }
+        );
       });
 
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1431,10 +1439,14 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).filter('[data-test-subj="lnsWorkspace"]').prop('onDrop')!({
-          indexPatternId: '1',
-          field: {},
-        });
+        instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(
+          {
+            indexPatternId: '1',
+            field: {},
+            id: '1',
+          },
+          { id: 'lnsWorkspace' }
+        );
       });
 
       expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(

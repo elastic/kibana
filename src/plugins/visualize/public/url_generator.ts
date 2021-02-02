@@ -16,9 +16,7 @@ import {
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
-
-const STATE_STORAGE_KEY = '_a';
-const GLOBAL_STATE_STORAGE_KEY = '_g';
+import { STATE_STORAGE_KEY, GLOBAL_STATE_STORAGE_KEY } from '../common/constants';
 
 export const VISUALIZE_APP_URL_GENERATOR = 'VISUALIZE_APP_URL_GENERATOR';
 
