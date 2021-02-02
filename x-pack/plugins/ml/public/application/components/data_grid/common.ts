@@ -82,6 +82,32 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
   return indexPatternFields;
 };
 
+/**
+ * Return a map of runtime_mappings for each of the index pattern field provided
+ * to provide in ES search queries
+ * @param indexPatternFields
+ * @param indexPattern
+ */
+export const getRuntimeFieldsMapping = (
+  indexPatternFields: string[],
+  indexPattern: IndexPattern
+) => {
+  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
+  const runtimeMappings = indexPattern.getComputedFields().runtimeFields;
+  const filteredRuntimeMappings: { [ipField: string]: any } = {};
+
+  if (typeof runtimeMappings === 'object' && Object.keys(runtimeMappings).length > 0) {
+    indexPatternFields.forEach((ipField) => {
+      if (runtimeMappings.hasOwnProperty(ipField)) {
+        filteredRuntimeMappings[ipField] = runtimeMappings[ipField];
+      }
+    });
+  }
+  return Object.keys(filteredRuntimeMappings).length > 0
+    ? { runtime_mappings: filteredRuntimeMappings }
+    : {};
+};
+
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
 }

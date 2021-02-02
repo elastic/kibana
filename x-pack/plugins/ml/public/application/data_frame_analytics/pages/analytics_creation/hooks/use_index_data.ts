@@ -30,6 +30,7 @@ import type { SearchResponse7 } from '../../../../../../common/types/es_client';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
+import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common';
 
 type IndexSearchResponse = SearchResponse7;
 
@@ -38,7 +39,9 @@ export const useIndexData = (
   query: any,
   toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
-  const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+  const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
+    indexPattern,
+  ]);
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = [
@@ -75,7 +78,6 @@ export const useIndexData = (
       s[column.id] = { order: column.direction };
       return s;
     }, {} as EsSorting);
-
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
@@ -86,6 +88,7 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
+        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
       },
     };
 
@@ -105,7 +108,7 @@ export const useIndexData = (
   useEffect(() => {
     getIndexData();
     // custom comparison
-  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
     indexPattern,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
@@ -33,6 +33,7 @@ export const useIndexData = (
       getFieldType,
       getDataGridSchemaFromKibanaFieldType,
       getFieldsFromKibanaIndexPattern,
+      getRuntimeFieldsMapping,
       showDataGridColumnChartErrorMessageToast,
       useDataGrid,
       useRenderCellValue,
@@ -41,7 +42,10 @@ export const useIndexData = (
     },
   } = useAppDependencies();
 
-  const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+  const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
+    indexPattern,
+    getFieldsFromKibanaIndexPattern,
+  ]);
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = [
@@ -92,6 +96,7 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
+        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
       },
     };
 
@@ -134,7 +139,7 @@ export const useIndexData = (
     fetchDataGridData();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
 
   useEffect(() => {
     if (chartsVisible) {

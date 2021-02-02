@@ -9,6 +9,7 @@ export {
   getDataGridSchemasFromFieldTypes,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
+  getRuntimeFieldsMapping,
   multiColumnSortFactory,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,

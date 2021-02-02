@@ -122,7 +122,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
 
   const pivotPreviewProps = {
-    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload),
+    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload, indexPattern),
     dataTestSubj: 'transformPivotPreview',
     title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
       defaultMessage: 'Transform preview',
