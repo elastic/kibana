@@ -10,13 +10,14 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import { connectorConfiguration } from './config';
+import { serviceNowITSMConfiguration, serviceNowSIRConfiguration } from './config';
 import logo from './logo.svg';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
   ServiceNowSecrets,
-  ServiceNowActionParams,
+  ServiceNowITSMActionParams,
+  ServiceNowSIRActionParams,
 } from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
@@ -60,19 +61,21 @@ const validateConnector = (
   return validationResult;
 };
 
-export function getActionType(): ActionTypeModel<
+export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
   ServiceNowSecrets,
-  ServiceNowActionParams
+  ServiceNowITSMActionParams
 > {
   return {
-    id: connectorConfiguration.id,
+    id: serviceNowITSMConfiguration.id,
     iconClass: logo,
-    selectMessage: i18n.SERVICENOW_DESC,
-    actionTypeTitle: connectorConfiguration.name,
+    selectMessage: serviceNowITSMConfiguration.desc,
+    actionTypeTitle: serviceNowITSMConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
-    validateParams: (actionParams: ServiceNowActionParams): GenericValidationResult<unknown> => {
+    validateParams: (
+      actionParams: ServiceNowITSMActionParams
+    ): GenericValidationResult<unknown> => {
       const errors = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'subActionParams.incident.short_description': new Array<string>(),
@@ -89,6 +92,39 @@ export function getActionType(): ActionTypeModel<
       }
       return validationResult;
     },
-    actionParamsFields: lazy(() => import('./servicenow_params')),
+    actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
+  };
+}
+
+export function getServiceNowSIRActionType(): ActionTypeModel<
+  ServiceNowConfig,
+  ServiceNowSecrets,
+  ServiceNowSIRActionParams
+> {
+  return {
+    id: serviceNowSIRConfiguration.id,
+    iconClass: logo,
+    selectMessage: serviceNowSIRConfiguration.desc,
+    actionTypeTitle: serviceNowSIRConfiguration.name,
+    validateConnector,
+    actionConnectorFields: lazy(() => import('./servicenow_connectors')),
+    validateParams: (actionParams: ServiceNowSIRActionParams): GenericValidationResult<unknown> => {
+      const errors = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'subActionParams.incident.short_description': new Array<string>(),
+      };
+      const validationResult = {
+        errors,
+      };
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.short_description?.length
+      ) {
+        errors['subActionParams.incident.short_description'].push(i18n.TITLE_REQUIRED);
+      }
+      return validationResult;
+    },
+    actionParamsFields: lazy(() => import('./servicenow_sir_params')),
   };
 }

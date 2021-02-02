@@ -96,6 +96,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
+
+      // navigating to a listing page clears the session
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await searchSessions.missingOrFail();
     });
   });
 }
