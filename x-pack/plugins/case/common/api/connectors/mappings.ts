@@ -194,12 +194,12 @@ export const PostPushRequestRt = rt.type({
 
 export type PostPushRequest = rt.TypeOf<typeof PostPushRequestRt>;
 
-export interface SimpleComment {
+export interface ExternalServiceComment {
   comment: string;
   commentId: string;
 }
 
 export interface MapIncident {
   incident: ExternalServiceParams;
-  comments: SimpleComment[];
+  comments: ExternalServiceComment[];
 }

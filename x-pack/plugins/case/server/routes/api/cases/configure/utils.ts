@@ -12,6 +12,8 @@ import {
   CaseResponse,
   CaseFullExternalService,
   CaseUserActionsResponse,
+  CommentResponse,
+  CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
   EntityInformation,
@@ -21,7 +23,7 @@ import {
   PipedField,
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
-  SimpleComment,
+  ExternalServiceComment,
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
@@ -53,6 +55,16 @@ export const getLatestPushInfo = (
 
 const isConnectorSupported = (connectorId: string): connectorId is FormatterConnectorTypes =>
   Object.values(ConnectorTypes).includes(connectorId as ConnectorTypes);
+
+const getCommentContent = (comment: CommentResponse): string => {
+  if (comment.type === CommentType.user) {
+    return comment.comment;
+  } else if (comment.type === CommentType.alert) {
+    return `Alert with id ${comment.alertId} added to case`;
+  }
+
+  return '';
+};
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -138,7 +150,7 @@ export const createIncident = async ({
     commentsIdsToBeUpdated.has(comment.id)
   );
 
-  let comments: SimpleComment[] = [];
+  let comments: ExternalServiceComment[] = [];
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
@@ -257,10 +269,10 @@ export const transformFields = <
 export const transformComments = (
   comments: CaseResponse['comments'] = [],
   pipes: string[]
-): SimpleComment[] =>
+): ExternalServiceComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
-      value: c.type === 'user' ? c.comment : '',
+      value: getCommentContent(c),
       date: c.updated_at ?? c.created_at,
       user: getEntity({
         createdAt: c.created_at,

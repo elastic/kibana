@@ -62,13 +62,11 @@ export const usePushToService = ({
     if (connector.id != null && connector.id !== 'none') {
       postPushToService({
         caseId,
-        caseServices,
         connector,
         updateCase,
-        alerts,
       });
     }
-  }, [alerts, caseId, caseServices, connector, postPushToService, updateCase]);
+  }, [caseId, connector, postPushToService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {
