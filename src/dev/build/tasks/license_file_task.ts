@@ -14,7 +14,7 @@ export const UpdateLicenseFile: Task = {
   description: 'Updating LICENSE.txt file',
 
   async run(config, log, build) {
-    const elasticLicense = await read(config.resolveFromRepo('licenses/ELASTIC-LICENSE.txt'));
+    const elasticLicense = await read(config.resolveFromRepo('licenses/ELASTIC-LICENSE-2.0.txt'));
     if (build.isOss()) {
       const ssplLicense = await read(config.resolveFromRepo('licenses/SSPL-LICENSE.txt'));
       log.info('Copying dual-license to LICENSE.txt');
