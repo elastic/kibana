@@ -287,4 +287,70 @@ describe('<UseField />', () => {
       expect(formHook?.getFormData()).toEqual({ name: 'myName' });
     });
   });
+
+  describe('change handlers', () => {
+    interface MyForm {
+      name: string;
+    }
+
+    const onError = jest.fn();
+    let formHook: FormHook<MyForm> | null = null;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      formHook = null;
+    });
+
+    const onFormHook = (_form: FormHook<MyForm>) => {
+      formHook = _form;
+    };
+
+    const getTestComp = (fieldConfig: FieldConfig) => {
+      const TestComp = ({ onForm }: { onForm: (form: FormHook) => void }) => {
+        const { form } = useForm<any>();
+
+        useEffect(() => {
+          onForm(form);
+        }, [onForm, form]);
+
+        return (
+          <Form form={form}>
+            <UseField path="name" config={fieldConfig} data-test-subj="myField" onError={onError} />
+          </Form>
+        );
+      };
+      return TestComp;
+    };
+
+    const setup = (fieldConfig: FieldConfig) => {
+      return registerTestBed(getTestComp(fieldConfig), {
+        memoryRouter: { wrapComponent: false },
+        defaultProps: { onForm: onFormHook },
+      })() as TestBed;
+    };
+
+    it('calls onError when validation state changes', async () => {
+      const {
+        form: { setInputValue },
+      } = setup({
+        validations: [
+          {
+            validator: ({ value }) => (value === '1' ? undefined : { message: 'oops!' }),
+          },
+        ],
+      });
+
+      expect(onError).toBeCalledTimes(0);
+      await act(async () => {
+        setInputValue('myField', '0');
+      });
+      expect(onError).toBeCalledTimes(1);
+      expect(onError).toBeCalledWith(['oops!']);
+      await act(async () => {
+        setInputValue('myField', '1');
+      });
+      expect(onError).toBeCalledTimes(2);
+      expect(onError).toBeCalledWith(null);
+    });
+  });
 });
