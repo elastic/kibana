@@ -83,17 +83,22 @@ export function useLogStream({
     }
   }, [query]);
 
+  const commonFetchArguments = useMemo(
+    () => ({
+      sourceId,
+      startTimestamp,
+      endTimestamp,
+      query: parsedQuery,
+      columnOverrides: columns,
+    }),
+    [columns, endTimestamp, parsedQuery, sourceId, startTimestamp]
+  );
+
   const {
     fetchLogEntriesAround,
     isRequestRunning: isLogEntriesAroundRequestRunning,
     logEntriesAroundSearchResponses$,
-  } = useFetchLogEntriesAround({
-    sourceId,
-    startTimestamp,
-    endTimestamp,
-    query: parsedQuery,
-    columnOverrides: columns,
-  });
+  } = useFetchLogEntriesAround(commonFetchArguments);
 
   useSubscription(logEntriesAroundSearchResponses$, {
     next: ({ before, after, combined }) => {
@@ -114,13 +119,7 @@ export function useLogStream({
     fetchLogEntriesBefore,
     isRequestRunning: isLogEntriesBeforeRequestRunning,
     logEntriesBeforeSearchResponse$,
-  } = useFetchLogEntriesBefore({
-    sourceId,
-    startTimestamp,
-    endTimestamp,
-    query: parsedQuery,
-    columnOverrides: columns,
-  });
+  } = useFetchLogEntriesBefore(commonFetchArguments);
 
   useSubscription(logEntriesBeforeSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
@@ -154,13 +153,7 @@ export function useLogStream({
     fetchLogEntriesAfter,
     isRequestRunning: isLogEntriesAfterRequestRunning,
     logEntriesAfterSearchResponse$,
-  } = useFetchLogEntriesAfter({
-    sourceId,
-    startTimestamp,
-    endTimestamp,
-    query: parsedQuery,
-    columnOverrides: columns,
-  });
+  } = useFetchLogEntriesAfter(commonFetchArguments);
 
   useSubscription(logEntriesAfterSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
