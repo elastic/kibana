@@ -24,12 +24,14 @@ import {
   EuiComboBox,
   EuiAccordion,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { px } from '../../../style/variables';
-import { SignificantTermsTable } from './SignificantTermsTable';
+import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
+import { useTheme } from '../../../hooks/use_theme';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -98,7 +100,11 @@ export function ErrorCorrelations() {
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h4>Error rate over time</h4>
+            <h4>
+              {i18n.translate('xpack.apm.correlations.error.chart.title', {
+                defaultMessage: 'Error rate over time',
+              })}
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -109,10 +115,30 @@ export function ErrorCorrelations() {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiAccordion id="accordion" buttonContent="Customize">
+          <CorrelationsTable
+            cardinalityColumnName={i18n.translate(
+              'xpack.apm.correlations.error.cardinalityColumnName',
+              { defaultMessage: '# of failed transactions' }
+            )}
+            significantTerms={data?.significantTerms}
+            status={status}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiAccordion
+            id="accordion"
+            buttonContent={i18n.translate(
+              'xpack.apm.correlations.customize.buttonLabel',
+              { defaultMessage: 'Customize fields' }
+            )}
+          >
             <EuiComboBox
               fullWidth={true}
-              placeholder="Select or create options"
+              placeholder={i18n.translate(
+                'xpack.apm.correlations.customize.fieldPlaceholder',
+                { defaultMessage: 'Select or create options' }
+              )}
               selectedOptions={fieldNames}
               onChange={setFieldNames}
               onCreateOption={(term) =>
@@ -120,14 +146,6 @@ export function ErrorCorrelations() {
               }
             />
           </EuiAccordion>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SignificantTermsTable
-            cardinalityColumnName="# of failed transactions"
-            significantTerms={data?.significantTerms}
-            status={status}
-            setSelectedSignificantTerm={setSelectedSignificantTerm}
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -143,6 +161,7 @@ function ErrorTimeseriesChart({
   selectedSignificantTerm: SignificantTerm | null;
   status: FETCH_STATUS;
 }) {
+  const theme = useTheme();
   const dateFormatter = timeFormatter('HH:mm:ss');
 
   return (
@@ -164,7 +183,10 @@ function ErrorTimeseriesChart({
         />
 
         <LineSeries
-          id="Overall error rate"
+          id={i18n.translate(
+            'xpack.apm.correlations.error.chart.overallErrorRateLabel',
+            { defaultMessage: 'Overall error rate' }
+          )}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
@@ -175,12 +197,15 @@ function ErrorTimeseriesChart({
 
         {selectedSignificantTerm !== null ? (
           <LineSeries
-            id="Error rate for selected term"
+            id={i18n.translate(
+              'xpack.apm.correlations.error.chart.selectedTermErrorRateLabel',
+              { defaultMessage: 'Error rate for selected term' }
+            )}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color="red"
+            color={theme.eui.euiColorAccent}
             data={selectedSignificantTerm.timeseries}
             curve={CurveType.CURVE_MONOTONE_X}
           />

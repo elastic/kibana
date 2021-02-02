@@ -12,8 +12,8 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SearchBar } from '../../shared/search_bar';
-import { Correlations } from '../Correlations';
 import { TraceList } from './TraceList';
+import { Correlations } from '../correlations';
 
 type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {

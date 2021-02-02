@@ -1,8 +1,7 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 import {
@@ -24,12 +23,17 @@ import {
   EuiFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { SignificantTermsTable } from './SignificantTermsTable';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../services/rest/createCallApmApi';
+import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
+import { useTheme } from '../../../hooks/use_theme';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/slow_transactions'>
@@ -51,7 +55,7 @@ const initialFieldNames = [
   'service.node.name',
 ].map((label) => ({ label }));
 
-export function LatencyCorrelations() {
+export function ThroughputCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
@@ -63,37 +67,34 @@ export function LatencyCorrelations() {
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/correlations/slow_transactions',
-          params: {
-            query: {
-              serviceName,
-              transactionName,
-              transactionType,
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-              durationPercentile,
-              fieldNames: fieldNames.map((field) => field.label).join(','),
-            },
+  const { data, status } = useFetcher(() => {
+    if (start && end) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/correlations/slow_transactions',
+        params: {
+          query: {
+            serviceName,
+            transactionName,
+            transactionType,
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            durationPercentile,
+            fieldNames: fieldNames.map((field) => field.label).join(','),
           },
-        });
-      }
-    },
-    [
-      serviceName,
-      start,
-      end,
-      transactionName,
-      transactionType,
-      uiFilters,
-      durationPercentile,
-      fieldNames,
-    ]
-  );
+        },
+      });
+    }
+  }, [
+    serviceName,
+    start,
+    end,
+    transactionName,
+    transactionType,
+    uiFilters,
+    durationPercentile,
+    fieldNames,
+  ]);
 
   return (
     <>
@@ -102,9 +103,14 @@ export function LatencyCorrelations() {
           <EuiFlexGroup direction="row">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h4>Latency distribution</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.correlations.throughput.chart.title',
+                    { defaultMessage: 'Throughput distribution' }
+                  )}
+                </h4>
               </EuiTitle>
-              <LatencyDistributionChart
+              <ThroughputDistributionChart
                 data={data}
                 status={status}
                 selectedSignificantTerm={selectedSignificantTerm}
@@ -113,10 +119,32 @@ export function LatencyCorrelations() {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiAccordion id="accordion" buttonContent="Customize">
+          <CorrelationsTable
+            cardinalityColumnName={i18n.translate(
+              'xpack.apm.correlations.throughput.cardinalityColumnName',
+              { defaultMessage: '# of slow transactions' }
+            )}
+            significantTerms={data?.significantTerms}
+            status={status}
+            setSelectedSignificantTerm={setSelectedSignificantTerm}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiAccordion
+            id="accordion"
+            buttonContent={i18n.translate(
+              'xpack.apm.correlations.customize.buttonLabel',
+              { defaultMessage: 'Customize fields' }
+            )}
+          >
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
-                <EuiFormRow label="Threshold">
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.apm.correlations.customize.thresholdLabel',
+                    { defaultMessage: 'Threshold' }
+                  )}
+                >
                   <EuiFieldNumber
                     value={durationPercentile}
                     onChange={(e) =>
@@ -128,12 +156,21 @@ export function LatencyCorrelations() {
               <EuiFlexItem grow={4}>
                 <EuiFormRow
                   fullWidth={true}
-                  label="Field"
-                  helpText="Fields to analyse for correlations"
+                  label={i18n.translate(
+                    'xpack.apm.correlations.customize.fieldLabel',
+                    { defaultMessage: 'Field' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.apm.correlations.customize.fieldHelpText',
+                    { defaultMessage: 'Fields to analyse for correlations' }
+                  )}
                 >
                   <EuiComboBox
                     fullWidth={true}
-                    placeholder="Select or create options"
+                    placeholder={i18n.translate(
+                      'xpack.apm.correlations.customize.fieldPlaceholder',
+                      { defaultMessage: 'Select or create options' }
+                    )}
                     selectedOptions={fieldNames}
                     onChange={setFieldNames}
                     onCreateOption={(term) => {
@@ -144,14 +181,6 @@ export function LatencyCorrelations() {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiAccordion>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SignificantTermsTable
-            cardinalityColumnName="# of slow transactions"
-            significantTerms={data?.significantTerms}
-            status={status}
-            setSelectedSignificantTerm={setSelectedSignificantTerm}
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -172,7 +201,7 @@ function getDistributionYMax(data?: CorrelationsApiResponse) {
   return Math.max(...yValues);
 }
 
-function LatencyDistributionChart({
+function ThroughputDistributionChart({
   data,
   selectedSignificantTerm,
   status,
@@ -181,6 +210,7 @@ function LatencyDistributionChart({
   selectedSignificantTerm: SignificantTerm | null;
   status: FETCH_STATUS;
 }) {
+  const theme = useTheme();
   const xMax = Math.max(
     ...(data?.overall?.distribution.map((p) => p.x ?? 0) ?? [])
   );
@@ -218,7 +248,10 @@ function LatencyDistributionChart({
         />
 
         <BarSeries
-          id="Overall latency distribution"
+          id={i18n.translate(
+            'xpack.apm.correlations.throughput.chart.overallThroughputDistributionLabel',
+            { defaultMessage: 'Overall throughput distribution' }
+          )}
           xScaleType={ScaleType.Linear}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
@@ -230,12 +263,15 @@ function LatencyDistributionChart({
 
         {selectedSignificantTerm !== null ? (
           <BarSeries
-            id="Latency distribution for selected term"
+            id={i18n.translate(
+              'xpack.apm.correlations.throughput.chart.selectedTermThroughputDistributionLabel',
+              { defaultMessage: 'Throughput distribution for selected term' }
+            )}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color="red"
+            color={theme.eui.euiColorAccent}
             data={selectedSignificantTerm.distribution}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}

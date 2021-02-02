@@ -17,17 +17,44 @@ import {
   EuiLink,
   EuiCallOut,
   EuiButton,
+  EuiTab,
+  EuiTabs,
+  EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { EuiSpacer } from '@elastic/eui';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { enableCorrelations } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { LatencyCorrelations } from './LatencyCorrelations';
-import { ErrorCorrelations } from './ErrorCorrelations';
+import { LatencyCorrelations } from './latency_correlations';
+import { ErrorCorrelations } from './error_correlations';
+import { ThroughputCorrelations } from './throughput_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+
+const latencyTab = {
+  key: 'latency',
+  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
+    defaultMessage: 'Latency',
+  }),
+  component: LatencyCorrelations,
+};
+const throughputTab = {
+  key: 'throughput',
+  label: i18n.translate('xpack.apm.correlations.tabs.throughputLabel', {
+    defaultMessage: 'Throughput',
+  }),
+  component: ThroughputCorrelations,
+};
+const errorRateTab = {
+  key: 'errorRate',
+  label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
+    defaultMessage: 'Error rate',
+  }),
+  component: ErrorCorrelations,
+};
+const tabs = [latencyTab, throughputTab, errorRateTab];
 
 export function Correlations() {
   const { uiSettings } = useApmPluginContext().core;
@@ -35,6 +62,10 @@ export function Correlations() {
   const license = useLicenseContext();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [currentTab, setCurrentTab] = useState(latencyTab.key);
+  const { component: TabContent } =
+    tabs.find((tab) => tab.key === currentTab) ?? latencyTab;
+
   if (
     !uiSettings.get(enableCorrelations) ||
     !isActivePlatinumLicense(license)
@@ -48,8 +79,11 @@ export function Correlations() {
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
+        iconType="visTagCloud"
       >
-        View correlations
+        {i18n.translate('xpack.apm.correlations.buttonLabel', {
+          defaultMessage: 'Explore correlations',
+        })}
       </EuiButton>
 
       <EuiSpacer size="s" />
@@ -63,19 +97,33 @@ export function Correlations() {
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">Correlations</h2>
+                <h2 id="correlations-flyout">
+                  {i18n.translate('xpack.apm.correlations.title', {
+                    defaultMessage: 'Correlations',
+                  })}
+                </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               {urlParams.kuery ? (
                 <>
                   <EuiCallOut size="m">
-                    <span>Filtering by</span>
+                    <span>
+                      {i18n.translate(
+                        'xpack.apm.correlations.filteringByLabel',
+                        { defaultMessage: 'Filtering by' }
+                      )}
+                    </span>
                     <EuiCode>{urlParams.kuery}</EuiCode>
                     <EuiLink
                       href={createHref(history, { query: { kuery: '' } })}
                     >
-                      <EuiButtonEmpty iconType="cross">Clear</EuiButtonEmpty>
+                      <EuiButtonEmpty iconType="cross">
+                        {i18n.translate(
+                          'xpack.apm.correlations.clearFiltersLabel',
+                          { defaultMessage: 'Clear' }
+                        )}
+                      </EuiButtonEmpty>
                     </EuiLink>
                   </EuiCallOut>
                   <EuiSpacer />
@@ -84,21 +132,40 @@ export function Correlations() {
 
               <EuiCallOut
                 size="s"
-                title="Experimental"
+                title={i18n.translate(
+                  'xpack.apm.correlations.experimentalWarning.title',
+                  { defaultMessage: 'Experimental' }
+                )}
                 color="warning"
                 iconType="alert"
               >
                 <p>
-                  Correlations is an experimental feature and in active
-                  development. Bugs and surprises are to be expected but let us
-                  know your feedback so we can improve it.
+                  {i18n.translate(
+                    'xpack.apm.correlations.experimentalWarning.text',
+                    {
+                      defaultMessage:
+                        'Correlations is an experimental feature and in active development. Bugs and surprises are to be expected but let us know your feedback so we can improve it.',
+                    }
+                  )}
                 </p>
               </EuiCallOut>
 
               <EuiSpacer />
-
-              <LatencyCorrelations />
-              <ErrorCorrelations />
+              <EuiTabs>
+                {tabs.map(({ key, label }) => (
+                  <EuiTab
+                    key={key}
+                    isSelected={key === currentTab}
+                    onClick={() => {
+                      setCurrentTab(key);
+                    }}
+                  >
+                    {label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+              <EuiSpacer />
+              <TabContent />
             </EuiFlyoutBody>
           </EuiFlyout>
         </EuiPortal>

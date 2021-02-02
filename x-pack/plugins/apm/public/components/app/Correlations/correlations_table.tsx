@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTable } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui';
@@ -31,7 +32,7 @@ interface Props<T> {
   setSelectedSignificantTerm: (term: T | null) => void;
 }
 
-export function SignificantTermsTable<T extends SignificantTerm>({
+export function CorrelationsTable<T extends SignificantTerm>({
   significantTerms,
   status,
   cardinalityColumnName,
@@ -42,7 +43,10 @@ export function SignificantTermsTable<T extends SignificantTerm>({
     {
       width: '100px',
       field: 'score',
-      name: 'Score',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.scoreLabel',
+        { defaultMessage: 'Score' }
+      ),
       render: (_: any, term: T) => {
         return <EuiCode>{Math.round(term.score)}</EuiCode>;
       },
@@ -57,19 +61,31 @@ export function SignificantTermsTable<T extends SignificantTerm>({
     },
     {
       field: 'fieldName',
-      name: 'Field name',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.fieldNameLabel',
+        { defaultMessage: 'Field name' }
+      ),
     },
     {
       field: 'fieldValue',
-      name: 'Field value',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.fieldValueLabel',
+        { defaultMessage: 'Field value' }
+      ),
       render: (_: any, term: T) => String(term.fieldValue).slice(0, 50),
     },
     {
       width: '100px',
       actions: [
         {
-          name: 'Focus',
-          description: 'Focus on this term',
+          name: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.filterLabel',
+            { defaultMessage: 'Filter' }
+          ),
+          description: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.filterDescription',
+            { defaultMessage: 'Filter by value' }
+          ),
           icon: 'magnifyWithPlus',
           type: 'icon',
           onClick: (term: T) => {
@@ -83,8 +99,14 @@ export function SignificantTermsTable<T extends SignificantTerm>({
           },
         },
         {
-          name: 'Exclude',
-          description: 'Exclude this term',
+          name: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.excludeLabel',
+            { defaultMessage: 'Exclude' }
+          ),
+          description: i18n.translate(
+            'xpack.apm.correlations.correlationsTable.excludeDescription',
+            { defaultMessage: 'Filter out value' }
+          ),
           icon: 'magnifyWithMinus',
           type: 'icon',
           onClick: (term: T) => {
@@ -98,7 +120,10 @@ export function SignificantTermsTable<T extends SignificantTerm>({
           },
         },
       ],
-      name: 'Actions',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.actionsLabel',
+        { defaultMessage: 'Actions' }
+      ),
       render: (_: any, term: T) => {
         return (
           <>
@@ -134,7 +159,9 @@ export function SignificantTermsTable<T extends SignificantTerm>({
   return (
     <EuiBasicTable
       items={significantTerms ?? []}
-      noItemsMessage={status === FETCH_STATUS.LOADING ? 'Loading' : 'No data'}
+      noItemsMessage={
+        status === FETCH_STATUS.LOADING ? loadingText : noDataText
+      }
       loading={status === FETCH_STATUS.LOADING}
       columns={columns}
       rowProps={(term) => {
@@ -146,3 +173,13 @@ export function SignificantTermsTable<T extends SignificantTerm>({
     />
   );
 }
+
+const loadingText = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.loadingText',
+  { defaultMessage: 'Loading' }
+);
+
+const noDataText = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.noDataText',
+  { defaultMessage: 'No data' }
+);
