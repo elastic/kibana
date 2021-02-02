@@ -235,10 +235,10 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana*' }, { ignore: [404] })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
-      it('should return 200 with errors', async () => {
+      it('should return generic 404', async () => {
         const response = await supertest
           .put(`/api/saved_objects/_bulk_update`)
           .send([
@@ -267,9 +267,9 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
           error: {
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred',
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
           },
         });
 
@@ -277,9 +277,9 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
           error: {
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred',
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] not found',
           },
         });
       });

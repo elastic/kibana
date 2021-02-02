@@ -5,7 +5,6 @@
  */
 
 import { ExtensionsSetup } from './services';
-import { FleetSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
@@ -15,7 +14,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface SetupDependencies {
-  fleet?: FleetSetup;
+  fleet?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }

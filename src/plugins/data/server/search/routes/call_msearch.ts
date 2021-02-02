@@ -12,9 +12,8 @@ import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
-import { shimHitsTotal } from './shim_hits_total';
 import { getKbnServerError } from '../../../../kibana_utils/server';
-import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
+import { getShardTimeout, getDefaultSearchParams, shimAbortSignal, shimHitsTotal } from '..';
 
 /** @internal */
 export function convertRequestBody(
