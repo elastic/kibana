@@ -306,9 +306,6 @@ function discoverController($route, $scope, Promise) {
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = capabilities.discover.saveQuery;
-  $scope.showTimeCol =
-    !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -429,6 +426,7 @@ function discoverController($route, $scope, Promise) {
     // number of records to fetch, then paginate through
     sampleSize: config.get(SAMPLE_SIZE_SETTING),
     timefield: getTimeField(),
+    services,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
@@ -436,6 +434,7 @@ function discoverController($route, $scope, Promise) {
     filterManager,
     setAppState,
     data,
+    stateContainer: state,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -489,12 +488,6 @@ function discoverController($route, $scope, Promise) {
           refetch$.next();
         })
       );
-
-      $scope.changeInterval = (interval) => {
-        if (interval) {
-          setAppState({ interval });
-        }
-      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
@@ -598,19 +591,6 @@ function discoverController($route, $scope, Promise) {
     if (isUpdate === false) {
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       refetch$.next();
-    }
-  };
-
-  $scope.updateSavedQueryId = (newSavedQueryId) => {
-    if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const state = {
-        ...appStateContainer.getState(),
-      };
-      delete state.savedQuery;
-      appStateContainer.set(state);
     }
   };
 

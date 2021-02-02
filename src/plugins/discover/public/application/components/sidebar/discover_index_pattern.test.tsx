@@ -8,38 +8,42 @@
 
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
-
-// @ts-ignore
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
+import { configMock } from '../../../__mocks__/config';
+import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 
 const indexPattern = {
-  id: 'test1',
+  id: 'the-index-pattern-id',
   title: 'test1 title',
-} as IIndexPattern;
+} as IndexPattern;
 
 const indexPattern1 = {
-  id: 'test1',
+  id: 'the-index-pattern-id',
   attributes: {
     title: 'test1 title',
   },
 } as SavedObject<any>;
 
 const indexPattern2 = {
-  id: 'test2',
+  id: 'the-index-pattern-id-2',
   attributes: {
     title: 'test2 title',
   },
 } as SavedObject<any>;
 
 const defaultProps = {
+  config: configMock,
   indexPatternList: [indexPattern1, indexPattern2],
   selectedIndexPattern: indexPattern,
-  setIndexPattern: jest.fn(async () => {}),
+  state: {},
+  setAppState: jest.fn(),
+  useNewFieldsApi: true,
+  indexPatterns: indexPatternsMock,
 };
 
 function getIndexPatternPickerList(instance: ShallowWrapper) {
@@ -84,6 +88,6 @@ describe('DiscoverIndexPattern', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
     selectIndexPatternPickerOption(instance, 'test2 title');
-    expect(defaultProps.setIndexPattern).toHaveBeenCalledWith('test2');
+    expect(defaultProps.setAppState).toHaveBeenCalledWith('test2');
   });
 });

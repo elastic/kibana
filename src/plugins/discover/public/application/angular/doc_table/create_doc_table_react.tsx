@@ -95,7 +95,7 @@ export interface DocTableLegacyProps {
   useNewFieldsApi?: boolean;
 }
 
-export function DocTableLegacy(renderProps: DocTableLegacyProps) {
+export function DocTableLegacy1(renderProps: DocTableLegacyProps) {
   const renderFn = convertDirectiveToRenderFn(
     {
       template: `<doc-table
@@ -153,3 +153,5 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
     </div>
   );
 }
+
+export const DocTableLegacy = React.memo(DocTableLegacy1);

@@ -20,8 +20,9 @@ import {
   TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
+import { AppState, GetStateReturn } from '../angular/discover_state';
 import { TopNavMenuData } from '../../../../navigation/public';
+import { DiscoverServices } from '../../build_services';
 
 export interface DiscoverProps {
   /**
@@ -62,10 +63,6 @@ export interface DiscoverProps {
    * Function to scroll down the legacy table to the bottom
    */
   onSkipBottomButtonClick: () => void;
-  /**
-   * Function to change sorting of the table, triggers a fetch
-   */
-  onSort: (sort: string[][]) => void;
   opts: {
     /**
      * Date histogram aggregation config
@@ -88,6 +85,10 @@ export interface DiscoverProps {
      */
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     /**
+     * Kibana core services used by discover
+     */
+    services: DiscoverServices;
+    /**
      * The number of documents that can be displayed in the table/grid
      */
     sampleSize: number;
@@ -99,6 +100,10 @@ export interface DiscoverProps {
      * Function to set the header menu
      */
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    /**
+     * Functions for retrieving/mutating state
+     */
+    stateContainer: GetStateReturn;
     /**
      * Timefield of the currently used index pattern
      */
@@ -140,8 +145,4 @@ export interface DiscoverProps {
    * Function to update the actual query
    */
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  /**
-   * Function to update the actual savedQuery id
-   */
-  updateSavedQueryId: (savedQueryId?: string) => void;
 }

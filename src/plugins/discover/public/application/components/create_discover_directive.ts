@@ -5,7 +5,6 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-
 import { Discover } from './discover';
 
 export function createDiscoverDirective(reactDirective: any) {
