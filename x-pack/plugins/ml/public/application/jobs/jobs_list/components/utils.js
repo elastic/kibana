@@ -36,6 +36,23 @@ export function loadFullJob(jobId) {
   });
 }
 
+export function loadJobForCloning(jobId) {
+  return new Promise((resolve, reject) => {
+    ml.jobs
+      .jobForCloning(jobId)
+      .then((resp) => {
+        if (resp) {
+          resolve(resp);
+        } else {
+          throw new Error(`Could not find job ${jobId}`);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 export function isStartable(jobs) {
   return jobs.some(
     (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
@@ -180,31 +197,38 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId);
-    if (job.custom_settings && job.custom_settings.created_by) {
+    const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
+      loadJobForCloning(jobId),
+      loadFullJob(jobId, false),
+    ]);
+    if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
 
       if (
-        job.data_counts.earliest_record_timestamp !== undefined &&
-        job.data_counts.latest_record_timestamp !== undefined &&
-        job.data_counts.latest_bucket_timestamp !== undefined
+        originalJob.data_counts.earliest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_record_timestamp !== undefined &&
+        originalJob.data_counts.latest_bucket_timestamp !== undefined
       ) {
         // if the job has run before, use the earliest and latest record timestamp
         // as the cloned job's time range
-        let start = job.data_counts.earliest_record_timestamp;
-        let end = job.data_counts.latest_record_timestamp;
+        let start = originalJob.data_counts.earliest_record_timestamp;
+        let end = originalJob.data_counts.latest_record_timestamp;
 
-        if (job.datafeed_config.aggregations !== undefined) {
+        if (originalJob.datafeed_config.aggregations !== undefined) {
           // if the datafeed uses aggregations the earliest and latest record timestamps may not be the same
           // as the start and end of the data in the index.
-          const bucketSpanMs = parseInterval(job.analysis_config.bucket_span).asMilliseconds();
+          const bucketSpanMs = parseInterval(
+            originalJob.analysis_config.bucket_span
+          ).asMilliseconds();
           // round down to the start of the nearest bucket
           start =
-            Math.floor(job.data_counts.earliest_record_timestamp / bucketSpanMs) * bucketSpanMs;
+            Math.floor(originalJob.data_counts.earliest_record_timestamp / bucketSpanMs) *
+            bucketSpanMs;
           // use latest_bucket_timestamp and add two bucket spans minus one ms
-          end = job.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
+          end = originalJob.data_counts.latest_bucket_timestamp + bucketSpanMs * 2 - 1;
         }
 
         mlJobService.tempJobCloningObjects.start = start;
@@ -212,12 +236,17 @@ export async function cloneJob(jobId) {
       }
     } else {
       // otherwise use the tempJobCloningObjects
-      mlJobService.tempJobCloningObjects.job = job;
+      mlJobService.tempJobCloningObjects.job = cloneableJob;
+      // resets the createdBy field in case it still retains previous settings
+      mlJobService.tempJobCloningObjects.createdBy = undefined;
+    }
+    if (datafeed !== undefined) {
+      mlJobService.tempJobCloningObjects.datafeed = datafeed;
     }
 
-    if (job.calendars) {
+    if (originalJob.calendars) {
       mlJobService.tempJobCloningObjects.calendars = await mlCalendarService.fetchCalendarsByIds(
-        job.calendars
+        originalJob.calendars
       );
     }
 

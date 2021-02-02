@@ -311,3 +311,157 @@ export const SOURCE_NAME_LABEL = i18n.translate(
     defaultMessage: 'Source name',
   }
 );
+
+export const ORG_SOURCES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.link',
+  {
+    defaultMessage: 'Add an organization content source',
+  }
+);
+
+export const ORG_SOURCES_HEADER_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.title',
+  {
+    defaultMessage: 'Organization sources',
+  }
+);
+
+export const ORG_SOURCES_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.org.description',
+  {
+    defaultMessage:
+      'Organization sources are available to the entire organization and can be assigned to specific user groups.',
+  }
+);
+
+export const PRIVATE_LINK_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.link',
+  {
+    defaultMessage: 'Add a private content source',
+  }
+);
+
+export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
+  {
+    defaultMessage: 'Manage private content sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
+  {
+    defaultMessage: 'Review Group Sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
+  {
+    defaultMessage: 'Review the status of all sources shared with your Group.',
+  }
+);
+
+export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
+  {
+    defaultMessage:
+      'Review the status of all connected private sources, and manage private sources for your account.',
+  }
+);
+
+export const PRIVATE_HEADER_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.header.title',
+  {
+    defaultMessage: 'My private content sources',
+  }
+);
+
+export const PRIVATE_HEADER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.header.description',
+  {
+    defaultMessage: 'Private content sources are available only to you.',
+  }
+);
+
+export const PRIVATE_SHARED_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.title',
+  {
+    defaultMessage: 'Shared content sources',
+  }
+);
+
+export const PRIVATE_EMPTY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.empty.title',
+  {
+    defaultMessage: 'You have no private sources',
+  }
+);
+export const SHARED_EMPTY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.title',
+  {
+    defaultMessage: 'No content source available',
+  }
+);
+
+export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.shared.empty.description',
+  {
+    defaultMessage:
+      'Once content sources are shared with you, they will be displayed here, and available via the search experience.',
+  }
+);
+
+export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
+  defaultMessage: 'and',
+});
+
+export const LICENSE_CALLOUT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title',
+  {
+    defaultMessage: 'Private Sources are no longer available',
+  }
+);
+
+export const LICENSE_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.description',
+  {
+    defaultMessage: 'Contact your search experience administrator for more information.',
+  }
+);
+
+export const SOURCE_DISABLED_CALLOUT_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.title',
+  {
+    defaultMessage: 'Content source is disabled',
+  }
+);
+
+export const SOURCE_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.description',
+  {
+    defaultMessage:
+      'Your organization’s license level has changed. Your data is safe, but document-level permissions are no longer supported and searching of this source has been disabled. Upgrade to a Platinum license to re-enable this source.',
+  }
+);
+
+export const SOURCE_DISABLED_CALLOUT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceDisabled.button',
+  {
+    defaultMessage: 'Explore Platinum license',
+  }
+);
+
+export const DOCUMENT_PERMISSIONS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.documentPermissionsLink',
+  {
+    defaultMessage: 'Learn more about document-level permission configuration',
+  }
+);
+
+export const UNDERSTAND_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.understandButton',
+  {
+    defaultMessage: 'I understand',
+  }
+);
