@@ -59,10 +59,13 @@ describe('useBarChartsHooks', () => {
     const firstChartItems = result.current[0];
     const lastChartItems = result.current[4];
 
-    // first chart items last item should be x 199, since we only display 150 items
+    // first chart items last item should be x 149, since we only display 150 items
     expect(firstChartItems[firstChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS - 1);
 
-    // since here are 5 charts, last chart first item should be x 800
+    // first chart will only contain x values from 0 - 149;
+    expect(firstChartItems.find((item) => item.x > 149)).toBe(undefined);
+
+    // since here are 5 charts, last chart first item should be x 600
     expect(lastChartItems[0].x).toBe(CANVAS_MAX_ITEMS * 4);
     expect(lastChartItems[lastChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS * 5 - 1);
   });
