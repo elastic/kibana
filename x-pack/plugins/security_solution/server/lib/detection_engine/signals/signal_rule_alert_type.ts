@@ -9,7 +9,7 @@
 import { Logger, KibanaRequest } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow, pipe } from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/lib/function';
 
 import { toError, toPromise } from '../../../../common/fp_utils';
 
@@ -188,22 +188,14 @@ export const signalRulesAlertType = ({
       try {
         if (!isEmpty(index)) {
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
+          const inputIndices = await getInputIndex(services, version, index);
           const [privileges, timestampFieldCaps] = await Promise.all([
-            pipe(
-              { services, version, index },
-              ({ services: svc, version: ver, index: idx }) =>
-                pipe(
-                  tryCatch(() => getInputIndex(svc, ver, idx), toError),
-                  chain((indices) => tryCatch(() => checkPrivileges(svc, indices), toError))
-                ),
-              toPromise
-            ),
+            checkPrivileges(services, inputIndices),
             services.scopedClusterClient.fieldCaps({
               index,
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
                 : ['@timestamp'],
-              allow_no_indices: false,
               include_unmapped: true,
             }),
           ]);
@@ -222,6 +214,7 @@ export const signalRulesAlertType = ({
                     wroteStatus,
                     hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
                     timestampFieldCaps,
+                    inputIndices,
                     ruleStatusService,
                     logger,
                     buildRuleMessage
