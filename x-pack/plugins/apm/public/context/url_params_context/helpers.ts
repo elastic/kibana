@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
+import { scaleUtc } from 'd3-scale';
+import { compact, pickBy } from 'lodash';
 import { IUrlParams } from './types';
 
-export function getParsedDate(rawDate?: string, opts = {}) {
+function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
-    const parsed = datemath.parse(rawDate, opts);
-    if (parsed) {
-      return parsed.toISOString();
+    const parsed = datemath.parse(rawDate, options);
+    if (parsed && parsed.isValid()) {
+      return parsed.toDate();
     }
   }
 }
@@ -26,13 +27,27 @@ export function getDateRange({
   rangeFrom?: string;
   rangeTo?: string;
 }) {
+  // If the previous state had the same range, just return that instead of calculating a new range.
   if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
     return { start: state.start, end: state.end };
   }
 
+  const start = getParsedDate(rangeFrom);
+  const end = getParsedDate(rangeTo, { roundUp: true });
+
+  // `getParsedDate` will return undefined for invalid or empty dates. We return
+  // the previous state if either date is undefined.
+  if (!start || !end) {
+    return { start: state.start, end: state.end };
+  }
+
+  // Calculate ticks for the time ranges to produce nicely rounded values.
+  const ticks = scaleUtc().domain([start, end]).nice().ticks();
+
+  // Return the first and last tick values.
   return {
-    start: getParsedDate(rangeFrom),
-    end: getParsedDate(rangeTo, { roundUp: true }),
+    start: ticks[0].toISOString(),
+    end: ticks[ticks.length - 1].toISOString(),
   };
 }
 

@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('search', () => {
     loadTestFile(require.resolve('./search'));
+    loadTestFile(require.resolve('./bsearch'));
     loadTestFile(require.resolve('./msearch'));
   });
 }

@@ -16,8 +16,8 @@ import {
   ProcessorsEditorContextProvider,
   OnUpdateHandler,
   OnDoneLoadJsonHandler,
-  PipelineProcessorsEditor,
-} from '../pipeline_processors_editor';
+  PipelineEditor,
+} from '../pipeline_editor';
 
 interface Props {
   processors: Processor[];
@@ -119,7 +119,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         onUpdate={onProcessorsUpdate}
         value={{ processors, onFailure }}
       >
-        <PipelineProcessorsEditor onLoadJson={onLoadJson} />
+        <PipelineEditor onLoadJson={onLoadJson} />
       </ProcessorsEditorContextProvider>
     </>
   );

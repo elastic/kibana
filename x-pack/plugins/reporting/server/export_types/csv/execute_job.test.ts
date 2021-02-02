@@ -22,7 +22,7 @@ import { LevelLogger } from '../../lib';
 import { setFieldFormats } from '../../services';
 import { createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
-import { TaskPayloadCSV } from './types';
+import { TaskPayloadDeprecatedCSV } from './types';
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
 
@@ -31,7 +31,7 @@ const getRandomScrollId = () => {
   return puid.generate();
 };
 
-const getBasePayload = (baseObj: any) => baseObj as TaskPayloadCSV;
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadDeprecatedCSV;
 
 describe('CSV Execute Job', function () {
   const encryptionKey = 'testEncryptionKey';

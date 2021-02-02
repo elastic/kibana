@@ -14,7 +14,7 @@ import {
   MAX_FILE_SIZE_BYTES,
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
-} from '../../../../../../common/constants/file_datavisualizer';
+} from '../../../../../../../file_upload/common';
 import { getUiSettings } from '../../../../util/dependency_cache';
 import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
 

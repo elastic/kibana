@@ -14,13 +14,15 @@ import {
   CaseConfigureService,
   ConnectorMappingsService,
 } from '../../../services';
-import { getActions } from '../__mocks__/request_responses';
+import { getActions, getActionTypes } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
+
   const log = loggingSystemMock.create().get('case');
   const esClientMock = elasticsearchServiceMock.createClusterClient();
 
