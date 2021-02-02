@@ -218,18 +218,18 @@ export enum TypeKind {
   InterfaceKind = 'Interface',
   TypeKind = 'Type', // For things like `export type Foo = ...`
   Unknown = 'Unknown', // There are a lot of ts-morph types, if I encounter something not handled, I dump it in here.
-  String = 'string',
-  Number = 'number',
-  Boolean = 'boolean',
-  Array = 'Array',
-  CompoundType = 'CompoundType', // Unions & intersections, to handle things like `string | number`. 
+  StringKind = 'string',
+  NumberKind = 'number',
+  BooleanKind = 'boolean',
+  ArrayKind = 'Array',
+  CompoundTypeKind = 'CompoundType', // Unions & intersections, to handle things like `string | number`. 
 }
 ```
 
 
 ### Text with reference links
 
-Signatures, descriptions and returns comments may all contain links to other API declarations. This information needs to be serializable into json. This serializable type encompasses the information needed to build the DocLink components within these fields. The logic of building
+Signatures, descriptions and return comments may all contain links to other API declarations. This information needs to be serializable into json. This serializable type encompasses the information needed to build the DocLink components within these fields. The logic of building
 the DocLink components currently resides inside the elasticdocs system. It's unclear if this will change.
 
 ```ts
@@ -293,7 +293,7 @@ With this structure, the mdx files end up looking like:
 
 ### PluginApi
 
-A plugins API is the component that is serialized into the json file. It is broken into public, server and common components.  `serviceFolders` is a way for the system to
+A plugin API is the component that is serialized into the json file. It is broken into public, server and common components.  `serviceFolders` is a way for the system to
 write separate mdx files depending on where each declaration is defined. This is because certain plugins (and core)
 are huge, and can't be rendered in a single page.
 
@@ -308,21 +308,24 @@ export interface PluginApi {
 }
 ```
 
-## Manifest file changes
+## kibana.json Manifest file changes
+
+### Using a kibana.json file for core
+
+For the purpose of API infrastructure, core is treated like any other plugin. This means it has to specify serviceFolders section inside a manifest file to be split into sub folders. There are other ways to tackle this - like a hard coded array just for the core folder, but I kept the logic as similar to the other plugins as possible.
+
+### New parameters
 
 **serviceFolders?: string[]**
 
 Used by the system to group services into sub-pages. Some plugins, like data and core, have such huge APIs they are very slow to contain in a single page, and they are less consummable by solution developers. The addition of an optional list of services folders will cause the system to automatically create a separate page with every API that is defined within that folder. The caveat is that core will need to define a manifest file in order to define its service folders...
-
-**Using a kibana.json file for core**
-
-For the purpose of API infrastructure, core is treated like any other plugin. This means it has to specify serviceFolders section inside a manifest file to be split into sub folders. There are other ways to tackle this - like a hard coded array just for the core folder, but I kept the logic as similar to the other plugins as possible.
 
 **teamOwner: string**
 
 Team owner can be determined via github CODEOWNERS file, but we want to encourage single team ownership per plugin. Requiring a team owner string in the manifest file will help with this and will allow the API doc system to manually add a section to every page that has a link to the team owner. Additional ideas are teamSlackChannel or teamEmail for further contact. 
 
 **summary: string**
+
 
 A brief description of the plugin can then be displayed in the automatically generated API documentation.
 
@@ -358,8 +361,8 @@ I propose we avoid this kind of pattern.
 
 ## Export every referenced type
 
-The docs system handles broken link warnings but to avoid breaking the ci, I suggest we turn this off initially. This will mean however,
-that we may miss situations where we are referencing a type that is not actually exported. This will cause a broken link in the docs
+The docs system handles broken link warnings but to avoid breaking the ci, I suggest we turn this off initially. However, this will mean
+we may miss situations where we are referencing a type that is not actually exported. This will cause a broken link in the docs
 system
 
 For example if your index.ts file has:
@@ -369,7 +372,7 @@ export type foo: string | AnInterface;
 
 and does not also export `AnInterface`, this will be a broken link in the docs system.
 
-Until we have better ci tools to catch these mistakes, developers will need to export every referenced type.
+Until we have better CI tools to catch these mistakes, developers will need to export every referenced type.
 
 ## Avoid `Pick` pattern
 
@@ -430,10 +433,8 @@ The APIs WILL need to be well commented or they won't be useful. We can measure 
 - [Microsoft .NET](https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic?view=netcore-3.1)
 - [Android](https://developer.android.com/reference/androidx/packages)
 
-# Architecure review feedback
+# Architecure review
 
-The primary concern is over the technology choice of ts-morph vs api-extractor.
-
-I propose we move forward with merging the ts-morph implementation in the short term. This will provide immediate benefit 
-to platform service consumers, and buy the platform group time to iterate on implementation details. Having the end to end pieces in place
-will help the elastic-docs team understand what components we need, and we can iterate on the developer documentation navigation menu.
+The primary concern coming out of the architecture review was over the technology choice of ts-morph vs api-extractor, and the potential maintenance
+burdern of using ts-morph. For the short term, we've decide tech leads will own this section of code, we'll consider it experimental and
+ focus on deriving value out of it. Once we are confident of the value, we can focus on stabilizing the implementation details.
