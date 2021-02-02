@@ -1,0 +1,9 @@
+.relevanceTuningForm {
+  .relevanceTuningForm__item {
+    width: 100%;
+  }
+
+  .relevanceTuningForm__panel + .relevanceTuningForm__panel {
+    margin-top: $euiSizeM;
+  }
+}

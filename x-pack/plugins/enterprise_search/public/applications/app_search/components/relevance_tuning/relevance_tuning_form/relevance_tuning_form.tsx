@@ -12,20 +12,31 @@ import {
   EuiTitle,
   EuiFieldSearch,
   EuiSpacer,
+  EuiAccordion,
+  EuiPanel,
 } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../relevance_tuning_logic';
+import { RelevanceTuningItem } from './relevance_tuning_item';
 import { FIELD_FILTER_CUTOFF } from '../constants';
 
+import './relevance_tuning_form.scss';
+
 export const RelevanceTuningForm: React.FC = () => {
-  const { filterInputValue, schemaFields } = useValues(RelevanceTuningLogic);
+  const {
+    filterInputValue,
+    schemaFields,
+    filteredSchemaFields,
+    schema,
+    searchSettings,
+  } = useValues(RelevanceTuningLogic);
   const { setFilterValue } = useActions(RelevanceTuningLogic);
 
   return (
-    <section>
+    <section className="relevanceTuningForm">
       <form>
         {/* TODO SchemaConflictCallout */}
 
@@ -62,6 +73,24 @@ export const RelevanceTuningForm: React.FC = () => {
             />
           </>
         )}
+        <EuiSpacer />
+        {filteredSchemaFields.map((fieldName) => (
+          <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
+            <EuiAccordion
+              id={fieldName}
+              buttonContentClassName="relevanceTuningForm__item"
+              buttonContent={
+                <RelevanceTuningItem
+                  name={fieldName}
+                  type={schema[fieldName]}
+                  boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
+                  field={searchSettings.search_fields[fieldName]}
+                />
+              }
+              paddingSize="s"
+            />
+          </EuiPanel>
+        ))}
       </form>
     </section>
   );

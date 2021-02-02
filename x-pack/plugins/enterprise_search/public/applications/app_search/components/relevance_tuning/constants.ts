@@ -39,3 +39,8 @@ export const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
     defaultMessage: 'Are you sure you want to delete this boost?',
   }
 );
+export const BOOST_TYPE_TO_ICON_MAP = {
+  value: 'tokenNumber',
+  functional: 'tokenFunction',
+  proximity: 'tokenGeo',
+};

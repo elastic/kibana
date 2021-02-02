@@ -25,13 +25,13 @@ export interface RawBoost extends BaseBoost {
 export interface Boost extends RawBoost {
   value?: string[];
 }
+
+export interface SearchField {
+  weight: number;
+}
+
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
-  search_fields: Record<
-    string,
-    {
-      weight: number;
-    }
-  >;
+  search_fields: Record<string, SearchField>;
   result_fields?: object;
 }

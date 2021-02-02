@@ -8,16 +8,37 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow, mount, ReactWrapper, ShallowWrapper } from 'enzyme';
 import { EuiFieldSearch } from '@elastic/eui';
+
+import { RelevanceTuningItem } from './relevance_tuning_item';
 
 import { RelevanceTuningForm } from './relevance_tuning_form';
 
 describe('RelevanceTuningForm', () => {
   const values = {
     filterInputValue: '',
-    schemaFields: [],
-    filteredSchemaFields: [],
+    schemaFields: ['foo', 'bar', 'baz'],
+    filteredSchemaFields: ['foo', 'bar'],
+    schema: {
+      foo: 'text',
+      bar: 'number',
+    },
+    searchSettings: {
+      boosts: {
+        foo: [
+          {
+            factor: 2,
+            type: 'value',
+          },
+        ],
+      },
+      search_fields: {
+        bar: {
+          weight: 1,
+        },
+      },
+    },
   };
   const actions = {
     setFilterValue: jest.fn(),
@@ -26,6 +47,51 @@ describe('RelevanceTuningForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(actions);
+  });
+
+  describe('fields', () => {
+    let wrapper: ReactWrapper;
+    let relevantTuningItems: any;
+
+    beforeAll(() => {
+      setMockValues(values);
+
+      wrapper = mount(<RelevanceTuningForm />);
+      relevantTuningItems = wrapper.find(RelevanceTuningItem);
+    });
+
+    it('renders a list of fields that may or may not have been filterd by user input', () => {
+      // The length is 2 because we're only pulling values from `filteredSchemaFields`, which
+      // is the list of schema fields that has been filtered by user input down to 2
+      expect(relevantTuningItems.length).toBe(2);
+    });
+
+    it('will pass the schema field name in the "name" prop of each list item', () => {
+      expect(relevantTuningItems.at(0).prop('name')).toBe('foo');
+      expect(relevantTuningItems.at(1).prop('name')).toBe('bar');
+    });
+
+    it('will pass the schema type of the field in the "type" prop of each list item', () => {
+      expect(relevantTuningItems.at(0).prop('type')).toBe('text');
+      expect(relevantTuningItems.at(1).prop('type')).toBe('number');
+    });
+
+    it('will pass a list of boosts in the "boosts" field of each list item, or undefined if none exist', () => {
+      expect(relevantTuningItems.at(0).prop('boosts')).toEqual([
+        {
+          factor: 2,
+          type: 'value',
+        },
+      ]);
+      expect(relevantTuningItems.at(1).prop('boosts')).toBeUndefined();
+    });
+
+    it('will pass the search_field configuration for the field in the "field" prop of each list item, or undefined if none exists', () => {
+      expect(relevantTuningItems.at(0).prop('field')).toBeUndefined();
+      expect(relevantTuningItems.at(1).prop('field')).toEqual({
+        weight: 1,
+      });
+    });
   });
 
   describe('field filtering', () => {
