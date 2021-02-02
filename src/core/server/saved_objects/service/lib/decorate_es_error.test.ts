@@ -109,27 +109,6 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(true);
   });
 
-  it('if saved objects index does not exist makes NotFound a SavedObjectsClient/generalError', () => {
-    const error = new esErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        statusCode: 404,
-        body: {
-          error: {
-            reason:
-              'no such index [.kibana_8.0.0] and [require_alias] request flag is [true] and [.kibana_8.0.0] is not an alias',
-          },
-        },
-      })
-    );
-    expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(false);
-    const genericError = decorateEsError(error);
-    expect(genericError.message).toEqual(
-      `Saved object index alias [.kibana_8.0.0] not found: Response Error`
-    );
-    expect(genericError.output.statusCode).toBe(500);
-    expect(SavedObjectsErrorHelpers.isGeneralError(error)).toBe(true);
-  });
-
   it('makes BadRequest a SavedObjectsClient/BadRequest error', () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({ statusCode: 400 })
