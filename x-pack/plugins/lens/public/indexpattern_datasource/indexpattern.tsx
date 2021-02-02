@@ -167,7 +167,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    toExpression,
+    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
       domElement: Element,
