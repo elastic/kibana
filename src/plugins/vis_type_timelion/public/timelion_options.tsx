@@ -9,7 +9,7 @@
 import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../kibana_react/public';
 
 import { TimelionVisParams } from './timelion_vis_fn';
@@ -18,7 +18,7 @@ import { TimelionVisDependencies } from './plugin';
 
 import './timelion_options.scss';
 
-export type TimelionOptionsProps = VisOptionsProps<TimelionVisParams>;
+export type TimelionOptionsProps = VisEditorOptionsProps<TimelionVisParams>;
 
 function TimelionOptions({
   services,

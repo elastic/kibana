@@ -6,21 +6,44 @@
  * Public License, v 1.
  */
 
-import { Test } from '../../fake_mocha_types';
+import { Suite, Test } from '../../fake_mocha_types';
 import { Lifecycle } from '../lifecycle';
 import { decorateSnapshotUi, expectSnapshot } from './decorate_snapshot_ui';
 import path from 'path';
 import fs from 'fs';
 
+const createMockSuite = ({ tests, root = true }: { tests: Test[]; root?: boolean }) => {
+  const suite = {
+    tests,
+    root,
+    eachTest: (cb: (test: Test) => void) => {
+      suite.tests.forEach((test) => cb(test));
+    },
+  } as Suite;
+
+  return suite;
+};
+
 const createMockTest = ({
   title = 'Test',
   passed = true,
-}: { title?: string; passed?: boolean } = {}) => {
-  return {
+  filename = __filename,
+  parent,
+}: { title?: string; passed?: boolean; filename?: string; parent?: Suite } = {}) => {
+  const test = ({
+    file: filename,
     fullTitle: () => title,
     isPassed: () => passed,
-    parent: {},
-  } as Test;
+  } as unknown) as Test;
+
+  if (parent) {
+    parent.tests.push(test);
+    test.parent = parent;
+  } else {
+    test.parent = createMockSuite({ tests: [test] });
+  }
+
+  return test;
 };
 
 describe('decorateSnapshotUi', () => {
@@ -211,7 +234,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('bar').toMatch();
         }).not.toThrow();
 
-        const afterTestSuite = lifecycle.afterTestSuite.trigger({});
+        const afterTestSuite = lifecycle.afterTestSuite.trigger(test.parent);
 
         await expect(afterTestSuite).resolves.toBe(undefined);
       });
@@ -225,7 +248,7 @@ exports[\`Test2 1\`] = \`"bar"\`;
           expectSnapshot('foo').toMatch();
         }).not.toThrow();
 
-        const afterTestSuite = lifecycle.afterTestSuite.trigger({});
+        const afterTestSuite = lifecycle.afterTestSuite.trigger(test.parent);
 
         await expect(afterTestSuite).rejects.toMatchInlineSnapshot(`
                 [Error: 1 obsolete snapshot(s) found:
@@ -233,6 +256,32 @@ exports[\`Test2 1\`] = \`"bar"\`;
 
                 Run tests again with \`--updateSnapshots\` to remove them.]
               `);
+      });
+
+      it('does not throw on unused when some tests are skipped', async () => {
+        const root = createMockSuite({ tests: [] });
+
+        const test = createMockTest({
+          title: 'Test',
+          parent: root,
+          passed: true,
+        });
+
+        createMockTest({
+          title: 'Test2',
+          parent: root,
+          passed: false,
+        });
+
+        await lifecycle.beforeEachTest.trigger(test);
+
+        expect(() => {
+          expectSnapshot('foo').toMatch();
+        }).not.toThrow();
+
+        const afterTestSuite = lifecycle.afterTestSuite.trigger(root);
+
+        await expect(afterTestSuite).resolves.toBeUndefined();
       });
     });
   });

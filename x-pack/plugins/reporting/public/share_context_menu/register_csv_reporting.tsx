@@ -10,7 +10,10 @@ import React from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
-import { JobParamsCSV, SearchRequest } from '../../server/export_types/csv/types';
+import {
+  JobParamsDeprecatedCSV,
+  SearchRequestDeprecatedCSV,
+} from '../../server/export_types/csv/types';
 import { ReportingPanelContent } from '../components/reporting_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -59,12 +62,12 @@ export const csvReportingProvider = ({
       return [];
     }
 
-    const jobParams: JobParamsCSV = {
+    const jobParams: JobParamsDeprecatedCSV = {
       browserTimezone,
       objectType,
       title: sharingData.title as string,
       indexPatternId: sharingData.indexPatternId as string,
-      searchRequest: sharingData.searchRequest as SearchRequest,
+      searchRequest: sharingData.searchRequest as SearchRequestDeprecatedCSV,
       fields: sharingData.fields as string[],
       metaFields: sharingData.metaFields as string[],
       conflictedTypesFields: sharingData.conflictedTypesFields as string[],

@@ -5,10 +5,11 @@
  */
 
 import { ValuesType } from 'utility-types';
+import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import {
+  ElasticsearchClient,
   KibanaRequest,
-  LegacyScopedClusterClient,
 } from '../../../../../../../../src/core/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
@@ -17,11 +18,16 @@ import {
 } from '../../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
-import { callClientWithDebug } from '../call_client_with_debug';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { unpackProcessorEvents } from './unpack_processor_events';
+import {
+  callAsyncWithDebug,
+  getDebugTitle,
+  getDebugBody,
+} from '../call_async_with_debug';
+import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -59,10 +65,7 @@ export function createApmEventClient({
   indices,
   options: { includeFrozen } = { includeFrozen: false },
 }: {
-  esClient: Pick<
-    LegacyScopedClusterClient,
-    'callAsInternalUser' | 'callAsCurrentUser'
-  >;
+  esClient: ElasticsearchClient;
   debug: boolean;
   request: KibanaRequest;
   indices: ApmIndicesConfig;
@@ -71,9 +74,9 @@ export function createApmEventClient({
   };
 }) {
   return {
-    search<TParams extends APMEventESSearchRequest>(
+    async search<TParams extends APMEventESSearchRequest>(
       params: TParams,
-      { includeLegacyData } = { includeLegacyData: false }
+      { includeLegacyData = false } = {}
     ): Promise<TypedSearchResponse<TParams>> {
       const withProcessorEventFilter = unpackProcessorEvents(params, indices);
 
@@ -81,15 +84,25 @@ export function createApmEventClient({
         ? addFilterToExcludeLegacyData(withProcessorEventFilter)
         : withProcessorEventFilter;
 
-      return callClientWithDebug({
-        apiCaller: esClient.callAsCurrentUser,
-        operationName: 'search',
-        params: {
-          ...withPossibleLegacyDataFilter,
-          ignore_throttled: !includeFrozen,
-          ignore_unavailable: true,
+      const searchParams = {
+        ...withPossibleLegacyDataFilter,
+        ignore_throttled: !includeFrozen,
+        ignore_unavailable: true,
+      };
+
+      return callAsyncWithDebug({
+        cb: () => {
+          const searchPromise = cancelEsRequestOnAbort(
+            esClient.search(searchParams),
+            request
+          );
+
+          return unwrapEsResponse(searchPromise);
         },
-        request,
+        getDebugMessage: () => ({
+          body: getDebugBody(searchParams, 'search'),
+          title: getDebugTitle(request),
+        }),
         debug,
       });
     },

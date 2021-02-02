@@ -18,7 +18,6 @@ export interface GeoContainmentAlertParams extends AlertTypeParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }

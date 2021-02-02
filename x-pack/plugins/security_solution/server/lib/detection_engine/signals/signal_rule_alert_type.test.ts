@@ -151,6 +151,7 @@ describe('rules_notification_alert_type', () => {
     const value: Partial<ApiResponse> = {
       statusCode: 200,
       body: {
+        indices: ['index1', 'index2', 'index3', 'index4'],
         fields: {
           '@timestamp': {
             date: {
@@ -535,6 +536,35 @@ describe('rules_notification_alert_type', () => {
           errors: [],
         });
         await alert.executor(payload);
+        expect(ruleStatusService.success).toHaveBeenCalled();
+      });
+
+      it('should not call checkPrivileges if ML rule', async () => {
+        const ruleAlert = getMlResult();
+        payload = getPayload(ruleAlert, alertServices) as jest.Mocked<RuleExecutorOptions>;
+        jobsSummaryMock.mockResolvedValue([
+          {
+            id: 'some_job_id',
+            jobState: 'started',
+            datafeedState: 'started',
+          },
+        ]);
+        (findMlSignals as jest.Mock).mockResolvedValue({
+          _shards: { failed: 0 },
+          hits: {
+            hits: [{}],
+          },
+        });
+        (bulkCreateMlSignals as jest.Mock).mockResolvedValue({
+          success: true,
+          bulkCreateDuration: 1,
+          createdItemsCount: 1,
+          errors: [],
+        });
+        (checkPrivileges as jest.Mock).mockClear();
+
+        await alert.executor(payload);
+        expect(checkPrivileges).toHaveBeenCalledTimes(0);
         expect(ruleStatusService.success).toHaveBeenCalled();
       });
 

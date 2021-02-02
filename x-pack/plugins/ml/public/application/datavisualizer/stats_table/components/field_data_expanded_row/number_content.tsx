@@ -5,7 +5,7 @@
  */
 
 import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,7 @@ import {
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
+import { ExpandedRowContent } from './expanded_row_content';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -97,7 +98,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     }
   );
   return (
-    <EuiFlexGroup data-test-subj={'mlDVNumberContent'} gutterSize={'xl'}>
+    <ExpandedRowContent dataTestSubj={'mlDVNumberContent'}>
       <DocumentStatsTable config={config} />
       <EuiFlexItem className={'mlDataVisualizerSummaryTableWrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
@@ -112,24 +113,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
       </EuiFlexItem>
 
       {stats && (
-        <EuiFlexItem data-test-subj={'mlTopValues'}>
-          <EuiFlexItem grow={false}>
-            <ExpandedRowFieldHeader>
-              <FormattedMessage
-                id="xpack.ml.fieldDataCardExpandedRow.numberContent.topValuesTitle"
-                defaultMessage="Top values"
-              />
-            </ExpandedRowFieldHeader>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <TopValues
-              stats={stats}
-              fieldFormat={fieldFormat}
-              barColor="secondary"
-              compressed={true}
-            />
-          </EuiFlexItem>
-        </EuiFlexItem>
+        <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
       )}
       {distribution && (
         <EuiFlexItem data-test-subj={'mlMetricDistribution'}>
@@ -164,6 +148,6 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
           </EuiFlexItem>
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </ExpandedRowContent>
   );
 };

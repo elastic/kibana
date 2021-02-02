@@ -9,13 +9,13 @@
 import React from 'react';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public/vis_options_props';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 
 interface CounterParams {
   counter: number;
 }
 
-export class SelfChangingEditor extends React.Component<VisOptionsProps<CounterParams>> {
+export class SelfChangingEditor extends React.Component<VisEditorOptionsProps<CounterParams>> {
   onCounterChange = (ev: any) => {
     this.props.setValue('counter', parseInt(ev.target.value, 10));
   };

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  ActionTypeConnector,
   CasePostRequest,
   CasesConfigureRequest,
   ConnectorTypes,
@@ -70,6 +71,49 @@ export const getActions = (): FindActionResult[] => [
     },
     isPreconfigured: false,
     referencedByCount: 0,
+  },
+];
+
+export const getActionTypes = (): ActionTypeConnector[] => [
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.index',
+    name: 'Index',
+    minimumLicenseRequired: 'basic',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.resilient',
+    name: 'IBM Resilient',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
   },
 ];
 

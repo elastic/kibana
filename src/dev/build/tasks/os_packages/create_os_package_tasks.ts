@@ -8,7 +8,7 @@
 
 import { Task } from '../../lib';
 import { runFpm } from './run_fpm';
-import { runDockerGenerator, runDockerGeneratorForUBI } from './docker_generator';
+import { runDockerGenerator } from './docker_generator';
 
 export const CreateDebPackage: Task = {
   description: 'Creating deb package',
@@ -49,20 +49,56 @@ export const CreateRpmPackage: Task = {
   },
 };
 
-export const CreateDockerPackage: Task = {
-  description: 'Creating docker package',
+export const CreateDockerCentOS: Task = {
+  description: 'Creating Docker CentOS image',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build);
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: false,
+      architecture: 'x64',
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: false,
+      architecture: 'aarch64',
+      image: true,
+    });
   },
 };
 
-export const CreateDockerUbiPackage: Task = {
-  description: 'Creating docker ubi package',
+export const CreateDockerUBI: Task = {
+  description: 'Creating Docker UBI image',
 
   async run(config, log, build) {
-    // Builds Docker target default with ubi7 base image
-    await runDockerGeneratorForUBI(config, log, build);
+    if (!build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: true,
+        context: false,
+        architecture: 'x64',
+        image: true,
+      });
+    }
+  },
+};
+
+export const CreateDockerContexts: Task = {
+  description: 'Creating Docker build contexts',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: true,
+      image: false,
+    });
+
+    if (!build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: true,
+        context: true,
+        image: false,
+      });
+    }
   },
 };

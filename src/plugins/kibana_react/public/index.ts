@@ -15,6 +15,7 @@ export * from './ui_settings';
 export * from './field_icon';
 export * from './field_button';
 export * from './table_list_view';
+export * from './toolbar_button';
 export * from './split_panel';
 export * from './react_router_navigate';
 export { ValidatedDualRange, Value } from './validated_range';

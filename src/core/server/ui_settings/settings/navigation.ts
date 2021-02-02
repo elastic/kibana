@@ -37,25 +37,5 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
           'The route must be a relative URL.',
       }),
     },
-    pageNavigation: {
-      name: i18n.translate('core.ui_settings.params.pageNavigationName', {
-        defaultMessage: 'Side nav style',
-      }),
-      value: 'modern',
-      description: i18n.translate('core.ui_settings.params.pageNavigationDesc', {
-        defaultMessage: 'Change the style of navigation',
-      }),
-      type: 'select',
-      options: ['modern', 'legacy'],
-      optionLabels: {
-        modern: i18n.translate('core.ui_settings.params.pageNavigationModern', {
-          defaultMessage: 'Modern',
-        }),
-        legacy: i18n.translate('core.ui_settings.params.pageNavigationLegacy', {
-          defaultMessage: 'Legacy',
-        }),
-      },
-      schema: schema.oneOf([schema.literal('modern'), schema.literal('legacy')]),
-    },
   };
 };

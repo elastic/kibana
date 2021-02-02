@@ -65,6 +65,10 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
 
   '.teamcity/**/*',
+
+  // Bazel default files
+  '**/WORKSPACE.bazel',
+  '**/BUILD.bazel',
 ];
 
 /**

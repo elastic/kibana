@@ -10,7 +10,7 @@ import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
   IManagementSectionsPluginsStart,
-  SessionsMgmtConfigSchema,
+  SessionsConfigSchema,
 } from '../';
 import { APP } from '../';
 import { SearchSessionsMgmtAPI } from '../lib/api';
@@ -20,7 +20,7 @@ import { renderApp } from './render';
 export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
-    private config: SessionsMgmtConfigSchema,
+    private config: SessionsConfigSchema,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
   ) {}

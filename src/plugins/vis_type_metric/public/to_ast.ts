@@ -7,13 +7,14 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, Vis } from '../../visualizations/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
+import { VisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -26,7 +27,7 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-export const toExpressionAst = (vis: Vis, params: any) => {
+export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
@@ -34,7 +35,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
       }),
     ]),
     metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: vis.params.showPartialRows || false,
+    partialRows: false,
     aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
@@ -65,7 +66,7 @@ export const toExpressionAst = (vis: Vis, params: any) => {
     colorMode: metricColorMode,
     useRanges,
     invertColors,
-    showLabels: labels && labels.show,
+    showLabels: labels?.show ?? false,
   });
 
   if (style) {

@@ -24,7 +24,10 @@ export function buildConfigFromDetector(job, detectorIndex) {
   const config = {
     jobId: job.job_id,
     detectorIndex: detectorIndex,
-    metricFunction: mlFunctionToESAggregation(detector.function),
+    metricFunction:
+      detector.function === ML_JOB_AGGREGATION.LAT_LONG
+        ? ML_JOB_AGGREGATION.LAT_LONG
+        : mlFunctionToESAggregation(detector.function),
     timeField: job.data_description.time_field,
     interval: job.analysis_config.bucket_span,
     datafeedConfig: job.datafeed_config,

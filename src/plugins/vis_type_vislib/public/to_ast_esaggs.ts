@@ -13,16 +13,13 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
 
-import { PieVisParams } from './pie';
-import { BasicVislibParams } from './types';
-
 /**
  * Get esaggs expressions function
  * TODO: replace this with vis.data.aggs!.toExpressionAst();
  * https://github.com/elastic/kibana/issues/61768
  * @param vis
  */
-export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {
+export function getEsaggsFn<T>(vis: Vis<T>) {
   return buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

@@ -24,7 +24,7 @@ import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../shared_components';
+import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface VisualizationSelection {
   visualizationId: string;

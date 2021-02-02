@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
+import { VisTypeDefinition } from 'src/plugins/visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
 
 // @ts-expect-error
@@ -21,7 +21,7 @@ import { MapTypes } from './utils/map_types';
 
 export function createTileMapTypeDefinition(
   dependencies: TileMapVisualizationDependencies
-): BaseVisTypeOptions<TileMapVisParams> {
+): VisTypeDefinition<TileMapVisParams> {
   const { uiSettings, getServiceSettings } = dependencies;
 
   return {
@@ -147,5 +147,6 @@ export function createTileMapTypeDefinition(
       }
       return vis;
     },
+    requiresSearch: true,
   };
 }

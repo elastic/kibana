@@ -74,12 +74,12 @@ export class VisualizeEmbeddableFactory
     type: 'visualization',
     getIconForSavedObject: (savedObject) => {
       return (
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.icon || 'visualizeApp'
       );
     },
     getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
-        getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type)?.title
       })`;
     },
     showSavedObject: (savedObject) => {

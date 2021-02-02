@@ -25,6 +25,10 @@ export const TOTAL_QUERIES = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueries',
   { defaultMessage: 'Total queries' }
 );
+export const TOTAL_QUERIES_NO_RESULTS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueriesNoResults',
+  { defaultMessage: 'Total queries with no results' }
+);
 export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',
   { defaultMessage: 'Total clicks' }

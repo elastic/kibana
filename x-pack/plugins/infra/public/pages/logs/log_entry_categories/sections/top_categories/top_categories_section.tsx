@@ -8,8 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } fro
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { LogEntryCategory } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
 import { BetaBadge } from '../../../../../components/beta_badge';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_setup/create_job_button';

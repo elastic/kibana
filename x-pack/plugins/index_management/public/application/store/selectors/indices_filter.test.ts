@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExtensionsService } from '../../../services';
-import { getFilteredIndices, setExtensionsService } from '.';
+import { getFilteredIndices } from '.';
 // @ts-ignore
 import { defaultTableState } from '../reducers/table_state';
+import { setExtensionsService } from './extension_service';
 
 describe('getFilteredIndices selector', () => {
   let extensionService: ExtensionsService;

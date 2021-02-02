@@ -12,9 +12,9 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { ValueAxis } from '../../../../../vis_type_xy/public';
 import {
-  VisOptionsProps,
   BasicOptions,
   SelectOption,
   SwitchOption,
@@ -28,7 +28,7 @@ import {
 import { HeatmapVisParams } from '../../../heatmap';
 import { LabelsPanel } from './labels_panel';
 
-function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
+function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;

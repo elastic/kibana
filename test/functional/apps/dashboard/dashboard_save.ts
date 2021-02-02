@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
 
-  describe('dashboard save', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/89476
+  describe.skip('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';

@@ -143,39 +143,38 @@ export const getRotateOptions = () => [
   },
 ];
 
-export const getFittingFunctions = () =>
-  [
-    {
-      value: Fit.None,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.none', {
-        defaultMessage: 'Hide (Do not fill gaps)',
-      }),
-    },
-    {
-      value: Fit.Zero,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.zero', {
-        defaultMessage: 'Zero (Fill gaps with zeros)',
-      }),
-    },
-    {
-      value: Fit.Linear,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.linear', {
-        defaultMessage: 'Linear (Fill gaps with a line)',
-      }),
-    },
-    {
-      value: Fit.Carry,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.carry', {
-        defaultMessage: 'Last (Fill gaps with the last value)',
-      }),
-    },
-    {
-      value: Fit.Lookahead,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.lookahead', {
-        defaultMessage: 'Next (Fill gaps with the next value)',
-      }),
-    },
-  ] as const;
+export const getFittingFunctions = () => [
+  {
+    value: Fit.None,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.none', {
+      defaultMessage: 'Hide (Do not fill gaps)',
+    }),
+  },
+  {
+    value: Fit.Zero,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.zero', {
+      defaultMessage: 'Zero (Fill gaps with zeros)',
+    }),
+  },
+  {
+    value: Fit.Linear,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.linear', {
+      defaultMessage: 'Linear (Fill gaps with a line)',
+    }),
+  },
+  {
+    value: Fit.Carry,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.carry', {
+      defaultMessage: 'Last (Fill gaps with the last value)',
+    }),
+  },
+  {
+    value: Fit.Lookahead,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.lookahead', {
+      defaultMessage: 'Next (Fill gaps with the next value)',
+    }),
+  },
+];
 
 export const getConfigCollections = () => ({
   legendPositions: getPositions(),

@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('doc view should show Time and _source columns', async function () {
-        const expectedHeader = 'Time (@timestamp) _source';
+        const expectedHeader = 'Time (@timestamp) Document';
         const DocHeader = await dataGrid.getHeaderFields();
         expect(DocHeader.join(' ')).to.be(expectedHeader);
       });

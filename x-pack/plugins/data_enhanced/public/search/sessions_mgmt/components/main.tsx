@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CoreStart, HttpStart } from 'kibana/public';
 import React from 'react';
-import type { SessionsMgmtConfigSchema } from '../';
+import type { SessionsConfigSchema } from '../';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { TableText } from './';
@@ -29,7 +29,7 @@ interface Props {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   timezone: string;
-  config: SessionsMgmtConfigSchema;
+  config: SessionsConfigSchema;
 }
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {

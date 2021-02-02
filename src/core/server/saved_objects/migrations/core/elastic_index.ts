@@ -221,10 +221,6 @@ export async function createIndex(
   });
 }
 
-export async function deleteIndex(client: MigrationEsClient, index: string) {
-  await client.indices.delete({ index });
-}
-
 /**
  * Converts an index to an alias. The `alias` parameter is the desired alias name which currently
  * is a concrete index. This function will reindex `alias` into a new index, delete the `alias`

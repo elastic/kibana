@@ -11,7 +11,8 @@
     "visualizations",
     "embeddable",
     "dashboard",
-    "uiActions"
+    "uiActions",
+    "presentationUtil"
   ],
   "optionalPlugins": [
     "home",
@@ -22,7 +23,6 @@
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "presentationUtil",
     "discover"
   ]
 }

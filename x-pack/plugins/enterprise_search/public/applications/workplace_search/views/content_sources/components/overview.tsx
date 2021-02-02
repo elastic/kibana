@@ -8,6 +8,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -35,6 +37,38 @@ import {
   EXTERNAL_IDENTITIES_DOCS_URL,
   getGroupPath,
 } from '../../../routes';
+
+import {
+  RECENT_ACTIVITY_TITLE,
+  CREDENTIALS_TITLE,
+  DOCUMENTATION_LINK_TITLE,
+} from '../../../constants';
+import {
+  SOURCES_NO_CONTENT_TITLE,
+  CONTENT_SUMMARY_TITLE,
+  CONTENT_TYPE_HEADER,
+  ITEMS_HEADER,
+  EVENT_HEADER,
+  STATUS_HEADER,
+  TIME_HEADER,
+  TOTAL_DOCUMENTS_LABEL,
+  EMPTY_ACTIVITY_TITLE,
+  GROUP_ACCESS_TITLE,
+  CONFIGURATION_TITLE,
+  DOCUMENT_PERMISSIONS_TITLE,
+  DOCUMENT_PERMISSIONS_TEXT,
+  DOCUMENT_PERMISSIONS_DISABLED_TEXT,
+  LEARN_MORE_LINK,
+  STATUS_HEADING,
+  STATUS_TEXT,
+  ADDITIONAL_CONFIG_HEADING,
+  EXTERNAL_IDENTITIES_LINK,
+  ACCESS_TOKEN_LABEL,
+  ID_LABEL,
+  LEARN_CUSTOM_FEATURES_BUTTON,
+  DOC_PERMISSIONS_DESCRIPTION,
+  CUSTOM_CALLOUT_TITLE,
+} from '../constants';
 
 import { AppLogic } from '../../../app_logic';
 
@@ -88,7 +122,7 @@ export const Overview: React.FC = () => {
         <EuiSpacer size="s" />
         <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyDocumentSummary">
           <EuiEmptyPrompt
-            title={<h2>No content yet</h2>}
+            title={<h2>{SOURCES_NO_CONTENT_TITLE}</h2>}
             iconType="documents"
             iconColor="subdued"
           />
@@ -100,7 +134,7 @@ export const Overview: React.FC = () => {
       <div className="content-section">
         <div className="section-header">
           <EuiTitle size="xs">
-            <h4>Content summary</h4>
+            <h4>{CONTENT_SUMMARY_TITLE}</h4>
           </EuiTitle>
         </div>
         <EuiSpacer size="s" />
@@ -111,14 +145,14 @@ export const Overview: React.FC = () => {
           ) : (
             <EuiTable>
               <EuiTableHeader>
-                <EuiTableHeaderCell>Content Type</EuiTableHeaderCell>
-                <EuiTableHeaderCell>Items</EuiTableHeaderCell>
+                <EuiTableHeaderCell>{CONTENT_TYPE_HEADER}</EuiTableHeaderCell>
+                <EuiTableHeaderCell>{ITEMS_HEADER}</EuiTableHeaderCell>
               </EuiTableHeader>
               <EuiTableBody>
                 {tableContent}
                 <EuiTableRow>
                   <EuiTableRowCell>
-                    <strong>Total documents</strong>
+                    <strong>{TOTAL_DOCUMENTS_LABEL}</strong>
                   </EuiTableRowCell>
                   <EuiTableRowCell>
                     <strong>{totalDocuments.toLocaleString('en-US')}</strong>
@@ -137,7 +171,7 @@ export const Overview: React.FC = () => {
         <EuiSpacer size="s" />
         <EuiPanel paddingSize="l" className="euiPanel--inset" data-test-subj="EmptyActivitySummary">
           <EuiEmptyPrompt
-            title={<h2>There is no recent activity</h2>}
+            title={<h2>{EMPTY_ACTIVITY_TITLE}</h2>}
             iconType="clock"
             iconColor="subdued"
           />
@@ -148,9 +182,9 @@ export const Overview: React.FC = () => {
     const activitiesTable = (
       <EuiTable>
         <EuiTableHeader>
-          <EuiTableHeaderCell>Event</EuiTableHeaderCell>
-          {!custom && <EuiTableHeaderCell>Status</EuiTableHeaderCell>}
-          <EuiTableHeaderCell>Time</EuiTableHeaderCell>
+          <EuiTableHeaderCell>{EVENT_HEADER}</EuiTableHeaderCell>
+          {!custom && <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>}
+          <EuiTableHeaderCell>{TIME_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
@@ -186,7 +220,7 @@ export const Overview: React.FC = () => {
       <div className="content-section">
         <div className="section-header">
           <EuiTitle size="xs">
-            <h3>Recent activity</h3>
+            <h3>{RECENT_ACTIVITY_TITLE}</h3>
           </EuiTitle>
         </div>
         <EuiSpacer size="s" />
@@ -198,7 +232,7 @@ export const Overview: React.FC = () => {
   const groupsSummary = (
     <>
       <EuiText>
-        <h4>Group Access</h4>
+        <h4>{GROUP_ACCESS_TITLE}</h4>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="GroupsSummary">
@@ -223,7 +257,7 @@ export const Overview: React.FC = () => {
     <>
       <EuiSpacer size="l" />
       <EuiText>
-        <h4>Configuration</h4>
+        <h4>{CONFIGURATION_TITLE}</h4>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiPanel>
@@ -251,7 +285,7 @@ export const Overview: React.FC = () => {
     <>
       <EuiSpacer />
       <EuiTitle size="s">
-        <h4>Document-level permissions</h4>
+        <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiPanel>
@@ -261,7 +295,7 @@ export const Overview: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <strong>Using document-level permissions</strong>
+              <strong>{DOCUMENT_PERMISSIONS_TEXT}</strong>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -273,7 +307,7 @@ export const Overview: React.FC = () => {
     <>
       <EuiSpacer />
       <EuiTitle size="s">
-        <h4>Document-level permissions</h4>
+        <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiPanel className="euiPanel--inset" data-test-subj="DocumentPermissionsDisabled">
@@ -284,13 +318,20 @@ export const Overview: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="m">
-                <strong>Disabled for this source</strong>
+                <strong>{DOCUMENT_PERMISSIONS_DISABLED_TEXT}</strong>
               </EuiText>
               <EuiText size="s">
-                <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-                  Learn more
-                </EuiLink>{' '}
-                about permissions
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.workplaceSearch.sources.learnMore.text"
+                  defaultMessage="{learnMoreLink} about permissions"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                        {LEARN_MORE_LINK}
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -303,7 +344,7 @@ export const Overview: React.FC = () => {
     <EuiPanel>
       <EuiText size="s">
         <h6>
-          <EuiTextColor color="subdued">Status</EuiTextColor>
+          <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
@@ -313,10 +354,10 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
-            <strong>Everything looks good</strong>
+            <strong>{STATUS_HEADING}</strong>
           </EuiText>
           <EuiText size="s">
-            <p>Your endpoints are ready to accept requests.</p>
+            <p>{STATUS_TEXT}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -327,7 +368,7 @@ export const Overview: React.FC = () => {
     <EuiPanel data-test-subj="PermissionsStatus">
       <EuiText size="s">
         <h6>
-          <EuiTextColor color="subdued">Status</EuiTextColor>
+          <EuiTextColor color="subdued">{STATUS_HEADING}</EuiTextColor>
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
@@ -337,15 +378,21 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
-            <strong>Requires additional configuration</strong>
+            <strong>{ADDITIONAL_CONFIG_HEADING}</strong>
           </EuiText>
           <EuiText size="s">
             <p>
-              The{' '}
-              <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
-                External Identities API
-              </EuiLink>{' '}
-              must be used to configure user access mappings. Read the guide to learn more.
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.sources.externalIdentities.text"
+                defaultMessage="The {externalIdentitiesLink} must be used to configure user access mappings. Read the guide to learn more."
+                values={{
+                  externalIdentitiesLink: (
+                    <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                      {EXTERNAL_IDENTITIES_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -357,13 +404,13 @@ export const Overview: React.FC = () => {
     <EuiPanel>
       <EuiText size="s">
         <h6>
-          <EuiTextColor color="subdued">Credentials</EuiTextColor>
+          <EuiTextColor color="subdued">{CREDENTIALS_TITLE}</EuiTextColor>
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label="ID" value={id} testSubj="ContentSourceId" />
+      <CredentialItem label={ID_LABEL} value={id} testSubj="ContentSourceId" />
       <EuiSpacer size="s" />
-      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
+      <CredentialItem label={ACCESS_TOKEN_LABEL} value={accessToken} testSubj="AccessToken" />
     </EuiPanel>
   );
 
@@ -377,7 +424,7 @@ export const Overview: React.FC = () => {
     <EuiPanel>
       <EuiText size="s">
         <h6>
-          <EuiTextColor color="subdued">Documentation</EuiTextColor>
+          <EuiTextColor color="subdued">{DOCUMENTATION_LINK_TITLE}</EuiTextColor>
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
@@ -393,18 +440,15 @@ export const Overview: React.FC = () => {
       <LicenseBadge />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
-        <h4>Document-level permissions</h4>
+        <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiText size="s">
-        <p>
-          Document-level permissions manage content access content on individual or group
-          attributes. Allow or deny access to specific documents.
-        </p>
+        <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiText size="s">
         <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          Learn about Platinum features
+          {LEARN_CUSTOM_FEATURES_BUTTON}
         </EuiLink>
       </EuiText>
     </EuiPanel>
@@ -449,13 +493,20 @@ export const Overview: React.FC = () => {
                 <EuiFlexItem>
                   <DocumentationCallout
                     data-test-subj="DocumentationCallout"
-                    title="Getting started with custom sources?"
+                    title={CUSTOM_CALLOUT_TITLE}
                   >
                     <p>
-                      <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
-                        Learn more
-                      </EuiLink>{' '}
-                      about custom sources.
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.workplaceSearch.sources.learnMoreCustom.text"
+                        defaultMessage="{learnMoreLink} about custom sources."
+                        values={{
+                          learnMoreLink: (
+                            <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                              {LEARN_MORE_LINK}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
                     </p>
                   </DocumentationCallout>
                 </EuiFlexItem>

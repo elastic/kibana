@@ -5,7 +5,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { euiStyled, EuiTheme, withTheme } from '../../../../../observability/public';
+import {
+  euiStyled,
+  EuiTheme,
+  withTheme,
+} from '../../../../../../../src/plugins/kibana_react/common';
 import { DocumentTitle } from '../../../components/document_title';
 import { Header } from '../../../components/header';
 import { ColumnarPage, PageContent } from '../../../components/page';

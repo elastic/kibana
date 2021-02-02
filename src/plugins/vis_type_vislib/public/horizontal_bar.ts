@@ -7,13 +7,12 @@
  */
 
 import { xyVisTypes } from '../../vis_type_xy/public';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 
 import { toExpressionAst } from './to_ast';
 import { BasicVislibParams } from './types';
 
-export const horizontalBarVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
-  ...(xyVisTypes.horizontalBar() as BaseVisTypeOptions<BasicVislibParams>),
+export const horizontalBarVisTypeDefinition = {
+  ...xyVisTypes.horizontalBar(),
   toExpressionAst,
-  visualization: undefined,
-};
+} as VisTypeDefinition<BasicVislibParams>;

@@ -21,6 +21,7 @@ import type {
 import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
+import type { MapsStartApi } from '../../../../maps/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -40,6 +41,7 @@ export interface DependencyCache {
   security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
+  maps: MapsStartApi | null;
 }
 
 const cache: DependencyCache = {
@@ -60,6 +62,7 @@ const cache: DependencyCache = {
   security: null,
   i18n: null,
   urlGenerators: null,
+  maps: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {

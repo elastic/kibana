@@ -15,7 +15,7 @@ export const hostDockerOverview: TSVBMetricModelCreator = (
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
-  type: 'gauge',
+  type: 'top_n',
   series: [
     {
       id: 'total',

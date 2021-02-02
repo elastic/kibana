@@ -15,6 +15,7 @@ import { InternalHttpServiceSetup } from '../http';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
+import { getEcsOpsMetricsLog } from './logging';
 
 interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -24,6 +25,7 @@ interface MetricsServiceSetupDeps {
 export class MetricsService
   implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart> {
   private readonly logger: Logger;
+  private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
@@ -31,6 +33,7 @@ export class MetricsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('metrics');
+    this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
   }
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
@@ -69,8 +72,9 @@ export class MetricsService
   }
 
   private async refreshMetrics() {
-    this.logger.debug('Refreshing metrics');
     const metrics = await this.metricsCollector!.collect();
+    const { message, ...meta } = getEcsOpsMetricsLog(metrics);
+    this.opsMetricsLogger.debug(message!, meta);
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }

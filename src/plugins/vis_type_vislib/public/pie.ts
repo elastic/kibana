@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
-import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 import { getPositions } from '../../vis_type_xy/public';
 
 import { CommonVislibParams } from './types';
@@ -28,7 +28,7 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
+export const pieVisTypeDefinition: VisTypeDefinition<PieVisParams> = {
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -93,5 +93,5 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
     ],
   },
   hierarchicalData: true,
-  responseHandler: 'vislib_slices',
+  requiresSearch: true,
 };

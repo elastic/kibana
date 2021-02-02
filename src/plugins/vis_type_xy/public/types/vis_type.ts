@@ -6,16 +6,11 @@
  * Public License, v 1.
  */
 
-import { BaseVisTypeOptions } from '../../../visualizations/public';
+import { VisTypeDefinition } from '../../../visualizations/public';
 import { ChartType } from '../../common';
 
 import { VisParams } from './param';
 
 export type VisTypeNames = ChartType | 'horizontal_bar';
 
-export type XyVisTypeDefinition = BaseVisTypeOptions<VisParams> & {
-  name: VisTypeNames;
-  visConfig: {
-    defaults: Omit<VisParams, 'dimensions'>;
-  };
-};
+export type XyVisTypeDefinition = VisTypeDefinition<VisParams>;

@@ -11,14 +11,14 @@ import { coreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import type { SessionsMgmtConfigSchema } from '../';
+import type { SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../common/search';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
-let mockConfig: SessionsMgmtConfigSchema;
+let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 
 describe('Search Sessions Management API', () => {
@@ -26,11 +26,14 @@ describe('Search Sessions Management API', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     mockConfig = {
-      expiresSoonWarning: moment.duration('1d'),
-      maxSessions: 2000,
-      refreshInterval: moment.duration('1s'),
-      refreshTimeout: moment.duration('10m'),
-    };
+      defaultExpiration: moment.duration('7d'),
+      management: {
+        expiresSoonWarning: moment.duration(1, 'days'),
+        maxSessions: 2000,
+        refreshInterval: moment.duration(1, 'seconds'),
+        refreshTimeout: moment.duration(10, 'minutes'),
+      },
+    } as any;
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
   });
@@ -93,8 +96,11 @@ describe('Search Sessions Management API', () => {
     test('handle timeout error', async () => {
       mockConfig = {
         ...mockConfig,
-        refreshInterval: moment.duration(1, 'hours'),
-        refreshTimeout: moment.duration(1, 'seconds'),
+        management: {
+          ...mockConfig.management,
+          refreshInterval: moment.duration(1, 'hours'),
+          refreshTimeout: moment.duration(1, 'seconds'),
+        },
       };
 
       sessionsClient.find = jest.fn().mockImplementation(async () => {

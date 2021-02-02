@@ -9,20 +9,20 @@
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { GaugeVisParams } from '../../../gauge';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';
 import { LabelsPanel } from './labels_panel';
 
-export type GaugeOptionsInternalProps = VisOptionsProps<GaugeVisParams> & {
+export type GaugeOptionsInternalProps = VisEditorOptionsProps<GaugeVisParams> & {
   setGaugeValue: <T extends keyof GaugeVisParams['gauge']>(
     paramName: T,
     value: GaugeVisParams['gauge'][T]
   ) => void;
 };
 
-function GaugeOptions(props: VisOptionsProps<GaugeVisParams>) {
+function GaugeOptions(props: VisEditorOptionsProps<GaugeVisParams>) {
   const { stateParams, setValue } = props;
 
   const setGaugeValue: GaugeOptionsInternalProps['setGaugeValue'] = useCallback(

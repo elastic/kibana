@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  describe('saved queries saved objects', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/89477
+  describe.skip('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');

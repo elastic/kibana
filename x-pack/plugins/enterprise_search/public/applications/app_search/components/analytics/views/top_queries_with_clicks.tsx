@@ -5,14 +5,20 @@
  */
 
 import React from 'react';
+import { useValues } from 'kea';
 
 import { TOP_QUERIES_WITH_CLICKS } from '../constants';
 import { AnalyticsLayout } from '../analytics_layout';
+import { AnalyticsSearch, AnalyticsTable } from '../components';
+import { AnalyticsLogic } from '../';
 
 export const TopQueriesWithClicks: React.FC = () => {
+  const { topQueriesWithClicks } = useValues(AnalyticsLogic);
+
   return (
     <AnalyticsLayout isAnalyticsView title={TOP_QUERIES_WITH_CLICKS}>
-      <p>TODO: Top queries with clicks</p>
+      <AnalyticsSearch />
+      <AnalyticsTable items={topQueriesWithClicks} hasClicks />
     </AnalyticsLayout>
   );
 };

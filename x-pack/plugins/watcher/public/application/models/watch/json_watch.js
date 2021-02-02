@@ -6,10 +6,11 @@
 
 import uuid from 'uuid';
 import { get } from 'lodash';
-import { BaseWatch } from './base_watch';
-import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
-import defaultWatchJson from './default_watch.json';
 import { i18n } from '@kbn/i18n';
+
+import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
+import { BaseWatch } from './base_watch';
+import { defaultWatch } from './default_watch';
 
 /**
  * {@code JsonWatch} allows a user to create a Watch by writing the raw JSON.
@@ -20,11 +21,11 @@ export class JsonWatch extends BaseWatch {
     props.id = typeof props.id === 'undefined' ? uuid.v4() : props.id;
     super(props);
     const existingWatch = get(props, 'watch');
-    this.watch = existingWatch ? existingWatch : defaultWatchJson;
+    this.watch = existingWatch ? existingWatch : defaultWatch;
     this.watchString = get(
       props,
       'watchString',
-      JSON.stringify(existingWatch ? existingWatch : defaultWatchJson, null, 2)
+      JSON.stringify(existingWatch ? existingWatch : defaultWatch, null, 2)
     );
     this.id = props.id;
   }
@@ -113,7 +114,6 @@ export class JsonWatch extends BaseWatch {
     return new JsonWatch(upstreamWatch);
   }
 
-  static defaultWatchJson = defaultWatchJson;
   static typeName = i18n.translate('xpack.watcher.models.jsonWatch.typeName', {
     defaultMessage: 'Advanced Watch',
   });

@@ -519,6 +519,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: actionId,
         provider: 'actions',
         actions: new Map([['execute', { equal: 1 }]]),
+        filter: 'event.action:(execute)',
       });
     });
 

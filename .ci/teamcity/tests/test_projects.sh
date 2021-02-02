@@ -5,4 +5,4 @@ set -euo pipefail
 source "$(dirname "${0}")/../util.sh"
 
 checks-reporter-with-killswitch "Test Projects" \
-  yarn kbn run test --exclude kibana --oss --skip-kibana-plugins
+  yarn kbn run test --exclude kibana --oss --skip-kibana-plugins --skip-missing

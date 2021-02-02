@@ -402,6 +402,9 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfigured: {},
+      proxyRejectUnauthorizedCertificates: true,
+      rejectUnauthorized: true,
     });
 
     const localActionTypeRegistryParams = {

@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
 import { RangeValues } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
-import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
-import { Alignment, GaugeType, BasicVislibParams, VislibChartType } from './types';
+import { Alignment, GaugeType, VislibChartType } from './types';
 import { getGaugeCollections } from './editor';
 import { toExpressionAst } from './to_ast';
 import { GaugeOptions } from './editor/components';
@@ -46,7 +46,7 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
+export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
@@ -135,5 +135,5 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
       },
     ],
   },
-  useCustomNoDataScreen: true,
+  requiresSearch: true,
 };

@@ -10,10 +10,10 @@ import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import {
   LogEntriesResponse,
-  LogEntry,
   LogEntriesRequest,
   LogEntriesBaseRequest,
 } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { fetchLogEntries } from './api/fetch_log_entries';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 

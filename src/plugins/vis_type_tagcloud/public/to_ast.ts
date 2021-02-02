@@ -11,7 +11,7 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, SchemaConfig, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
 import { TagcloudExpressionFunctionDefinition } from './tag_cloud_fn';
 import { TagCloudVisParams } from './types';
 
@@ -26,7 +26,7 @@ const prepareDimension = (params: SchemaConfig) => {
   return buildExpression([visdimension]);
 };
 
-export const toExpressionAst = (vis: Vis<TagCloudVisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<TagCloudVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {

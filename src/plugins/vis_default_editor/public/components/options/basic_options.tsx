@@ -10,7 +10,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from '../../vis_options_props';
+import { VisEditorOptionsProps } from '../../../../visualizations/public';
 import { SwitchOption } from './switch';
 import { SelectOption } from './select';
 
@@ -23,7 +23,7 @@ function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
   vis,
-}: VisOptionsProps<VisParams>) {
+}: VisEditorOptionsProps<VisParams>) {
   return (
     <>
       <SelectOption

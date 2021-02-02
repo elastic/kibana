@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface LogTextStreamJumpToTailProps {
   onClickJump?: () => void;

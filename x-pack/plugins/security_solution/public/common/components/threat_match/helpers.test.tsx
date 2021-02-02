@@ -21,6 +21,10 @@ import {
 } from './helpers';
 import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123'),
+}));
+
 const getMockIndexPattern = (): IndexPattern =>
   ({
     id: '1234',
@@ -29,6 +33,7 @@ const getMockIndexPattern = (): IndexPattern =>
   } as IndexPattern);
 
 const getMockEntry = (): FormattedEntry => ({
+  id: '123',
   field: getField('ip'),
   value: getField('ip'),
   type: 'mapping',
@@ -42,6 +47,7 @@ describe('Helpers', () => {
 
   afterEach(() => {
     moment.tz.setDefault('Browser');
+    jest.clearAllMocks();
   });
 
   describe('#getFormattedEntry', () => {
@@ -70,6 +76,7 @@ describe('Helpers', () => {
       const output = getFormattedEntry(payloadIndexPattern, payloadIndexPattern, payloadItem, 0);
       const expected: FormattedEntry = {
         entryIndex: 0,
+        id: '123',
         field: {
           name: 'machine.os.raw.text',
           type: 'string',
@@ -94,6 +101,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: undefined,
           value: undefined,
@@ -109,6 +117,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -134,6 +143,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, threatIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -170,6 +180,7 @@ describe('Helpers', () => {
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
+          id: '123',
           field: {
             name: 'machine.os',
             type: 'string',
@@ -194,6 +205,7 @@ describe('Helpers', () => {
           entryIndex: 0,
         },
         {
+          id: '123',
           field: {
             name: 'ip',
             type: 'ip',
@@ -249,9 +261,10 @@ describe('Helpers', () => {
       const payloadItem = getMockEntry();
       const payloadIFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: Entry; index: number } = {
+      const expected: { updatedEntry: Entry & { id: string }; index: number } = {
         index: 0,
         updatedEntry: {
+          id: '123',
           field: 'ip',
           type: 'mapping',
           value: 'ip',

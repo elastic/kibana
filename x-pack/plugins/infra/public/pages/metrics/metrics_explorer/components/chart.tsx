@@ -25,7 +25,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';

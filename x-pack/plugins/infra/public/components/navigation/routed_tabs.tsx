@@ -8,7 +8,7 @@ import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { useLinkProps } from '../../hooks/use_link_props';
 import { LinkDescriptor } from '../../hooks/use_link_props';
 

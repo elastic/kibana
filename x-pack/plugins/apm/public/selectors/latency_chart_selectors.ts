@@ -6,7 +6,7 @@
 import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';

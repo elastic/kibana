@@ -107,11 +107,19 @@ export const hasTimestampFields = async (
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
+  inputIndices: string[],
   ruleStatusService: RuleStatusService,
   logger: Logger,
   buildRuleMessage: BuildRuleMessage
 ): Promise<boolean> => {
-  if (
+  if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
+    const errorString = `The following index patterns did not match any indices: ${JSON.stringify(
+      inputIndices
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.error(errorString);
+    return true;
+  } else if (
     !wroteStatus &&
     (isEmpty(timestampFieldCapsResponse.body.fields) ||
       timestampFieldCapsResponse.body.fields[timestampField] == null ||
@@ -120,8 +128,10 @@ export const hasTimestampFields = async (
     // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
     // partial failure
     const errorString = `The following indices are missing the ${
-      timestampField === '@timestamp' ? 'timestamp field "@timestamp"' : 'timestamp override field'
-    } "${timestampField}": ${JSON.stringify(
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(
       isEmpty(timestampFieldCapsResponse.body.fields)
         ? timestampFieldCapsResponse.body.indices
         : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices

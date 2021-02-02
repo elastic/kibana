@@ -12,7 +12,7 @@ export const DistinctValues = ({ cardinality }: { cardinality?: number }) => {
   if (cardinality === undefined) return null;
   return (
     <EuiFlexGroup alignItems={'center'}>
-      <EuiFlexItem style={{ maxWidth: 10 }}>
+      <EuiFlexItem className={'mlDataVisualizerColumnHeaderIcon'}>
         <EuiIcon type="database" size={'s'} />
       </EuiFlexItem>
       <EuiText size={'s'}>

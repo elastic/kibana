@@ -5,95 +5,94 @@
  */
 
 import _ from 'lodash';
+import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { DeprecationAPIResponse } from '../../common/types';
 
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
+const asApiResponse = <T>(body: T): RequestEvent<T> =>
+  ({
+    body,
+  } as RequestEvent<T>);
+
 describe('getUpgradeAssistantStatus', () => {
   const resolvedIndices = {
     indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
   };
-  let deprecationsResponse: DeprecationAPIResponse;
+  // @ts-expect-error mock data is too loosely typed
+  const deprecationsResponse: DeprecationAPIResponse = _.cloneDeep(fakeDeprecations);
 
-  const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
-    if (path === '/_migration/deprecations') {
-      return deprecationsResponse;
-    } else if (path === '/_resolve/index/*') {
-      return resolvedIndices;
-    } else if (api === 'indices.getMapping') {
-      return {};
-    } else {
-      throw new Error(`Unexpected API call: ${path}`);
-    }
-  });
+  const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
-  beforeEach(() => {
-    // @ts-expect-error mock data is too loosely typed
-    deprecationsResponse = _.cloneDeep(fakeDeprecations);
-  });
+  esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+    asApiResponse(deprecationsResponse)
+  );
+
+  esClient.asCurrentUser.indices.resolveIndex.mockResolvedValue(asApiResponse(resolvedIndices));
 
   it('calls /_migration/deprecations', async () => {
-    await getUpgradeAssistantStatus(dataClient, false);
-    expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('transport.request', {
-      path: '/_migration/deprecations',
-      method: 'GET',
-    });
+    await getUpgradeAssistantStatus(esClient, false);
+    expect(esClient.asCurrentUser.migration.deprecations).toHaveBeenCalled();
   });
 
   it('returns the correct shape of data', async () => {
-    const resp = await getUpgradeAssistantStatus(dataClient, false);
+    const resp = await getUpgradeAssistantStatus(esClient, false);
     expect(resp).toMatchSnapshot();
   });
 
   it('returns readyForUpgrade === false when critical issues found', async () => {
-    deprecationsResponse = {
-      cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
-      node_settings: [],
-      ml_settings: [],
-      index_settings: {},
-    };
+    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      asApiResponse({
+        cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
+        node_settings: [],
+        ml_settings: [],
+        index_settings: {},
+      })
+    );
 
-    await expect(getUpgradeAssistantStatus(dataClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
       'readyForUpgrade',
       false
     );
   });
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
-    deprecationsResponse = {
-      cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
-      node_settings: [],
-      ml_settings: [],
-      index_settings: {},
-    };
+    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      asApiResponse({
+        cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
+        node_settings: [],
+        ml_settings: [],
+        index_settings: {},
+      })
+    );
 
-    await expect(getUpgradeAssistantStatus(dataClient, false)).resolves.toHaveProperty(
+    await expect(getUpgradeAssistantStatus(esClient, false)).resolves.toHaveProperty(
       'readyForUpgrade',
       true
     );
   });
 
   it('filters out security realm deprecation on Cloud', async () => {
-    deprecationsResponse = {
-      cluster_settings: [
-        {
-          level: 'critical',
-          message: 'Security realm settings structure changed',
-          url: 'https://...',
-        },
-      ],
-      node_settings: [],
-      ml_settings: [],
-      index_settings: {},
-    };
+    esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      asApiResponse({
+        cluster_settings: [
+          {
+            level: 'critical',
+            message: 'Security realm settings structure changed',
+            url: 'https://...',
+          },
+        ],
+        node_settings: [],
+        ml_settings: [],
+        index_settings: {},
+      })
+    );
 
-    const result = await getUpgradeAssistantStatus(dataClient, true);
+    const result = await getUpgradeAssistantStatus(esClient, true);
 
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);

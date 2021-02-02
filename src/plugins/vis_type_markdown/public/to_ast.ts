@@ -9,8 +9,9 @@
 import { VisToExpressionAst } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { MarkdownVisExpressionFunctionDefinition } from './markdown_fn';
+import { MarkdownVisParams } from './types';
 
-export const toExpressionAst: VisToExpressionAst = (vis) => {
+export const toExpressionAst: VisToExpressionAst<MarkdownVisParams> = (vis) => {
   const { markdown, fontSize, openLinksInNewTab } = vis.params;
 
   const markdownVis = buildExpressionFunction<MarkdownVisExpressionFunctionDefinition>(

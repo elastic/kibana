@@ -105,27 +105,6 @@ test('re-validate config when updated', async () => {
   `);
 });
 
-test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
-  const rawConfig = getRawConfigProvider({});
-  const configService = new ConfigService(rawConfig, defaultEnv, logger);
-
-  const value$ = configService.optionalAtPath('unique-name');
-  const value = await value$.pipe(first()).toPromise();
-
-  expect(value).toBeUndefined();
-});
-
-test('returns observable config at optional path if it exists', async () => {
-  const rawConfig = getRawConfigProvider({ value: 'bar' });
-  const configService = new ConfigService(rawConfig, defaultEnv, logger);
-  await configService.setSchema('value', schema.string());
-
-  const value$ = configService.optionalAtPath('value');
-  const value: any = await value$.pipe(first()).toPromise();
-
-  expect(value).toBe('bar');
-});
-
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
@@ -209,34 +188,38 @@ test('flags schema paths as handled when registering a schema', async () => {
 
 test('tracks unhandled paths', async () => {
   const initialConfig = {
-    bar: {
-      deep1: {
-        key: '123',
-      },
-      deep2: {
-        key: '321',
-      },
+    service: {
+      string: 'str',
+      number: 42,
     },
-    foo: 'value',
-    quux: {
-      deep1: {
-        key: 'hello',
-      },
-      deep2: {
-        key: 'world',
-      },
+    plugin: {
+      foo: 'bar',
+    },
+    unknown: {
+      hello: 'dolly',
+      number: 9000,
     },
   };
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-
-  configService.atPath('foo');
-  configService.atPath(['bar', 'deep2']);
+  await configService.setSchema(
+    'service',
+    schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    })
+  );
+  await configService.setSchema(
+    'plugin',
+    schema.object({
+      foo: schema.string(),
+    })
+  );
 
   const unused = await configService.getUnusedPaths();
 
-  expect(unused).toEqual(['bar.deep1.key', 'quux.deep1.key', 'quux.deep2.key']);
+  expect(unused).toEqual(['unknown.hello', 'unknown.number']);
 });
 
 test('correctly passes context', async () => {
@@ -339,22 +322,18 @@ test('does not throw if schema does not define "enabled" schema', async () => {
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-  await expect(
+  expect(
     configService.setSchema(
       'pid',
       schema.object({
         file: schema.string(),
       })
     )
-  ).resolves.toBeUndefined();
+  ).toBeUndefined();
 
   const value$ = configService.atPath('pid');
   const value: any = await value$.pipe(first()).toPromise();
   expect(value.enabled).toBe(undefined);
-
-  const valueOptional$ = configService.optionalAtPath('pid');
-  const valueOptional: any = await valueOptional$.pipe(first()).toPromise();
-  expect(valueOptional.enabled).toBe(undefined);
 });
 
 test('treats config as enabled if config path is not present in config', async () => {
@@ -456,4 +435,45 @@ test('logs deprecation warning during validation', async () => {
       ],
     ]
   `);
+});
+
+describe('atPathSync', () => {
+  test('returns the value at path', async () => {
+    const rawConfig = getRawConfigProvider({ key: 'foo' });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+    const stringSchema = schema.string();
+    await configService.setSchema('key', stringSchema);
+
+    await configService.validate();
+
+    const value = configService.atPathSync('key');
+    expect(value).toBe('foo');
+  });
+
+  test('throws if called before `validate`', async () => {
+    const rawConfig = getRawConfigProvider({ key: 'foo' });
+    const configService = new ConfigService(rawConfig, defaultEnv, logger);
+    const stringSchema = schema.string();
+    await configService.setSchema('key', stringSchema);
+
+    expect(() => configService.atPathSync('key')).toThrowErrorMatchingInlineSnapshot(
+      `"\`atPathSync\` called before config was validated"`
+    );
+  });
+
+  test('returns the last config value', async () => {
+    const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+    const rawConfigProvider = rawConfigServiceMock.create({ rawConfig$ });
+
+    const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+    await configService.setSchema('key', schema.string());
+
+    await configService.validate();
+
+    expect(configService.atPathSync('key')).toEqual('value');
+
+    rawConfig$.next({ key: 'new-value' });
+
+    expect(configService.atPathSync('key')).toEqual('new-value');
+  });
 });

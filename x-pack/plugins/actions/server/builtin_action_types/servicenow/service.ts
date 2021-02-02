@@ -12,42 +12,51 @@ import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const API_VERSION = 'v2';
-const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
 const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
 
-// Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
-const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
-
 export const createExternalService = (
+  table: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
-    throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
+    throw Error(`[Action]${i18n.SERVICENOW}: Wrong configuration.`);
   }
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
-  const incidentUrl = `${urlWithoutTrailingSlash}/${INCIDENT_URL}`;
-  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
+  const incidentUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/${table}`;
+  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^ORname=${table}^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
+  const choicesUrl = `${urlWithoutTrailingSlash}/api/now/${API_VERSION}/table/sys_choice`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
   const getIncidentViewURL = (id: string) => {
-    return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}${id}`;
+    // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
+    return `${urlWithoutTrailingSlash}/nav_to.do?uri=${table}.do?sys_id=${id}`;
+  };
+
+  const getChoicesURL = (fields: string[]) => {
+    const elements = fields
+      .slice(1)
+      .reduce((acc, field) => `${acc}^ORelement=${field}`, `element=${fields[0]}`);
+
+    return `${choicesUrl}?sysparm_query=name=task^ORname=${table}^${elements}&sysparm_fields=label,value,dependent_value,element`;
   };
 
   const checkInstance = (res: AxiosResponse) => {
     if (res.status === 200 && res.data.result == null) {
       throw new Error(
-        `There is an issue with your Service Now Instance. Please check ${res.request.connection.servername}`
+        `There is an issue with your Service Now Instance. Please check ${
+          res.request?.connection?.servername ?? ''
+        }.`
       );
     }
   };
@@ -58,13 +67,16 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return { ...res.data.result };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to get incident with id ${id}. Error: ${error.message}`
+        )
       );
     }
   };
@@ -75,14 +87,17 @@ export const createExternalService = (
         axios: axiosInstance,
         url: incidentUrl,
         logger,
-        proxySettings,
         params,
+        configurationUtilities,
       });
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.SERVICENOW,
+          `Unable to find incidents by query. Error: ${error.message}`
+        )
       );
     }
   };
@@ -93,9 +108,9 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}`,
         logger,
-        proxySettings,
         method: 'post',
         data: { ...(incident as Record<string, unknown>) },
+        configurationUtilities,
       });
       checkInstance(res);
       return {
@@ -106,7 +121,7 @@ export const createExternalService = (
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(i18n.SERVICENOW, `Unable to create incident. Error: ${error.message}`)
       );
     }
   };
@@ -118,7 +133,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data: { ...(incident as Record<string, unknown>) },
-        proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return {
@@ -130,7 +145,7 @@ export const createExternalService = (
     } catch (error) {
       throw new Error(
         getErrorMessage(
-          i18n.NAME,
+          i18n.SERVICENOW,
           `Unable to update incident with id ${incidentId}. Error: ${error.message}`
         )
       );
@@ -143,12 +158,31 @@ export const createExternalService = (
         axios: axiosInstance,
         url: fieldsUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
       checkInstance(res);
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}`));
+      throw new Error(
+        getErrorMessage(i18n.SERVICENOW, `Unable to get fields. Error: ${error.message}`)
+      );
+    }
+  };
+
+  const getChoices = async (fields: string[]) => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getChoicesURL(fields),
+        logger,
+        configurationUtilities,
+      });
+      checkInstance(res);
+      return res.data.result;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.SERVICENOW, `Unable to get choices. Error: ${error.message}`)
+      );
     }
   };
 
@@ -158,5 +192,6 @@ export const createExternalService = (
     getFields,
     getIncident,
     updateIncident,
+    getChoices,
   };
 };

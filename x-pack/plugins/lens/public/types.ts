@@ -16,16 +16,20 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState, Dragging } from './drag_drop';
+import { DragContextState, DragDropIdentifier } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
+import {
+  LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+} from './datatable_visualization/components/constants';
 import type {
   LensSortActionData,
-  LENS_EDIT_SORT_ACTION,
-} from './datatable_visualization/expression';
+  LensResizeActionData,
+} from './datatable_visualization/components/types';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -139,6 +143,10 @@ export interface DatasourceSuggestion<T = unknown> {
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
+export interface InitializationOptions {
+  isFullEditor?: boolean;
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -151,7 +159,8 @@ export interface Datasource<T = unknown, P = unknown> {
   initialize: (
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext
+    initialContext?: VisualizeFieldContext,
+    options?: InitializationOptions
   ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
@@ -217,8 +226,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
-  dropOntoWorkspace: (field: Dragging) => void;
-  hasSuggestionForField: (field: Dragging) => boolean;
+  dropOntoWorkspace: (field: DragDropIdentifier) => void;
+  hasSuggestionForField: (field: DragDropIdentifier) => boolean;
 }
 
 interface SharedDimensionProps {
@@ -292,6 +301,8 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
+  groupId: string;
+  isNew?: boolean;
 };
 
 export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
@@ -636,6 +647,7 @@ export interface LensBrushEvent {
 // Use same technique as TriggerContext
 interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+  [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
 }
 type LensEditSupportedActions = keyof LensEditContextMapping;
 

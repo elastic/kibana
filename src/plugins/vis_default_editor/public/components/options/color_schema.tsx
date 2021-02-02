@@ -12,7 +12,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ColorSchemaParams, ColorSchema } from 'src/plugins/charts/public';
-import { VisOptionsProps } from '../../vis_options_props';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 
@@ -24,7 +24,7 @@ export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaParams>(
 interface ColorSchemaOptionsProps extends ColorSchemaParams {
   disabled?: boolean;
   colorSchemas: ColorSchema[];
-  uiState: VisOptionsProps['uiState'];
+  uiState: VisEditorOptionsProps['uiState'];
   setValue: SetColorSchemaOptionsValue;
   showHelpText?: boolean;
 }
