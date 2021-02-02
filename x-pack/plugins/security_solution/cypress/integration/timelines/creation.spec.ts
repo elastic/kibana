@@ -48,7 +48,7 @@ describe('Timelines', (): void => {
       closeTimeline();
     });
 
-    it('save timeline', () => {
+    before(() => {
       cy.intercept('PATCH', '/api/timeline').as('timeline');
 
       openTimelineUsingToggle();
@@ -56,10 +56,10 @@ describe('Timelines', (): void => {
       cy.wait('@timeline').then(({ response }) => {
         timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
       });
+      populateTimeline();
     });
 
-    it('populates events', () => {
-      populateTimeline();
+    it('can be added filter', () => {
       addFilter(timeline.filter);
     });
 
