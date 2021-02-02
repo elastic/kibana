@@ -333,6 +333,7 @@ function discoverController($route, $scope, Promise) {
     filterManager,
     setAppState,
     data,
+    stateContainer: state,
   };
 
   const inspectorAdapters = ($scope.opts.inspectorAdapters = {
