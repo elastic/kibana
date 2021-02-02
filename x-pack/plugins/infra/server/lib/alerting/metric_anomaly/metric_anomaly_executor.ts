@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import moment from 'moment';
+import { stateToAlertMessage } from '../common/messages';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { MappedAnomalyHit } from '../../infra_ml';
 import { AlertStates } from '../common/types';
@@ -26,7 +27,6 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
   services,
   params,
   startedAt,
-  previousStartedAt,
 }: AlertExecutorOptions<
   /**
    * TODO: Remove this use of `any` by utilizing a proper type
@@ -55,9 +55,13 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
 
   const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
 
+  const bucketInterval = getIntervalInSeconds('15m') * 1000;
+  const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
+
   const endTime = startedAt.getTime();
-  const startTime =
-    previousStartedAt?.getTime() ?? endTime - getIntervalInSeconds(alertInterval ?? '1m') * 1000;
+  const previousBucketStartTime = endTime - (endTime % bucketInterval);
+
+  const startTime = Math.min(endTime - alertIntervalInMs, previousBucketStartTime);
 
   const { data } = await evaluateCondition({
     sourceId: sourceId ?? 'default',
@@ -80,7 +84,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     )!;
 
     alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
-      alertState: AlertStates.ALERT,
+      alertState: stateToAlertMessage[AlertStates.ALERT],
       timestamp: moment(anomalyStartTime).toISOString(),
       anomalyScore,
       actual,

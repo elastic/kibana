@@ -45,11 +45,15 @@ export const previewMetricAnomalyAlert = async ({
 
   const lookbackInterval = `1${lookback}`;
   const lookbackIntervalInSeconds = getIntervalInSeconds(lookbackInterval);
-
   const endTime = Date.now();
   const startTime = endTime - lookbackIntervalInSeconds * 1000;
 
-  const numberOfBuckets = Math.floor(lookbackIntervalInSeconds / alertIntervalInSeconds);
+  const numberOfExecutions = Math.floor(lookbackIntervalInSeconds / alertIntervalInSeconds);
+  const bucketIntervalInSeconds = getIntervalInSeconds('15m');
+  const bucketsPerExecution = Math.max(
+    1,
+    Math.floor(alertIntervalInSeconds / bucketIntervalInSeconds)
+  );
 
   try {
     let anomalies: MappedAnomalyHit[] = [];
@@ -67,9 +71,8 @@ export const previewMetricAnomalyAlert = async ({
     });
     anomalies = [...anomalies, ...data];
 
-    const bucketedAnomalies = countBy(anomalies, ({ startTime: anomStartTime }) =>
-      Math.floor((anomStartTime - startTime) / (alertIntervalInSeconds * 1000))
-    );
+    const anomaliesByTime = countBy(anomalies, ({ startTime: anomStartTime }) => anomStartTime);
+
     let numberOfTimesFired = 0;
     let numberOfNotifications = 0;
     let throttleTracker = 0;
@@ -77,8 +80,25 @@ export const previewMetricAnomalyAlert = async ({
       if (throttleTracker === 0) numberOfNotifications++;
       throttleTracker++;
     };
-    for (let i = 0; i < numberOfBuckets; i++) {
-      if (Reflect.has(bucketedAnomalies, i)) {
+    // Mock each alert evaluation
+    for (let i = 0; i < numberOfExecutions; i++) {
+      const executionTime = startTime + alertIntervalInSeconds * 1000 * i;
+      // Get an array of bucket times this mock alert evaluation will be looking at
+      // Anomalies are bucketed at :00, :15, :30, :45 minutes every hour,
+      // so this is an array of how many of those times occurred between this evaluation
+      // and the previous one
+      const bucketsLookedAt = Array.from(Array(bucketsPerExecution), (_, idx) => {
+        const previousBucketStartTime =
+          executionTime -
+          (executionTime % (bucketIntervalInSeconds * 1000)) -
+          idx * bucketIntervalInSeconds * 1000;
+        return previousBucketStartTime;
+      });
+      const anomaliesDetectedInBuckets = bucketsLookedAt.some((bucketTime) =>
+        Reflect.has(anomaliesByTime, bucketTime)
+      );
+
+      if (anomaliesDetectedInBuckets) {
         numberOfTimesFired++;
         notifyWithThrottle();
       } else if (throttleTracker > 0) {

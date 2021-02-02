@@ -32,10 +32,10 @@ export function createMetricAnomalyAlertType(): AlertTypeModel<MetricAnomalyAler
       {
         defaultMessage: `\\{\\{alertName\\}\\} is in a state of \\{\\{context.alertState\\}\\}
 
-\\{\\{metric\\}\\} was \\{\\{summary\\}\\} than normal at \\{\\{timestamp\\}\\}
+\\{\\{context.metric\\}\\} was \\{\\{context.summary\\}\\} than normal at \\{\\{context.timestamp\\}\\}
 
-Typical value: \\{\\{typical\\}\\}
-Actual value: \\{\\{actual\\}\\}
+Typical value: \\{\\{context.typical\\}\\}
+Actual value: \\{\\{context.actual\\}\\}
 `,
       }
     ),
