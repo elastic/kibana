@@ -81,7 +81,7 @@ test:debug --test_output=streamed --test_strategy=exclusive --test_timeout=9999 
 run:debug --define=VERBOSE_LOGS=1 -- --node_options=--inspect-brk
 # The following option will change the build output of certain rules such as terser and may not be desirable in all cases
 # It will also output both the repo cache and action cache to a folder inside the repo
-build:debug --compilation_mode=dbg --show_result=1 --disk_cache=bazel-cache/disk-cache --repository_cache=bazel-cache/repository-cache
+build:debug --compilation_mode=dbg --show_result=1 --disk_cache=bazel/disk-cache --repository_cache=bazel/repository-cache
 
 # Turn off legacy external runfiles
 # This prevents accidentally depending on this feature, which Bazel will remove.
