@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { Projection } from './utils/projections';
-import { RumDashboard } from './RumDashboard';
-
 import { LocalUIFilters } from './LocalUIFilters';
+import { RumDashboard } from './RumDashboard';
 import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
@@ -20,7 +18,6 @@ export function RumOverview() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['location', 'device', 'os', 'browser'],
-      projection: Projection.rumOverview,
     };
 
     return config;

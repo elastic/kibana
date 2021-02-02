@@ -21,7 +21,6 @@ import {
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { Projection } from '../utils/projections';
 
 const getInitialData = (
   filterNames: LocalUIFilterName[]
@@ -33,12 +32,10 @@ const getInitialData = (
 };
 
 export function useLocalUIFilters({
-  projection,
   filterNames,
   params,
   shouldFetch,
 }: {
-  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   shouldFetch: boolean;
@@ -74,7 +71,7 @@ export function useLocalUIFilters({
     (callApmApi) => {
       if (shouldFetch && urlParams.start && urlParams.end) {
         return callApmApi({
-          endpoint: `GET /api/apm/ui_filters/local_filters/${projection}` as const,
+          endpoint: `GET /api/apm/ui_filters/local_filters/rumOverview`,
           params: {
             query: {
               uiFilters: JSON.stringify(uiFilters),
@@ -89,7 +86,6 @@ export function useLocalUIFilters({
       }
     },
     [
-      projection,
       uiFilters,
       urlParams.start,
       urlParams.end,
