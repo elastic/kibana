@@ -18,8 +18,8 @@ you can simply zoom in on the graph - this will adjust the specific time range,
 and all of the data on the page will update accordingly.
 
 *Throughput*::
-Visualize response codes: `2xx`, `3xx`, `4xx`, etc..
-Useful for determining if you're serving more of one code than you typically do.
+Visualize response codes: `2xx`, `3xx`, `4xx`, etc.
+Useful for determining if more responses than usual are being served with a particular response code.
 Like in the latency graph, you can zoom in on anomalies to further investigate them.
 
 *Error rate*::
