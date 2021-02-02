@@ -50,7 +50,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
     const abortCtrl = new AbortController();
     setLoading(true);
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const privilege = await getUserPrivilege({
           signal: abortCtrl.signal,
@@ -62,7 +62,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
               hasEncryptionKey: privilege.has_encryption_key,
-              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
               hasIndexMaintenance: privilege.index[indexName].maintenance,
               hasIndexWrite:
                 privilege.index[indexName].create ||
@@ -89,15 +89,14 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatchToaster]);
 
   return { loading, ...privilegeUser };
 };
