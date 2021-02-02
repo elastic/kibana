@@ -114,6 +114,7 @@ export const WaterfallFilter = ({
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
               color={activeFilters.length > 0 ? 'primary' : 'text'}
+              aria-pressed={activeFilters.length > 0}
             />
           }
           isOpen={isPopoverOpen}
@@ -137,7 +138,7 @@ export const WaterfallFilter = ({
             compressed={true}
             disabled={!(query || activeFilters.length > 0)}
             id="onlyHighlighted"
-            label="Only show highlighted"
+            label="Collapse to only show matching requests"
             checked={onlyHighlighted}
             onChange={(e) => {
               setOnlyHighlighted(e.target.checked);
