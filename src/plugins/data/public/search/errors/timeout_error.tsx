@@ -24,7 +24,7 @@ export enum TimeoutErrorMode {
  */
 export class SearchTimeoutError extends KbnError {
   public mode: TimeoutErrorMode;
-  constructor(err: Error, mode: TimeoutErrorMode) {
+  constructor(err: Record<string, any>, mode: TimeoutErrorMode) {
     super(`Request timeout: ${JSON.stringify(err?.message)}`);
     this.mode = mode;
   }

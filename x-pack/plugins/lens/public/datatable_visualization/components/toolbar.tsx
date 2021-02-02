@@ -17,6 +17,7 @@ export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualiza
   state.columns.forEach((column) => {
     columnMap[column.columnId] = column;
   });
+  const datasourceLayer = frame.datasourceLayers[state.layerId];
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <ToolbarPopover
@@ -28,10 +29,8 @@ export function TableToolbar(props: VisualizationToolbarProps<DatatableVisualiza
         buttonDataTestSubj="lnsColumnsButton"
       >
         <EuiFlexGroup gutterSize="m" direction="column">
-          {frame.datasourceLayers[state.layerId].getTableSpec().map(({ columnId }) => {
-            const label = props.frame.datasourceLayers[state.layerId].getOperationForColumnId(
-              columnId
-            )?.label;
+          {datasourceLayer.getTableSpec().map(({ columnId }) => {
+            const label = datasourceLayer.getOperationForColumnId(columnId)?.label;
             const isHidden = columnMap[columnId].hidden;
             return (
               <EuiFlexItem key={columnId}>
