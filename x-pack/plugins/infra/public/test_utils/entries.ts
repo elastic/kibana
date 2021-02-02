@@ -28,6 +28,7 @@ export function generateFakeEntries(
     const timestamp = i === count - 1 ? endTimestamp : startTimestamp + timestampStep * i;
     entries.push({
       id: `entry-${i}`,
+      index: 'logs-fake',
       context: {},
       cursor: { time: timestamp, tiebreaker: i },
       columns: columns.map((column) => {

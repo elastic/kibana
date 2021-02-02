@@ -5,8 +5,18 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-import ServiceNowParamsFields from './servicenow_params';
+import { act } from '@testing-library/react';
+
 import { ActionConnector } from '../../../../types';
+import { useGetChoices } from './use_get_choices';
+import ServiceNowITSMParamsFields from './servicenow_itsm_params';
+import { Choice } from './types';
+
+jest.mock('./use_get_choices');
+jest.mock('../../../../common/lib/kibana');
+
+const useGetChoicesMock = useGetChoices as jest.Mock;
+
 const actionParams = {
   subAction: 'pushToService',
   subActionParams: {
@@ -16,7 +26,6 @@ const actionParams = {
       severity: '1',
       urgency: '2',
       impact: '3',
-      savedObjectId: '123',
       externalId: null,
     },
     comments: [],
@@ -31,6 +40,7 @@ const connector: ActionConnector = {
   name: 'Test',
   isPreconfigured: false,
 };
+
 const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,
@@ -40,31 +50,71 @@ const defaultProps = {
   index: 0,
   messageVariables: [],
 };
-describe('ServiceNowParamsFields renders', () => {
+
+const useGetChoicesResponse = {
+  isLoading: false,
+  choices: ['severity', 'urgency', 'impact']
+    .map((element) => [
+      {
+        dependent_value: '',
+        label: '1 - Critical',
+        value: '1',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '2 - High',
+        value: '2',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '3 - Moderate',
+        value: '3',
+        element,
+      },
+      {
+        dependent_value: '',
+        label: '4 - Low',
+        value: '4',
+        element,
+      },
+    ])
+    .flat(),
+};
+
+describe('ServiceNowITSMParamsFields renders', () => {
+  let onChoices = (choices: Choice[]) => {};
+
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetChoicesMock.mockImplementation((args) => {
+      onChoices = args.onSuccess;
+      return useGetChoicesResponse;
+    });
   });
+
   test('all params fields is rendered', () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
-      '1'
-    );
-    expect(wrapper.find('[data-test-subj="impactSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="short_descriptionInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
+    expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
   });
+
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       errors: { 'subActionParams.incident.short_description': ['error'] },
     };
-    const wrapper = mount(<ServiceNowParamsFields {...newProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...newProps} />);
     const title = wrapper.find('[data-test-subj="short_descriptionInput"]').first();
     expect(title.prop('isInvalid')).toBeTruthy();
   });
+
   test('When subActionParams is undefined, set to default', () => {
     const { subActionParams, ...newParams } = actionParams;
 
@@ -72,12 +122,13 @@ describe('ServiceNowParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ServiceNowParamsFields {...newProps} />);
+    mount(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual({
       incident: {},
       comments: [],
     });
   });
+
   test('When subAction is undefined, set to default', () => {
     const { subAction, ...newParams } = actionParams;
 
@@ -85,11 +136,12 @@ describe('ServiceNowParamsFields renders', () => {
       ...defaultProps,
       actionParams: newParams,
     };
-    mount(<ServiceNowParamsFields {...newProps} />);
+    mount(<ServiceNowITSMParamsFields {...newProps} />);
     expect(editAction.mock.calls[0][1]).toEqual('pushToService');
   });
+
   test('Resets fields when connector changes', () => {
-    const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
     wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
     expect(editAction.mock.calls.length).toEqual(1);
@@ -98,6 +150,52 @@ describe('ServiceNowParamsFields renders', () => {
       comments: [],
     });
   });
+
+  test('it transforms the urgencies to options correctly', async () => {
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('options')).toEqual([
+      { value: '1', text: '1 - Critical' },
+      { value: '2', text: '2 - High' },
+      { value: '3', text: '3 - Moderate' },
+      { value: '4', text: '4 - Low' },
+    ]);
+  });
+
+  test('it transforms the severities to options correctly', async () => {
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('options')).toEqual([
+      { value: '1', text: '1 - Critical' },
+      { value: '2', text: '2 - High' },
+      { value: '3', text: '3 - Moderate' },
+      { value: '4', text: '4 - Low' },
+    ]);
+  });
+
+  test('it transforms the impacts to options correctly', async () => {
+    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
+    act(() => {
+      onChoices(useGetChoicesResponse.choices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('options')).toEqual([
+      { value: '1', text: '1 - Critical' },
+      { value: '2', text: '2 - High' },
+      { value: '3', text: '3 - Moderate' },
+      { value: '4', text: '4 - Low' },
+    ]);
+  });
+
   describe('UI updates', () => {
     const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
     const simpleFields = [
@@ -107,22 +205,25 @@ describe('ServiceNowParamsFields renders', () => {
       { dataTestSubj: '[data-test-subj="severitySelect"]', key: 'severity' },
       { dataTestSubj: '[data-test-subj="impactSelect"]', key: 'impact' },
     ];
+
     simpleFields.forEach((field) =>
       test(`${field.key} update triggers editAction :D`, () => {
-        const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+        const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
         const theField = wrapper.find(field.dataTestSubj).first();
         theField.prop('onChange')!(changeEvent);
         expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
       })
     );
+
     test('A comment triggers editAction', () => {
-      const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+      const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
     });
+
     test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<ServiceNowParamsFields {...defaultProps} />);
+      const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
       const emptyComment = { target: { value: '' } };
       const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
       expect(comments.simulate('change', emptyComment));

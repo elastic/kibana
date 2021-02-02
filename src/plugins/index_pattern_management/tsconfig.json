@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*",
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../management/tsconfig.json" },
+    { "path": "../url_forwarding/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+  ]
+}

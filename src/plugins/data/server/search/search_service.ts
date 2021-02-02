@@ -36,7 +36,7 @@ import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -205,7 +205,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
-            onResponse: (req, res) => shimHitsTotal(res),
+            onResponse: (req, res) => res,
             legacy: {
               callMsearch: getCallMsearch({
                 esClient,

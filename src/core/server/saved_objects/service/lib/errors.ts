@@ -135,19 +135,6 @@ export class SavedObjectsErrorHelpers {
     return decorate(Boom.notFound(), CODE_NOT_FOUND, 404);
   }
 
-  public static createIndexAliasNotFoundError(alias: string) {
-    return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(Boom.internal(), alias);
-  }
-
-  public static decorateIndexAliasNotFoundError(error: Error, alias: string) {
-    return decorate(
-      error,
-      CODE_GENERAL_ERROR,
-      500,
-      `Saved object index alias [${alias}] not found`
-    );
-  }
-
   public static isNotFoundError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_NOT_FOUND;
   }
@@ -197,9 +184,5 @@ export class SavedObjectsErrorHelpers {
 
   public static decorateGeneralError(error: Error, reason?: string) {
     return decorate(error, CODE_GENERAL_ERROR, 500, reason);
-  }
-
-  public static isGeneralError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_GENERAL_ERROR;
   }
 }

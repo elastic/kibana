@@ -122,7 +122,7 @@ describe('LogEntry search strategy', () => {
     expect(response.rawResponse.data).toEqual({
       id: 'HIT_ID',
       index: 'HIT_INDEX',
-      key: {
+      cursor: {
         time: 1605116827143,
         tiebreaker: 1,
       },

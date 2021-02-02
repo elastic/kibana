@@ -912,6 +912,7 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     isRestore?: boolean;
     isStored?: boolean;
+    legacyHitsTotal?: boolean;
     sessionId?: string;
     strategy?: string;
 }
@@ -1292,7 +1293,7 @@ export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
 export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
-export function shimHitsTotal(response: SearchResponse<any>): {
+export function shimHitsTotal(response: SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): {
     hits: {
         total: any;
         max_score: number;
@@ -1301,7 +1302,7 @@ export function shimHitsTotal(response: SearchResponse<any>): {
             _type: string;
             _id: string;
             _score: number;
-            _source: any;
+            _source: unknown;
             _version?: number | undefined;
             _explanation?: import("elasticsearch").Explanation | undefined;
             fields?: any;

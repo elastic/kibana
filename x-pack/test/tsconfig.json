@@ -21,6 +21,7 @@
     { "path": "../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../src/plugins/home/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_overview/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
@@ -36,9 +37,11 @@
     { "path": "../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../src/plugins/url_forwarding/tsconfig.json" },
+    { "path": "../../src/plugins/index_pattern_management/tsconfig.json" },
 
     { "path": "../plugins/actions/tsconfig.json" },
     { "path": "../plugins/alerts/tsconfig.json" },
+    { "path": "../plugins/code/tsconfig.json" },
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/data_enhanced/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },
@@ -63,6 +66,8 @@
     { "path": "../plugins/global_search_bar/tsconfig.json" },
     { "path": "../plugins/ingest_pipelines/tsconfig.json" },
     { "path": "../plugins/license_management/tsconfig.json" },
+    { "path": "../plugins/snapshot_restore/tsconfig.json" },
+    { "path": "../plugins/grokdebugger/tsconfig.json" },
     { "path": "../plugins/painless_lab/tsconfig.json" },
     { "path": "../plugins/watcher/tsconfig.json" }
   ]
