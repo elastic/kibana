@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -99,14 +100,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await retry.waitFor('timepicker to show the right amount of hours', async () => {
-          await PageObjects.timePicker.setDefaultAbsoluteRange();
-          await PageObjects.discover.brushHistogram();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-          const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-          log.debug(`Number of hours: ${newDurationHours}`);
-          return Math.round(newDurationHours) === 26;
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
+        log.debug(`Number of renderings 1: ${prevRenderingCount}`);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart to have rendered', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings 2: ${prevRenderingCount} - ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + 2;
         });
+        const oldDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        log.debug(`Number of hours: ${oldDurationHours}`);
+        await PageObjects.discover.brushHistogram();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart to have rendered after brushed', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings 3: ${prevRenderingCount} - ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + 4;
+        });
+        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        log.debug(`Number of hours: ${newDurationHours}`);
+        expect(Math.round(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table to contain the right search result', async () => {
           const rowData = await PageObjects.discover.getDocTableField(1);
