@@ -188,29 +188,18 @@ describe('search settings routes', () => {
     });
 
     describe('validates query', () => {
-      const queryRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{engineName}/search_settings_search',
-        payload: 'query',
-      });
-
       it('correctly', () => {
-        registerSearchSettingsRoutes({
-          ...mockDependencies,
-          router: queryRouter.router,
-        });
-
         const request = {
           query: {
             query: 'foo',
           },
         };
-        queryRouter.shouldValidate(request);
+        mockRouter.shouldValidate(request);
       });
 
       it('missing required fields', () => {
         const request = { query: {} };
-        queryRouter.shouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
     });
   });
