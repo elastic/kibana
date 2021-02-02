@@ -337,68 +337,64 @@ const PreviewTextString = ({
   previewResult: AlertPreviewSuccessResponsePayload & Record<string, any>;
   hasWarningThreshold: boolean;
 }) => {
-  // Differentiate between
-  // "there was 1 critical and 1 warning instance"
-  // vs "there were 1 critical and 0 warning instances"
-  // or "there were 0 critical and 1 warning instances"
-  const xorPlurality =
-    hasWarningThreshold &&
-    previewResult.resultTotals.fired === 1 &&
-    previewResult.resultTotals.warning === 1
-      ? 1
-      : 0;
-
   const instanceCount = hasWarningThreshold ? (
     <FormattedMessage
       id="xpack.infra.metrics.alertFlyout.alertPreviewResultWithSeverityLevels"
-      defaultMessage="There {wereWas} {critical} and {warning} {instances}"
+      defaultMessage="There {wereWas} {criticalInstances} that satisfied the {boldCritical} conditions, and {warningInstances} that satisfied the {boldWarning} conditions of this alert"
       values={{
         wereWas: (
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.wereWas"
             defaultMessage="{plurality, plural, one {was} other {were}}"
             values={{
-              plurality: xorPlurality,
+              plurality: previewResult.resultTotals.fired,
             }}
           />
         ),
-        critical: (
+        criticalInstances: (
           <strong>
             <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.criticalTimes"
-              defaultMessage="{critical} critical"
+              id="xpack.infra.metrics.alertFlyout.firedTimes"
+              defaultMessage="{fired, plural, one {# instance} other {# instances}}"
               values={{
-                critical: previewResult.resultTotals.fired,
+                fired: previewResult.resultTotals.fired,
               }}
             />
           </strong>
         ),
-        warning: (
+        warningInstances: (
           <strong>
             <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.criticalTimes"
-              defaultMessage="{warning} warning"
+              id="xpack.infra.metrics.alertFlyout.firedTimes"
+              defaultMessage="{fired, plural, one {# instance} other {# instances}}"
               values={{
-                warning: previewResult.resultTotals.warning,
+                fired: previewResult.resultTotals.warning,
               }}
             />
           </strong>
         ),
-        instances: (
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.instanceInstances"
-            defaultMessage="{xorPlurality, plural, one {instance} other {instances}}"
-            values={{
-              xorPlurality,
-            }}
-          />
+        boldCritical: (
+          <strong>
+            <FormattedMessage
+              id="xpack.infra.metrics.alertFlyout.boldCritical"
+              defaultMessage="critical"
+            />
+          </strong>
+        ),
+        boldWarning: (
+          <strong>
+            <FormattedMessage
+              id="xpack.infra.metrics.alertFlyout.boldWarning"
+              defaultMessage="warning"
+            />
+          </strong>
         ),
       }}
     />
   ) : (
     <FormattedMessage
-      id="xpack.infra.metrics.alertFlyout.alertPreviewResult"
-      defaultMessage="There {wereWas} {firedTimes}"
+      id="xpack.infra.metrics.alertFlyout.alertPreviewResultInstances"
+      defaultMessage="There {wereWas} {firedTimes} that satisfied the conditions of this alert"
       values={{
         wereWas: (
           <FormattedMessage
@@ -425,35 +421,49 @@ const PreviewTextString = ({
   );
 
   const groupByText = previewResult.groupByDisplayName ? (
+    <>
+      <FormattedMessage
+        id="xpack.infra.metrics.alertFlyout.alertPreviewGroupBy"
+        defaultMessage="across {groups}"
+        values={{
+          groups: (
+            <strong>
+              <FormattedMessage
+                id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
+                defaultMessage="{numberOfGroups, plural, one {# {groupName}} other {# {groupName}s}}"
+                values={{
+                  numberOfGroups: previewResult.numberOfGroups,
+                  groupName: previewResult.groupByDisplayName,
+                }}
+              />
+            </strong>
+          ),
+        }}
+      />{' '}
+    </>
+  ) : (
+    <></>
+  );
+
+  const lookbackText = (
     <FormattedMessage
-      id="xpack.infra.metrics.alertFlyout.alertPreviewGroupBy"
-      defaultMessage="across {groups}"
+      id="xpack.infra.metrics.alertFlyout.alertPreviewLookback"
+      defaultMessage="in the last {lookback}"
       values={{
-        groups: (
-          <strong>
-            <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
-              defaultMessage="{numberOfGroups, plural, one {# {groupName}} other {# {groupName}s}}"
-              values={{
-                numberOfGroups: previewResult.numberOfGroups,
-                groupName: previewResult.groupByDisplayName,
-              }}
-            />
-          </strong>
-        ),
+        lookback: previewOptions.find((e) => e.value === previewResult.previewLookbackInterval)
+          ?.shortText,
       }}
     />
-  ) : null;
+  );
 
   return (
     <FormattedMessage
       id="xpack.infra.metrics.alertFlyout.alertPreviewResultText"
-      defaultMessage="{instanceCount} {groupBy}that satisfied the conditions of this alert in the last {lookback}."
+      defaultMessage="{instanceCount} {groupByWithConditionalTrailingSpace}{lookbackText}."
       values={{
         instanceCount,
-        groupBy: groupByText ? `${groupByText} ` : '',
-        lookback: previewOptions.find((e) => e.value === previewResult.previewLookbackInterval)
-          ?.shortText,
+        groupByWithConditionalTrailingSpace: groupByText,
+        lookbackText,
       }}
     />
   );

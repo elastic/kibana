@@ -253,7 +253,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 {warningThresholdExpression}
                 <StyledHealth color="warning">
                   <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    id="xpack.infra.metrics.alertFlyout.warningThreshold"
                     defaultMessage="Warning"
                   />
                 </StyledHealth>
@@ -273,19 +273,24 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             </>
           )}
           {!displayWarningThreshold && (
-            <StyledExpressionRow>
-              <EuiButtonEmpty
-                color={'primary'}
-                flush={'left'}
-                size="xs"
-                onClick={toggleWarningThreshold}
-              >
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
-                  defaultMessage="Add warning threshold"
-                />
-              </EuiButtonEmpty>
-            </StyledExpressionRow>
+            <>
+              {' '}
+              <EuiSpacer size={'xs'} />
+              <StyledExpressionRow>
+                <EuiButtonEmpty
+                  color={'primary'}
+                  flush={'left'}
+                  size="xs"
+                  iconType={'plusInCircleFilled'}
+                  onClick={toggleWarningThreshold}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                    defaultMessage="Add warning threshold"
+                  />
+                </EuiButtonEmpty>
+              </StyledExpressionRow>
+            </>
           )}
         </EuiFlexItem>
         {canDelete && (
