@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
+import { PartialClock, CheckInEmptyCircle } from './custom_icons';
 import './search_session_indicator.scss';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
 
@@ -113,7 +113,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Loading]: {
     button: {
       color: 'subdued',
-      iconType: 'clock', // TODO: NEW ICON
+      iconType: PartialClock,
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
         { defaultMessage: 'Search session loading' }
@@ -227,8 +227,8 @@ const searchSessionIndicatorViewStateToProps: {
   },
   [SearchSessionState.Restored]: {
     button: {
-      color: 'warning',
-      iconType: 'refresh',
+      color: 'success',
+      iconType: CheckInEmptyCircle,
       'aria-label': i18n.translate(
         'xpack.data.searchSessionIndicator.restoredResultsIconAriaLabel',
         {
