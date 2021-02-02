@@ -120,6 +120,7 @@ export const getAllExceptionListsColumns = (
         })}
         aria-label="Export exception list"
         iconType="exportAction"
+        data-test-subj="exceptionsTableExportButton"
       />
     ),
   },

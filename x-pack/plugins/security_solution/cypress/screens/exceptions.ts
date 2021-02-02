@@ -33,6 +33,8 @@ export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingException
 
 export const EXCEPTIONS_TABLE_DELETE_BTN = '[data-test-subj="exceptionsTableDeleteButton"]';
 
+export const EXCEPTIONS_TABLE_EXPORT_BTN = '[data-test-subj="exceptionsTableExportButton"]';
+
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR = '[data-test-subj="header-section-supplements"] button';
 
 export const EXCEPTIONS_TABLE_LIST_NAME = '[data-test-subj="exceptionsTableName"]';

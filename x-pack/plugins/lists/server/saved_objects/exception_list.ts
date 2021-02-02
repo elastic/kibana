@@ -54,7 +54,12 @@ export const commonMapping: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     tags: {
-      type: 'keyword',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
+      type: 'text',
     },
     tie_breaker_id: {
       type: 'keyword',

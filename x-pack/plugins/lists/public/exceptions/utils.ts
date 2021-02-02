@@ -73,7 +73,7 @@ export const getGeneralFilters = (
   return Object.keys(filters)
     .map((filterKey) => {
       const value = get(filterKey, filters);
-      if (value != null) {
+      if (value != null && value.trim() !== '') {
         const filtersByNamespace = namespaceTypes
           .map((namespace) => {
             return `${namespace}.attributes.${filterKey}:${value}`;
