@@ -26,6 +26,14 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { calculateThroughput } from '../helpers/calculate_throughput';
+
+export type ServiceOverviewTransactionGroupSortField =
+  | 'name'
+  | 'latency'
+  | 'throughput'
+  | 'errorRate'
+  | 'impact';
 
 export async function getServiceTransactionGroups({
   serviceName,
@@ -41,7 +49,6 @@ export async function getServiceTransactionGroups({
   latencyAggregationType: LatencyAggregationType;
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
-  const deltaAsMinutes = (end - start) / 1000 / 60;
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
@@ -110,7 +117,11 @@ export async function getServiceTransactionGroups({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.doc_count / deltaAsMinutes,
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
         errorRate,
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
