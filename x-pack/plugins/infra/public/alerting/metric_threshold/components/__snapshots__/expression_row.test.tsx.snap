@@ -3,7 +3,7 @@
 exports[`ExpressionRow should render a helpText for the of expression 1`] = `
 <FormattedMessage
   defaultMessage="Can't find a metric? {documentationLink}."
-  id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
+  id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
   values={
     Object {
       "documentationLink": <EuiLink
@@ -12,7 +12,7 @@ exports[`ExpressionRow should render a helpText for the of expression 1`] = `
       >
         <FormattedMessage
           defaultMessage="Learn how to add more data"
-          id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
+          id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
           values={Object {}}
         />
       </EuiLink>,

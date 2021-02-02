@@ -164,7 +164,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   onChangeSelectedAggField={updateMetric}
                   helpText={
                     <FormattedMessage
-                      id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverHelpTextDetail"
+                      id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
                       defaultMessage="Can't find a metric? {documentationLink}."
                       values={{
                         documentationLink: (
@@ -173,7 +173,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                             target="BLANK"
                           >
                             <FormattedMessage
-                              id="xpack.triggersActionsUI.common.expressionItems.of.popoverHelpText.popoverLinkLabel"
+                              id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
                               defaultMessage="Learn how to add more data"
                             />
                           </EuiLink>
