@@ -19,11 +19,23 @@ describe('WorkplaceSearchHeaderActions', () => {
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
+  it('renders a link to the personal dashboard', () => {
+    externalUrl.enterpriseSearchUrl = 'http://localhost:3002';
+
+    const wrapper = shallow(<WorkplaceSearchHeaderActions />);
+
+    expect(wrapper.find(EuiButtonEmpty).first().prop('href')).toEqual(
+      'http://localhost:3002/ws/sources'
+    );
+  });
+
   it('renders a link to the search application', () => {
     externalUrl.enterpriseSearchUrl = 'http://localhost:3002';
 
     const wrapper = shallow(<WorkplaceSearchHeaderActions />);
 
-    expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('http://localhost:3002/ws/search');
+    expect(wrapper.find(EuiButtonEmpty).last().prop('href')).toEqual(
+      'http://localhost:3002/ws/search'
+    );
   });
 });

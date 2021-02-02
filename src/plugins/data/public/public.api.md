@@ -1649,6 +1649,7 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     isRestore?: boolean;
     isStored?: boolean;
+    legacyHitsTotal?: boolean;
     sessionId?: string;
     strategy?: string;
 }
@@ -2290,8 +2291,11 @@ export class SearchInterceptor {
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
+    // Warning: (ae-forgotten-export) The symbol "KibanaServerError" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+    protected handleSearchError(e: KibanaServerError | AbortError, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
@@ -2461,7 +2465,7 @@ export interface SearchSourceFields {
 //
 // @public
 export class SearchTimeoutError extends KbnError {
-    constructor(err: Error, mode: TimeoutErrorMode);
+    constructor(err: Record<string, any>, mode: TimeoutErrorMode);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)

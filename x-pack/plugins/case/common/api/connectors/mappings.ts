@@ -7,7 +7,6 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import * as rt from 'io-ts';
-import { ElasticUser } from '../../../../security_solution/public/cases/containers/types';
 import {
   PushToServiceApiParams as JiraPushToServiceApiParams,
   Incident as JiraIncident,
@@ -17,23 +16,30 @@ import {
   Incident as ResilientIncident,
 } from '../../../../actions/server/builtin_action_types/resilient/types';
 import {
-  PushToServiceApiParams as ServiceNowPushToServiceApiParams,
-  Incident as ServiceNowIncident,
+  PushToServiceApiParamsITSM as ServiceNowITSMPushToServiceApiParams,
+  ServiceNowITSMIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowFieldsRT } from './servicenow';
 import { JiraFieldsRT } from './jira';
 
+// Formerly imported from security_solution
+export interface ElasticUser {
+  readonly email?: string | null;
+  readonly fullName?: string | null;
+  readonly username?: string | null;
+}
+
 export {
   JiraPushToServiceApiParams,
   ResilientPushToServiceApiParams,
-  ServiceNowPushToServiceApiParams,
+  ServiceNowITSMPushToServiceApiParams,
 };
-export type Incident = JiraIncident | ResilientIncident | ServiceNowIncident;
+export type Incident = JiraIncident | ResilientIncident | ServiceNowITSMIncident;
 export type PushToServiceApiParams =
   | JiraPushToServiceApiParams
   | ResilientPushToServiceApiParams
-  | ServiceNowPushToServiceApiParams;
+  | ServiceNowITSMPushToServiceApiParams;
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),

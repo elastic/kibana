@@ -47,7 +47,6 @@ test('set correct defaults', () => {
         "http://localhost:9200",
       ],
       "ignoreVersionMismatch": false,
-      "logQueries": false,
       "password": undefined,
       "pingTimeout": "PT30S",
       "requestHeadersWhitelist": Array [

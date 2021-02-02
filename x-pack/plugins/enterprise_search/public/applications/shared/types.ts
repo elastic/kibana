@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ADD, UPDATE } from './constants/operations';
+
 export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
 // Certain API endpoints will use these internal type names, which map to the external names above
 export type InternalSchemaTypes = 'string' | 'float' | 'location' | 'date';
@@ -31,5 +33,12 @@ export interface SchemaConflicts {
 export interface IIndexingStatus {
   percentageComplete: number;
   numDocumentsWithErrors: number;
-  activeReindexJobId: number;
+  activeReindexJobId: string;
 }
+
+export interface IndexJob extends IIndexingStatus {
+  isActive?: boolean;
+  hasErrors?: boolean;
+}
+
+export type TOperation = typeof ADD | typeof UPDATE;

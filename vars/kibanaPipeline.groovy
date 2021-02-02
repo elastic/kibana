@@ -130,6 +130,8 @@ def functionalTestProcess(String name, String script) {
 
 def ossCiGroupProcess(ciGroup) {
   return functionalTestProcess("ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -143,6 +145,7 @@ def ossCiGroupProcess(ciGroup) {
 
 def xpackCiGroupProcess(ciGroup) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
+    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -451,6 +454,7 @@ def allCiTasks() {
 }
 
 def pipelineLibraryTests() {
+  return
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {

@@ -133,6 +133,10 @@ const deprecations: ConfigDeprecationProvider = () => [
       log(
         `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
       );
+    } else if (es.logQueries === true) {
+      log(
+        `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`
+      );
     }
     return settings;
   },
@@ -163,12 +167,6 @@ export class ElasticsearchConfig {
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
    */
   public readonly apiVersion: string;
-
-  /**
-   * Specifies whether all queries to the client should be logged (status code,
-   * method, query etc.).
-   */
-  public readonly logQueries: boolean;
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
@@ -248,7 +246,6 @@ export class ElasticsearchConfig {
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
-    this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist

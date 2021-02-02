@@ -12,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import {
   getContentSourcePath,
   SOURCES_PATH,
-  ORG_SOURCES_PATH,
+  PERSONAL_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -26,13 +26,13 @@ describe('getContentSourcePath', () => {
     const wrapper = shallow(<TestComponent id="123" isOrg />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${ORG_SOURCES_PATH}/123`);
+    expect(path).toEqual(`${SOURCES_PATH}/123`);
   });
 
   it('should format user route', () => {
     const wrapper = shallow(<TestComponent id="123" />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${SOURCES_PATH}/123`);
+    expect(path).toEqual(`${PERSONAL_SOURCES_PATH}/123`);
   });
 });

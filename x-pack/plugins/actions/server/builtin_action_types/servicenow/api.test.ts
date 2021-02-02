@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { externalServiceMock, apiParams, serviceNowCommonFields } from './mocks';
+import { externalServiceMock, apiParams, serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';
 let mockedLogger: jest.Mocked<Logger>;
@@ -233,6 +233,16 @@ describe('api', () => {
         params: {},
       });
       expect(res).toEqual(serviceNowCommonFields);
+    });
+  });
+
+  describe('getChoices', () => {
+    test('it returns the fields correctly', async () => {
+      const res = await api.getChoices({
+        externalService,
+        params: { fields: ['priority'] },
+      });
+      expect(res).toEqual(serviceNowChoices);
     });
   });
 });

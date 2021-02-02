@@ -88,7 +88,7 @@ export const LogEntryFlyout = ({
               </>
             ) : null}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem style={{ padding: 8 }} grow={false}>
             {logEntry ? <LogEntryActionsMenu logEntry={logEntry} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>

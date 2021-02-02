@@ -15,13 +15,18 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
 
-  start(core: CoreStart, shareRegistry: ShareMenuRegistryStart) {
+  start(
+    core: CoreStart,
+    shareRegistry: ShareMenuRegistryStart,
+    anonymousAccess?: SecurityOssPluginStart['anonymousAccess']
+  ) {
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
@@ -35,6 +40,7 @@ export class ShareMenuManager {
           menuItems,
           post: core.http.post,
           basePath: core.http.basePath.get(),
+          anonymousAccess,
         });
       },
     };
@@ -57,10 +63,13 @@ export class ShareMenuManager {
     post,
     basePath,
     embedUrlParamExtensions,
+    anonymousAccess,
+    showPublicUrlSwitch,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
     basePath: string;
+    anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
   }) {
     if (this.isOpen) {
       this.onClose();
@@ -92,6 +101,8 @@ export class ShareMenuManager {
             post={post}
             basePath={basePath}
             embedUrlParamExtensions={embedUrlParamExtensions}
+            anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
           />
         </EuiWrappingPopover>
       </I18nProvider>

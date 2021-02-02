@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
 
-import { CLOUD_DOCS_PREFIX, ENT_SEARCH_DOCS_PREFIX } from '../../constants';
+import { docLinks } from '../../doc_links';
 
 interface Props {
   productName: string;
@@ -79,7 +79,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     optionsLink: (
                       <EuiLink
-                        href={`${ENT_SEARCH_DOCS_PREFIX}/configuration.html`}
+                        href={`${docLinks.enterpriseSearchBase}/configuration.html`}
                         target="_blank"
                       >
                         {i18n.translate(
@@ -124,7 +124,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                     productName,
                     configurePolicyLink: (
                       <EuiLink
-                        href={`${CLOUD_DOCS_PREFIX}/ec-configure-index-management.html`}
+                        href={`${docLinks.cloudBase}/ec-configure-index-management.html`}
                         target="_blank"
                       >
                         {i18n.translate(
