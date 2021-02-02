@@ -23,11 +23,8 @@ export const DestroyCommand: ICommand = {
 
   async run(projects) {
     log.warning(dedent`
-
-      'yarn kbn destroy' is the most deeper and destroying clean command. Use it only when switching between a non Bazel branch into a
-      Bazel branch or when you are having problems with node_modules.
-      Otherwise please just run 'yarn kbn clean'.
-
+      In most cases, `yarn kbn clean` is all that should be needed to recover a consistent state when
+      problems arise. If you need to use this command, please let us know, as it should not be necessary.
     `);
 
     const toDelete = [];
