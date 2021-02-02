@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
   // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.only('Management', function () {
+  describe('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
