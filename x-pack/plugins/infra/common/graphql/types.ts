@@ -28,12 +28,6 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A consecutive span of log entries surrounding a point in time */
-  logEntriesAround: InfraLogEntryInterval;
-  /** A consecutive span of log entries within an interval */
-  logEntriesBetween: InfraLogEntryInterval;
-  /** Sequences of log entries matching sets of highlighting queries within an interval */
-  logEntryHighlights: InfraLogEntryInterval[];
 
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
@@ -129,80 +123,6 @@ export interface InfraIndexField {
   /** Whether the field should be displayed based on event.module and a ECS allowed list */
   displayable: boolean;
 }
-/** A consecutive sequence of log entries */
-export interface InfraLogEntryInterval {
-  /** The key corresponding to the start of the interval covered by the entries */
-  start?: InfraTimeKey | null;
-  /** The key corresponding to the end of the interval covered by the entries */
-  end?: InfraTimeKey | null;
-  /** Whether there are more log entries available before the start */
-  hasMoreBefore: boolean;
-  /** Whether there are more log entries available after the end */
-  hasMoreAfter: boolean;
-  /** The query the log entries were filtered by */
-  filterQuery?: string | null;
-  /** The query the log entries were highlighted with */
-  highlightQuery?: string | null;
-  /** A list of the log entries */
-  entries: InfraLogEntry[];
-}
-/** A representation of the log entry's position in the event stream */
-export interface InfraTimeKey {
-  /** The timestamp of the event that the log entry corresponds to */
-  time: number;
-  /** The tiebreaker that disambiguates events with the same timestamp */
-  tiebreaker: number;
-}
-/** A log entry */
-export interface InfraLogEntry {
-  /** A unique representation of the log entry's position in the event stream */
-  key: InfraTimeKey;
-  /** The log entry's id */
-  gid: string;
-  /** The source id */
-  source: string;
-  /** The columns used for rendering the log entry */
-  columns: InfraLogEntryColumn[];
-}
-/** A special built-in column that contains the log entry's timestamp */
-export interface InfraLogEntryTimestampColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** The timestamp */
-  timestamp: number;
-}
-/** A special built-in column that contains the log entry's constructed message */
-export interface InfraLogEntryMessageColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** A list of the formatted log entry segments */
-  message: InfraLogMessageSegment[];
-}
-/** A segment of the log entry message that was derived from a field */
-export interface InfraLogMessageFieldSegment {
-  /** The field the segment was derived from */
-  field: string;
-  /** The segment's message */
-  value: string;
-  /** A list of highlighted substrings of the value */
-  highlights: string[];
-}
-/** A segment of the log entry message that was derived from a string literal */
-export interface InfraLogMessageConstantSegment {
-  /** The segment's message */
-  constant: string;
-}
-/** A column that contains the value of a field of the log entry */
-export interface InfraLogEntryFieldColumn {
-  /** The id of the corresponding column configuration */
-  columnId: string;
-  /** The field name of the column */
-  field: string;
-  /** The value of the field in the log entry */
-  value: string;
-  /** A list of highlighted substrings of the value */
-  highlights: string[];
-}
 
 export interface InfraSnapshotResponse {
   /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
@@ -275,21 +195,6 @@ export interface DeleteSourceResult {
 // ====================================================
 // InputTypes
 // ====================================================
-
-export interface InfraTimeKeyInput {
-  time: number;
-
-  tiebreaker: number;
-}
-/** A highlighting definition */
-export interface InfraLogEntryHighlightInput {
-  /** The query to highlight by */
-  query: string;
-  /** The number of highlighted documents to include beyond the beginning of the interval */
-  countBefore: number;
-  /** The number of highlighted documents to include beyond the end of the interval */
-  countAfter: number;
-}
 
 export interface InfraTimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
@@ -380,34 +285,6 @@ export interface UpdateSourceTimestampLogColumnInput {
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
-}
-export interface LogEntriesAroundInfraSourceArgs {
-  /** The sort key that corresponds to the point in time */
-  key: InfraTimeKeyInput;
-  /** The maximum number of preceding to return */
-  countBefore?: number | null;
-  /** The maximum number of following to return */
-  countAfter?: number | null;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-}
-export interface LogEntriesBetweenInfraSourceArgs {
-  /** The sort key that corresponds to the start of the interval */
-  startKey: InfraTimeKeyInput;
-  /** The sort key that corresponds to the end of the interval */
-  endKey: InfraTimeKeyInput;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-}
-export interface LogEntryHighlightsInfraSourceArgs {
-  /** The sort key that corresponds to the start of the interval */
-  startKey: InfraTimeKeyInput;
-  /** The sort key that corresponds to the end of the interval */
-  endKey: InfraTimeKeyInput;
-  /** The query to filter the log entries by */
-  filterQuery?: string | null;
-  /** The highlighting to apply to the log entries */
-  highlights: InfraLogEntryHighlightInput[];
 }
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
@@ -565,15 +442,6 @@ export type InfraSourceLogColumn =
   | InfraSourceMessageLogColumn
   | InfraSourceFieldLogColumn;
 
-/** A column of a log entry */
-export type InfraLogEntryColumn =
-  | InfraLogEntryTimestampColumn
-  | InfraLogEntryMessageColumn
-  | InfraLogEntryFieldColumn;
-
-/** A segment of the log entry message */
-export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
-
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -581,46 +449,6 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // ====================================================
 // Documents
 // ====================================================
-
-export namespace LogEntryHighlightsQuery {
-  export type Variables = {
-    sourceId?: string | null;
-    startKey: InfraTimeKeyInput;
-    endKey: InfraTimeKeyInput;
-    filterQuery?: string | null;
-    highlights: InfraLogEntryHighlightInput[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logEntryHighlights: LogEntryHighlights[];
-  };
-
-  export type LogEntryHighlights = {
-    __typename?: 'InfraLogEntryInterval';
-
-    start?: Start | null;
-
-    end?: End | null;
-
-    entries: Entries[];
-  };
-
-  export type Start = InfraTimeKeyFields.Fragment;
-
-  export type End = InfraTimeKeyFields.Fragment;
-
-  export type Entries = InfraLogEntryHighlightFields.Fragment;
-}
 
 export namespace MetricsQuery {
   export type Variables = {
@@ -820,50 +648,6 @@ export namespace WaffleNodesQuery {
   };
 }
 
-export namespace LogEntries {
-  export type Variables = {
-    sourceId?: string | null;
-    timeKey: InfraTimeKeyInput;
-    countBefore?: number | null;
-    countAfter?: number | null;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logEntriesAround: LogEntriesAround;
-  };
-
-  export type LogEntriesAround = {
-    __typename?: 'InfraLogEntryInterval';
-
-    start?: Start | null;
-
-    end?: End | null;
-
-    hasMoreBefore: boolean;
-
-    hasMoreAfter: boolean;
-
-    entries: Entries[];
-  };
-
-  export type Start = InfraTimeKeyFields.Fragment;
-
-  export type End = InfraTimeKeyFields.Fragment;
-
-  export type Entries = InfraLogEntryFields.Fragment;
-}
-
 export namespace SourceConfigurationFields {
   export type Fragment = {
     __typename?: 'InfraSourceConfiguration';
@@ -992,126 +776,5 @@ export namespace InfraSourceFields {
     updatedAt?: number | null;
 
     origin: string;
-  };
-}
-
-export namespace InfraLogEntryFields {
-  export type Fragment = {
-    __typename?: 'InfraLogEntry';
-
-    gid: string;
-
-    key: Key;
-
-    columns: Columns[];
-  };
-
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
-
-  export type Columns =
-    | InfraLogEntryTimestampColumnInlineFragment
-    | InfraLogEntryMessageColumnInlineFragment
-    | InfraLogEntryFieldColumnInlineFragment;
-
-  export type InfraLogEntryTimestampColumnInlineFragment = {
-    __typename?: 'InfraLogEntryTimestampColumn';
-
-    columnId: string;
-
-    timestamp: number;
-  };
-
-  export type InfraLogEntryMessageColumnInlineFragment = {
-    __typename?: 'InfraLogEntryMessageColumn';
-
-    columnId: string;
-
-    message: Message[];
-  };
-
-  export type Message =
-    | InfraLogMessageFieldSegmentInlineFragment
-    | InfraLogMessageConstantSegmentInlineFragment;
-
-  export type InfraLogMessageFieldSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageFieldSegment';
-
-    field: string;
-
-    value: string;
-  };
-
-  export type InfraLogMessageConstantSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageConstantSegment';
-
-    constant: string;
-  };
-
-  export type InfraLogEntryFieldColumnInlineFragment = {
-    __typename?: 'InfraLogEntryFieldColumn';
-
-    columnId: string;
-
-    field: string;
-
-    value: string;
-  };
-}
-
-export namespace InfraLogEntryHighlightFields {
-  export type Fragment = {
-    __typename?: 'InfraLogEntry';
-
-    gid: string;
-
-    key: Key;
-
-    columns: Columns[];
-  };
-
-  export type Key = {
-    __typename?: 'InfraTimeKey';
-
-    time: number;
-
-    tiebreaker: number;
-  };
-
-  export type Columns =
-    | InfraLogEntryMessageColumnInlineFragment
-    | InfraLogEntryFieldColumnInlineFragment;
-
-  export type InfraLogEntryMessageColumnInlineFragment = {
-    __typename?: 'InfraLogEntryMessageColumn';
-
-    columnId: string;
-
-    message: Message[];
-  };
-
-  export type Message = InfraLogMessageFieldSegmentInlineFragment;
-
-  export type InfraLogMessageFieldSegmentInlineFragment = {
-    __typename?: 'InfraLogMessageFieldSegment';
-
-    field: string;
-
-    highlights: string[];
-  };
-
-  export type InfraLogEntryFieldColumnInlineFragment = {
-    __typename?: 'InfraLogEntryFieldColumn';
-
-    columnId: string;
-
-    field: string;
-
-    highlights: string[];
   };
 }
