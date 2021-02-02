@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-import { ServiceConnectorCaseResponse, CaseConnector } from '../../../../case/common/api';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { CaseConnector } from '../../../../case/common/api';
 import {
   errorToToaster,
   useStateToaster,
   displaySuccessToast,
 } from '../../common/components/toasters';
 
-import { pushToService, pushCase } from './api';
+import { pushCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 
 interface PushToServiceState {
-  serviceData: ServiceConnectorCaseResponse | null;
-  pushedCaseData: Case | null;
   isLoading: boolean;
   isError: boolean;
 }
-type Action =
-  | { type: 'FETCH_INIT' }
-  | { type: 'FETCH_SUCCESS_PUSH_SERVICE'; payload: ServiceConnectorCaseResponse | null }
-  | { type: 'FETCH_SUCCESS_PUSH_CASE'; payload: Case | null }
-  | { type: 'FETCH_FAILURE' };
+type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServiceState => {
   switch (action.type) {
@@ -37,19 +31,11 @@ const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServ
         isLoading: true,
         isError: false,
       };
-    case 'FETCH_SUCCESS_PUSH_SERVICE':
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        serviceData: action.payload ?? null,
-      };
-    case 'FETCH_SUCCESS_PUSH_CASE':
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        pushedCaseData: action.payload ?? null,
       };
     case 'FETCH_FAILURE':
       return {
@@ -65,51 +51,45 @@ const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServ
 interface PushToServiceRequest {
   caseId: string;
   connector: CaseConnector;
-  updateCase: (newCase: Case) => void;
 }
 
 export interface UsePostPushToService extends PushToServiceState {
-  postPushToService: ({ caseId, connector, updateCase }: PushToServiceRequest) => void;
+  pushCaseToExternalService: ({
+    caseId,
+    connector,
+  }: PushToServiceRequest) => Promise<Case | undefined>;
 }
 
 export const usePostPushToService = (): UsePostPushToService => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    serviceData: null,
-    pushedCaseData: null,
     isLoading: false,
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const cancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
 
-  const postPushToService = useCallback(
-    async ({ caseId, connector, updateCase }: PushToServiceRequest) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
+  const pushCaseToExternalService = useCallback(
+    async ({ caseId, connector }: PushToServiceRequest) => {
       try {
         dispatch({ type: 'FETCH_INIT' });
-        const responseService = await pushToService(connector.id, caseId, abortCtrl.signal);
-        const responseCase = await pushCase(
-          caseId,
-          {
-            connector_id: connector.id,
-            connector_name: connector.name,
-            external_id: responseService.id,
-            external_title: responseService.title,
-            external_url: responseService.url,
-          },
-          abortCtrl.signal
-        );
-        if (!cancel) {
-          dispatch({ type: 'FETCH_SUCCESS_PUSH_SERVICE', payload: responseService });
-          dispatch({ type: 'FETCH_SUCCESS_PUSH_CASE', payload: responseCase });
-          updateCase(responseCase);
+        abortCtrl.current.abort();
+        cancel.current = false;
+        abortCtrl.current = new AbortController();
+
+        const response = await pushCase(caseId, connector.id, abortCtrl.current.signal);
+
+        if (!cancel.current) {
+          dispatch({ type: 'FETCH_SUCCESS' });
           displaySuccessToast(
             i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
             dispatchToaster
           );
         }
+
+        return response;
       } catch (error) {
-        if (!cancel) {
+        if (!cancel.current) {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -118,14 +98,17 @@ export const usePostPushToService = (): UsePostPushToService => {
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }
-      return () => {
-        cancel = true;
-        abortCtrl.abort();
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  return { ...state, postPushToService };
+  useEffect(() => {
+    return () => {
+      abortCtrl.current.abort();
+      cancel.current = true;
+    };
+  }, []);
+
+  return { ...state, pushCaseToExternalService };
 };

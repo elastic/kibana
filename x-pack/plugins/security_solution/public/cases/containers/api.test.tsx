@@ -25,7 +25,6 @@ import {
   postCase,
   postComment,
   pushCase,
-  pushToService,
 } from './api';
 
 import {
@@ -34,26 +33,20 @@ import {
   basicCase,
   allCasesSnake,
   basicCaseSnake,
-  actionTypeExecutorResult,
   pushedCaseSnake,
   casesStatus,
   casesSnake,
   cases,
   caseUserActions,
   pushedCase,
-  pushSnake,
   reporters,
   respReporters,
-  serviceConnector,
-  basicCaseId,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import * as i18n from './translations';
-import { getCaseConfigurePushUrl } from '../../../../case/common/api/helpers';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -446,87 +439,28 @@ describe('Case Configuration API', () => {
   });
 
   describe('pushCase', () => {
+    const connectorId = 'connectorId';
+
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(pushedCaseSnake);
     });
 
     test('check url, method, signal', async () => {
-      await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/_push`, {
-        method: 'POST',
-        body: JSON.stringify(pushSnake),
-        signal: abortCtrl.signal,
-      });
+      await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
+        {
+          method: 'POST',
+          body: JSON.stringify({}),
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('happy path', async () => {
-      const resp = await pushCase(basicCase.id, pushSnake, abortCtrl.signal);
+      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
-    });
-  });
-
-  describe('pushToService', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(actionTypeExecutorResult);
-    });
-
-    const connectorId = 'connectorId';
-
-    test('check url, method, signal', async () => {
-      await pushToService(connectorId, basicCaseId, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${getCaseConfigurePushUrl(connectorId)}`, {
-        method: 'POST',
-        body: JSON.stringify({
-          connector_type: ConnectorTypes.jira,
-          params: {
-            case_id: basicCaseId,
-          },
-        }),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await pushToService(connectorId, basicCaseId, abortCtrl.signal);
-      expect(resp).toEqual(serviceConnector);
-    });
-
-    test('unhappy path - serviceMessage', async () => {
-      const theError = 'the error';
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-        serviceMessage: theError,
-        message: 'not it',
-      });
-      await expect(
-        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
-    });
-
-    test('unhappy path - message', async () => {
-      const theError = 'the error';
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-        message: theError,
-      });
-      await expect(
-        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
-    });
-
-    test('unhappy path - no message', async () => {
-      const theError = i18n.ERROR_PUSH_TO_SERVICE;
-      fetchMock.mockResolvedValue({
-        ...actionTypeExecutorResult,
-        status: 'error',
-      });
-      await expect(
-        await pushToService(connectorId, basicCaseId, abortCtrl.signal)
-      ).rejects.toMatchObject({ message: theError });
     });
   });
 });

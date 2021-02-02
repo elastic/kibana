@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import isEmpty from 'lodash/isEmpty';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -20,16 +19,19 @@ import {
 } from '../utils';
 
 import {
-  CaseExternalServiceRequestRt,
+  ActionConnector,
   CaseResponseRt,
+  ExternalServiceResponse,
   throwErrors,
   CaseStatuses,
+  CasePushRequestParamsRt,
 } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
-import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { CASE_PUSH_URL } from '../../../../common/constants';
+import { createIncident, isCommentAlertType } from './utils';
 
-export function initPushCaseUserActionApi({
+export function initPushCaseApi({
   caseConfigureService,
   caseService,
   router,
@@ -37,22 +39,28 @@ export function initPushCaseUserActionApi({
 }: RouteDeps) {
   router.post(
     {
-      path: `${CASE_DETAILS_URL}/_push`,
+      path: CASE_PUSH_URL,
       validate: {
-        params: schema.object({
-          case_id: schema.string(),
-        }),
+        params: escapeHatch,
         body: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.client;
+        if (!context.case) {
+          throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+        }
+
+        const savedObjectsClient = context.core.savedObjects.client;
+        const caseClient = context.case.getCaseClient();
         const actionsClient = await context.actions?.getActionsClient();
 
-        const caseId = request.params.case_id;
-        const query = pipe(
-          CaseExternalServiceRequestRt.decode(request.body),
+        if (actionsClient == null) {
+          throw Boom.notFound('Action client have not been found');
+        }
+
+        const params = pipe(
+          CasePushRequestParamsRt.decode(request.params),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
@@ -60,6 +68,44 @@ export function initPushCaseUserActionApi({
           throw Boom.notFound('Action client have not been found');
         }
 
+        const caseId = params.case_id;
+        const connectorId = params.connector_id;
+
+        /* Start of push to external service */
+        const connector = await actionsClient.get({ id: connectorId });
+        const theCase = await caseClient.get({ id: caseId, includeComments: true });
+        const userActions = await caseClient.getUserActions({ caseId });
+        const alerts = await caseClient.getAlerts({
+          ids: theCase.comments?.filter(isCommentAlertType).map((comment) => comment.alertId) ?? [],
+        });
+
+        const connectorMappings = await caseClient.getMappings({
+          actionsClient,
+          caseClient,
+          connectorId: connector.id,
+          connectorType: connector.actionTypeId,
+        });
+
+        const res = await createIncident({
+          actionsClient,
+          theCase,
+          userActions,
+          connector: connector as ActionConnector,
+          mappings: connectorMappings,
+          alerts,
+        });
+
+        const pushRes = await actionsClient.execute({
+          actionId: params.connector_id,
+          params: {
+            subAction: 'pushToService',
+            subActionParams: res,
+          },
+        });
+
+        /* End of push to external service */
+
+        /* Start of update case with push information */
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
 
@@ -67,12 +113,12 @@ export function initPushCaseUserActionApi({
 
         const [myCase, myCaseConfigure, totalCommentsFindByCases, connectors] = await Promise.all([
           caseService.getCase({
-            client,
-            caseId: request.params.case_id,
+            client: savedObjectsClient,
+            caseId,
           }),
-          caseConfigureService.find({ client }),
+          caseConfigureService.find({ client: savedObjectsClient }),
           caseService.getAllCaseComments({
-            client,
+            client: savedObjectsClient,
             caseId,
             options: {
               fields: [],
@@ -90,7 +136,7 @@ export function initPushCaseUserActionApi({
         }
 
         const comments = await caseService.getAllCaseComments({
-          client,
+          client: savedObjectsClient,
           caseId,
           options: {
             fields: [],
@@ -99,10 +145,16 @@ export function initPushCaseUserActionApi({
           },
         });
 
+        const externalServiceResponse = pushRes.data as ExternalServiceResponse;
+
         const externalService = {
           pushed_at: pushedDate,
           pushed_by: { username, full_name, email },
-          ...query,
+          connector_id: connector.id,
+          connector_name: connector.name,
+          external_id: externalServiceResponse.id,
+          external_title: externalServiceResponse.title,
+          external_url: externalServiceResponse.url,
         };
 
         const updateConnector = myCase.attributes.connector;
@@ -110,14 +162,14 @@ export function initPushCaseUserActionApi({
         if (
           isEmpty(updateConnector) ||
           (updateConnector != null && updateConnector.id === 'none') ||
-          !connectors.some((connector) => connector.id === updateConnector.id)
+          !connectors.some((c) => c.id === updateConnector.id)
         ) {
           throw Boom.notFound('Connector not found or set to none');
         }
 
         const [updatedCase, updatedComments] = await Promise.all([
           caseService.patchCase({
-            client,
+            client: savedObjectsClient,
             caseId,
             updatedAttributes: {
               ...(myCaseConfigure.total > 0 &&
@@ -134,8 +186,9 @@ export function initPushCaseUserActionApi({
             },
             version: myCase.version,
           }),
+
           caseService.patchComments({
-            client,
+            client: savedObjectsClient,
             comments: comments.saved_objects
               .filter((comment) => comment.attributes.pushed_at == null)
               .map((comment) => ({
@@ -147,8 +200,9 @@ export function initPushCaseUserActionApi({
                 version: comment.version,
               })),
           }),
+
           userActionService.postUserActions({
-            client,
+            client: savedObjectsClient,
             actions: [
               ...(myCaseConfigure.total > 0 &&
               myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
@@ -175,6 +229,7 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
+        /* End of update case with push information */
 
         return response.ok({
           body: CaseResponseRt.encode(

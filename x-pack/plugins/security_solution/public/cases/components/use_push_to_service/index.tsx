@@ -54,19 +54,22 @@ export const usePushToService = ({
 }: UsePushToService): ReturnUsePushToService => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
-  const { isLoading, postPushToService } = usePostPushToService();
+  const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const handlePushToService = useCallback(() => {
+  const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
-      postPushToService({
+      const theCase = await pushCaseToExternalService({
         caseId,
         connector,
-        updateCase,
       });
+
+      if (theCase != null) {
+        updateCase(theCase);
+      }
     }
-  }, [caseId, connector, postPushToService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {

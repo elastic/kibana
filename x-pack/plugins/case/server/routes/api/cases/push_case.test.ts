@@ -14,7 +14,7 @@ import {
   createRouteContext,
   mockCases,
 } from '../__fixtures__';
-import { initPushCaseUserActionApi } from './push_case';
+import { initPushCaseApi } from './push_case';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
 
@@ -29,7 +29,7 @@ describe('Push case', () => {
     external_url: 'external_url',
   };
   beforeAll(async () => {
-    routeHandler = await createRoute(initPushCaseUserActionApi, 'post');
+    routeHandler = await createRoute(initPushCaseApi, 'post');
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
     spyOnDate.mockImplementation(() => ({
       toISOString: jest.fn().mockReturnValue(mockDate),

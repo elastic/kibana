@@ -29,10 +29,10 @@ import {
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
-} from '../../../../../common/api';
-import { ActionsClient } from '../../../../../../actions/server';
-import { externalServiceFormatters, FormatterConnectorTypes } from '../../../../connectors';
-import { CaseClientGetAlertsResponse } from '../../../../client/alerts/types';
+} from '../../../../common/api';
+import { ActionsClient } from '../../../../../actions/server';
+import { externalServiceFormatters, FormatterConnectorTypes } from '../../../connectors';
+import { CaseClientGetAlertsResponse } from '../../../client/alerts/types';
 
 export const getLatestPushInfo = (
   connectorId: string,

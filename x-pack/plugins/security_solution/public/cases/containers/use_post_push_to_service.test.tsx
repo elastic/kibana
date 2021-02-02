@@ -69,54 +69,30 @@ describe('usePostPushToService', () => {
         pushedCaseData: null,
         isLoading: false,
         isError: false,
-        postPushToService: result.current.postPushToService,
+        pushCaseToExternalService: result.current.pushCaseToExternalService,
       });
     });
   });
 
   it('calls pushCase with correct arguments', async () => {
-    const spyOnPushCase = jest.spyOn(api, 'pushCase');
+    const spyOnPushToService = jest.spyOn(api, 'pushCase');
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.postPushToService(samplePush);
-      await waitForNextUpdate();
-      expect(spyOnPushCase).toBeCalledWith(
-        samplePush.caseId,
-        {
-          connector_id: samplePush.connector.id,
-          connector_name: samplePush.connector.name,
-          external_id: serviceConnector.id,
-          external_title: serviceConnector.title,
-          external_url: serviceConnector.url,
-        },
-        abortCtrl.signal
-      );
-    });
-  });
-
-  it('calls pushToService with correct arguments', async () => {
-    const spyOnPushToService = jest.spyOn(api, 'pushToService');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
-        usePostPushToService()
-      );
-      await waitForNextUpdate();
-      result.current.postPushToService(samplePush);
+      result.current.pushCaseToExternalService(samplePush);
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
+        samplePush.caseId,
         samplePush.connector.id,
-        samplePush.connector.type,
         abortCtrl.signal
       );
     });
   });
 
-  it('calls pushToService with correct arguments when no push history', async () => {
+  it('calls pushCase with correct arguments when no push history', async () => {
     const samplePush2 = {
       caseId: pushedCase.id,
       caseServices: {},
@@ -129,14 +105,14 @@ describe('usePostPushToService', () => {
       alerts: samplePush.alerts,
       updateCase,
     };
-    const spyOnPushToService = jest.spyOn(api, 'pushToService');
+    const spyOnPushToService = jest.spyOn(api, 'pushCase');
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.postPushToService(samplePush2);
+      result.current.pushCaseToExternalService(samplePush2);
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush2.connector.id,
@@ -152,14 +128,14 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.postPushToService(samplePush);
+      result.current.pushCaseToExternalService(samplePush);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         serviceData: serviceConnector,
         pushedCaseData: pushedCase,
         isLoading: false,
         isError: false,
-        postPushToService: result.current.postPushToService,
+        pushCaseToExternalService: result.current.pushCaseToExternalService,
       });
     });
   });
@@ -170,13 +146,13 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.postPushToService(samplePush);
+      result.current.pushCaseToExternalService(samplePush);
       expect(result.current.isLoading).toBe(true);
     });
   });
 
   it('unhappy path', async () => {
-    const spyOnPushToService = jest.spyOn(api, 'pushToService');
+    const spyOnPushToService = jest.spyOn(api, 'pushCase');
     spyOnPushToService.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
@@ -186,7 +162,7 @@ describe('usePostPushToService', () => {
         usePostPushToService()
       );
       await waitForNextUpdate();
-      result.current.postPushToService(samplePush);
+      result.current.pushCaseToExternalService(samplePush);
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
@@ -194,7 +170,7 @@ describe('usePostPushToService', () => {
         pushedCaseData: null,
         isLoading: false,
         isError: true,
-        postPushToService: result.current.postPushToService,
+        pushCaseToExternalService: result.current.pushCaseToExternalService,
       });
     });
   });

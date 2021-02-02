@@ -170,29 +170,8 @@ export const ServiceConnectorCaseParamsRt = rt.intersection([
   ConnectorPartialFieldsRt,
 ]);
 
-export const ServiceConnectorCaseResponseRt = rt.intersection([
-  rt.type({
-    title: rt.string,
-    id: rt.string,
-    pushedDate: rt.string,
-    url: rt.string,
-  }),
-  rt.partial({
-    comments: rt.array(
-      rt.intersection([
-        rt.type({
-          commentId: rt.string,
-          pushedDate: rt.string,
-        }),
-        rt.partial({ externalCommentId: rt.string }),
-      ])
-    ),
-  }),
-]);
-
 export type ServiceConnectorBasicCaseParams = rt.TypeOf<typeof ServiceConnectorBasicCaseParamsRt>;
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
-export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
 
 export const PostPushRequestRt = rt.type({
