@@ -43,7 +43,9 @@ interface LegacyESClientError {
   path?: string;
   query?: string | undefined;
   body?: {
-    error: object;
+    error: {
+      type: string;
+    };
     status: number;
   };
   statusCode?: number;

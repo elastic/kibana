@@ -18,6 +18,7 @@ import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
 import { appContextService } from '../../../app_context';
+import { isLegacyESClientError } from '../../../../errors';
 
 interface TransformInstallation {
   installationName: string;
@@ -115,13 +116,22 @@ async function handleTransformInstall({
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
-  // defer validation on put if the source index is not available
-  await callCluster('transport.request', {
-    method: 'PUT',
-    path: `/_transform/${transform.installationName}`,
-    query: 'defer_validation=true',
-    body: transform.content,
-  });
+  try {
+    // defer validation on put if the source index is not available
+    await callCluster('transport.request', {
+      method: 'PUT',
+      path: `/_transform/${transform.installationName}`,
+      query: 'defer_validation=true',
+      body: transform.content,
+    });
+  } catch (err) {
+    // swallow the error if the transform already exists.
+    const isAlreadyExistError =
+      isLegacyESClientError(err) && err?.body?.error?.type === 'resource_already_exists_exception';
+    if (!isAlreadyExistError) {
+      throw err;
+    }
+  }
 
   await callCluster('transport.request', {
     method: 'POST',
