@@ -5,9 +5,19 @@
  */
 
 import { getUptimeESMockClient } from './helper';
-import { getNetworkEvents } from './get_network_events';
+import { getNetworkEvents, secondsToMillis } from './get_network_events';
 
 describe('getNetworkEvents', () => {
+  describe('secondsToMillis conversion', () => {
+    it('returns -1 for -1 value', () => {
+      expect(secondsToMillis(-1)).toBe(-1);
+    });
+
+    it('returns a value of seconds as milliseconds', () => {
+      expect(secondsToMillis(10)).toBe(10_000);
+    });
+  });
+
   let mockHits: any;
 
   beforeEach(() => {
