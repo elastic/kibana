@@ -14,7 +14,7 @@ export class Lifecycle {
   public readonly beforeTests = new LifecyclePhase<[Suite]>({
     singular: true,
   });
-  public readonly beforeEachRunnable = new LifecyclePhase<[Text]>();
+  public readonly beforeEachRunnable = new LifecyclePhase<[Test]>();
   public readonly beforeTestSuite = new LifecyclePhase<[Suite]>();
   public readonly beforeEachTest = new LifecyclePhase<[Test]>();
   public readonly afterTestSuite = new LifecyclePhase<[Suite]>();
