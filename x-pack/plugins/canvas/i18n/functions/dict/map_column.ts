@@ -22,6 +22,10 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
     },
   }),
   args: {
+    id: i18n.translate('xpack.canvas.functions.mapColumn.args.idHelpText', {
+      defaultMessage:
+        'An optional id of the resulting column. When `null` the name argument is used as id.',
+    }),
     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
       defaultMessage: 'The name of the resulting column.',
     }),

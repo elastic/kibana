@@ -53,6 +53,16 @@ describe('mapColumn', () => {
     });
   });
 
+  it('should assign specific id, different from name, when id arg is passed', () => {
+    return fn(emptyTable, { name: 'name', id: 'myid', expression: pricePlusTwo }).then((result) => {
+      expect(result.type).toBe('datatable');
+      expect(result.columns).toHaveLength(1);
+      expect(result.columns[0]).toHaveProperty('name', 'name');
+      expect(result.columns[0]).toHaveProperty('id', 'myid');
+      expect(result.columns[0].meta).toHaveProperty('type', 'null');
+    });
+  });
+
   describe('expression', () => {
     it('maps null values to the new column', () => {
       return fn(testTable, { name: 'empty' }).then((result) => {

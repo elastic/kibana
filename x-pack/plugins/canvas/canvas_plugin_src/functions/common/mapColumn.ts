@@ -8,6 +8,7 @@ import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
+  id: string | null;
   name: string;
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
@@ -27,6 +28,12 @@ export function mapColumn(): ExpressionFunctionDefinition<
     inputTypes: ['datatable'],
     help,
     args: {
+      id: {
+        types: ['string', 'null'],
+        help: argHelp.id,
+        required: false,
+        default: null,
+      },
       name: {
         types: ['string'],
         aliases: ['_', 'column'],
@@ -43,7 +50,7 @@ export function mapColumn(): ExpressionFunctionDefinition<
     },
     fn: (input, args) => {
       const expression = args.expression || (() => Promise.resolve(null));
-
+      const columnId = args.id != null ? args.id : args.name;
       const columns = [...input.columns];
       const rowPromises = input.rows.map((row) => {
         return expression({
@@ -52,14 +59,18 @@ export function mapColumn(): ExpressionFunctionDefinition<
           rows: [row],
         }).then((val) => ({
           ...row,
-          [args.name]: val,
+          [columnId]: val,
         }));
       });
 
       return Promise.all(rowPromises).then((rows) => {
         const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-        const type = rows.length ? getType(rows[0][args.name]) : 'null';
-        const newColumn = { id: args.name, name: args.name, meta: { type } };
+        const type = rows.length ? getType(rows[0][columnId]) : 'null';
+        const newColumn = {
+          id: columnId,
+          name: args.name,
+          meta: { type },
+        };
 
         if (existingColumnIndex === -1) {
           columns.push(newColumn);
