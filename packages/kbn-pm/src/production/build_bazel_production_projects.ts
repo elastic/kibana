@@ -7,10 +7,11 @@
  */
 
 import copy from 'cpy';
+import globby from 'globby';
 import { basename, join, relative, resolve } from 'path';
 
 import { buildProject, getProductionProjects } from './build_non_bazel_production_projects';
-import { isFile } from '../utils/fs';
+import { chmod, isFile, isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import {
   createProductionPackageJson,
@@ -37,7 +38,7 @@ export async function buildBazelProductionProjects({
   for (const project of projects.values()) {
     await buildProject(project);
     await copyToBuild(project, kibanaRoot, buildRoot);
-    // chmod -R 644
+    await applyCorrectPermissions(project, kibanaRoot, buildRoot);
   }
 }
 
@@ -78,4 +79,25 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
 
   const preparedPackageJson = createProductionPackageJson(packageJson);
   await writePackageJson(buildProjectPath, preparedPackageJson);
+}
+
+async function applyCorrectPermissions(project: Project, kibanaRoot: string, buildRoot: string) {
+  const relativeProjectPath = relative(kibanaRoot, project.path);
+  const buildProjectPath = resolve(buildRoot, relativeProjectPath);
+  const allPluginPaths = await globby([`**/*`], {
+    onlyFiles: false,
+    cwd: join(kibanaRoot, 'bazel-dist', 'bin', 'packages', basename(buildProjectPath)),
+    dot: true,
+  });
+
+  for (const pluginPath of allPluginPaths) {
+    const resolvedPluginPath = resolve(buildRoot, pluginPath);
+    if (await isFile(resolvedPluginPath)) {
+      await chmod(resolvedPluginPath, 0o644);
+    }
+
+    if (await isDirectory(resolvedPluginPath)) {
+      await chmod(resolvedPluginPath, 0o755);
+    }
+  }
 }
