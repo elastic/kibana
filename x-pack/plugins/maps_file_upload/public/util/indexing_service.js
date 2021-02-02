@@ -119,7 +119,7 @@ async function writeToIndex(indexingDetails) {
   const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
   return await httpService({
-    url: `/api/fileupload/import`,
+    url: `/api/maps/fileupload/import`,
     method: 'POST',
     ...(query ? { query } : {}),
     data: {
