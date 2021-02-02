@@ -15,24 +15,4 @@ export const connectorConfiguration = {
   enabledInConfig: true,
   enabledInLicense: true,
   minimumLicenseRequired: 'platinum',
-  fields: {
-    name: {
-      label: i18n.MAPPING_FIELD_NAME,
-      validSourceFields: ['title', 'description'],
-      defaultSourceField: 'title',
-      defaultActionType: 'overwrite',
-    },
-    description: {
-      label: i18n.MAPPING_FIELD_DESC,
-      validSourceFields: ['title', 'description'],
-      defaultSourceField: 'description',
-      defaultActionType: 'overwrite',
-    },
-    comments: {
-      label: i18n.MAPPING_FIELD_COMMENTS,
-      validSourceFields: ['comments'],
-      defaultSourceField: 'comments',
-      defaultActionType: 'append',
-    },
-  },
 };

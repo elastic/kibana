@@ -16,7 +16,6 @@ import {
 } from '../../server/lib/ui_filters/local_ui_filters/config';
 import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/url_params_context/helpers';
-import { useCallApi } from './useCallApi';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { LocalUIFilterName } from '../../common/ui_filter';
@@ -43,7 +42,6 @@ export function useLocalUIFilters({
 }) {
   const history = useHistory();
   const { uiFilters, urlParams } = useUrlParams();
-  const callApi = useCallApi();
 
   const values = pickKeys(uiFilters, ...filterNames);
 
@@ -69,30 +67,34 @@ export function useLocalUIFilters({
     });
   };
 
-  const { data = getInitialData(filterNames), status } = useFetcher(() => {
-    if (shouldFetch) {
-      return callApi<LocalUIFiltersAPIResponse>({
-        method: 'GET',
-        pathname: `/api/apm/ui_filters/local_filters/${projection}`,
-        query: {
-          uiFilters: JSON.stringify(uiFilters),
-          start: urlParams.start,
-          end: urlParams.end,
-          filterNames: JSON.stringify(filterNames),
-          ...params,
-        },
-      });
-    }
-  }, [
-    callApi,
-    projection,
-    uiFilters,
-    urlParams.start,
-    urlParams.end,
-    filterNames,
-    params,
-    shouldFetch,
-  ]);
+  const { data = getInitialData(filterNames), status } = useFetcher(
+    (callApmApi) => {
+      if (shouldFetch && urlParams.start && urlParams.end) {
+        return callApmApi({
+          endpoint: `GET /api/apm/ui_filters/local_filters/${projection}` as const,
+          params: {
+            query: {
+              uiFilters: JSON.stringify(uiFilters),
+              start: urlParams.start,
+              end: urlParams.end,
+              // type expects string constants, but we have to send it as json
+              filterNames: JSON.stringify(filterNames) as any,
+              ...params,
+            },
+          },
+        });
+      }
+    },
+    [
+      projection,
+      uiFilters,
+      urlParams.start,
+      urlParams.end,
+      filterNames,
+      params,
+      shouldFetch,
+    ]
+  );
 
   const filters = data.map((filter) => ({
     ...filter,
