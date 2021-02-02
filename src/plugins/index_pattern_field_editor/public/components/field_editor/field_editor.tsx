@@ -18,7 +18,7 @@ import {
   useFormData,
   RuntimeType,
 } from '../../shared_imports';
-import { Field } from '../../types';
+import { Field, InternalFieldType } from '../../types';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
@@ -40,7 +40,7 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal extends Omit<Field, 'type'> {
+export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> {
   type: Array<EuiComboBoxOptionOption<RuntimeType>>;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -59,8 +59,10 @@ export interface Props {
   field?: Field;
   /** Handler to receive state changes updates */
   onChange?: (state: FieldEditorFormState) => void;
-  /** Optional context object */
-  ctx?: {
+  /** Context object */
+  ctx: {
+    /** The internal field type we are dealing with (concrete|runtime)*/
+    fieldTypeToProcess: InternalFieldType;
     /**
      * An array of field names not allowed.
      * e.g we probably don't want a user to give a name of an existing
@@ -115,7 +117,7 @@ const geti18nTexts = () => ({
 const formDeserializer = (field: Field): FieldFormInternal => {
   let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
   if (!field.type) {
-    fieldType = [];
+    fieldType = [RUNTIME_FIELD_OPTIONS[0]];
   } else {
     const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === field.type)?.label;
     fieldType = [{ label: label ?? field.type, value: field.type as RuntimeType }];
@@ -145,7 +147,7 @@ const FieldEditorComponent = ({
   field,
   onChange,
   links,
-  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
+  ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields = [] },
 }: Props) => {
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -178,6 +180,7 @@ const FieldEditorComponent = ({
             data-test-subj="nameField"
             componentProps={{
               euiFieldProps: {
+                disabled: fieldTypeToProcess === 'concrete',
                 'aria-label': i18n.translate('indexPatternFieldEditor.editor.form.nameAriaLabel', {
                   defaultMessage: 'Name field',
                 }),
@@ -188,7 +191,7 @@ const FieldEditorComponent = ({
 
         {/* Type */}
         <EuiFlexItem>
-          <TypeField />
+          <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -212,14 +215,16 @@ const FieldEditorComponent = ({
       </FormRow>
 
       {/* Set value */}
-      <FormRow
-        title={i18nTexts.value.title}
-        description={i18nTexts.value.description}
-        formFieldPath="__meta__.isValueVisible"
-        withDividerRule
-      >
-        <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
-      </FormRow>
+      {fieldTypeToProcess === 'runtime' && (
+        <FormRow
+          title={i18nTexts.value.title}
+          description={i18nTexts.value.description}
+          formFieldPath="__meta__.isValueVisible"
+          withDividerRule
+        >
+          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+        </FormRow>
+      )}
 
       {/* Set custom format */}
       <FormRow

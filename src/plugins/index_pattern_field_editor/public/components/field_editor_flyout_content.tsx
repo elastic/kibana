@@ -23,7 +23,7 @@ import {
 
 import { DocLinksStart } from 'src/core/public';
 
-import { Field } from '../types';
+import { Field, InternalFieldType } from '../types';
 import { getLinks } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 
@@ -68,9 +68,9 @@ export interface Props {
    * The Field editor component that contains the form to create or edit a field
    */
   FieldEditor: React.ComponentType<FieldEditorProps> | null;
-  /**
-   * Optional field to edit
-   */
+  /** The internal field type we are dealing with (concrete|runtime)*/
+  fieldTypeToProcess: InternalFieldType;
+  /** Optional field to process */
   field?: Field;
 }
 
@@ -80,6 +80,7 @@ const FieldEditorFlyoutContentComponent = ({
   onCancel,
   FieldEditor,
   docLinks,
+  fieldTypeToProcess,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
@@ -110,7 +111,12 @@ const FieldEditorFlyoutContentComponent = ({
 
       <EuiFlyoutBody>
         {FieldEditor && (
-          <FieldEditor links={getLinks(docLinks)} field={field} onChange={setFormState} />
+          <FieldEditor
+            links={getLinks(docLinks)}
+            field={field}
+            onChange={setFormState}
+            ctx={{ fieldTypeToProcess }}
+          />
         )}
       </EuiFlyoutBody>
 

@@ -15,7 +15,13 @@ const setup = (props?: Props) =>
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
 
-const defaultProps: Props = { onSave: noop, onCancel: noop, docLinks, FieldEditor: null };
+const defaultProps: Props = {
+  onSave: noop,
+  onCancel: noop,
+  docLinks,
+  FieldEditor: null,
+  fieldTypeToProcess: 'runtime',
+};
 
 describe('<FieldEditorFlyoutContent />', () => {
   test('should have the correct title', () => {

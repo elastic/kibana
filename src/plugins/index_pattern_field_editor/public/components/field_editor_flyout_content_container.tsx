@@ -10,13 +10,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { DocLinksStart } from 'src/core/public';
 
 import { IndexPatternField, IndexPattern } from '../shared_imports';
-import { Field } from '../types';
+import { Field, InternalFieldType } from '../types';
 import { deserializeField, serializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
 export interface FieldEditorContext {
   indexPattern: IndexPattern;
+  /**
+   * The Kibana field type of the field to create or edit
+   * Default: "runtime"
+   */
+  fieldTypeToProcess: InternalFieldType;
 }
 
 export interface Props {
@@ -48,7 +53,13 @@ export interface Props {
  * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
  * anything about where a field comes from and where it should be persisted.
  */
-export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, docLinks }: Props) => {
+export const FieldEditorFlyoutContentContainer = ({
+  field,
+  onSave,
+  onCancel,
+  docLinks,
+  ctx: { indexPattern, fieldTypeToProcess },
+}: Props) => {
   const fieldToEdit = deserializeField(field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
@@ -79,6 +90,7 @@ export const FieldEditorFlyoutContentContainer = ({ field, onSave, onCancel, doc
       docLinks={docLinks}
       field={fieldToEdit}
       FieldEditor={Editor}
+      fieldTypeToProcess={fieldTypeToProcess}
     />
   );
 };

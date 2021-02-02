@@ -9,14 +9,22 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
 
-import { createKibanaReactContext, toMountPoint, IndexPatternField } from './shared_imports';
+import {
+  createKibanaReactContext,
+  toMountPoint,
+  IndexPatternField,
+  IndexPattern,
+} from './shared_imports';
+import { InternalFieldType } from './types';
 import {
   FieldEditorFlyoutContentContainer,
   Props as FieldEditorFlyoutContentContainerProps,
 } from './components/field_editor_flyout_content_container';
 
 export interface OpenFieldEditorOptions {
-  ctx: FieldEditorFlyoutContentContainerProps['ctx'];
+  ctx: {
+    indexPattern: IndexPattern;
+  };
   onSave?: (field: IndexPatternField) => void;
   field?: FieldEditorFlyoutContentContainerProps['field'];
 }
@@ -32,6 +40,9 @@ export const getFieldEditorOpener = (coreStart: CoreStart) => (
   let overlayRef: OverlayRef | null = null;
 
   const openEditor = ({ onSave, field, ctx }: OpenFieldEditorOptions): CloseEditor => {
+    // TODO (Matt): here will come the logic to define the internal field type (concrete|runtime)
+    const fieldTypeToProcess: InternalFieldType = 'runtime';
+
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -55,7 +66,7 @@ export const getFieldEditorOpener = (coreStart: CoreStart) => (
             onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
-            ctx={ctx}
+            ctx={{ ...ctx, fieldTypeToProcess }}
           />
         </KibanaReactContextProvider>
       )

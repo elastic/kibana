@@ -15,7 +15,7 @@ You will then receive in the start contract of the indexPatternFieldEditor plugi
 
 ### `openEditor(options: OpenFieldEditorOptions): CloseEditor`
 
-Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime | scripted) a field.  
+Use this method to open the index pattern field editor to either create (runtime) or edit (concrete | runtime) a field.  
 
 #### `options`
 

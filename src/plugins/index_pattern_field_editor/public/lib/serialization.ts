@@ -10,7 +10,7 @@ import { Field } from '../types';
 
 export const deserializeField = (field?: IndexPatternField): Field | undefined => {
   if (field === undefined) {
-    return field;
+    return undefined;
   }
 
   return {
