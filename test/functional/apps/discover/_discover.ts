@@ -100,26 +100,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
+        // this is the number of renderings of the histogram needed when new data is fetched
+        // this needs to be improved
+        const renderingCountInc = 3;
         const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-        log.debug(`Number of renderings 1: ${prevRenderingCount}`);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart to have rendered', async () => {
+        await retry.waitFor('chart rendering complete', async () => {
           const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings 2: ${prevRenderingCount} - ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 3;
+          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + renderingCountInc;
         });
-        const oldDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        log.debug(`Number of hours: ${oldDurationHours}`);
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await retry.waitFor('chart to have rendered after brushed', async () => {
+        await retry.waitFor('chart rendering complete after being brushed', async () => {
           const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
-          log.debug(`Number of renderings 3: ${prevRenderingCount} - ${actualRenderingCount}`);
+          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
           return actualRenderingCount === prevRenderingCount + 6;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-        log.debug(`Number of hours: ${newDurationHours}`);
         expect(Math.round(newDurationHours)).to.be(26);
 
         await retry.waitFor('doc table to contain the right search result', async () => {
