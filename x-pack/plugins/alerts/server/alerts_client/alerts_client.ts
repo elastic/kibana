@@ -427,6 +427,7 @@ export class AlertsClient {
         parsedDateStart.toISOString(),
         dateNow.toISOString()
       );
+
       alertEventsSummary = queryResults[0].summary;
     } catch (err) {
       this.logger.debug(
@@ -437,7 +438,7 @@ export class AlertsClient {
 
     return alertInstanceSummaryFromEventLog({
       alert,
-      alertEventsSummary,
+      summary: alertEventsSummary,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
