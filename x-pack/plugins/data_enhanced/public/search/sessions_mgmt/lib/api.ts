@@ -21,7 +21,6 @@ type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
 function getActions(status: SearchSessionStatus) {
   const actions: ACTION[] = [];
-  actions.push(ACTION.RELOAD);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
     actions.push(ACTION.DELETE);

@@ -11,13 +11,12 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
 import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
-import { ReloadButton } from './reload_button';
 import { ACTION, OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, expires, reloadUrl }: UISession,
+  { id, name, expires }: UISession,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   switch (actionType) {
@@ -26,13 +25,6 @@ export const getAction = (
         iconType: 'crossInACircleFilled',
         textColor: 'default',
         label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
-    case ACTION.RELOAD:
-      return {
-        iconType: 'refresh',
-        textColor: 'default',
-        label: <ReloadButton api={api} reloadUrl={reloadUrl} />,
       };
 
     case ACTION.EXTEND:

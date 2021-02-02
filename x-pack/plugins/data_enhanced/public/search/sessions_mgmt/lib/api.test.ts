@@ -60,7 +60,6 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
-              "reload",
               "extend",
               "delete",
             ],
@@ -163,32 +162,6 @@ describe('Search Sessions Management API', () => {
         new Error('implementation is so bad'),
         { title: 'Failed to cancel the search session!' }
       );
-    });
-  });
-
-  describe('reload', () => {
-    beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return {
-          saved_objects: [
-            {
-              id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: SearchSessionStatus.COMPLETE },
-            },
-          ],
-        } as SavedObjectsFindResponse;
-      });
-    });
-
-    test('send cancel calls the cancel endpoint with a session ID', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
-        notifications: mockCoreStart.notifications,
-        application: mockCoreStart.application,
-      });
-      await api.reloadSearchSession('www.myurl.com');
-
-      expect(mockCoreStart.application.navigateToUrl).toHaveBeenCalledWith('www.myurl.com');
     });
   });
 
