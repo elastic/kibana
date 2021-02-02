@@ -73,6 +73,7 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
   padding-left: ${(props) => props.theme.eui.paddingSizes.m};
   padding-right: ${(props) => props.theme.eui.paddingSizes.m};
+  justify-content: space-around;
 `;
 
 interface WaterfallChartChartContainer {

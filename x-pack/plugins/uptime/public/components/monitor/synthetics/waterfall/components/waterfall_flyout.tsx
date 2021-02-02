@@ -12,6 +12,7 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiLink,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
@@ -69,7 +70,7 @@ export const WaterfallFlyout = ({
     if (isFlyoutVisible && flyoutData && flyoutRef.current) {
       flyoutRef.current?.focus();
     }
-  });
+  }, [flyoutData, isFlyoutVisible, flyoutRef]);
 
   if (!flyoutData || !isFlyoutVisible) {
     return null;
@@ -81,12 +82,17 @@ export const WaterfallFlyout = ({
 
   return (
     <EuiPortal>
-      <div tab-index={-1} ref={flyoutRef} data-test-subj="waterfallFlyout">
-        <FlyoutContainer size="s" onClose={onFlyoutClose} aria-labelledby="flyoutTitle">
+      <div
+        tab-index={-1}
+        ref={flyoutRef}
+        data-test-subj="waterfallFlyout"
+        aria-labelledby="flyoutTitle"
+      >
+        <FlyoutContainer size="s" onClose={onFlyoutClose}>
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
+            <EuiTitle size="s">
               <h2 id="flyoutTitle">
-                <MiddleTruncatedText text={url} />
+                <MiddleTruncatedText text={url} url={url} />
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>

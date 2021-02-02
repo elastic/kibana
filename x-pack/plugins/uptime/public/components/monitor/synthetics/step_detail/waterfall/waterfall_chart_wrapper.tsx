@@ -57,7 +57,7 @@ export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
           buttonRef={setRef}
           data-test-subj={`sidebarItem${index}`}
         >
-          <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+          <MiddleTruncatedText text={`${index + 1}. ${item.url}`} url={item.url} />
         </StyledButton>
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -67,7 +67,7 @@ export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
               buttonRef={setRef}
               data-test-subj={`sidebarItem${index}`}
             >
-              <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+              <MiddleTruncatedText text={`${index + 1}. ${item.url}`} url={item.url} />
             </StyledButton>
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>

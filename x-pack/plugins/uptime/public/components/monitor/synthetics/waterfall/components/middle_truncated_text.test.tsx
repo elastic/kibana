@@ -24,18 +24,27 @@ describe('getChunks', () => {
 });
 
 describe('Component', () => {
+  const url = 'http://www.elastic.co';
   it('renders truncated text', () => {
-    const { getByText } = render(<MiddleTruncatedText text={longString} />);
+    const { getByText } = render(<MiddleTruncatedText text={longString} url={url} />);
 
     expect(getByText(first)).toBeInTheDocument();
     expect(getByText(last)).toBeInTheDocument();
   });
 
   it('renders screen reader only text', () => {
-    const { getByTestId } = render(<MiddleTruncatedText text={longString} />);
+    const { getByTestId } = render(<MiddleTruncatedText text={longString} url={url} />);
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
 
     expect(getByText(longString)).toBeInTheDocument();
+  });
+
+  it('renders external link', () => {
+    const { getByText } = render(<MiddleTruncatedText text={longString} url={url} />);
+    const link = getByText('Open resource in new tab').closest('a');
+
+    expect(link).toHaveAttribute('href', url);
+    expect(link).toHaveAttribute('target', '_blank');
   });
 });
