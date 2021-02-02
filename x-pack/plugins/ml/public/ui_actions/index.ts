@@ -17,10 +17,7 @@ import { createClearSelectionAction } from './clear_selection_action';
 
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
-export {
-  APPLY_INFLUENCER_FILTERS_ACTION,
-  CONTROLLED_BY_SWIM_LANE_FILTER,
-} from './apply_influencer_filters_action';
+export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 
 export { SWIM_LANE_SELECTION_TRIGGER } from './triggers';
