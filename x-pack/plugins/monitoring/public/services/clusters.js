@@ -88,6 +88,7 @@ export function monitoringClustersProvider($injector) {
     }
 
     if (!once) {
+      once = true;
       const clusters = await getClusters();
       if (clusters.length) {
         try {
@@ -96,7 +97,6 @@ export function monitoringClustersProvider($injector) {
         } catch (_err) {
           // Intentionally swallow the error as this will retry the next page load
         }
-        once = true;
       }
       return clusters;
     }
