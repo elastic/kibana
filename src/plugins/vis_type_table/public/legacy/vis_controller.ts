@@ -18,8 +18,7 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
 import { TablePluginStartDependencies } from '../plugin';
-import { TableVisConfig } from '../types';
-import { TableContext } from '../table_vis_response_handler';
+import { TableVisConfig, TableVisData } from '../types';
 
 const innerAngularName = 'kibana/table_vis';
 
@@ -64,7 +63,7 @@ export function getTableVisualizationControllerClass(
     }
 
     async render(
-      esResponse: TableContext,
+      esResponse: TableVisData,
       visParams: TableVisConfig,
       handlers: IInterpreterRenderHandlers
     ): Promise<void> {
