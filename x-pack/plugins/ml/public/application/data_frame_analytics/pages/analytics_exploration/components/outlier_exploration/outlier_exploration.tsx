@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, FC, useCallback } from 'react';
+import React, { useCallback, useState, FC } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -15,6 +15,7 @@ import {
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
@@ -90,6 +91,13 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       (d) => d.id === `${resultsField}.${FEATURE_INFLUENCE}.feature_name`
     ) === -1;
 
+  const scatterplotFieldOptions = useScatterplotFieldOptions(
+    indexPattern,
+    jobConfig?.analyzed_fields.includes,
+    jobConfig?.analyzed_fields.excludes,
+    resultsField
+  );
+
   if (indexPatternErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
@@ -126,11 +134,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
-      {typeof jobConfig?.id === 'string' && jobConfig?.analyzed_fields.includes.length > 1 && (
+      {typeof jobConfig?.id === 'string' && scatterplotFieldOptions.length > 1 && (
         <ExpandableSectionSplom
-          fields={jobConfig?.analyzed_fields.includes}
+          fields={scatterplotFieldOptions}
           index={jobConfig?.dest.index}
           resultsField={jobConfig?.dest.results_field}
+          searchQuery={searchQuery}
         />
       )}
       {showLegacyFeatureInfluenceFormatCallout && (

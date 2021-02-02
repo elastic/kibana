@@ -23,7 +23,7 @@ import {
   Form,
 } from '../../../../../../../shared_imports';
 import { Document } from '../../../../types';
-import { AddDocumentsAccordion } from './add_documents_accordion';
+import { AddDocumentsAccordion } from './add_docs_accordion';
 import { ResetDocumentsModal } from './reset_documents_modal';
 
 import './tab_documents.scss';

@@ -6,7 +6,6 @@
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
@@ -627,11 +626,17 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
-        esKuery.fromKueryExpression(
-          `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-        )
-      );
+      // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+      // resolved, we can start using this code again, instead of toMatchSnapshot():
+      //
+      // expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
+      //   esKuery.fromKueryExpression(
+      //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+      //   )
+      // );
+
+      // This code is the replacement code for above
+      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchSnapshot();
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
     });

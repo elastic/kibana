@@ -12,7 +12,7 @@ import {
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
 } from '../../../types';
-
+import { DragContextState } from '../../../drag_drop';
 export interface ConfigPanelWrapperProps {
   activeDatasourceId: string;
   visualizationState: unknown;
@@ -29,6 +29,30 @@ export interface ConfigPanelWrapperProps {
     }
   >;
   core: DatasourceDimensionEditorProps['core'];
+}
+
+export interface LayerPanelProps {
+  activeDatasourceId: string;
+  visualizationState: unknown;
+  datasourceMap: Record<string, Datasource>;
+  activeVisualization: Visualization;
+  dispatch: (action: Action) => void;
+  framePublicAPI: FramePublicAPI;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
+  core: DatasourceDimensionEditorProps['core'];
+}
+
+export interface LayerDatasourceDropProps {
+  layerId: string;
+  dragDropContext: DragContextState;
+  state: unknown;
+  setState: (newState: unknown) => void;
 }
 
 export interface ActiveDimensionState {
