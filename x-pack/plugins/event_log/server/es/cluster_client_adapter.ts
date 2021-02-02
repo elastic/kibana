@@ -16,6 +16,7 @@ import { esKuery } from '../../../../../src/plugins/data/server';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
+const MAX_BUCKETS_LIMIT = 65535;
 
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
@@ -301,93 +302,165 @@ export class ClusterClientAdapter {
     ids: string[],
     start?: string,
     end?: string
-  ): Promise<Array<{ alertId: string; instances: AlertInstanceSummary[] }>> {
+  ): Promise<
+    Array<{
+      alertId: string;
+      instances: AlertInstanceSummary[];
+      last_execution_state: Record<string, unknown>;
+    }>
+  > {
     const namespaceQuery = getNamespaceQuery(namespace);
     const esClient = await this.elasticsearchClientPromise;
     const body = {
       size: 0,
       sort: { ['@timestamp']: { order: 'desc' } },
       aggs: {
-        summary: {
-          nested: {
-            path: 'kibana.saved_objects',
+        events: {
+          filter: {
+            bool: {
+              must: reject(
+                [
+                  start && {
+                    range: {
+                      '@timestamp': {
+                        gte: start,
+                      },
+                    },
+                  },
+                  end && {
+                    range: {
+                      '@timestamp': {
+                        lte: end,
+                      },
+                    },
+                  },
+                  namespaceQuery,
+                ],
+                isUndefined
+              ),
+            },
           },
           aggs: {
-            alerts: {
-              filter: {
-                bool: {
-                  must: reject(
-                    [
-                      {
-                        bool: {
-                          must: [
-                            {
-                              term: {
-                                'kibana.saved_objects.rel': {
-                                  value: SAVED_OBJECT_REL_PRIMARY,
-                                },
-                              },
-                            },
-                            {
-                              term: {
-                                'kibana.saved_objects.type': {
-                                  value: 'alert',
-                                },
-                              },
-                            },
-                            {
-                              terms: {
-                                // default maximum of 65,536 terms, configurable by index.max_terms_count
-                                'kibana.saved_objects.id': ids,
-                              },
-                            },
-                            namespaceQuery,
-                          ],
-                        },
-                      },
-                    ],
-                    isUndefined
-                  ),
-                },
+            saved_objects: {
+              nested: {
+                path: 'kibana.saved_objects',
               },
               aggs: {
-                alert_ids: {
-                  terms: {
-                    field: 'kibana.saved_objects.id',
+                alerts: {
+                  filter: {
+                    bool: {
+                      must: reject(
+                        [
+                          {
+                            bool: {
+                              must: [
+                                {
+                                  term: {
+                                    'kibana.saved_objects.rel': {
+                                      value: SAVED_OBJECT_REL_PRIMARY,
+                                    },
+                                  },
+                                },
+                                {
+                                  term: {
+                                    'kibana.saved_objects.type': {
+                                      value: 'alert',
+                                    },
+                                  },
+                                },
+                                {
+                                  terms: {
+                                    // default maximum of 65,536 terms, configurable by index.max_terms_count
+                                    'kibana.saved_objects.id': ids,
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        isUndefined
+                      ),
+                    },
                   },
                   aggs: {
-                    instances: {
-                      reverse_nested: {},
+                    ids: {
+                      // use 'terms' with size of MAX_BUCKETS_LIMIT instead of 'composite', because of filter
+                      terms: {
+                        field: 'kibana.saved_objects.id',
+                        size: MAX_BUCKETS_LIMIT,
+                      },
                       aggs: {
-                        instance_id: {
-                          terms: {
-                            field: 'kibana.alerting.instance_id',
-                          },
+                        summary: {
+                          reverse_nested: {},
                           aggs: {
-                            action: {
-                              filter: {
-                                bool: {
-                                  must: [
-                                    {
-                                      bool: {
-                                        should: [
-                                          { term: { 'event.action': 'active-instance' } },
-                                          { term: { 'event.action': 'recovered-instance' } },
-                                        ],
-                                      },
-                                    },
-                                  ],
-                                },
+                            instances: {
+                              // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
+                              terms: {
+                                field: 'kibana.alerting.instance_id',
+                                order: { _key: 'asc' },
+                                size: MAX_BUCKETS_LIMIT,
                               },
                               aggs: {
-                                name: {
-                                  terms: {
-                                    field: 'event.action',
-                                    size: 1,
-                                    order: { max_timestampt: 'desc' },
+                                last_state: {
+                                  filter: {
+                                    bool: {
+                                      should: [
+                                        { term: { 'event.action': 'active-instance' } },
+                                        { term: { 'event.action': 'recovered-instance' } },
+                                      ],
+                                    },
+                                  },
+                                  aggs: {
+                                    action: {
+                                      top_hits: {
+                                        sort: [
+                                          {
+                                            '@timestamp': {
+                                              order: 'desc',
+                                            },
+                                          },
+                                        ],
+                                        _source: {
+                                          includes: [
+                                            '@timestamp',
+                                            'event.action',
+                                            'kibana.alerting.action_group_id',
+                                            'kibana.alerting.action_subgroup',
+                                          ],
+                                        },
+                                        size: 1,
+                                      },
+                                    },
+                                  },
+                                },
+                                instance_created: {
+                                  filter: {
+                                    term: { 'event.action': 'active-instance' },
                                   },
                                   aggs: {
                                     max_timestampt: { max: { field: '@timestamp' } },
+                                  },
+                                },
+                              },
+                            },
+                            last_execution_state: {
+                              filter: {
+                                term: { 'event.action': 'execute' },
+                              },
+                              aggs: {
+                                action: {
+                                  top_hits: {
+                                    sort: [
+                                      {
+                                        '@timestamp': {
+                                          order: 'desc',
+                                        },
+                                      },
+                                    ],
+                                    _source: {
+                                      includes: ['@timestamp', 'error.message'],
+                                    },
+                                    size: 1,
                                   },
                                 },
                               },
@@ -404,28 +477,47 @@ export class ClusterClientAdapter {
         },
       },
     };
+
     try {
       const result = await esClient.search({
         index,
         body,
       });
-      return result.body.aggregations.summary.alerts.alert_ids.buckets.map((alert) => {
-        return {
-          alertId: alert.key,
-          instances: alert.instances.instance_id.buckets.map((instance) => {
-            console.log(instance.action.name.buckets);
-            return {
-              instance_id: instance.key,
-              lastAction: instance.action.name.buckets[0].key,
-              actionGroupId: '',
-              actionSubgroup: '',
-              activeStartDate: '',
-            };
-          }),
-        };
-      });
+      return result.body.aggregations.events.saved_objects.alerts.ids.buckets.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (alertSummary: Record<string, any>) => ({
+          alertId: alertSummary.key,
+          instances: alertSummary.summary.instances
+            ? alertSummary.summary.instances.buckets.map(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (instance: Record<string, any>) => {
+                  const actionActivityResult = instance.last_state.action.hits.hits;
+                  if (actionActivityResult.length > 0) {
+                    const actionData = actionActivityResult[0]._source;
+                    const actionSummary: AlertInstanceSummary = {
+                      instance_id: instance.key,
+                      lastAction: actionData.event.action,
+                    };
+                    if (actionData.event.action === 'active-instance') {
+                      actionSummary.actionGroupId = actionData.kibana.alerting.action_group_id;
+                      actionSummary.actionSubgroup = actionData.kibana.alerting.action_subgroup;
+
+                      actionSummary.activeStartDate =
+                        instance.instance_created.max_timestampt.value_as_string;
+                    }
+                    return actionSummary;
+                  }
+                  return {
+                    instance_id: instance.key,
+                  };
+                }
+              )
+            : [],
+          last_execution_state:
+            alertSummary.summary.last_execution_state.action.hits.hits[0]._source,
+        })
+      );
     } catch (err) {
-      console.log(err.meta.body.error);
       throw new Error(
         `querying for Event Log alerts instances summaries by alert ids "${ids}" failed with: ${err.message}`
       );
