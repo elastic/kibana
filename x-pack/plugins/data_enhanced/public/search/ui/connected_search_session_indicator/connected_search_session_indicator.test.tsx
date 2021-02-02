@@ -53,7 +53,13 @@ test("shouldn't show indicator in case no active search session", async () => {
   await expect(
     waitFor(() => getByTestId('searchSessionIndicator'), { timeout: 100 })
   ).rejects.toThrow();
-  expect(container).toMatchInlineSnapshot(`<div />`);
+  expect(container).toMatchInlineSnapshot(`
+    <div>
+      <div
+        class="kbnRedirectCrossAppLinks"
+      />
+    </div>
+  `);
 });
 
 test("shouldn't show indicator in case app hasn't opt-in", async () => {
@@ -70,7 +76,13 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   await expect(
     waitFor(() => getByTestId('searchSessionIndicator'), { timeout: 100 })
   ).rejects.toThrow();
-  expect(container).toMatchInlineSnapshot(`<div />`);
+  expect(container).toMatchInlineSnapshot(`
+    <div>
+      <div
+        class="kbnRedirectCrossAppLinks"
+      />
+    </div>
+  `);
 });
 
 test('should show indicator in case there is an active search session', async () => {

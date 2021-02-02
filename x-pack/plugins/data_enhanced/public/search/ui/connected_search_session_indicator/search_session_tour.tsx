@@ -34,7 +34,7 @@ export function useSearchSessionTour(
     if (state === SearchSessionState.Loading) {
       if (!safeHas(storage, TOUR_TAKING_TOO_LONG_STEP_KEY)) {
         timeoutHandle = window.setTimeout(() => {
-          searchSessionIndicatorRef?.current?.openPopover();
+          searchSessionIndicatorRef.current?.openPopover();
         }, TOUR_TAKING_TOO_LONG_TIMEOUT);
       }
     }

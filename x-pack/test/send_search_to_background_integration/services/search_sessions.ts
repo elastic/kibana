@@ -12,6 +12,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
 const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
 
+export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
+export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
+
 type SessionStateType =
   | 'none'
   | 'loading'
@@ -78,7 +81,19 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverOpened();
     }
 
-    public async ensurePopoverOpened() {
+    public async openedOrFail() {
+      return testSubjects.existOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
+    }
+
+    public async closedOrFail() {
+      return testSubjects.missingOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
+    }
+
+    private async ensurePopoverOpened() {
       const isAlreadyOpen = await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
       if (isAlreadyOpen) return;
       return retry.waitFor(`searchSessions popover opened`, async () => {
@@ -87,7 +102,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async ensurePopoverClosed() {
+    private async ensurePopoverClosed() {
       const isAlreadyClosed = !(await testSubjects.exists(
         SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
       ));
@@ -126,6 +141,20 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
           })
         );
       });
+    }
+
+    public async markTourDone() {
+      await Promise.all([
+        browser.setLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY, 'true'),
+        browser.setLocalStorageItem(TOUR_RESTORE_STEP_KEY, 'true'),
+      ]);
+    }
+
+    public async markTourUndone() {
+      await Promise.all([
+        browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
+        browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
+      ]);
     }
   })();
 }

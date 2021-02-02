@@ -74,7 +74,6 @@ export const createConnectedSearchSessionIndicator = ({
     }
 
     if (!sessionService.isSessionStorageReady()) return null;
-    if (state === SearchSessionState.None) return null;
     return (
       <RedirectAppLinks application={application}>
         <SearchSessionIndicator
