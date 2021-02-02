@@ -22,7 +22,6 @@ import { DEFAULT_HEADERS } from '../default_headers';
 export type ElasticsearchClientConfig = Pick<
   ElasticsearchConfig,
   | 'customHeaders'
-  | 'logQueries'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
   | 'requestHeadersWhitelist'
