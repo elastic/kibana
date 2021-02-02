@@ -17,6 +17,7 @@ import { useLogStream } from '../../containers/logs/log_stream';
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
 import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
+import { Query } from '../../../../../../src/plugins/data/common';
 
 const PAGE_THRESHOLD = 2;
 
@@ -55,7 +56,7 @@ export interface LogStreamProps {
   sourceId?: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string;
+  query?: string | Query;
   center?: LogEntryCursor;
   highlight?: string;
   height?: string | number;
