@@ -9,6 +9,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButtonIcon,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,

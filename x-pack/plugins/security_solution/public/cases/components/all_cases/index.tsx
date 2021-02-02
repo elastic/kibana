@@ -51,6 +51,7 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { Stats } from '../status';
+import { getExpandedRowMap } from './expanded_row';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -313,6 +314,18 @@ export const AllCases = React.memo<AllCasesProps>(
       () => getCasesColumns(userCanCrud ? actions : [], filterOptions.status, isModal),
       [actions, filterOptions.status, userCanCrud, isModal]
     );
+
+    const itemIdToExpandedRowMap = useMemo(
+      () =>
+        getExpandedRowMap({
+          columns: memoizedGetCasesColumns,
+          data: data.cases,
+          isModal,
+          userCanCrud,
+        }),
+      [data.cases, isModal, memoizedGetCasesColumns, userCanCrud]
+    );
+
     const memoizedPagination = useMemo(
       () => ({
         pageIndex: queryParams.page - 1,
@@ -476,6 +489,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 isSelectable={userCanCrud && !isModal}
                 itemId="id"
                 items={data.cases}
+                itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                 noItemsMessage={
                   <EuiEmptyPrompt
                     title={<h3>{i18n.NO_CASES}</h3>}
