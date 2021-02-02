@@ -65,8 +65,6 @@
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
 |  [SearchStrategyDependencies](./kibana-plugin-plugins-data-server.searchstrategydependencies.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
-|  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
-|  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
 
 ## Variables
 
@@ -111,6 +109,5 @@
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
-|  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
