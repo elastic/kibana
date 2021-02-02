@@ -62,7 +62,7 @@ describe('Search Sessions Management API', () => {
             "actions": Array [
               "reload",
               "extend",
-              "cancel",
+              "delete",
             ],
             "appId": "pizza",
             "created": undefined,
