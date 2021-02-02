@@ -47,7 +47,6 @@
     "plugins/painless_lab/**/*",
     "plugins/watcher/**/*",
     "plugins/grokdebugger/**/*",
-    "plugins/xpack_legacy/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -132,7 +131,6 @@
     { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/watcher/tsconfig.json" },
-    { "path": "./plugins/xpack_legacy/tsconfig.json" }
+    { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }

@@ -51,7 +51,6 @@
     { "path": "./plugins/license_management/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "./plugins/watcher/tsconfig.json" },
-    { "path": "./plugins/xpack_legacy/tsconfig.json" }
+    { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }
