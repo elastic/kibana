@@ -30,9 +30,25 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async 
     malwareUrl = null,
     priority = null,
   } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
+
+  const destinationIps: string[] = [];
+  const sourceIps: string[] = [];
+
+  if (destIp != null || sourceIp != null) {
+    alerts.forEach((alert) => {
+      if (alert.destination) {
+        destinationIps.push(alert.destination.ip);
+      }
+
+      if (alert.source) {
+        sourceIps.push(alert.source.ip);
+      }
+    });
+  }
+
   return {
-    dest_ip: destIp,
-    source_ip: sourceIp,
+    dest_ip: destinationIps.length > 0 ? destinationIps.join(',') : null,
+    source_ip: sourceIps.length > 0 ? sourceIps.join(',') : null,
     category,
     subcategory,
     malware_hash: malwareHash,

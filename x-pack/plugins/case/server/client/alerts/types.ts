@@ -7,6 +7,12 @@
 interface Alert {
   id: string;
   index: string;
+  destination?: {
+    ip: string;
+  };
+  source?: {
+    ip: string;
+  };
 }
 
 export type CaseClientGetAlertsResponse = Alert[];
