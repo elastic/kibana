@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResilientFieldsType } from '../../../common/api';
+import { ResilientFieldsType, ConnectorResillientTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
 const format: ExternalServiceFormatter<ResilientFieldsType>['format'] = async (theCase) => {
-  const { incidentTypes, severityCode } = theCase.connector.fields as ResilientFieldsType;
+  const { incidentTypes = null, severityCode = null } =
+    (theCase.connector.fields as ConnectorResillientTypeFields['fields']) ?? {};
   return { incidentTypes, severityCode };
 };
 

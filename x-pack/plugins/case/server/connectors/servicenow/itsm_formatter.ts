@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceNowITSMFieldsType } from '../../../common/api';
+import { ServiceNowITSMFieldsType, ConnectorServiceNowITSMTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
 const format: ExternalServiceFormatter<ServiceNowITSMFieldsType>['format'] = async (theCase) => {
-  const { severity, urgency, impact } = theCase.connector.fields as ServiceNowITSMFieldsType;
+  const { severity = null, urgency = null, impact = null } =
+    (theCase.connector.fields as ConnectorServiceNowITSMTypeFields['fields']) ?? {};
   return { severity, urgency, impact };
 };
 

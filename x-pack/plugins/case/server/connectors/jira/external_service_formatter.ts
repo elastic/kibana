@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JiraFieldsType } from '../../../common/api';
+import { JiraFieldsType, ConnectorJiraTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
 interface ExternalServiceParams extends JiraFieldsType {
@@ -12,7 +12,8 @@ interface ExternalServiceParams extends JiraFieldsType {
 }
 
 const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (theCase) => {
-  const { priority, issueType, parent } = theCase.connector.fields as JiraFieldsType;
+  const { priority = null, issueType = null, parent = null } =
+    (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
   return { priority, labels: theCase.tags, issueType, parent };
 };
 

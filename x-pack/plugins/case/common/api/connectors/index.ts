@@ -81,6 +81,12 @@ export const CaseConnectorRt = rt.intersection([
 
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
+export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
+export type ConnectorResillientTypeFields = rt.TypeOf<typeof ConnectorResillientTypeFieldsRt>;
+export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
+  typeof ConnectorServiceNowITSMTypeFieldsRt
+>;
+export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;

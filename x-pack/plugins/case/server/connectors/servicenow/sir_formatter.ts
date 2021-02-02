@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceNowSIRFieldsType } from '../../../common/api';
+import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
 interface ExternalServiceParams {
@@ -21,8 +21,15 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async 
   theCase,
   alerts
 ) => {
-  const { destIp, sourceIp, category, subcategory, malwareHash, malwareUrl, priority } = theCase
-    .connector.fields as ServiceNowSIRFieldsType;
+  const {
+    destIp = null,
+    sourceIp = null,
+    category = null,
+    subcategory = null,
+    malwareHash = null,
+    malwareUrl = null,
+    priority = null,
+  } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
   return {
     dest_ip: destIp,
     source_ip: sourceIp,
