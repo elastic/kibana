@@ -18,7 +18,7 @@ import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
   description:
-    'Remove target directories from all projects, remove extra patterns and runs a Bazel state soft clean.',
+    'Deletes output directories and resets caches.',
   name: 'clean',
 
   async run(projects) {
