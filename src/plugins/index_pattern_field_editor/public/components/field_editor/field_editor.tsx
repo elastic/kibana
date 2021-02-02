@@ -6,11 +6,10 @@
  * Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { isArray } from 'lodash';
+// import { isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
-import { castEsToKbnFieldTypeName } from '../../../../data/public';
 
 import {
   Form,
@@ -22,7 +21,6 @@ import {
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
-  ES_FIELD_TYPES,
 } from '../../shared_imports';
 import { Field, PluginStart } from '../../types';
 
@@ -168,7 +166,7 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: 'name' });
+  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: ['name'] });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
@@ -244,13 +242,6 @@ const FieldEditorComponent = ({
       >
         {/** type need to be set to kbn type, esTypes need to be set */}
         <FormatField
-          fieldAttrs={{
-            name,
-            type: castEsToKbnFieldTypeName(field?.type || 'keyword'),
-            esTypes:
-              (isArray(field?.type) ? field?.type : ([field?.type] as ES_FIELD_TYPES[])) ||
-              (['keyword'] as ES_FIELD_TYPES[]),
-          }}
           indexPattern={indexPattern}
           fieldFormatEditors={fieldFormatEditors}
           fieldFormats={fieldFormats}

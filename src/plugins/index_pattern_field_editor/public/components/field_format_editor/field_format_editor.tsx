@@ -87,9 +87,6 @@ export class FormatSelectEditor extends PureComponent<
       fieldAttrs: { name, type, esTypes },
     } = props;
 
-    /* also to do - dealing with kbn type and es type */
-    /* changing type should change formatter options */
-
     // get current formatter for field, provides default if none exists
     const format = indexPattern.getFormatterForField({
       name,
