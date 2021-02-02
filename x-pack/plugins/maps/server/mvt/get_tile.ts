@@ -160,11 +160,8 @@ export async function getTile({
       )
       .toPromise();
 
-    const totalMeta = countResponse.rawResponse.hits.total as { value: number; relation: string };
-    if (
-      totalMeta.value > requestBody.size ||
-      (totalMeta.value === requestBody.size && totalMeta.relation === 'gte')
-    ) {
+    // @ts-expect-error
+    if (countResponse.rawResponse.hits.total > requestBody.size) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
         .search!.search(
