@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
-
-export function unwrapEsResponse<T extends Promise<{ body: any }>>(
-  responsePromise: T
-): Promise<UnwrapPromise<T>['body']> {
-  return responsePromise.then((res) => res.body);
+export default function loadTests({ loadTestFile }) {
+  describe('Data Stream Endpoints', () => {
+    loadTestFile(require.resolve('./list'));
+  });
 }
