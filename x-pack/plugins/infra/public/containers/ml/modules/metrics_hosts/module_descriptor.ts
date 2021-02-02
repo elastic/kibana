@@ -110,7 +110,12 @@ const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler)
     const config = { ...defaultDatafeedConfig };
 
     if (filter) {
-      config.query = JSON.parse(filter);
+      const query = JSON.parse(filter);
+
+      config.query.bool = {
+        ...config.query.bool,
+        ...query.bool,
+      };
     }
 
     if (!partitionField || id === 'hosts_memory_usage') {

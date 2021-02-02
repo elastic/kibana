@@ -278,14 +278,14 @@ export const JobSetupScreen = (props: Props) => {
                   <h3>
                     <FormattedMessage
                       id="xpack.infra.ml.steps.setupProcess.filter.title"
-                      defaultMessage="Filter data"
+                      defaultMessage="Filter"
                     />
                   </h3>
                 }
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.filter.description"
-                    defaultMessage="Filter description"
+                    defaultMessage="By default, machine learning jobs analyze all of your metric data."
                   />
                 }
               >
