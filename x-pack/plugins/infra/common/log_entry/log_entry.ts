@@ -14,7 +14,6 @@ export type LogEntryTime = TimeKey;
 /**
  * message parts
  */
-
 export const logMessageConstantPartRT = rt.type({
   constant: rt.string,
 });
