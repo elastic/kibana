@@ -30,7 +30,6 @@ export function instantiateClient(
   const cluster = createClient('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
     plugins: [monitoringBulk, monitoringEndpointDisableWatches],
-    logQueries: Boolean(elasticsearchConfig.logQueries),
   } as ESClusterConfig);
 
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';

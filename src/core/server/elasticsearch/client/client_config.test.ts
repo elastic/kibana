@@ -15,7 +15,6 @@ const createConfig = (
 ): ElasticsearchClientConfig => {
   return {
     customHeaders: {},
-    logQueries: false,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,

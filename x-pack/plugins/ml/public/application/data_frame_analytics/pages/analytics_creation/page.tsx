@@ -62,7 +62,7 @@ export const Page: FC<Props> = ({ jobId }) => {
     if (currentIndexPattern) {
       (async function () {
         if (jobId !== undefined) {
-          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+          const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId, true);
           if (
             Array.isArray(analyticsConfigs.data_frame_analytics) &&
             analyticsConfigs.data_frame_analytics.length > 0
