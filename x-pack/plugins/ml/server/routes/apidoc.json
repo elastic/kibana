@@ -73,6 +73,7 @@
     "CloseJobs",
     "JobsSummary",
     "JobsWithTimeRange",
+    "GetJobForCloning",
     "CreateFullJobsList",
     "GetAllGroups",
     "JobsExist",

@@ -8,6 +8,9 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiLink,
@@ -26,6 +29,12 @@ import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
 
 import { EXTERNAL_IDENTITIES_DOCS_URL, DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
+
+import {
+  EXTERNAL_IDENTITIES_LINK,
+  DOCUMENT_PERMISSIONS_LINK,
+  UNDERSTAND_BUTTON,
+} from './constants';
 
 import { SourcesLogic } from './sources_logic';
 
@@ -59,35 +68,53 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
               <EuiFlexItem grow={false}>
                 <SourceIcon serviceType={serviceType} name={addedSourceName} />
               </EuiFlexItem>
-              <EuiFlexItem>{addedSourceName} requires additional configuration</EuiFlexItem>
+              <EuiFlexItem>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.heading',
+                  {
+                    defaultMessage: '{addedSourceName} requires additional configuration',
+                    values: { addedSourceName },
+                  }
+                )}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText grow={false}>
             <p>
-              {addedSourceName} has been successfully connected and initial content synchronization
-              is already underway. Since you have elected to synchronize document-level permission
-              information, you must now provide user and group mappings using the&nbsp;
-              <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
-                External Identities API
-              </EuiLink>
-              .
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.success"
+                defaultMessage="{addedSourceName} has been successfully connected and initial content synchronization is already underway. Since you have elected to synchronize document-level permission information, you must now provide user and group mappings using the {externalIdentitiesLink}."
+                values={{
+                  addedSourceName,
+                  externalIdentitiesLink: (
+                    <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                      {EXTERNAL_IDENTITIES_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
 
             <p>
-              Documents will not be searchable from Workplace Search until user and group mappings
-              have been configured.&nbsp;
-              <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-                Learn more about document-level permission configuration
-              </EuiLink>
-              .
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.sourcesView.modal.docPermissions.description"
+                defaultMessage="Documents will not be searchable from Workplace Search until user and group mappings have been configured. {documentPermissionsLink}."
+                values={{
+                  documentPermissionsLink: (
+                    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      {DOCUMENT_PERMISSIONS_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </p>
           </EuiText>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButton onClick={resetPermissionsModal} fill>
-            I understand
+            {UNDERSTAND_BUTTON}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

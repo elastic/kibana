@@ -13,10 +13,8 @@ exports[`DragDrop items that have droppable=false get special styling when anoth
 <button
   className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
   data-test-subj="lnsDragDrop"
-  onDragEnd={[Function]}
   onDragLeave={[Function]}
   onDragOver={[Function]}
-  onDragStart={[Function]}
   onDrop={[Function]}
 >
   Hello!
@@ -24,11 +22,19 @@ exports[`DragDrop items that have droppable=false get special styling when anoth
 `;
 
 exports[`DragDrop renders if nothing is being dragged 1`] = `
-<button
-  class="lnsDragDrop lnsDragDrop-isDraggable"
-  data-test-subj="lnsDragDrop"
-  draggable="true"
->
-  Hello!
-</button>
+<div>
+  <button
+    aria-describedby="lnsDragDrop-keyboardInstructions"
+    aria-label="dragging"
+    class="euiScreenReaderOnly--showOnFocus lnsDragDrop__keyboardHandler"
+    data-test-subj="lnsDragDrop-keyboardHandler"
+  />
+  <button
+    class="lnsDragDrop lnsDragDrop-isDraggable"
+    data-test-subj="lnsDragDrop"
+    draggable="true"
+  >
+    Hello!
+  </button>
+</div>
 `;

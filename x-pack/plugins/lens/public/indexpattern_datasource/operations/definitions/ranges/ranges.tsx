@@ -132,7 +132,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  toEsAggsFn: (column, columnId) => {
+  toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
     if (params.type === MODES.Range) {
       return buildExpressionFunction<AggFunctionsMapping['aggRange']>('aggRange', {
@@ -158,13 +158,15 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         ),
       }).toAst();
     }
+    const maxBarsDefaultValue =
+      (uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS) - MIN_HISTOGRAM_BARS) / 2;
+
     return buildExpressionFunction<AggFunctionsMapping['aggHistogram']>('aggHistogram', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: sourceField,
-      // fallback to 0 in case of empty string
-      maxBars: params.maxBars === AUTO_BARS ? undefined : params.maxBars,
+      maxBars: params.maxBars === AUTO_BARS ? maxBarsDefaultValue : params.maxBars,
       interval: 'auto',
       has_extended_bounds: false,
       min_doc_count: false,

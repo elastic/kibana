@@ -6,6 +6,5 @@
  * Public License, v 1.
  */
 
-export * from './use_formatted_columns';
 export * from './use_pagination';
 export * from './use_ui_state';
