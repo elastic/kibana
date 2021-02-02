@@ -92,6 +92,14 @@ describe('ConfigPanel', () => {
     mockDatasource = createMockDatasource('ds1');
   });
 
+  // in what case is this test needed?
+  it('should fail to render layerPanels if the public API is out of date', () => {
+    const props = getDefaultProps();
+    props.framePublicAPI.datasourceLayers = {};
+    const component = mountWithIntl(<LayerPanels {...props} />);
+    expect(component.find(LayerPanel).exists()).toBe(false);
+  });
+
   describe('focus behavior when adding or removing layers', () => {
     it('should focus the only layer when resetting the layer', () => {
       const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />);

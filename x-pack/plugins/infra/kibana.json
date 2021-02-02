@@ -6,7 +6,7 @@
     "features",
     "usageCollection",
     "spaces",
-    
+    "embeddable",
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
@@ -22,7 +22,6 @@
     "licenseManagement",
     "kibanaUtils",
     "kibanaReact",
-    "apm",
     "home",
     "ml",
     "embeddable"
