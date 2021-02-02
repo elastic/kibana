@@ -1,0 +1,13 @@
+diff --git a/packages/kbn-test/src/functional_test_runner/functional_test_runner.ts b/packages/kbn-test/src/functional_test_runner/functional_test_runner.ts
+index b4b5066eb28..6b474ef1f1a 100644
+--- a/packages/kbn-test/src/functional_test_runner/functional_test_runner.ts
++++ b/packages/kbn-test/src/functional_test_runner/functional_test_runner.ts
+@@ -94,6 +94,8 @@ export class FunctionalTestRunner {
+ 
+       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+ 
++      await this.lifecycle.beforeTests.trigger(mocha.suite);
++
+       const countTests = (suite: Suite): number =>
+         suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
+ 
