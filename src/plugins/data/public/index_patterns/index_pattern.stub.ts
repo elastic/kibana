@@ -47,7 +47,7 @@ export class StubIndexPattern {
   formatHit: Record<string, any>;
   fieldsFetcher: Record<string, any>;
   formatField: Function;
-  getFormatterForField: () => { convert: Function };
+  getFormatterForField: () => { convert: Function; toJSON: Function };
   _reindexFields: Function;
   stubSetFieldFormat: Function;
   fields?: FieldSpec[];
@@ -87,6 +87,7 @@ export class StubIndexPattern {
     this.formatField = this.formatHit.formatField;
     this.getFormatterForField = () => ({
       convert: () => '',
+      toJSON: () => '{}',
     });
 
     this._reindexFields = function () {

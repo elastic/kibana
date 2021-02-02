@@ -98,7 +98,7 @@ describe('esaggs expression function - public', () => {
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
     await definition().fn(null, args, mockHandlers);
 
-    expect(handleEsaggsRequest).toHaveBeenCalledWith(null, args, {
+    expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
       aggs: { foo: 'bar' },
       filters: undefined,
@@ -128,8 +128,6 @@ describe('esaggs expression function - public', () => {
     await definition().fn(input, args, mockHandlers);
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
-      input,
-      args,
       expect.objectContaining({
         filters: input.filters,
         query: input.query,

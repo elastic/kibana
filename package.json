@@ -681,7 +681,7 @@
     "http-proxy": "^1.18.1",
     "i18n-iso-countries": "^4.3.1",
     "icalendar": "0.7.1",
-    "iedriver": "^3.14.2",
+
     "imports-loader": "^0.8.0",
     "inquirer": "^7.3.3",
     "intl-messageformat-parser": "^1.4.0",

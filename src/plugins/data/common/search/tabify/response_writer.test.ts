@@ -59,6 +59,7 @@ describe('TabbedAggResponseWriter class', () => {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
       },
+      getFormatterForField: () => ({ toJSON: () => '' }),
     } as any;
 
     return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
@@ -142,10 +143,8 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
-        expect(response.columns[0]).toHaveProperty('aggConfig');
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
-        expect(response.columns[1]).toHaveProperty('aggConfig');
       });
 
       test('produces correct response for no data', () => {
@@ -157,10 +156,8 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
-        expect(response.columns[0]).toHaveProperty('aggConfig');
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
-        expect(response.columns[1]).toHaveProperty('aggConfig');
       });
     });
   });
