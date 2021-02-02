@@ -36,7 +36,7 @@ export const getLatestPushInfo = (
   connectorId: string,
   userActions: CaseUserActionsResponse
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
-  for (const [index, action] of [...userActions.reverse()].entries()) {
+  for (const [index, action] of [...userActions].reverse().entries()) {
     if (action.action === 'push-to-service' && action.new_value)
       try {
         const pushedInfo = JSON.parse(action.new_value);
@@ -141,12 +141,14 @@ export const createIncident = async ({
 
   const commentsIdsToBeUpdated = new Set(
     userActions
+      .slice(latestPushInfo?.index ?? 0)
       .filter(
-        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
+        (action, index) =>
+          Array.isArray(action.action_field) && action.action_field[0] === 'comment'
       )
       .map((action) => action.comment_id)
   );
-  const commentsToBeUpdated = caseComments?.filter((comment, index) =>
+  const commentsToBeUpdated = caseComments?.filter((comment) =>
     commentsIdsToBeUpdated.has(comment.id)
   );
 
