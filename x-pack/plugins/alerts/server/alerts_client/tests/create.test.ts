@@ -462,6 +462,73 @@ describe('create()', () => {
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
+  test('creates an alert with a custom id', async () => {
+    const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '123',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    const result = await alertsClient.create({ data, options: { id: '123' } });
+    expect(result.id).toEqual('123');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "id": "123",
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+      }
+    `);
+  });
+
   test('creates an alert with multiple actions', async () => {
     const data = getMockData({
       actions: [
