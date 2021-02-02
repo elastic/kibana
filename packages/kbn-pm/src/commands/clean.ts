@@ -17,7 +17,7 @@ import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Deletes output directories and resets caches.',
+  description: 'Deletes output directories, node_modules and resets caches.',
   name: 'clean',
 
   async run(projects) {
@@ -29,6 +29,13 @@ export const CleanCommand: ICommand = {
 
     const toDelete = [];
     for (const project of projects.values()) {
+      if (await isDirectory(project.nodeModulesLocation)) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: relative(project.path, project.nodeModulesLocation),
+        });
+      }
+
       if (await isDirectory(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,

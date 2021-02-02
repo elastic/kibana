@@ -54262,17 +54262,25 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const CleanCommand = {
-  description: 'Deletes output directories and resets caches.',
+  description: 'Deletes output directories, node_modules and resets caches.',
   name: 'clean',
 
   async run(projects) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-      NOTICE: When switching between Bazel and non-Bazel branches, you might want to instead
-      run 'yarn kbn reset', which also removes node_module directories.
+      This command is only necessary for the rare circumstance where you need to recover a consistent
+      state when problems arise. If you need to run this command often, please let us know by
+      filling out this form: https://ela.st/yarn-kbn-clean.
     `);
     const toDelete = [];
 
     for (const project of projects.values()) {
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isDirectory"])(project.nodeModulesLocation)) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.nodeModulesLocation)
+        });
+      }
+
       if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isDirectory"])(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
