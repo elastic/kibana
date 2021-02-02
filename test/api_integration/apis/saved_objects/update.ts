@@ -121,10 +121,10 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana*' }, { ignore: [404] })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
-      it('should return 500', async () =>
+      it('should return generic 404', async () =>
         await supertest
           .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
           .send({
@@ -132,12 +132,13 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'My second favorite vis',
             },
           })
-          .expect(500)
+          .expect(404)
           .then((resp) => {
             expect(resp.body).eql({
-              statusCode: 500,
-              error: 'Internal Server Error',
-              message: 'An internal server error occurred.',
+              statusCode: 404,
+              error: 'Not Found',
+              message:
+                'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
             });
           }));
     });

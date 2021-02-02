@@ -8,7 +8,7 @@
 
 import { getServices, chance } from './lib';
 
-export const docMissingSuite = (savedObjectsIndex: string) => () => {
+export function docMissingSuite() {
   // ensure the kibana index has no documents
   beforeEach(async () => {
     const { kbnServer, callCluster } = getServices();
@@ -22,7 +22,7 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
-      index: savedObjectsIndex,
+      index: kbnServer.config.get('kibana.index'),
       body: {
         query: { match_all: {} },
       },
@@ -136,4 +136,4 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
       });
     });
   });
-};
+}
