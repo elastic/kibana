@@ -989,6 +989,7 @@ export const mockUserPrivilege: Privilege = {
   cluster: {
     monitor_ml: true,
     manage_ccr: true,
+    manage_api_key: true,
     manage_index_templates: true,
     monitor_watcher: true,
     monitor_transform: true,
@@ -1033,6 +1034,7 @@ export const mockUserPrivilege: Privilege = {
       write: true,
     },
   },
+  application: {},
   is_authenticated: true,
   has_encryption_key: true,
 };
