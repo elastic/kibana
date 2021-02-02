@@ -5,10 +5,8 @@
  */
 
 import { Importer, ImportConfig, CreateDocsResponse } from './importer';
-import {
-  Doc,
-  FindFileStructureResponse,
-} from '../../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
+import { Doc } from '../../../../../../../../file_upload/common';
 
 export class MessageImporter extends Importer {
   private _excludeLinesRegex: RegExp | null;
