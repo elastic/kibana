@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { generatePath } from 'react-router-dom';
-
-import { encodePathParams } from '../../utils/encode_path_params';
+import { generateEncodedPath } from '../../utils/encode_path_params';
 
 import { EngineLogic } from './';
 
@@ -15,5 +13,5 @@ import { EngineLogic } from './';
  */
 export const generateEnginePath = (path: string, pathParams: object = {}) => {
   const { engineName } = EngineLogic.values;
-  return generatePath(path, encodePathParams({ engineName, ...pathParams }));
+  return generateEncodedPath(path, { engineName, ...pathParams });
 };

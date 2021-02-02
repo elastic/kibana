@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { generatePath } from 'react-router-dom';
 import classNames from 'classnames';
 
 import './result.scss';
@@ -14,7 +13,7 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-import { encodePathParams } from '../../utils/encode_path_params';
+import { generateEncodedPath } from '../../utils/encode_path_params';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 
 import { Schema } from '../../../shared/types';
@@ -53,13 +52,10 @@ export const Result: React.FC<Props> = ({
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const documentLink = generatePath(
-    ENGINE_DOCUMENT_DETAIL_PATH,
-    encodePathParams({
-      engineName: resultMeta.engine,
-      documentId: resultMeta.id,
-    })
-  );
+  const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
+    engineName: resultMeta.engine,
+    documentId: resultMeta.id,
+  });
   const conditionallyLinkedArticle = (children: React.ReactNode) => {
     return shouldLinkToDetailPage ? (
       <ReactRouterHelper to={documentLink}>
