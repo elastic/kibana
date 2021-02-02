@@ -59,8 +59,10 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
   const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
 
   const endTime = startedAt.getTime();
+  // Anomalies are bucketed at :00, :15, :30, :45 minutes every hour
   const previousBucketStartTime = endTime - (endTime % bucketInterval);
 
+  // If the alert interval is less than 15m, make sure that it actually queries an anomaly bucket
   const startTime = Math.min(endTime - alertIntervalInMs, previousBucketStartTime);
 
   const { data } = await evaluateCondition({
