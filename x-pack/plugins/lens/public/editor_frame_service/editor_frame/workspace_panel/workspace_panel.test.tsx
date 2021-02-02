@@ -784,7 +784,15 @@ describe('workspace_panel', () => {
 
     function initComponent(draggingContext = draggedField) {
       instance = mount(
-        <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
+        <ChildDragDropProvider
+          dragging={draggingContext}
+          setDragging={() => {}}
+          setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          setA11yMessage={() => {}}
+        >
           <WorkspacePanel
             activeDatasourceId={'mock'}
             datasourceStates={{
@@ -822,7 +830,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',

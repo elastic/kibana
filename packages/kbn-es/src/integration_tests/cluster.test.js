@@ -264,9 +264,7 @@ describe('#start(installPath)', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [
-            "indices.query.bool.max_nested_depth=100",
-          ],
+          Array [],
           undefined,
           Object {
             "log": <ToolingLog>,
@@ -342,9 +340,7 @@ describe('#run()', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [
-            "indices.query.bool.max_nested_depth=100",
-          ],
+          Array [],
           undefined,
           Object {
             "log": <ToolingLog>,

@@ -59,7 +59,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       return await this.options.baseClient.create(type, attributes, options);
     }
 
-    const id = getValidId(options.id, options.version, options.overwrite);
+    const id = this.getValidId(options.id, options.version, options.overwrite);
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -93,7 +93,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           return object;
         }
 
-        const id = getValidId(object.id, object.version, options?.overwrite);
+        const id = this.getValidId(object.id, object.version, options?.overwrite);
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -307,27 +307,27 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return response;
   }
-}
 
-// Saved objects with encrypted attributes should have IDs that are hard to guess especially
-// since IDs are part of the AAD used during encryption, that's why we control them within this
-// wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
-function getValidId(
-  id: string | undefined,
-  version: string | undefined,
-  overwrite: boolean | undefined
-) {
-  if (id) {
-    // only allow a specified ID if we're overwriting an existing ESO with a Version
-    // this helps us ensure that the document really was previously created using ESO
-    // and not being used to get around the specified ID limitation
-    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
-    if (!canSpecifyID) {
-      throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
-      );
+  // Saved objects with encrypted attributes should have IDs that are hard to guess especially
+  // since IDs are part of the AAD used during encryption, that's why we control them within this
+  // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+  private getValidId(
+    id: string | undefined,
+    version: string | undefined,
+    overwrite: boolean | undefined
+  ) {
+    if (id) {
+      // only allow a specified ID if we're overwriting an existing ESO with a Version
+      // this helps us ensure that the document really was previously created using ESO
+      // and not being used to get around the specified ID limitation
+      const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+      if (!canSpecifyID) {
+        throw this.errors.createBadRequestError(
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+        );
+      }
+      return id;
     }
-    return id;
+    return SavedObjectsUtils.generateId();
   }
-  return SavedObjectsUtils.generateId();
 }

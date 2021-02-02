@@ -620,7 +620,7 @@ export class VectorStyle implements IVectorStyle {
       dataRequestId = SOURCE_FORMATTERS_DATA_REQUEST_ID;
     } else {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+        return !!join.getRightJoinSource().getFieldByName(fieldName);
       });
       if (targetJoin) {
         dataRequestId = targetJoin.getSourceFormattersDataRequestId();
@@ -841,7 +841,7 @@ export class VectorStyle implements IVectorStyle {
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
   }
 
-  _makeField(fieldDescriptor?: StylePropertyField) {
+  _makeField(fieldDescriptor?: StylePropertyField): IField | null {
     if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
@@ -852,10 +852,10 @@ export class VectorStyle implements IVectorStyle {
       return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const targetJoin = this._layer.getValidJoins().find((join) => {
-        return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
+        return !!join.getRightJoinSource().getFieldByName(fieldDescriptor.name);
       });
       return targetJoin
-        ? targetJoin.getRightJoinSource().getMetricFieldForName(fieldDescriptor.name)
+        ? targetJoin.getRightJoinSource().getFieldByName(fieldDescriptor.name)
         : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
