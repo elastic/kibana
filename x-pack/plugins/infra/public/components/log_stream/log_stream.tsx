@@ -101,14 +101,14 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
 
   // Internal state
   const {
-    loadingState,
-    pageLoadingState,
     entries,
-    hasMoreBefore,
-    hasMoreAfter,
     fetchEntries,
-    fetchPreviousEntries,
     fetchNextEntries,
+    fetchPreviousEntries,
+    hasMoreAfter,
+    hasMoreBefore,
+    isLoadingMore,
+    isReloading,
   } = useLogStream({
     sourceId,
     startTimestamp,
@@ -117,12 +117,6 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     center,
     columns: customColumns,
   });
-
-  // Derived state
-  const isReloading =
-    isLoadingSourceConfiguration || loadingState === 'uninitialized' || loadingState === 'loading';
-
-  const isLoadingMore = pageLoadingState === 'loading';
 
   const columnConfigurations = useMemo(() => {
     return sourceConfiguration ? customColumns ?? sourceConfiguration.configuration.logColumns : [];
@@ -177,7 +171,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         items={streamItems}
         scale="medium"
         wrap={true}
-        isReloading={isReloading}
+        isReloading={isLoadingSourceConfiguration || isReloading}
         isLoadingMore={isLoadingMore}
         hasMoreBeforeStart={hasMoreBefore}
         hasMoreAfterEnd={hasMoreAfter}
