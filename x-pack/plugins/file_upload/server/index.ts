@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initMlTelemetry } from './ml_usage_collector';
-export { updateTelemetry } from './telemetry';
+import { FileUploadPlugin } from './plugin';
+
+export const plugin = () => new FileUploadPlugin();
