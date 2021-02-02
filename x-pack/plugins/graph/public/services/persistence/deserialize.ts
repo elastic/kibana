@@ -104,7 +104,11 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
   return indexPattern
     .getNonScriptedFields()
     .filter(
-      (field) => !blockedFieldNames.includes(field.name) && !indexPatternsUtils.isNestedField(field)
+      (field) =>
+        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
+        field.isMapped &&
+        !blockedFieldNames.includes(field.name) &&
+        !indexPatternsUtils.isNestedField(field)
     )
     .map((field, index) => ({
       name: field.name,
