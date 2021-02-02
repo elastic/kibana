@@ -96,7 +96,12 @@ export function getServiceNowSIRActionType(
       }),
       params: ExecutorParamsSchemaSIR,
     },
-    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowSIRTable }),
+    executor: curry(executor)({
+      logger,
+      configurationUtilities,
+      table: serviceNowSIRTable,
+      commentFieldKey: 'work_notes',
+    }),
   };
 }
 
@@ -107,7 +112,13 @@ async function executor(
     logger,
     configurationUtilities,
     table,
-  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities; table: string },
+    commentFieldKey = 'comments',
+  }: {
+    logger: Logger;
+    configurationUtilities: ActionsConfigurationUtilities;
+    table: string;
+    commentFieldKey?: string;
+  },
   execOptions: ActionTypeExecutorOptions<
     ServiceNowPublicConfigurationType,
     ServiceNowSecretConfigurationType,
@@ -147,6 +158,7 @@ async function executor(
       params: pushToServiceParams,
       secrets,
       logger,
+      commentFieldKey,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
