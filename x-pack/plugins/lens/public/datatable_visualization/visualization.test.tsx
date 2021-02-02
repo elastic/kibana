@@ -107,6 +107,32 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should retain width and hidden config from existing state', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          columns: [
+            { columnId: 'col1', width: 123 },
+            { columnId: 'col2', hidden: true },
+          ],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [numCol('col1'), strCol('col2'), strCol('col3')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions[0].state.columns).toEqual([
+        { columnId: 'col1', width: 123 },
+        { columnId: 'col2', hidden: true },
+        { columnId: 'col3' },
+      ]);
+    });
+
     it('should not make suggestions when the table is unchanged', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {
