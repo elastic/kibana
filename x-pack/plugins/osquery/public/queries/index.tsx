@@ -7,31 +7,31 @@
 import React from 'react';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 
-import { SavedQueriesPage } from './queries';
+import { QueriesPage } from './queries';
 import { NewSavedQueryPage } from './new';
 import { EditSavedQueryPage } from './edit';
 // import { QueryAgentResults } from './agent_results';
 // import { SavedQueriesPage } from './saved_query';
 
-const SavedQueryComponent = () => {
+const QueriesComponent = () => {
   const match = useRouteMatch();
 
   return (
     <Switch>
-      <Route path={`${match.url}/queries/new`}>
+      <Route path={`${match.url}/new`}>
         <NewSavedQueryPage />
       </Route>
-      {/* <Route path={`${match.url}/queries/:savedQueryId/results/:agentId`}>
+      {/* <Route path={`${match.url}/:savedQueryId/results/:agentId`}>
         <QueryAgentResults />
       </Route> */}
-      <Route path={`${match.url}/queries/:savedQueryId`}>
+      <Route path={`${match.url}/:savedQueryId`}>
         <EditSavedQueryPage />
       </Route>
-      <Route path={`${match.url}/queries`}>
-        <SavedQueriesPage />
+      <Route path={`${match.url}/`}>
+        <QueriesPage />
       </Route>
     </Switch>
   );
 };
 
-export const SavedQuery = React.memo(SavedQueryComponent);
+export const Queries = React.memo(QueriesComponent);

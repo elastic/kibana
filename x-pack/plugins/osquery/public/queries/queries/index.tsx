@@ -13,17 +13,17 @@ import { useHistory } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 
-const SavedQueriesPageComponent = () => {
+const QueriesPageComponent = () => {
   const { push } = useHistory();
   const queryClient = useQueryClient();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('updated_at');
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortDirection, setSortDirection] = useState('desc');
   const [selectedItems, setSelectedItems] = useState([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
   const { http } = useKibana().services;
-  const newQueryLinkProps = useRouterNavigate('/saved_query/queries/new');
+  const newQueryLinkProps = useRouterNavigate('queries/new');
 
   const deleteSavedQueriesMutation = useMutation(
     (payload) => http.delete(`/api/osquery/saved_query`, { body: JSON.stringify(payload) }),
@@ -79,7 +79,7 @@ const SavedQueriesPageComponent = () => {
     [itemIdToExpandedRowMap, toggleDetails]
   );
 
-  const handleEditClick = useCallback((item) => push(`/saved_query/queries/${item.id}`), []);
+  const handleEditClick = useCallback((item) => push(`/queries/${item.id}`), [push]);
 
   const columns = useMemo(
     () => [
@@ -194,4 +194,4 @@ const SavedQueriesPageComponent = () => {
   );
 };
 
-export const SavedQueriesPage = React.memo(SavedQueriesPageComponent);
+export const QueriesPage = React.memo(QueriesPageComponent);

@@ -25,7 +25,7 @@ const NewSavedQueryPageComponent = () => {
     (payload) => http.post(`/api/osquery/saved_query`, { body: JSON.stringify(payload) }),
     {
       onSuccess: (data) => {
-        history.push(`/saved_query/queries/${data.id}`);
+        history.push(`/queries/${data.id}`);
       },
     }
   );
@@ -51,8 +51,8 @@ const NewSavedQueryPageComponent = () => {
     })
   );
 
-  console.error('createActionMutation', createActionMutation);
-  console.error('savedQueryFormData', savedQueryFormData);
+  // console.error('createActionMutation', createActionMutation);
+  // console.error('savedQueryFormData', savedQueryFormData);
 
   return (
     <>

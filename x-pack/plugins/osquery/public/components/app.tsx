@@ -20,7 +20,7 @@ import {
 
 import { PLUGIN_NAME } from '../../common';
 import { LiveQuery } from '../live_query';
-import { SavedQuery } from '../saved_query';
+import { Queries } from '../queries';
 
 export const OsqueryAppComponent = () => {
   return (
@@ -43,11 +43,8 @@ export const OsqueryAppComponent = () => {
             <EuiSpacer />
 
             <Switch>
-              <Route path={`/live_query`}>
-                <LiveQuery />
-              </Route>
-              <Route path={`/saved_query`}>
-                <SavedQuery />
+              <Route path={`/queries`}>
+                <Queries />
               </Route>
             </Switch>
 

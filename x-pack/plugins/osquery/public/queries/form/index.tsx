@@ -5,14 +5,12 @@
  */
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 
-import { Field, getUseField, UseField, Form, useForm } from '../../shared_imports';
+import { Field, getUseField, UseField, Form } from '../../shared_imports';
 import { CodeEditorField } from './code_editor_field';
 
 export const CommonUseField = getUseField({ component: Field });
-
-const FORM_ID = 'savedQueryForm';
 
 interface SavedQueryFormProps {
   actionDetails?: Record<string, string>;
