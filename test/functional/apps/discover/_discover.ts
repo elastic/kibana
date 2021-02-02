@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('chart to have rendered', async () => {
           const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
           log.debug(`Number of renderings 2: ${prevRenderingCount} - ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 2;
+          return actualRenderingCount === prevRenderingCount + 3;
         });
         const oldDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         log.debug(`Number of hours: ${oldDurationHours}`);
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('chart to have rendered after brushed', async () => {
           const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
           log.debug(`Number of renderings 3: ${prevRenderingCount} - ${actualRenderingCount}`);
-          return actualRenderingCount === prevRenderingCount + 4;
+          return actualRenderingCount === prevRenderingCount + 6;
         });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         log.debug(`Number of hours: ${newDurationHours}`);
