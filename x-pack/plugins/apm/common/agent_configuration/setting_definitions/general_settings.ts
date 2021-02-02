@@ -254,6 +254,6 @@ export const generalSettings: RawSettingDefinition[] = [
           'Used to restrict requests to certain URLs from being instrumented. This config accepts a comma-separated list of wildcard patterns of URL paths that should be ignored. When an incoming HTTP request is detected, its request path will be tested against each element in this list. For example, adding `/home/index` to this list would match and remove instrumentation from `http://localhost/home/index` as well as `http://whatever.com/home/index?value1=123`',
       }
     ),
-    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby'],
+    includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby', 'go'],
   },
 ];

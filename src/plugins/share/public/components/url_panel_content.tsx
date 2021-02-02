@@ -28,9 +28,11 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import type { Capabilities } from 'src/core/public';
 
 import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
+import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowShortUrl: boolean;
@@ -41,6 +43,8 @@ interface Props {
   basePath: string;
   post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
+  anonymousAccess?: SecurityOssPluginStart['anonymousAccess'];
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
 }
 
 export enum ExportUrlAsType {
@@ -57,10 +61,13 @@ interface UrlParams {
 interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
+  usePublicUrl: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
   urlParams?: UrlParams;
+  anonymousAccessParameters: Record<string, string> | null;
+  showPublicUrlSwitch: boolean;
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -75,8 +82,11 @@ export class UrlPanelContent extends Component<Props, State> {
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
+      usePublicUrl: false,
       isCreatingShortUrl: false,
       url: '',
+      anonymousAccessParameters: null,
+      showPublicUrlSwitch: false,
     };
   }
 
@@ -91,6 +101,41 @@ export class UrlPanelContent extends Component<Props, State> {
     this.setUrl();
 
     window.addEventListener('hashchange', this.resetUrl, false);
+
+    if (this.props.anonymousAccess) {
+      (async () => {
+        const anonymousAccessParameters = await this.props.anonymousAccess!.getAccessURLParameters();
+
+        if (!this.mounted) {
+          return;
+        }
+
+        if (!anonymousAccessParameters) {
+          return;
+        }
+
+        let showPublicUrlSwitch: boolean = false;
+
+        if (this.props.showPublicUrlSwitch) {
+          const anonymousUserCapabilities = await this.props.anonymousAccess!.getCapabilities();
+
+          if (!this.mounted) {
+            return;
+          }
+
+          try {
+            showPublicUrlSwitch = this.props.showPublicUrlSwitch!(anonymousUserCapabilities);
+          } catch {
+            showPublicUrlSwitch = false;
+          }
+        }
+
+        this.setState({
+          anonymousAccessParameters,
+          showPublicUrlSwitch,
+        });
+      })();
+    }
   }
 
   public render() {
@@ -99,7 +144,16 @@ export class UrlPanelContent extends Component<Props, State> {
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
-          {this.renderShortUrlSwitch()}
+
+          <EuiFormRow
+            label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
+          >
+            <>
+              <EuiSpacer size={'s'} />
+              {this.renderShortUrlSwitch()}
+              {this.renderPublicUrlSwitch()}
+            </>
+          </EuiFormRow>
 
           <EuiSpacer size="m" />
 
@@ -150,10 +204,10 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private updateUrlParams = (url: string) => {
-    const embedUrl = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
-    const extendUrl = this.state.urlParams ? this.getUrlParamExtensions(embedUrl) : embedUrl;
+    url = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
+    url = this.state.urlParams ? this.getUrlParamExtensions(url) : url;
 
-    return extendUrl;
+    return url;
   };
 
   private getSavedObjectUrl = () => {
@@ -206,6 +260,20 @@ export class UrlPanelContent extends Component<Props, State> {
     return `${url}${embedParam}`;
   };
 
+  private addUrlAnonymousAccessParameters = (url: string): string => {
+    if (!this.state.anonymousAccessParameters || !this.state.usePublicUrl) {
+      return url;
+    }
+
+    const parsedUrl = new URL(url);
+
+    for (const [name, value] of Object.entries(this.state.anonymousAccessParameters)) {
+      parsedUrl.searchParams.set(name, value);
+    }
+
+    return parsedUrl.toString();
+  };
+
   private getUrlParamExtensions = (url: string): string => {
     const { urlParams } = this.state;
     return urlParams
@@ -232,13 +300,18 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private setUrl = () => {
-    let url;
+    let url: string | undefined;
+
     if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = this.getSavedObjectUrl();
     } else if (this.state.useShortUrl) {
       url = this.shortUrlCache;
     } else {
       url = this.getSnapshotUrl();
+    }
+
+    if (url) {
+      url = this.addUrlAnonymousAccessParameters(url);
     }
 
     if (this.props.isEmbedded) {
@@ -269,6 +342,14 @@ export class UrlPanelContent extends Component<Props, State> {
     this.createShortUrl();
   };
 
+  private handlePublicUrlChange = () => {
+    this.setState(({ usePublicUrl }) => {
+      return {
+        usePublicUrl: !usePublicUrl,
+      };
+    }, this.setUrl);
+  };
+
   private createShortUrl = async () => {
     this.setState({
       isCreatingShortUrl: true,
@@ -280,33 +361,38 @@ export class UrlPanelContent extends Component<Props, State> {
         basePath: this.props.basePath,
         post: this.props.post,
       });
-      if (this.mounted) {
-        this.shortUrlCache = shortUrl;
-        this.setState(
-          {
-            isCreatingShortUrl: false,
-            useShortUrl: true,
-          },
-          this.setUrl
-        );
+
+      if (!this.mounted) {
+        return;
       }
+
+      this.shortUrlCache = shortUrl;
+      this.setState(
+        {
+          isCreatingShortUrl: false,
+          useShortUrl: true,
+        },
+        this.setUrl
+      );
     } catch (fetchError) {
-      if (this.mounted) {
-        this.shortUrlCache = undefined;
-        this.setState(
-          {
-            useShortUrl: false,
-            isCreatingShortUrl: false,
-            shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
-              defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-              values: {
-                errorMessage: fetchError.message,
-              },
-            }),
-          },
-          this.setUrl
-        );
+      if (!this.mounted) {
+        return;
       }
+
+      this.shortUrlCache = undefined;
+      this.setState(
+        {
+          useShortUrl: false,
+          isCreatingShortUrl: false,
+          shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
+            defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+            values: {
+              errorMessage: fetchError.message,
+            },
+          }),
+        },
+        this.setUrl
+      );
     }
   };
 
@@ -416,6 +502,36 @@ export class UrlPanelContent extends Component<Props, State> {
 
     return (
       <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderPublicUrlSwitch = () => {
+    if (!this.state.anonymousAccessParameters || !this.state.showPublicUrlSwitch) {
+      return null;
+    }
+
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.publicUrlLabel" defaultMessage="Public URL" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={this.state.usePublicUrl}
+        onChange={this.handlePublicUrlChange}
+        data-test-subj="usePublicUrl"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.publicUrlHelpText"
+        defaultMessage="Use public URL to share with anyone. It enables one-step anonymous access by removing the login prompt."
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="createPublicUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );

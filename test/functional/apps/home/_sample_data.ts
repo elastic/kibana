@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/89379
-  describe.skip('sample data', function describeIndexTests() {
+  describe('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {

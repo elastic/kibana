@@ -30,6 +30,8 @@ import { AnalyticsLogic } from '../';
 import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';
 import { convertTagsToSelectOptions } from '../utils';
 
+import './analytics_header.scss';
+
 interface Props {
   title: string;
 }
@@ -60,7 +62,7 @@ export const AnalyticsHeader: React.FC<Props> = ({ title }) => {
   const hasInvalidDateRange = startDate > endDate;
 
   return (
-    <EuiPageHeader>
+    <EuiPageHeader className="analyticsHeader">
       <EuiPageHeaderSection>
         <EuiFlexGroup alignItems="center" justifyContent="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -69,13 +71,13 @@ export const AnalyticsHeader: React.FC<Props> = ({ title }) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <LogRetentionTooltip type={LogRetentionOptions.Analytics} />
+            <LogRetentionTooltip type={LogRetentionOptions.Analytics} position="right" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeaderSection>
-      <EuiPageHeaderSection>
+      <EuiPageHeaderSection className="analyticsHeader__filters">
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiSelect
               options={convertTagsToSelectOptions(allTags)}
               value={currentTag}
@@ -87,7 +89,7 @@ export const AnalyticsHeader: React.FC<Props> = ({ title }) => {
               fullWidth
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiDatePickerRange
               startDateControl={
                 <EuiDatePicker

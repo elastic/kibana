@@ -1,0 +1,12 @@
+{
+  "name": "@kbn/tinymath",
+  "version": "2.0.0",
+  "license": "SSPL-1.0 OR Elastic License",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "kbn:bootstrap": "yarn build",
+    "build": "../../node_modules/.bin/pegjs -o src/grammar.js src/grammar.pegjs"
+  },
+  "dependencies": {}
+}

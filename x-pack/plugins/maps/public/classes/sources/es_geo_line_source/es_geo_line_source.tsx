@@ -213,6 +213,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.esGeoLine.entityRequestDescription', {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -282,6 +283,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage:
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,

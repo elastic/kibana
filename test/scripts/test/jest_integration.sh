@@ -3,4 +3,4 @@
 source src/dev/ci_setup/setup_env.sh
 
 checks-reporter-with-killswitch "Jest Integration Tests" \
-  node scripts/jest_integration --ci --verbose --coverage
+  node scripts/jest_integration --ci --verbose

@@ -7,3 +7,5 @@
  */
 
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
+export const STATE_STORAGE_KEY = '_a';
+export const GLOBAL_STATE_STORAGE_KEY = '_g';

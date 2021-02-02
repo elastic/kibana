@@ -6,6 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import SemVer from 'semver/classes/semver';
 
 import { LoadingState } from '../../types';
 import AssistanceData from '../__fixtures__/checkup_api_response.json';
@@ -19,6 +20,26 @@ const defaultProps = {
   loadingState: LoadingState.Success,
   setSelectedTabIndex: jest.fn(),
 };
+
+const mockKibanaVersion = new SemVer('8.0.0');
+
+jest.mock('../../../app_context', () => {
+  return {
+    useAppContext: () => {
+      return {
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
+        kibanaVersionInfo: {
+          currentMajor: mockKibanaVersion.major,
+          prevMajor: mockKibanaVersion.major - 1,
+          nextMajor: mockKibanaVersion.major + 1,
+        },
+      };
+    },
+  };
+});
 
 /**
  * Mostly a dumb container with copy, test the three main states.

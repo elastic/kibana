@@ -84,6 +84,23 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         });
       });
 
+      // get the filtered events only with action 'new-instance'
+      const filteredEvents = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: alertId,
+          provider: 'alerting',
+          actions: new Map([['new-instance', { equal: 1 }]]),
+          filter: 'event.action:(new-instance)',
+        });
+      });
+
+      expect(getEventsByAction(filteredEvents, 'execute').length).equal(0);
+      expect(getEventsByAction(filteredEvents, 'execute-action').length).equal(0);
+      expect(getEventsByAction(events, 'new-instance').length).equal(1);
+
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');

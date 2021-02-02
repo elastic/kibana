@@ -5,27 +5,28 @@
  */
 
 import { createEsContext } from './context';
-import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
+import { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { RequestEvent } from '@elastic/elasticsearch';
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
-type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
-let clusterClient: EsClusterClient;
+let elasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 });
 
 describe('createEsContext', () => {
   test('should return is ready state as falsy if not initialized', () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test0',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     expect(context.initialized).toBeFalsy();
@@ -37,9 +38,9 @@ describe('createEsContext', () => {
   test('should return esNames', () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test-index',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
 
     const esNames = context.esNames;
@@ -57,12 +58,12 @@ describe('createEsContext', () => {
   test('should return exist false for esAdapter ilm policy, index template and alias before initialize', async () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test1',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
-    clusterClient.callAsInternalUser.mockResolvedValue(false);
-
+    elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
+    elasticsearchClient.indices.existsAlias.mockResolvedValue(asApiResponse(false));
     const doesAliasExist = await context.esAdapter.doesAliasExist(context.esNames.alias);
     expect(doesAliasExist).toBeFalsy();
 
@@ -75,11 +76,11 @@ describe('createEsContext', () => {
   test('should return exist true for esAdapter ilm policy, index template and alias after initialize', async () => {
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
-    clusterClient.callAsInternalUser.mockResolvedValue(true);
+    elasticsearchClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
     context.initialize();
 
     const doesIlmPolicyExist = await context.esAdapter.doesIlmPolicyExist(
@@ -100,12 +101,18 @@ describe('createEsContext', () => {
     jest.requireMock('./init').initializeEs.mockResolvedValue(false);
     const context = createEsContext({
       logger,
-      clusterClientPromise: Promise.resolve(clusterClient),
       indexNameRoot: 'test2',
       kibanaVersion: '1.2.3',
+      elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
     context.initialize();
     const success = await context.waitTillReady();
     expect(success).toBe(false);
   });
 });
+
+function asApiResponse<T>(body: T): RequestEvent<T> {
+  return {
+    body,
+  } as RequestEvent<T>;
+}

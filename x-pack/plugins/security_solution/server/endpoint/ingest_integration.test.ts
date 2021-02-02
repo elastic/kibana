@@ -6,7 +6,10 @@
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
-import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidFeatures,
+} from '../../common/endpoint/models/policy_config';
 import {
   getManifestManagerMock,
   ManifestManagerMockType,
@@ -55,6 +58,9 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('ingest_integration sanity checks', () => {
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
     test('policy is updated with initial manifest', async () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const manifestManager = getManifestManagerMock({
@@ -68,13 +74,14 @@ describe('ingest_integration tests ', () => {
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
         endpointAppContextMock.alerts,
+        licenseService,
         exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual({
         artifacts: {
           'endpoint-exceptionlist-macos-v1': {
@@ -146,13 +153,14 @@ describe('ingest_integration tests ', () => {
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
         endpointAppContextMock.alerts,
+        licenseService,
         exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
         lastComputed!.toEndpointFormat()
       );
@@ -174,13 +182,14 @@ describe('ingest_integration tests ', () => {
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
         endpointAppContextMock.alerts,
+        licenseService,
         exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
     });
 
     test('subsequent policy creations succeed', async () => {
@@ -196,13 +205,14 @@ describe('ingest_integration tests ', () => {
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
         endpointAppContextMock.alerts,
+        licenseService,
         exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
         lastComputed!.toEndpointFormat()
       );
@@ -221,6 +231,7 @@ describe('ingest_integration tests ', () => {
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
         endpointAppContextMock.alerts,
+        licenseService,
         exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
@@ -228,7 +239,7 @@ describe('ingest_integration tests ', () => {
 
       expect(exceptionListClient.createEndpointList).toHaveBeenCalled();
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
         lastComputed!.toEndpointFormat()
       );
@@ -239,8 +250,7 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Gold); // set license level to gold
     });
     it('returns an error if paid features are turned on in the policy', async () => {
-      const mockPolicy = policyConfigFactory();
-      mockPolicy.windows.popup.malware.message = 'paid feature';
+      const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
@@ -250,7 +260,7 @@ describe('ingest_integration tests ', () => {
       );
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
-      const mockPolicy = policyConfigFactory();
+      const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
@@ -265,7 +275,7 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
     it('updates successfully when paid features are turned on', async () => {
-      const mockPolicy = policyConfigFactory();
+      const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);

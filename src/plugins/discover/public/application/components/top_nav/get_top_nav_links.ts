@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { showOpenSearchPanel } from './show_open_search_panel';
-import { getSharingData } from '../../helpers/get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from '../../helpers/get_sharing_data';
 import { unhashUrl } from '../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../build_services';
 import { Adapters } from '../../../../../inspector/common/adapters';
@@ -108,6 +108,7 @@ export const getTopNavLinks = ({
           title: savedSearch.title,
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
+        showPublicUrlSwitch,
       });
     },
   };
