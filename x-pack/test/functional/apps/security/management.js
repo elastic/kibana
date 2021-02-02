@@ -148,7 +148,9 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.security.clickSaveEditUser();
 
           await PageObjects.settings.navigateTo();
-          await testSubjects.click('users');
+          await testSubjects.click('roles');
+          await testSubjects.click('tablePaginationPopoverButton');
+          await testSubjects.click('tablePagination-100-rows');
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
