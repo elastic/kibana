@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-expect-error no @typed def; Elastic library
 import { evaluate } from '@kbn/tinymath';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { Datatable, isDatatable, ExpressionFunctionDefinition } from '../../../types';
