@@ -1280,22 +1280,9 @@ describe('sources routes', () => {
       });
     });
 
-    const query = {
-      code: 'foo',
-      state: '{foo:"bar"}',
-      session_state: 'baz',
-    };
-
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/create',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = { query };
-        mockRouter.shouldValidate(request);
       });
     });
   });
