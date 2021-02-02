@@ -7,7 +7,7 @@
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import { alertingServiceProvider } from '../lib/alerts/alerting_service';
-import { mlAnomalyThresholdAlertParams } from './schemas/alerting_schema';
+import { mlAnomalyThresholdAlertPreviewRequest } from './schemas/alerting_schema';
 
 export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -21,7 +21,7 @@ export function alertingRoutes({ router, routeGuard }: RouteInitialization) {
     {
       path: '/api/ml/alerting/preview',
       validate: {
-        body: mlAnomalyThresholdAlertParams,
+        body: mlAnomalyThresholdAlertPreviewRequest,
       },
       options: {
         tags: ['access:ml:canGetJobs'],

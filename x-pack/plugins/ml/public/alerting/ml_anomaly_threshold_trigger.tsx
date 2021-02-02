@@ -55,6 +55,10 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
 
   useEffect(function setDefaults() {
     onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
+    setAlertProperty('tags', ['ml']);
+    return () => {
+      // Reset alert properties on unmount
+    };
   }, []);
 
   return (

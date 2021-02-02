@@ -7,12 +7,16 @@
 import { HttpService } from '../http_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
 import { MlAnomalyThresholdAlertParams } from '../../../alerting/ml_anomaly_threshold_trigger';
+import { PreviewResponse } from '../../../../common/types/alerts';
 
 export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {
-    preview(params: { alertParams: MlAnomalyThresholdAlertParams; timeRange: string }) {
+    preview(params: {
+      alertParams: MlAnomalyThresholdAlertParams;
+      timeRange: string;
+    }): Promise<PreviewResponse> {
       const body = JSON.stringify(params);
       return httpService.http<any>({
         path: `${ML_BASE_PATH}/alerting/preview`,

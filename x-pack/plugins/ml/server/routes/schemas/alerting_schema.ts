@@ -21,8 +21,19 @@ export const mlAnomalyThresholdAlertParams = schema.object({
     }
   ),
   severity: schema.number(),
-  resultTypes: schema.arrayOf(schema.string()),
+  resultType: schema.string(),
+});
+
+export const mlAnomalyThresholdAlertPreviewRequest = schema.object({
+  alertParams: mlAnomalyThresholdAlertParams,
+  /**
+   * Relative time range to look back from now, e.g. 1y, 8m, 15d
+   */
   timeRange: schema.string(),
 });
 
 export type MlAnomalyThresholdAlertParams = TypeOf<typeof mlAnomalyThresholdAlertParams>;
+
+export type MlAnomalyThresholdAlertPreviewRequest = TypeOf<
+  typeof mlAnomalyThresholdAlertPreviewRequest
+>;

@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { GetGuards } from '../shared_services';
+import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
+
+export function getAlertingServiceProvider(getGuards: GetGuards) {
+  return {
+    alertingServiceProvider(
+      savedObjectsClient: SavedObjectsClientContract,
+      request?: KibanaRequest
+    ) {
+      return {
+        preview: async (...args: Parameters<MlAlertingService['preview']>) => {
+          return await getGuards(request!, savedObjectsClient)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(({ mlClient }) => alertingServiceProvider(mlClient).preview(...args));
+        },
+        execute: async (
+          ...args: Parameters<MlAlertingService['execute']>
+        ): ReturnType<MlAlertingService['execute']> => {
+          const fakeRequest = {} as KibanaRequest;
+          return await getGuards(fakeRequest, savedObjectsClient)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(({ mlClient }) => alertingServiceProvider(mlClient).execute(...args));
+        },
+      };
+    },
+  };
+}
+
+export type MlAlertingServiceProvider = ReturnType<typeof getAlertingServiceProvider>;

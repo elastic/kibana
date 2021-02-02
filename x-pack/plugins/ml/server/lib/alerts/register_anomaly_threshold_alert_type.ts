@@ -4,19 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ML_ALERT_TYPES, ML_ALERT_TYPES_CONFIG } from '../../../common/constants/alerts';
-import { AlertingPlugin } from '../../../../alerts/server';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import { mlAnomalyThresholdAlertParams } from '../../routes/schemas/alerting_schema';
+import { RegisterAlertParams } from './register_ml_alerts';
+import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_THRESHOLD];
 
-interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+export interface AnomalyThresholdAlertContext {
+  name: string;
+  jobIds: string[];
+  timestampIso8601: string;
+  timestamp: number;
+  score: number;
+  isInterim: boolean;
+  topRecords: RecordAnomalyAlertDoc[];
+  topInfluencers?: InfluencerAnomalyAlertDoc[];
+  anomalyExplorerUrl: string;
 }
 
-export function registerAnomalyThresholdAlertType({ alerts }: RegisterAlertParams) {
+export function registerAnomalyThresholdAlertType({
+  alerts,
+  mlSharedServices,
+}: RegisterAlertParams) {
   alerts.registerType({
     id: ML_ALERT_TYPES.ANOMALY_THRESHOLD,
     name: alertTypeConfig.name,
@@ -26,10 +39,63 @@ export function registerAnomalyThresholdAlertType({ alerts }: RegisterAlertParam
       params: mlAnomalyThresholdAlertParams,
     },
     actionVariables: {
-      context: [],
+      context: [
+        {
+          name: 'timestamp',
+          description: i18n.translate('xpack.ml.alertContext.timestampDescription', {
+            defaultMessage: 'Timestamp of the anomaly',
+          }),
+        },
+        {
+          name: 'jobIds',
+          description: i18n.translate('xpack.ml.alertContext.isInterimDescription', {
+            defaultMessage: 'List of job ids triggered the alert instance',
+          }),
+        },
+        {
+          name: 'isInterim',
+          description: i18n.translate('xpack.ml.alertContext.isInterimDescription', {
+            defaultMessage: 'Indicate if top hits contain interim results',
+          }),
+        },
+        {
+          name: 'score',
+          description: i18n.translate('xpack.ml.alertContext.scoreDescription', {
+            defaultMessage: 'Anomaly score',
+          }),
+        },
+        {
+          name: 'topRecords',
+          description: i18n.translate('xpack.ml.alertContext.topRecordsDescription', {
+            defaultMessage: 'Top records',
+          }),
+        },
+        {
+          name: 'topInfluencers',
+          description: i18n.translate('xpack.ml.alertContext.topInfluencersDescription', {
+            defaultMessage: 'Top influencers',
+          }),
+        },
+        {
+          name: 'anomalyExplorerUrl',
+          description: i18n.translate('xpack.ml.alertContext.anomalyExplorerUrlDescription', {
+            defaultMessage: 'URL to open in the Anomaly Explorer',
+          }),
+        },
+      ],
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
-    executor: async ({ services, params }) => {},
+    async executor({ services, params }) {
+      const { execute } = mlSharedServices.alertingServiceProvider(services.savedObjectsClient);
+      const executionResult = await execute(params);
+
+      if (executionResult) {
+        const alertInstanceName = executionResult.name;
+        const alertInstance = services.alertInstanceFactory(alertInstanceName);
+        // @ts-ignore
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, executionResult);
+      }
+    },
   });
 }

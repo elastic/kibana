@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
@@ -14,21 +15,94 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiSpacer,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import type { AlertingApiService } from '../application/services/ml_api_service/alerting';
 import { MlAnomalyThresholdAlertParams } from './ml_anomaly_threshold_trigger';
+import { PreviewResponse } from '../../common/types/alerts';
 
 export interface PreviewAlertConditionProps {
   alertingApiService: AlertingApiService;
   alertParams: MlAnomalyThresholdAlertParams;
 }
 
+const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
+  ({ jobIds, timestampIso8601, score, topInfluencers, topRecords }) => {
+    const listItems = [
+      {
+        title: i18n.translate('xpack.ml.previewAlert.jobsLabel', {
+          defaultMessage: 'Job IDs: ',
+        }),
+        description: jobIds.join(', '),
+      },
+      {
+        title: i18n.translate('xpack.ml.previewAlert.timeLabel', {
+          defaultMessage: 'Time',
+        }),
+        description: timestampIso8601,
+      },
+      {
+        title: i18n.translate('xpack.ml.previewAlert.scoreLabel', {
+          defaultMessage: 'Anomaly score',
+        }),
+        description: score,
+      },
+      ...(topInfluencers
+        ? [
+            {
+              title: i18n.translate('xpack.ml.previewAlert.topInfluencersLabel', {
+                defaultMessage: 'Top influencers:',
+              }),
+              description: (
+                <ul>
+                  {topInfluencers.map((i) => (
+                    <li key={i.unique_key}>
+                      {i.influencer_field_name} = {i.influencer_field_value} [{i.score}]
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+          ]
+        : []),
+      ...(topRecords
+        ? [
+            {
+              title: i18n.translate('xpack.ml.previewAlert.topRecordsLabel', {
+                defaultMessage: 'Top records:',
+              }),
+              description: (
+                <ul>
+                  {topRecords.map((i) => (
+                    <li key={i.unique_key}>
+                      {i.function}({i.field_name}) {i.by_field_value} {i.over_field_value}{' '}
+                      {i.partition_field_value} [{i.score}]
+                    </li>
+                  ))}
+                </ul>
+              ),
+            },
+          ]
+        : []),
+    ];
+
+    return <EuiDescriptionList type={'column'} compressed={true} listItems={listItems} />;
+  }
+);
+
 export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   alertingApiService,
   alertParams,
 }) => {
   const [lookBehindInterval, setLookBehindInterval] = useState<string>('');
-  const [previewResponse, setPreviewResponse] = useState<any>();
+  const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
+
+  useEffect(
+    function resetPreview() {
+      setPreviewResponse(undefined);
+    },
+    [alertParams]
+  );
 
   const testCondition = useCallback(async () => {
     try {
@@ -41,6 +115,15 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       // TODO handle error
     }
   }, [alertParams, lookBehindInterval]);
+
+  /**
+   * Sample of the 5 results from the top hits
+   */
+  const sampleHits = useMemo(() => {
+    if (!previewResponse) return;
+
+    return previewResponse.results.slice(0, 5);
+  }, [previewResponse]);
 
   const isReady =
     (alertParams.jobSelection?.jobIds?.length! > 0 ||
@@ -77,7 +160,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {previewResponse && (
+      {previewResponse && sampleHits && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
@@ -85,15 +168,25 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             title={
               <FormattedMessage
                 id="xpack.ml.previewAlert.previewMessage"
-                defaultMessage="There were {alertsCount} that satisfied the conditions of the alert in the last {interval}"
+                defaultMessage="There were {alertsCount} anomalies that satisfied the conditions of the alert in the last {interval}"
                 values={{
-                  alertsCount: 1,
+                  alertsCount: previewResponse.count,
                   interval: lookBehindInterval,
                 }}
               />
             }
             iconType="alert"
-          />
+          >
+            <ul>
+              {sampleHits.map((v) => {
+                return (
+                  <li key={v.key}>
+                    <AlertInstancePreview {...v} />
+                  </li>
+                );
+              })}
+            </ul>
+          </EuiCallOut>
         </>
       )}
     </>

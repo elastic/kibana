@@ -101,7 +101,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
-      alerting: [ML_ALERT_TYPES.ANOMALY_THRESHOLD],
+      alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
         all: admin,
         read: user,
@@ -129,12 +129,6 @@ export class MlServerPlugin
     });
 
     registerKibanaSettings(coreSetup);
-
-    if (plugins.alerts) {
-      registerMlAlerts({
-        alerts: plugins.alerts,
-      });
-    }
 
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
@@ -204,18 +198,25 @@ export class MlServerPlugin
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return {
-      ...createSharedServices(
-        this.mlLicense,
-        getSpaces,
-        plugins.cloud,
-        plugins.security?.authz,
-        resolveMlCapabilities,
-        () => this.clusterClient,
-        () => getInternalSavedObjectsClient(),
-        () => this.isMlReady
-      ),
-    };
+    const sharedServices = createSharedServices(
+      this.mlLicense,
+      getSpaces,
+      plugins.cloud,
+      plugins.security?.authz,
+      resolveMlCapabilities,
+      () => this.clusterClient,
+      () => getInternalSavedObjectsClient(),
+      () => this.isMlReady
+    );
+
+    if (plugins.alerts) {
+      registerMlAlerts({
+        alerts: plugins.alerts,
+        mlSharedServices: sharedServices,
+      });
+    }
+
+    return { ...sharedServices };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {

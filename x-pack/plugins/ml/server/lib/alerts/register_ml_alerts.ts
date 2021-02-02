@@ -6,13 +6,13 @@
 
 import { AlertingPlugin } from '../../../../alerts/server';
 import { registerAnomalyThresholdAlertType } from './register_anomaly_threshold_alert_type';
+import { SharedServices } from '../../shared_services';
 
-interface Params {
+export interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
+  mlSharedServices: SharedServices;
 }
 
-export function registerMlAlerts(params: Params) {
-  registerAnomalyThresholdAlertType({
-    alerts: params.alerts,
-  });
+export function registerMlAlerts(params: RegisterAlertParams) {
+  registerAnomalyThresholdAlertType(params);
 }
