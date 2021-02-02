@@ -111,6 +111,75 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should allow providing custom saved object ids (uuid v1)', async () => {
+      const customId = '09570bb0-6299-11eb-8fde-9fe5ce6ea450';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
+      expect(response.body.id).to.eql(customId);
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: customId,
+      });
+    });
+
+    it('should allow providing custom saved object ids (uuid v4)', async () => {
+      const customId = 'b3bc6d83-3192-4ffd-9702-ad4fb88617ba';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
+      expect(response.body.id).to.eql(customId);
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: customId,
+      });
+    });
+
+    it('should not allow providing simple custom ids (non uuid)', async () => {
+      const customId = '1';
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData());
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.: Bad Request',
+      });
+    });
+
+    it('should return 409 when document with id already exists', async () => {
+      const customId = '5031f8f0-629a-11eb-b500-d1931a8e5df7';
+      const createdAlertResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlertResponse.body.id, 'alert', 'alerts');
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${customId}`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData())
+        .expect(409);
+    });
+
     it('should handle create alert request appropriately when consumer is unknown', async () => {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)

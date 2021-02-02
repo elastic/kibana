@@ -62,8 +62,6 @@ exports.run = async (defaults = {}) => {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
 
-    options.bundledJDK = true;
-
     await cluster.run(installPath, options);
   }
 };

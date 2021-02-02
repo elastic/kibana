@@ -17,24 +17,23 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { useAppContext } from '../../../app_context';
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
-const WAIT_FOR_RELEASE_STEP = {
+const WAIT_FOR_RELEASE_STEP = (majorVersion: number, nextMajorVersion: number) => ({
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
     defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release',
     values: {
-      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
+      nextEsVersion: `${nextMajorVersion}.0`,
     },
   }),
   children: (
-    <Fragment>
+    <>
       <EuiText grow={false}>
         <p>
           <FormattedMessage
@@ -42,19 +41,19 @@ const WAIT_FOR_RELEASE_STEP = {
             defaultMessage="Once the release is out, upgrade to the latest {currentEsMajorVersion} version, and then
               return here to proceed with your {nextEsMajorVersion} upgrade."
             values={{
-              currentEsMajorVersion: `${CURRENT_MAJOR_VERSION}.x`, // use "0.x" notation to imply the last minor
-              nextEsMajorVersion: `${NEXT_MAJOR_VERSION}.0`,
+              currentEsMajorVersion: `${majorVersion}.x`, // use "0.x" notation to imply the last minor
+              nextEsMajorVersion: `${nextMajorVersion}.0`,
             }}
           />
         </p>
       </EuiText>
-    </Fragment>
+    </>
   ),
-};
+});
 
 // Swap in this step for the one above it on the last minor release.
 // @ts-ignore
-const START_UPGRADE_STEP = (isCloudEnabled: boolean) => ({
+const START_UPGRADE_STEP = (isCloudEnabled: boolean, esDocBasePath: string) => ({
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepTitle', {
     defaultMessage: 'Start your upgrade',
   }),
@@ -73,10 +72,7 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean) => ({
               defaultMessage="Follow {instructionButton} to start your upgrade."
               values={{
                 instructionButton: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
-                    target="_blank"
-                  >
+                  <EuiLink href={`${esDocBasePath}/setup-upgrade.html`} target="_blank" external>
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overviewTab.steps.startUpgradeStepOnPrem.stepDetail.instructionButtonLabel"
                       defaultMessage="these instructions"
@@ -92,10 +88,9 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean) => ({
   ),
 });
 
-export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps> = ({
+export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
   checkupData,
   setSelectedTabIndex,
-  intl,
 }) => {
   const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
   const countByType = Object.keys(checkupDataTyped).reduce((counts, checkupType) => {
@@ -104,7 +99,12 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
   }, {} as { [checkupType: string]: number });
 
   // Uncomment when START_UPGRADE_STEP is in use!
-  const { http /* , isCloudEnabled */ } = useAppContext();
+  const { kibanaVersionInfo, docLinks, http /* , isCloudEnabled */ } = useAppContext();
+
+  const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
+  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+
+  const { currentMajor, nextMajor } = kibanaVersionInfo;
 
   return (
     <EuiSteps
@@ -113,15 +113,18 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
       steps={[
         {
           title: countByType.cluster
-            ? intl.formatMessage({
-                id: 'xpack.upgradeAssistant.overviewTab.steps.clusterStep.issuesRemainingStepTitle',
-                defaultMessage: 'Check for issues with your cluster',
-              })
-            : intl.formatMessage({
-                id:
-                  'xpack.upgradeAssistant.overviewTab.steps.clusterStep.noIssuesRemainingStepTitle',
-                defaultMessage: 'Your cluster settings are ready',
-              }),
+            ? i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.clusterStep.issuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Check for issues with your cluster',
+                }
+              )
+            : i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.clusterStep.noIssuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Your cluster settings are ready',
+                }
+              ),
           status: countByType.cluster ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -168,15 +171,18 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
         },
         {
           title: countByType.indices
-            ? intl.formatMessage({
-                id: 'xpack.upgradeAssistant.overviewTab.steps.indicesStep.issuesRemainingStepTitle',
-                defaultMessage: 'Check for issues with your indices',
-              })
-            : intl.formatMessage({
-                id:
-                  'xpack.upgradeAssistant.overviewTab.steps.indicesStep.noIssuesRemainingStepTitle',
-                defaultMessage: 'Your index settings are ready',
-              }),
+            ? i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.indicesStep.issuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Check for issues with your indices',
+                }
+              )
+            : i18n.translate(
+                'xpack.upgradeAssistant.overviewTab.steps.indicesStep.noIssuesRemainingStepTitle',
+                {
+                  defaultMessage: 'Your index settings are ready',
+                }
+              ),
           status: countByType.indices ? 'warning' : 'complete',
           children: (
             <EuiText>
@@ -222,10 +228,12 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
           ),
         },
         {
-          title: intl.formatMessage({
-            id: 'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.stepTitle',
-            defaultMessage: 'Review the Elasticsearch deprecation logs',
-          }),
+          title: i18n.translate(
+            'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.stepTitle',
+            {
+              defaultMessage: 'Review the Elasticsearch deprecation logs',
+            }
+          ),
           children: (
             <Fragment>
               <EuiText grow={false}>
@@ -237,8 +245,9 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
                     values={{
                       deprecationLogsDocButton: (
                         <EuiLink
-                          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging"
+                          href={`${esDocBasePath}/logging.html#deprecation-logging`}
                           target="_blank"
+                          external
                         >
                           <FormattedMessage
                             id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.deprecationLogs.deprecationLogsDocButtonLabel"
@@ -246,7 +255,7 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
                           />
                         </EuiLink>
                       ),
-                      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
+                      nextEsVersion: `${nextMajor}.0`,
                     }}
                   />
                 </p>
@@ -255,11 +264,12 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
               <EuiSpacer />
 
               <EuiFormRow
-                label={intl.formatMessage({
-                  id:
-                    'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
-                  defaultMessage: 'Enable deprecation logging?',
-                })}
+                label={i18n.translate(
+                  'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
+                  {
+                    defaultMessage: 'Enable deprecation logging?',
+                  }
+                )}
                 describedByIds={['deprecation-logging']}
               >
                 <DeprecationLoggingToggle http={http} />
@@ -269,11 +279,9 @@ export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.Inj
         },
 
         // Swap in START_UPGRADE_STEP on the last minor release.
-        WAIT_FOR_RELEASE_STEP,
-        // START_UPGRADE_STEP(isCloudEnabled),
+        WAIT_FOR_RELEASE_STEP(currentMajor, nextMajor),
+        // START_UPGRADE_STEP(isCloudEnabled, esDocBasePath),
       ]}
     />
   );
 };
-
-export const Steps = injectI18n(StepsUI);

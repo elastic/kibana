@@ -796,6 +796,42 @@ describe('edit button', () => {
   });
 });
 
+describe('refresh button', () => {
+  it('should call requestRefresh when clicked', () => {
+    const alert = mockAlert();
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      enabledInLicense: true,
+    };
+
+    const requestRefresh = jest.fn();
+    const refreshButton = shallow(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        requestRefresh={requestRefresh}
+      />
+    )
+      .find('[data-test-subj="refreshAlertsButton"]')
+      .first();
+
+    expect(refreshButton.exists()).toBeTruthy();
+
+    refreshButton.simulate('click');
+    expect(requestRefresh).toHaveBeenCalledTimes(1);
+  });
+});
+
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
     id: uuid.v4(),

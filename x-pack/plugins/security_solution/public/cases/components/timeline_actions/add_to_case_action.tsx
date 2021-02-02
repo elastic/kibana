@@ -20,6 +20,10 @@ import { ActionIconItem } from '../../../timelines/components/timeline/body/acti
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { useStateToaster } from '../../../common/components/toasters';
+import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { SecurityPageName } from '../../../app/types';
 import { useCreateCaseModal } from '../use_create_case_modal';
 import { useAllCasesModal } from '../use_all_cases_modal';
 import { createUpdateSuccessToaster } from './helpers';
@@ -39,12 +43,23 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   const eventId = ecsRowData._id;
   const eventIndex = ecsRowData._index;
 
+  const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const { postComment } = usePostComment();
+
+  const onViewCaseClick = useCallback(
+    (id) => {
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCaseDetailsUrl({ id }),
+      });
+    },
+    [navigateToApp]
+  );
+
   const attachAlertToCase = useCallback(
     (theCase: Case) => {
       postComment(
@@ -54,10 +69,14 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () => dispatchToaster({ type: 'addToaster', toast: createUpdateSuccessToaster(theCase) })
+        () =>
+          dispatchToaster({
+            type: 'addToaster',
+            toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
+          })
       );
     },
-    [postComment, eventId, eventIndex, dispatchToaster]
+    [postComment, eventId, eventIndex, dispatchToaster, onViewCaseClick]
   );
 
   const { modal: createCaseModal, openModal: openCreateCaseModal } = useCreateCaseModal({

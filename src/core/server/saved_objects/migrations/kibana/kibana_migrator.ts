@@ -90,13 +90,12 @@ export class KibanaMigrator {
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
-    this.kibanaVersion = kibanaVersion;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
       typeRegistry,

@@ -6,9 +6,34 @@
  * Public License, v 1.
  */
 
+import type { SavedObject, SavedObjectError } from 'src/core/types';
+import type { SavedObjectsFindResponse } from 'src/core/server';
 import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+
+const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
+  id: 'id',
+  type: 'type',
+  attributes: {},
+  references: [],
+  ...parts,
+});
+
+const createFindResponse = (objs: SavedObject[]): SavedObjectsFindResponse => ({
+  saved_objects: objs.map((obj) => ({ ...obj, score: 1 })),
+  total: objs.length,
+  per_page: 20,
+  page: 1,
+});
+
+const createError = (parts: Partial<SavedObjectError>): SavedObjectError => ({
+  error: 'error',
+  message: 'message',
+  metadata: {},
+  statusCode: 404,
+  ...parts,
+});
 
 describe('findRelationships', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -19,7 +44,7 @@ describe('findRelationships', () => {
     managementService = managementMock.create();
   });
 
-  it('returns the child and parent references of the object', async () => {
+  it('calls the savedObjectClient APIs with the correct parameters', async () => {
     const type = 'dashboard';
     const id = 'some-id';
     const references = [
@@ -36,46 +61,35 @@ describe('findRelationships', () => {
     ];
     const referenceTypes = ['some-type', 'another-type'];
 
-    savedObjectsClient.get.mockResolvedValue({
-      id,
-      type,
-      attributes: {},
-      references,
-    });
-
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        references,
+      })
+    );
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
-        {
+        createObj({
           type: 'some-type',
           id: 'ref-1',
-          attributes: {},
-          references: [],
-        },
-        {
+        }),
+        createObj({
           type: 'another-type',
           id: 'ref-2',
-          attributes: {},
-          references: [],
-        },
+        }),
       ],
     });
-
-    savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [
-        {
+    savedObjectsClient.find.mockResolvedValue(
+      createFindResponse([
+        createObj({
           type: 'parent-type',
           id: 'parent-id',
-          attributes: {},
-          score: 1,
-          references: [],
-        },
-      ],
-      total: 1,
-      per_page: 20,
-      page: 1,
-    });
+        }),
+      ])
+    );
 
-    const relationships = await findRelationships({
+    await findRelationships({
       type,
       id,
       size: 20,
@@ -101,8 +115,63 @@ describe('findRelationships', () => {
       perPage: 20,
       type: referenceTypes,
     });
+  });
 
-    expect(relationships).toEqual([
+  it('returns the child and parent references of the object', async () => {
+    const type = 'dashboard';
+    const id = 'some-id';
+    const references = [
+      {
+        type: 'some-type',
+        id: 'ref-1',
+        name: 'ref 1',
+      },
+      {
+        type: 'another-type',
+        id: 'ref-2',
+        name: 'ref 2',
+      },
+    ];
+    const referenceTypes = ['some-type', 'another-type'];
+
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        references,
+      })
+    );
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        createObj({
+          type: 'some-type',
+          id: 'ref-1',
+        }),
+        createObj({
+          type: 'another-type',
+          id: 'ref-2',
+        }),
+      ],
+    });
+    savedObjectsClient.find.mockResolvedValue(
+      createFindResponse([
+        createObj({
+          type: 'parent-type',
+          id: 'parent-id',
+        }),
+      ])
+    );
+
+    const { relations, invalidRelations } = await findRelationships({
+      type,
+      id,
+      size: 20,
+      client: savedObjectsClient,
+      referenceTypes,
+      savedObjectsManagement: managementService,
+    });
+
+    expect(relations).toEqual([
       {
         id: 'ref-1',
         relationship: 'child',
@@ -121,6 +190,70 @@ describe('findRelationships', () => {
         type: 'parent-type',
         meta: expect.any(Object),
       },
+    ]);
+    expect(invalidRelations).toHaveLength(0);
+  });
+
+  it('returns the invalid relations', async () => {
+    const type = 'dashboard';
+    const id = 'some-id';
+    const references = [
+      {
+        type: 'some-type',
+        id: 'ref-1',
+        name: 'ref 1',
+      },
+      {
+        type: 'another-type',
+        id: 'ref-2',
+        name: 'ref 2',
+      },
+    ];
+    const referenceTypes = ['some-type', 'another-type'];
+
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        references,
+      })
+    );
+    const ref1Error = createError({ message: 'Not found' });
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        createObj({
+          type: 'some-type',
+          id: 'ref-1',
+          error: ref1Error,
+        }),
+        createObj({
+          type: 'another-type',
+          id: 'ref-2',
+        }),
+      ],
+    });
+    savedObjectsClient.find.mockResolvedValue(createFindResponse([]));
+
+    const { relations, invalidRelations } = await findRelationships({
+      type,
+      id,
+      size: 20,
+      client: savedObjectsClient,
+      referenceTypes,
+      savedObjectsManagement: managementService,
+    });
+
+    expect(relations).toEqual([
+      {
+        id: 'ref-2',
+        relationship: 'child',
+        type: 'another-type',
+        meta: expect.any(Object),
+      },
+    ]);
+
+    expect(invalidRelations).toEqual([
+      { type: 'some-type', id: 'ref-1', relationship: 'child', error: ref1Error.message },
     ]);
   });
 
@@ -144,32 +277,24 @@ describe('findRelationships', () => {
       uiCapabilitiesPath: 'uiCapabilitiesPath',
     });
 
-    savedObjectsClient.get.mockResolvedValue({
-      id,
-      type,
-      attributes: {},
-      references,
-    });
-
+    savedObjectsClient.get.mockResolvedValue(
+      createObj({
+        id,
+        type,
+        references,
+      })
+    );
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
-        {
+        createObj({
           type: 'some-type',
           id: 'ref-1',
-          attributes: {},
-          references: [],
-        },
+        }),
       ],
     });
+    savedObjectsClient.find.mockResolvedValue(createFindResponse([]));
 
-    savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [],
-      total: 0,
-      per_page: 20,
-      page: 1,
-    });
-
-    const relationships = await findRelationships({
+    const { relations } = await findRelationships({
       type,
       id,
       size: 20,
@@ -183,7 +308,7 @@ describe('findRelationships', () => {
     expect(managementService.getEditUrl).toHaveBeenCalledTimes(1);
     expect(managementService.getInAppUrl).toHaveBeenCalledTimes(1);
 
-    expect(relationships).toEqual([
+    expect(relations).toEqual([
       {
         id: 'ref-1',
         relationship: 'child',

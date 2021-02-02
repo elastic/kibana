@@ -173,6 +173,7 @@ export class Plugin {
           defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
           values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
         }),
+        sensitive: true,
         category: ['timelion'],
         schema: schema.string(),
       },

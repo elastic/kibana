@@ -17,6 +17,7 @@ import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox'
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
+import { SOURCE_TYPES } from '../../../../../common/constants';
 
 export class Join extends Component {
   state = {
@@ -85,6 +86,7 @@ export class Join extends Component {
         ...restOfRight,
         indexPatternId,
         indexPatternTitle,
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
       },
     });
   };
