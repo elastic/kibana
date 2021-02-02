@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not host.ip:10.46.229.234',
+              kql: 'not (HostDetails.host.ip:10.46.229.234 or host.ip:10.46.229.234)',
             },
           })
           .expect(200);
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not host.ip:${notIncludedIp}`,
+              kql: `not (HostDetails.host.ip:${notIncludedIp} or host.ip:${notIncludedIp})`,
             },
           })
           .expect(200);
@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue} or host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp} or host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not Endpoint.policy.applied.status:success`,
+              kql: `not (HostDetails.Endpoint.policy.applied.status:success or Endpoint.policy.applied.status:success)`,
             },
           })
           .expect(200);
@@ -257,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId} or elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);
