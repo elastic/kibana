@@ -25,7 +25,9 @@ import {
   User,
   CommentPatchAttributes,
   SubCaseAttributes,
+  AssociationType,
 } from '../../common/api';
+import { combineFilters } from '../routes/api/cases/helpers';
 import { transformNewSubCase } from '../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,
@@ -65,7 +67,19 @@ interface FindCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
   options?: SavedObjectFindOptions;
-  subCaseID?: string | string[];
+}
+
+interface FindCaseCommentsArgs {
+  client: SavedObjectsClientContract;
+  id: string | string[];
+  options?: SavedObjectFindOptions;
+  includeSubCaseComments?: boolean;
+}
+
+interface FindSubCaseCommentsArgs {
+  client: SavedObjectsClientContract;
+  id: string | string[];
+  options?: SavedObjectFindOptions;
 }
 
 interface FindCasesArgs extends ClientArgs {
@@ -139,7 +153,12 @@ export interface CaseServiceSetup {
   findSubCasesByCaseId(
     args: FindSubCasesByIDArgs
   ): Promise<SavedObjectsFindResponse<SubCaseAttributes>>;
-  getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getAllCaseComments(
+    args: FindCaseCommentsArgs
+  ): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getAllSubCaseComments(
+    args: FindSubCaseCommentsArgs
+  ): Promise<SavedObjectsFindResponse<CommentAttributes>>;
   getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   getSubCase(args: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
   getSubCases(args: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>>;
@@ -394,38 +413,22 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
-  /**
-   * Default behavior is to retrieve all comments that adhere to a given filter (if one is included).
-   * to override this pass in the either the page or perPage options.
-   */
-  public async getAllCaseComments({
+  private async getAllComments({
     client,
     id,
     options,
-    subCaseID,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
-      const refs =
-        subCaseID == null
-          ? this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }))
-          : this.asArray(subCaseID).map((idObj) => ({
-              type: SUB_CASE_SAVED_OBJECT,
-              id: idObj,
-            }));
-      this.log.debug(`Attempting to GET all comments for case caseID ${id} subCaseID ${subCaseID}`);
+      this.log.debug(`Attempting to GET all comments for id ${id}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
-          hasReferenceOperator: 'OR',
-          hasReference: refs,
           ...options,
         });
       }
       // get the total number of comments that are in ES then we'll grab them all in one go
       const stats = await client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
-        hasReferenceOperator: 'OR',
-        hasReference: refs,
         fields: [],
         page: 1,
         perPage: 1,
@@ -435,17 +438,85 @@ export class CaseService implements CaseServiceSetup {
 
       return client.find({
         type: CASE_COMMENT_SAVED_OBJECT,
-        hasReferenceOperator: 'OR',
-        hasReference: refs,
         page: 1,
         perPage: stats.total,
         ...options,
       });
     } catch (error) {
-      this.log.debug(`Error on GET all comments for case ${id} subCaseID: ${subCaseID}: ${error}`);
+      this.log.debug(`Error on GET all comments for ${id}: ${error}`);
       throw error;
     }
   }
+
+  /**
+   * Default behavior is to retrieve all comments that adhere to a given filter (if one is included).
+   * to override this pass in the either the page or perPage options.
+   *
+   * @param includeSubCaseComments is a flag to indicate that sub case comments should be included as well, by default
+   *  sub case comments are excluded. If the `filter` field is included in the options, it will override this behavior
+   */
+  public async getAllCaseComments({
+    client,
+    id,
+    options,
+    includeSubCaseComments = false,
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+    try {
+      const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
+
+      let filter: string | undefined;
+      if (!includeSubCaseComments) {
+        // if other filters were passed in then combine them to filter out sub case comments
+        filter = combineFilters(
+          [
+            options?.filter ?? '',
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${AssociationType.case}`,
+          ],
+          'AND'
+        );
+      }
+
+      this.log.debug(`Attempting to GET all comments for case caseID ${id}`);
+      return this.getAllComments({
+        client,
+        id,
+        options: {
+          hasReferenceOperator: 'OR',
+          hasReference: refs,
+          filter,
+          ...options,
+        },
+      });
+    } catch (error) {
+      this.log.debug(`Error on GET all comments for case ${id}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async getAllSubCaseComments({
+    client,
+    id,
+    options,
+  }: FindSubCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+    try {
+      const refs = this.asArray(id).map((caseID) => ({ type: SUB_CASE_SAVED_OBJECT, id: caseID }));
+
+      this.log.debug(`Attempting to GET all comments for sub case caseID ${id}`);
+      return this.getAllComments({
+        client,
+        id,
+        options: {
+          hasReferenceOperator: 'OR',
+          hasReference: refs,
+          ...options,
+        },
+      });
+    } catch (error) {
+      this.log.debug(`Error on GET all comments for sub case ${id}: ${error}`);
+      throw error;
+    }
+  }
+
   public async getReporters({ client }: ClientArgs) {
     try {
       this.log.debug(`Attempting to GET all reporters`);

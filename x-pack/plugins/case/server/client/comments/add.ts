@@ -294,6 +294,7 @@ export const addComment = async ({
     caseService.postNewComment({
       client: savedObjectsClient,
       attributes: transformNewComment({
+        // TODO: this needs to be sub if it is a sub case
         associationType: AssociationType.case,
         createdDate,
         ...query,

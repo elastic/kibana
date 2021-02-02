@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as rt from 'io-ts';
+
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
@@ -12,6 +14,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
+  AssociationType,
   CommentsResponseRt,
   SavedObjectFindOptionsRt,
   throwErrors,
@@ -19,9 +22,15 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { getComments } from '../helpers';
 
 const defaultPage = 1;
 const defaultPerPage = 20;
+
+const FindQueryParamsRt = rt.partial({
+  ...SavedObjectFindOptionsRt.props,
+  sub_case_id: rt.string,
+});
 
 export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -38,14 +47,17 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
       try {
         const client = context.core.savedObjects.client;
         const query = pipe(
-          SavedObjectFindOptionsRt.decode(request.query),
+          FindQueryParamsRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        const id = query.sub_case_id ?? request.params.case_id;
+        const associationType = query.sub_case_id ? AssociationType.subCase : AssociationType.case;
         const args = query
           ? {
+              caseService,
               client,
-              id: request.params.case_id,
+              id,
               options: {
                 // We need this because the default behavior of getAllCaseComments is to return all the comments
                 // unless the page and/or perPage is specified. Since we're spreading the query after the request can
@@ -55,13 +67,20 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
                 ...query,
                 sortField: 'created_at',
               },
+              associationType,
             }
           : {
+              caseService,
               client,
-              id: request.params.case_id,
+              id,
+              options: {
+                page: defaultPage,
+                perPage: defaultPerPage,
+              },
+              associationType,
             };
 
-        const theComments = await caseService.getAllCaseComments(args);
+        const theComments = await getComments(args);
         return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
       } catch (error) {
         return response.customError(wrapError(error));

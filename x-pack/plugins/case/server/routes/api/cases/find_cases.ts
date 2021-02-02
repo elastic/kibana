@@ -21,6 +21,7 @@ import {
   CaseType,
   SavedObjectFindOptions,
   CaseResponse,
+  AssociationType,
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
@@ -98,7 +99,7 @@ async function findCases({
     client,
     caseService,
     ids: Array.from(casesMap.keys()),
-    type: CASE_SAVED_OBJECT,
+    associationType: AssociationType.case,
   });
 
   const casesWithComments = new Map<string, CaseResponse>();

@@ -26,6 +26,7 @@ import {
   ESCaseAttributes,
   SubCaseResponse,
   SubCasesResponseRt,
+  AssociationType,
 } from '../../../../../common/api';
 import { SUB_CASES_PATCH_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
@@ -250,10 +251,9 @@ async function update({
   // TODO: extra to new function
   for (const subCaseToSync of subCasesToSyncAlertsFor) {
     const currentSubCase = subCasesMap.get(subCaseToSync.id);
-    const alertComments = await caseService.getAllCaseComments({
+    const alertComments = await caseService.getAllSubCaseComments({
       client,
       id: subCaseToSync.id,
-      subCaseID: subCaseToSync.id,
       options: {
         filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
       },

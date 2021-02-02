@@ -18,6 +18,11 @@ export function initPostCommentApi({ router }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            sub_case_id: schema.maybe(schema.string()),
+          })
+        ),
         body: escapeHatch,
       },
     },
@@ -27,7 +32,7 @@ export function initPostCommentApi({ router }: RouteDeps) {
       }
 
       const caseClient = context.case.getCaseClient();
-      const caseId = request.params.case_id;
+      const caseId = request.query?.sub_case_id ?? request.params.case_id;
       const comment = request.body as CommentRequest;
 
       try {

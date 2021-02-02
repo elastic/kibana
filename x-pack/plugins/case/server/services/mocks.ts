@@ -27,6 +27,7 @@ export const createCaseServiceMock = (): CaseServiceMock => ({
   findSubCases: jest.fn(),
   findSubCasesByCaseId: jest.fn(),
   getAllCaseComments: jest.fn(),
+  getAllSubCaseComments: jest.fn(),
   getCase: jest.fn(),
   getCases: jest.fn(),
   getComment: jest.fn(),

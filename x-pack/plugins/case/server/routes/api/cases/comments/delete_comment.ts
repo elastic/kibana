@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
-import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
@@ -22,6 +22,11 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           case_id: schema.string(),
           comment_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            sub_case_id: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
@@ -40,10 +45,13 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
-        if (caseRef == null || (caseRef != null && caseRef.id !== request.params.case_id)) {
+        const type = request.query?.sub_case_id ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const id = request.query?.sub_case_id ?? request.params.case_id;
+
+        const caseRef = myComment.references.find((c) => c.type === type);
+        if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
           throw Boom.notFound(
-            `This comment ${request.params.comment_id} does not exist in ${request.params.case_id}).`
+            `This comment ${request.params.comment_id} does not exist in ${id}).`
           );
         }
 
@@ -59,7 +67,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
               action: 'delete',
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
+              caseId: id,
               commentId: request.params.comment_id,
               fields: ['comment'],
             }),

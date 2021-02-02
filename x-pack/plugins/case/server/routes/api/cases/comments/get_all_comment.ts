@@ -6,7 +6,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AllCommentsResponseRt } from '../../../../../common/api';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { AllCommentsResponseRt, CommentAttributes } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObjects, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
@@ -21,7 +22,8 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         }),
         query: schema.maybe(
           schema.object({
-            sub_case_id: schema.string(),
+            include_sub_case_comments: schema.maybe(schema.boolean()),
+            sub_case_id: schema.maybe(schema.string()),
           })
         ),
       },
@@ -29,11 +31,21 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const comments = await caseService.getAllCaseComments({
-          client,
-          id: request.params.case_id,
-          subCaseID: request.query?.sub_case_id,
-        });
+        let comments: SavedObjectsFindResponse<CommentAttributes>;
+
+        if (request.query?.sub_case_id) {
+          comments = await caseService.getAllSubCaseComments({
+            client,
+            id: request.query.sub_case_id,
+          });
+        } else {
+          comments = await caseService.getAllCaseComments({
+            client,
+            id: request.params.case_id,
+            includeSubCaseComments: request.query?.include_sub_case_comments,
+          });
+        }
+
         return response.ok({
           body: AllCommentsResponseRt.encode(flattenCommentSavedObjects(comments.saved_objects)),
         });

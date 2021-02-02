@@ -76,13 +76,17 @@ export class CommentableCase {
 
   // TODO: refactor this, we shouldn't really need to know the saved object type?
   public buildRefsToCase(): SavedObjectReference[] {
-    const type = this.subCase ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+    const subCaseSOType = SUB_CASE_SAVED_OBJECT;
+    const caseSOType = CASE_SAVED_OBJECT;
     return [
       {
-        type,
-        name: `associated-${type}`,
-        id: this.id,
+        type: caseSOType,
+        name: `associated-${caseSOType}`,
+        id: this.collection.id,
       },
+      ...(this.subCase
+        ? [{ type: subCaseSOType, name: `associated-${subCaseSOType}`, id: this.subCase.id }]
+        : []),
     ];
   }
 
@@ -108,10 +112,9 @@ export class CommentableCase {
     });
 
     if (this.subCase) {
-      const subCaseComments = await this.service.getAllCaseComments({
+      const subCaseComments = await this.service.getAllSubCaseComments({
         client: this.soClient,
         id: this.subCase.id,
-        subCaseID: this.subCase.id,
       });
 
       return CollectWithSubCaseResponseRt.encode({

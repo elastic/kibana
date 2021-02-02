@@ -10,6 +10,8 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { getComments } from '../helpers';
+import { AssociationType } from '../../../../../common/api';
 
 export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
@@ -19,6 +21,11 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         params: schema.object({
           case_id: schema.string(),
         }),
+        query: schema.maybe(
+          schema.object({
+            sub_case_id: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
@@ -28,10 +35,16 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
-        const comments = await caseService.getAllCaseComments({
+        const id = request.query?.sub_case_id ?? request.params.case_id;
+        const comments = await getComments({
           client,
-          id: request.params.case_id,
+          caseService,
+          id,
+          associationType: request.query?.sub_case_id
+            ? AssociationType.subCase
+            : AssociationType.case,
         });
+
         await Promise.all(
           comments.saved_objects.map((comment) =>
             caseService.deleteComment({
@@ -48,7 +61,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
               action: 'delete',
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
+              caseId: id,
               commentId: comment.id,
               fields: ['comment'],
             })

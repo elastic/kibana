@@ -20,10 +20,10 @@ import {
   CaseStatuses,
   CaseType,
   SavedObjectFindOptions,
-  AssociationType,
   CommentType,
   SubCaseResponse,
   SubCaseAttributes,
+  AssociationType,
 } from '../../../../common/api';
 import { ESConnectorFields, ConnectorTypeFields } from '../../../../common/api/connectors';
 import {
@@ -207,6 +207,35 @@ export const findCaseStatusStats = async ({
   return total;
 };
 
+interface FindCommentsArgs {
+  client: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  id: string | string[];
+  associationType: AssociationType;
+  options?: SavedObjectFindOptions;
+}
+export const getComments = async ({
+  client,
+  caseService,
+  id,
+  associationType,
+  options,
+}: FindCommentsArgs) => {
+  if (associationType === AssociationType.subCase) {
+    return caseService.getAllSubCaseComments({
+      client,
+      id,
+      options,
+    });
+  } else {
+    return caseService.getAllCaseComments({
+      client,
+      id,
+      options,
+    });
+  }
+};
+
 interface SubCaseStats {
   commentTotals: Map<string, number>;
   alertTotals: Map<string, number>;
@@ -216,43 +245,41 @@ export const getCaseCommentStats = async ({
   client,
   caseService,
   ids,
-  type,
+  associationType,
 }: {
   client: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   ids: string[];
-  type: typeof SUB_CASE_SAVED_OBJECT | typeof CASE_SAVED_OBJECT;
+  associationType: AssociationType;
 }): Promise<SubCaseStats> => {
+  const refType =
+    associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
+
   const allComments = await Promise.all(
     ids.map((id) =>
-      caseService.getAllCaseComments({
+      getComments({
         client,
+        caseService,
+        associationType,
         id,
-        subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
-        options: {
-          fields: [],
-          page: 1,
-          perPage: 1,
-        },
+        options: { page: 1, perPage: 1 },
       })
     )
   );
 
-  const associationType =
-    type === SUB_CASE_SAVED_OBJECT ? AssociationType.subCase : AssociationType.case;
-
-  const alerts = await caseService.getAllCaseComments({
+  const alerts = await getComments({
     client,
+    caseService,
+    associationType,
     id: ids,
-    subCaseID: type === SUB_CASE_SAVED_OBJECT ? ids : undefined,
     options: {
-      filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}) AND ${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${associationType}`,
+      filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
     },
   });
 
   const getID = (comments: SavedObjectsFindResponse<unknown>) => {
     return comments.saved_objects.length > 0
-      ? comments.saved_objects[0].references.find((ref) => ref.type === type)?.id
+      ? comments.saved_objects[0].references.find((ref) => ref.type === refType)?.id
       : undefined;
   };
 
@@ -266,7 +293,7 @@ export const getCaseCommentStats = async ({
 
   const getFindResultID = (comment: SavedObjectsFindResult<unknown>) => {
     const refs = comment.references;
-    return refs.length > 0 ? refs.find((ref) => ref.type === type)?.id : undefined;
+    return refs.length > 0 ? refs.find((ref) => ref.type === refType)?.id : undefined;
   };
 
   const groupedAlerts = alerts.saved_objects.reduce((acc, alertsInfo) => {
@@ -328,7 +355,7 @@ export const findSubCases = async ({
     client,
     caseService,
     ids: subCases.saved_objects.map((subCase) => subCase.id),
-    type: SUB_CASE_SAVED_OBJECT,
+    associationType: AssociationType.subCase,
   });
 
   const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {

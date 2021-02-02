@@ -20,7 +20,11 @@ import {
   transformESConnectorToCaseConnector,
 } from '../../routes/api/cases/helpers';
 import { UserActionItem } from '.';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../saved_object_types';
 
 export const transformNewUserAction = ({
   actionField,
@@ -58,6 +62,7 @@ interface BuildCaseUserAction {
   fields: UserActionField | unknown[];
   newValue?: string | unknown;
   oldValue?: string | unknown;
+  subCaseId?: string;
 }
 
 interface BuildCommentUserActionItem extends BuildCaseUserAction {
@@ -73,6 +78,7 @@ export const buildCommentUserActionItem = ({
   fields,
   newValue,
   oldValue,
+  subCaseId,
 }: BuildCommentUserActionItem): UserActionItem => ({
   attributes: transformNewUserAction({
     actionField: fields as UserActionField,
@@ -93,6 +99,15 @@ export const buildCommentUserActionItem = ({
       name: `associated-${CASE_COMMENT_SAVED_OBJECT}`,
       id: commentId,
     },
+    ...(subCaseId
+      ? [
+          {
+            type: SUB_CASE_SAVED_OBJECT,
+            id: subCaseId,
+            name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+          },
+        ]
+      : []),
   ],
 });
 

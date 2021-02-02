@@ -58,13 +58,9 @@ async function deleteSubCases({
   const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
 
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllCaseComments({
+  const commentsForSubCases = await caseService.getAllSubCaseComments({
     client,
     id: subCaseIDs,
-    subCaseID: subCaseIDs,
-    options: {
-      fields: [],
-    },
   });
 
   // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted

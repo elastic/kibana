@@ -20,14 +20,14 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           case_id: schema.string(),
         }),
         query: schema.object({
-          includeComments: schema.string({ defaultValue: 'true' }),
+          includeComments: schema.boolean({ defaultValue: true }),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const includeComments = JSON.parse(request.query.includeComments);
+        const includeComments = request.query.includeComments;
 
         const [theCase] = await Promise.all([
           caseService.getCase({
