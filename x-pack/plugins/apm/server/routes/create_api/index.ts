@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
@@ -131,6 +132,15 @@ export function createApi() {
             } catch (error) {
               if (Boom.isBoom(error)) {
                 return convertBoomToKibanaResponse(error, response);
+              }
+
+              if (error instanceof RequestAbortedError) {
+                return response.custom({
+                  statusCode: 499,
+                  body: {
+                    message: 'Client closed request',
+                  },
+                });
               }
               throw error;
             }

@@ -26,6 +26,8 @@ export const tabify = (
       );
 };
 
+export { tabifyDocs };
+
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';
 
