@@ -8,8 +8,8 @@ import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
+import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
 import { SharePluginStart } from '../../../../../src/plugins/share/public';
