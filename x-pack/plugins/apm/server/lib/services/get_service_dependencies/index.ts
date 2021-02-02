@@ -191,7 +191,10 @@ export async function getServiceDependencies({
   });
 
   const latencySums = metricsByResolvedAddress
-    .map((metrics) => metrics.latency.value)
+    .map(
+      (metrics) =>
+        (metrics.latency.value ?? 0) * (metrics.throughput.value ?? 0)
+    )
     .filter(isFiniteNumber);
 
   const minLatencySum = Math.min(...latencySums);
