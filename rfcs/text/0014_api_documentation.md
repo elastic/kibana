@@ -217,7 +217,9 @@ export enum TypeKind {
   ObjectKind = 'Object',
   InterfaceKind = 'Interface',
   TypeKind = 'Type', // For things like `export type Foo = ...`
-  Unknown = 'Unknown', // There are a lot of ts-morph types, if I encounter something not handled, I dump it in here.
+  UnknownKind = 'Unknown', // For the special "unknown" typescript type.
+  AnyKind = 'Any', // For the "any" kind, which should almost never be used in our public API.
+  UnCategorized = 'UnCategorized', // There are a lot of ts-morph types, if I encounter something not handled, I dump it in here.
   StringKind = 'string',
   NumberKind = 'number',
   BooleanKind = 'boolean',
@@ -230,7 +232,7 @@ export enum TypeKind {
 ### Text with reference links
 
 Signatures, descriptions and return comments may all contain links to other API declarations. This information needs to be serializable into json. This serializable type encompasses the information needed to build the DocLink components within these fields. The logic of building
-the DocLink components currently resides inside the elasticdocs system. It's unclear if this will change.
+the DocLink components currently resides inside the elastic-docs system. It's unclear if this will change.
 
 ```ts
 /**
