@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
+import { LogEntry } from '../../../../common/log_entry';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
+import { LogEntriesState } from '../../../containers/logs/log_entries';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
@@ -24,7 +27,6 @@ import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
-import { WithStreamItems } from '../../../containers/logs/with_stream_items';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
 
@@ -39,7 +41,32 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isFlyoutOpen,
     logEntryId: flyoutLogEntryId,
   } = useLogEntryFlyoutContext();
-  const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
+
+  const [logEntriesState, logEntriesCallbacks] = useContext(LogEntriesState.Context);
+  const {
+    isReloading,
+    entries,
+    hasMoreAfterEnd,
+    hasMoreBeforeStart,
+    isLoadingMore,
+    lastLoadedTime,
+  } = logEntriesState;
+  const { fetchNewerEntries, checkForNewEntries } = logEntriesCallbacks;
+  const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
+    LogHighlightsState.Context
+  );
+
+  const items = useMemo(
+    () =>
+      isReloading
+        ? []
+        : entries.map((logEntry) =>
+            createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.id] || [])
+          ),
+
+    [entries, isReloading, logEntryHighlightsById]
+  );
+
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   const {
     isStreaming,
@@ -84,47 +111,33 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
         />
       ) : null}
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
-        <WithStreamItems>
-          {({
-            currentHighlightKey,
-            hasMoreAfterEnd,
-            hasMoreBeforeStart,
-            isLoadingMore,
-            isReloading,
-            items,
-            lastLoadedTime,
-            fetchNewerEntries,
-            checkForNewEntries,
-          }) => (
-            <ScrollableLogTextStreamView
-              columnConfigurations={
-                (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
-              }
-              hasMoreAfterEnd={hasMoreAfterEnd}
-              hasMoreBeforeStart={hasMoreBeforeStart}
-              isLoadingMore={isLoadingMore}
-              isReloading={isReloading}
-              isStreaming={isStreaming}
-              items={items}
-              jumpToTarget={jumpToTargetPosition}
-              lastLoadedTime={lastLoadedTime}
-              loadNewerItems={fetchNewerEntries}
-              reloadItems={checkForNewEntries}
-              reportVisibleInterval={reportVisiblePositions}
-              scale={textScale}
-              target={targetPosition}
-              wrap={textWrap}
-              onOpenLogEntryFlyout={openLogEntryFlyout}
-              setContextEntry={setContextEntry}
-              highlightedItem={surroundingLogsId ? surroundingLogsId : null}
-              currentHighlightKey={currentHighlightKey}
-              startDateExpression={startDateExpression}
-              endDateExpression={endDateExpression}
-              updateDateRange={updateDateRange}
-              startLiveStreaming={startLiveStreaming}
-            />
-          )}
-        </WithStreamItems>
+        <ScrollableLogTextStreamView
+          columnConfigurations={
+            (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
+          }
+          hasMoreAfterEnd={hasMoreAfterEnd}
+          hasMoreBeforeStart={hasMoreBeforeStart}
+          isLoadingMore={isLoadingMore}
+          isReloading={isReloading}
+          isStreaming={isStreaming}
+          items={items}
+          jumpToTarget={jumpToTargetPosition}
+          lastLoadedTime={lastLoadedTime}
+          loadNewerItems={fetchNewerEntries}
+          reloadItems={checkForNewEntries}
+          reportVisibleInterval={reportVisiblePositions}
+          scale={textScale}
+          target={targetPosition}
+          wrap={textWrap}
+          onOpenLogEntryFlyout={openLogEntryFlyout}
+          setContextEntry={setContextEntry}
+          highlightedItem={surroundingLogsId ? surroundingLogsId : null}
+          currentHighlightKey={currentHighlightKey}
+          startDateExpression={startDateExpression}
+          endDateExpression={endDateExpression}
+          updateDateRange={updateDateRange}
+          startLiveStreaming={startLiveStreaming}
+        />
 
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
@@ -132,23 +145,19 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets, start, end }) => (
-                    <WithStreamItems>
-                      {({ isReloading }) => (
-                        <LogMinimap
-                          start={start}
-                          end={end}
-                          height={height}
-                          width={width}
-                          highlightedInterval={isReloading ? null : visibleTimeInterval}
-                          jumpToTarget={jumpToTargetPosition}
-                          summaryBuckets={buckets}
-                          summaryHighlightBuckets={
-                            logSummaryHighlights.length > 0 ? logSummaryHighlights[0].buckets : []
-                          }
-                          target={visibleMidpointTime}
-                        />
-                      )}
-                    </WithStreamItems>
+                    <LogMinimap
+                      start={start}
+                      end={end}
+                      height={height}
+                      width={width}
+                      highlightedInterval={isReloading ? null : visibleTimeInterval}
+                      jumpToTarget={jumpToTargetPosition}
+                      summaryBuckets={buckets}
+                      summaryHighlightBuckets={
+                        logSummaryHighlights.length > 0 ? logSummaryHighlights[0].buckets : []
+                      }
+                      target={visibleMidpointTime}
+                    />
                   )}
                 </WithSummary>
               </LogPageMinimapColumn>
@@ -168,3 +177,12 @@ const LogPageMinimapColumn = euiStyled.div`
   display: flex;
   flex-direction: column;
 `;
+
+const createLogEntryStreamItem = (
+  logEntry: LogEntry,
+  highlights: LogEntry[]
+): LogEntryStreamItem => ({
+  kind: 'logEntry' as 'logEntry',
+  logEntry,
+  highlights,
+});
