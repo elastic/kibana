@@ -24,7 +24,7 @@ function getActions(status: SearchSessionStatus) {
   actions.push(ACTION.RELOAD);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
-    actions.push(ACTION.CANCEL);
+    actions.push(ACTION.DELETE);
   }
   return actions;
 }

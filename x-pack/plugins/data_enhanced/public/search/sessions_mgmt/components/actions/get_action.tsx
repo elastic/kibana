@@ -9,7 +9,7 @@ import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { CancelButton } from './cancel_button';
+import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
 import { ReloadButton } from './reload_button';
 import { ACTION, OnActionComplete } from './types';
@@ -21,11 +21,11 @@ export const getAction = (
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
   switch (actionType) {
-    case ACTION.CANCEL:
+    case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: <CancelButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     case ACTION.RELOAD:

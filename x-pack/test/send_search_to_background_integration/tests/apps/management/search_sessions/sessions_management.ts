@@ -78,15 +78,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectState('completed');
       });
 
-      it('Cancels a session from management', async () => {
+      it('Deletes a session from management', async () => {
         await PageObjects.searchSessionsManagement.goTo();
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
 
         expect(searchSessionList.length).to.be(1);
-        await searchSessionList[0].cancel();
+        await searchSessionList[0].delete();
 
-        // TODO: update this once canceling doesn't delete the object!
         await retry.waitFor(`wait for list to be empty`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
 
