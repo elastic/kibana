@@ -5,16 +5,17 @@
  */
 
 import React from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { PingTimestamp } from './ping_timestamp';
-import { mockReduxHooks } from '../../../../lib/helper/test_helpers';
-import { render } from '../../../../lib/helper/rtl_helpers';
-import { Ping } from '../../../../../common/runtime_types/ping';
-import * as observabilityPublic from '../../../../../../observability/public';
+import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
+import { render } from '../../../../../lib/helper/rtl_helpers';
+import { Ping } from '../../../../../../common/runtime_types/ping';
+import * as observabilityPublic from '../../../../../../../observability/public';
 
 mockReduxHooks();
 
-jest.mock('../../../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../../../observability/public');
+jest.mock('../../../../../../../observability/public', () => {
+  const originalModule = jest.requireActual('../../../../../../../observability/public');
 
   return {
     ...originalModule,
@@ -91,5 +92,27 @@ describe('Ping Timestamp component', () => {
     });
     const { container } = render(<PingTimestamp ping={response} timestamp={response.timestamp} />);
     expect(container.querySelector('img')?.src).toBe(src);
+  });
+
+  it('displays popover image when mouse enters img caption, and hides onLeave', async () => {
+    const src = 'http://sample.com/sampleImageSrc.png';
+    jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
+      status: FETCH_STATUS.SUCCESS,
+      data: { src },
+      refetch: () => null,
+    });
+    const { getByAltText, getByText, queryByAltText } = render(
+      <PingTimestamp ping={response} timestamp={response.timestamp} />
+    );
+    const caption = getByText('Nov 26, 2020 10:28:56 AM');
+    fireEvent.mouseEnter(caption);
+
+    const altText = `A larger version of the screenshot for this journey step's thumbnail.`;
+
+    await waitFor(() => getByAltText(altText));
+
+    fireEvent.mouseLeave(caption);
+
+    await waitFor(() => expect(queryByAltText(altText)).toBeNull());
   });
 });
