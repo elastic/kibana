@@ -38,7 +38,7 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       : i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteMultipleTitle',
           {
-            defaultMessage: `Remove {count} auto-follow patterns?`,
+            defaultMessage: `Remove {count} runtime fields?`,
             values: { count: fieldsToDelete.length },
           }
         );
