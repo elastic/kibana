@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst]',
           status_code: 403,
         });
       });
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t2_analyst], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t2_analyst]',
           status_code: 403,
         });
       });
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [soc_manager], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [soc_manager]',
           status_code: 403,
         });
       });
@@ -266,7 +266,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [hunter], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [hunter]',
           status_code: 403,
         });
       });
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [reader], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [reader]',
           status_code: 403,
         });
       });
@@ -401,7 +401,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [rule_author], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [rule_author]',
           status_code: 403,
         });
       });
