@@ -5,9 +5,7 @@
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
-import { InfraLogEntryFields } from '../../graphql/types';
 import {
   LogEntry,
   LogColumn,
@@ -18,10 +16,6 @@ import {
   LogMessageFieldPart,
   LogMessageConstantPart,
 } from '../../../common/log_entry';
-
-export type LogEntryMessageSegment = InfraLogEntryFields.Message;
-export type LogEntryConstantMessageSegment = InfraLogEntryFields.InfraLogMessageConstantSegmentInlineFragment;
-export type LogEntryFieldMessageSegment = InfraLogEntryFields.InfraLogMessageFieldSegmentInlineFragment;
 
 export const getLogEntryKey = (entry: { cursor: TimeKey }) => entry.cursor;
 
