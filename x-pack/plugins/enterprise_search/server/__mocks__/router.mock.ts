@@ -81,7 +81,7 @@ export class MockRouter {
     expect(() => this.validateRoute(request)).toThrow();
   };
 
-  findRouteRegistration = () => {
+  private findRouteRegistration = () => {
     const routerCalls = this.router[this.method].mock.calls as any[];
     if (!routerCalls.length) throw new Error('No routes registered.');
 
