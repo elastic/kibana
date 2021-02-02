@@ -12,7 +12,6 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 
@@ -35,26 +34,29 @@ export function TransactionErrorRateChart({
   const { transactionType } = useApmServiceContext();
   const { start, end, transactionName } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (transactionType && serviceName && start && end) {
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
-        params: {
-          path: {
-            serviceName,
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (transactionType && serviceName && start && end) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              transactionName,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-            transactionName,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters, transactionType, transactionName]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters, transactionType, transactionName]
+  );
 
   const errorRates = data?.transactionErrorRate || [];
 
