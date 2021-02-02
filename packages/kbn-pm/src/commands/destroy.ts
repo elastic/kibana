@@ -18,7 +18,7 @@ import { ICommand } from './';
 
 export const DestroyCommand: ICommand = {
   description:
-    'Remove the node_modules, remove target directories from all projects, remove extra patterns and runs a Bazel state hard clean.',
+    'Deletes node_modules and output directories, resets caches, and stops Bazel server',
   name: 'destroy',
 
   async run(projects) {
