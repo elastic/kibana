@@ -38,7 +38,7 @@ export async function sendUpgradeAgentAction({
     type: 'UPGRADE',
   });
   await updateAgent(soClient, esClient, agentId, {
-    upgraded_at: undefined,
+    upgraded_at: null,
     upgrade_started_at: now,
   });
 }
@@ -56,7 +56,7 @@ export async function ackAgentUpgraded(
   if (!version) throw new Error('version missing from UPGRADE action');
   await updateAgent(soClient, esClient, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
-    upgrade_started_at: undefined,
+    upgrade_started_at: null,
   });
 }
 
@@ -115,7 +115,7 @@ export async function sendUpgradeAgentsActions(
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
       data: {
-        upgraded_at: undefined,
+        upgraded_at: null,
         upgrade_started_at: now,
       },
     }))

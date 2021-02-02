@@ -128,8 +128,8 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
-  upgraded_at?: string;
-  upgrade_started_at?: string;
+  upgraded_at?: string | null;
+  upgrade_started_at?: string | null;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
@@ -191,11 +191,11 @@ export interface FleetServerAgent {
   /**
    * Date/time the Elastic Agent was last upgraded
    */
-  upgraded_at?: string;
+  upgraded_at?: string | null;
   /**
    * Date/time the Elastic Agent started the current upgrade
    */
-  upgrade_started_at?: string;
+  upgrade_started_at?: string | null;
   /**
    * ID of the API key the Elastic Agent must used to contact Fleet Server
    */
@@ -216,7 +216,7 @@ export interface FleetServerAgent {
   /**
    * The current policy revision_idx for the Elastic Agent
    */
-  policy_revision_idx?: number;
+  policy_revision_idx?: number | null;
   /**
    * The current policy coordinator for the Elastic Agent
    */
