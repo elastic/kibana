@@ -8,23 +8,26 @@ import { CoreSetup } from 'kibana/server';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
-import { mlTelemetryMappingsType } from './mappings';
+import { telemetryMappingsType } from './mappings';
 import { setInternalRepository } from './internal_repository';
 
-export function initMlTelemetry(coreSetup: CoreSetup, usageCollection: UsageCollectionSetup) {
-  coreSetup.savedObjects.registerType(mlTelemetryMappingsType);
-  registerMlUsageCollector(usageCollection);
+export function initFileUploadTelemetry(
+  coreSetup: CoreSetup,
+  usageCollection: UsageCollectionSetup
+) {
+  coreSetup.savedObjects.registerType(telemetryMappingsType);
+  registerUsageCollector(usageCollection);
   coreSetup.getStartServices().then(([core]) => {
     setInternalRepository(core.savedObjects.createInternalRepository);
   });
 }
 
-function registerMlUsageCollector(usageCollection: UsageCollectionSetup): void {
-  const mlUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
-    type: 'mlTelemetry',
+function registerUsageCollector(usageCollectionSetup: UsageCollectionSetup): void {
+  const usageCollector = usageCollectionSetup.makeUsageCollector<Telemetry>({
+    type: 'fileUpload',
     isReady: () => true,
     schema: {
-      file_data_visualizer: {
+      file_upload: {
         index_creation_count: { type: 'long' },
       },
     },
@@ -38,5 +41,5 @@ function registerMlUsageCollector(usageCollection: UsageCollectionSetup): void {
     },
   });
 
-  usageCollection.registerCollector(mlUsageCollector);
+  usageCollectionSetup.registerCollector(usageCollector);
 }

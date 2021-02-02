@@ -9,10 +9,10 @@ import { ISavedObjectsRepository } from 'kibana/server';
 
 import { getInternalRepository } from './internal_repository';
 
-export const TELEMETRY_DOC_ID = 'ml-telemetry';
+export const TELEMETRY_DOC_ID = 'file-upload-usage-collection-telemetry';
 
 export interface Telemetry {
-  file_data_visualizer: {
+  file_upload: {
     index_creation_count: number;
   };
 }
@@ -23,7 +23,7 @@ export interface TelemetrySavedObject {
 
 export function initTelemetry(): Telemetry {
   return {
-    file_data_visualizer: {
+    file_upload: {
       index_creation_count: 0,
     },
   };
@@ -74,8 +74,8 @@ export async function updateTelemetry(internalRepo?: ISavedObjectsRepository) {
 
 function incrementCounts(telemetry: Telemetry) {
   return {
-    file_data_visualizer: {
-      index_creation_count: telemetry.file_data_visualizer.index_creation_count + 1,
+    file_upload: {
+      index_creation_count: telemetry.file_upload.index_creation_count + 1,
     },
   };
 }
