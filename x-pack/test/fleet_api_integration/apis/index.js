@@ -9,6 +9,7 @@ export default function ({ loadTestFile }) {
     this.tags('ciGroup10');
     // Agent setup
     loadTestFile(require.resolve('./agents_setup'));
+
     // Agents
     loadTestFile(require.resolve('./agents/delete'));
     loadTestFile(require.resolve('./agents/list'));
@@ -22,7 +23,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
 
-    // Enrollement API keys
+    // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
 
     // EPM
@@ -35,6 +36,9 @@ export default function ({ loadTestFile }) {
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));
+
+    // Data Streams
+    loadTestFile(require.resolve('./data_streams/index'));
 
     // Settings
     loadTestFile(require.resolve('./settings/index'));
