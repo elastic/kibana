@@ -349,6 +349,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchToVisualization(subVisualizationId: string) {
       await this.openChartSwitchPopover();
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async openChartSwitchPopover() {

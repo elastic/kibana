@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'timestamp',
+        operation: 'terms',
+        field: 'DestCityName',
       });
 
       await PageObjects.lens.configureDimension({
@@ -61,7 +61,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('lens datatable', async () => {
+    // blocked by https://github.com/elastic/eui/issues/4474
+    it.skip('lens datatable', async () => {
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await a11y.testAppSnapshot();
     });
