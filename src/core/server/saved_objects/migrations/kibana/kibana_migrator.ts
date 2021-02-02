@@ -98,7 +98,7 @@ export class KibanaMigrator {
     this.log = logger;
     this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
     this.documentMigrator = new DocumentMigrator({
-      kibanaVersion,
+      kibanaVersion: this.kibanaVersion,
       typeRegistry,
       log: this.log,
     });
