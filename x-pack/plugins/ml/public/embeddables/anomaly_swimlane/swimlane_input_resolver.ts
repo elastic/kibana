@@ -35,7 +35,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/apply_influencer_filters_action';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
