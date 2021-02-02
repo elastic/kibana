@@ -11,11 +11,7 @@ interface SavedObjectsPitParams {
   keepAlive?: string;
 }
 
-export function getPitParams(pit?: SavedObjectsPitParams) {
-  if (!pit) {
-    return {};
-  }
-
+export function getPitParams(pit: SavedObjectsPitParams) {
   return {
     pit: {
       id: pit.id,

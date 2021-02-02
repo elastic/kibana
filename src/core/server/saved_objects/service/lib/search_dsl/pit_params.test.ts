@@ -25,8 +25,4 @@ describe('searchDsl/getPitParams', () => {
       },
     });
   });
-
-  it('returns empty object if pit is undefined', () => {
-    expect(getPitParams()).toEqual({});
-  });
 });
