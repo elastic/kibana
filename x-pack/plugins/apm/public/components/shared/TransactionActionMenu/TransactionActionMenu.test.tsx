@@ -52,7 +52,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  fireEvent.click(rendered.getByText('Actions'));
+  fireEvent.click(rendered.getByText('Investigate'));
 
   return rendered;
 };
@@ -289,7 +289,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -313,7 +313,7 @@ describe('TransactionActionMenu component', () => {
         { wrapper: Wrapper }
       );
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
@@ -330,7 +330,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -347,7 +347,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
@@ -364,7 +364,7 @@ describe('TransactionActionMenu component', () => {
       });
       const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
-        fireEvent.click(component.getByText('Actions'));
+        fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
       act(() => {
