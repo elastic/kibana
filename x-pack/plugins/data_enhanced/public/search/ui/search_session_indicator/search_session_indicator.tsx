@@ -180,7 +180,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundTitleText', {
-        defaultMessage: 'Saved session in progress.',
+        defaultMessage: 'Saved session in progress',
       }),
       description: i18n.translate(
         'xpack.data.searchSessionIndicator.loadingInTheBackgroundDescriptionText',
@@ -213,7 +213,7 @@ const searchSessionIndicatorViewStateToProps: {
       title: i18n.translate(
         'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundTitleText',
         {
-          defaultMessage: 'Saved session complete.',
+          defaultMessage: 'Saved session complete',
         }
       ),
       description: i18n.translate(
@@ -241,7 +241,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.restoredTitleText', {
-        defaultMessage: 'Search session restored.',
+        defaultMessage: 'Search session restored',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.restoredDescriptionText', {
         defaultMessage:
@@ -263,7 +263,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       title: i18n.translate('xpack.data.searchSessionIndicator.canceledTitleText', {
-        defaultMessage: 'Search session stopped.',
+        defaultMessage: 'Search session stopped',
       }),
       description: i18n.translate('xpack.data.searchSessionIndicator.canceledDescriptionText', {
         defaultMessage: 'You are viewing incomplete data.',
