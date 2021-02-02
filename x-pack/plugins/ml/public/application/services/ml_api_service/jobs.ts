@@ -13,6 +13,8 @@ import {
   MlJobWithTimeRange,
   MlSummaryJobs,
   CombinedJobWithStats,
+  Job,
+  Datafeed,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
@@ -43,6 +45,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       jobsMap: Dictionary<MlJobWithTimeRange>;
     }>({
       path: `${basePath()}/jobs/jobs_with_time_range`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobForCloning(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
+      path: `${basePath()}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });
