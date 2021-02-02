@@ -119,7 +119,7 @@ export const findSubCaseStatusStats = async ({
       hasReference: ids.map((id) => {
         return {
           id,
-          type: SUB_CASE_SAVED_OBJECT,
+          type: CASE_SAVED_OBJECT,
         };
       }),
     },

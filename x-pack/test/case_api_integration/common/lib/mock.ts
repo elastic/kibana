@@ -63,7 +63,6 @@ export const postCaseResp = (
   totalComment: 0,
   type: CaseType.individual,
   closed_by: null,
-  converted_by: null,
   created_by: defaultUser,
   external_service: null,
   status: CaseStatuses.open,
