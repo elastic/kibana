@@ -15,5 +15,3 @@ export enum ROLES {
   platform_engineer = 'platform_engineer',
   detections_admin = 'detections_admin',
 }
-
-export type RolesType = keyof typeof ROLES;

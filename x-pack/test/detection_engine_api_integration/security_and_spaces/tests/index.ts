@@ -16,6 +16,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./add_prepackaged_rules'));
       loadTestFile(require.resolve('./create_rules'));
       loadTestFile(require.resolve('./create_rules_bulk'));
+      loadTestFile(require.resolve('./create_index'));
       loadTestFile(require.resolve('./create_threat_matching'));
       loadTestFile(require.resolve('./create_exceptions'));
       loadTestFile(require.resolve('./delete_rules'));
@@ -31,6 +32,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./update_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules_bulk'));
       loadTestFile(require.resolve('./patch_rules'));
+      loadTestFile(require.resolve('./read_privileges'));
       loadTestFile(require.resolve('./query_signals'));
       loadTestFile(require.resolve('./open_close_signals'));
       loadTestFile(require.resolve('./get_signals_migration_status'));
