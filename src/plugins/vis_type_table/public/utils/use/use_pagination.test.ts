@@ -33,6 +33,12 @@ describe('usePagination', () => {
     });
   });
 
+  it('should skip setting the pagination if perPage is not set', () => {
+    const { result } = renderHook(() => usePagination({ ...visParams, perPage: '' }, 15));
+
+    expect(result.current).toBeUndefined();
+  });
+
   it('should change the page via callback', () => {
     const { result } = renderHook(() => usePagination(visParams, 15));
 
@@ -44,6 +50,22 @@ describe('usePagination', () => {
     expect(result.current).toEqual({
       pageIndex: 1,
       pageSize: 10,
+      onChangeItemsPerPage: expect.any(Function),
+      onChangePage: expect.any(Function),
+    });
+  });
+
+  it('should change items per page via callback', () => {
+    const { result } = renderHook(() => usePagination(visParams, 15));
+
+    act(() => {
+      // change the page to the next one
+      result.current?.onChangeItemsPerPage(20);
+    });
+
+    expect(result.current).toEqual({
+      pageIndex: 0,
+      pageSize: 20,
       onChangeItemsPerPage: expect.any(Function),
       onChangePage: expect.any(Function),
     });
