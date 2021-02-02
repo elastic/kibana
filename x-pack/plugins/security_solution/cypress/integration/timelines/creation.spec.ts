@@ -48,55 +48,98 @@ import { openTimeline } from '../../tasks/timelines';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
 // Skipped at the moment as there looks to be in-deterministic bugs with the open timeline dialog.
-describe.skip('Timelines', () => {
-  beforeEach(() => {
+describe('Timelines', () => {
+  let timelineId: string | null = null;
+
+  before(() => {
     cleanKibana();
+    loginAndWaitForPage(OVERVIEW_URL);
   });
 
-  it('Creates a timeline', () => {
-    cy.intercept('PATCH', '/api/timeline').as('timeline');
+  describe('Toggle create timeline from plus icon', () => {
+    after(() => {
+      closeTimeline();
+    });
 
-    loginAndWaitForPage(OVERVIEW_URL);
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(timeline);
+    it('toggle create timeline ', () => {
+      createNewTimeline();
+    });
+  });
 
-    cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+  describe('Creates a timeline by clicking untitled timeline from bottom bar', () => {
+    after(() => {
+      closeTimeline();
+    });
 
+    it('save timeline', () => {
+      cy.intercept('PATCH', '/api/timeline').as('timeline');
+
+      openTimelineUsingToggle();
+      addNameAndDescriptionToTimeline(timeline);
+      cy.wait('@timeline').then(({ response }) => {
+        timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      });
+    });
+
+    it('populates events', () => {
       populateTimeline();
       addFilter(timeline.filter);
-      pinFirstEvent();
+    });
 
+    it('pins an event', () => {
+      pinFirstEvent();
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
-      cy.get(LOCKED_ICON).should('be.visible');
+    });
 
+    it('has a lock icon', () => {
+      cy.get(LOCKED_ICON).should('be.visible');
+    });
+
+    it('can be added notes', () => {
       addNotesToTimeline(timeline.notes);
+    });
+
+    it('can be marked as favorite', () => {
       markAsFavorite();
       waitForTimelineChanges();
-      createNewTimeline();
-      closeTimeline();
-      openTimelineFromSettings();
+    });
+  });
 
+  describe('Open a timeline from the modal', () => {
+    after(() => {
+      closeTimeline();
+    });
+
+    it('should open a modal', () => {
+      openTimelineFromSettings();
       cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
       cy.contains(timeline.title).should('exist');
       cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
       cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
       cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
       cy.get(TIMELINES_FAVORITE).first().should('exist');
+    });
 
-      openTimeline(timelineId);
+    it('should open a timeline from the modal', () => {
+      openTimeline(timelineId!);
 
       cy.get(FAVORITE_TIMELINE).should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
       cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description); // This is the flake part where it sometimes does not show/load the timelines correctly
+    });
+
+    it('should contain the query tab', () => {
       cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
       cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
       cy.get(UNLOCKED_ICON).should('be.visible');
+    });
+
+    it('should contain the notes tab', () => {
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 
