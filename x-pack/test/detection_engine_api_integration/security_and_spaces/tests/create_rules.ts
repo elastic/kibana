@@ -113,6 +113,47 @@ export default ({ getService }: FtrProviderContext) => {
         expect(statusBody[body.id].current_status.status).to.eql('succeeded');
       });
 
+      it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
+        expect(statusBody[body.id].current_status.status).to.eql('failed');
+        expect(statusBody[body.id].current_status.last_failure_message).to.eql(
+          'The following index patterns did not match any indices: ["does-not-exist-*"]'
+        );
+      });
+
+      it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'succeeded');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
+        expect(statusBody[body.id].current_status.status).to.eql('succeeded');
+      });
+
       it('should create a single rule without an input index', async () => {
         const rule: CreateRulesSchema = {
           name: 'Simple Rule Query',
