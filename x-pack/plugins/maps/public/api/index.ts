@@ -5,5 +5,6 @@
  */
 
 export { MapsStartApi } from './start_api';
+export { MapsSetupApi } from './setup_api';
 export { createLayerDescriptors } from './create_layer_descriptors';
 export { registerLayerWizard, registerSource } from './register';

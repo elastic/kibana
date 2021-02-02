@@ -63,6 +63,7 @@ import {
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { MapsSetupApi } from './api/setup_api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -113,7 +114,10 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+
+    console.log('maps setuip');
+
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -157,9 +161,18 @@ export class MapsPlugin
         return renderApp(params);
       },
     });
+
+    return {
+      registerLayerWizard,
+      registerSource,
+    };
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
+
+
+    console.log('maps start');
+
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 

@@ -46,6 +46,7 @@ import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 import type { MapsStartApi } from '../../maps/public';
+import { registerWithMaps } from './maps/register_with_maps';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -174,6 +175,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   start(core: CoreStart, deps: any) {
+    registerWithMaps(deps.maps);
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,

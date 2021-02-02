@@ -12,6 +12,7 @@ export enum LICENSED_FEATURES {
   GEO_LINE_AGG = 'GEO_LINE_AGG',
   GEO_SHAPE_AGGS_GEO_TILE = 'GEO_SHAPE_AGGS_GEO_TILE',
   ON_PREM_EMS = 'ON_PREM_EMS',
+  ML_ANOMALIES = 'ML_ANOMALIES',
 }
 
 export interface LicensedFeatureDetail {
@@ -30,6 +31,10 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
   },
   [LICENSED_FEATURES.ON_PREM_EMS]: {
     name: 'layer from local Elastic Maps Server',
+    license: 'enterprise',
+  },
+  [LICENSED_FEATURES.ML_ANOMALIES]: {
+    name: 'layer from ML anomaly job',
     license: 'enterprise',
   },
 };
