@@ -3,4 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { ValidationStep } from './validation_step';
+export { ValidationStepWrapper } from './validation_step_wrapper';
