@@ -8,9 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { DropType } from '../types';
 
 type ActionType = 'lifted' | 'cancelled' | 'selectedTarget' | 'dropped' | 'blockedArrows';
-
-// draggingElement: label, groupLabel, position
-// droppingElement: label, groupLabel, position
 export interface HumanData {
   label: string;
   groupLabel?: string;
@@ -173,9 +170,9 @@ export const announce = (
   const announcementType =
     dropType && dropType in announcements ? announcements[dropType] : defaultAnnouncements;
   const announcement = announcementType?.[actionType] || defaultAnnouncements[actionType];
-  // console.log(
-  //   `%c ${announcement(draggingElement, droppingElement)}`,
-  //   'background: #251e3e; color: #eee3e7'
-  // );
+  console.log(
+    `%c ${announcement({ draggedElement, dropElement })}`,
+    'background: #251e3e; color: #eee3e7'
+  );
   return announcement({ draggedElement, dropElement });
 };
