@@ -16,6 +16,7 @@ RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 COPY --chown=1000:0 {{artifactTarball}} .
 RUN tar --strip-components=1 -zxf {{artifactTarball}}
+
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -31,15 +32,19 @@ FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG}
 EXPOSE 5601
 
 RUN yum update --setopt=tsflags=nodocs -y && \
-      yum install -y fontconfig freetype shadow-utils libnss3.so && \
+      yum install -y fontconfig freetype shadow-utils nss && \
       yum clean all
 
 COPY LICENSE /licenses/elastic-kibana
 
 # Add a dumb init process
-WORKDIR /usr/local/bin
-COPY dumb-init /usr/local/bin/dumb-init
-RUN chmod +x /usr/local/bin/dumb-init
+COPY tini /bin/tini
+RUN chmod +x /bin/tini
+
+# Noto Fonts
+RUN mkdir /usr/share/fonts/local
+COPY NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
+RUN fc-cache -v
 
 # Bring in Kibana from the initial stage.
 COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
@@ -56,19 +61,16 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 # variables and translate them to Kibana CLI options.
 COPY --chown=1000:0 scripts/kibana-docker /usr/local/bin/
 
-# Ensure gid 0 write permissions for OpenShift.
-RUN chmod g+ws /usr/share/kibana && find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \;
-
 # Remove the suid bit everywhere to mitigate "Stack Clash"
 RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
-RUN groupadd --gid 1000 kibana && useradd --uid 1000 --gid 1000 --home-dir /usr/share/kibana --no-create-home kibana
-USER kibana
+RUN groupadd --gid 1000 kibana && \
+    useradd --uid 1000 --gid 1000 -G 0 \
+      --home-dir /usr/share/kibana --no-create-home \
+      kibana
 
-LABEL org.label-schema.schema-version="1.0" org.label-schema.vendor="Elastic" org.label-schema.name="kibana" org.label-schema.version="{{version}}" org.label-schema.url="https://www.elastic.co/products/kibana" org.label-schema.vcs-url="https://github.com/elastic/kibana" org.label-schema.license="Elastic License" license="Elastic License"
-
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+ENTRYPOINT ["/bin/tini", "--"]
 
 CMD ["/usr/local/bin/kibana-docker"]
 
