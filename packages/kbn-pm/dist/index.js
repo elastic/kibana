@@ -54312,7 +54312,7 @@ const CleanCommand = {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       This command is only necessary for the rare circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
-      filling out this form: https://ela.st/yarn-kbn-clean.
+      filling out this form: https://ela.st/yarn-kbn-clean
     `);
     const toDelete = [];
 
