@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { getTotalLoaded, toKibanaSearchResponse } from './response_utils';
+import { getTotalLoaded, toKibanaSearchResponse, shimHitsTotal } from './response_utils';
 import { SearchResponse } from 'elasticsearch';
 
 describe('response utils', () => {
@@ -52,6 +52,81 @@ describe('response utils', () => {
         isPartial: false,
         total: 100,
         loaded: 15,
+      });
+    });
+  });
+
+  describe('shimHitsTotal', () => {
+    test('returns the total if it is already numeric', () => {
+      const result = shimHitsTotal({
+        hits: {
+          total: 5,
+        },
+      } as any);
+      expect(result).toEqual({
+        hits: {
+          total: 5,
+        },
+      });
+    });
+
+    test('returns the total if it is inside `value`', () => {
+      const result = shimHitsTotal({
+        hits: {
+          total: {
+            value: 5,
+          },
+        },
+      } as any);
+      expect(result).toEqual({
+        hits: {
+          total: 5,
+        },
+      });
+    });
+
+    test('returns other properties from the response', () => {
+      const result = shimHitsTotal({
+        _shards: {},
+        hits: {
+          hits: [],
+          total: {
+            value: 5,
+          },
+        },
+      } as any);
+      expect(result).toEqual({
+        _shards: {},
+        hits: {
+          hits: [],
+          total: 5,
+        },
+      });
+    });
+
+    test('returns the response as-is if `legacyHitsTotal` is `false`', () => {
+      const result = shimHitsTotal(
+        {
+          _shards: {},
+          hits: {
+            hits: [],
+            total: {
+              value: 5,
+              relation: 'eq',
+            },
+          },
+        } as any,
+        { legacyHitsTotal: false }
+      );
+      expect(result).toEqual({
+        _shards: {},
+        hits: {
+          hits: [],
+          total: {
+            value: 5,
+            relation: 'eq',
+          },
+        },
       });
     });
   });

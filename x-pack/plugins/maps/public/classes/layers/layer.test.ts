@@ -7,7 +7,13 @@
 
 import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
-import { AGG_TYPE, FIELD_ORIGIN, LAYER_STYLE_TYPE, VECTOR_STYLES } from '../../../common/constants';
+import {
+  AGG_TYPE,
+  FIELD_ORIGIN,
+  LAYER_STYLE_TYPE,
+  SOURCE_TYPES,
+  VECTOR_STYLES,
+} from '../../../common/constants';
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 
@@ -73,7 +79,7 @@ describe('cloneDescriptor', () => {
               indexPatternTitle: 'logs-*',
               metrics: [{ type: AGG_TYPE.COUNT }],
               term: 'myTermField',
-              type: 'joinSource',
+              type: SOURCE_TYPES.ES_TERM_SOURCE,
               applyGlobalQuery: true,
               applyGlobalTime: true,
             },

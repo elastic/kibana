@@ -8,11 +8,11 @@
 import { Query } from 'src/plugins/data/public';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, ESTermSourceDescriptor } from './source_descriptor_types';
+import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 
 export type JoinDescriptor = {
   leftField?: string;
-  right: ESTermSourceDescriptor;
+  right: TermJoinSourceDescriptor;
 };
 
 export type LayerDescriptor = {
