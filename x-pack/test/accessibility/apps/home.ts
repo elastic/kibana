@@ -9,12 +9,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
-  const retry = getService('retry');
-  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/80929
-  describe.skip('Kibana Home', () => {
+  describe('Kibana Home', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -23,64 +21,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('all plugins view page meets a11y requirements', async () => {
-      await PageObjects.home.clickAllKibanaPlugins();
+    it('Kibana overview page meets a11y requirements ', async () => {
+      await testSubjects.click('homSolutionPanel homSolutionPanel_kibana');
       await a11y.testAppSnapshot();
     });
 
-    it('visualize & explore details tab meets a11y requirements', async () => {
-      await PageObjects.home.clickVisualizeExplorePlugins();
+    it('toggle side nav meets a11y requirements', async () => {
+      await testSubjects.click('toggleNavButton');
       await a11y.testAppSnapshot();
     });
 
-    it('administrative detail tab meets a11y requirements', async () => {
-      await PageObjects.home.clickAdminPlugin();
+    it('Enterprise search overview page meets a11y requirements ', async () => {
+      await testSubjects.click('homeLink');
+      await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearch');
       await a11y.testAppSnapshot();
     });
 
-    it('navigating to console app from administration tab meets a11y requirements', async () => {
-      await PageObjects.home.clickOnConsole();
-      // wait till dev tools app is loaded (lazy loading the bundle)
-      await retry.waitFor(
-        'switched to dev tools',
-        async () => (await globalNav.getLastBreadcrumb()) === 'Dev Tools'
-      );
+    it('Observability overview page meets a11y requirements ', async () => {
+      await testSubjects.click('toggleNavButton');
+      await testSubjects.click('homeLink');
+      await testSubjects.click('homSolutionPanel homSolutionPanel_observability');
       await a11y.testAppSnapshot();
     });
 
-    it('navigating back to home page from console meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogo();
+    it('Security overview page meets a11y requirements ', async () => {
+      await testSubjects.click('toggleNavButton');
+      await testSubjects.click('homeLink');
+      await testSubjects.click('homSolutionPanel homSolutionPanel_securitySolution');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Add data page meets a11y requirements ', async () => {
+      await testSubjects.click('toggleNavButton');
+      await testSubjects.click('homeLink');
+      await testSubjects.click('homeAddData');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Sample data page meets a11y requirements ', async () => {
+      await testSubjects.click('homeTab-sampleData');
       await a11y.testAppSnapshot();
     });
 
     it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await PageObjects.home.clickOnAddData();
+      await testSubjects.click('sampleDataSetCardlogs');
       await a11y.testAppSnapshot();
     });
 
     it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnLogsTutorial();
+      await testSubjects.click('homeTab-all');
+      await testSubjects.click('homeSynopsisLinkactivemqlogs');
       await a11y.testAppSnapshot();
     });
 
     it('click on cloud tutorial meets a11y requirements', async () => {
-      await PageObjects.home.clickOnCloudTutorial();
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on side nav to see all the side nav menu', async () => {
-      await PageObjects.home.clickOnLogo();
-      await PageObjects.home.clickOnToggleNavButton();
+      await testSubjects.click('onCloudTutorial');
       await a11y.testAppSnapshot();
     });
 
     it('Dock the side nav', async () => {
+      await testSubjects.click('toggleNavButton');
       await PageObjects.home.dockTheSideNav();
       await a11y.testAppSnapshot();
     });
 
     it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
-      await PageObjects.home.collapseObservabibilitySideNav();
+      await find.clickByCssSelector(
+        '[data-test-subj="collapsibleNavGroup-observability"] .euiCollapsibleNavGroup__title'
+      );
       await a11y.testAppSnapshot();
     });
 
@@ -91,8 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('passes with searchbox open', async () => {
-      await PageObjects.common.navigateToApp('home');
-      await testSubjects.click('header-search');
+      await testSubjects.click('nav-search-popover');
       await a11y.testAppSnapshot();
     });
   });

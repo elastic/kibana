@@ -7,6 +7,7 @@
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
@@ -33,6 +34,7 @@ export interface InfraClientSetupDeps {
   observability: ObservabilityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface InfraClientStartDeps {
