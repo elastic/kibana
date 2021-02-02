@@ -12,7 +12,6 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import {
   EnvironmentField,
@@ -54,27 +53,30 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const thresholdAsPercent = (threshold ?? 0) / 100;
 
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
-        params: {
-          query: {
-            ...getAbsoluteTimeRange(windowSize, windowUnit),
-            environment,
-            serviceName,
-            transactionType: alertParams.transactionType,
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (windowSize && windowUnit) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
+          params: {
+            query: {
+              ...getAbsoluteTimeRange(windowSize, windowUnit),
+              environment,
+              serviceName,
+              transactionType: alertParams.transactionType,
+            },
           },
-        },
-      });
-    }
-  }, [
-    alertParams.transactionType,
-    environment,
-    serviceName,
-    windowSize,
-    windowUnit,
-  ]);
+        });
+      }
+    },
+    [
+      alertParams.transactionType,
+      environment,
+      serviceName,
+      windowSize,
+      windowUnit,
+    ]
+  );
 
   if (serviceName && !transactionTypes.length) {
     return null;
