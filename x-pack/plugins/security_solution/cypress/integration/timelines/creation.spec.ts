@@ -5,28 +5,8 @@
  */
 import { timeline } from '../../objects/timeline';
 
-import {
-  FAVORITE_TIMELINE,
-  LOCKED_ICON,
-  UNLOCKED_ICON,
-  NOTES_TAB_BUTTON,
-  NOTES_TEXT,
-  // NOTES_COUNT,
-  NOTES_TEXT_AREA,
-  PIN_EVENT,
-  TIMELINE_DESCRIPTION,
-  TIMELINE_FILTER,
-  // TIMELINE_FILTER,
-  TIMELINE_QUERY,
-  TIMELINE_TITLE,
-  OPEN_TIMELINE_MODAL,
-} from '../../screens/timeline';
-import {
-  TIMELINES_DESCRIPTION,
-  TIMELINES_PINNED_EVENT_COUNT,
-  TIMELINES_NOTES_COUNT,
-  TIMELINES_FAVORITE,
-} from '../../screens/timelines';
+import { LOCKED_ICON, PIN_EVENT } from '../../screens/timeline';
+
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -38,17 +18,14 @@ import {
   closeTimeline,
   createNewTimeline,
   markAsFavorite,
-  openTimelineFromSettings,
   pinFirstEvent,
   populateTimeline,
   waitForTimelineChanges,
 } from '../../tasks/timeline';
-import { openTimeline } from '../../tasks/timelines';
 
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-// Skipped at the moment as there looks to be in-deterministic bugs with the open timeline dialog.
-describe('Timelines', () => {
+describe('Timelines', (): void => {
   let timelineId: string | null = null;
 
   before(() => {
@@ -104,46 +81,6 @@ describe('Timelines', () => {
     it('can be marked as favorite', () => {
       markAsFavorite();
       waitForTimelineChanges();
-    });
-  });
-
-  describe('Open a timeline from the modal', () => {
-    after(() => {
-      closeTimeline();
-    });
-
-    it('should open a modal', () => {
-      openTimelineFromSettings();
-      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-      cy.contains(timeline.title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_FAVORITE).first().should('exist');
-    });
-
-    it('should open a timeline from the modal', () => {
-      openTimeline(timelineId!);
-
-      cy.get(FAVORITE_TIMELINE).should('exist');
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description); // This is the flake part where it sometimes does not show/load the timelines correctly
-    });
-
-    it('should contain the query tab', () => {
-      cy.get(TIMELINE_QUERY).should('have.text', `${timeline.query} `);
-      cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      cy.get(PIN_EVENT)
-        .should('have.attr', 'aria-label')
-        .and('match', /Unpin the event in row 2/);
-      cy.get(UNLOCKED_ICON).should('be.visible');
-    });
-
-    it('should contain the notes tab', () => {
-      cy.get(NOTES_TAB_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('exist');
-
-      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
   });
 });

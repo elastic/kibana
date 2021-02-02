@@ -72,6 +72,8 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
+export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
+
 export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
