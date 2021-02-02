@@ -8,6 +8,7 @@ import {
   DatasourceDimensionDropProps,
   DatasourceDimensionDropHandlerProps,
   isDraggedOperation,
+  DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
 import { insertOrReplaceColumn } from '../operations';
@@ -15,7 +16,15 @@ import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { getOperationSupportMatrix } from './operation_support';
+import { getOperationSupportMatrix, OperationSupportMatrix } from './operation_support';
+
+type DropHandlerProps<T = DraggedOperation> = Pick<
+  DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>,
+  'columnId' | 'setState' | 'state' | 'layerId' | 'droppedItem'
+> & {
+  droppedItem: T;
+  operationSupportMatrix: OperationSupportMatrix;
+};
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
   const operationSupportMatrix = getOperationSupportMatrix(props);
@@ -29,11 +38,11 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
 
   if (isDraggedField(dragging)) {
     const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
-    return (
+    return Boolean(
       layerIndexPatternId === dragging.indexPatternId &&
-      Boolean(hasOperationForField(dragging.field)) &&
-      (!currentColumn ||
-        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
+        Boolean(hasOperationForField(dragging.field)) &&
+        (!currentColumn ||
+          (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
     );
   }
 
@@ -59,73 +68,79 @@ function reorderElements(items: string[], dest: string, src: string) {
   return result;
 }
 
-export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const operationSupportMatrix = getOperationSupportMatrix(props);
-  const { setState, state, layerId, columnId, droppedItem } = props;
+const onReorderDrop = ({ columnId, setState, state, layerId, droppedItem }: DropHandlerProps) => {
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer: {
+        columnOrder: reorderElements(
+          state.layers[layerId].columnOrder,
+          columnId,
+          droppedItem.columnId
+        ),
+      },
+    })
+  );
 
-  if (isDraggedOperation(droppedItem) && props.isReorder) {
-    const dropEl = columnId;
+  return true;
+};
 
-    setState(
-      mergeLayer({
-        state,
-        layerId,
-        newLayer: {
-          columnOrder: reorderElements(
-            state.layers[layerId].columnOrder,
-            dropEl,
-            droppedItem.columnId
-          ),
-        },
-      })
-    );
+const onMoveDropToCompatibleGroup = ({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+}: DropHandlerProps) => {
+  const layer = state.layers[layerId];
+  const op = { ...layer.columns[droppedItem.columnId] };
+  const newColumns = { ...layer.columns };
+  delete newColumns[droppedItem.columnId];
+  newColumns[columnId] = op;
 
-    return true;
+  const newColumnOrder = [...layer.columnOrder];
+  const oldIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
+  const newIndex = newColumnOrder.findIndex((c) => c === columnId);
+
+  if (newIndex === -1) {
+    newColumnOrder[oldIndex] = columnId;
+  } else {
+    newColumnOrder.splice(oldIndex, 1);
   }
 
+  // Time to replace
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer: {
+        columnOrder: newColumnOrder,
+        columns: newColumns,
+      },
+    })
+  );
+  return { deleted: droppedItem.columnId };
+};
+
+const onFieldDrop = ({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+  operationSupportMatrix,
+}: DropHandlerProps<unknown>) => {
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationSupportMatrix.operationByField[field.name]);
-  }
-
-  if (isDraggedOperation(droppedItem) && droppedItem.layerId === layerId) {
-    const layer = state.layers[layerId];
-    const op = { ...layer.columns[droppedItem.columnId] };
-    if (!props.filterOperations(op)) {
-      return false;
-    }
-
-    const newColumns = { ...layer.columns };
-    delete newColumns[droppedItem.columnId];
-    newColumns[columnId] = op;
-
-    const newColumnOrder = [...layer.columnOrder];
-    const oldIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
-    const newIndex = newColumnOrder.findIndex((c) => c === columnId);
-
-    if (newIndex === -1) {
-      newColumnOrder[oldIndex] = columnId;
-    } else {
-      newColumnOrder.splice(oldIndex, 1);
-    }
-
-    // Time to replace
-    setState(
-      mergeLayer({
-        state,
-        layerId,
-        newLayer: {
-          columnOrder: newColumnOrder,
-          columns: newColumns,
-        },
-      })
-    );
-    return { deleted: droppedItem.columnId };
   }
 
   if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
     // TODO: What do we do if we couldn't find a column?
     return false;
   }
+
+  // dragged field, not operation
 
   const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
@@ -159,6 +174,56 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
   setState(mergeLayer({ state, layerId, newLayer }));
-
   return true;
+};
+
+export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
+  const operationSupportMatrix = getOperationSupportMatrix(props);
+  const { setState, state, droppedItem, columnId, layerId, groupId, isNew } = props;
+
+  if (!isDraggedOperation(droppedItem)) {
+    return onFieldDrop({
+      columnId,
+      setState,
+      state,
+      layerId,
+      droppedItem,
+      operationSupportMatrix,
+    });
+  }
+  const isExistingFromSameGroup =
+    droppedItem.groupId === groupId && droppedItem.columnId !== columnId && !isNew;
+
+  // reorder in the same group
+  if (isExistingFromSameGroup) {
+    return onReorderDrop({
+      columnId,
+      setState,
+      state,
+      layerId,
+      droppedItem,
+      operationSupportMatrix,
+    });
+  }
+
+  // replace or move to compatible group
+  const isFromOtherGroup = droppedItem.groupId !== groupId && droppedItem.layerId === layerId;
+
+  if (isFromOtherGroup) {
+    const layer = state.layers[layerId];
+    const op = { ...layer.columns[droppedItem.columnId] };
+
+    if (props.filterOperations(op)) {
+      return onMoveDropToCompatibleGroup({
+        columnId,
+        setState,
+        state,
+        layerId,
+        droppedItem,
+        operationSupportMatrix,
+      });
+    }
+  }
+
+  return false;
 }
