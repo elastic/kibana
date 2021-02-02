@@ -197,7 +197,7 @@ function discoverController($route, $scope, Promise) {
     session: data.search.session,
   });
 
-  const state = getState({
+  const stateContainer = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
@@ -212,7 +212,7 @@ function discoverController($route, $scope, Promise) {
     replaceUrlAppState,
     kbnUrlStateStorage,
     getPreviousAppState,
-  } = state;
+  } = stateContainer;
 
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -333,7 +333,7 @@ function discoverController($route, $scope, Promise) {
     filterManager,
     setAppState,
     data,
-    stateContainer: state,
+    stateContainer,
   };
 
   const inspectorAdapters = ($scope.opts.inspectorAdapters = {
