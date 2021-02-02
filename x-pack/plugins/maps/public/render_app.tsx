@@ -79,7 +79,7 @@ export async function renderApp({
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
     const { embeddableId, originatingApp, valueInput } =
-      stateTransfer?.getIncomingEditorState() || {};
+      stateTransfer.getIncomingEditorState() || {};
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {
