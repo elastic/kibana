@@ -48,9 +48,9 @@ export function updateSearchSource(
     .setField('filter', data.query.filterManager.getFilters());
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    const fields: Record<string, any> = { field: '*' };
+    const fields: Record<string, string> = { field: '*' };
     if (showUnmappedFields) {
-      fields.include_unmapped = true;
+      fields.include_unmapped = 'true';
     }
     searchSource.setField('fields', [fields]);
   } else {
