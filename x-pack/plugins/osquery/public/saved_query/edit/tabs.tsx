@@ -5,7 +5,7 @@
  */
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { ResultsTable } from '../../results/results_table';
 import { ActionResultsTable } from '../../action_results/action_results_table';
@@ -37,19 +37,7 @@ const ResultTabsComponent = ({ actionId }: { actionId: string }) => {
     [actionId]
   );
 
-  const handleTabClick = useCallback((tab) => {
-    // eslint-disable-next-line no-console
-    console.log('clicked tab', tab);
-  }, []);
-
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      onTabClick={handleTabClick}
-    />
-  );
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />;
 };
 
 export const ResultTabs = React.memo(ResultTabsComponent);

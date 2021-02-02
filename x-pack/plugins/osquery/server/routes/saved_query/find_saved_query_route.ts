@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../lib/saved_query/saved_object_mappings';
@@ -16,36 +14,22 @@ export const findSavedQueryRoute = (router: IRouter) => {
     {
       path: '/api/osquery/saved_query',
       validate: {
+        query: schema.object({}, { unknowns: 'allow' }),
         params: schema.object({}, { unknowns: 'allow' }),
         body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, response) => {
-      //   const esClient = context.core.elasticsearch.client.asInternalUser;
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const savedQueries = await savedObjectsClient.find({ type: savedQuerySavedObjectType });
-      //   const query = await esClient.index<{}, {}>({
-      //     index: '.fleet-actions',
-      //     body: {
-      //       action_id: uuid.v4(),
-      //       '@timestamp': moment().toISOString(),
-      //       expiration: moment().add(2, 'days').toISOString(),
-      //       type: 'APP_ACTION',
-      //       input_id: 'osquery',
-      //       // @ts-expect-error
-      //       agents: request.body.agents,
-      //       data: {
-      //         commands: [
-      //           {
-      //             id: uuid.v4(),
-      //             // @ts-expect-error
-      //             query: request.body.command.query,
-      //           },
-      //         ],
-      //       },
-      //     },
-      //   });
+      const savedQueries = await savedObjectsClient.find({
+        type: savedQuerySavedObjectType,
+        page: parseInt(request.query.pageIndex, 10) + 1,
+        perPage: request.query.pageSize,
+        sortField: request.query.sortField,
+        sortOrder: request.query.sortDirection,
+      });
+
       return response.ok({
         body: savedQueries,
       });

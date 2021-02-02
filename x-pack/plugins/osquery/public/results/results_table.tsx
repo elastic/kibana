@@ -47,7 +47,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
     [setSortingColumns]
   );
 
-  const [, { results, totalCount }] = useAllResults({
+  const { data: allResultsData } = useAllResults({
     actionId,
     agentId,
     activePage: pagination.pageIndex,
@@ -99,7 +99,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   );
 
   useEffect(() => {
-    const newColumns = keys(results[0]?.fields)
+    const newColumns = keys(allResultsData?.results[0]?.fields)
       .sort()
       .reduce((acc, fieldName) => {
         if (fieldName === 'agent.name') {
@@ -131,15 +131,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-  }, [columns, results]);
+  }, [columns, allResultsData?.results]);
 
   return (
-    <DataContext.Provider value={results}>
+    <DataContext.Provider value={allResultsData?.results ?? []}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        rowCount={totalCount}
+        rowCount={allResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}

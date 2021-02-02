@@ -34,7 +34,7 @@ export const createActionRoute = (router: IRouter) => {
             {
               id: uuid.v4(),
               // @ts-expect-error
-              query: request.body.command.query,
+              query: request.body.command,
             },
           ],
         },

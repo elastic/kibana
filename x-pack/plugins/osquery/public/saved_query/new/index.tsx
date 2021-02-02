@@ -5,20 +5,23 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from 'react-query';
 
+import { useForm, useFormData } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { SavedQueryForm } from '../form';
 import { LiveQueryForm } from '../../live_query/form';
 import { ResultTabs } from '../edit/tabs';
 
+const SAVED_QUERY_FORM_ID = 'savedQueryForm';
+
 const NewSavedQueryPageComponent = () => {
   const { http } = useKibana().services;
   const history = useHistory();
 
-  const updateSavedQueryMutation = useMutation(
+  const createSavedQueryMutation = useMutation(
     (payload) => http.post(`/api/osquery/saved_query`, { body: JSON.stringify(payload) }),
     {
       onSuccess: (data) => {
@@ -27,33 +30,42 @@ const NewSavedQueryPageComponent = () => {
     }
   );
 
-  const handleSubmit = useCallback((payload) => updateSavedQueryMutation.mutate(payload), [
-    updateSavedQueryMutation,
-  ]);
+  const { form: savedQueryForm } = useForm({
+    id: SAVED_QUERY_FORM_ID,
+    // schema: formSchema,
+    onSubmit: createSavedQueryMutation.mutate,
+    options: {
+      stripEmptyFields: false,
+    },
+    defaultValue: {},
+  });
 
-  const createActionMutation = useMutation((payload) =>
-    http.post('/api/osquery/action', { body: JSON.stringify(payload) })
+  const [savedQueryFormData] = useFormData({
+    watch: ['command'],
+    form: savedQueryForm,
+  });
+
+  const createActionMutation = useMutation((payload: Record<string, any>) =>
+    http.post('/api/osquery/action', {
+      body: JSON.stringify({ ...payload, command: savedQueryFormData.command }),
+    })
   );
 
   console.error('createActionMutation', createActionMutation);
+  console.error('savedQueryFormData', savedQueryFormData);
 
   return (
     <>
-      <SavedQueryForm onSubmit={handleSubmit} />
+      <SavedQueryForm form={savedQueryForm} />
       <EuiSpacer />
       <LiveQueryForm onSubmit={createActionMutation.mutate} />
 
-      {createActionMutation.data ||
-        (true && (
-          <>
-            <EuiSpacer />
-            <ResultTabs
-              actionId={
-                '6f80265b-f4bd-40ac-a677-4b60426e1a69' ?? createActionMutation.data.action.action_id
-              }
-            />
-          </>
-        ))}
+      {createActionMutation.data && (
+        <>
+          <EuiSpacer />
+          <ResultTabs actionId={createActionMutation.data?.action.action_id} />
+        </>
+      )}
     </>
   );
 };

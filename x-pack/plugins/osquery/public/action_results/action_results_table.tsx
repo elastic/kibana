@@ -119,7 +119,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'rows_count') {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const [, { totalCount: agentResultsCount }] = useAllResults({
+        const { data: allResultsData } = useAllResults({
           actionId,
           agentId: value.fields.agent_id[0],
           activePage: pagination.pageIndex,
@@ -127,7 +127,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
           direction: Direction.asc,
           sortField: '@timestamp',
         });
-        return agentResultsCount;
+        return allResultsData?.totalCount ?? '-';
       }
 
       if (columnId === 'agent_status') {
@@ -144,13 +144,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const agentName = agent?.local_metadata.host.name;
 
-        console.error(
-          'aaa',
-          value,
-          agentIdValue,
-          agentName,
-          find(['_id', agentIdValue], agentsData?.agents)
-        );
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(
           `/live_query/queries/${actionId}/results/${agentIdValue}`

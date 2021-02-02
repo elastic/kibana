@@ -32,10 +32,23 @@ const SavedQueriesPageComponent = () => {
     }
   );
 
-  const { data = {} } = useQuery('savedQueryList', () => http.get('/api/osquery/saved_query'), {
-    // Refetch the data every 10 seconds
-    refetchInterval: 10000,
-  });
+  const { data = {} } = useQuery(
+    ['savedQueryList', { pageIndex, pageSize, sortField, sortDirection }],
+    () =>
+      http.get('/api/osquery/saved_query', {
+        query: {
+          pageIndex,
+          pageSize,
+          sortField,
+          sortDirection,
+        },
+      }),
+    {
+      keepPreviousData: true,
+      // Refetch the data every 10 seconds
+      refetchInterval: 5000,
+    }
+  );
   const { total = 0, saved_objects: savedQueries } = data;
 
   const toggleDetails = useCallback(
@@ -111,14 +124,10 @@ const SavedQueriesPageComponent = () => {
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {
-    const { index: pageIndex, size: pageSize } = page;
-
-    const { field: sortField, direction: sortDirection } = sort;
-
-    setPageIndex(pageIndex);
-    setPageSize(pageSize);
-    setSortField(sortField);
-    setSortDirection(sortDirection);
+    setPageIndex(page.index);
+    setPageSize(page.size);
+    setSortField(sort.field);
+    setSortDirection(sort.direction);
   }, []);
 
   const pagination = useMemo(
@@ -163,7 +172,7 @@ const SavedQueriesPageComponent = () => {
         </EuiButton>
       ) : (
         <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
-          Delete {selectedItems.length} Users
+          {`Delete ${selectedItems.length} Queries`}
         </EuiButton>
       )}
 

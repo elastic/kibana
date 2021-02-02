@@ -19,30 +19,7 @@ interface SavedQueryFormProps {
   onSubmit: (payload: Record<string, string>) => Promise<void>;
 }
 
-const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ actionDetails, onSubmit }) => {
-  const handleSubmit = useCallback(
-    (payload) => {
-      onSubmit(payload);
-      return Promise.resolve();
-    },
-    [onSubmit]
-  );
-
-  const { form } = useForm({
-    id: FORM_ID,
-    // schema: formSchema,
-    onSubmit: handleSubmit,
-    options: {
-      stripEmptyFields: false,
-    },
-    defaultValue: actionDetails,
-    deserializer: (payload) => ({
-      title: payload.attributes.title,
-      description: payload.attributes.description,
-      command: payload.attributes.command,
-    }),
-  });
-
+const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ form }) => {
   const { submit } = form;
 
   return (
