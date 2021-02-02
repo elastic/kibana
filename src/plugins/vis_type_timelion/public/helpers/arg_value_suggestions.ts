@@ -59,7 +59,9 @@ export function getArgValueSuggestions() {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
-        return (await indexPatterns.find(search, 25)).map(({ title }) => ({
+        const size = 25;
+
+        return (await indexPatterns.find(search, size)).map(({ title }) => ({
           name: title,
         }));
       },
