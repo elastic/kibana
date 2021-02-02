@@ -4,18 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
+import {
+  ExecutorSubActionPushParamsITSM,
+  ExecutorSubActionPushParamsSIR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
   ServiceNowSecrets
 >;
 
-export interface ServiceNowActionParams {
+export interface ServiceNowITSMActionParams {
   subAction: string;
-  subActionParams: ExecutorSubActionPushParams;
+  subActionParams: ExecutorSubActionPushParamsITSM;
+}
+
+export interface ServiceNowSIRActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
 export interface ServiceNowConfig {
@@ -26,3 +35,13 @@ export interface ServiceNowSecrets {
   username: string;
   password: string;
 }
+
+export interface Choice {
+  value: string;
+  label: string;
+  element: string;
+  dependent_value: string;
+}
+
+export type Fields = Record<string, Choice[]>;
+export type Options = Record<string, EuiSelectOption[]>;
