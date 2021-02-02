@@ -12,7 +12,7 @@ export { schema } from './schema';
 
 export * from './validations';
 
-export { Form } from './components';
+export { Form, EnhancedUseField as UseField } from './components';
 
 export {
   ConfigurationIssuesProvider,

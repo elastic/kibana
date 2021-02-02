@@ -883,9 +883,9 @@ describe('<EditPolicy />', () => {
     // the form object before we look at the form object. See:
     // x-pack/plugins/index_lifecycle_management/public/application/sections/edit_policy/form/form_errors_context.tsx
     // for where this logic lives.
-    const runTimers = async () => {
+    const runTimers = () => {
       const { component } = testBed;
-      await act(async () => {
+      act(() => {
         jest.runAllTimers();
       });
       component.update();
@@ -913,7 +913,7 @@ describe('<EditPolicy />', () => {
       // 1. Hot phase validation issue
       await actions.hot.toggleForceMerge(true);
       await actions.hot.setForcemergeSegmentsCount('-22');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(true);
       expect(actions.warm.hasErrorIndicator()).toBe(false);

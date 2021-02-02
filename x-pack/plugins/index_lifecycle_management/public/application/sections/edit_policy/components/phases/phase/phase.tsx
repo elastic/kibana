@@ -18,9 +18,10 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ToggleField, UseField, useFormData } from '../../../../../../shared_imports';
+import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 
+import { UseField } from '../../../form';
 import { ActiveHighlight } from '../../active_highlight';
 import { MinAgeField } from '../shared_fields';
 

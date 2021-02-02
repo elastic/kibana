@@ -23,9 +23,9 @@ const i18nTexts = {
  * This component hooks into the form state and updates whenever new form data is inputted.
  */
 export const PhaseErrorIndicator: FunctionComponent<Props> = memo(({ phase }) => {
-  const errors = useFormErrorsContext();
+  const { errors } = useFormErrorsContext();
 
-  if (errors[phase].length > 0) {
+  if (Object.keys(errors[phase]).length) {
     return (
       <div data-test-subj={`phaseErrorIndicator-${phase}`}>
         <EuiIconTip type="alert" color="danger" content={i18nTexts.toolTipContent} />

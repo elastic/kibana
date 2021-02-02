@@ -4,107 +4,106 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {
-  createContext,
-  useContext,
-  FunctionComponent,
-  useEffect,
-  useState,
-  useRef,
-} from 'react';
+import React, { createContext, useContext, FunctionComponent, useState, useCallback } from 'react';
 
-import { useFormData, useFormContext } from '../../../../shared_imports';
+import { Phases as _Phases } from '../../../../../common/types';
+
+import { useFormContext } from '../../../../shared_imports';
 
 import { FormInternal } from '../types';
 
-interface ContextValue {
+type Phases = keyof _Phases;
+
+type PhasesAndOther = Phases | 'other';
+
+interface ErrorGroup {
+  [fieldPath: string]: string[];
+}
+
+interface Errors {
   hasErrors: boolean;
-  hot: string[];
-  warm: string[];
-  cold: string[];
+  hot: ErrorGroup;
+  warm: ErrorGroup;
+  cold: ErrorGroup;
+  delete: ErrorGroup;
   /**
    * Errors that are not specific to a phase should go here.
    */
-  other: string[];
+  other: ErrorGroup;
+}
+
+interface ContextValue {
+  errors: Errors;
+  addError(phase: PhasesAndOther, fieldPath: string, errorMessages: string[]): void;
+  clearError(phase: PhasesAndOther, fieldPath: string): void;
 }
 
 const FormErrorsContext = createContext<ContextValue>(null as any);
 
-const isXPhaseField = (phase: 'hot' | 'warm' | 'cold') => (fieldPath: string): boolean =>
-  fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
-
-const isHotPhaseField = isXPhaseField('hot');
-const isWarmPhaseField = isXPhaseField('warm');
-const isColdPhaseField = isXPhaseField('cold');
-
-const createEmptyContextValue = (): ContextValue => ({
+const createEmptyErrors = (): Errors => ({
   hasErrors: false,
-  hot: [],
-  warm: [],
-  cold: [],
-  other: [],
+  hot: {},
+  warm: {},
+  cold: {},
+  delete: {},
+  other: {},
 });
 
 export const FormErrorsProvider: FunctionComponent = ({ children }) => {
-  const [contextValue, setContextValue] = useState<ContextValue>(createEmptyContextValue);
-  const { hasErrors } = contextValue;
-  const isMounted = useRef<boolean>(false);
-
+  const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 
-  // Hook into form updates
-  const [formData] = useFormData<FormInternal>();
+  const addError: ContextValue['addError'] = useCallback(
+    (phase, fieldPath, errorMessages) => {
+      setErrors((previousErrors) => ({
+        ...previousErrors,
+        hasErrors: true,
+        [phase]: {
+          ...previousErrors[phase],
+          [fieldPath]: errorMessages,
+        },
+      }));
+    },
+    [setErrors]
+  );
 
-  useEffect(() => {
-    isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      return;
-    }
-    // This is a hack, we need to wait for the next tick to let all of the async validation complete
-    // and have form errors populate. It would be best if there were another way to listen/hook into
-    // form errors.
-    setTimeout(() => {
-      // For now, we check on the form for any error messages and since we do not have a way to tie
-      // these back to fields we need to loop through the fields. This if check just makes sure we
-      // do not do this work if there are no form errors.
+  const clearError: ContextValue['clearError'] = useCallback(
+    (phase, fieldPath) => {
       if (form.getErrors().length) {
-        const fields = form.getFields();
-        const result: ContextValue = {
-          hasErrors: true,
-          hot: [],
-          warm: [],
-          cold: [],
-          other: [],
-        };
-        Object.entries(fields).forEach(([fieldPath, field]) => {
-          const errorMessages = field.getErrorsMessages();
-          if (!errorMessages) {
-            return;
-          }
-          if (isHotPhaseField(fieldPath)) {
-            result.hot.push(errorMessages);
-          } else if (isWarmPhaseField(fieldPath)) {
-            result.warm.push(errorMessages);
-          } else if (isColdPhaseField(fieldPath)) {
-            result.cold.push(errorMessages);
-          } else {
-            result.other.push(errorMessages);
-          }
-        });
-        setContextValue(result);
-      } else if (hasErrors === true) {
-        setContextValue(createEmptyContextValue);
-      }
-    });
-  }, [form, formData, hasErrors, setContextValue]);
+        setErrors((previousErrors) => {
+          const {
+            [phase]: { [fieldPath]: fieldErrorToOmit, ...restOfPhaseErrors },
+            ...otherPhases
+          } = previousErrors;
 
-  return <FormErrorsContext.Provider value={contextValue}>{children}</FormErrorsContext.Provider>;
+          const hasErrors =
+            Object.keys(restOfPhaseErrors).length === 0 &&
+            Object.keys(otherPhases).some((phaseErrors) => !!Object.keys(phaseErrors).length);
+
+          return {
+            ...previousErrors,
+            hasErrors,
+            [phase]: restOfPhaseErrors,
+          };
+        });
+      } else {
+        setErrors(createEmptyErrors);
+      }
+    },
+    [form, setErrors]
+  );
+
+  return (
+    <FormErrorsContext.Provider
+      value={{
+        errors,
+        addError,
+        clearError,
+      }}
+    >
+      {children}
+    </FormErrorsContext.Provider>
+  );
 };
 
 export const useFormErrorsContext = () => {

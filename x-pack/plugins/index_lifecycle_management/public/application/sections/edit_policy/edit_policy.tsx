@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -31,10 +29,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TextField, UseField, useForm, useFormData } from '../../../shared_imports';
+import { TextField, useForm, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 import { createDocLink } from '../../services/documentation';
+
+import { UseField } from './form';
 
 import { savePolicy } from './save_policy';
 

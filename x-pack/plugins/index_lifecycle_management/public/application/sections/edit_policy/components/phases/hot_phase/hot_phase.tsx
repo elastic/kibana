@@ -19,11 +19,11 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
+import { useFormData, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 

@@ -22,7 +22,9 @@ const i18nTexts = {
 };
 
 export const FormErrorsCallout: FunctionComponent = () => {
-  const { hasErrors } = useFormErrorsContext();
+  const {
+    errors: { hasErrors },
+  } = useFormErrorsContext();
 
   if (!hasErrors) {
     return null;
