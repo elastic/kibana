@@ -37,6 +37,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -846,6 +847,7 @@ export class SavedObjectsRepository {
         (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
           score: (hit as any)._score,
+          ...((hit as any).sort ? { sort: (hit as any).sort } : {}),
         })
       ),
       ...(body.pit_id ? { pit_id: body.pit_id } : {}),
@@ -1812,7 +1814,7 @@ export class SavedObjectsRepository {
   async openPointInTimeForType(
     type: string | string[],
     { keepAlive, preference }: SavedObjectsOpenPointInTimeOptions = {}
-  ): Promise<{ id: string }> {
+  ): Promise<SavedObjectsOpenPointInTimeResponse> {
     const defaultKeepAlive = '5m';
 
     const types = Array.isArray(type) ? type : [type];

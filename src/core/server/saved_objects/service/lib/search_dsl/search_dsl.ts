@@ -22,7 +22,7 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  searchAfter?: Array<number | string>;
+  searchAfter?: unknown[];
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];

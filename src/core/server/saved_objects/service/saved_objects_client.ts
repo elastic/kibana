@@ -129,6 +129,10 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * The Elasticsearch `_score` of this result.
    */
   score: number;
+  /**
+   * The Elasticsearch `sort` value of this result.
+   */
+  sort?: unknown[];
 }
 
 /**
@@ -324,6 +328,16 @@ export interface SavedObjectsOpenPointInTimeOptions {
    * An optional ES preference value to be used for the query.
    */
   preference?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeResponse {
+  /**
+   * PIT ID returned from ES.
+   */
+  id: string;
 }
 
 /**
@@ -526,7 +540,7 @@ export class SavedObjectsClient {
    */
   async openPointInTimeForType(
     type: string | string[],
-    options: SavedObjectsOpenPointInTimeOptions
+    options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
     return await this._repository.openPointInTimeForType(type, options);
   }
