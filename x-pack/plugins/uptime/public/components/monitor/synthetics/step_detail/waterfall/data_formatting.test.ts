@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import moment from 'moment';
 import { colourPalette, getSeriesAndDomain } from './data_formatting';
 import {
   NetworkItems,
@@ -13,6 +13,7 @@ import {
   Timings,
   MetaData,
 } from './types';
+import { mockMoment } from '../../../../../lib/helper/test_helpers';
 import { WaterfallDataEntry } from '../../waterfall/types';
 
 export const networkItems: NetworkItems = [
@@ -182,6 +183,10 @@ describe('Palettes', () => {
 });
 
 describe('getSeriesAndDomain', () => {
+  beforeEach(() => {
+    mockMoment();
+  });
+
   it('formats series timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual.series).toMatchInlineSnapshot(`
@@ -547,8 +552,8 @@ describe('getSeriesAndDomain', () => {
     const metaDataEntry = metaData[0];
     expect(metaDataEntry.certificates).toEqual([
       { name: 'Issuer', value: networkItems[0].certificates?.issuer },
-      { name: 'Valid from', value: '01/07/2020 7:00 PM' },
-      { name: 'Valid until', value: '04/08/2021 8:00 AM' },
+      { name: 'Valid from', value: moment(networkItems[0].certificates?.validFrom).format('L LT') },
+      { name: 'Valid until', value: moment(networkItems[0].certificates?.validTo).format('L LT') },
       { name: 'Common name', value: networkItems[0].certificates?.subjectName },
     ]);
     metaDataEntry.responseHeaders?.forEach((header) => {
