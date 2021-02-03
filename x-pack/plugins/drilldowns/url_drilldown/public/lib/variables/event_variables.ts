@@ -153,7 +153,7 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
     title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
       defaultMessage: 'Click value.',
     }),
-    documentation: i18n.translate('xpack.urlDrilldown.click.event.key.documentation', {
+    documentation: i18n.translate('xpack.urlDrilldown.click.event.value.documentation', {
       defaultMessage: 'Value behind clicked data point.',
     }),
     kind,
