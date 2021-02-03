@@ -475,7 +475,7 @@ describe('ManifestManager', () => {
         .fn()
         .mockImplementation((type: string, object: InternalManifestSchema) => object);
 
-      await expect(manifestManager.commit(manifest)).resolves.toBe(null);
+      await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
 
       expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(1);
       expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
@@ -512,7 +512,7 @@ describe('ManifestManager', () => {
         .fn()
         .mockImplementation((type: string, id: string, object: InternalManifestSchema) => object);
 
-      await expect(manifestManager.commit(manifest)).resolves.toBe(null);
+      await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
 
       expect(context.savedObjectsClient.update).toHaveBeenCalledTimes(1);
       expect(context.savedObjectsClient.update).toHaveBeenNthCalledWith(
