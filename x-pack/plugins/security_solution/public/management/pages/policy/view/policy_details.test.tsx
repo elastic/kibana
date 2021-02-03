@@ -331,9 +331,11 @@ describe('Policy Details', () => {
         expect(tooltip).toHaveLength(0);
       });
 
-      it('ransomware card is hidden', () => {
+      it('ransomware card is hidden and locked card is shown instead', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
         expect(ransomware).toHaveLength(0);
+        expect(lockedCard).toHaveLength(1);
       });
     });
   });
