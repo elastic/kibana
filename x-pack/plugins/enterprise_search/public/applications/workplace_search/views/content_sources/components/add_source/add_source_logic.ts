@@ -381,9 +381,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       const query = {
         kibana_host: kibanaHost,
-        index_permissions: indexPermissions,
       } as HttpFetchQuery;
 
+      if (isOrganization) query.index_permissions = indexPermissions;
       if (subdomain) query.subdomain = subdomain;
 
       try {

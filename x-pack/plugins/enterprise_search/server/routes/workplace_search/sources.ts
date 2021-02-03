@@ -255,7 +255,6 @@ export function registerAccountPrepareSourcesRoute({
         }),
         query: schema.object({
           kibana_host: schema.string(),
-          index_permissions: schema.boolean(),
           subdomain: schema.maybe(schema.string()),
         }),
       },
