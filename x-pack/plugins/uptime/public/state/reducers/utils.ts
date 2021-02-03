@@ -13,7 +13,7 @@ export function handleAsyncAction<ReducerState>(
   asyncAction: AsyncAction<any, any>
 ) {
   return {
-    [String(asyncAction.get)]: (state: ReducerState, action: any) => ({
+    [String(asyncAction.get)]: (state: ReducerState) => ({
       ...state,
       [storeKey]: {
         ...(state as any)[storeKey],
