@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CONTENT_TYPE_CSV, CSV_JOB_TYPE } from '../../../common/constants';
+import { CONTENT_TYPE_CSV, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
 import { createGenerateCsv } from './generate_csv';
-import { TaskPayloadCSV } from './types';
+import { TaskPayloadDeprecatedCSV } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<
-  RunTaskFn<TaskPayloadCSV>
+  RunTaskFn<TaskPayloadDeprecatedCSV>
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken) {
     const elasticsearch = reporting.getElasticsearchService();
-    const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
+    const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED, 'execute-job', jobId]);
     const generateCsv = createGenerateCsv(logger);
 
     const encryptionKey = config.get('encryptionKey');
