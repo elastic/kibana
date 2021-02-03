@@ -129,7 +129,7 @@
               "type": "long"
             },
             "ram_range": {
-              "type": "long"
+              "type": "long_range"
             }
           }
         },
@@ -881,7 +881,7 @@
               "type": "long"
             },
             "ram_range": {
-              "type": "long"
+              "type": "long_range"
             }
           }
         },
