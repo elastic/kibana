@@ -60,7 +60,7 @@ interface AlertOptions {
   throttle?: string | null;
   interval?: string;
   legacy?: LegacyOptions;
-  defaultParams?: CommonAlertParams;
+  defaultParams?: Partial<CommonAlertParams>;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
   accessorKey?: string;
@@ -89,8 +89,13 @@ export class BaseAlert {
     public rawAlert?: SanitizedAlert,
     public alertOptions: AlertOptions = defaultAlertOptions()
   ) {
-    this.alertOptions = { ...defaultAlertOptions(), ...this.alertOptions };
-    this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
+    const defaultOptions = defaultAlertOptions();
+    defaultOptions.defaultParams = {
+      ...defaultOptions.defaultParams,
+      ...this.alertOptions.defaultParams,
+    };
+    this.alertOptions = { ...defaultOptions, ...this.alertOptions };
+    this.scopedLogger = Globals.app.getLogger(alertOptions.id);
   }
 
   public getAlertType(): AlertType<never, never, never, never, 'default'> {

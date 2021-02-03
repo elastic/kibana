@@ -739,6 +739,21 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
+  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+  let showUnmappedFields = showUnmappedFieldsDefaultValue;
+
+  const onChangeUnmappedFields = (value) => {
+    showUnmappedFields = value;
+    $scope.unmappedFieldsConfig.showUnmappedFields = value;
+    $scope.fetch();
+  };
+
+  $scope.unmappedFieldsConfig = {
+    showUnmappedFieldsDefaultValue,
+    showUnmappedFields,
+    onChangeUnmappedFields,
+  };
+
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
@@ -748,6 +763,7 @@ function discoverController($route, $scope, Promise) {
       sort,
       columns,
       useNewFieldsApi,
+      showUnmappedFields,
     });
     return Promise.resolve();
   };

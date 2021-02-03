@@ -53,12 +53,7 @@ export function getFunctionDefinition({
         );
       }
 
-      const {
-        aggs,
-        deserializeFieldFormat,
-        indexPatterns,
-        searchSource,
-      } = await getStartDependencies(kibanaRequest);
+      const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
 
       const indexPattern = await indexPatterns.create(args.index.value, true);
       const aggConfigs = aggs.createAggConfigs(
@@ -66,10 +61,9 @@ export function getFunctionDefinition({
         args.aggs!.map((agg) => agg.value)
       );
 
-      return await handleEsaggsRequest(input, args, {
+      return await handleEsaggsRequest({
         abortSignal: (abortSignal as unknown) as AbortSignal,
         aggs: aggConfigs,
-        deserializeFieldFormat,
         filters: get(input, 'filters', undefined),
         indexPattern,
         inspectorAdapters: inspectorAdapters as Adapters,
@@ -106,16 +100,13 @@ export function getEsaggs({
 }): () => EsaggsExpressionFunctionDefinition {
   return getFunctionDefinition({
     getStartDependencies: async (request: KibanaRequest) => {
-      const [{ elasticsearch, savedObjects, uiSettings }, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, search } = self;
+      const [{ elasticsearch, savedObjects }, , self] = await getStartServices();
+      const { indexPatterns, search } = self;
       const esClient = elasticsearch.client.asScoped(request);
       const savedObjectsClient = savedObjects.getScopedClient(request);
-      const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-      const scopedFieldFormats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        deserializeFieldFormat: scopedFieldFormats.deserialize.bind(scopedFieldFormats),
         indexPatterns: await indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
