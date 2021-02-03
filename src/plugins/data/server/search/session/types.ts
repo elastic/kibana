@@ -24,7 +24,7 @@ export interface IScopedSearchSessionsClient<T = unknown> {
     options: ISearchOptions
   ) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
-  save: (sessionId: string, attributes: Partial<T>) => Promise<SavedObject<T>>;
+  save: (sessionId: string, attributes: Partial<T>) => Promise<SavedObject<T> | undefined>;
   get: (sessionId: string) => Promise<SavedObject<T>>;
   find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SavedObjectsFindResponse<T>>;
   update: (sessionId: string, attributes: Partial<T>) => Promise<SavedObjectsUpdateResponse<T>>;
