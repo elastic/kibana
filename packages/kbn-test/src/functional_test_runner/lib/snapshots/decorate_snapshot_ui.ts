@@ -71,45 +71,48 @@ export function decorateSnapshotUi({
   updateSnapshots: boolean;
   isCi: boolean;
 }) {
-  globalState.registered = true;
-  globalState.snapshotStates = {};
-  globalState.currentTest = null;
-
-  if (isCi) {
-    // make sure snapshots that have not been committed
-    // are not written to file on CI, passing the test
-    globalState.updateSnapshot = 'none';
-  } else {
-    globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
-  }
-
-  modifyStackTracePrepareOnce();
-
-  addSerializer({
-    serialize: (num: number) => {
-      return String(parseFloat(num.toPrecision(15)));
-    },
-    test: (value: any) => {
-      return typeof value === 'number';
-    },
-  });
-
-  // @ts-expect-error
-  global.expectSnapshot = expectSnapshot;
-
   let rootSuite: Suite | undefined;
+
+  lifecycle.beforeTests.add((root) => {
+    if (!root) {
+      throw new Error('Root suite was not set');
+    }
+    rootSuite = root;
+
+    globalState.registered = true;
+    globalState.snapshotStates = {};
+    globalState.currentTest = null;
+
+    if (isCi) {
+      // make sure snapshots that have not been committed
+      // are not written to file on CI, passing the test
+      globalState.updateSnapshot = 'none';
+    } else {
+      globalState.updateSnapshot = updateSnapshots ? 'all' : 'new';
+    }
+
+    modifyStackTracePrepareOnce();
+
+    addSerializer({
+      serialize: (num: number) => {
+        return String(parseFloat(num.toPrecision(15)));
+      },
+      test: (value: any) => {
+        return typeof value === 'number';
+      },
+    });
+
+    // @ts-expect-error
+    global.expectSnapshot = expectSnapshot;
+  });
 
   lifecycle.beforeEachTest.add((test: Test) => {
     globalState.currentTest = test;
   });
 
-  lifecycle.beforeTests.add((root) => {
-    rootSuite = root;
-  });
-
   lifecycle.cleanup.add(() => {
     if (!rootSuite) {
-      throw new Error('Snapshots could not be saved, root suite was not found');
+      return;
     }
 
     rootSuite.eachTest((test) => {
