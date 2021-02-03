@@ -79,9 +79,9 @@ describe('EnginesOverview', () => {
       const { navigateToUrl } = mockKibanaValues;
       const wrapper = shallow(<EnginesOverview />);
 
-      wrapper.find('[data-test-subj="appSearchEnginesCreateEngineButton"]').simulate('click');
+      wrapper.find('[data-test-subj="appSearchEnginesEngineCreationButton"]').simulate('click');
 
-      expect(navigateToUrl).toHaveBeenCalledWith('/create_engine');
+      expect(navigateToUrl).toHaveBeenCalledWith('/engine_creation');
     });
 
     describe('when on a platinum license', () => {

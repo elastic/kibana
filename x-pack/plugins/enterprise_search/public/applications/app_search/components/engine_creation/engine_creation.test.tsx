@@ -10,9 +10,9 @@ import { shallow } from 'enzyme';
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues } from '../../../__mocks__';
 
-import { CreateEngine } from './';
+import { EngineCreation } from './';
 
-describe('CreateEngine', () => {
+describe('EngineCreation', () => {
   const DEFAULT_VALUES = {
     name: '',
     rawName: '',
@@ -26,38 +26,38 @@ describe('CreateEngine', () => {
 
     it('renders', () => {
       setMockValues(DEFAULT_VALUES);
-      const wrapper = shallow(<CreateEngine />);
-      expect(wrapper.find('[data-test-subj="CreateEngine"]')).toHaveLength(1);
+      const wrapper = shallow(<EngineCreation />);
+      expect(wrapper.find('[data-test-subj="EngineCreation"]')).toHaveLength(1);
     });
 
     it('contains a form', () => {
       setMockValues(DEFAULT_VALUES);
-      const wrapper = shallow(<CreateEngine />);
-      expect(wrapper.find('[data-test-subj="CreateEngineForm"]')).toHaveLength(1);
+      const wrapper = shallow(<EngineCreation />);
+      expect(wrapper.find('[data-test-subj="EngineCreationForm"]')).toHaveLength(1);
     });
 
     it('contains a name input', () => {
       setMockValues(DEFAULT_VALUES);
-      const wrapper = shallow(<CreateEngine />);
-      expect(wrapper.find('[data-test-subj="CreateEngineNameInput"]')).toHaveLength(1);
+      const wrapper = shallow(<EngineCreation />);
+      expect(wrapper.find('[data-test-subj="EngineCreationNameInput"]')).toHaveLength(1);
     });
 
     it('contains a language input', () => {
       setMockValues(DEFAULT_VALUES);
-      const wrapper = shallow(<CreateEngine />);
-      expect(wrapper.find('[data-test-subj="CreateEngineLanguageInput"]')).toHaveLength(1);
+      const wrapper = shallow(<EngineCreation />);
+      expect(wrapper.find('[data-test-subj="EngineCreationLanguageInput"]')).toHaveLength(1);
     });
 
     describe('NewEngineSubmitButton', () => {
       it('renders', () => {
         setMockValues(DEFAULT_VALUES);
-        const wrapper = shallow(<CreateEngine />);
+        const wrapper = shallow(<EngineCreation />);
         expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]')).toHaveLength(1);
       });
 
       it('is disabled when name is empty', () => {
         setMockValues(DEFAULT_VALUES);
-        const wrapper = shallow(<CreateEngine />);
+        const wrapper = shallow(<EngineCreation />);
         expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('disabled')).toEqual(
           true
         );
@@ -65,7 +65,7 @@ describe('CreateEngine', () => {
 
       it('is enabled when name has a value', () => {
         setMockValues({ ...DEFAULT_VALUES, name: 'test', rawName: 'test' });
-        const wrapper = shallow(<CreateEngine />);
+        const wrapper = shallow(<EngineCreation />);
         expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('disabled')).toEqual(
           false
         );

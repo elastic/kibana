@@ -6,64 +6,64 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CREATE_ENGINE_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.title',
+export const ENGINE_CREATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.title',
   {
     defaultMessage: 'Create an Engine',
   }
 );
 
-export const CREATE_ENGINE_FORM_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.title',
+export const ENGINE_CREATION_FORM_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.title',
   {
     defaultMessage: 'Name your Engine',
   }
 );
 
-export const CREATE_ENGINE_FORM_ENGINE_NAME_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.label',
+export const ENGINE_CREATION_FORM_ENGINE_NAME_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.engineName.label',
   {
     defaultMessage: 'Engine Name',
   }
 );
 
 export const ALLOWED_CHARS_NOTE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.allowedCharactersNote',
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.engineName.allowedCharactersNote',
   {
     defaultMessage: 'Engine names can only contain lowercase letters, numbers, and hyphens',
   }
 );
 
 export const SANITIZED_NAME_NOTE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.sanitizedNameNote',
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.engineName.sanitizedNameNote',
   {
     defaultMessage: 'Your engine will be named',
   }
 );
 
-export const CREATE_ENGINE_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.engineName.placeholder',
+export const ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.engineName.placeholder',
   {
     defaultMessage: 'i.e., my-search-engine',
   }
 );
 
-export const CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.engineLanguage.label',
+export const ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.engineLanguage.label',
   {
     defaultMessage: 'Engine Language',
   }
 );
 
-export const CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.form.submitButton.label',
+export const ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.form.submitButton.label',
   {
     defaultMessage: 'Create Engine',
   }
 );
 
-export const CREATE_ENGINE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.createEngine.successMessage',
+export const ENGINE_CREATION_SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineCreation.successMessage',
   {
     defaultMessage: 'Successfully created engine.',
   }

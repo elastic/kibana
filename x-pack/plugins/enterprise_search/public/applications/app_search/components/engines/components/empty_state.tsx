@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { CREATE_ENGINES_PATH } from '../../../routes';
+import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { EnginesOverviewHeader } from './header';
 
@@ -22,7 +22,7 @@ export const EmptyState: React.FC = () => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
-    href: getAppSearchUrl(CREATE_ENGINES_PATH),
+    href: getAppSearchUrl(ENGINE_CREATION_PATH),
     target: '_blank',
     onClick: () =>
       sendAppSearchTelemetry({

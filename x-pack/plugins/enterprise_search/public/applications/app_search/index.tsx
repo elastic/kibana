@@ -19,7 +19,7 @@ import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { EngineNav, EngineRouter } from './components/engine';
 
 import {
-  CREATE_ENGINES_PATH,
+  ENGINE_CREATION_PATH,
   ROOT_PATH,
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
@@ -30,7 +30,7 @@ import {
   LIBRARY_PATH,
 } from './routes';
 
-import { CreateEngine } from './components/create_engine';
+import { EngineCreation } from './components/engine_creation';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
@@ -102,8 +102,8 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
                 <Credentials />
               </Route>
               {canManageEngines && (
-                <Route exact path={CREATE_ENGINES_PATH}>
-                  <CreateEngine />
+                <Route exact path={ENGINE_CREATION_PATH}>
+                  <EngineCreation />
                 </Route>
               )}
               <Route>

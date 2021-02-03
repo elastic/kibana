@@ -13,7 +13,7 @@ import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { CreateEngine } from './components/create_engine';
+import { EngineCreation } from './components/engine_creation';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EnginesOverview } from './components/engines';
@@ -98,18 +98,18 @@ describe('AppSearchConfigured', () => {
 
   describe('ability checks', () => {
     describe('canManageEngines', () => {
-      it('renders CreateEngine when user canManageEngines is true', () => {
+      it('renders EngineCreation when user canManageEngines is true', () => {
         setMockValues({ myRole: { canManageEngines: true } });
         const wrapper = shallow(<AppSearchConfigured />);
 
-        expect(wrapper.find(CreateEngine)).toHaveLength(1);
+        expect(wrapper.find(EngineCreation)).toHaveLength(1);
       });
 
-      it('does not render CreateEngine when user canManageEngines is false', () => {
+      it('does not render EngineCreation when user canManageEngines is false', () => {
         setMockValues({ myRole: { canManageEngines: false } });
         const wrapper = shallow(<AppSearchConfigured />);
 
-        expect(wrapper.find(CreateEngine)).toHaveLength(0);
+        expect(wrapper.find(EngineCreation)).toHaveLength(0);
       });
     });
   });

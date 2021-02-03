@@ -27,28 +27,28 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { FlashMessages } from '../../../shared/flash_messages';
 import {
   ALLOWED_CHARS_NOTE,
-  CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL,
-  CREATE_ENGINE_FORM_ENGINE_NAME_LABEL,
-  CREATE_ENGINE_FORM_ENGINE_NAME_PLACEHOLDER,
-  CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL,
-  CREATE_ENGINE_FORM_TITLE,
-  CREATE_ENGINE_TITLE,
+  ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,
+  ENGINE_CREATION_FORM_ENGINE_NAME_LABEL,
+  ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER,
+  ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL,
+  ENGINE_CREATION_FORM_TITLE,
+  ENGINE_CREATION_TITLE,
   SANITIZED_NAME_NOTE,
   SUPPORTED_LANGUAGES,
 } from './constants';
-import { CreateEngineLogic } from './create_engine_logic';
+import { EngineCreationLogic } from './engine_creation_logic';
 
-export const CreateEngine: React.FC = () => {
-  const { name, rawName, language } = useValues(CreateEngineLogic);
-  const { setLanguage, setRawName, submitEngine } = useActions(CreateEngineLogic);
+export const EngineCreation: React.FC = () => {
+  const { name, rawName, language } = useValues(EngineCreationLogic);
+  const { setLanguage, setRawName, submitEngine } = useActions(EngineCreationLogic);
 
   return (
-    <div data-test-subj="CreateEngine">
-      <SetPageChrome trail={[CREATE_ENGINE_TITLE]} />
+    <div data-test-subj="EngineCreation">
+      <SetPageChrome trail={[ENGINE_CREATION_TITLE]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>{CREATE_ENGINE_TITLE}</h1>
+            <h1>{ENGINE_CREATION_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
@@ -56,20 +56,20 @@ export const CreateEngine: React.FC = () => {
       <EuiPanel>
         <EuiForm>
           <form
-            data-test-subj="CreateEngineForm"
+            data-test-subj="EngineCreationForm"
             onSubmit={(e) => {
               e.preventDefault();
               submitEngine();
             }}
           >
             <EuiTitle>
-              <EuiText>{CREATE_ENGINE_FORM_TITLE}</EuiText>
+              <EuiText>{ENGINE_CREATION_FORM_TITLE}</EuiText>
             </EuiTitle>
             <EuiSpacer />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFormRow
-                  label={CREATE_ENGINE_FORM_ENGINE_NAME_LABEL}
+                  label={ENGINE_CREATION_FORM_ENGINE_NAME_LABEL}
                   helpText={
                     name.length > 0 && rawName !== name ? (
                       <>
@@ -87,19 +87,19 @@ export const CreateEngine: React.FC = () => {
                     onChange={(event) => setRawName(event.currentTarget.value)}
                     autoComplete="off"
                     fullWidth={true}
-                    data-test-subj="CreateEngineNameInput"
-                    placeholder={CREATE_ENGINE_FORM_ENGINE_NAME_PLACEHOLDER}
+                    data-test-subj="EngineCreationNameInput"
+                    placeholder={ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
                     autoFocus={true}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow label={CREATE_ENGINE_FORM_ENGINE_LANGUAGE_LABEL}>
+                <EuiFormRow label={ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL}>
                   <EuiSelect
                     name="engine-language"
                     value={language}
                     options={SUPPORTED_LANGUAGES}
-                    data-test-subj="CreateEngineLanguageInput"
+                    data-test-subj="EngineCreationLanguageInput"
                     onChange={(event) => setLanguage(event.target.value)}
                   />
                 </EuiFormRow>
@@ -113,7 +113,7 @@ export const CreateEngine: React.FC = () => {
               fill
               color="secondary"
             >
-              {CREATE_ENGINE_FORM_SUBMIT_BUTTON_LABEL}
+              {ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
             </EuiButton>
           </form>
         </EuiForm>

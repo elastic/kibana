@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CreateEngine } from './create_engine';
+export { EngineCreation } from './engine_creation';

@@ -20,7 +20,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
-import { CREATE_ENGINES_PATH } from '../../routes';
+import { ENGINE_CREATION_PATH } from '../../routes';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { EngineIcon } from './assets/engine_icon';
@@ -78,8 +78,8 @@ export const EnginesOverview: React.FC = () => {
             <EuiButton
               color="secondary"
               fill
-              data-test-subj="appSearchEnginesCreateEngineButton"
-              onClick={() => KibanaLogic.values.navigateToUrl(CREATE_ENGINES_PATH)}
+              data-test-subj="appSearchEnginesEngineCreationButton"
+              onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
             >
               {CREATE_AN_ENGINE_BUTTON_LABEL}
             </EuiButton>

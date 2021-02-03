@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 import { generatePath } from 'react-router-dom';
 
-import { CREATE_ENGINE_SUCCESS_MESSAGE } from './constants';
+import { ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
@@ -16,23 +16,23 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 export const DEFAULT_LANGUAGE = 'Universal';
 
-interface CreateEngineActions {
-  onCreateEngineSuccess(): void;
+interface EngineCreationActions {
+  onEngineCreationSuccess(): void;
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
 }
 
-interface CreateEngineValues {
+interface EngineCreationValues {
   language: string;
   name: string;
   rawName: string;
 }
 
-export const CreateEngineLogic = kea<MakeLogicType<CreateEngineValues, CreateEngineActions>>({
-  path: ['enterprise_search', 'app_search', 'create_engine_logic'],
+export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, EngineCreationActions>>({
+  path: ['enterprise_search', 'app_search', 'engine_creation_logic'],
   actions: {
-    onCreateEngineSuccess: true,
+    onEngineCreationSuccess: true,
     setLanguage: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
     submitEngine: true,
@@ -63,17 +63,17 @@ export const CreateEngineLogic = kea<MakeLogicType<CreateEngineValues, CreateEng
 
       try {
         await http.post('/api/app_search/engines', { body });
-        actions.onCreateEngineSuccess();
+        actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);
       }
     },
-    onCreateEngineSuccess: () => {
+    onEngineCreationSuccess: () => {
       const { name } = values;
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(CREATE_ENGINE_SUCCESS_MESSAGE);
+      setQueuedSuccessMessage(ENGINE_CREATION_SUCCESS_MESSAGE);
       navigateToUrl(enginePath);
     },
   }),
