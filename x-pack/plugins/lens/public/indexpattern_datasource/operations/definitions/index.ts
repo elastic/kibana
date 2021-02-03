@@ -114,6 +114,7 @@ export {
   derivativeOperation,
   movingAverageOperation,
 } from './calculations';
+export { formulaOperation } from './formula';
 
 /**
  * Properties passed to the operation-specific part of the popover editor

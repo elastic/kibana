@@ -14,6 +14,7 @@ import { ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { getColumnOrder } from '../layer_helpers';
 import { mathOperation, hasMathNode, findVariables } from './math';
+import { documentField } from '../../document_field';
 
 type GroupedNodes = {
   [Key in TinymathNamedArgument['type']]: TinymathNamedArgument[];
@@ -194,9 +195,9 @@ function parseAndExtract(
     { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
     */
     const extracted = extractColumns(columnId, operationDefinitionMap, ast, layer, indexPattern);
-    return { extracted, hasError: false };
+    return { extracted, isValid: true };
   } catch (e) {
-    return { extracted: [], hasError: true };
+    return { extracted: [], isValid: false };
   }
 }
 
@@ -208,13 +209,14 @@ export function regenerateLayerFromAst(
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
-  const { extracted, hasError } = parseAndExtract(
+  const { extracted, isValid } = parseAndExtract(
     text,
     layer,
     columnId,
     indexPattern,
     operationDefinitionMap
   );
+
   const columns = {
     ...layer.columns,
   };
@@ -234,9 +236,9 @@ export function regenerateLayerFromAst(
     params: {
       ...currentColumn.params,
       formula: text,
-      isFormulaBroken: hasError,
+      isFormulaBroken: !isValid,
     },
-    references: hasError ? [] : [`${columnId}X${extracted.length - 1}`],
+    references: !isValid ? [] : [`${columnId}X${extracted.length - 1}`],
   };
 
   return {
@@ -271,26 +273,41 @@ function addASTValidation(
     const { namedArguments, variables, functions } = groupArgsByType(node.args);
 
     if (nodeOperation.input === 'field') {
-      if (!isFirstArgumentValidType(node.args, 'variable')) {
-        errors.push(
-          i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
-            defaultMessage:
-              'The first argument for {operation} should be a {type} name. Found {argument}',
-            values: {
-              operation: node.name,
-              type: 'field',
-              argument: getValueOrName(node.args[0]),
-            },
-          })
-        );
-      } else {
+      if (shouldHaveFieldArgument(node)) {
+        if (!isFirstArgumentValidType(node.args, 'variable')) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
+              defaultMessage:
+                'The first argument for {operation} should be a {type} name. Found {argument}',
+              values: {
+                operation: node.name,
+                type: 'field',
+                argument: getValueOrName(node.args[0]),
+              },
+            })
+          );
+        }
+
         const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
-        if (!indexPattern.getFieldByName(fieldName.value)) {
+        if (fieldName) {
+          if (!indexPattern.getFieldByName(fieldName.value)) {
+            errors.push(
+              i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
+                defaultMessage: 'The field {field} was not found.',
+                values: {
+                  field: fieldName.value,
+                },
+              })
+            );
+          }
+        }
+      } else {
+        if (node?.args[0]) {
           errors.push(
             i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
-              defaultMessage: 'The field {field} was not found.',
+              defaultMessage: 'The operation {operation} does not accept any parameter',
               values: {
-                field: fieldName.value,
+                operation: node.name,
               },
             })
           );
@@ -306,7 +323,7 @@ function addASTValidation(
               'The operation {operation} in the Formula is missing the following parameters: {params}',
             values: {
               operation: node.name,
-              params: missingParameters.join(', '),
+              params: missingParameters.map(({ name }) => name).join(', '),
             },
           })
         );
@@ -337,7 +354,7 @@ function addASTValidation(
               'The operation {operation} in the Formula is missing the following parameters: {params}',
             values: {
               operation: node.name,
-              params: missingParameters.join(', '),
+              params: missingParameters.map(({ name }) => name).join(', '),
             },
           })
         );
@@ -368,7 +385,11 @@ function groupArgsByType(args: TinymathAST[]) {
     }
   ) as GroupedNodes;
   // better naming
-  return { namedArguments: namedArgument, variables: variable, functions };
+  return {
+    namedArguments: namedArgument || [],
+    variables: variable || [],
+    functions: functions || [],
+  };
 }
 
 function extractColumns(
@@ -403,12 +424,20 @@ function extractColumns(
 
     // operation node
     if (nodeOperation.input === 'field') {
-      if (!isFirstArgumentValidType(node.args, 'variable')) {
-        throw Error('field as first argument not found');
+      if (shouldHaveFieldArgument(node)) {
+        if (!isFirstArgumentValidType(node.args, 'variable')) {
+          throw Error('field as first argument not found');
+        }
+      } else {
+        if (node?.args[0]) {
+          throw Error('field as first argument not valid');
+        }
       }
 
       const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
-      const field = indexPattern.getFieldByName(fieldName.value);
+      const field = shouldHaveFieldArgument(node)
+        ? indexPattern.getFieldByName(fieldName.value)
+        : documentField;
 
       if (!field) {
         throw Error('field not found');
@@ -531,6 +560,10 @@ function getOperationParams(
     }
     return args;
   }, {});
+}
+
+function shouldHaveFieldArgument(node: TinymathFunction) {
+  return !['count'].includes(node.name);
 }
 
 function isFirstArgumentValidType(args: TinymathAST[], type: TinymathNodeTypes['type']) {
