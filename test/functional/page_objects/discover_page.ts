@@ -143,12 +143,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickHistogramBar() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
       await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
+      await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(

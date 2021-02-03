@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -31,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
@@ -96,11 +96,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it.skip('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function () {
+        // this is the number of renderings of the histogram needed when new data is fetched
+        // this needs to be improved
+        const renderingCountInc = 3;
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart rendering complete', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+        });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-
+        await retry.waitFor('chart rendering complete after being brushed', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + 6;
+        });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
 
