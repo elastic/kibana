@@ -51,10 +51,16 @@ describe('config schema', () => {
           },
         },
         "ui": Object {
+          "apm": Object {
+            "agent_mode": false,
+          },
           "ccs": Object {
             "enabled": true,
           },
           "container": Object {
+            "apm": Object {
+              "enabled": false,
+            },
             "elasticsearch": Object {
               "enabled": false,
             },

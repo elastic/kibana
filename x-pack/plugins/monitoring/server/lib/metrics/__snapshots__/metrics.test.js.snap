@@ -412,6 +412,56 @@ Object {
     "units": "/s",
     "uuidField": "cluster_uuid",
   },
+  "apm_cgroup_cpu": QuotaMetric {
+    "aggs": Object {
+      "periods": Object {
+        "max": Object {
+          "field": "beats_stats.metrics.beat.cgroup.cpu.stats.periods",
+        },
+      },
+      "periods_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "periods",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+      "quota": Object {
+        "min": Object {
+          "field": "beats_stats.metrics.beat.cgroup.cpu.cfs.quota.us",
+        },
+      },
+      "usage": Object {
+        "max": Object {
+          "field": "beats_stats.metrics.beat.cgroup.cpuacct.total.ns",
+        },
+      },
+      "usage_deriv": Object {
+        "derivative": Object {
+          "buckets_path": "usage",
+          "gap_policy": "skip",
+          "unit": "1s",
+        },
+      },
+    },
+    "app": "apm",
+    "calculation": [Function],
+    "derivative": true,
+    "description": "CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.",
+    "field": "beats_stats.metrics.beat.cpu.total.value",
+    "fieldSource": "beats_stats.metrics.beat.cgroup",
+    "format": "0,0.[00]",
+    "label": "Cgroup CPU Utilization",
+    "metricAgg": "max",
+    "periodsField": "cpu.stats.periods",
+    "quotaField": "cpu.cfs.quota.us",
+    "timestampField": "beats_stats.timestamp",
+    "title": "CPU Utilization",
+    "type": "node",
+    "units": "%",
+    "usageField": "cpuacct.total.ns",
+    "uuidField": "beats_stats.beat.uuid",
+  },
   "apm_cpu_total": ApmCpuUtilizationMetric {
     "app": "apm",
     "calculation": [Function],
