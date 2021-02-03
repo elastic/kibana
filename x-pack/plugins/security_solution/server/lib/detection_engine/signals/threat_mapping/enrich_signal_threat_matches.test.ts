@@ -206,6 +206,107 @@ describe('buildMatchedIndicator', () => {
       },
     ]);
   });
+
+  it('returns only the match data if indicator field is absent', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {},
+      }),
+    ];
+
+    const indicators = buildMatchedIndicator({
+      queries,
+      threats,
+    });
+
+    expect(indicators).toEqual([
+      {
+        matched: {
+          atomic: undefined,
+          field: 'threat.indicator.domain',
+          type: undefined,
+        },
+      },
+    ]);
+  });
+
+  it('returns only the match data if indicator field is an empty array', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: { threat: { indicator: [] } },
+      }),
+    ];
+
+    const indicators = buildMatchedIndicator({
+      queries,
+      threats,
+    });
+
+    expect(indicators).toEqual([
+      {
+        matched: {
+          atomic: undefined,
+          field: 'threat.indicator.domain',
+          type: undefined,
+        },
+      },
+    ]);
+  });
+
+  it('returns data sans atomic from first indicator if indicator field is an array of objects', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          threat: {
+            indicator: [
+              { domain: 'foo', type: 'first' },
+              { domain: 'bar', type: 'second' },
+            ],
+          },
+        },
+      }),
+    ];
+
+    const indicators = buildMatchedIndicator({
+      queries,
+      threats,
+    });
+
+    expect(indicators).toEqual([
+      {
+        domain: 'foo',
+        matched: {
+          atomic: undefined,
+          field: 'threat.indicator.domain',
+          type: 'first',
+        },
+        type: 'first',
+      },
+    ]);
+  });
+
+  it('throws an error if indicator field is not an object or an array', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          threat: {
+            indicator: 'not an object',
+          },
+        },
+      }),
+    ];
+
+    expect(() =>
+      buildMatchedIndicator({
+        queries,
+        threats,
+      })
+    ).toThrowError('Expected indicator field to be an object, but found: not an object');
+  });
 });
 
 describe('enrichSignalThreatMatches', () => {

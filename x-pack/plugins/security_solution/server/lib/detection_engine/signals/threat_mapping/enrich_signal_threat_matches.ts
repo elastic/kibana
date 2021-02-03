@@ -49,12 +49,13 @@ export const buildMatchedIndicator = ({
 }): ThreatIndicator[] =>
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
-    // TODO what if this is an array? Grab the first?
-    const indicator = get(matchedThreat?._source, indicatorPath);
-    const atomic = get(matchedThreat?._source, query.value);
-    const type = get(indicator, 'type');
-    // console.log('matchedThreat', JSON.stringify(matchedThreat, null, 2));
-    // console.log('indicator', JSON.stringify(indicator, null, 2));
+    const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
+    const indicator = [indicatorValue].flat()[0] ?? {};
+    if (!isObject(indicator)) {
+      throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
+    }
+    const atomic = get(matchedThreat?._source, query.value) as unknown;
+    const type = get(indicator, 'type') as unknown;
 
     return {
       ...indicator,
