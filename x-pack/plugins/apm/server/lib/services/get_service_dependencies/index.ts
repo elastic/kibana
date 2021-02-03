@@ -196,19 +196,26 @@ export async function getServiceDependencies({
   });
 
   const latencySums = metricsByResolvedAddress
-    .map((metrics) => metrics.latency.value)
+    .map(
+      (metric) => (metric.latency.value ?? 0) * (metric.throughput.value ?? 0)
+    )
     .filter(isFiniteNumber);
 
   const minLatencySum = Math.min(...latencySums);
   const maxLatencySum = Math.max(...latencySums);
 
-  return metricsByResolvedAddress.map((metric) => ({
-    ...metric,
-    impact:
-      metric.latency.value === null
-        ? 0
-        : ((metric.latency.value - minLatencySum) /
+  return metricsByResolvedAddress.map((metric) => {
+    const impact =
+      isFiniteNumber(metric.latency.value) &&
+      isFiniteNumber(metric.throughput.value)
+        ? ((metric.latency.value * metric.throughput.value - minLatencySum) /
             (maxLatencySum - minLatencySum)) *
-          100,
-  }));
+          100
+        : 0;
+
+    return {
+      ...metric,
+      impact,
+    };
+  });
 }
