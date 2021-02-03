@@ -6,7 +6,7 @@
 try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.common
 
 # Import and load bazelrc ci auth settings for BuildBuddy
-try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.auth
+try-import /var/lib/jenkins/.bazelrc-ci.auth
 
 # BuildBuddy Remote Settings
 build --bes_results_url=https://app.buildbuddy.io/invocation/
