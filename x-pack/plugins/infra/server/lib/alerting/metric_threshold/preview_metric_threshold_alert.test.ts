@@ -19,10 +19,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '1m',
         alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(30);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(30);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(30);
     });
 
@@ -34,10 +34,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '3m',
         alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(10);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(10);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(10);
     });
     test('returns the expected results using a bucket interval longer than the alert interval', async () => {
@@ -48,10 +48,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '30s',
         alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(60);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(60);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(60);
     });
     test('returns the expected results using a throttle interval longer than the alert interval', async () => {
@@ -62,10 +62,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '3m',
         alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(30);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(30);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(15);
     });
   });
@@ -82,15 +82,25 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '1m',
         alertOnNoData: true,
       });
-      const [firedResultsA, noDataResultsA, errorResultsA, notificationsA] = resultA;
-      expect(firedResultsA).toBe(30);
-      expect(noDataResultsA).toBe(0);
-      expect(errorResultsA).toBe(0);
+      const {
+        fired: firedA,
+        noData: noDataA,
+        error: errorA,
+        notifications: notificationsA,
+      } = resultA;
+      expect(firedA).toBe(30);
+      expect(noDataA).toBe(0);
+      expect(errorA).toBe(0);
       expect(notificationsA).toBe(30);
-      const [firedResultsB, noDataResultsB, errorResultsB, notificationsB] = resultB;
-      expect(firedResultsB).toBe(60);
-      expect(noDataResultsB).toBe(0);
-      expect(errorResultsB).toBe(0);
+      const {
+        fired: firedB,
+        noData: noDataB,
+        error: errorB,
+        notifications: notificationsB,
+      } = resultB;
+      expect(firedB).toBe(60);
+      expect(noDataB).toBe(0);
+      expect(errorB).toBe(0);
       expect(notificationsB).toBe(60);
     });
   });
@@ -112,10 +122,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertThrottle: '1m',
         alertOnNoData: true,
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(25);
-      expect(noDataResults).toBe(10);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(25);
+      expect(noData).toBe(10);
+      expect(error).toBe(0);
       expect(notifications).toBe(35);
     });
   });
