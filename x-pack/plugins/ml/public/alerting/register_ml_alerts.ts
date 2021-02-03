@@ -15,10 +15,11 @@ export function registerMlAlerts(
   alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyThreshold.description', {
-      defaultMessage: 'Alert when anomaly score reaches the threshold.',
+      defaultMessage: 'Alert when anomaly detection jobs results match the condition.',
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
+      // TODO add the documentation link
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/ml-alerts.html`;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
