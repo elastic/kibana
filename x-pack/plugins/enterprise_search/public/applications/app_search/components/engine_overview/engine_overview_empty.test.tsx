@@ -9,7 +9,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
-import { FlashMessages } from '../../../shared/flash_messages';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import { EmptyEngineOverview } from './engine_overview_empty';
 
@@ -26,10 +25,6 @@ describe('EmptyEngineOverview', () => {
 
   it('renders a documentation link', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(`${docLinks.appSearchBase}/index.html`);
-  });
-
-  it('contains FlashMessages', () => {
-    expect(wrapper.find(FlashMessages)).toHaveLength(1);
   });
 
   it('renders document creation components', () => {

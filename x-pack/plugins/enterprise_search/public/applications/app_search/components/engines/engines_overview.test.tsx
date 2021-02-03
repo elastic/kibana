@@ -5,7 +5,7 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions, rerender, mockKibanaValues } from '../../../__mocks__';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -72,8 +72,16 @@ describe('EnginesOverview', () => {
       const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="appSearchEnginesCreateEngineButton"]')).toHaveLength(1);
       expect(actions.loadEngines).toHaveBeenCalled();
+    });
+
+    it('renders a create engine button which takes users to the create engine page', () => {
+      const { navigateToUrl } = mockKibanaValues;
+      const wrapper = shallow(<EnginesOverview />);
+
+      wrapper.find('[data-test-subj="appSearchEnginesCreateEngineButton"]').simulate('click');
+
+      expect(navigateToUrl).toHaveBeenCalledWith('/create_engine');
     });
 
     describe('when on a platinum license', () => {

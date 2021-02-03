@@ -9,7 +9,6 @@ import { setMockValues } from '../../../__mocks__/kea.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
 
@@ -17,11 +16,6 @@ describe('EngineOverviewMetrics', () => {
   it('renders', () => {
     const wrapper = shallow(<EngineOverviewMetrics />);
     expect(wrapper.find('h1').text()).toEqual('Engine overview');
-  });
-
-  it('contains FlashMessages', () => {
-    const wrapper = shallow(<EngineOverviewMetrics />);
-    expect(wrapper.find(FlashMessages)).toHaveLength(1);
   });
 
   it('renders an unavailable prompt if engine data is still indexing', () => {
