@@ -116,7 +116,7 @@ export default function ({ getPageObjects, getService }) {
         source: 'n1t6f',
         minzoom: 0,
         maxzoom: 24,
-        filter: ['==', ['get', '__kbn_too_many_features__'], true],
+        filter: ['==', ['get', '__kbn_is_incomplete_data_feature__'], true],
         layout: { visibility: 'visible' },
         paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
       });
