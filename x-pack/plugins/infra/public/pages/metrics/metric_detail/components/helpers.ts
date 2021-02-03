@@ -8,14 +8,16 @@ import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../../../common/formatters';
-import { InfraDataSeries } from '../../../../graphql/types';
 import {
   InventoryVisTypeRT,
   InventoryFormatterType,
   InventoryVisType,
 } from '../../../../../common/inventory_models/types';
 import { SeriesOverrides } from '../types';
-import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
+import {
+  NodeDetailsDataSeries,
+  NodeDetailsMetricData,
+} from '../../../../../common/http_api/node_details_api';
 
 /**
  * Returns a formatter
@@ -28,7 +30,7 @@ export const getFormatter = (
 /**
  * Does a series have more then two points?
  */
-export const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
+export const seriesHasLessThen2DataPoints = (series: NodeDetailsDataSeries): boolean => {
   return series.data.length < 2;
 };
 

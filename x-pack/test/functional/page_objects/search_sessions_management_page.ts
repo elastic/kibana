@@ -7,6 +7,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
@@ -21,7 +22,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     async getList() {
-      const table = await find.byCssSelector('table');
+      const table = await testSubjects.find('searchSessionsMgmtTable');
       const allRows = await table.findAllByTestSubject('searchSessionsRow');
 
       return Promise.all(
@@ -37,15 +38,18 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
             app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
             view: async () => {
+              log.debug('management ui: view the session');
               await viewCell.click();
             },
             reload: async () => {
+              log.debug('management ui: reload the status');
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-reload"]'
               );
             },
             delete: async () => {
+              log.debug('management ui: delete the session');
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-delete"]'

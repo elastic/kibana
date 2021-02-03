@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -18,13 +19,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const searchSessions = getService('searchSessions');
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
+  const log = getService('log');
 
   // FLAKY: https://github.com/elastic/kibana/issues/89069
-  describe.skip('Search search sessions Management UI', () => {
+  describe.skip('Search sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
+        log.debug('wait for dashboard landing page');
+        retry.tryForTime(10000, async () => {
+          testSubjects.existOrFail('dashboardLandingPage');
+        });
       });
 
       after(async () => {
@@ -32,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Saves a session and verifies it in the Management app', async () => {
+        log.debug('loading the "Not Delayed" dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
         await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.expectState('completed');
@@ -47,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // find there is only one item in the table which is the newly saved session
+        log.debug('find the newly saved session');
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
         expect(searchSessionList.length).to.be(1);
         expect(searchSessionList[0].expires).not.to.eql('--');
@@ -63,6 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectState('restored');
       });
 
+      // NOTE: this test depends on the previous one passing
       it('Reloads as new session from management', async () => {
         await PageObjects.searchSessionsManagement.goTo();
 

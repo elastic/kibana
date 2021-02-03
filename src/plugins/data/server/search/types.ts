@@ -25,17 +25,18 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { ISessionService, IScopedSessionService } from './session';
+import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
-  sessionService: ISessionService;
+  sessionService: ISearchSessionService;
 }
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
+  searchSessionsClient: IScopedSearchSessionsClient;
 }
 
 export interface ISearchSetup {
@@ -85,6 +86,15 @@ export interface ISearchStrategy<
   ) => Promise<void>;
 }
 
+export interface IScopedSearchClient extends ISearchClient {
+  saveSession: IScopedSearchSessionsClient['save'];
+  getSession: IScopedSearchSessionsClient['get'];
+  findSessions: IScopedSearchSessionsClient['find'];
+  updateSession: IScopedSearchSessionsClient['update'];
+  cancelSession: IScopedSearchSessionsClient['cancel'];
+  extendSession: IScopedSearchSessionsClient['extend'];
+}
+
 export interface ISearchStart<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
@@ -98,21 +108,19 @@ export interface ISearchStart<
   getSearchStrategy: (
     name?: string // Name of the search strategy (defaults to the Elasticsearch strategy)
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  asScoped: (request: KibanaRequest) => ISearchClient;
+  asScoped: (request: KibanaRequest) => IScopedSearchClient;
   searchSource: {
     asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
   };
 }
 
-export interface DataApiRequestHandlerContext extends ISearchClient {
-  session: IScopedSessionService;
-}
+export type SearchRequestHandlerContext = IScopedSearchClient;
 
 /**
  * @internal
  */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
-  search: DataApiRequestHandlerContext;
+  search: SearchRequestHandlerContext;
 }
 
 export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

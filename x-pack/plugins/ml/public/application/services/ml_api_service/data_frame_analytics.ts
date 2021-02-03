@@ -34,18 +34,19 @@ export type GetDataFrameAnalyticsStatsResponse =
   | GetDataFrameAnalyticsStatsResponseOk
   | GetDataFrameAnalyticsStatsResponseError;
 
-interface GetDataFrameAnalyticsResponse {
+export interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-interface DeleteDataFrameAnalyticsWithIndexResponse {
+export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
-interface JobsExistsResponse {
+
+export interface JobsExistsResponse {
   results: {
     [jobId: string]: boolean;
   };
