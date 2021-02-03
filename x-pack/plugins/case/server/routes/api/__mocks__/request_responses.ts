@@ -10,7 +10,6 @@ import {
   CasePostRequest,
   CasesConfigureRequest,
   ConnectorTypes,
-  PostPushRequest,
 } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
@@ -126,10 +125,6 @@ export const newConfiguration: CasesConfigureRequest = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
-};
-
-export const newPostPushRequest: PostPushRequest = {
-  case_id: '123',
 };
 
 export const executePushResponse = {

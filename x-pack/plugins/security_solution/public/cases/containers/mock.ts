@@ -9,7 +9,6 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 
 import {
   CommentResponse,
-  ServiceConnectorCaseResponse,
   CaseStatuses,
   UserAction,
   UserActionField,
@@ -136,19 +135,6 @@ export const pushedCase: Case = {
   externalService: basicPush,
 };
 
-export const serviceConnector: ServiceConnectorCaseResponse = {
-  title: '123',
-  id: '444',
-  pushedDate: basicUpdatedAt,
-  url: 'connector.com',
-  comments: [
-    {
-      commentId: basicCommentId,
-      pushedDate: basicUpdatedAt,
-    },
-  ],
-};
-
 const basicAction = {
   actionAt: basicCreatedAt,
   actionBy: elasticUser,
@@ -156,12 +142,6 @@ const basicAction = {
   newValue: 'what a cool value',
   caseId: basicCaseId,
   commentId: null,
-};
-
-export const actionTypeExecutorResult = {
-  actionId: 'string',
-  status: 'ok',
-  data: serviceConnector,
 };
 
 export const cases: Case[] = [
@@ -179,6 +159,7 @@ export const allCases: AllCases = {
   total: 10,
   ...casesStatus,
 };
+
 export const actionLicenses: ActionLicense[] = [
   {
     id: '.servicenow',
@@ -202,6 +183,7 @@ export const elasticUserSnake = {
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
 };
+
 export const basicCommentSnake: CommentResponse = {
   comment: 'Solve this fast!',
   type: CommentType.user,
@@ -247,11 +229,13 @@ export const pushSnake = {
   external_title: 'external title',
   external_url: 'basicPush.com',
 };
+
 export const basicPushSnake = {
   ...pushSnake,
   pushed_at: basicUpdatedAt,
   pushed_by: elasticUserSnake,
 };
+
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   external_service: basicPushSnake,

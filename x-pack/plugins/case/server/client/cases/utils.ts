@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
-  BasicParams,
   CaseResponse,
   CaseFullExternalService,
   CaseUserActionsResponse,
@@ -18,17 +17,6 @@ import {
   CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
-  EntityInformation,
-  ExternalServiceParams,
-  Incident,
-  MapIncident,
-  PipedField,
-  PrepareFieldsForTransformArgs,
-  PushToServiceApiParams,
-  ExternalServiceComment,
-  Transformer,
-  TransformerArgs,
-  TransformFieldsArgs,
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
@@ -37,6 +25,20 @@ import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CaseClientGetAlertsResponse } from '../../client/alerts/types';
 import { isUserContext } from '../../routes/api/utils';
+import {
+  BasicParams,
+  EntityInformation,
+  ExternalServiceParams,
+  ExternalServiceComment,
+  Incident,
+  MapIncident,
+  PipedField,
+  PrepareFieldsForTransformArgs,
+  PushToServiceApiParams,
+  Transformer,
+  TransformerArgs,
+  TransformFieldsArgs,
+} from './types';
 
 export const getLatestPushInfo = (
   connectorId: string,

@@ -7,7 +7,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, kibanaResponseFactory } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
@@ -73,6 +73,7 @@ async function executor(
   const caseClient = createCaseClient({
     savedObjectsClient,
     request: {} as KibanaRequest,
+    response: kibanaResponseFactory,
     caseService,
     caseConfigureService,
     connectorMappingsService,

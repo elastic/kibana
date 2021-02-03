@@ -25,10 +25,10 @@ jest.mock('./use_get_choices', () => ({
 
 describe('ServiceNowSIR Fields', () => {
   const fields = {
-    destIp: '192.68.1.1',
-    sourceIp: '192.68.1.2',
-    malwareHash: '098f6bcd4621d373cade4e832627b4f6',
-    malwareUrl: 'https://attack.com',
+    destIp: true,
+    sourceIp: true,
+    malwareHash: true,
+    malwareUrl: true,
     priority: '1',
     category: 'Denial of Service',
     subcategory: '26',

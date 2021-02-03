@@ -26,6 +26,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -57,6 +58,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -77,6 +79,7 @@ describe('api', () => {
         params,
         secrets: { username: 'elastic', password: 'elastic' },
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -99,6 +102,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
       expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
       expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
@@ -134,6 +138,7 @@ describe('api', () => {
         params: apiParams,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -161,6 +166,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -178,6 +184,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
@@ -200,6 +207,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
       expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
       expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {

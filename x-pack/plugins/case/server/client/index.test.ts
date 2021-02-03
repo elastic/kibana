@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, kibanaResponseFactory } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createCaseClient } from '.';
 import {
@@ -32,6 +32,7 @@ const alertsService = createAlertServiceMock();
 const caseService = createCaseServiceMock();
 const connectorMappingsService = connectorMappingsServiceMock();
 const request = {} as KibanaRequest;
+const response = kibanaResponseFactory;
 const savedObjectsClient = savedObjectsClientMock.create();
 const userActionService = createUserActionServiceMock();
 const context = {} as CasesRequestHandlerContext;
@@ -50,6 +51,7 @@ describe('createCaseClient()', () => {
       connectorMappingsService,
       context,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     });

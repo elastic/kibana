@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { BasicParams, ExternalServiceParams, Incident } from '../../../common/api';
+import { comment as commentObj, mappings, defaultPipes, basicParams, updateUser } from './mock';
+import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
+import { flattenCaseSavedObject } from '../../routes/api/utils';
+import { mockCases } from '../../routes/api/__fixtures__';
+
+import { BasicParams, ExternalServiceParams, Incident } from './types';
 
 import {
   createIncident,
@@ -14,11 +19,6 @@ import {
   transformers,
   transformFields,
 } from './utils';
-
-import { comment as commentObj, mappings, defaultPipes, basicParams, updateUser } from './mock';
-import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
-import { flattenCaseSavedObject } from '../../routes/api/utils';
-import { mockCases } from '../../routes/api/__fixtures__';
 
 const formatComment = {
   commentId: commentObj.id,

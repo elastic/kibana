@@ -3,12 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  BasicParams,
-  CommentResponse,
-  CommentType,
-  ConnectorMappingsAttributes,
-} from '../../../common/api';
+import { CommentResponse, CommentType, ConnectorMappingsAttributes } from '../../../common/api';
+
+import { BasicParams } from './types';
 
 export const updateUser = {
   updatedAt: '2020-03-13T08:34:53.450Z',

@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, kibanaResponseFactory } from 'kibana/server';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {
@@ -27,6 +27,7 @@ export const createCaseClientMock = (): CaseClientMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
   get: jest.fn(),
+  push: jest.fn(),
   getAlerts: jest.fn(),
   getFields: jest.fn(),
   getMappings: jest.fn(),
@@ -54,6 +55,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
   const request = {} as KibanaRequest;
+  const response = kibanaResponseFactory;
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
@@ -96,6 +98,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   const caseClient = createCaseClient({
     savedObjectsClient,
     request,
+    response,
     caseService,
     caseConfigureService,
     connectorMappingsService,
