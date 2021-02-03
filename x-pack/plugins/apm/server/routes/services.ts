@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { uniq } from 'lodash';
+import moment from 'moment';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -25,6 +26,7 @@ import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
+import { Coordinate } from '../../typings/timeseries';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -316,23 +318,77 @@ export const serviceThroughputRoute = createRoute({
       t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
+      t.partial({
+        comparisonStart: t.string,
+        comparisonEnd: t.string,
+      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const {
+      transactionType,
+      comparisonStart,
+      comparisonEnd,
+    } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getThroughput({
+    const { start, end } = setup;
+
+    const commonProps = {
       searchAggregatedTransactions,
       serviceName,
       setup,
       transactionType,
+    };
+
+    const { throughput } = await getThroughput({
+      ...commonProps,
+      start,
+      end,
     });
+
+    const comparisonData =
+      comparisonStart && comparisonEnd
+        ? await getThroughput({
+            ...commonProps,
+            start: moment(comparisonStart).valueOf(),
+            end: moment(comparisonEnd).valueOf(),
+          })
+        : undefined;
+
+    function mergeComparisonTimeseries({
+      timeseries,
+      comparisonTimeseries,
+    }: {
+      timeseries: Coordinate[];
+      comparisonTimeseries?: Coordinate[];
+    }) {
+      if (!comparisonTimeseries) {
+        return;
+      }
+      return comparisonTimeseries.map(({ x, y }, index) => {
+        const xTimeseries = timeseries[index].x;
+        return {
+          x: xTimeseries,
+          y,
+        };
+      });
+    }
+
+    const mergedComparisonTimeseries = mergeComparisonTimeseries({
+      timeseries: throughput,
+      comparisonTimeseries: comparisonData?.throughput,
+    });
+
+    return {
+      timeseries: throughput,
+      comparisonTimeseries: mergedComparisonTimeseries,
+    };
   },
 });
 
