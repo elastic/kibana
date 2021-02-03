@@ -22,10 +22,6 @@ export const OverviewPage: FC = () => {
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
-  const {
-    services: { docLinks },
-  } = useMlKibana();
-  const helpLink = docLinks.links.ml.guide;
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
