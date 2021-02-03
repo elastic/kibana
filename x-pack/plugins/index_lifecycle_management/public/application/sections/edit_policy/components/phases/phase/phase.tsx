@@ -18,11 +18,14 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ToggleField, UseField, useFormData } from '../../../../../shared_imports';
-import { i18nTexts } from '../../i18n_texts';
+import { ToggleField, useFormData } from '../../../../../../shared_imports';
+import { i18nTexts } from '../../../i18n_texts';
 
-import { ActiveHighlight } from '../active_highlight';
-import { MinAgeField } from './shared_fields';
+import { UseField } from '../../../form';
+import { ActiveHighlight } from '../../active_highlight';
+import { MinAgeField } from '../shared_fields';
+
+import { PhaseErrorIndicator } from './phase_error_indicator';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
@@ -63,9 +66,16 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size={'s'}>
-                    <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
-                  </EuiTitle>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem>
+                      <EuiTitle size="s">
+                        <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <PhaseErrorIndicator phase={phase} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -74,7 +84,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
                 <EuiFlexGroup
                   justifyContent="spaceBetween"
                   alignItems="center"
-                  gutterSize={'xs'}
+                  gutterSize="xs"
                   wrap
                 >
                   <EuiFlexItem grow={true}>
@@ -102,7 +112,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
             )}
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+          <EuiText color="subdued" size="s" style={{ maxWidth: '50%' }}>
             {i18nTexts.editPolicy.descriptions[phase]}
           </EuiText>
 

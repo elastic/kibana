@@ -30,5 +30,3 @@ export { tabifyDocs };
 
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';
-
-export { TabbedTable, TabbedAggRow, TabbedAggColumn } from './types';
