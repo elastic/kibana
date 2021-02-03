@@ -228,9 +228,18 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobs('security');
 
+      const datafeedStatsCache = await ml
+        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
+        .datafeedStats();
+
       return securityJobStats.jobs.map((jobStat) => {
         const jobId = jobStat.job_id;
         const jobDetail = jobDetails.jobs.find((job) => job.job_id === jobId);
+        const datafeedStat = datafeedStatsCache.datafeeds.find(
+          (datafeed) => datafeed.datafeed_id === `datafeed-${jobId}`
+        );
+
+        // console.log(datafeedStat);
 
         return {
           job_id: jobId,
