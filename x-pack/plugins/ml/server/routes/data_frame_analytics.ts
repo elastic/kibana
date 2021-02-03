@@ -19,6 +19,7 @@ import {
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
+  analyticsQuerySchema,
 } from './schemas/data_analytics_schema';
 import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
@@ -43,7 +44,7 @@ function getAnalyticsMap(
   client: IScopedClusterClient,
   idOptions: GetAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.getAnalyticsMap(idOptions);
 }
 
@@ -52,7 +53,7 @@ function getExtendedMap(
   client: IScopedClusterClient,
   idOptions: ExtendAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
@@ -102,7 +103,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDataFrameAnalytics({ size: 1000 });
+        const { body } = await mlClient.getDataFrameAnalytics({
+          size: 1000,
+        });
         return response.ok({
           body,
         });
@@ -126,6 +129,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
         params: analyticsIdSchema,
+        query: analyticsQuerySchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
@@ -134,8 +138,11 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
+        const { excludeGenerated } = request.query;
+
         const { body } = await mlClient.getDataFrameAnalytics({
           id: analyticsId,
+          ...(excludeGenerated ? { exclude_generated: true } : {}),
         });
         return response.ok({
           body,

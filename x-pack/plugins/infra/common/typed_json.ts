@@ -7,6 +7,8 @@
 import * as rt from 'io-ts';
 import { JsonArray, JsonObject, JsonValue } from '../../../../src/plugins/kibana_utils/common';
 
+export { JsonArray, JsonObject, JsonValue };
+
 export const jsonScalarRT = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
 
 export const jsonValueRT: rt.Type<JsonValue> = rt.recursion('JsonValue', () =>

@@ -83,7 +83,7 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: (params) => {
+      update: (params: UpdateValue) => {
         this.updateSubject.next(params);
       },
       event: (data) => {

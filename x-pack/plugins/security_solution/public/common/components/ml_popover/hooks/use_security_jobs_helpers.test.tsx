@@ -29,6 +29,7 @@ describe('useSecurityJobsHelpers', () => {
         false
       );
       expect(securityJob).toEqual({
+        awaitingNodeAssignment: false,
         datafeedId: '',
         datafeedIndices: [],
         datafeedState: '',

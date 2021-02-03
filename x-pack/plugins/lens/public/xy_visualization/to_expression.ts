@@ -7,11 +7,11 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, ValidLayer, LayerConfig } from './types';
+import { State, ValidLayer, XYLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 
-export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
+export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
     .getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)
