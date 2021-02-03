@@ -66,7 +66,7 @@ export const EnginesOverview: React.FC = () => {
       <EnginesOverviewHeader />
       <EuiPageContent panelPaddingSize="s" className="enginesOverview">
         <FlashMessages />
-        <EuiPageContentHeader>
+        <EuiPageContentHeader responsive={false}>
           <EuiPageContentHeaderSection>
             <EuiTitle size="s">
               <h2>
