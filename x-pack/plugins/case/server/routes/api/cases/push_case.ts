@@ -103,6 +103,10 @@ export function initPushCaseApi({
           },
         });
 
+        if (pushRes.status === 'error') {
+          throw new Error(pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service');
+        }
+
         /* End of push to external service */
 
         /* Start of update case with push information */
