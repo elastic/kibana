@@ -39,7 +39,7 @@ export type MetricThresholdAlertType = AlertType<
   Record<string, any>,
   AlertInstanceState,
   AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
 >;
 export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
   /**
@@ -49,7 +49,7 @@ export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
   Record<string, any>,
   AlertInstanceState,
   AlertInstanceContext,
-  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+  ActionGroupIdsOf<typeof FIRED_ACTIONS | typeof WARNING_ACTIONS>
 >;
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {

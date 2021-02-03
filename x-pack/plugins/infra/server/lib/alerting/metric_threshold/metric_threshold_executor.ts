@@ -16,7 +16,7 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { createFormatter } from '../../../../common/formatters';
-import { AlertStates } from './types';
+import { AlertStates, Comparator } from './types';
 import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
 import {
   MetricThresholdAlertExecutorOptions,
@@ -58,10 +58,7 @@ export const createMetricThresholdExecutor = (
         // Grab the result of the most recent bucket
         last(result[group].shouldFire)
       );
-      const shouldAlertWarn = alertResults.every((result) =>
-        // Grab the result of the most recent bucket
-        last(result[group].shouldWarn)
-      );
+      const shouldAlertWarn = alertResults.every((result) => last(result[group].shouldWarn));
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => last(result[group].isNoData));
@@ -78,13 +75,13 @@ export const createMetricThresholdExecutor = (
         : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT) {
+      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = alertResults
-          .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
-          .join('\n');
-      } else if (nextState === AlertStates.WARNING) {
-        reason = alertResults
-          .map((result) => buildFiredAlertReason(formatAlertResult(result[group], true)))
+          .map((result) =>
+            buildFiredAlertReason(
+              formatAlertResult(result[group], nextState === AlertStates.WARNING)
+            )
+          )
           .join('\n');
       } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         /*
@@ -113,7 +110,11 @@ export const createMetricThresholdExecutor = (
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         const actionGroupId =
-          nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+          nextState === AlertStates.OK
+            ? RecoveredActionGroup.id
+            : AlertStates.WARNING
+            ? WARNING_ACTIONS.id
+            : FIRED_ACTIONS.id;
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -167,11 +168,20 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number;
     threshold: number[];
+    comparator: Comparator;
     warningThreshold?: number[];
+    warningComparator?: Comparator;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
-  const { metric, currentValue, threshold, warningThreshold } = alertResult;
+  const {
+    metric,
+    currentValue,
+    threshold,
+    comparator,
+    warningThreshold,
+    warningComparator,
+  } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
     {
@@ -185,6 +195,7 @@ const formatAlertResult = <AlertResult>(
     };
   const formatter = createFormatter('percent');
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
+  const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
   return {
     ...alertResult,
     currentValue:
@@ -194,5 +205,6 @@ const formatAlertResult = <AlertResult>(
     threshold: Array.isArray(thresholdToFormat)
       ? thresholdToFormat.map((v: number) => formatter(v))
       : thresholdToFormat,
+    comparator: comparatorToFormat,
   };
 };

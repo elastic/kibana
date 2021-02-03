@@ -20,4 +20,6 @@ export interface InventoryMetricConditions {
   threshold: number[];
   comparator: Comparator;
   customMetric?: SnapshotCustomMetricInput;
+  warningThreshold?: number[];
+  warningComparator?: Comparator;
 }

@@ -13,6 +13,7 @@ import {
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { PreviewResult } from '../common/types';
 import { MetricExpressionParams } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
 
@@ -32,14 +33,6 @@ interface PreviewMetricThresholdAlertParams {
   alertOnNoData: boolean;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
-}
-
-interface PreviewResult {
-  fired: number;
-  warning: number;
-  noData: number;
-  error: number;
-  notifications: number;
 }
 
 export const previewMetricThresholdAlert: (
