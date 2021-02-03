@@ -93,15 +93,30 @@ Entity: {{context.entityId}} with document ID: {{context.entityDocumentId}} has 
 - At the bottom right, click `Save`. Your alert should now be created!
 - You should now be able to see alerts generated in your Kibana console log.
 
-### 9. Consider ways to visually confirm your alerts
-- The map you create is entirely up to you, minimally you have the following
-source data to work with:
-    - Original tracks data
-    - Boundary data
-- If you add `mtatracks*` as a layer, consider setting the `Top Hits` setting to 1 or a larger
-number if you want to see a trail of where it's been. If you do so, also set the Map's
-refresh rate to a similar interval as the alert interval so data updates similarly.
-Be aware that many busses moving around will create a lot of points. You could do multiple
-layers here where small points plot the bus's trail and the larger point just covers the
-most recent location.
-- Consider adding tooltips to layers to better understand the data in your layers.
+### 9. Visually confirm your alerts with Maps
+- Creating layers
+  - Using the source data below, you can create the following layers:
+      - Boundary data (`nyc-neighborhoods`)
+        - Boundary layer
+      - Original tracks data (`mtatracks*`)
+        - Last known location
+        - Geo-line track
+  - Boundary layer
+    - This layer should already be added from when you uploaded the GeoJSON
+      file earlier. Otherwise it can be added by selecting `Documents` > `Index patterns` > `nyc-neighborhoods` 
+      then accept the defaults. 
+  - Vehicle tracks
+    - Add `Tracks` > `Index patterns` > `mtatracks*`, accept the defaults selected and set `Entity` > `entity_id`. Add the layer and style appropriately.
+  - Last known location
+    - Add `Documents` > `Index patterns` > `mtatracks*` and select `Show top hits per entity`
+    - For `Entity` select `entity_id` and add the layer. 
+    - The only required setting on the following screen is to set `Sorting` to sort on `@timestamp`
+- Update time scope of data
+  - Changing the refresh rate `Refresh every`: `4 seconds` keeps the layers updated and in particular
+  shows the latest values obtained in the `Top hits` layer
+  - The time picker should be set to the default `15 minutes`, this is a good default but can be adusted
+  up or down to see more or less data respectively
+- General tips  
+    - Style layers with contrasting colors to clearly see each
+    - Consider using icons for the `Top hits` vehicle movement layer
+    - Consider adding tooltips to layers to better understand the data in your layers.
