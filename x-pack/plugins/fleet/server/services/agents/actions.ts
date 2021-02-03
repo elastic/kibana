@@ -23,6 +23,8 @@ import {
 import { appContextService } from '../app_context';
 import { nodeTypes } from '../../../../../../src/plugins/data/common';
 
+const ONE_MONTH_IN_MS = 2592000000;
+
 export async function createAgentAction(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -77,6 +79,7 @@ async function createAction(
   ) {
     const body: FleetServerAgentAction = {
       '@timestamp': new Date().toISOString(),
+      expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
       agents: [actionSO.attributes.agent_id],
       action_id: actionSO.id,
       data: newAgentAction.data,
@@ -143,6 +146,7 @@ async function bulkCreateActions(
         }
         const body: FleetServerAgentAction = {
           '@timestamp': new Date().toISOString(),
+          expiration: new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
           agents: [actionSO.attributes.agent_id],
           action_id: actionSO.id,
           data: actionSO.attributes.data ? JSON.parse(actionSO.attributes.data) : undefined,

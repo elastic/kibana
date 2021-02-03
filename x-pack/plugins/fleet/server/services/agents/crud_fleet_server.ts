@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
+import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 
 import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
@@ -14,32 +15,6 @@ import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { appContextService } from '../../services';
 import { esKuery } from '../../../../../../src/plugins/data/server';
-
-interface SearchResponse<T> {
-  took: number;
-  timed_out: boolean;
-  _scroll_id?: string;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      fields?: any;
-      highlight?: any;
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
-  };
-}
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;

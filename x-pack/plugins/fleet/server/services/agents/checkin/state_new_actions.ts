@@ -105,15 +105,13 @@ function createAgentPolicyActionSharedObservable(agentPolicyId: string) {
   );
 }
 
-async function getOrCreateAgentDefaultOutputAPIKey(
+async function getAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agent: Agent
-): Promise<string> {
+) {
   if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-    if (agent.default_api_key) {
-      return agent.default_api_key;
-    }
+    return agent.default_api_key;
   } else {
     const {
       attributes: { default_api_key: defaultApiKey },
@@ -121,9 +119,18 @@ async function getOrCreateAgentDefaultOutputAPIKey(
       .getEncryptedSavedObjects()
       .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
 
-    if (defaultApiKey) {
-      return defaultApiKey;
-    }
+    return defaultApiKey;
+  }
+}
+
+async function getOrCreateAgentDefaultOutputAPIKey(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agent: Agent
+): Promise<string> {
+  const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
+  if (defaultAPIKey) {
+    return defaultAPIKey;
   }
 
   const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
