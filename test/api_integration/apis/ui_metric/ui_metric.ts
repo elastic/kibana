@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   const createStatsMetric = (
@@ -35,10 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
   });
 
   describe('ui_metric savedObject data', () => {
-    before(async () => {
-      await esArchiver.emptyKibanaIndex();
-    });
-
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       const reportManager = new ReportManager();
       const uiStatsMetric = createStatsMetric('myEvent');

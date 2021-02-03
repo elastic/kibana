@@ -119,6 +119,6 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
 const createLogEntryFromHit = (hit: LogEntryHit) => ({
   id: hit._id,
   index: hit._index,
-  key: getLogEntryCursorFromHit(hit),
+  cursor: getLogEntryCursorFromHit(hit),
   fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
 });
