@@ -5,6 +5,10 @@
 # Import and load bazelrc common settings for ci env
 try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.common
 
+# Import and load bazelrc ci auth settings for BuildBuddy
+try-import %workspace%/src/dev/ci_setup/.bazelrc-ci.auth
+
+## Disabled for now as we are using BuildBuddy
 # Remote cache settings for ci env
 # build --google_default_credentials
 # build --remote_upload_local_results=true
