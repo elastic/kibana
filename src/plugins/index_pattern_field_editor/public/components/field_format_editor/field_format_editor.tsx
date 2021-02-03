@@ -166,16 +166,7 @@ export class FormatSelectEditor extends PureComponent<
     );
     return (
       <>
-        <EuiFormRow
-          label={label}
-          helpText={
-            <FormattedMessage
-              id="indexPatternFieldEditor.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-          completely changed and prevent highlighting in Discover from working."
-            />
-          }
-        >
+        <EuiFormRow label={label}>
           <EuiSelect
             value={fieldFormatId}
             options={fieldTypeFormats.map((fmt) => {
