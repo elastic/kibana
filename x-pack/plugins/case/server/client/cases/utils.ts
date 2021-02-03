@@ -29,10 +29,14 @@ import {
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
-} from '../../../../common/api';
-import { ActionsClient } from '../../../../../actions/server';
-import { externalServiceFormatters, FormatterConnectorTypes } from '../../../connectors';
-import { CaseClientGetAlertsResponse } from '../../../client/alerts/types';
+  CommentAttributes,
+  CommentRequestUserType,
+  CommentRequestAlertType,
+} from '../../../common/api';
+import { ActionsClient } from '../../../../actions/server';
+import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
+import { CaseClientGetAlertsResponse } from '../../client/alerts/types';
+import { isUserContext } from '../../routes/api/utils';
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -291,3 +295,17 @@ export const transformComments = (
 export const isCommentAlertType = (
   comment: CommentResponse
 ): comment is CommentResponseAlertsType => comment.type === CommentType.alert;
+
+export const getCommentContextFromAttributes = (
+  attributes: CommentAttributes
+): CommentRequestUserType | CommentRequestAlertType =>
+  isUserContext(attributes)
+    ? {
+        type: CommentType.user,
+        comment: attributes.comment,
+      }
+    : {
+        type: CommentType.alert,
+        alertId: attributes.alertId,
+        index: attributes.index,
+      };

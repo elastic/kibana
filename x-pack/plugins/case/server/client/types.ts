@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
@@ -42,6 +42,13 @@ export interface CaseClientGet {
   includeComments?: boolean;
 }
 
+export interface CaseClientPush {
+  actionsClient: ActionsClient;
+  caseClient: CaseClient;
+  caseId: string;
+  connectorId: string;
+}
+
 export interface CaseClientAddComment {
   caseClient: CaseClient;
   caseId: string;
@@ -66,6 +73,7 @@ export interface CaseClientFactoryArguments {
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;
   request: KibanaRequest;
+  response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
@@ -85,6 +93,7 @@ export interface CaseClient {
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
   getUserActions: (args: CaseClientGetUserActions) => Promise<CaseUserActionsResponse>;
+  push: (args: CaseClientPush) => Promise<CaseResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
   updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
 }

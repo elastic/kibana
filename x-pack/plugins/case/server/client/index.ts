@@ -9,6 +9,7 @@ import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
 import { get } from './cases/get';
 import { update } from './cases/update';
+import { push } from './cases/push';
 import { addComment } from './comments/add';
 import { getFields } from './configure/get_fields';
 import { getMappings } from './configure/get_mappings';
@@ -24,6 +25,7 @@ export const createCaseClient = ({
   caseService,
   connectorMappingsService,
   request,
+  response,
   savedObjectsClient,
   userActionService,
   alertsService,
@@ -36,6 +38,7 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -45,6 +48,7 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -54,8 +58,20 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
+    }),
+    push: push({
+      alertsService,
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      request,
+      response,
+      savedObjectsClient,
+      userActionService,
+      context,
     }),
     addComment: addComment({
       alertsService,
@@ -63,6 +79,7 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -73,6 +90,7 @@ export const createCaseClient = ({
       connectorMappingsService,
       context,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -83,6 +101,7 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -92,6 +111,7 @@ export const createCaseClient = ({
       caseService,
       connectorMappingsService,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),
@@ -102,6 +122,7 @@ export const createCaseClient = ({
       connectorMappingsService,
       context,
       request,
+      response,
       savedObjectsClient,
       userActionService,
     }),

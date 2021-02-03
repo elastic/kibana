@@ -8,7 +8,7 @@ import {
   CommentResponse,
   CommentType,
   ConnectorMappingsAttributes,
-} from '../../../../common/api';
+} from '../../../common/api';
 
 export const updateUser = {
   updatedAt: '2020-03-13T08:34:53.450Z',
