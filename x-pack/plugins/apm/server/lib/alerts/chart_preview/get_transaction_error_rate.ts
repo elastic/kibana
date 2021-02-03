@@ -44,9 +44,7 @@ export async function getTransactionErrorRateChartPreview({
     },
   };
 
-  const outcomes = getOutcomeAggregation({
-    searchAggregatedTransactions: false,
-  });
+  const outcomes = getOutcomeAggregation();
 
   const { intervalString } = getBucketSize({ start, end, numBuckets: 20 });
 

@@ -7,11 +7,11 @@
  */
 
 import { createTableVisFn } from './table_vis_fn';
-import { tableVisResponseHandler } from './table_vis_response_handler';
+import { tableVisResponseHandler } from './utils';
 
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 
-jest.mock('./table_vis_response_handler', () => ({
+jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({
     tables: [{ columns: [], rows: [] }],
   }),
@@ -62,6 +62,6 @@ describe('interpreter/functions#table', () => {
   it('calls response handler with correct values', async () => {
     await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(tableVisResponseHandler).toHaveBeenCalledTimes(1);
-    expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
+    expect(tableVisResponseHandler).toHaveBeenCalledWith(context, visConfig);
   });
 });

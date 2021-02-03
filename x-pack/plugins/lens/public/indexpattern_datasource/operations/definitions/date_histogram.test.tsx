@@ -83,9 +83,11 @@ const indexPattern2: IndexPattern = {
   ]),
 };
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -200,7 +202,8 @@ describe('date_histogram', () => {
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
         indexPattern1,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -252,7 +255,8 @@ describe('date_histogram', () => {
             },
           ]),
         },
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({

@@ -843,5 +843,13 @@ describe('<EditPolicy />', () => {
       expect(actions.timeline.hasColdPhase()).toBe(true);
       expect(actions.timeline.hasDeletePhase()).toBe(true);
     });
+
+    test('show and hide rollover indicator on timeline', async () => {
+      const { actions } = testBed;
+      expect(actions.timeline.hasRolloverIndicator()).toBe(true);
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.toggleRollover(false);
+      expect(actions.timeline.hasRolloverIndicator()).toBe(false);
+    });
   });
 });

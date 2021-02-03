@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
@@ -16,7 +16,7 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { Document } from '../../persistence/saved_object_store';
-import { Dragging, RootDragDropProvider } from '../../drag_drop';
+import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
@@ -260,7 +260,7 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   const getSuggestionForField = React.useCallback(
-    (field: Dragging) => {
+    (field: DragDropIdentifier) => {
       const { activeDatasourceId, datasourceStates } = state;
       const activeVisualizationId = state.visualization.activeId;
       const visualizationState = state.visualization.state;
@@ -290,12 +290,12 @@ export function EditorFrame(props: EditorFrameProps) {
     ]
   );
 
-  const hasSuggestionForField = React.useCallback(
-    (field: Dragging) => getSuggestionForField(field) !== undefined,
+  const hasSuggestionForField = useCallback(
+    (field: DragDropIdentifier) => getSuggestionForField(field) !== undefined,
     [getSuggestionForField]
   );
 
-  const dropOntoWorkspace = React.useCallback(
+  const dropOntoWorkspace = useCallback(
     (field) => {
       const suggestion = getSuggestionForField(field);
       if (suggestion) {
