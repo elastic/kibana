@@ -5,6 +5,7 @@
  */
 
 export {
+  SEARCH_SESSION_TYPE,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
   EqlRequestParams,
