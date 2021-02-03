@@ -7,14 +7,13 @@
 import { kea, MakeLogicType } from 'kea';
 import { generatePath } from 'react-router-dom';
 
-import { ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
-export const DEFAULT_LANGUAGE = 'Universal';
+import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 
 interface EngineCreationActions {
   onEngineCreationSuccess(): void;
