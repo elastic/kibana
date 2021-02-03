@@ -10,7 +10,6 @@ import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
-import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';
 import {
@@ -97,7 +96,7 @@ export async function getFullEndpointExceptionList(
 
     if (response?.data !== undefined) {
       exceptions.entries = exceptions.entries.concat(
-        translateToEndpointExceptions(response, schemaVersion)
+        translateToEndpointExceptions(response.data, schemaVersion)
       );
 
       paging = (page - 1) * 100 + response.data.length < response.total;
@@ -116,16 +115,17 @@ export async function getFullEndpointExceptionList(
 
 /**
  * Translates Exception list items to Exceptions the endpoint can understand
- * @param exc
+ * @param exceptions
+ * @param schemaVersion
  */
 export function translateToEndpointExceptions(
-  exc: FoundExceptionListItemSchema,
+  exceptions: ExceptionListItemSchema[],
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
   const entrySet = new Set();
   const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
-    exc.data.forEach((entry) => {
+    exceptions.forEach((entry) => {
       const translatedItem = translateItem(schemaVersion, entry);
       const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
       if (!entrySet.has(entryHash)) {
