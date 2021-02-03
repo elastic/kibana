@@ -45,12 +45,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id and add an exception list to the rule', async () => {
