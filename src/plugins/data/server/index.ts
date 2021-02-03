@@ -229,10 +229,9 @@ export {
   searchUsageObserver,
   shimAbortSignal,
   SearchUsage,
-  SessionService,
-  ISessionService,
-  IScopedSessionService,
-  DataApiRequestHandlerContext,
+  SearchSessionService,
+  ISearchSessionService,
+  SearchRequestHandlerContext,
   DataRequestHandlerContext,
 } from './search';
 
