@@ -170,6 +170,10 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await testSubjects.click('mapSaveAndReturnButton');
     }
 
+    async expectMissingSaveAndReturnButton() {
+      await testSubjects.missingOrFail('mapSaveAndReturnButton');
+    }
+
     async expectMissingSaveButton() {
       await testSubjects.missingOrFail('mapSaveButton');
     }
