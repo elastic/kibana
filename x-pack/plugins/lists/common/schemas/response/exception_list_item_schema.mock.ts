@@ -22,7 +22,9 @@ import {
 
 import { ExceptionListItemSchema } from './exception_list_item_schema';
 
-export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
+export const getExceptionListItemSchemaMock = (
+  overrides?: Partial<ExceptionListItemSchema>
+): ExceptionListItemSchema => ({
   _version: undefined,
   comments: COMMENTS,
   created_at: DATE_NOW,
@@ -41,6 +43,7 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   type: ITEM_TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
+  ...(overrides || {}),
 });
 
 export const getExceptionListItemSchemaXMock = (count = 1): ExceptionListItemSchema[] => {
