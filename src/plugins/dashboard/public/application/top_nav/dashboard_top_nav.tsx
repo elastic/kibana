@@ -6,8 +6,6 @@
  * Public License, v 1.
  */
 
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -31,7 +29,6 @@ import {
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
 import { DashboardStateManager } from '../dashboard_state_manager';
-import { leaveConfirmStrings } from '../../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
   DashboardAppServices,
@@ -46,7 +43,10 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
+import { getNewDashboardTitle } from '../../dashboard_strings';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -91,6 +91,8 @@ export function DashboardTopNav({
     setHeaderActionMenu,
     savedObjectsTagging,
     dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
@@ -99,8 +101,16 @@ export function DashboardTopNav({
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
     });
+    const { id, title, getFullEditPath } = savedDashboard;
+    if (id || allowByValueEmbeddables) {
+      chrome.recentlyAccessed.add(
+        getFullEditPath(dashboardStateManager.getIsEditMode()),
+        title || getNewDashboardTitle(),
+        id || DASHBOARD_PANELS_UNSAVED_ID
+      );
+    }
     return () => visibleSubscription.unsubscribe();
-  }, [chrome]);
+  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
@@ -142,47 +152,40 @@ export function DashboardTopNav({
     }
   }, [state.addPanelOverlay]);
 
+  const onDiscardChanges = useCallback(() => {
+    function revertChangesAndExitEditMode() {
+      dashboardStateManager.resetState();
+      dashboardStateManager.clearUnsavedPanels();
+
+      // We need to do a hard reset of the timepicker. appState will not reload like
+      // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+      // reload will cause it not to sync.
+      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+      }
+      dashboardStateManager.switchViewMode(ViewMode.VIEW);
+    }
+    confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
+  }, [core.overlays, dashboardStateManager, timefilter]);
+
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
       clearAddPanel();
-      const isPageRefresh = newMode === dashboardStateManager.getViewMode();
-      const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-      const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
-
-      if (!willLoseChanges) {
-        dashboardStateManager.switchViewMode(newMode);
-        return;
+      if (savedDashboard?.id && allowByValueEmbeddables) {
+        const { getFullEditPath, title, id } = savedDashboard;
+        chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
       }
-
-      function revertChangesAndExitEditMode() {
-        dashboardStateManager.resetState();
-        // This is only necessary for new dashboards, which will default to Edit mode.
-        dashboardStateManager.switchViewMode(ViewMode.VIEW);
-
-        // We need to do a hard reset of the timepicker. appState will not reload like
-        // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-        // reload will cause it not to sync.
-        if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-        }
-        redirectTo({ destination: 'dashboard', id: savedDashboard.id });
-      }
-
-      core.overlays
-        .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-          confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-          cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
-          defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-          title: leaveConfirmStrings.getDiscardTitle(),
-        })
-        .then((isConfirmed) => {
-          if (isConfirmed) {
-            revertChangesAndExitEditMode();
-          }
-        });
+      dashboardStateManager.switchViewMode(newMode);
+      dashboardStateManager.restorePanels();
     },
-    [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager, clearAddPanel]
+    [
+      clearAddPanel,
+      savedDashboard,
+      dashboardStateManager,
+      allowByValueEmbeddables,
+      chrome.recentlyAccessed,
+    ]
   );
 
   /**
@@ -210,8 +213,9 @@ export function DashboardTopNav({
               'data-test-subj': 'saveDashboardSuccess',
             });
 
+            dashboardPanelStorage.clearPanels(lastDashboardId);
             if (id !== lastDashboardId) {
-              redirectTo({ destination: 'dashboard', id });
+              redirectTo({ destination: 'dashboard', id, useReplace: !lastDashboardId });
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
               dashboardStateManager.switchViewMode(ViewMode.VIEW);
@@ -236,6 +240,7 @@ export function DashboardTopNav({
     [
       core.notifications.toasts,
       dashboardStateManager,
+      dashboardPanelStorage,
       lastDashboardId,
       chrome.docTitle,
       redirectTo,
@@ -349,6 +354,7 @@ export function DashboardTopNav({
       },
       [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
+      [TopNavIds.DISCARD_CHANGES]: onDiscardChanges,
       [TopNavIds.SAVE]: runSave,
       [TopNavIds.CLONE]: runClone,
       [TopNavIds.ADD_EXISTING]: addFromLibrary,
@@ -385,6 +391,7 @@ export function DashboardTopNav({
   }, [
     dashboardCapabilities,
     dashboardStateManager,
+    onDiscardChanges,
     onChangeViewMode,
     savedDashboard,
     addFromLibrary,
