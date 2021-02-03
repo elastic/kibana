@@ -9,7 +9,6 @@ import { Type } from '@kbn/config-schema';
 import {
   HttpResources,
   HttpResourcesRequestHandler,
-  IRouter,
   RequestHandler,
   kibanaResponseFactory,
   RouteConfig,
@@ -18,6 +17,7 @@ import { SecurityLicense } from '../../../common/licensing';
 import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
+import type { SecurityRouter, SecurityRequestHandlerContext } from '../../types';
 
 import {
   coreMock,
@@ -28,7 +28,7 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
   let httpResources: jest.Mocked<HttpResources>;
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let license: jest.Mocked<SecurityLicense>;
   let config: ConfigType;
   beforeEach(() => {
@@ -145,7 +145,7 @@ describe('Login view routes', () => {
       return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
     }
 
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
       const [loginStateRouteConfig, loginStateRouteHandler] = router.get.mock.calls.find(
@@ -173,6 +173,7 @@ describe('Login view routes', () => {
         showRoleMappingsManagement: true,
         allowSubFeaturePrivileges: true,
         allowAuditLogging: true,
+        allowLegacyAuditLogging: true,
         showLogin: true,
       });
 

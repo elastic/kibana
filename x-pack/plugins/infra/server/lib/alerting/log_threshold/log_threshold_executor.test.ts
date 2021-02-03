@@ -413,31 +413,6 @@ describe('Log threshold executor', () => {
 
   describe('Results processors', () => {
     describe('Can process ungrouped results', () => {
-      test('It handles the OK state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
-          criteria: [positiveCriteria[0]],
-        };
-        const results = {
-          hits: {
-            total: {
-              value: 2,
-            },
-          },
-        } as UngroupedSearchQueryResponse;
-        processUngroupedResults(
-          results,
-          alertParams,
-          alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
-        );
-        // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.OK);
-        // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toBe(undefined);
-      });
-
       test('It handles the ALERT state correctly', () => {
         const alertInstanceUpdaterMock = jest.fn();
         const alertParams = {
@@ -475,68 +450,6 @@ describe('Log threshold executor', () => {
     });
 
     describe('Can process grouped results', () => {
-      test('It handles the OK state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
-          criteria: [positiveCriteria[0]],
-          groupBy: ['host.name', 'event.dataset'],
-        };
-        const results = [
-          {
-            key: {
-              'host.name': 'i-am-a-host-name',
-              'event.dataset': 'i-am-a-dataset',
-            },
-            doc_count: 100,
-            filtered_results: {
-              doc_count: 1,
-            },
-          },
-          {
-            key: {
-              'host.name': 'i-am-a-host-name',
-              'event.dataset': 'i-am-a-dataset',
-            },
-            doc_count: 100,
-            filtered_results: {
-              doc_count: 2,
-            },
-          },
-          {
-            key: {
-              'host.name': 'i-am-a-host-name',
-              'event.dataset': 'i-am-a-dataset',
-            },
-            doc_count: 100,
-            filtered_results: {
-              doc_count: 3,
-            },
-          },
-        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
-        processGroupByResults(
-          results,
-          alertParams,
-          alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
-        );
-        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(3);
-        // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.OK);
-        // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toBe(undefined);
-
-        // Second call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.OK);
-        // Second call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toBe(undefined);
-
-        // Third call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[2][1]).toBe(AlertStates.OK);
-        // Third call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[2][2]).toBe(undefined);
-      });
-
       test('It handles the ALERT state correctly', () => {
         const alertInstanceUpdaterMock = jest.fn();
         const alertParams = {
@@ -583,7 +496,7 @@ describe('Log threshold executor', () => {
           alertsMock.createAlertInstanceFactory,
           alertInstanceUpdaterMock
         );
-        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(results.length);
+        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
         expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
         // First call, third argument
@@ -600,14 +513,9 @@ describe('Log threshold executor', () => {
         ]);
 
         // Second call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.OK);
+        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
         // Second call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toBe(undefined);
-
-        // Third call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[2][1]).toBe(AlertStates.ALERT);
-        // Third call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[2][2]).toEqual([
+        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {

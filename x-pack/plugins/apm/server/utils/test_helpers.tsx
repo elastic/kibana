@@ -79,6 +79,9 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.maxServiceEnvironments':
               return 100;
+
+            case 'xpack.apm.maxServiceSelection':
+              return 50;
           }
         },
       }

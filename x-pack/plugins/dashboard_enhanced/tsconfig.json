@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+  ],
+  "references": [
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/dashboard/tsconfig.json" },
+    { "path": "../../../src/plugins/share/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json"},
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../embeddable_enhanced/tsconfig.json" },
+    { "path": "../ui_actions_enhanced/tsconfig.json" },
+  ]
+}

@@ -38,6 +38,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 aria-hidden="true"
                 className="euiFormControlLayoutCustomIcon__icon"
                 data-euiicon-type="search"
+                size="m"
               />
             </span>
           </div>
@@ -53,17 +54,13 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownCenter"
           id="field_value_selection_0"
-          onKeyDown={[Function]}
-          onMouseDown={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
           >
             <button
               className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+              disabled={false}
               onClick={[Function]}
               type="button"
             >
@@ -117,17 +114,13 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             >
               <div
                 className="euiPopover euiPopover--anchorDownRight"
-                onKeyDown={[Function]}
-                onMouseDown={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
               >
                 <div
                   className="euiPopover__anchor"
                 >
                   <button
                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -186,11 +179,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
-                    title={
-                      <Component
-                        ariaSortValue="ascending"
-                      />
-                    }
+                    title="; Sorted in ascending order"
                   >
                     Template name
                   </span>
@@ -275,6 +264,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 <button
                   aria-label="Clone workpad template 'test1'"
                   className="euiButtonEmpty euiButtonEmpty--primary"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
@@ -330,7 +320,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -351,7 +341,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -396,6 +386,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 <button
                   aria-label="Clone workpad template 'test2'"
                   className="euiButtonEmpty euiButtonEmpty--primary"
+                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
@@ -451,7 +442,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -472,7 +463,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                   </div>
                 </div>
                 <div
-                  className="euiHealth"
+                  className="euiHealth euiHealth--textSizeS"
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

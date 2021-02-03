@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
@@ -25,18 +29,25 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         defaultMessage: 'Send to email',
       }
     ),
-    validateConnector: (action: EmailActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: EmailActionConnector
+    ): ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets> => {
+      const configErrors = {
         from: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
+      };
+      const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
       };
-      validationResult.errors = errors;
+
+      const validationResult = {
+        config: { errors: configErrors },
+        secrets: { errors: secretsErrors },
+      };
       if (!action.config.from) {
-        errors.from.push(
+        configErrors.from.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
             {
@@ -46,7 +57,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (action.config.from && !action.config.from.trim().match(mailformat)) {
-        errors.from.push(
+        configErrors.from.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
             {
@@ -56,7 +67,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (!action.config.port) {
-        errors.port.push(
+        configErrors.port.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
             {
@@ -66,7 +77,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (!action.config.host) {
-        errors.host.push(
+        configErrors.host.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
             {
@@ -76,7 +87,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        errors.user.push(
+        secretsErrors.user.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
             {
@@ -86,7 +97,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        errors.password.push(
+        secretsErrors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
             {
@@ -96,7 +107,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (action.secrets.user && !action.secrets.password) {
-        errors.password.push(
+        secretsErrors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
             {
@@ -106,7 +117,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         );
       }
       if (!action.secrets.user && action.secrets.password) {
-        errors.user.push(
+        secretsErrors.user.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredUserText',
             {
@@ -117,8 +128,9 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       }
       return validationResult;
     },
-    validateParams: (actionParams: EmailActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: EmailActionParams
+    ): GenericValidationResult<EmailActionParams> => {
       const errors = {
         to: new Array<string>(),
         cc: new Array<string>(),
@@ -126,7 +138,7 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         message: new Array<string>(),
         subject: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (
         (!(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
         (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&

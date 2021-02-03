@@ -27,6 +27,7 @@ import {
   FindExceptionListItemOptions,
   FindExceptionListOptions,
   FindExceptionListsItemOptions,
+  FindValueListExceptionListsItems,
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
@@ -44,7 +45,10 @@ import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
-import { findExceptionListsItem } from './find_exception_list_items';
+import {
+  findExceptionListsItem,
+  findValueListExceptionListItems,
+} from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 
@@ -139,7 +143,7 @@ export class ExceptionListClient {
   };
 
   /**
-   * This is the same as "updateListItem" except it applies specifically to the endpoint list and will
+   * This is the same as "updateExceptionListItem" except it applies specifically to the endpoint list and will
    * auto-call the "createEndpointList" for you so that you have the best chance of the endpoint
    * being there if it did not exist before. If the list did not exist before, then creating it here will still cause a
    * return of null but at least the list exists again.
@@ -407,6 +411,24 @@ export class ExceptionListClient {
       savedObjectsClient,
       sortField,
       sortOrder,
+    });
+  };
+
+  public findValueListExceptionListItems = async ({
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    valueListId,
+  }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+    const { savedObjectsClient } = this;
+    return findValueListExceptionListItems({
+      page,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+      valueListId,
     });
   };
 

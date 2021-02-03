@@ -31,34 +31,34 @@ export class EMSSettings {
     this._getIsEnterprisePlus = getIsEnterPrisePlus;
   }
 
-  _isEMSUrlSet() {
+  isEMSUrlSet() {
     return !!this._config.emsUrl;
   }
 
-  _getEMSRoot() {
+  getEMSRoot() {
     return this._config.emsUrl!.replace(/\/$/, '');
-  }
-
-  isOnPrem(): boolean {
-    return this._isEMSUrlSet();
   }
 
   isIncludeElasticMapsService() {
     return !!this._config.includeElasticMapsService;
   }
 
+  hasOnPremLicense() {
+    return this._getIsEnterprisePlus();
+  }
+
   isEMSEnabled(): boolean {
-    if (this._isEMSUrlSet()) {
+    if (this.isEMSUrlSet()) {
       return this._getIsEnterprisePlus();
     }
     return this.isIncludeElasticMapsService();
   }
 
   getEMSFileApiUrl(): string {
-    if (this._config.emsFileApiUrl !== DEFAULT_EMS_FILE_API_URL || !this._isEMSUrlSet()) {
+    if (this._config.emsFileApiUrl !== DEFAULT_EMS_FILE_API_URL || !this.isEMSUrlSet()) {
       return this._config.emsFileApiUrl!;
     } else {
-      return `${this._getEMSRoot()}/file`;
+      return `${this.getEMSRoot()}/file`;
     }
   }
 
@@ -67,25 +67,25 @@ export class EMSSettings {
   }
 
   getEMSTileApiUrl(): string {
-    if (this._config.emsTileApiUrl !== DEFAULT_EMS_TILE_API_URL || !this._isEMSUrlSet()) {
+    if (this._config.emsTileApiUrl !== DEFAULT_EMS_TILE_API_URL || !this.isEMSUrlSet()) {
       return this._config.emsTileApiUrl!;
     } else {
-      return `${this._getEMSRoot()}/tile`;
+      return `${this.getEMSRoot()}/tile`;
     }
   }
   getEMSLandingPageUrl(): string {
-    if (this._config.emsLandingPageUrl !== DEFAULT_EMS_LANDING_PAGE_URL || !this._isEMSUrlSet()) {
+    if (this._config.emsLandingPageUrl !== DEFAULT_EMS_LANDING_PAGE_URL || !this.isEMSUrlSet()) {
       return this._config.emsLandingPageUrl!;
     } else {
-      return `${this._getEMSRoot()}/maps`;
+      return `${this.getEMSRoot()}/maps`;
     }
   }
 
   getEMSFontLibraryUrl(): string {
-    if (this._config.emsFontLibraryUrl !== DEFAULT_EMS_FONT_LIBRARY_URL || !this._isEMSUrlSet()) {
+    if (this._config.emsFontLibraryUrl !== DEFAULT_EMS_FONT_LIBRARY_URL || !this.isEMSUrlSet()) {
       return this._config.emsFontLibraryUrl!;
     } else {
-      return `${this._getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
+      return `${this.getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
     }
   }
 }

@@ -325,6 +325,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource,
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const allHits: any[] = [];
@@ -375,7 +376,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
     } else {
@@ -391,6 +392,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource,
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     return {
@@ -487,8 +489,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {};
     }
 
+    const { docValueFields } = getDocValueAndSourceFields(
+      indexPattern,
+      this._getTooltipPropertyNames()
+    );
+
+    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
-    const searchSource = searchService.searchSource.createEmpty();
+    const searchSource = await searchService.searchSource.create(initialSearchContext as object);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
@@ -499,7 +507,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
 
     searchSource.setField('query', query);
-    searchSource.setField('fields', this._getTooltipPropertyNames());
+    searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
     const resp = await searchSource.fetch();
 
@@ -702,7 +710,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       indexSettings.maxResultWindow,
       initialSearchContext
     );
-    searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
+    searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
     } else {
@@ -721,12 +729,21 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const geoField = await this._getGeoField();
 
-    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${this._descriptor.geoField}&index=${indexPattern.title}&requestBody=${risonDsl}&geoFieldType=${geoField.type}`;
+    const urlTemplate = `${mvtUrlServicePath}\
+?x={x}\
+&y={y}\
+&z={z}\
+&geometryFieldName=${this._descriptor.geoField}\
+&index=${indexPattern.title}\
+&requestBody=${risonDsl}\
+&geoFieldType=${geoField.type}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),
       maxSourceZoom: this.getMaxZoom(),
-      urlTemplate,
+      urlTemplate: searchFilters.searchSessionId
+        ? urlTemplate + `&searchSessionId=${searchFilters.searchSessionId}`
+        : urlTemplate,
     };
   }
 }

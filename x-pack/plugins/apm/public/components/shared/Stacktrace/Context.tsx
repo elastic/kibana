@@ -7,26 +7,18 @@
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
-// TODO add dependency for @types/react-syntax-highlighter
-// @ts-expect-error
-import javascript from 'react-syntax-highlighter/dist/languages/javascript';
-// @ts-expect-error
-import python from 'react-syntax-highlighter/dist/languages/python';
-// @ts-expect-error
-import ruby from 'react-syntax-highlighter/dist/languages/ruby';
-// @ts-expect-error
-import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-// @ts-expect-error
-import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-expect-error
-import { xcode } from 'react-syntax-highlighter/dist/styles';
+import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
+import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
+import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
+import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import styled from 'styled-components';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 
-registerLanguage('javascript', javascript);
-registerLanguage('python', python);
-registerLanguage('ruby', ruby);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('ruby', ruby);
 
 const ContextContainer = styled.div`
   position: relative;
@@ -106,7 +98,9 @@ function getStackframeLines(stackframe: StackframeWithLineContext) {
   const line = stackframe.line.context;
   const preLines = stackframe.context?.pre || [];
   const postLines = stackframe.context?.post || [];
-  return [...preLines, line, ...postLines];
+  return [...preLines, line, ...postLines].map(
+    (x) => (x.endsWith('\n') ? x.slice(0, -1) : x) || ' '
+  );
 }
 
 function getStartLineNumber(stackframe: StackframeWithLineContext) {
@@ -146,7 +140,7 @@ export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
             CodeTag={Code}
             customStyle={{ padding: null, overflowX: null }}
           >
-            {line || '\n'}
+            {line}
           </SyntaxHighlighter>
         ))}
       </LineContainer>

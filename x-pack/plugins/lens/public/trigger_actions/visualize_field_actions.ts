@@ -12,7 +12,7 @@ import {
 import { ApplicationStart } from '../../../../../src/core/public';
 
 export const visualizeFieldAction = (application: ApplicationStart) =>
-  createAction<typeof ACTION_VISUALIZE_LENS_FIELD>({
+  createAction<VisualizeFieldContext>({
     type: ACTION_VISUALIZE_LENS_FIELD,
     id: ACTION_VISUALIZE_LENS_FIELD,
     getDisplayName: () =>

@@ -8,17 +8,36 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Alert } from '../../../types';
-import { AlertsContextProvider } from '../../context/alerts_context';
+import {
+  ValidationResult,
+  Alert,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../common/lib/kibana';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+jest.mock('../../lib/alert_api', () => ({
+  loadAlertTypes: jest.fn(),
+  updateAlert: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
+  alertingFrameworkHealth: jest.fn(() => ({
+    isSufficientlySecure: true,
+    hasPermanentEncryptionKey: true,
+  })),
+}));
+
+jest.mock('../../../common/lib/health_api', () => ({
+  triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
+}));
 
 describe('alert_edit', () => {
-  let deps: any;
   let wrapper: ReactWrapper<any>;
   let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
 
@@ -32,25 +51,46 @@ describe('alert_edit', () => {
         application: { capabilities },
       },
     ] = await mockedCoreSetup.getStartServices();
-    deps = {
-      toastNotifications: mockedCoreSetup.notifications.toasts,
-      http: mockedCoreSetup.http,
-      uiSettings: mockedCoreSetup.uiSettings,
-      actionTypeRegistry,
-      alertTypeRegistry,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-      capabilities,
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      alerts: {
+        show: true,
+        save: true,
+        delete: true,
+        execute: true,
+      },
     };
 
-    mockedCoreSetup.http.get.mockResolvedValue({
-      isSufficientlySecure: true,
-      hasPermanentEncryptionKey: true,
-    });
-
+    const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+    const alertTypes = [
+      {
+        id: 'my-alert-type',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
+        actionVariables: {
+          context: [],
+          state: [],
+          params: [],
+        },
+      },
+    ];
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
       description: 'test',
       documentationUrl: null,
       validate: (): ValidationResult => {
@@ -60,21 +100,20 @@ describe('alert_edit', () => {
       requiresAppContext: false,
     };
 
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
-
+    });
+    loadAlertTypes.mockResolvedValue(alertTypes);
     const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
       params: {
@@ -101,6 +140,7 @@ describe('alert_edit', () => {
       tags: [],
       name: 'test alert',
       throttle: null,
+      notifyWhen: null,
       apiKeyOwner: null,
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -122,24 +162,15 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <KibanaContextProvider services={deps}>
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps!.http,
-            actionTypeRegistry: deps!.actionTypeRegistry,
-            alertTypeRegistry: deps!.alertTypeRegistry,
-            toastNotifications: deps!.toastNotifications,
-            uiSettings: deps!.uiSettings,
-            docLinks: deps.docLinks,
-            capabilities: deps!.capabilities,
-          }}
-        >
-          <AlertEdit onClose={() => {}} initialAlert={alert} />
-        </AlertsContextProvider>
-      </KibanaContextProvider>
+      <AlertEdit
+        onClose={() => {}}
+        initialAlert={alert}
+        reloadAlerts={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
+      />
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -148,22 +179,20 @@ describe('alert_edit', () => {
     });
   }
 
-  it('renders alert add flyout', async () => {
+  it('renders alert edit flyout', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
   });
 
   it('displays a toast message on save for server errors', async () => {
-    mockedCoreSetup.http.get.mockResolvedValue([]);
     await setup();
-    const err = new Error() as any;
-    err.body = {};
-    err.body.message = 'Fail message';
-    mockedCoreSetup.http.put.mockRejectedValue(err);
+
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
-    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+      'Fail message'
+    );
   });
 });

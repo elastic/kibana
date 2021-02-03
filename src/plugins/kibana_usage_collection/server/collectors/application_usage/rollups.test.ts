@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { rollDailyData, rollTotals } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
@@ -80,12 +70,25 @@ describe('rollDailyData', () => {
                 attributes: {
                   appId: 'appId',
                   timestamp: '2020-01-01T11:31:00.000Z',
-                  minutesOnScreen: 1.5,
+                  minutesOnScreen: 2.5,
                   numberOfClicks: 2,
                 },
               },
+              {
+                id: 'test-id-3',
+                type,
+                score: 0,
+                references: [],
+                attributes: {
+                  appId: 'appId',
+                  viewId: 'appId_viewId',
+                  timestamp: '2020-01-01T11:31:00.000Z',
+                  minutesOnScreen: 1,
+                  numberOfClicks: 5,
+                },
+              },
             ],
-            total: 2,
+            total: 3,
             page,
             per_page: perPage,
           };
@@ -99,10 +102,16 @@ describe('rollDailyData', () => {
     });
 
     await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(undefined);
-    expect(savedObjectClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectClient.get).toHaveBeenCalledWith(
+    expect(savedObjectClient.get).toHaveBeenCalledTimes(2);
+    expect(savedObjectClient.get).toHaveBeenNthCalledWith(
+      1,
       SAVED_OBJECTS_DAILY_TYPE,
       'appId:2020-01-01'
+    );
+    expect(savedObjectClient.get).toHaveBeenNthCalledWith(
+      2,
+      SAVED_OBJECTS_DAILY_TYPE,
+      'appId:2020-01-01:appId_viewId'
     );
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.bulkCreate).toHaveBeenCalledWith(
@@ -112,22 +121,41 @@ describe('rollDailyData', () => {
           id: 'appId:2020-01-01',
           attributes: {
             appId: 'appId',
+            viewId: undefined,
             timestamp: '2020-01-01T00:00:00.000Z',
-            minutesOnScreen: 2.0,
+            minutesOnScreen: 3.0,
             numberOfClicks: 3,
+          },
+        },
+        {
+          type: SAVED_OBJECTS_DAILY_TYPE,
+          id: 'appId:2020-01-01:appId_viewId',
+          attributes: {
+            appId: 'appId',
+            viewId: 'appId_viewId',
+            timestamp: '2020-01-01T00:00:00.000Z',
+            minutesOnScreen: 1.0,
+            numberOfClicks: 5,
           },
         },
       ],
       { overwrite: true }
     );
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
+    expect(savedObjectClient.delete).toHaveBeenCalledTimes(3);
+    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+      1,
       SAVED_OBJECTS_TRANSACTIONAL_TYPE,
       'test-id-1'
     );
-    expect(savedObjectClient.delete).toHaveBeenCalledWith(
+    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+      2,
       SAVED_OBJECTS_TRANSACTIONAL_TYPE,
       'test-id-2'
+    );
+    expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
+      3,
+      SAVED_OBJECTS_TRANSACTIONAL_TYPE,
+      'test-id-3'
     );
   });
 
@@ -229,12 +257,25 @@ describe('rollTotals', () => {
                 attributes: {
                   appId: 'appId-1',
                   timestamp: '2020-01-01T11:31:00.000Z',
-                  minutesOnScreen: 1.5,
+                  minutesOnScreen: 2.5,
                   numberOfClicks: 2,
                 },
               },
+              {
+                id: 'appId-1:2020-01-01:viewId-1',
+                type,
+                score: 0,
+                references: [],
+                attributes: {
+                  appId: 'appId-1',
+                  viewId: 'viewId-1',
+                  timestamp: '2020-01-01T11:31:00.000Z',
+                  minutesOnScreen: 1,
+                  numberOfClicks: 1,
+                },
+              },
             ],
-            total: 2,
+            total: 3,
             page,
             per_page: perPage,
           };
@@ -252,8 +293,32 @@ describe('rollTotals', () => {
                   numberOfClicks: 1,
                 },
               },
+              {
+                id: 'appId-1___viewId-1',
+                type,
+                score: 0,
+                references: [],
+                attributes: {
+                  appId: 'appId-1',
+                  viewId: 'viewId-1',
+                  minutesOnScreen: 4,
+                  numberOfClicks: 2,
+                },
+              },
+              {
+                id: 'appId-2___viewId-1',
+                type,
+                score: 0,
+                references: [],
+                attributes: {
+                  appId: 'appId-2',
+                  viewId: 'viewId-1',
+                  minutesOnScreen: 1,
+                  numberOfClicks: 1,
+                },
+              },
             ],
-            total: 1,
+            total: 3,
             page,
             per_page: perPage,
           };
@@ -270,8 +335,29 @@ describe('rollTotals', () => {
           id: 'appId-1',
           attributes: {
             appId: 'appId-1',
-            minutesOnScreen: 2.0,
+            viewId: MAIN_APP_DEFAULT_VIEW_ID,
+            minutesOnScreen: 3.0,
             numberOfClicks: 3,
+          },
+        },
+        {
+          type: SAVED_OBJECTS_TOTAL_TYPE,
+          id: 'appId-1___viewId-1',
+          attributes: {
+            appId: 'appId-1',
+            viewId: 'viewId-1',
+            minutesOnScreen: 5.0,
+            numberOfClicks: 3,
+          },
+        },
+        {
+          type: SAVED_OBJECTS_TOTAL_TYPE,
+          id: 'appId-2___viewId-1',
+          attributes: {
+            appId: 'appId-2',
+            viewId: 'viewId-1',
+            minutesOnScreen: 1.0,
+            numberOfClicks: 1,
           },
         },
         {
@@ -279,6 +365,7 @@ describe('rollTotals', () => {
           id: 'appId-2',
           attributes: {
             appId: 'appId-2',
+            viewId: MAIN_APP_DEFAULT_VIEW_ID,
             minutesOnScreen: 0.5,
             numberOfClicks: 1,
           },
@@ -286,7 +373,7 @@ describe('rollTotals', () => {
       ],
       { overwrite: true }
     );
-    expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
+    expect(savedObjectClient.delete).toHaveBeenCalledTimes(3);
     expect(savedObjectClient.delete).toHaveBeenCalledWith(
       SAVED_OBJECTS_DAILY_TYPE,
       'appId-2:2020-01-01'
@@ -294,6 +381,10 @@ describe('rollTotals', () => {
     expect(savedObjectClient.delete).toHaveBeenCalledWith(
       SAVED_OBJECTS_DAILY_TYPE,
       'appId-1:2020-01-01'
+    );
+    expect(savedObjectClient.delete).toHaveBeenCalledWith(
+      SAVED_OBJECTS_DAILY_TYPE,
+      'appId-1:2020-01-01:viewId-1'
     );
   });
 });

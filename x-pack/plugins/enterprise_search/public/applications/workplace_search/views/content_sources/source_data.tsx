@@ -106,7 +106,7 @@ export const staticSourceData = [
       }
     ),
     connectStepDescription: connectStepDescription.files,
-    objTypes: [SOURCE_OBJ_TYPES.ALL_FILES],
+    objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
         FeatureIds.SyncFrequency,
@@ -156,6 +156,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -435,6 +436,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,

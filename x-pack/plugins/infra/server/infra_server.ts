@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { initIpToHostName } from './routes/ip_to_hostname';
-import { schemas } from './graphql';
-import { createSourceStatusResolvers } from './graphql/source_status';
-import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
@@ -34,26 +30,16 @@ import {
   initLogEntriesHighlightsRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
-  initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initSourceRoute } from './routes/source';
+import { initOverviewRoute } from './routes/overview';
 import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
 import { initProcessListRoute } from './routes/process_list';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
-  const schema = makeExecutableSchema({
-    resolvers: [
-      createSourcesResolvers(libs) as IResolvers,
-      createSourceStatusResolvers(libs) as IResolvers,
-    ],
-    typeDefs: schemas,
-  });
-
-  libs.framework.registerGraphQLEndpoint('/graphql', schema);
-
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
@@ -74,7 +60,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogEntriesHighlightsRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
-  initLogEntriesItemRoute(libs);
   initMetricExplorerRoute(libs);
   initMetricsAPIRoute(libs);
   initMetadataRoute(libs);
@@ -84,4 +69,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initAlertPreviewRoute(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
+  initOverviewRoute(libs);
 };

@@ -90,7 +90,7 @@ export const exceptionListItemToTrustedApp = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
   if (exceptionListItem.os_types[0]) {
-    const os = OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
+    const os = osFromExceptionItem(exceptionListItem);
     const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
     return {
@@ -121,6 +121,12 @@ export const exceptionListItemToTrustedApp = (
   }
 };
 
+export const osFromExceptionItem = (
+  exceptionListItem: ExceptionListItemSchema
+): TrustedApp['os'] => {
+  return OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
+};
+
 const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
   switch (hash.length) {
     case 32:
@@ -140,9 +146,7 @@ export const createEntryNested = (field: string, entries: NestedEntriesArray): E
   return { field, entries, type: 'nested' };
 };
 
-export const conditionEntriesToEntries = (
-  conditionEntries: Array<ConditionEntry<ConditionEntryField>>
-): EntriesArray => {
+export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
     if (conditionEntry.field === ConditionEntryField.HASH) {
       return createEntryMatch(

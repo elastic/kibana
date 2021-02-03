@@ -34,45 +34,59 @@ import { ActionTypeForm, ActionTypeFormProps } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
+import {
+  VIEW_LICENSE_OPTIONS_LINK,
+  DEFAULT_HIDDEN_ACTION_TYPES,
+  DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
+} from '../../../common/constants';
 import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
+
+export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
+  omitOptionalMessageVariables?: boolean;
+  defaultActionMessage?: string;
+}
 
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
-  actionGroups?: ActionGroup[];
+  actionGroups?: ActionGroupWithMessageVariables[];
+  defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setAlertProperty: (actions: AlertAction[]) => void;
+  setActions: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
-  defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
+  getDefaultActionParams?: DefaultActionParamsGetter;
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 }
 
 interface ActiveActionConnectorState {
   actionTypeId: string;
-  index: number;
+  indices: number[];
 }
 
 export const ActionForm = ({
   actions,
   defaultActionGroupId,
-  actionGroups,
   setActionIdByIndex,
   setActionGroupIdByIndex,
-  setAlertProperty,
+  setActions,
   setActionParamsProperty,
   actionTypes,
   messageVariables,
+  actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
+  getDefaultActionParams,
+  isActionGroupDisabledForActionType,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -220,9 +234,15 @@ export const ActionForm = ({
       .list()
       /**
        * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+       * TODO: Need to decide about ServiceNow SIR connector.
        * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
        */
-      .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
+      .filter(
+        ({ id }) =>
+          actionTypes ??
+          (!DEFAULT_HIDDEN_ACTION_TYPES.includes(id) &&
+            !DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES.includes(id))
+      )
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
@@ -297,13 +317,13 @@ export const ActionForm = ({
                 index={index}
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
-                defaultActionGroupId={defaultActionGroupId}
                 emptyActionsIds={emptyActionsIds}
+                connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
                     (_item: AlertAction, i: number) => i !== index
                   );
-                  setAlertProperty(updatedActions);
+                  setActions(updatedActions);
                   setIsAddActionPanelOpen(
                     updatedActions.filter((item: AlertAction) => item.id !== actionItem.id)
                       .length === 0
@@ -311,8 +331,18 @@ export const ActionForm = ({
                   setActiveActionItem(undefined);
                 }}
                 onAddConnector={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                  setActiveActionItem({
+                    actionTypeId: actionItem.actionTypeId,
+                    indices: actions
+                      .map((item: AlertAction, idx: number) =>
+                        item.id === actionItem.id ? idx : -1
+                      )
+                      .filter((idx: number) => idx >= 0),
+                  });
                   setAddModalVisibility(true);
+                }}
+                onSelectConnector={(connectorId: string) => {
+                  setActionIdByIndex(connectorId, index);
                 }}
               />
             );
@@ -333,12 +363,14 @@ export const ActionForm = ({
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
-              defaultActionMessage={defaultActionMessage}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
+              defaultActionMessage={defaultActionMessage}
+              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
-                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
@@ -349,7 +381,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                setAlertProperty(updatedActions);
+                setActions(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0
@@ -425,12 +457,12 @@ export const ActionForm = ({
       )}
       {actionTypesIndex && activeActionItem && addModalVisible ? (
         <ConnectorAddModal
-          key={activeActionItem.index}
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
             connectors.push(savedAction);
-            setActionIdByIndex(savedAction.id, activeActionItem.index);
+            const indicesToUpdate = activeActionItem.indices || [];
+            indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));
           }}
           actionTypeRegistry={actionTypeRegistry}
         />

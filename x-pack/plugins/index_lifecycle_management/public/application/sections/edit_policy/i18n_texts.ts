@@ -8,8 +8,38 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.shrink.indexFieldLabel', {
+      defaultMessage: 'Shrink index',
+    }),
+    rolloverOffsetsHotPhaseTiming: i18n.translate(
+      'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
+      {
+        defaultMessage:
+          'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
+      }
+    ),
+    searchableSnapshotInHotPhase: {
+      searchableSnapshotDisallowed: {
+        calloutTitle: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle',
+          {
+            defaultMessage: 'Searchable snapshot disabled',
+          }
+        ),
+        calloutBody: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody',
+          {
+            defaultMessage:
+              'To use searchable snapshot in this phase you must disable searchable snapshot in the hot phase.',
+          }
+        ),
+      },
+    },
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
+    }),
+    readonlyEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.readonlyFieldLabel', {
+      defaultMessage: 'Make index read only',
     }),
     maxNumSegmentsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.forceMerge.numberOfSegmentsLabel',
@@ -17,10 +47,10 @@ export const i18nTexts = {
         defaultMessage: 'Number of segments',
       }
     ),
-    setPriorityFieldLabel: i18n.translate(
+    indexPriorityFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.indexPriorityLabel',
       {
-        defaultMessage: 'Index priority (optional)',
+        defaultMessage: 'Index priority',
       }
     ),
     bestCompressionFieldLabel: i18n.translate(
@@ -44,6 +74,12 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.dataTierAllocation.nodeAllocationFieldLabel',
       {
         defaultMessage: 'Select a node attribute',
+      }
+    ),
+    searchableSnapshotsFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot repository',
       }
     ),
     errors: {
@@ -134,6 +170,37 @@ export const i18nTexts = {
           defaultMessage: 'A policy name cannot be longer than 255 bytes.',
         }
       ),
+      searchableSnapshotRepoRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoRequiredError',
+        {
+          defaultMessage: 'A snapshot repository name is required.',
+        }
+      ),
+    },
+    titles: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseTitle', {
+        defaultMessage: 'Hot phase',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseTitle', {
+        defaultMessage: 'Warm phase',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
+        defaultMessage: 'Cold phase',
+      }),
+    },
+    descriptions: {
+      hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
+        defaultMessage:
+          'This phase is required. You are actively querying and writing to your index. For faster updates, you can roll over the index when it gets too big or too old.',
+      }),
+      warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
+        defaultMessage:
+          'You are still querying your index, but it is read-only. You can allocate shards to less performant hardware. For faster searches, you can reduce the number of shards and force merge segments.',
+      }),
+      cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
+        defaultMessage:
+          'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
+      }),
     },
   },
 };

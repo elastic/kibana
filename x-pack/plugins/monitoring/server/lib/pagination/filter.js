@@ -15,7 +15,7 @@ function defaultFilterFn(value, query) {
 export function filter(data, queryText, fields, filterFn = defaultFilterFn) {
   return data.filter((item) => {
     for (const field of fields) {
-      if (filterFn(get(item, field), queryText)) {
+      if (filterFn(get(item, field, ''), queryText)) {
         return true;
       }
     }

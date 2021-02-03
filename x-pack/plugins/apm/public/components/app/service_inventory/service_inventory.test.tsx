@@ -9,24 +9,24 @@ import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
-import { EuiThemeProvider } from '../../../../../observability/public';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
-import * as useAnomalyDetectionJobs from '../../../hooks/useAnomalyDetectionJobs';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
-import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
-import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
-import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
+import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
+import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import * as hook from './use_anomaly_detection_jobs_fetcher';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const addWarning = jest.fn();
@@ -57,6 +57,8 @@ function wrapper({ children }: { children?: ReactNode }) {
                 rangeTo: 'now',
                 start: 'mystart',
                 end: 'myend',
+                comparisonEnabled: true,
+                comparisonType: 'yesterday',
               }}
             >
               {children}
@@ -80,19 +82,13 @@ describe('ServiceInventory', () => {
       status: FETCH_STATUS.SUCCESS,
     });
 
-    jest
-      .spyOn(useAnomalyDetectionJobs, 'useAnomalyDetectionJobs')
-      .mockReturnValue({
-        status: FETCH_STATUS.SUCCESS,
-        data: {
-          jobs: [],
-          hasLegacyJobs: false,
-        },
-        refetch: () => undefined,
-      });
+    jest.spyOn(hook, 'useAnomalyDetectionJobsFetcher').mockReturnValue({
+      anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+      anomalyDetectionJobsData: { jobs: [], hasLegacyJobs: false },
+    });
 
     jest
-      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPatternFetcher')
       .mockReturnValue({
         indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,

@@ -22,9 +22,6 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
-import { IncidentConfigurationSchema } from '../case/schema';
-import { Comment } from '../case/types';
-
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
 >;
@@ -38,8 +35,6 @@ export type ExecutorSubActionCommonFieldsParams = TypeOf<
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -58,28 +53,17 @@ export interface ExternalServiceIncidentResponse {
   pushedDate: string;
 }
 
-export interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
-}
-
 export type ExternalServiceParams = Record<string, unknown>;
 export interface ExternalServiceFields {
-  id: string;
   input_type: string;
   name: string;
   read_only: boolean;
   required?: string;
+  text: string;
 }
 export type GetCommonFieldsResponse = ExternalServiceFields[];
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams,
-  'description' | 'incidentTypes' | 'severityCode'
-> & {
-  name: string;
-};
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface CreateIncidentParams {
   incident: Incident;
@@ -92,7 +76,7 @@ export interface UpdateIncidentParams {
 
 export interface CreateCommentParams {
   incidentId: string;
-  comment: Comment;
+  comment: SimpleComment;
 }
 
 export type GetIncidentTypesResponse = Array<{ id: string; name: string }>;
@@ -108,10 +92,7 @@ export interface ExternalService {
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
-  externalObject: Record<string, any>;
-}
-
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export type ExecutorSubActionGetIncidentTypesParams = TypeOf<
   typeof ExecutorSubActionGetIncidentTypesParamsSchema
 >;
@@ -122,7 +103,6 @@ export type ExecutorSubActionGetSeverityParams = TypeOf<
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
@@ -221,4 +201,13 @@ export interface CreateIncidentData {
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
   severity_code?: { id: number };
+}
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

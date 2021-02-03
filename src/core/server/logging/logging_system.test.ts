@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 const mockStreamWrite = jest.fn();
 jest.mock('fs', () => ({
+  ...(jest.requireActual('fs') as any),
   constants: {},
   createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
 }));
@@ -67,7 +57,7 @@ test('uses default memory buffer logger until config is provided', () => {
   expect(bufferAppendSpy.mock.calls[1][0]).toMatchSnapshot({ pid: expect.any(Number) });
 });
 
-test('flushes memory buffer logger and switches to real logger once config is provided', () => {
+test('flushes memory buffer logger and switches to real logger once config is provided', async () => {
   const logger = system.get('test', 'context');
 
   logger.trace('buffered trace message');
@@ -77,7 +67,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
 
   // Switch to console appender with `info` level, so that `trace` message won't go through.
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
@@ -96,7 +86,7 @@ test('flushes memory buffer logger and switches to real logger once config is pr
   expect(bufferAppendSpy).not.toHaveBeenCalled();
 });
 
-test('appends records via multiple appenders.', () => {
+test('appends records via multiple appenders.', async () => {
   const loggerWithoutConfig = system.get('some-context');
   const testsLogger = system.get('tests');
   const testsChildLogger = system.get('tests', 'child');
@@ -109,7 +99,7 @@ test('appends records via multiple appenders.', () => {
   expect(mockConsoleLog).not.toHaveBeenCalled();
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: {
         default: { kind: 'console', layout: { kind: 'pattern' } },
@@ -131,8 +121,8 @@ test('appends records via multiple appenders.', () => {
   expect(mockStreamWrite.mock.calls[1][0]).toMatchSnapshot('file logs');
 });
 
-test('uses `root` logger if context is not specified.', () => {
-  system.upgrade(
+test('uses `root` logger if context is not specified.', async () => {
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'pattern' } } },
     })
@@ -145,7 +135,7 @@ test('uses `root` logger if context is not specified.', () => {
 });
 
 test('`stop()` disposes all appenders.', async () => {
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
@@ -161,10 +151,10 @@ test('`stop()` disposes all appenders.', async () => {
   expect(consoleDisposeSpy).toHaveBeenCalledTimes(1);
 });
 
-test('asLoggerFactory() only allows to create new loggers.', () => {
+test('asLoggerFactory() only allows to create new loggers.', async () => {
   const logger = system.asLoggerFactory().get('test', 'context');
 
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'all' },
@@ -183,19 +173,19 @@ test('asLoggerFactory() only allows to create new loggers.', () => {
   expect(JSON.parse(mockConsoleLog.mock.calls[2][0])).toMatchSnapshot(dynamicProps);
 });
 
-test('setContextConfig() updates config with relative contexts', () => {
+test('setContextConfig() updates config with relative contexts', async () => {
   const testsLogger = system.get('tests');
   const testsChildLogger = system.get('tests', 'child');
   const testsGrandchildLogger = system.get('tests', 'child', 'grandchild');
 
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
     })
   );
 
-  system.setContextConfig(['tests', 'child'], {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -238,19 +228,19 @@ test('setContextConfig() updates config with relative contexts', () => {
   );
 });
 
-test('setContextConfig() updates config for a root context', () => {
+test('setContextConfig() updates config for a root context', async () => {
   const testsLogger = system.get('tests');
   const testsChildLogger = system.get('tests', 'child');
   const testsGrandchildLogger = system.get('tests', 'child', 'grandchild');
 
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
     })
   );
 
-  system.setContextConfig(['tests', 'child'], {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -283,8 +273,8 @@ test('setContextConfig() updates config for a root context', () => {
   );
 });
 
-test('custom context configs are applied on subsequent calls to update()', () => {
-  system.setContextConfig(['tests', 'child'], {
+test('custom context configs are applied on subsequent calls to update()', async () => {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -295,7 +285,7 @@ test('custom context configs are applied on subsequent calls to update()', () =>
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
-  system.upgrade(
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
@@ -320,15 +310,15 @@ test('custom context configs are applied on subsequent calls to update()', () =>
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context override the previous config', () => {
-  system.upgrade(
+test('subsequent calls to setContextConfig() for the same context override the previous config', async () => {
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
     })
   );
 
-  system.setContextConfig(['tests', 'child'], {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -339,7 +329,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
   });
 
   // Call again, this time with level: 'warn' and a different pattern
-  system.setContextConfig(['tests', 'child'], {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -370,15 +360,15 @@ test('subsequent calls to setContextConfig() for the same context override the p
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context can disable the previous config', () => {
-  system.upgrade(
+test('subsequent calls to setContextConfig() for the same context can disable the previous config', async () => {
+  await system.upgrade(
     config.schema.validate({
       appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
       root: { level: 'info' },
     })
   );
 
-  system.setContextConfig(['tests', 'child'], {
+  await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
         'custom',
@@ -389,7 +379,7 @@ test('subsequent calls to setContextConfig() for the same context can disable th
   });
 
   // Call again, this time no customizations (effectively disabling)
-  system.setContextConfig(['tests', 'child'], {});
+  await system.setContextConfig(['tests', 'child'], {});
 
   const logger = system.get('tests', 'child', 'grandchild');
   logger.debug('this should not show anywhere!');

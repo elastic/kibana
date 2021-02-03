@@ -8,8 +8,8 @@ import { CoreSetup } from 'src/core/server';
 import { CoreStart } from 'src/core/server';
 import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
+import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
@@ -134,12 +134,14 @@ export type ExecutionContainer<Output = ExpressionValue> = StateContainer<Execut
 // @public
 export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
     abortSignal: AbortSignal;
+    getKibanaRequest?: () => KibanaRequest;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectAttributes" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObject" needs to be exported by the entry point index.d.ts
     getSavedObject?: <T extends SavedObjectAttributes = SavedObjectAttributes>(type: string, id: string) => Promise<SavedObject<T>>;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
     inspectorAdapters: InspectorAdapters;
+    isSyncColorsEnabled?: () => boolean;
     types: Record<string, ExpressionType>;
     variables: Record<string, unknown>;
 }
@@ -734,11 +736,14 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     getRenderMode: () => RenderMode;
     // (undocumented)
+    hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
+    isSyncColorsEnabled: () => boolean;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -932,8 +937,8 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/expressions/common/ast/types.ts:40:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_types/specs/error.ts:31:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/ast/types.ts:29:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
+// src/plugins/expressions/common/expression_types/specs/error.ts:20:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

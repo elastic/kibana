@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'src/core/public';
-import { Space } from '../../common/model/space';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { SpaceCards } from './components';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import { SpacesManager } from '../spaces_manager';

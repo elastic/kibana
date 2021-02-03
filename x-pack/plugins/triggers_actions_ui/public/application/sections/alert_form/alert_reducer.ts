@@ -10,7 +10,7 @@ import { AlertActionParam, IntervalSchedule } from '../../../../../alerts/common
 import { Alert, AlertAction } from '../../../types';
 
 export type InitialAlert = Partial<Alert> &
-  Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
+  Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
 
 interface CommandType<
   T extends
@@ -152,7 +152,11 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
         keyof AlertAction,
         SavedObjectAttribute
       >;
-      if (index === undefined || isEqual(alert.actions[index][key], value)) {
+      if (
+        index === undefined ||
+        alert.actions[index] == null ||
+        isEqual(alert.actions[index][key], value)
+      ) {
         return state;
       } else {
         const oldAction = alert.actions.splice(index, 1)[0];

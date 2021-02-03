@@ -8,7 +8,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
     <EuiFieldText
       fullWidth={true}
       onChange={[Function]}
-      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      placeholder="field filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
       value=""
     />
   </EuiFlexItem>
@@ -35,7 +35,7 @@ exports[`AddFilter should render normally 1`] = `
     <EuiFieldText
       fullWidth={true}
       onChange={[Function]}
-      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      placeholder="field filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
       value=""
     />
   </EuiFlexItem>

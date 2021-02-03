@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
 import { date } from './date';
 

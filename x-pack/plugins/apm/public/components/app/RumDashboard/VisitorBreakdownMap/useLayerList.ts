@@ -6,7 +6,6 @@
 
 import {
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
@@ -17,12 +16,13 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from '../../../../../../maps/common/constants';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -30,7 +30,7 @@ import {
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 
 const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.country_iso_code',
@@ -47,7 +47,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
-  type: 'ES_TERM_SOURCE',
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
   indexPatternTitle: 'apm-*',
   term: 'client.geo.region_iso_code',
@@ -77,10 +77,6 @@ export const TRANSACTION_DURATION_REGION =
 export const TRANSACTION_DURATION_COUNTRY =
   '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
 
-interface LayerDescriptor extends BaseLayerDescriptor {
-  sourceDescriptor: EMSTMSSourceDescriptor;
-}
-
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
@@ -89,18 +85,6 @@ export function useLayerList() {
   const { urlParams } = useUrlParams();
 
   const { serviceName } = urlParams;
-
-  const baseLayer: LayerDescriptor = {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: { type: 'TILE' },
-    type: 'VECTOR_TILE',
-  };
 
   ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
 
@@ -197,8 +181,7 @@ export function useLayerList() {
   };
 
   return [
-    baseLayer,
     pageLoadDurationByCountryLayer,
     pageLoadDurationByAdminRegionLayer,
-  ];
+  ] as BaseLayerDescriptor[];
 }

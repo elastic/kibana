@@ -1,36 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Observable, Subscription } from 'rxjs';
 
-import { Filter, Query, TimefilterContract as Timefilter } from 'src/plugins/data/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { SavedObjectTagDecoratorTypeGuard } from 'src/plugins/saved_objects_tagging_oss/public';
-import { migrateLegacyQuery } from './lib/migrate_legacy_query';
-
-import { ViewMode } from '../embeddable_plugin';
-import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
 import { FilterUtils } from './lib/filter_utils';
+import { DashboardContainer } from './embeddable';
+import { DashboardSavedObject } from '../saved_dashboards';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
+import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
@@ -38,16 +25,18 @@ import {
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
+
+import { ViewMode } from '../services/embeddable';
+import { UsageCollectionSetup } from '../services/usage_collection';
+import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
+import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
 import {
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
   ReduxLikeStateContainer,
   syncState,
-} from '../../../kibana_utils/public';
-import { SavedObjectDashboard } from '../saved_dashboards';
-import { DashboardContainer } from './embeddable';
-import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
+} from '../services/kibana_utils';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -56,7 +45,7 @@ import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/
  * versa. They should be as decoupled as possible so updating the store won't affect bwc of urls.
  */
 export class DashboardStateManager {
-  public savedDashboard: SavedObjectDashboard;
+  public savedDashboard: DashboardSavedObject;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -83,7 +72,7 @@ export class DashboardStateManager {
   >;
   private readonly stateContainerChangeSub: Subscription;
   private readonly STATE_STORAGE_KEY = '_a';
-  private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
+  public readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly history: History;
   private readonly usageCollection: UsageCollectionSetup | undefined;
@@ -105,7 +94,7 @@ export class DashboardStateManager {
     usageCollection,
     hasTaggingCapabilities,
   }: {
-    savedDashboard: SavedObjectDashboard;
+    savedDashboard: DashboardSavedObject;
     hideWriteControls: boolean;
     kibanaVersion: string;
     kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -223,6 +212,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
+
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
@@ -234,9 +224,14 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
+    let expandedPanelValid = false;
     Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
+      }
+
+      if (panelState.explicitInput.id === input.expandedPanelId) {
+        expandedPanelValid = true;
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
@@ -272,8 +267,10 @@ export class DashboardStateManager {
       this.setFullScreenMode(input.isFullScreenMode);
     }
 
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+    if (expandedPanelValid && input.expandedPanelId !== this.getExpandedPanelId()) {
       this.setExpandedPanelId(input.expandedPanelId);
+    } else if (!expandedPanelValid && this.getExpandedPanelId()) {
+      this.setExpandedPanelId(undefined);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {
@@ -402,6 +399,15 @@ export class DashboardStateManager {
 
   public setUseMargins(useMargins: boolean) {
     this.stateContainer.transitions.setOption('useMargins', useMargins);
+  }
+
+  public getSyncColors() {
+    // Existing dashboards that don't define this should default to true.
+    return this.appState.options.syncColors === undefined ? true : this.appState.options.syncColors;
+  }
+
+  public setSyncColors(syncColors: boolean) {
+    this.stateContainer.transitions.setOption('syncColors', syncColors);
   }
 
   public getHidePanelTitles() {
@@ -590,7 +596,7 @@ export class DashboardStateManager {
       this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
-    return this.kbnUrlStateStorage.flush({ replace });
+    return !!this.kbnUrlStateStorage.kbnUrlControls.flush(replace);
   }
 
   // TODO: find nicer solution for this

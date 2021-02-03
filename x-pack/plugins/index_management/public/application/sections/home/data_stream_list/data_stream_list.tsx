@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -32,8 +32,10 @@ import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
-import { filterDataStreams } from '../../../lib/data_streams';
+import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
+import { FilterListButton, Filters } from '../components';
 
+export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
   dataStreamName?: string;
 }
@@ -45,19 +47,119 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   location: { search },
   history,
 }) => {
-  const { isDeepLink } = extractQueryParams(search);
+  const { isDeepLink, includeHidden } = extractQueryParams(search);
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
     core: { getUrlForApp },
-    plugins: { fleet },
+    plugins: { isFleetEnabled },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
-  const [isIncludeManagedChecked, setIsIncludeManagedChecked] = useState(true);
   const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
+
+  const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
+    managed: {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
+        defaultMessage: 'Fleet-managed data streams',
+      }),
+      checked: 'on',
+    },
+    hidden: {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.viewHiddenLabel', {
+        defaultMessage: 'Hidden data streams',
+      }),
+      checked: includeHidden ? 'on' : 'off',
+    },
+  });
+
+  const activateHiddenFilter = (shouldBeActive: boolean) => {
+    if (shouldBeActive && filters.hidden.checked === 'off') {
+      setFilters({
+        ...filters,
+        hidden: {
+          ...filters.hidden,
+          checked: 'on',
+        },
+      });
+    }
+  };
+
+  const filteredDataStreams = useMemo(() => {
+    if (!dataStreams) {
+      // If dataStreams are not fetched, return empty array.
+      return [];
+    }
+
+    const visibleTypes = Object.entries(filters)
+      .filter(([name, _filter]) => _filter.checked === 'on')
+      .map(([name]) => name);
+
+    return filterDataStreams(dataStreams, visibleTypes);
+  }, [dataStreams, filters]);
+
+  const renderHeader = () => {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
+              defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={documentationService.getDataStreamsDocumentationLink()}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
+                  {
+                    defaultMessage: 'Include stats',
+                  }
+                )}
+                checked={isIncludeStatsChecked}
+                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                data-test-subj="includeStatsSwitch"
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+                  {
+                    defaultMessage: 'Including stats can increase reload times',
+                  }
+                )}
+                position="top"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   let content;
 
@@ -101,7 +203,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {fleet ? (
+            {isFleetEnabled ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."
@@ -150,94 +252,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
-    const filteredDataStreams = isIncludeManagedChecked
-      ? dataStreams
-      : filterDataStreams(dataStreams);
+    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams, decodedDataStreamName));
     content = (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-                defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink
-                      href={documentationService.getDataStreamsDocumentationLink()}
-                      target="_blank"
-                      external
-                    >
-                      {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
-                        defaultMessage: 'Learn more.',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                    {
-                      defaultMessage: 'Include stats',
-                    }
-                  )}
-                  checked={isIncludeStatsChecked}
-                  onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                  data-test-subj="includeStatsSwitch"
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                    {
-                      defaultMessage: 'Including stats can increase reload times',
-                    }
-                  )}
-                  position="top"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchLabel',
-                    {
-                      defaultMessage: 'Include Fleet-managed streams',
-                    }
-                  )}
-                  checked={isIncludeManagedChecked}
-                  onChange={(e) => setIsIncludeManagedChecked(e.target.checked)}
-                  data-test-subj="includeManagedSwitch"
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeManagedSwitchToolTip',
-                    {
-                      defaultMessage: 'Display data streams managed by Fleet',
-                    }
-                  )}
-                  position="top"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
+        {renderHeader()}
         <EuiSpacer size="l" />
 
         <DataStreamTable

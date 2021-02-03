@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
@@ -61,6 +50,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       let isPresent = false;
       await retry.try(async () => {
         isPresent = await testSubjects.exists(testSubj, { timeout: 20000 });
+        if (!isPresent) {
+          isPresent = await testSubjects.exists('visNoResult', { timeout: 1000 });
+        }
       });
       if (!isPresent) {
         throw new Error(`TSVB ${name} tab is not loaded`);
@@ -131,8 +123,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async enterMarkdown(markdown: string) {
-      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await input.type(markdown);
       await PageObjects.common.sleep(3000);
     }
@@ -147,12 +139,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         const value = $('.ace_line').text();
         if (value.length > 0) {
           log.debug('Clearing text area input');
-          const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-          await input.clearValueWithKeyboard();
+          this.waitForMarkdownTextAreaCleaned();
         }
 
         return value.length === 0;
       });
+    }
+
+    public async waitForMarkdownTextAreaCleaned() {
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clearValueWithKeyboard();
+      const text = await this.getMarkdownText();
+      return text.length === 0;
     }
 
     public async getMarkdownText(): Promise<string> {

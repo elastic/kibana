@@ -41,7 +41,9 @@ export const changeToThreeHundredRowsPerPage = () => {
 };
 
 export const editFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
 };
 
@@ -126,7 +128,7 @@ export const waitForRulesToBeLoaded = () => {
 };
 
 export const checkAutoRefresh = (ms: number, condition: string) => {
-  cy.get(ASYNC_LOADING_PROGRESS).should('not.be.visible');
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
   cy.tick(ms);
   cy.get(ASYNC_LOADING_PROGRESS).should(condition);
 };
@@ -136,7 +138,7 @@ export const dismissAllRulesIdleModal = () => {
     .eq(1)
     .should('exist')
     .click({ force: true, multiple: true });
-  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.be.visible');
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
 };
 
 export const checkAllRulesIdleModal = (condition: string) => {

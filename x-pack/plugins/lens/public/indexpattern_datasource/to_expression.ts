@@ -4,16 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import type { IUiSettingsClient } from 'kibana/public';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../../../../src/plugins/data/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+} from '../../../../../src/plugins/expressions/public';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+import { getEsAggsSuffix } from './operations/definitions/helpers';
 
-function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPattern): Ast | null {
+function getExpressionForLayer(
+  layer: IndexPatternLayer,
+  indexPattern: IndexPattern,
+  uiSettings: IUiSettingsClient
+): ExpressionAstExpression | null {
   const { columns, columnOrder } = layer;
-
   if (columnOrder.length === 0) {
     return null;
   }
@@ -21,21 +36,28 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
   if (columnEntries.length) {
-    const aggs: unknown[] = [];
-    const expressions: ExpressionFunctionAST[] = [];
+    const aggs: ExpressionAstExpressionBuilder[] = [];
+    const expressions: ExpressionAstFunction[] = [];
     columnEntries.forEach(([colId, col]) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
-        aggs.push(def.toEsAggsConfig(col, colId, indexPattern));
+        aggs.push(
+          buildExpression({
+            type: 'expression',
+            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
+          })
+        );
       }
     });
 
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : index}-${colId}`]: {
+        [`${esAggsId}${suffix}`]: {
           ...column,
           id: colId,
         },
@@ -65,13 +87,13 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
         (('format' in col.params && col.params.format) ||
           ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
+    const formatterOverrides: ExpressionAstFunction[] = columnsWithFormatters.map(
       ([id, col]: [string, FormattedColumn]) => {
         // TODO: improve the type handling here
         const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
         const format = (col as FormattedColumn).params!.format;
 
-        const base: ExpressionFunctionAST = {
+        const base: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_format_column',
           arguments: {
@@ -98,20 +120,21 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
             operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
         )
       : [];
-    const timeScaleFunctions: ExpressionFunctionAST[] = columnsWithTimeScale.flatMap(
+    const timeScaleFunctions: ExpressionAstFunction[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {
-        const scalingCall: ExpressionFunctionAST = {
+        const scalingCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
             dateColumnId: [firstDateHistogramColumn![0]],
             inputColumnId: [id],
             outputColumnId: [id],
+            outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
           },
         };
 
-        const formatCall: ExpressionFunctionAST = {
+        const formatCall: ExpressionAstFunction = {
           type: 'function',
           function: 'lens_format_column',
           arguments: {
@@ -134,18 +157,18 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
     return {
       type: 'expression',
       chain: [
-        {
-          type: 'function',
-          function: 'esaggs',
-          arguments: {
-            index: [indexPattern.id],
-            metricsAtAllLevels: [false],
-            partialRows: [false],
-            includeFormatHints: [true],
-            timeFields: allDateHistogramFields,
-            aggConfigs: [JSON.stringify(aggs)],
-          },
-        },
+        buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+          index: buildExpression([
+            buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+              'indexPatternLoad',
+              { id: indexPattern.id }
+            ),
+          ]),
+          aggs,
+          metricsAtAllLevels: false,
+          partialRows: false,
+          timeFields: allDateHistogramFields,
+        }).toAst(),
         {
           type: 'function',
           function: 'lens_rename_columns',
@@ -163,11 +186,16 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
   return null;
 }
 
-export function toExpression(state: IndexPatternPrivateState, layerId: string) {
+export function toExpression(
+  state: IndexPatternPrivateState,
+  layerId: string,
+  uiSettings: IUiSettingsClient
+) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
-      state.indexPatterns[state.layers[layerId].indexPatternId]
+      state.indexPatterns[state.layers[layerId].indexPatternId],
+      uiSettings
     );
   }
 

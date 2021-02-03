@@ -13,6 +13,8 @@ import { getRandomString } from './random';
 export const initElasticsearchHelpers = (es) => {
   let indicesCreated = [];
   let templatesCreated = [];
+  let composableTemplatesCreated = [];
+  let dataStreamsCreated = [];
 
   // Indices
   const getIndex = (index) => es.indices.get({ index }).then(({ body }) => body);
@@ -30,6 +32,20 @@ export const initElasticsearchHelpers = (es) => {
   const deleteAllIndices = () =>
     Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
+  // Data streams
+  const createDataStream = (dataStream = getRandomString(), document) => {
+    dataStreamsCreated.push(dataStream);
+    return es.index({ index: dataStream, body: document });
+  };
+
+  const deleteDataStream = (dataStream) => {
+    dataStreamsCreated = dataStreamsCreated.filter((i) => i !== dataStream);
+    return es.indices.deleteDataStream({ name: dataStream });
+  };
+
+  const deleteAllDataStreams = () =>
+    Promise.all(dataStreamsCreated.map(deleteDataStream)).then(() => (dataStreamsCreated = []));
+
   // Index templates
   const getIndexTemplates = () => es.indices.getTemplate();
 
@@ -37,6 +53,11 @@ export const initElasticsearchHelpers = (es) => {
   const createIndexTemplate = (name, template) => {
     templatesCreated.push(name);
     return es.indices.putTemplate({ name, body: template }, { create: true });
+  };
+
+  const createComposableIndexTemplate = (name, template) => {
+    composableTemplatesCreated.push(name);
+    return es.indices.putIndexTemplate({ name, body: template }, { create: true });
   };
 
   const deleteIndexTemplate = (name) => {
@@ -49,22 +70,45 @@ export const initElasticsearchHelpers = (es) => {
     });
   };
 
+  const deleteComposableIndexTemplate = (name) => {
+    composableTemplatesCreated = composableTemplatesCreated.filter((i) => i !== name);
+    return es.indices.deleteIndexTemplate({ name }).catch((err) => {
+      // Silently fail if templates not found
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+    });
+  };
+
   const deleteAllTemplates = () =>
     Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => (templatesCreated = []));
 
-  const cleanUp = () => Promise.all([deleteAllIndices(), deleteAllTemplates()]);
+  const deleteAllComposableTemplates = () =>
+    Promise.all(templatesCreated.map(deleteComposableIndexTemplate)).then(
+      () => (composableTemplatesCreated = [])
+    );
+
+  const cleanUp = () =>
+    Promise.all([
+      deleteAllIndices(),
+      deleteAllTemplates(),
+      deleteAllComposableTemplates(),
+      deleteAllDataStreams(),
+    ]);
 
   const getNodesStats = () => es.nodes.stats().then(({ body }) => body);
 
   return {
     getIndex,
     createIndex,
+    createDataStream,
     deleteIndex,
     deleteAllIndices,
     deleteAllTemplates,
     getIndexTemplates,
     createIndexTemplate,
     deleteIndexTemplate,
+    createComposableIndexTemplate,
     getNodesStats,
     cleanUp,
   };

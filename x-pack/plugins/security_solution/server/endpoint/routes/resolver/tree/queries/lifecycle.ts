@@ -8,12 +8,12 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, Timerange, docValueFields } from '../utils/index';
+import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface LifecycleParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
-  timerange: Timerange;
+  timeRange: TimeRange;
 }
 
 /**
@@ -22,13 +22,13 @@ interface LifecycleParams {
 export class LifecycleQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
-  private readonly timerange: Timerange;
+  private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
-  constructor({ schema, indexPatterns, timerange }: LifecycleParams) {
+  constructor({ schema, indexPatterns, timeRange }: LifecycleParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
-    this.timerange = timerange;
+    this.timeRange = timeRange;
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -46,8 +46,8 @@ export class LifecycleQuery {
             {
               range: {
                 '@timestamp': {
-                  gte: this.timerange.from,
-                  lte: this.timerange.to,
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
                   format: 'strict_date_optional_time',
                 },
               },
@@ -58,6 +58,13 @@ export class LifecycleQuery {
             {
               exists: {
                 field: this.schema.id,
+              },
+            },
+            {
+              bool: {
+                must_not: {
+                  term: { [this.schema.id]: '' },
+                },
               },
             },
             {
@@ -79,12 +86,13 @@ export class LifecycleQuery {
    * @param nodes the unique IDs to search for in Elasticsearch
    */
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<FieldsObject[]> {
-    if (nodes.length <= 0) {
+    const validNodes = validIDs(nodes);
+    if (validNodes.length <= 0) {
       return [];
     }
 
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
-      body: this.query(nodes),
+      body: this.query(validNodes),
       index: this.indexPatterns,
     });
 

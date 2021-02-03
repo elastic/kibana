@@ -3,12 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LegacyScopedClusterClient, IRouter } from 'src/core/server';
+import type {
+  LegacyScopedClusterClient,
+  ILegacyScopedClusterClient,
+  IRouter,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License, IndexDataEnricher } from './services';
-import { isEsError, handleEsError } from './shared_imports';
+import { isEsError, parseEsError, handleEsError } from './shared_imports';
 
 export interface Dependencies {
   security: SecurityPluginSetup;
@@ -17,7 +22,7 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: IndexManagementRouter;
   license: License;
   config: {
     isSecurityEnabled: () => boolean;
@@ -25,8 +30,32 @@ export interface RouteDependencies {
   indexDataEnricher: IndexDataEnricher;
   lib: {
     isEsError: typeof isEsError;
+    parseEsError: typeof parseEsError;
     handleEsError: typeof handleEsError;
   };
 }
 
 export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
+
+export interface DataManagementContext {
+  client: ILegacyScopedClusterClient;
+}
+
+/**
+ * @internal
+ */
+export interface IndexManagementApiRequestHandlerContext {
+  client: ILegacyScopedClusterClient;
+}
+
+/**
+ * @internal
+ */
+export interface IndexManagementRequestHandlerContext extends RequestHandlerContext {
+  dataManagement: IndexManagementApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type IndexManagementRouter = IRouter<IndexManagementRequestHandlerContext>;

@@ -22,12 +22,13 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create_rules_bulk', () => {
     describe('validation errors', () => {
@@ -54,11 +55,13 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('creating rules in bulk', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -99,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccess(supertest, body[0].id);
+        await waitForRuleSuccessOrStatus(supertest, body[0].id);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)

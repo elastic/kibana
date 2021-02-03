@@ -38,5 +38,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         fields: null,
       });
     });
+
+    it('7.11.0 migrates cases settings', async () => {
+      const { body } = await supertest
+        .get(`${CASES_URL}/e1900ac0-017f-11eb-93f8-d161651bf509`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      expect(body).key('settings');
+      expect(body.settings).to.eql({
+        syncAlerts: true,
+      });
+    });
   });
 }

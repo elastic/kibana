@@ -5,12 +5,12 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -63,8 +63,8 @@ export const useNetworkTls = ({
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
-  const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTlsSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
@@ -72,24 +72,7 @@ export const useNetworkTls = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
 
-  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.tls,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  const [networkTlsRequest, setHostRequest] = useState<NetworkTlsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -127,7 +110,7 @@ export const useNetworkTls = ({
 
   const networkTlsSearch = useCallback(
     (request: NetworkTlsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -180,7 +163,7 @@ export const useNetworkTls = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -200,24 +183,12 @@ export const useNetworkTls = ({
         },
         sort,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    limit,
-    startDate,
-    sort,
-    skip,
-    flowTarget,
-    ip,
-    id,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, flowTarget, ip, id]);
 
   useEffect(() => {
     networkTlsSearch(networkTlsRequest);

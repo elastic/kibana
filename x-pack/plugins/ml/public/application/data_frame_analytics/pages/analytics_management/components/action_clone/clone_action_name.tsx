@@ -310,9 +310,6 @@ export type CloneDataFrameAnalyticsConfig = Omit<
  */
 export function extractCloningConfig({
   id,
-  version,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  create_time,
   ...configToClone
 }: DeepReadonly<DataFrameAnalyticsConfig>): CloneDataFrameAnalyticsConfig {
   return (cloneDeep({
@@ -343,7 +340,7 @@ export const useNavigateToWizardWithClonedJob = () => {
 
   const savedObjectsClient = savedObjects.client;
 
-  return async (item: DataFrameAnalyticsListRow) => {
+  return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
       ? item.config.source.index.join(',')
       : item.config.source.index;

@@ -10,7 +10,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
 import { InitializeArguments } from '.';
 
-interface Arguments {
+export interface Arguments {
   type: string[];
 }
 

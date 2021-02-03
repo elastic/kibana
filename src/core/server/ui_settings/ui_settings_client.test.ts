@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import Chance from 'chance';
@@ -655,6 +644,38 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#isSensitive()', () => {
+    it('returns false if sensitive config is not set', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(false);
+    });
+
+    it('returns false if key is not in the settings', () => {
+      const { uiSettings } = setup();
+      expect(uiSettings.isSensitive('baz')).toBe(false);
+    });
+
+    it('returns true if overrides defined and key is overridden', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          sensitive: true,
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(true);
+    });
+  });
+
   describe('#isOverridden()', () => {
     it('returns false if no overrides defined', () => {
       const { uiSettings } = setup();
@@ -674,6 +695,113 @@ describe('ui settings', () => {
     it('returns true if overrides defined and key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
       expect(uiSettings.isOverridden('bar')).toBe(true);
+    });
+  });
+
+  describe('caching', () => {
+    describe('read operations cache user config', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.clearAllTimers();
+      });
+
+      it('get', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getAll', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getUserProvided', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('write operations invalidate user config cache', () => {
+      it('set', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.set('foo', 'bar');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('setMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.setMany({ foo: 'bar' });
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('remove', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.remove('foo');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('removeMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.removeMany(['foo', 'bar']);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

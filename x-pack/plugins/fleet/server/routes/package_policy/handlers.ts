@@ -13,7 +13,6 @@ import {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
-  NewPackagePolicy,
 } from '../../types';
 import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -75,43 +74,39 @@ export const createPackagePolicyHandler: RequestHandler<
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
-  const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
-    // If we have external callbacks, then process those now before creating the actual package policy
-    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyCreate');
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-
-      for (const callback of externalCallbacks) {
-        try {
-          // ensure that the returned value by the callback passes schema validation
-          updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData, context, request)
-          );
-        } catch (error) {
-          // Log the error, but keep going and process the other callbacks
-          logger.error(
-            'An external registered [packagePolicyCreate] callback failed when executed'
-          );
-          logger.error(error);
-        }
-      }
-
-      newData = updatedNewData;
-    }
+    newData = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyCreate',
+      newData,
+      context,
+      request
+    );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {
-      user,
-    });
+    const packagePolicy = await packagePolicyService.create(
+      soClient,
+      esClient,
+      callCluster,
+      newData,
+      {
+        user,
+      }
+    );
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultIngestErrorHandler({ error, response });
   }
 };
@@ -122,20 +117,29 @@ export const updatePackagePolicyHandler: RequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
+
+  if (!packagePolicy) {
+    throw Boom.notFound('Package policy not found');
+  }
+
+  let newData = { ...request.body };
+  const pkg = newData.package || packagePolicy.package;
+  const inputs = newData.inputs || packagePolicy.inputs;
+
   try {
-    const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
-
-    if (!packagePolicy) {
-      throw Boom.notFound('Package policy not found');
-    }
-
-    const newData = { ...request.body };
-    const pkg = newData.package || packagePolicy.package;
-    const inputs = newData.inputs || packagePolicy.inputs;
+    newData = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyUpdate',
+      newData,
+      context,
+      request
+    );
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
+      esClient,
       request.params.packagePolicyId,
       { ...newData, package: pkg, inputs },
       { user }
@@ -154,10 +158,12 @@ export const deletePackagePolicyHandler: RequestHandler<
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
+      esClient,
       request.body.packagePolicyIds,
       { user }
     );

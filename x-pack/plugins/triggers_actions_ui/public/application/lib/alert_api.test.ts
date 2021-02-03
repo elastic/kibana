@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert, AlertType } from '../../types';
+import { Alert, AlertType, AlertUpdates } from '../../types';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
@@ -25,11 +25,11 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
-  health,
+  alertingFrameworkHealth,
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
-import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
+import { AlertNotifyWhenType, ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -48,8 +48,11 @@ describe('loadAlertTypes', () => {
         },
         producer: ALERTS_FEATURE_ID,
         actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         defaultActionGroupId: 'default',
         authorizedConsumers: {},
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -535,7 +538,7 @@ describe('deleteAlerts', () => {
 
 describe('createAlert', () => {
   test('should call create alert API', async () => {
-    const alertToCreate = {
+    const alertToCreate: AlertUpdates = {
       name: 'test',
       consumer: 'alerts',
       tags: ['foo'],
@@ -547,12 +550,16 @@ describe('createAlert', () => {
       actions: [],
       params: {},
       throttle: null,
+      notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
-      apiKey: null,
       apiKeyOwner: null,
+      createdBy: null,
+      updatedBy: null,
+      muteAll: false,
+      mutedInstanceIds: [],
     };
-    const resolvedValue: Alert = {
+    const resolvedValue = {
       ...alertToCreate,
       id: '123',
       createdBy: null,
@@ -572,7 +579,7 @@ describe('createAlert', () => {
       Array [
         "/api/alerts/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"notifyWhen\\":\\"onActionGroupChange\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKeyOwner\\":null,\\"createdBy\\":null,\\"updatedBy\\":null,\\"muteAll\\":false,\\"mutedInstanceIds\\":[]}",
         },
       ]
     `);
@@ -595,6 +602,7 @@ describe('updateAlert', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
+      notifyWhen: 'onThrottleInterval' as AlertNotifyWhenType,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
@@ -618,7 +626,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alerts/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"notifyWhen\\":\\"onThrottleInterval\\"}",
         },
       ]
     `);
@@ -793,9 +801,9 @@ describe('unmuteAlerts', () => {
   });
 });
 
-describe('health', () => {
-  test('should call health API', async () => {
-    const result = await health({ http });
+describe('alertingFrameworkHealth', () => {
+  test('should call alertingFrameworkHealth API', async () => {
+    const result = await alertingFrameworkHealth({ http });
     expect(result).toEqual(undefined);
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [

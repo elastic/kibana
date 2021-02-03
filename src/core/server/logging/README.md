@@ -5,6 +5,10 @@
 - [Layouts](#layouts)
   - [Pattern layout](#pattern-layout)
   - [JSON layout](#json-layout)
+- [Appenders](#appenders)
+  - [Rolling File Appender](#rolling-file-appender)
+    - [Triggering Policies](#triggering-policies)
+    - [Rolling strategies](#rolling-strategies)
 - [Configuration](#configuration)
 - [Usage](#usage)
 - [Logging config migration](#logging-config-migration)
@@ -127,6 +131,138 @@ Outputs the process ID.
 With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context, message 
 text and any other metadata that may be associated with the log message itself.
 
+## Appenders
+
+### Rolling File Appender
+
+Similar to Log4j's `RollingFileAppender`, this appender will log into a file, and rotate it following a rolling
+strategy when the configured policy triggers.
+
+#### Triggering Policies
+
+The triggering policy determines when a rolling should occur.
+
+There are currently two policies supported: `size-limit` and `time-interval`.
+
+##### SizeLimitTriggeringPolicy
+
+This policy will rotate the file when it reaches a predetermined size.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        kind: size-limit
+        size: 50mb
+      strategy:
+        //... 
+      layout:
+        kind: pattern
+```
+
+The options are:
+
+- `size`
+
+the maximum size the log file should reach before a rollover should be performed.
+
+The default value is `100mb`
+
+##### TimeIntervalTriggeringPolicy
+
+This policy will rotate the file every given interval of time.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        kind: time-interval
+        interval: 10s
+        modulate: true
+      strategy:
+        //... 
+      layout:
+        kind: pattern
+```
+
+The options are:
+
+- `interval`
+
+How often a rollover should occur.
+
+The default value is `24h`
+
+- `modulate`
+ 
+Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
+ 
+For example, when true, if the interval is `4h` and the current hour is 3 am then the first rollover will occur at 4 am 
+and then next ones will occur at 8 am, noon, 4pm, etc.
+
+The default value is `true`.
+
+#### Rolling strategies
+
+The rolling strategy determines how the rollover should occur: both the naming of the rolled files,
+and their retention policy.
+
+There is currently one strategy supported: `numeric`.
+
+##### NumericRollingStrategy
+
+This strategy will suffix the file with a given pattern when rolling,
+and will retains a fixed amount of rolled files.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        // ...
+      strategy:
+        kind: numeric
+        pattern: '-%i'
+        max: 2
+      layout:
+        kind: pattern
+```
+
+For example, with this configuration:
+
+- During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
+  being written to.
+- During the second rollover kibana-1.log is renamed to kibana-2.log and kibana.log is renamed to kibana-1.log.
+  A new kibana.log file is created and starts being written to.
+- During the third and subsequent rollovers, kibana-2.log is deleted, kibana-1.log is renamed to kibana-2.log and
+  kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts being written to.
+
+The options are:
+
+- `pattern`
+
+The suffix to append to the file path when rolling. Must include `%i`, as this is the value
+that will be converted to the file index.
+
+for example, with `path: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
+will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
+
+The default value is `-%i`
+
+- `max`
+
+The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
+
+The default value is `7`
+
 ## Configuration
 
 As any configuration in the platform, logging configuration is validated against the predefined schema and if there are
@@ -176,6 +312,9 @@ logging:
     - context: telemetry
       level: all
       appenders: [json-file-appender]
+    - context: metrics.ops
+      level: debug
+      appenders: [console]
 ```
 
 Here is what we get with the config above:
@@ -188,6 +327,7 @@ Here is what we get with the config above:
 | server           | console, file            | fatal |
 | optimize         | console                  | error |
 | telemetry        | json-file-appender       | all   |
+| metrics.ops      | console                  | debug |
 
 
 The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
@@ -205,7 +345,25 @@ Or disable logging entirely with `off`:
 ```yaml
 logging.root.level: off
 ```
+### Dedicated loggers
 
+The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
+The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
+
+| Ops formatted log property | Location in metrics service | Log units
+| :------------------------- | :-------------------------- | :-------------------------- |
+| memory | process.memory.heap.used_in_bytes | [depends on the value](http://numeraljs.com/#format), typically MB or GB |
+| uptime  | process.uptime_in_millis | HH:mm:ss |
+| load  | os.load | [ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"] |
+| delay | process.event_loop_delay | ms |
+
+The log interval is the same as the interval at which system and process information is refreshed and is configurable under `ops.interval`:
+
+```yaml
+ops.interval: 5000
+```
+
+The minimum interval is 100ms and defaults to 5000ms.
 ## Usage
 
 Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 

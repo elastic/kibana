@@ -7,8 +7,13 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { filter, get, pickBy } from 'lodash/fp';
 import styled from 'styled-components';
-import { TimelineId } from '../../../../common/types/timeline';
 
+import {
+  elementOrChildrenHasFocus,
+  skipFocusInContainerTo,
+  stopPropagationAndPreventDefault,
+} from '../../../common/components/accessibility/helpers';
+import { TimelineId } from '../../../../common/types/timeline';
 import { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
 import {
@@ -148,3 +153,242 @@ export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
     ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
     : {};
+
+export const CATEGORIES_PANE_CLASS_NAME = 'categories-pane';
+export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
+export const CLOSE_BUTTON_CLASS_NAME = 'close-button';
+export const RESET_FIELDS_CLASS_NAME = 'reset-fields';
+export const VIEW_ALL_BUTTON_CLASS_NAME = 'view-all';
+
+export const categoriesPaneHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${CATEGORIES_PANE_CLASS_NAME}`)
+  );
+
+export const categoryTableHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${CATEGORY_TABLE_CLASS_NAME}`)
+  );
+
+export const closeButtonHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${CLOSE_BUTTON_CLASS_NAME}`)
+  );
+
+export const searchInputHasFocus = ({
+  containerElement,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  timelineId: string;
+}): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(
+      `.${getFieldBrowserSearchInputClassName(timelineId)}`
+    )
+  );
+
+export const viewAllHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${VIEW_ALL_BUTTON_CLASS_NAME}`)
+  );
+
+export const scrollCategoriesPane = ({
+  containerElement,
+  selectedCategoryId,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  selectedCategoryId: string;
+  timelineId: string;
+}) => {
+  if (selectedCategoryId !== '') {
+    const selectedCategories =
+      containerElement?.getElementsByClassName(
+        getCategoryPaneCategoryClassName({
+          categoryId: selectedCategoryId,
+          timelineId,
+        })
+      ) ?? [];
+
+    if (selectedCategories.length > 0) {
+      selectedCategories[0].scrollIntoView();
+    }
+  }
+};
+
+export const focusCategoriesPane = ({
+  containerElement,
+  selectedCategoryId,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  selectedCategoryId: string;
+  timelineId: string;
+}) => {
+  if (selectedCategoryId !== '') {
+    const selectedCategories =
+      containerElement?.getElementsByClassName(
+        getCategoryPaneCategoryClassName({
+          categoryId: selectedCategoryId,
+          timelineId,
+        })
+      ) ?? [];
+
+    if (selectedCategories.length > 0) {
+      (selectedCategories[0] as HTMLButtonElement).focus();
+    }
+  }
+};
+
+export const focusCategoryTable = (containerElement: HTMLElement | null) => {
+  const firstEntry = containerElement?.querySelector<HTMLDivElement>(
+    `.${CATEGORY_TABLE_CLASS_NAME} [data-colindex="1"]`
+  );
+
+  if (firstEntry != null) {
+    firstEntry.focus();
+  } else {
+    skipFocusInContainerTo({
+      containerElement,
+      className: CATEGORY_TABLE_CLASS_NAME,
+    });
+  }
+};
+
+export const focusCloseButton = (containerElement: HTMLElement | null) =>
+  skipFocusInContainerTo({
+    containerElement,
+    className: CLOSE_BUTTON_CLASS_NAME,
+  });
+
+export const focusResetFieldsButton = (containerElement: HTMLElement | null) =>
+  skipFocusInContainerTo({ containerElement, className: RESET_FIELDS_CLASS_NAME });
+
+export const focusSearchInput = ({
+  containerElement,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  timelineId: string;
+}) =>
+  skipFocusInContainerTo({
+    containerElement,
+    className: getFieldBrowserSearchInputClassName(timelineId),
+  });
+
+export const focusViewAllButton = (containerElement: HTMLElement | null) =>
+  skipFocusInContainerTo({ containerElement, className: VIEW_ALL_BUTTON_CLASS_NAME });
+
+export const onCategoriesPaneFocusChanging = ({
+  containerElement,
+  shiftKey,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  shiftKey: boolean;
+  timelineId: string;
+}) =>
+  shiftKey
+    ? focusSearchInput({
+        containerElement,
+        timelineId,
+      })
+    : focusViewAllButton(containerElement);
+
+export const onCategoryTableFocusChanging = ({
+  containerElement,
+  shiftKey,
+}: {
+  containerElement: HTMLElement | null;
+  shiftKey: boolean;
+}) => (shiftKey ? focusViewAllButton(containerElement) : focusCloseButton(containerElement));
+
+export const onCloseButtonFocusChanging = ({
+  containerElement,
+  shiftKey,
+}: {
+  containerElement: HTMLElement | null;
+  shiftKey: boolean;
+}) => (shiftKey ? focusCategoryTable(containerElement) : focusResetFieldsButton(containerElement));
+
+export const onSearchInputFocusChanging = ({
+  containerElement,
+  selectedCategoryId,
+  shiftKey,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  selectedCategoryId: string;
+  shiftKey: boolean;
+  timelineId: string;
+}) =>
+  shiftKey
+    ? focusResetFieldsButton(containerElement)
+    : focusCategoriesPane({ containerElement, selectedCategoryId, timelineId });
+
+export const onViewAllFocusChanging = ({
+  containerElement,
+  selectedCategoryId,
+  shiftKey,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  selectedCategoryId: string;
+  shiftKey: boolean;
+  timelineId: string;
+}) =>
+  shiftKey
+    ? focusCategoriesPane({ containerElement, selectedCategoryId, timelineId })
+    : focusCategoryTable(containerElement);
+
+export const onFieldsBrowserTabPressed = ({
+  containerElement,
+  keyboardEvent,
+  selectedCategoryId,
+  timelineId,
+}: {
+  containerElement: HTMLElement | null;
+  keyboardEvent: React.KeyboardEvent;
+  selectedCategoryId: string;
+  timelineId: string;
+}) => {
+  const { shiftKey } = keyboardEvent;
+
+  if (searchInputHasFocus({ containerElement, timelineId })) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onSearchInputFocusChanging({
+      containerElement,
+      selectedCategoryId,
+      shiftKey,
+      timelineId,
+    });
+  } else if (categoriesPaneHasFocus(containerElement)) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onCategoriesPaneFocusChanging({
+      containerElement,
+      shiftKey,
+      timelineId,
+    });
+  } else if (viewAllHasFocus(containerElement)) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onViewAllFocusChanging({
+      containerElement,
+      selectedCategoryId,
+      shiftKey,
+      timelineId,
+    });
+  } else if (categoryTableHasFocus(containerElement)) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onCategoryTableFocusChanging({
+      containerElement,
+      shiftKey,
+    });
+  } else if (closeButtonHasFocus(containerElement)) {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    onCloseButtonFocusChanging({
+      containerElement,
+      shiftKey,
+    });
+  }
+};

@@ -43,6 +43,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startLayout();
 
     const layout = createLayout(captureConfig, layoutParams);
+    logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
     tracker.endLayout();
 
     tracker.startScreenshots();
@@ -80,7 +81,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         let buffer: Buffer | null = null;
         try {
           tracker.startCompile();
-          logger.debug(`Compiling PDF...`);
+          logger.debug(`Compiling PDF using "${layout.id}" layout...`);
           pdfOutput.generate();
           tracker.endCompile();
 

@@ -14,11 +14,12 @@ import {
   getIndexPatternService,
   getHttp,
 } from '../kibana_services';
-import { ES_GEO_FIELD_TYPES } from '../../common/constants';
+import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
   value: string | null;
+  isGeoPointsOnly?: boolean;
 }
 
 interface State {
@@ -128,7 +129,9 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
               defaultMessage: 'Select index pattern',
             })}
-            fieldTypes={ES_GEO_FIELD_TYPES}
+            fieldTypes={
+              this.props?.isGeoPointsOnly ? [ES_GEO_FIELD_TYPE.GEO_POINT] : ES_GEO_FIELD_TYPES
+            }
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
           />

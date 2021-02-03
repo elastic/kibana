@@ -140,12 +140,12 @@ export default function ({ getService }: FtrProviderContext) {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('legacyEs').deleteByQuery({
+        const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          q: 'doc_type:token',
+          body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
 
         const response = await supertest
           .get('/abc/xyz/')

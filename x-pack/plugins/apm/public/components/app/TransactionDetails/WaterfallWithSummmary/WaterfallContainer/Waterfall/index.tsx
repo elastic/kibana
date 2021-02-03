@@ -9,9 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
-import { px } from '../../../../../../style/variables';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
@@ -56,10 +54,7 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = styled.div<{
-  paddingTop: number;
-}>`
-  padding-top: ${(props) => px(props.paddingTop)};
+const WaterfallItemsContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
@@ -128,7 +123,7 @@ export function Waterfall({
             })}
           />
         )}
-        <StickyContainer>
+        <div>
           <div style={{ display: 'flex' }}>
             <EuiButtonEmpty
               style={{ zIndex: 3, position: 'absolute' }}
@@ -144,10 +139,10 @@ export function Waterfall({
               margins={TIMELINE_MARGINS}
             />
           </div>
-          <WaterfallItemsContainer paddingTop={TIMELINE_MARGINS.top}>
+          <WaterfallItemsContainer>
             {renderItems(waterfall.childrenByParentId)}
           </WaterfallItemsContainer>
-        </StickyContainer>
+        </div>
 
         <WaterfallFlyout
           waterfallItemId={waterfallItemId}

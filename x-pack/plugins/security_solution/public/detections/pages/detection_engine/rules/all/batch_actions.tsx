@@ -27,7 +27,8 @@ interface GetBatchItems {
   hasMlPermissions: boolean;
   hasActionsPrivileges: boolean;
   loadingRuleIds: string[];
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  reFetchRules: () => Promise<void>;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   rules: Rule[];
   selectedRuleIds: string[];
 }
@@ -39,17 +40,18 @@ export const getBatchItems = ({
   hasMlPermissions,
   loadingRuleIds,
   reFetchRules,
+  refetchPrePackagedRulesStatus,
   rules,
   selectedRuleIds,
   hasActionsPrivileges,
 }: GetBatchItems) => {
-  const selectedRules = selectedRuleIds.reduce((acc, id) => {
+  const selectedRules = selectedRuleIds.reduce<Record<string, Rule>>((acc, id) => {
     const found = rules.find((r) => r.id === id);
     if (found != null) {
       return { [id]: found, ...acc };
     }
     return acc;
-  }, {} as Record<string, Rule>);
+  }, {});
 
   const containsEnabled = selectedRuleIds.some((id) => selectedRules[id]?.enabled ?? false);
   const containsDisabled = selectedRuleIds.some((id) => !selectedRules[id]?.enabled ?? false);
@@ -139,7 +141,8 @@ export const getBatchItems = ({
           dispatch,
           dispatchToaster
         );
-        reFetchRules(true);
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }}
     >
       <EuiToolTip
@@ -158,7 +161,8 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         await deleteRulesAction(selectedRuleIds, dispatch, dispatchToaster);
-        reFetchRules(true);
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }}
     >
       {i18n.BATCH_ACTION_DELETE_SELECTED}

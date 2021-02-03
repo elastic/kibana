@@ -13,6 +13,7 @@ describe('Lens migrations', () => {
 
     const example = {
       type: 'lens',
+      id: 'mock-saved-object-id',
       attributes: {
         expression:
           'kibana\n| kibana_context  query="{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"}" \n| lens_merge_tables layerIds="c61a8afb-a185-4fae-a064-fb3846f6c451" \n  tables={esaggs index="logstash-*" metricsAtAllLevels=false partialRows=false includeFormatHints=true aggConfigs="[{\\"id\\":\\"2cd09808-3915-49f4-b3b0-82767eba23f7\\",\\"enabled\\":true,\\"type\\":\\"max\\",\\"schema\\":\\"metric\\",\\"params\\":{\\"field\\":\\"bytes\\"}}]" | lens_rename_columns idMap="{\\"col-0-2cd09808-3915-49f4-b3b0-82767eba23f7\\":\\"2cd09808-3915-49f4-b3b0-82767eba23f7\\"}"}\n| lens_metric_chart title="Maximum of bytes" accessor="2cd09808-3915-49f4-b3b0-82767eba23f7"',
@@ -164,6 +165,7 @@ describe('Lens migrations', () => {
 
     const example = {
       type: 'lens',
+      id: 'mock-saved-object-id',
       attributes: {
         expression: `kibana
   | kibana_context query="{\\"query\\":\\"\\",\\"language\\":\\"kuery\\"}" filters="[]"
@@ -265,6 +267,7 @@ describe('Lens migrations', () => {
     it('should handle pre-migrated expression', () => {
       const input = {
         type: 'lens',
+        id: 'mock-saved-object-id',
         attributes: {
           ...example.attributes,
           expression: `kibana
@@ -283,6 +286,7 @@ describe('Lens migrations', () => {
     const context = {} as SavedObjectMigrationContext;
 
     const example = {
+      id: 'mock-saved-object-id',
       attributes: {
         description: '',
         expression:
@@ -513,6 +517,7 @@ describe('Lens migrations', () => {
 
     const example = {
       type: 'lens',
+      id: 'mock-saved-object-id',
       attributes: {
         state: {
           datasourceStates: {

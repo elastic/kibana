@@ -6,18 +6,18 @@
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
+import { waitForLoadingToFinish } from './utils';
 
 When(`a user clicks inside url search field`, () => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  waitForLoadingToFinish();
+  cy.get('.euiStat__title-isLoading').should('not.exist');
   cy.get('span[data-cy=csmUrlFilter]', DEFAULT_TIMEOUT).within(() => {
     cy.get('input.euiFieldSearch').click();
   });
 });
 
 Then(`it displays top pages in the suggestion popover`, () => {
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
     const listOfUrls = cy.get('li.euiSelectableListItem');
@@ -38,17 +38,17 @@ Then(`it displays top pages in the suggestion popover`, () => {
 });
 
 When(`a user enters a query in url search field`, () => {
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   cy.get('[data-cy=csmUrlFilter]').within(() => {
     cy.get('input.euiSelectableSearch').type('cus');
   });
 
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 });
 
 Then(`it should filter results based on query`, () => {
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   cy.get('div.euiPopover__panel-isOpen', DEFAULT_TIMEOUT).within(() => {
     const listOfUrls = cy.get('li.euiSelectableListItem');

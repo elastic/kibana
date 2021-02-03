@@ -5,7 +5,8 @@
  */
 
 import { AsyncResourceState } from '../state';
-import { initialTrustedAppsPageState, trustedAppsPageReducer } from './reducer';
+import { initialTrustedAppsPageState } from './builders';
+import { trustedAppsPageReducer } from './reducer';
 import {
   createSampleTrustedApp,
   createListLoadedResourceState,

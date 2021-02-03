@@ -18,7 +18,12 @@ import {
   getCommentContextFromAttributes,
 } from '../utils';
 
-import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
+import {
+  CaseExternalServiceRequestRt,
+  CaseResponseRt,
+  throwErrors,
+  CaseStatuses,
+} from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
@@ -77,7 +82,7 @@ export function initPushCaseUserActionApi({
           actionsClient.getAll(),
         ]);
 
-        if (myCase.attributes.status === 'closed') {
+        if (myCase.attributes.status === CaseStatuses.closed) {
           throw Boom.conflict(
             `This case ${myCase.attributes.title} is closed. You can not pushed if the case is closed.`
           );
@@ -117,7 +122,7 @@ export function initPushCaseUserActionApi({
               ...(myCaseConfigure.total > 0 &&
               myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
-                    status: 'closed',
+                    status: CaseStatuses.closed,
                     closed_at: pushedDate,
                     closed_by: { email, full_name, username },
                   }
@@ -153,7 +158,7 @@ export function initPushCaseUserActionApi({
                       actionBy: { username, full_name, email },
                       caseId,
                       fields: ['status'],
-                      newValue: 'closed',
+                      newValue: CaseStatuses.closed,
                       oldValue: myCase.attributes.status,
                     }),
                   ]

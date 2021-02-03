@@ -71,6 +71,25 @@ export default function (providerContext: FtrProviderContext) {
         warnAndSkipTest(this, log);
       }
     });
+    it('returns correct package info from registry if a different version is installed by upload', async function () {
+      if (server.enabled) {
+        const buf = fs.readFileSync(testPkgArchiveZip);
+        await supertest
+          .post(`/api/fleet/epm/packages`)
+          .set('kbn-xsrf', 'xxxx')
+          .type('application/zip')
+          .send(buf)
+          .expect(200);
+
+        const res = await supertest.get(`/api/fleet/epm/packages/apache-0.1.3`).expect(200);
+        const packageInfo = res.body.response;
+        expect(packageInfo.description).to.equal('Apache Integration');
+        expect(packageInfo.download).to.not.equal(undefined);
+        await uninstallPackage(testPkgKey);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
     it('returns a 500 for a package key without a proper name', async function () {
       if (server.enabled) {
         await supertest.get('/api/fleet/epm/packages/-0.1.0').expect(500);

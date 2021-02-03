@@ -17,6 +17,7 @@ export const MAPBOX_STYLES = {
       [
         'all',
         ['!=', ['get', '__kbn_too_many_features__'], true],
+        ['!=', ['get', '__kbn_is_centroid_feature__'], true],
         ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']],
       ],
     ],
@@ -91,6 +92,7 @@ export const MAPBOX_STYLES = {
       [
         'all',
         ['!=', ['get', '__kbn_too_many_features__'], true],
+        ['!=', ['get', '__kbn_is_centroid_feature__'], true],
         ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
       ],
     ],
@@ -161,6 +163,7 @@ export const MAPBOX_STYLES = {
       [
         'all',
         ['!=', ['get', '__kbn_too_many_features__'], true],
+        ['!=', ['get', '__kbn_is_centroid_feature__'], true],
         [
           'any',
           ['==', ['geometry-type'], 'Polygon'],

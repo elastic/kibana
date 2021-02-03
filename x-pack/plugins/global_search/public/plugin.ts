@@ -45,13 +45,14 @@ export class GlobalSearchPlugin
 
   start({ http }: CoreStart, { licensing }: GlobalSearchPluginStartDeps) {
     this.licenseChecker = new LicenseChecker(licensing.license$);
-    const { find } = this.searchService.start({
+    const { find, getSearchableTypes } = this.searchService.start({
       http,
       licenseChecker: this.licenseChecker,
     });
 
     return {
       find,
+      getSearchableTypes,
     };
   }
 

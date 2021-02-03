@@ -502,3 +502,119 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:exact-match",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome exactMatch"
+      },
+      "namespaces": ["default", "space_1", "space_2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:alias-match-newid",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome aliasMatch"
+      },
+      "namespaces": ["default", "space_1", "space_2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:disabled",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid",
+        "disabled": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:conflict",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome conflict (1 of 2)"
+      },
+      "namespaces": ["default", "space_1", "space_2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:conflict-newid",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome conflict (2 of 2)"
+      },
+      "namespaces": ["default", "space_1", "space_2"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:conflict",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "conflict-newid"
+      }
+    }
+  }
+}

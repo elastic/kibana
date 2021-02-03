@@ -7,13 +7,13 @@
   }
 
   .select-rule-action-panel {
-    padding: $euiSizeS 0px;
+    padding: $euiSizeS 0;
 
     // SASSTODO: Dangerous EUI overwrite
     .euiDescriptionList {
       .euiDescriptionList__title {
         flex-basis: 15%;
-        padding: 0px $euiSize;
+        padding: 0 $euiSize;
       }
 
       .euiDescriptionList__description {
@@ -70,7 +70,7 @@
   .condition-edit-value-field {
     width: 170px;
     height: 28px;
-    margin: 0px 2px;
+    margin: 0 2px;
 
     input {
       height: 28px;

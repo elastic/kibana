@@ -41,13 +41,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user', async function () {
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'Lee',
         password: 'LeePwd',
-        confirmPassword: 'LeePwd',
-        fullname: 'LeeFirst LeeLast',
+        confirm_password: 'LeePwd',
+        full_name: 'LeeFirst LeeLast',
         email: 'lee@myEmail.com',
-        save: true,
         roles: ['kibana_admin'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -59,11 +58,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user with optional fields left empty', async function () {
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'OptionalUser',
         password: 'OptionalUserPwd',
-        confirmPassword: 'OptionalUserPwd',
-        save: true,
+        confirm_password: 'OptionalUserPwd',
         roles: [],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

@@ -10,7 +10,7 @@ import { ToastNotificationService } from '../services/toast_notification_service
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {
@@ -57,9 +57,12 @@ export const getFunctionDescription = async (
       .getRecordsForCriteria([selectedJob.job_id], criteriaFields, 0, null, null, 1)
       .toPromise();
     if (Array.isArray(resp?.records) && resp.records.length === 1) {
+      // grabbing first record because records should have already been sorted by score desc
       const highestScoringAnomaly = resp.records[0];
       return highestScoringAnomaly?.function_description;
     }
+    // if there's no anomaly found, auto default to plotting the mean
+    return ES_AGGREGATION.AVG;
   } catch (error) {
     toastNotificationService.displayErrorToast(
       error,

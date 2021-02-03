@@ -17,8 +17,7 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { DetectionEnginePageComponent } from './detection_engine';
+import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
@@ -84,12 +83,7 @@ describe('DetectionEnginePageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <DetectionEnginePageComponent
-            graphEventId={undefined}
-            query={{ query: 'query', language: 'language' }}
-            filters={[]}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-          />
+          <DetectionEnginePage />
         </Router>
       </TestProviders>
     );

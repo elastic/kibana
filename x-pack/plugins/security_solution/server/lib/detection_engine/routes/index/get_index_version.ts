@@ -21,16 +21,16 @@ interface IndexAliasResponse {
 export const getIndexVersion = async (
   callCluster: LegacyAPICaller,
   index: string
-): Promise<number | undefined> => {
+): Promise<number> => {
   const indexAlias: IndicesAliasResponse = await callCluster('indices.getAlias', {
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(
-    (key) => indexAlias[key].aliases[index].is_write_index
+    (key) => indexAlias[key].aliases[index]?.is_write_index
   );
   if (writeIndex === undefined) {
-    return undefined;
+    return 0;
   }
   const writeIndexMapping = await readIndex(callCluster, writeIndex);
-  return get(writeIndexMapping, [writeIndex, 'mappings', '_meta', 'version']);
+  return get(writeIndexMapping, [writeIndex, 'mappings', '_meta', 'version']) ?? 0;
 };

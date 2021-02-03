@@ -15,3 +15,4 @@ export * from './found_list_schema';
 export * from './list_item_schema';
 export * from './list_schema';
 export * from './list_item_index_exist_schema';
+export * from './search_list_item_schema';

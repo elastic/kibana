@@ -7,21 +7,26 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from '@elastic/eui';
 import moment from 'moment';
-import { encode, RisonValue } from 'rison-node';
 import { stringify } from 'query-string';
-import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
-import { euiStyled, useTrackPageview } from '../../../../../observability/public';
-import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { encode, RisonValue } from 'rison-node';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useTrackPageview } from '../../../../../observability/public';
+import { TimeRange } from '../../../../common/time/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
+import { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useInterval } from '../../../hooks/use_interval';
 import { AnomaliesResults } from './sections/anomalies';
@@ -31,9 +36,6 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
-import { LogEntryFlyout, LogEntryFlyoutProps } from '../../../components/logging/log_entry_flyout';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -77,6 +79,12 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     setAutoRefresh,
   } = useLogAnalysisResultsUrlState();
 
+  const {
+    closeFlyout: closeLogEntryFlyout,
+    isFlyoutOpen: isLogEntryFlyoutOpen,
+    logEntryId: flyoutLogEntryId,
+  } = useLogEntryFlyoutContext();
+
   const [queryTimeRange, setQueryTimeRange] = useState<{
     value: TimeRange;
     lastChangedTime: number;
@@ -85,8 +93,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     lastChangedTime: Date.now(),
   }));
 
-  const linkToLogStream = useCallback<LogEntryFlyoutProps['setFilter']>(
-    (filter, id, timeKey) => {
+  const linkToLogStream = useCallback(
+    (filter: string, id: string, timeKey?: TimeKey) => {
       const params = {
         logPosition: encode({
           end: moment(queryTimeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
@@ -143,10 +151,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
   });
-
-  const { flyoutVisible, setFlyoutVisibility, flyoutItem, isLoading: isFlyoutLoading } = useContext(
-    LogFlyout.Context
-  );
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -301,13 +305,12 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </ResultsContentPage>
-
-      {flyoutVisible ? (
+      {isLogEntryFlyoutOpen ? (
         <LogEntryFlyout
-          flyoutItem={flyoutItem}
-          setFlyoutVisibility={setFlyoutVisibility}
-          loading={isFlyoutLoading}
-          setFilter={linkToLogStream}
+          logEntryId={flyoutLogEntryId}
+          onCloseFlyout={closeLogEntryFlyout}
+          onSetFieldFilter={linkToLogStream}
+          sourceId={sourceId}
         />
       ) : null}
     </>

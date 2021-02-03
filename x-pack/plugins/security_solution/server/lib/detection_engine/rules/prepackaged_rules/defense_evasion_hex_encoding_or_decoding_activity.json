@@ -38,17 +38,7 @@
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
           "reference": "https://attack.mitre.org/techniques/T1140/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
-      },
-      "technique": [
+        },
         {
           "id": "T1027",
           "name": "Obfuscated Files or Information",
@@ -58,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

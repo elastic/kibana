@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }) {
     it('should render lines', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       const features = mapboxStyle.sources[VECTOR_SOURCE_ID].data.features;
-      expect(features.length).to.equal(2);
+      expect(features.length).to.equal(4);
       expect(features[0].geometry.type).to.equal('LineString');
     });
 

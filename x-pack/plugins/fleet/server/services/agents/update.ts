@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { listAgents } from './crud';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { unenrollAgent } from './unenroll';
 
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   policyId: string
 ) {
   let hasMore = true;
   let page = 1;
   while (hasMore) {
-    const { agents } = await listAgents(soClient, {
+    const { agents } = await listAgents(soClient, esClient, {
       kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${policyId}"`,
       page: page++,
       perPage: 1000,

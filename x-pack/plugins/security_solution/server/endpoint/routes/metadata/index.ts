@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
 import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
@@ -60,7 +60,10 @@ export const GetMetadataListRequestSchema = {
   ),
 };
 
-export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerEndpointRoutes(
+  router: SecuritySolutionPluginRouter,
+  endpointAppContext: EndpointAppContext
+) {
   const logger = getLogger(endpointAppContext);
   router.post(
     {

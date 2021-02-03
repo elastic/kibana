@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import {
@@ -63,7 +52,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
     );
   });
 
-  it('uses the custom label if it is set', function () {
+  it('uses the custom label if it is set', () => {
     const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
       aggConfigs.aggs[0] as IPercentileRanksAggConfig
     );
@@ -73,5 +62,75 @@ describe('AggTypesMetricsPercentileRanksProvider class', function () {
 
     expect(percentileRankLabelFor5kBytes).toBe('Percentile rank 5000 of "my custom field label"');
     expect(percentileRankLabelFor10kBytes).toBe('Percentile rank 10000 of "my custom field label"');
+  });
+
+  it('produces the expected expression ast', () => {
+    const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
+      aggConfigs.aggs[0] as IPercentileRanksAggConfig
+    );
+    expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "customLabel": Array [
+                "my custom field label",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "percentile_ranks.5000",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+              "values": Array [
+                5000,
+                10000,
+              ],
+            },
+            "function": "aggPercentileRanks",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
+    expect(responseAggs[1].toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "customLabel": Array [
+                "my custom field label",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "percentile_ranks.10000",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+              "values": Array [
+                5000,
+                10000,
+              ],
+            },
+            "function": "aggPercentileRanks",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 });

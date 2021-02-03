@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -141,22 +130,27 @@ export function runFtrCli() {
           config: 'test/functional/config.js',
         },
         help: `
-        --config=path      path to a config file
-        --bail             stop tests after the first failure
-        --grep <pattern>   pattern used to select which tests to run
-        --invert           invert grep to exclude tests
-        --include=file     a test file to be included, pass multiple times for multiple files
-        --exclude=file     a test file to be excluded, pass multiple times for multiple files
-        --include-tag=tag  a tag to be included, pass multiple times for multiple tags
-        --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
-        --test-stats       print the number of tests (included and excluded) to STDERR
-        --updateBaselines  replace baseline screenshots with whatever is generated from the test
-        --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
-        -u                 replace both baseline screenshots and snapshots
-        --kibana-install-dir  directory where the Kibana install being tested resides
-        --throttle         enable network throttling in Chrome browser
-        --headless         run browser in headless mode
-      `,
+          --config=path      path to a config file
+          --bail             stop tests after the first failure
+          --grep <pattern>   pattern used to select which tests to run
+          --invert           invert grep to exclude tests
+          --include=file     a test file to be included, pass multiple times for multiple files
+          --exclude=file     a test file to be excluded, pass multiple times for multiple files
+          --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only
+                               suites which have one of the passed include-tag tags will be executed.
+                               When combined with the --exclude-tag flag both conditions must be met
+                               for a suite to run.
+          --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags. Any suite
+                               which has any of the exclude-tags will be excluded. When combined with
+                               the --include-tag flag both conditions must be met for a suite to run.
+          --test-stats       print the number of tests (included and excluded) to STDERR
+          --updateBaselines  replace baseline screenshots with whatever is generated from the test
+          --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
+          -u                 replace both baseline screenshots and snapshots
+          --kibana-install-dir  directory where the Kibana install being tested resides
+          --throttle         enable network throttling in Chrome browser
+          --headless         run browser in headless mode
+        `,
       },
     }
   );

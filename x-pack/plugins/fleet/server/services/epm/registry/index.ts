@@ -110,6 +110,15 @@ export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<Re
   return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
 }
 
+export async function getFile(
+  pkgName: string,
+  pkgVersion: string,
+  relPath: string
+): Promise<Response> {
+  const filePath = `/package/${pkgName}/${pkgVersion}/${relPath}`;
+  return fetchFile(filePath);
+}
+
 export async function fetchFile(filePath: string): Promise<Response> {
   const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
@@ -154,7 +163,6 @@ export async function getRegistryPackage(
   }
 
   const packageInfo = await getInfo(name, version);
-
   return { paths, packageInfo };
 }
 
@@ -200,7 +208,10 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = getPathParts(path.replace(/^\/package\//, ''));
-    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
+    if (
+      (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) ||
+      parts.service === 'elasticsearch'
+    ) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);
@@ -211,6 +222,6 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   return {
     kibana: assets.kibana,
-    // elasticsearch: assets.elasticsearch,
+    elasticsearch: assets.elasticsearch,
   };
 }

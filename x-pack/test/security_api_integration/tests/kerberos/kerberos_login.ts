@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   getMutualAuthenticationResponseToken,
@@ -54,7 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('does not prevent basic login', async () => {
-      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username, password },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
 
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', cookie.cookieString())
         .expect(200);
 
-      expect(user.username).to.eql(username);
+      expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.eql('realm');
       // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
@@ -259,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/security/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
         // Token that was stored in the previous cookie should be invalidated as well and old
         // session cookie should not allow API access.
@@ -383,12 +383,12 @@ export default function ({ getService }: FtrProviderContext) {
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index after
         // some period of time.
-        const esResponse = await getService('legacyEs').deleteByQuery({
+        const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          q: 'doc_type:token',
+          body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
       });
 
       it('AJAX call should initiate SPNEGO and clear existing cookie', async function () {

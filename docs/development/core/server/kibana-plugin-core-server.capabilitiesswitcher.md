@@ -9,5 +9,5 @@ See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md)
 <b>Signature:</b>
 
 ```typescript
-export declare type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+export declare type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities, useDefaultCapabilities: boolean) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
 ```

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Draggable,
@@ -22,9 +23,12 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/com
 
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
+import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
-import { getDraggableId, getDroppableId } from './helpers';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME, getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
+
+import * as i18n from './translations';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -82,7 +86,7 @@ const ProviderContentWrapper = styled.span`
 
 type RenderFunctionProp = (
   props: DataProvider,
-  provided: DraggableProvided,
+  provided: DraggableProvided | null,
   state: DraggableStateSnapshot
 ) => React.ReactNode;
 
@@ -115,6 +119,11 @@ export const getStyle = (
   };
 };
 
+const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
+  const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
+  return links.length > 0;
+};
+
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
   onFilterAdded,
@@ -122,6 +131,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   timelineId,
   truncate,
 }) => {
+  const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const draggableRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
@@ -129,12 +139,24 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
+  const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
   const dispatch = useDispatch();
 
-  const handleClosePopOverTrigger = useCallback(
-    () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
-    []
-  );
+  const handleClosePopOverTrigger = useCallback(() => {
+    setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
+    setHoverActionsOwnFocus((prevHoverActionsOwnFocus) => {
+      if (prevHoverActionsOwnFocus) {
+        setTimeout(() => {
+          keyboardHandlerRef.current?.focus();
+        }, 0);
+      }
+      return false; // always give up ownership
+    });
+
+    setTimeout(() => {
+      setHoverActionsOwnFocus(false);
+    }, 0); // invoked on the next tick, because we want to restore focus first
+  }, [keyboardHandlerRef]);
 
   const toggleTopN = useCallback(() => {
     setShowTopN((prevShowTopN) => {
@@ -167,14 +189,27 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     [unRegisterProvider]
   );
 
-  const hoverContent = useMemo(
-    () => (
+  const hoverContent = useMemo(() => {
+    // display links as additional content in the hover menu to enable keyboard
+    // navigation of links (when the draggable contains them):
+    const additionalContent =
+      hoverActionsOwnFocus && !showTopN && draggableContainsLinks(draggableRef.current) ? (
+        <ProviderContentWrapper
+          data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
+        >
+          {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+        </ProviderContentWrapper>
+      ) : null;
+
+    return (
       <DraggableWrapperHoverContent
+        additionalContent={additionalContent}
         closePopOver={handleClosePopOverTrigger}
         draggableId={getDraggableId(dataProvider.id)}
         field={dataProvider.queryMatch.field}
         goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
+        ownFocus={hoverActionsOwnFocus}
         showTopN={showTopN}
         timelineId={timelineId ?? timelineIdFind}
         toggleTopN={toggleTopN}
@@ -184,17 +219,18 @@ const DraggableWrapperComponent: React.FC<Props> = ({
             : `${dataProvider.queryMatch.value}`
         }
       />
-    ),
-    [
-      dataProvider,
-      handleClosePopOverTrigger,
-      onFilterAdded,
-      showTopN,
-      timelineId,
-      timelineIdFind,
-      toggleTopN,
-    ]
-  );
+    );
+  }, [
+    dataProvider,
+    handleClosePopOverTrigger,
+    hoverActionsOwnFocus,
+    onFilterAdded,
+    render,
+    showTopN,
+    timelineId,
+    timelineIdFind,
+    toggleTopN,
+  ]);
 
   const RenderClone = useCallback(
     (provided, snapshot) => (
@@ -205,6 +241,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
           style={getStyle(provided.draggableProps.style, snapshot)}
           ref={provided.innerRef}
           data-test-subj="providerContainer"
+          tabIndex={-1}
         >
           <ProviderContentWrapper
             data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
@@ -229,7 +266,11 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         data-test-subj="providerContainer"
         isDragging={snapshot.isDragging}
         registerProvider={registerProvider}
+        tabIndex={-1}
       >
+        <EuiScreenReaderOnly data-test-subj="screenReaderOnlyField">
+          <p>{dataProvider.queryMatch.field}</p>
+        </EuiScreenReaderOnly>
         {truncate && !snapshot.isDragging ? (
           <TruncatableText data-test-subj="draggable-truncatable-content">
             {render(dataProvider, provided, snapshot)}
@@ -241,26 +282,72 @@ const DraggableWrapperComponent: React.FC<Props> = ({
             {render(dataProvider, provided, snapshot)}
           </ProviderContentWrapper>
         )}
+        {!snapshot.isDragging && (
+          <EuiScreenReaderOnly data-test-subj="draggableKeyboardInstructionsNotDragging">
+            <p>{i18n.DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}</p>
+          </EuiScreenReaderOnly>
+        )}
       </ProviderContainer>
     ),
     [dataProvider, registerProvider, render, truncate]
   );
 
+  const openPopover = useCallback(() => {
+    setHoverActionsOwnFocus(true);
+  }, []);
+
+  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+    closePopover: handleClosePopOverTrigger,
+    draggableId: getDraggableId(dataProvider.id),
+    fieldName: dataProvider.queryMatch.field,
+    keyboardHandlerRef,
+    openPopover,
+  });
+
+  const onFocus = useCallback(() => {
+    if (!hoverActionsOwnFocus) {
+      keyboardHandlerRef.current?.focus();
+    }
+  }, [hoverActionsOwnFocus, keyboardHandlerRef]);
+
+  const onCloseRequested = useCallback(() => {
+    setShowTopN(false);
+
+    if (hoverActionsOwnFocus) {
+      setHoverActionsOwnFocus(false);
+
+      setTimeout(() => {
+        onFocus(); // return focus to this draggable on the next tick, because we owned focus
+      }, 0);
+    }
+  }, [onFocus, hoverActionsOwnFocus]);
+
   const DroppableContent = useCallback(
     (droppableProvided) => (
       <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
-        <Draggable
-          draggableId={getDraggableId(dataProvider.id)}
-          index={0}
-          key={getDraggableId(dataProvider.id)}
-          isDragDisabled={isDisabled}
+        <div
+          className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
+          data-test-subj="draggableWrapperKeyboardHandler"
+          onClick={onFocus}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          ref={keyboardHandlerRef}
+          role="button"
+          tabIndex={0}
         >
-          {DraggableContent}
-        </Draggable>
+          <Draggable
+            draggableId={getDraggableId(dataProvider.id)}
+            index={0}
+            key={getDraggableId(dataProvider.id)}
+            isDragDisabled={isDisabled}
+          >
+            {DraggableContent}
+          </Draggable>
+        </div>
         {droppableProvided.placeholder}
       </div>
     ),
-    [DraggableContent, dataProvider.id, isDisabled]
+    [DraggableContent, dataProvider.id, isDisabled, onBlur, onFocus, onKeyDown]
   );
 
   const content = useMemo(
@@ -286,9 +373,10 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   return (
     <WithHoverActions
-      alwaysShow={showTopN}
+      alwaysShow={showTopN || hoverActionsOwnFocus}
       closePopOverTrigger={closePopOverTrigger}
       hoverContent={hoverContent}
+      onCloseRequested={onCloseRequested}
       render={renderContent}
     />
   );
@@ -297,7 +385,6 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 export const DraggableWrapper = React.memo(DraggableWrapperComponent);
 
 DraggableWrapper.displayName = 'DraggableWrapper';
-
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
  * from containers that have css transforms

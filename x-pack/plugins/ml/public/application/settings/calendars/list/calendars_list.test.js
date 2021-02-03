@@ -13,6 +13,19 @@ import { CalendarsList } from './calendars_list';
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
+
+jest.mock('../../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    links: {
+      ml: { calendars: jest.fn() },
+    },
+  }),
+}));
+
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
@@ -103,10 +116,6 @@ const props = {
         toasts: {
           addDanger: () => {},
         },
-      },
-      docLinks: {
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        DOC_LINK_VERSION: 'jest-metadata-mock-branch',
       },
     },
   },

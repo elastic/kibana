@@ -23,8 +23,8 @@ interface Props {
 export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = [
-    ...createFieldOptions(fields, jobCreator.additionalFields),
     ...createDocCountFieldOption(jobCreator.aggregationFields.length > 0),
+    ...createFieldOptions(fields, jobCreator.additionalFields),
   ];
 
   const selection: EuiComboBoxOptionOption[] = [];

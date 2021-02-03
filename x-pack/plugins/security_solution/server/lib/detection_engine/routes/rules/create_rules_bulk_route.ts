@@ -8,7 +8,7 @@ import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -22,8 +22,13 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { RuleTypeParams } from '../../types';
+import { Alert } from '../../../../../../alerts/common';
 
-export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const createRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml']
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -95,9 +100,12 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
 
-              const createdRule = await alertsClient.create({
+              /**
+               * TODO: Remove this use of `as` by utilizing the proper type
+               */
+              const createdRule = (await alertsClient.create({
                 data: internalRule,
-              });
+              })) as Alert<RuleTypeParams>;
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,

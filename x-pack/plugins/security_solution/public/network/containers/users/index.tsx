@@ -5,10 +5,10 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
@@ -62,8 +62,8 @@ export const useNetworkUsers = ({
   skip,
   startDate,
 }: UseNetworkUsers): [boolean, NetworkUsersArgs] => {
-  const getNetworkUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useShallowEqualSelector(getNetworkUsersSelector);
+  const getNetworkUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
+  const { activePage, sort, limit } = useDeepEqualSelector(getNetworkUsersSelector);
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -71,22 +71,7 @@ export const useNetworkUsers = ({
   const [loading, setLoading] = useState(false);
 
   const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex,
-          factoryQueryType: NetworkQueries.users,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
+    null
   );
 
   const wrappedLoadMore = useCallback(
@@ -125,7 +110,7 @@ export const useNetworkUsers = ({
 
   const networkUsersSearch = useCallback(
     (request: NetworkUsersRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -181,7 +166,7 @@ export const useNetworkUsers = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -201,23 +186,12 @@ export const useNetworkUsers = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    defaultIndex,
-    endDate,
-    filterQuery,
-    limit,
-    startDate,
-    sort,
-    skip,
-    ip,
-    flowTarget,
-  ]);
+  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, ip, flowTarget]);
 
   useEffect(() => {
     networkUsersSearch(networkUsersRequest);

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 // inner angular imports
@@ -41,6 +30,7 @@ import { createTableRowDirective } from './application/angular/doc_table/compone
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
+import { createDiscoverGridDirective } from './application/components/create_discover_grid_directive';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
@@ -49,12 +39,11 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
-  createTopNavDirective,
-  createTopNavHelper,
 } from '../../kibana_legacy/public';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
-import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
+import { createDiscoverDirective } from './application/components/create_discover_directive';
+
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary
@@ -95,7 +84,6 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -128,7 +116,6 @@ export function initializeInnerAngularModule(
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
-      'discoverTopNav',
       'discoverLocalStorageProvider',
       'discoverDocTable',
       'discoverPagerFactory',
@@ -136,7 +123,7 @@ export function initializeInnerAngularModule(
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverLegacy', createDiscoverLegacyDirective);
+    .directive('discover', createDiscoverDirective);
 }
 
 function createLocalPromiseModule() {
@@ -145,13 +132,6 @@ function createLocalPromiseModule() {
 
 function createLocalPrivateModule() {
   angular.module('discoverPrivate', []).provider('Private', PrivateProvider);
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('discoverTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
@@ -188,6 +168,7 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
+    .directive('discoverGrid', createDiscoverGridDirective)
     .directive('docViewer', createDocViewerDirective)
     .directive('contextAppLegacy', createContextAppLegacy);
 }

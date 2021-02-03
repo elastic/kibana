@@ -7,14 +7,18 @@
 import { SavedObjectsType } from 'src/core/server';
 import { TELEMETRY_DOC_ID } from './telemetry';
 
-export const fileUploadTelemetryMappingsType: SavedObjectsType = {
+export const telemetryMappingsType: SavedObjectsType = {
   name: TELEMETRY_DOC_ID,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
     properties: {
-      filesUploadedTotalCount: {
-        type: 'long',
+      file_upload: {
+        properties: {
+          index_creation_count: {
+            type: 'long',
+          },
+        },
       },
     },
   },

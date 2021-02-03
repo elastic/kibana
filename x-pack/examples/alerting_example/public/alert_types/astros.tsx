@@ -44,7 +44,6 @@ function isValueInEnum(enumeratin: Record<string, any>, value: any): boolean {
 export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.people-in-space',
-    name: 'People Are In Space Right Now',
     description: 'Alert when people are in space right now',
     iconClass: 'globe',
     documentationUrl: null,

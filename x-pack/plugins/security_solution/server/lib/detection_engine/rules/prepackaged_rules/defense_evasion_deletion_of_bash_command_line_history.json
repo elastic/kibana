@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1146",
-          "name": "Clear Command History",
-          "reference": "https://attack.mitre.org/techniques/T1146/"
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.003",
+              "name": "Clear Command History",
+              "reference": "https://attack.mitre.org/techniques/T1070/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

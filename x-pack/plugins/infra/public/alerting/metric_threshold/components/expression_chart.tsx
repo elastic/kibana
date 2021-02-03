@@ -21,8 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import {
   Comparator,
@@ -31,16 +29,16 @@ import {
 import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression, AlertContextMeta } from '../types';
+import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface Props {
-  context: AlertsContextValue<AlertContextMeta>;
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
@@ -62,7 +60,6 @@ const TIME_LABELS = {
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  context,
   derivedIndexPattern,
   source,
   filterQuery,
@@ -70,19 +67,20 @@ export const ExpressionChart: React.FC<Props> = ({
 }) => {
   const { loading, data } = useMetricsExplorerChartData(
     expression,
-    context,
     derivedIndexPattern,
     source,
     filterQuery,
     groupBy
   );
 
+  const { uiSettings } = useKibanaContextForPlugin().services;
+
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = first(data?.series);
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;

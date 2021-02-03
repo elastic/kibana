@@ -23,6 +23,7 @@ interface PrivilegesFromEs {
 interface StatsFromEs {
   data_stream: string;
   store_size: string;
+  store_size_bytes: number;
   maximum_timestamp: number;
 }
 
@@ -40,7 +41,7 @@ const enhanceDataStreams = ({
 
     if (dataStreamsStats) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { store_size, maximum_timestamp } =
+      const { store_size, store_size_bytes, maximum_timestamp } =
         dataStreamsStats.find(
           ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
         ) || {};
@@ -48,6 +49,7 @@ const enhanceDataStreams = ({
       enhancedDataStream = {
         ...enhancedDataStream,
         store_size,
+        store_size_bytes,
         maximum_timestamp,
       };
     }
@@ -65,12 +67,24 @@ const enhanceDataStreams = ({
   });
 };
 
+const getDataStreams = (client: ElasticsearchClient, name = '*') => {
+  // TODO update when elasticsearch client has update requestParams for 'indices.getDataStream'
+  return client.transport.request({
+    path: `/_data_stream/${encodeURIComponent(name)}`,
+    method: 'GET',
+    querystring: {
+      expand_wildcards: 'all',
+    },
+  });
+};
+
 const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
   return client.transport.request({
     path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
     method: 'GET',
     querystring: {
       human: true,
+      expand_wildcards: 'all',
     },
   });
 };
@@ -107,7 +121,7 @@ export function registerGetAllRoute({
       try {
         let {
           body: { data_streams: dataStreams },
-        } = await asCurrentUser.indices.getDataStream();
+        } = await getDataStreams(asCurrentUser);
 
         let dataStreamsStats;
         let dataStreamsPrivileges;
@@ -165,7 +179,7 @@ export function registerGetOneRoute({
             body: { data_streams: dataStreamsStats },
           },
         ] = await Promise.all([
-          asCurrentUser.indices.getDataStream({ name }),
+          getDataStreams(asCurrentUser, name),
           getDataStreamsStats(asCurrentUser, name),
         ]);
 

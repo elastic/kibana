@@ -4,39 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
+import { EuiSelectOption } from '@elastic/eui';
 import { UserConfiguredActionConnector } from '../../../../types';
+import {
+  ExecutorSubActionPushParamsITSM,
+  ExecutorSubActionPushParamsSIR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
   ServiceNowSecrets
 >;
 
-export interface ServiceNowActionParams {
+export interface ServiceNowITSMActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comment: string;
-    externalId: string | null;
-    severity: string;
-    urgency: string;
-    impact: string;
-  };
+  subActionParams: ExecutorSubActionPushParamsITSM;
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
+export interface ServiceNowSIRActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
 export interface ServiceNowConfig {
   apiUrl: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
 export interface ServiceNowSecrets {
   username: string;
   password: string;
 }
+
+export interface Choice {
+  value: string;
+  label: string;
+  element: string;
+  dependent_value: string;
+}
+
+export type Fields = Record<string, Choice[]>;
+export type Options = Record<string, EuiSelectOption[]>;

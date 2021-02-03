@@ -12,12 +12,9 @@ import {
   BulkItem,
   RuleAlertAttributes,
   SignalHit,
+  WrappedSignalHit,
 } from '../types';
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusSOAttributes } from '../../rules/types';
@@ -150,8 +147,8 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  ip?: string,
-  destIp?: string
+  ip?: string | string[],
+  destIp?: string | string[]
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -239,6 +236,14 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     hits: [],
   },
 });
+
+export const sampleWrappedSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleSignalHit(),
+  };
+};
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
@@ -502,8 +507,8 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[],
-  destIps?: string[]
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -606,7 +611,7 @@ export const exampleFindRuleStatusResponse: (
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingSystemMock.createLogger();
+export const mockLogger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

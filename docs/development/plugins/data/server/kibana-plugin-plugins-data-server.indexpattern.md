@@ -20,8 +20,8 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-server.indexpattern.allownoindex.md) |  | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [deleteFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
-|  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.indexpattern.fields.md) |  | <code>IIndexPatternFieldList &amp; {</code><br/><code>        toSpec: () =&gt; IndexPatternFieldMap;</code><br/><code>    }</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-server.indexpattern.flattenhit.md) |  | <code>(hit: Record&lt;string, any&gt;, deep?: boolean) =&gt; Record&lt;string, any&gt;</code> |  |
@@ -37,14 +37,15 @@ export declare class IndexPattern implements IIndexPattern
 |  [sourceFilters](./kibana-plugin-plugins-data-server.indexpattern.sourcefilters.md) |  | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.indexpattern.title.md) |  | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> |  |
-|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> |  |
-|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> |  |
+|  [type](./kibana-plugin-plugins-data-server.indexpattern.type.md) |  | <code>string &#124; undefined</code> | Type is used to identify rollup index patterns |
+|  [typeMeta](./kibana-plugin-plugins-data-server.indexpattern.typemeta.md) |  | <code>TypeMeta</code> | Only used by rollup indices, used by rollup specific endpoint to load field list |
+|  [version](./kibana-plugin-plugins-data-server.indexpattern.version.md) |  | <code>string &#124; undefined</code> | SavedObject version |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [addRuntimeField(name, runtimeField)](./kibana-plugin-plugins-data-server.indexpattern.addruntimefield.md) |  | Add a runtime field - Appended to existing mapped field or a new field is created as appropriate |
 |  [addScriptedField(name, script, fieldType)](./kibana-plugin-plugins-data-server.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-server.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-server.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
@@ -58,6 +59,10 @@ export declare class IndexPattern implements IIndexPattern
 |  [getTimeField()](./kibana-plugin-plugins-data-server.indexpattern.gettimefield.md) |  |  |
 |  [isTimeBased()](./kibana-plugin-plugins-data-server.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-server.indexpattern.istimenanosbased.md) |  |  |
+|  [removeRuntimeField(name)](./kibana-plugin-plugins-data-server.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-server.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
-|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  |  |
+|  [setFieldAttrs(fieldName, attrName, value)](./kibana-plugin-plugins-data-server.indexpattern.setfieldattrs.md) |  |  |
+|  [setFieldCount(fieldName, count)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcount.md) |  |  |
+|  [setFieldCustomLabel(fieldName, customLabel)](./kibana-plugin-plugins-data-server.indexpattern.setfieldcustomlabel.md) |  |  |
+|  [toSpec()](./kibana-plugin-plugins-data-server.indexpattern.tospec.md) |  | Create static representation of index pattern |
 

@@ -20,7 +20,7 @@ import { useMlContext } from '../../contexts/ml';
 import { DataFrameAnalyticsConfig } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
-import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../pages/analytics_management/components/analytics_list/common';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
 import { getToastNotificationService } from '../../services/toast_notification_service';
@@ -45,7 +45,7 @@ export const useResultsViewConfig = (jobId: string) => {
     undefined
   );
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
+  const [jobStatus, setJobStatus] = useState<DataFrameTaskStateType | undefined>(undefined);
 
   const [totalFeatureImportance, setTotalFeatureImportance] = useState<
     TotalFeatureImportance[] | undefined
@@ -102,6 +102,12 @@ export const useResultsViewConfig = (jobId: string) => {
 
             try {
               indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+
+              // Force refreshing the fields list here because a user directly coming
+              // from the job creation wizard might land on the page without the
+              // index pattern being fully initialized because it was created
+              // before the analytics job populated the destination index.
+              await mlContext.indexPatterns.refreshFields(indexP);
             } catch (e) {
               indexP = undefined;
             }

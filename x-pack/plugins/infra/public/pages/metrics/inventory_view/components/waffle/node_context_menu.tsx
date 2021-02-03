@@ -16,6 +16,7 @@ import { createUptimeLink } from '../../lib/create_uptime_link';
 import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   Section,
   SectionLinkProps,
@@ -24,8 +25,6 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
-  withTheme,
-  EuiTheme,
 } from '../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 
@@ -161,14 +160,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       },
     };
 
-    const openNewOverlayMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.openNewOverlay', {
-        defaultMessage: '**** [NEW] Overlay ***',
-      }),
-      style: { color: theme?.eui.euiLinkColor || '#006BB4', fontWeight: 500, padding: 0 },
-      onClick: openNewOverlay,
-    };
-
     return (
       <>
         <ActionMenu
@@ -204,7 +195,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
                 <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
                 <SectionLink {...uptimeMenuItem} />
                 <SectionLink {...createAlertMenuItem} />
-                <SectionLink {...openNewOverlayMenuItem} />
               </SectionLinks>
             </Section>
           </div>

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,6 +13,7 @@ import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressio
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
 import { PieVisParams } from './pie';
+import { VislibChartType } from './types';
 import { vislibVisName } from './vis_type_vislib_vis_fn';
 
 export const vislibPieName = 'vislib_pie_vis';
@@ -32,9 +22,9 @@ interface Arguments {
   visConfig: string;
 }
 
-interface RenderValue {
+export interface PieRenderValue {
+  visType: Extract<VislibChartType, 'pie'>;
   visData: unknown;
-  visType: string;
   visConfig: PieVisParams;
 }
 
@@ -42,7 +32,7 @@ export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDef
   typeof vislibPieName,
   Datatable,
   Arguments,
-  Render<RenderValue>
+  Render<PieRenderValue>
 >;
 
 export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({
@@ -59,9 +49,13 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
       help: 'vislib pie vis config',
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const visConfig = JSON.parse(args.visConfig) as PieVisParams;
     const visData = vislibSlicesResponseHandler(input, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
 
     return {
       type: 'render',
@@ -69,7 +63,7 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
       value: {
         visData,
         visConfig,
-        visType: 'pie',
+        visType: VislibChartType.Pie,
       },
     };
   },

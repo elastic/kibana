@@ -5,6 +5,7 @@
  */
 
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
+import { waitForLoadingToFinish } from './utils';
 
 /**
  * Verifies the behavior of the client metrics component
@@ -17,15 +18,14 @@ export function verifyClientMetrics(
 ) {
   const clientMetricsSelector = '[data-cy=client-metrics] .euiStat__title';
 
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   if (checkTitleStatus) {
     cy.get('.euiStat__title', DEFAULT_TIMEOUT).should('be.visible');
-    cy.get('.euiSelect-isLoading').should('not.be.visible');
+    cy.get('.euiSelect-isLoading').should('not.exist');
   }
 
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   cy.get(clientMetricsSelector).eq(0).should('have.text', metrics[0]);
 

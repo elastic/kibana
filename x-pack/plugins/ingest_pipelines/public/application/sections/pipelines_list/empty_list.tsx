@@ -46,6 +46,7 @@ export const EmptyList: FunctionComponent = () => {
           }
           actions={
             <EuiButton
+              data-test-subj="emptyStateCreatePipelineButton"
               {...reactRouterNavigate(history, getCreatePath())}
               iconType="plusInCircle"
               fill

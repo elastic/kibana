@@ -6,27 +6,29 @@
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, UserConfiguredActionConnector } from '../../../types';
+import {
+  UserConfiguredActionConnector,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 jest.mock('../../../common/lib/kibana');
 
 describe('action_connector_form', () => {
   it('renders action_connector_form', () => {
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
-      actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 

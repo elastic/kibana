@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyCallAPIOptions } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginsSetup } from '../plugin';
-
-type CallCluster = <T = unknown>(
-  endpoint: string,
-  clientParams: Record<string, unknown>,
-  options?: LegacyCallAPIOptions
-) => Promise<T>;
+import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 interface SpacesAggregationResponse {
   hits: {
@@ -33,10 +28,10 @@ interface SpacesAggregationResponse {
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
- * @return {UsageStats}
+ * @return {UsageData}
  */
 async function getSpacesUsage(
-  callCluster: CallCluster,
+  esClient: ElasticsearchClient,
   kibanaIndex: string,
   features: PluginsSetup['features'],
   spacesAvailable: boolean
@@ -49,7 +44,7 @@ async function getSpacesUsage(
 
   let resp: SpacesAggregationResponse | undefined;
   try {
-    resp = await callCluster<SpacesAggregationResponse>('search', {
+    ({ body: resp } = await esClient.search({
       index: kibanaIndex,
       body: {
         track_total_hits: true,
@@ -71,7 +66,7 @@ async function getSpacesUsage(
         },
         size: 0,
       },
-    });
+    }));
   } catch (err) {
     if (err.status === 404) {
       return null;
@@ -109,10 +104,22 @@ async function getSpacesUsage(
     count,
     usesFeatureControls,
     disabledFeatures,
-  } as UsageStats;
+  } as UsageData;
 }
 
-export interface UsageStats {
+async function getUsageStats(
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>,
+  spacesAvailable: boolean
+) {
+  if (!spacesAvailable) {
+    return null;
+  }
+
+  const usageStatsClient = await usageStatsServicePromise.then(({ getClient }) => getClient());
+  return usageStatsClient.getUsageStats();
+}
+
+export interface UsageData extends UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
@@ -143,6 +150,7 @@ interface CollectorDeps {
   kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
 }
 
 /*
@@ -153,7 +161,7 @@ export function getSpacesUsageCollector(
   usageCollection: UsageCollectionSetup,
   deps: CollectorDeps
 ) {
-  return usageCollection.makeUsageCollector<UsageStats>({
+  return usageCollection.makeUsageCollector<UsageData>({
     type: 'spaces',
     isReady: () => true,
     schema: {
@@ -181,20 +189,35 @@ export function getSpacesUsageCollector(
       available: { type: 'boolean' },
       enabled: { type: 'boolean' },
       count: { type: 'long' },
+      'apiCalls.copySavedObjects.total': { type: 'long' },
+      'apiCalls.copySavedObjects.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.copySavedObjects.kibanaRequest.no': { type: 'long' },
+      'apiCalls.copySavedObjects.createNewCopiesEnabled.yes': { type: 'long' },
+      'apiCalls.copySavedObjects.createNewCopiesEnabled.no': { type: 'long' },
+      'apiCalls.copySavedObjects.overwriteEnabled.yes': { type: 'long' },
+      'apiCalls.copySavedObjects.overwriteEnabled.no': { type: 'long' },
+      'apiCalls.resolveCopySavedObjectsErrors.total': { type: 'long' },
+      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': { type: 'long' },
+      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': { type: 'long' },
+      'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': { type: 'long' },
     },
-    fetch: async ({ callCluster }: CollectorFetchContext) => {
-      const license = await deps.licensing.license$.pipe(take(1)).toPromise();
+    fetch: async ({ esClient }: CollectorFetchContext) => {
+      const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
+      const license = await licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
-      const kibanaIndex = (await deps.kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
+      const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
-      const usageStats = await getSpacesUsage(callCluster, kibanaIndex, deps.features, available);
+      const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
+      const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {
         available,
         enabled: available,
+        ...usageData,
         ...usageStats,
-      } as UsageStats;
+      } as UsageData;
     },
   });
 }

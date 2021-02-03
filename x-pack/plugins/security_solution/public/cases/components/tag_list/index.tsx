@@ -18,12 +18,13 @@ import {
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, FormDataProvider, useForm } from '../../../shared_imports';
+import { Form, FormDataProvider, useForm, getUseField, Field } from '../../../shared_imports';
 import { schema } from './schema';
-import { CommonUseField } from '../create';
 import { useGetTags } from '../../containers/use_get_tags';
 
 import { Tags } from './tags';
+
+const CommonUseField = getUseField({ component: Field });
 
 interface TagListProps {
   disabled?: boolean;

@@ -17,6 +17,8 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
+import { MachineLearningDataFrameAnalyticsScatterplotProvider } from './data_frame_analytics_scatterplot';
+import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
@@ -41,6 +43,7 @@ import { MachineLearningSettingsFilterListProvider } from './settings_filter_lis
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
+import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -59,13 +62,18 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
+  const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
-  const dataVisualizer = MachineLearningDataVisualizerProvider(context);
-  const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
-  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(
-    context,
-    commonUI
+  const dataFrameAnalyticsScatterplot = MachineLearningDataFrameAnalyticsScatterplotProvider(
+    context
   );
+
+  const dataVisualizer = MachineLearningDataVisualizerProvider(context);
+  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
+
+  const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
+  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -99,10 +107,13 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
     dataFrameAnalyticsResults,
+    dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
+    dataFrameAnalyticsScatterplot,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerTable,
     jobManagement,
     jobSelection,
     jobSourceSelection,

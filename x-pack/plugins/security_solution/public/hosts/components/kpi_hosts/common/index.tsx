@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-
 import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { HostsKpiStrategyResponse } from '../../../../../common/search_strategy';
@@ -27,7 +27,7 @@ export const FlexGroup = styled(EuiFlexGroup)`
 
 FlexGroup.displayName = 'FlexGroup';
 
-export const HostsKpiBaseComponent = React.memo<{
+interface HostsKpiBaseComponentProps {
   fieldsMapping: Readonly<StatItems[]>;
   data: HostsKpiStrategyResponse;
   loading?: boolean;
@@ -35,34 +35,46 @@ export const HostsKpiBaseComponent = React.memo<{
   from: string;
   to: string;
   narrowDateRange: UpdateDateRange;
-}>(({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
-  const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
-    fieldsMapping,
-    data,
-    id,
-    from,
-    to,
-    narrowDateRange
-  );
+}
 
-  if (loading) {
-    return (
-      <FlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </FlexGroup>
+export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
+  ({ fieldsMapping, data, id, loading = false, from, to, narrowDateRange }) => {
+    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
+      fieldsMapping,
+      data,
+      id,
+      from,
+      to,
+      narrowDateRange
     );
-  }
 
-  return (
-    <EuiFlexGroup wrap>
-      {statItemsProps.map((mappedStatItemProps) => (
-        <StatItemsComponent {...mappedStatItemProps} />
-      ))}
-    </EuiFlexGroup>
-  );
-});
+    if (loading) {
+      return (
+        <FlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </FlexGroup>
+      );
+    }
+
+    return (
+      <EuiFlexGroup wrap>
+        {statItemsProps.map((mappedStatItemProps) => (
+          <StatItemsComponent {...mappedStatItemProps} />
+        ))}
+      </EuiFlexGroup>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.fieldsMapping === nextProps.fieldsMapping &&
+    prevProps.id === nextProps.id &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.from === nextProps.from &&
+    prevProps.to === nextProps.to &&
+    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    deepEqual(prevProps.data, nextProps.data)
+);
 
 HostsKpiBaseComponent.displayName = 'HostsKpiBaseComponent';
 

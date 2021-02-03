@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { NetworkHttpEdges, NetworkHttpFields } from '../../../../common/search_strategy';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getNetworkHttpColumns } from './columns';
@@ -50,8 +50,8 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getNetworkHttpSelector = networkSelectors.httpSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getNetworkHttpSelector = useMemo(() => networkSelectors.httpSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getNetworkHttpSelector(state, type)
   );
   const tableType =

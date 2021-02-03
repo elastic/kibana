@@ -6,94 +6,110 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ObjectRemover } from '../../lib/object_remover';
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const browser = getService('browser');
-  const alerting = getService('alerting');
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Home page', function () {
-    before(async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
-    });
+    describe('Loads the app with limited privileges', () => {
+      before(async () => {
+        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
 
-    it('Loads the app', async () => {
-      await log.debug('Checking for section heading to say Triggers and Actions.');
-
-      const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-      expect(headingText).to.be('Alerts and Actions');
-    });
-
-    describe('Connectors tab', () => {
-      it('renders the connectors tab', async () => {
-        // Navigate to the connectors tab
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify url
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/connectors`);
-
-        // Verify content
-        await testSubjects.existOrFail('actionsList');
+      it('Loads the Alerts page', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
+        expect(headingText).to.be('Alerts and Actions');
       });
     });
 
-    describe('Alerts tab', () => {
-      it('renders the alerts tab', async () => {
-        // Navigate to the alerts tab
-        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
-
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify url
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/alerts`);
-
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
+    describe('Loads the app', () => {
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
       });
 
-      it('navigates to an alert details page', async () => {
-        const action = await alerting.actions.createAction({
-          name: `Slack-${Date.now()}`,
-          actionTypeId: '.slack',
-          config: {},
-          secrets: {
-            webhookUrl: 'https://test',
-          },
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('Loads the Alerts page', async () => {
+        await log.debug('Checking for section heading to say Triggers and Actions.');
+
+        const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
+        expect(headingText).to.be('Alerts and Actions');
+      });
+
+      describe('Connectors tab', () => {
+        it('renders the connectors tab', async () => {
+          // Navigate to the connectors tab
+          await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          // Verify url
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/connectors`);
+
+          // Verify content
+          await testSubjects.existOrFail('actionsList');
+        });
+      });
+
+      describe('Alerts tab', () => {
+        it('renders the alerts tab', async () => {
+          // Navigate to the alerts tab
+          await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          // Verify url
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/alerts`);
+
+          // Verify content
+          await testSubjects.existOrFail('alertsList');
         });
 
-        const alert = await alerting.alerts.createAlwaysFiringWithAction(
-          `test-alert-${Date.now()}`,
-          {
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          }
-        );
+        it('navigates to an alert details page', async () => {
+          const { body: createdAction } = await supertest
+            .post(`/api/actions/action`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestActionData())
+            .expect(200);
+          objectRemover.add(createdAction.id, 'action', 'actions');
 
-        // refresh to see alert
-        await browser.refresh();
+          const { body: createdAlert } = await supertest
+            .post(`/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+          objectRemover.add(createdAlert.id, 'alert', 'alerts');
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+          // refresh to see alert
+          await browser.refresh();
 
-        // Verify content
-        await testSubjects.existOrFail('alertsList');
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+          // Verify content
+          await testSubjects.existOrFail('alertsList');
 
-        // Verify url
-        expect(await browser.getCurrentUrl()).to.contain(`/alert/${alert.id}`);
+          // click on first alert
+          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
 
-        await alerting.alerts.deleteAlert(alert.id);
+          // Verify url
+          expect(await browser.getCurrentUrl()).to.contain(`/alert/${createdAlert.id}`);
+        });
       });
     });
   });

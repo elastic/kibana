@@ -34,11 +34,12 @@ import {
 import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
-import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
+import { SaveModal } from './save_modal';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
+import { useTimeRange } from './time_range';
 
 export function App({
   history,
@@ -48,6 +49,7 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
+  redirectToDashboard,
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
@@ -58,6 +60,7 @@ export function App({
     navigation,
     uiSettings,
     application,
+    stateTransfer,
     notifications,
     attributeService,
     savedObjectsClient,
@@ -69,7 +72,6 @@ export function App({
   } = useKibana<LensAppServices>().services;
 
   const [state, setState] = useState<LensAppState>(() => {
-    const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
       // Do not use app-specific filters from previous app,
@@ -79,14 +81,11 @@ export function App({
         : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
-      dateRange: {
-        fromDate: currentRange.from,
-        toDate: currentRange.to,
-      },
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
+      searchSessionId: data.search.session.start(),
     };
   });
 
@@ -105,9 +104,15 @@ export function App({
     state.indicateNoData,
     state.query,
     state.filters,
-    state.dateRange,
     state.indexPatternsForTopNav,
+    state.searchSessionId,
   ]);
+
+  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
+    data,
+    state.lastKnownDoc,
+    setState
+  );
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -158,23 +163,34 @@ export function App({
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState((s) => ({ ...s, filters: data.query.filterManager.getFilters() }));
+        setState((s) => ({
+          ...s,
+          filters: data.query.filterManager.getFilters(),
+          searchSessionId: data.search.session.start(),
+        }));
         trackUiEvent('app_filters_updated');
       },
     });
 
     const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
       next: () => {
-        const currentRange = data.query.timefilter.timefilter.getTime();
         setState((s) => ({
           ...s,
-          dateRange: {
-            fromDate: currentRange.from,
-            toDate: currentRange.to,
-          },
+          searchSessionId: data.search.session.start(),
         }));
       },
     });
+
+    const autoRefreshSubscription = data.query.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe({
+        next: () => {
+          setState((s) => ({
+            ...s,
+            searchSessionId: data.search.session.start(),
+          }));
+        },
+      });
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
@@ -190,10 +206,12 @@ export function App({
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
+      autoRefreshSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    data.search.session,
     notifications.toasts,
     uiSettings,
     data.query,
@@ -352,9 +370,15 @@ export function App({
     state.persistedDoc?.state,
   ]);
 
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
+
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      dashboardId?: string | null;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
       newTags?: string[];
@@ -366,8 +390,11 @@ export function App({
     }
 
     let references = lastKnownDoc.references;
-    if (savedObjectsTagging && saveProps.newTags) {
-      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    if (savedObjectsTagging) {
+      references = savedObjectsTagging.ui.updateTagsReferences(
+        references,
+        saveProps.newTags || tagsIds
+      );
     }
 
     const docToSave = {
@@ -429,6 +456,13 @@ export function App({
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
         return;
+      } else if (saveProps.dashboardId && redirectToDashboard) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToDashboard(newInput, saveProps.dashboardId);
+        return;
       }
 
       notifications.toasts.addSuccess(
@@ -454,6 +488,9 @@ export function App({
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+        // remove editor state so the connection is still broken after reload
+        stateTransfer.clearEditorState();
+
         redirectTo(newInput.savedObjectId);
         return;
       }
@@ -557,11 +594,6 @@ export function App({
     },
   });
 
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
-
   return (
     <>
       <div className="lnsApp">
@@ -581,21 +613,21 @@ export function App({
             appName={'lens'}
             onQuerySubmit={(payload) => {
               const { dateRange, query } = payload;
-              if (
-                dateRange.from !== state.dateRange.fromDate ||
-                dateRange.to !== state.dateRange.toDate
-              ) {
+              const currentRange = data.query.timefilter.timefilter.getTime();
+              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
                 data.query.timefilter.timefilter.setTime(dateRange);
                 trackUiEvent('app_date_change');
               } else {
+                // Query has changed, renew the session id.
+                // Time change will be picked up by the time subscription
+                setState((s) => ({
+                  ...s,
+                  searchSessionId: data.search.session.start(),
+                }));
                 trackUiEvent('app_query_change');
               }
               setState((s) => ({
                 ...s,
-                dateRange: {
-                  fromDate: dateRange.from,
-                  toDate: dateRange.to,
-                },
                 query: query || s.query,
               }));
             }}
@@ -609,12 +641,6 @@ export function App({
               setState((s) => ({
                 ...s,
                 savedQuery: { ...savedQuery }, // Shallow query for reference issues
-                dateRange: savedQuery.attributes.timefilter
-                  ? {
-                      fromDate: savedQuery.attributes.timefilter.from,
-                      toDate: savedQuery.attributes.timefilter.to,
-                    }
-                  : s.dateRange,
               }));
             }}
             onClearSavedQuery={() => {
@@ -627,8 +653,8 @@ export function App({
               }));
             }}
             query={state.query}
-            dateRangeFrom={state.dateRange.fromDate}
-            dateRangeTo={state.dateRange.toDate}
+            dateRangeFrom={fromDate}
+            dateRangeTo={toDate}
             indicateNoData={state.indicateNoData}
           />
         </div>
@@ -637,7 +663,8 @@ export function App({
             className="lnsApp__frame"
             render={editorFrame.mount}
             nativeProps={{
-              dateRange: state.dateRange,
+              searchSessionId: state.searchSessionId,
+              dateRange: resolvedDateRange,
               query: state.query,
               filters: state.filters,
               savedQuery: state.savedQuery,
@@ -649,7 +676,7 @@ export function App({
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
-                if (!_.isEqual(state.persistedDoc, doc)) {
+                if (!_.isEqual(state.persistedDoc, doc) && !_.isEqual(state.lastKnownDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
                 }
                 if (!_.isEqual(state.activeData, activeData)) {
@@ -679,35 +706,27 @@ export function App({
           />
         )}
       </div>
-      {lastKnownDoc && state.isSaveModalVisible && (
-        <TagEnhancedSavedObjectSaveModalOrigin
-          savedObjectsTagging={savedObjectsTagging}
-          initialTags={tagsIds}
-          originatingApp={incomingState?.originatingApp}
-          onSave={(props) => runSave(props, { saveToLibrary: true })}
-          onClose={() => {
-            setState((s) => ({ ...s, isSaveModalVisible: false }));
-          }}
-          getAppNameFromId={() => getOriginatingAppName()}
-          documentInfo={{
-            id: lastKnownDoc.savedObjectId,
-            title: lastKnownDoc.title || '',
-            description: lastKnownDoc.description || '',
-          }}
-          returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
-              ? i18n.translate('xpack.lens.app.updatePanel', {
-                  defaultMessage: 'Update panel on {originatingAppName}',
-                  values: { originatingAppName: getOriginatingAppName() },
-                })
-              : undefined
-          }
-          objectType={i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          })}
-          data-test-subj="lnsApp_saveModalOrigin"
-        />
-      )}
+      <SaveModal
+        isVisible={state.isSaveModalVisible}
+        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
+        savedObjectsTagging={savedObjectsTagging}
+        tagsIds={tagsIds}
+        onSave={runSave}
+        onClose={() => {
+          setState((s) => ({ ...s, isSaveModalVisible: false }));
+        }}
+        getAppNameFromId={() => getOriginatingAppName()}
+        lastKnownDoc={lastKnownDoc}
+        returnToOriginSwitchLabel={
+          getIsByValueMode() && initialInput
+            ? i18n.translate('xpack.lens.app.updatePanel', {
+                defaultMessage: 'Update panel on {originatingAppName}',
+                values: { originatingAppName: getOriginatingAppName() },
+              })
+            : undefined
+        }
+      />
     </>
   );
 }

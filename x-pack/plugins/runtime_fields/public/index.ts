@@ -7,6 +7,7 @@ import { RuntimeFieldsPlugin } from './plugin';
 
 export {
   RuntimeFieldEditorFlyoutContent,
+  RuntimeFieldEditorFlyoutContentProps,
   RuntimeFieldEditor,
   RuntimeFieldFormState,
 } from './components';

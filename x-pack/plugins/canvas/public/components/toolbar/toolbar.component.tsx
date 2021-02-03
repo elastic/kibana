@@ -21,7 +21,6 @@ import {
 import { WorkpadManager } from '../workpad_manager';
 import { RouterContext } from '../router';
 import { PageManager } from '../page_manager';
-// @ts-expect-error untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
@@ -32,7 +31,7 @@ const { Toolbar: strings } = ComponentStrings;
 
 type TrayType = 'pageManager' | 'expression';
 
-interface Props {
+export interface Props {
   isWriteable: boolean;
   selectedElement?: CanvasElement;
   selectedPageNumber: number;

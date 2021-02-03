@@ -9,11 +9,19 @@ interface BuildSignalsSearchQuery {
   index: string;
   from: string;
   to: string;
+  size?: number;
 }
 
-export const buildSignalsSearchQuery = ({ ruleId, index, from, to }: BuildSignalsSearchQuery) => ({
+export const buildSignalsSearchQuery = ({
+  ruleId,
+  index,
+  from,
+  to,
+  size,
+}: BuildSignalsSearchQuery) => ({
   index,
   body: {
+    size,
     query: {
       bool: {
         filter: [

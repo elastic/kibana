@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FindResult } from '../../../../../alerts/server';
+import { AlertTypeParams, FindResult } from '../../../../../alerts/server';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 
@@ -24,7 +24,7 @@ export const findNotifications = async ({
   filter,
   sortField,
   sortOrder,
-}: FindNotificationParams): Promise<FindResult> =>
+}: FindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
   alertsClient.find({
     options: {
       fields,

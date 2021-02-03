@@ -6,7 +6,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useTransactionBreakdown } from '../../../../hooks/use_transaction_breakdown';
+import { useTransactionBreakdown } from './use_transaction_breakdown';
 import { TransactionBreakdownChartContents } from './transaction_breakdown_chart_contents';
 
 export function TransactionBreakdownChart({
@@ -26,7 +26,7 @@ export function TransactionBreakdownChart({
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-                defaultMessage: 'Average duration by span type',
+                defaultMessage: 'Time spent by span type',
               })}
             </h3>
           </EuiTitle>

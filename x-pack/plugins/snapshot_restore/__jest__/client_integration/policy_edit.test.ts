@@ -124,7 +124,8 @@ describe('<PolicyEdit />', () => {
         const { snapshotName } = POLICY_EDIT;
 
         // Complete step 1, change snapshot name
-        form.setInputValue('snapshotNameInput', `${snapshotName}-edited`);
+        const editedSnapshotName = `${snapshotName}-edited`;
+        form.setInputValue('snapshotNameInput', editedSnapshotName);
         actions.clickNextButton();
 
         // Complete step 2, enable ignore unavailable indices switch
@@ -143,20 +144,24 @@ describe('<PolicyEdit />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
+        const { name, isManagedPolicy, schedule, repository, retention } = POLICY_EDIT;
+
         const expected = {
-          ...POLICY_EDIT,
-          ...{
-            config: {
-              ignoreUnavailable: true,
-            },
-            retention: {
-              ...POLICY_EDIT.retention,
-              expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-              expireAfterUnit: EXPIRE_AFTER_UNIT,
-            },
-            snapshotName: `${POLICY_EDIT.snapshotName}-edited`,
+          name,
+          isManagedPolicy,
+          schedule,
+          repository,
+          config: {
+            ignoreUnavailable: true,
           },
+          retention: {
+            ...retention,
+            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+            expireAfterUnit: EXPIRE_AFTER_UNIT,
+          },
+          snapshotName: editedSnapshotName,
         };
+
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
 
@@ -180,10 +185,25 @@ describe('<PolicyEdit />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
+        const {
+          name,
+          isManagedPolicy,
+          schedule,
+          repository,
+          retention,
+          config,
+          snapshotName,
+        } = POLICY_EDIT;
+
         const expected = {
-          ...POLICY_EDIT,
+          name,
+          isManagedPolicy,
+          schedule,
+          repository,
+          config,
+          snapshotName,
           retention: {
-            ...POLICY_EDIT.retention,
+            ...retention,
             expireAfterValue: Number(EXPIRE_AFTER_VALUE),
             expireAfterUnit: TIME_UNITS.DAY, // default value
           },

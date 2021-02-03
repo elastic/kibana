@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+import { isEmpty } from 'lodash/fp';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
   EuiLoadingSpinner,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 
-import * as i18n from './translations';
+import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -29,7 +29,7 @@ import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
-import { CaseStatus } from '../case_status';
+import { CaseActionBar } from '../case_action_bar';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
@@ -41,6 +41,16 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
+import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TimelineId } from '../../../../common/types/timeline';
+import { timelineActions } from '../../../timelines/store/timeline';
+import { StatusActionButton } from '../status/button';
+
+import * as i18n from './translations';
 
 interface Props {
   caseId: string;
@@ -55,10 +65,8 @@ export interface OnUpdateFields {
 }
 
 const MyWrapper = styled.div`
-  padding: ${({
-    theme,
-  }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
-  ${theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -78,12 +86,38 @@ export interface CaseProps extends Props {
   updateCase: (newCase: Case) => void;
 }
 
+interface Signal {
+  rule: {
+    id: string;
+    name: string;
+    to: string;
+    from: string;
+  };
+}
+
+interface SignalHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+    signal: Signal;
+  };
+}
+
+export type Alert = {
+  _id: string;
+  _index: string;
+  '@timestamp': string;
+} & Signal;
+
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
+    const dispatch = useDispatch();
     const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
     const allCasesLink = getCaseUrl(search);
     const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
     const [initLoadingData, setInitLoadingData] = useState(true);
+    const init = useRef(true);
 
     const {
       caseUserActions,
@@ -97,6 +131,40 @@ export const CaseComponent = React.memo<CaseProps>(
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
+
+    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
+      caseData.comments,
+    ]);
+
+    /**
+     * For the future developer: useSourcererScope is security solution dependent.
+     * You can use useSignalIndex as an alternative.
+     */
+    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
+      SourcererScopeName.detections
+    );
+
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
+      alertsQuery,
+      selectedPatterns[0]
+    );
+
+    const alerts = useMemo(
+      () =>
+        alertsData?.hits.hits.reduce<Record<string, Alert>>(
+          (acc, { _id, _index, _source }) => ({
+            ...acc,
+            [_id]: {
+              _id,
+              _index,
+              '@timestamp': _source['@timestamp'],
+              ..._source.signal,
+            },
+          }),
+          {}
+        ) ?? {},
+      [alertsData?.hits.hits]
+    );
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -112,7 +180,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'title',
                 updateValue: titleUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -126,7 +194,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'connector',
                 updateValue: connector,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -140,7 +208,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'description',
                 updateValue: descriptionUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -153,24 +221,39 @@ export const CaseComponent = React.memo<CaseProps>(
               updateKey: 'tags',
               updateValue: tagsUpdate,
               updateCase: handleUpdateNewCase,
-              version: caseData.version,
+              caseData,
               onSuccess,
               onError,
             });
             break;
           case 'status':
-            const statusUpdate = getTypedPayload<string>(value);
+            const statusUpdate = getTypedPayload<CaseStatuses>(value);
             if (caseData.status !== value) {
               updateCaseProperty({
                 fetchCaseUserActions,
                 updateKey: 'status',
                 updateValue: statusUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
             }
+            break;
+          case 'settings':
+            const settingsUpdate = getTypedPayload<CaseAttributes['settings']>(value);
+            if (caseData.settings !== value) {
+              updateCaseProperty({
+                fetchCaseUserActions,
+                updateKey: 'settings',
+                updateValue: settingsUpdate,
+                updateCase: handleUpdateNewCase,
+                caseData,
+                onSuccess,
+                onError,
+              });
+            }
+            break;
           default:
             return null;
         }
@@ -212,7 +295,8 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
-      isValidConnector,
+      isValidConnector: isLoadingConnectors ? true : isValidConnector,
+      alerts,
     });
 
     const onSubmitConnector = useCallback(
@@ -241,11 +325,11 @@ export const CaseComponent = React.memo<CaseProps>(
       [onUpdateField]
     );
 
-    const toggleStatusCase = useCallback(
-      (nextStatus) =>
+    const changeStatus = useCallback(
+      (status: CaseStatuses) =>
         onUpdateField({
           key: 'status',
-          value: nextStatus ? 'closed' : 'open',
+          value: status,
         }),
       [onUpdateField]
     );
@@ -257,32 +341,6 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
-    const caseStatusData = useMemo(
-      () =>
-        caseData.status === 'open'
-          ? {
-              'data-test-subj': 'case-view-createdAt',
-              value: caseData.createdAt,
-              title: i18n.CASE_OPENED,
-              buttonLabel: i18n.CLOSE_CASE,
-              status: caseData.status,
-              icon: 'folderCheck',
-              badgeColor: 'secondary',
-              isSelected: false,
-            }
-          : {
-              'data-test-subj': 'case-view-closedAt',
-              value: caseData.closedAt ?? '',
-              title: i18n.CASE_CLOSED,
-              buttonLabel: i18n.REOPEN_CASE,
-              status: caseData.status,
-              icon: 'folderExclamation',
-              badgeColor: 'danger',
-              isSelected: true,
-            },
-      [caseData.closedAt, caseData.createdAt, caseData.status]
-    );
-
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
@@ -292,10 +350,10 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
+      if (initLoadingData && !isLoadingUserActions && !isLoadingAlerts) {
         setInitLoadingData(false);
       }
-    }, [initLoadingData, isLoadingUserActions]);
+    }, [initLoadingData, isLoadingAlerts, isLoadingUserActions]);
 
     const backOptions = useMemo(
       () => ({
@@ -307,10 +365,37 @@ export const CaseComponent = React.memo<CaseProps>(
       [allCasesLink]
     );
 
-    const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
-    const handleToggleStatusCase = useCallback(() => {
-      toggleStatusCase(!isSelected);
-    }, [toggleStatusCase, isSelected]);
+    const showAlert = useCallback(
+      (alertId: string, index: string) => {
+        dispatch(
+          timelineActions.toggleExpandedEvent({
+            timelineId: TimelineId.casePage,
+            event: {
+              eventId: alertId,
+              indexName: index,
+            },
+          })
+        );
+      },
+      [dispatch]
+    );
+
+    // useEffect used for component's initialization
+    useEffect(() => {
+      if (init.current) {
+        init.current = false;
+        // We need to create a timeline to show the details view
+        dispatch(
+          timelineActions.createTimeline({
+            id: TimelineId.casePage,
+            columns: [],
+            indexNames: [],
+            expandedEvent: {},
+            show: false,
+          })
+        );
+      }
+    }, [dispatch]);
 
     return (
       <>
@@ -329,14 +414,13 @@ export const CaseComponent = React.memo<CaseProps>(
             }
             title={caseData.title}
           >
-            <CaseStatus
+            <CaseActionBar
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}
-              isLoading={isLoading && updateKey === 'status'}
+              isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
-              toggleStatusCase={handleToggleStatusCase}
-              {...caseStatusData}
+              onUpdateField={onUpdateField}
             />
           </HeaderPage>
         </HeaderWrapper>
@@ -345,7 +429,9 @@ export const CaseComponent = React.memo<CaseProps>(
             {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
-                {initLoadingData && <EuiLoadingContent lines={8} />}
+                {initLoadingData && (
+                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                )}
                 {!initLoadingData && (
                   <>
                     <UserActionTree
@@ -359,20 +445,18 @@ export const CaseComponent = React.memo<CaseProps>(
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
+                      alerts={alerts}
+                      onShowAlertDetails={showAlert}
                     />
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj={caseStatusData['data-test-subj']}
-                          iconType={caseStatusData.icon}
-                          isDisabled={!userCanCrud}
+                        <StatusActionButton
+                          status={caseData.status}
+                          onStatusChanged={changeStatus}
+                          disabled={!userCanCrud}
                           isLoading={isLoading && updateKey === 'status'}
-                          fill={caseStatusData.isSelected}
-                          onClick={handleToggleStatusCase}
-                        >
-                          {caseStatusData.buttonLabel}
-                        </EuiButton>
+                        />
                       </EuiFlexItem>
                       {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
@@ -417,6 +501,11 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
+        <EventDetailsFlyout
+          browserFields={browserFields}
+          docValueFields={docValueFields}
+          timelineId={TimelineId.casePage}
+        />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
     );

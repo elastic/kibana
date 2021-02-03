@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { Connection, ConnectionNode } from '../../../common/service_map';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({
@@ -79,7 +79,7 @@ export async function getServiceMapFromTraceIds({
   serviceName,
   environment,
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
   traceIds: string[];
   serviceName?: string;
   environment?: string;

@@ -442,6 +442,7 @@ export function resolveCopyToSpaceConflictsSuite(
             .send({
               objects: [dashboardObject],
               includeReferences: true,
+              createNewCopies: false,
               retries: { [destination]: [{ ...visualizationObject, overwrite: false }] },
             })
             .expect(tests.withReferencesNotOverwriting.statusCode)
@@ -457,6 +458,7 @@ export function resolveCopyToSpaceConflictsSuite(
             .send({
               objects: [dashboardObject],
               includeReferences: true,
+              createNewCopies: false,
               retries: { [destination]: [{ ...visualizationObject, overwrite: true }] },
             })
             .expect(tests.withReferencesOverwriting.statusCode)
@@ -472,6 +474,7 @@ export function resolveCopyToSpaceConflictsSuite(
             .send({
               objects: [dashboardObject],
               includeReferences: false,
+              createNewCopies: false,
               retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
             })
             .expect(tests.withoutReferencesOverwriting.statusCode)
@@ -487,6 +490,7 @@ export function resolveCopyToSpaceConflictsSuite(
             .send({
               objects: [dashboardObject],
               includeReferences: false,
+              createNewCopies: false,
               retries: { [destination]: [{ ...dashboardObject, overwrite: false }] },
             })
             .expect(tests.withoutReferencesNotOverwriting.statusCode)
@@ -502,6 +506,7 @@ export function resolveCopyToSpaceConflictsSuite(
             .send({
               objects: [dashboardObject],
               includeReferences: false,
+              createNewCopies: false,
               retries: { [destination]: [{ ...dashboardObject, overwrite: true }] },
             })
             .expect(tests.nonExistentSpace.statusCode)
@@ -510,6 +515,7 @@ export function resolveCopyToSpaceConflictsSuite(
       });
 
       const includeReferences = false;
+      const createNewCopies = false;
       describe(`multi-namespace types with "overwrite" retry`, () => {
         before(() => esArchiver.load('saved_objects/spaces'));
         after(() => esArchiver.unload('saved_objects/spaces'));
@@ -520,7 +526,7 @@ export function resolveCopyToSpaceConflictsSuite(
             return supertestWithoutAuth
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_resolve_copy_saved_objects_errors`)
               .auth(user.username, user.password)
-              .send({ objects, includeReferences, retries })
+              .send({ objects, includeReferences, createNewCopies, retries })
               .expect(statusCode)
               .then(response);
           });

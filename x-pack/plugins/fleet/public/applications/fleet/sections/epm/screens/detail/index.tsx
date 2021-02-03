@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useCallback, ReactEventHandler } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,7 +20,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { DetailViewPanelName, entries, InstallStatus, PackageInfo } from '../../../../types';
+import {
+  CreatePackagePolicyRouteState,
+  DetailViewPanelName,
+  entries,
+  InstallStatus,
+  PackageInfo,
+} from '../../../../types';
 import { Loading, Error } from '../../../../components';
 import {
   useGetPackageInfoByKey,
@@ -36,6 +42,9 @@ import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
 import './index.scss';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import { PLUGIN_ID } from '../../../../../../../common/constants';
+import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
+import { IntegrationAgentPolicyCount } from './integration_agent_policy_count';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -55,7 +64,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
     defaultMessage: 'Settings',
   }),
   custom: i18n.translate('xpack.fleet.epm.packageDetailsNav.packageCustomLinkText', {
-    defaultMessage: 'Custom',
+    defaultMessage: 'Advanced',
   }),
 };
 
@@ -77,8 +86,10 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { pkgkey, panel = DEFAULT_PANEL } = useParams<DetailParams>();
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
+  const history = useHistory();
+  const location = useLocation();
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -173,6 +184,40 @@ export function Detail() {
     [getHref, isLoading, packageInfo]
   );
 
+  const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
+    (ev) => {
+      ev.preventDefault();
+
+      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
+      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
+      const currentPath = history.createHref({
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      });
+      const redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
+        CreatePackagePolicyRouteState['onCancelNavigateTo'] = [
+        PLUGIN_ID,
+        {
+          path: currentPath,
+        },
+      ];
+      const redirectBackRouteState: CreatePackagePolicyRouteState = {
+        onSaveNavigateTo: redirectToPath,
+        onCancelNavigateTo: redirectToPath,
+        onCancelUrl: currentPath,
+      };
+
+      history.push({
+        pathname: getPath('add_integration_to_policy', {
+          pkgkey,
+        }),
+        state: redirectBackRouteState,
+      });
+    },
+    [getPath, history, location.hash, location.pathname, location.search, pkgkey]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -195,9 +240,22 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
+              ...(packageInstallStatus === 'installed'
+                ? [
+                    { isDivider: true },
+                    {
+                      label: i18n.translate('xpack.fleet.epm.usedByLabel', {
+                        defaultMessage: 'Agent Policies',
+                      }),
+                      'data-test-subj': 'agentPolicyCount',
+                      content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
+                    },
+                  ]
+                : []),
               { isDivider: true },
               {
                 content: (
+                  // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiButton
                     fill
                     isDisabled={!hasWriteCapabilites}
@@ -205,6 +263,8 @@ export function Detail() {
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                     })}
+                    onClick={handleAddIntegrationPolicyClick}
+                    data-test-subj="addIntegrationPolicyButton"
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
@@ -217,7 +277,7 @@ export function Detail() {
                 ),
               },
             ].map((item, index) => (
-              <EuiFlexItem grow={false} key={index}>
+              <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
                   <Divider />
                 ) : item.label ? (
@@ -233,7 +293,15 @@ export function Detail() {
           </EuiFlexGroup>
         </>
       ) : undefined,
-    [getHref, hasWriteCapabilites, packageInfo, pkgkey, updateAvailable]
+    [
+      getHref,
+      handleAddIntegrationPolicyClick,
+      hasWriteCapabilites,
+      packageInfo,
+      packageInstallStatus,
+      pkgkey,
+      updateAvailable,
+    ]
   );
 
   const tabs = useMemo<WithHeaderLayoutProps['tabs']>(() => {
@@ -262,7 +330,7 @@ export function Detail() {
           isSelected: panelId === panel,
           'data-test-subj': `tab-${panelId}`,
           href: getHref('integration_details', {
-            pkgkey: `${packageInfo?.name}-${packageInfo?.version}`,
+            pkgkey: pkgKeyFromPackageInfo(packageInfo || {}),
             panel: panelId,
           }),
         };

@@ -89,13 +89,13 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        '--xpack.data_enhanced.search.sendToBackground.enabled=true', // enable WIP send to background UI
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -232,6 +232,7 @@ export default async function ({ readConfigFile }) {
             {
               feature: {
                 canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
@@ -404,6 +405,25 @@ export default async function ({ readConfigFile }) {
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {

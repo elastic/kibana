@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -17,8 +18,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/81668
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -73,39 +73,51 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: [
-            'execute',
-            'execute-action',
-            'new-instance',
-            'active-instance',
-            'resolved-instance',
-          ],
+          actions: new Map([
+            // make sure the counts of the # of events per type are as expected
+            ['execute', { gte: 4 }],
+            ['execute-action', { equal: 2 }],
+            ['new-instance', { equal: 1 }],
+            ['active-instance', { gte: 1 }],
+            ['recovered-instance', { equal: 1 }],
+          ]),
         });
       });
 
-      // make sure the counts of the # of events per type are as expected
+      // get the filtered events only with action 'new-instance'
+      const filteredEvents = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: alertId,
+          provider: 'alerting',
+          actions: new Map([['new-instance', { equal: 1 }]]),
+          filter: 'event.action:(new-instance)',
+        });
+      });
+
+      expect(getEventsByAction(filteredEvents, 'execute').length).equal(0);
+      expect(getEventsByAction(filteredEvents, 'execute-action').length).equal(0);
+      expect(getEventsByAction(events, 'new-instance').length).equal(1);
+
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const resolvedInstanceEvents = getEventsByAction(events, 'resolved-instance');
-
-      expect(executeEvents.length >= 4).to.be(true);
-      expect(executeActionEvents.length).to.be(2);
-      expect(newInstanceEvents.length).to.be(1);
-      expect(resolvedInstanceEvents.length).to.be(1);
+      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
       const executeActionTimes = getTimestamps(executeActionEvents);
       const newInstanceTimes = getTimestamps(newInstanceEvents);
-      const resolvedInstanceTimes = getTimestamps(resolvedInstanceEvents);
+      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
 
       expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
       expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
       expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
       expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
-      expect(resolvedInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
       // validate each event
       let executeCount = 0;
@@ -136,11 +148,152 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           case 'new-instance':
             validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
-          case 'resolved-instance':
-            validateInstanceEvent(event, `resolved instance: 'instance'`);
+          case 'recovered-instance':
+            validateInstanceEvent(event, `instance 'instance' has recovered`);
             break;
           case 'active-instance':
             validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
+            break;
+          // this will get triggered as we add new event actions
+          default:
+            throw new Error(`unexpected event action "${event?.event?.action}"`);
+        }
+      }
+
+      function validateInstanceEvent(event: IValidatedEvent, subMessage: string) {
+        validateEvent(event, {
+          spaceId: Spaces.space1.id,
+          savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+          message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
+          instanceId: 'instance',
+          actionGroupId: 'default',
+        });
+      }
+    });
+
+    it('should generate expected events for normal operation with subgroups', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire
+      const [firstSubgroup, secondSubgroup] = [uuid.v4(), uuid.v4()];
+      const pattern = {
+        instance: [false, firstSubgroup, secondSubgroup],
+      };
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            schedule: { interval: '1s' },
+            throttle: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      const alertId = response.body.id;
+      objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
+
+      // get the events we're expecting
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: alertId,
+          provider: 'alerting',
+          actions: new Map([
+            // make sure the counts of the # of events per type are as expected
+            ['execute', { gte: 4 }],
+            ['execute-action', { equal: 2 }],
+            ['new-instance', { equal: 1 }],
+            ['active-instance', { gte: 2 }],
+            ['recovered-instance', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvents = getEventsByAction(events, 'execute');
+      const executeActionEvents = getEventsByAction(events, 'execute-action');
+      const newInstanceEvents = getEventsByAction(events, 'new-instance');
+      const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
+
+      // make sure the events are in the right temporal order
+      const executeTimes = getTimestamps(executeEvents);
+      const executeActionTimes = getTimestamps(executeActionEvents);
+      const newInstanceTimes = getTimestamps(newInstanceEvents);
+      const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
+
+      expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
+      expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
+      expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
+      expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
+      expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
+      expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
+
+      // validate each event
+      let executeCount = 0;
+      const executeStatuses = ['ok', 'active', 'active'];
+      for (const event of events) {
+        switch (event?.event?.action) {
+          case 'execute':
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [{ type: 'alert', id: alertId, rel: 'primary' }],
+              outcome: 'success',
+              message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+              status: executeStatuses[executeCount++],
+            });
+            break;
+          case 'execute-action':
+            expect(
+              [firstSubgroup, secondSubgroup].includes(event?.kibana?.alerting?.action_subgroup!)
+            ).to.be(true);
+            validateEvent(event, {
+              spaceId: Spaces.space1.id,
+              savedObjects: [
+                { type: 'alert', id: alertId, rel: 'primary' },
+                { type: 'action', id: createdAction.id },
+              ],
+              message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
+              instanceId: 'instance',
+              actionGroupId: 'default',
+            });
+            break;
+          case 'new-instance':
+            validateInstanceEvent(event, `created new instance: 'instance'`);
+            break;
+          case 'recovered-instance':
+            validateInstanceEvent(event, `instance 'instance' has recovered`);
+            break;
+          case 'active-instance':
+            expect(
+              [firstSubgroup, secondSubgroup].includes(event?.kibana?.alerting?.action_subgroup!)
+            ).to.be(true);
+            validateInstanceEvent(
+              event,
+              `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`
+            );
             break;
           // this will get triggered as we add new event actions
           default:
@@ -182,7 +335,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute'],
+          actions: new Map([['execute', { gte: 1 }]]),
         });
       });
 

@@ -1,24 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBar = getService('filterBar');
@@ -52,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await retry.waitFor('wait for count to equal 9,109', async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          return data.trim() === '9,109';
+          const data = await PageObjects.visChart.getTableVisContent();
+          return data[0][0] === '9,109';
         });
       });
 
@@ -81,8 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 21, 2015 @ 10:00:00.000'
         );
         await retry.waitFor('wait for count to equal 3,950', async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          return data.trim() === '3,950';
+          const data = await PageObjects.visChart.getTableVisContent();
+          return data[0][0] === '3,950';
         });
       });
 
@@ -90,16 +81,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.addFilter('bytes', 'is between', '100', '3000');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 707', async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          return data.trim() === '707';
+          const data = await PageObjects.visChart.getTableVisContent();
+          return data[0][0] === '707';
         });
       });
 
       it('should allow unlinking from a linked search', async () => {
         await PageObjects.visualize.clickUnlinkSavedSearch();
         await retry.waitFor('wait for count to equal 707', async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          return data.trim() === '707';
+          const data = await PageObjects.visChart.getTableVisContent();
+          return data[0][0] === '707';
         });
         // The filter on the saved search should now be in the editor
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
@@ -109,8 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.toggleFilterEnabled('extension.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
-          const unfilteredData = await PageObjects.visChart.getTableVisData();
-          return unfilteredData.trim() === '1,293';
+          const unfilteredData = await PageObjects.visChart.getTableVisContent();
+          return unfilteredData[0][0] === '1,293';
         });
       });
 
@@ -118,8 +109,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.saveVisualizationExpectSuccess('Unlinked before saved');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {
-          const data = await PageObjects.visChart.getTableVisData();
-          return data.trim() === '1,293';
+          const data = await PageObjects.visChart.getTableVisContent();
+          return data[0][0] === '1,293';
         });
       });
     });

@@ -1,0 +1,18 @@
+$visColorPickerWidth: $euiSizeL * 8; // 8 columns
+
+.visColorPicker__value {
+  width: $visColorPickerWidth;
+}
+
+.visColorPicker__valueDot {
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.4);
+  }
+
+  &-isSelected {
+    border: $euiSizeXS solid;
+    border-radius: 100%;
+  }
+}

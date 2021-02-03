@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -289,11 +278,97 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
   };
+  /**
+   * {@link LoggerFactory | logger factory} instance already bound to the plugin's logging context
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   * // "id: myPlugin" in `plugins/my-plugin/kibana.yaml`
+   *
+   * export class MyPlugin implements Plugin  {
+   *   constructor(private readonly initContext: PluginInitializerContext) {
+   *     this.logger = initContext.logger.get();
+   *     // `logger` context: `plugins.myPlugin`
+   *     this.mySubLogger = initContext.logger.get('sub'); // or this.logger.get('sub');
+   *     // `mySubLogger` context: `plugins.myPlugin.sub`
+   *   }
+   * }
+   * ```
+   */
   logger: LoggerFactory;
+  /**
+   * Accessors for the plugin's configuration
+   */
   config: {
-    legacy: { globalConfig$: Observable<SharedGlobalConfig> };
+    /**
+     * Provide access to Kibana legacy configuration values.
+     *
+     * @remarks Naming not final here, it may be renamed in a near future
+     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged
+     */
+    legacy: {
+      globalConfig$: Observable<SharedGlobalConfig>;
+      get: () => SharedGlobalConfig;
+    };
+    /**
+     * Return an observable of the plugin's configuration
+     *
+     * @example
+     * ```typescript
+     * // plugins/my-plugin/server/plugin.ts
+     *
+     * export class MyPlugin implements Plugin {
+     *   constructor(private readonly initContext: PluginInitializerContext) {}
+     *   setup(core) {
+     *     this.configSub = this.initContext.config.create<MyPluginConfigType>().subscribe((config) => {
+     *       this.myService.reconfigure(config);
+     *     });
+     *   }
+     *   stop() {
+     *     this.configSub.unsubscribe();
+     *   }
+     * ```
+     *
+     * @example
+     * ```typescript
+     * // plugins/my-plugin/server/plugin.ts
+     *
+     * export class MyPlugin implements Plugin {
+     *   constructor(private readonly initContext: PluginInitializerContext) {}
+     *   async setup(core) {
+     *     this.config = await this.initContext.config.create<MyPluginConfigType>().pipe(take(1)).toPromise();
+     *   }
+     *   stop() {
+     *     this.configSub.unsubscribe();
+     *   }
+     * ```
+     *
+     * @remarks The underlying observable has a replay effect, meaning that awaiting for the first emission
+     *          will be resolved at next tick, without risks to delay any asynchronous code's workflow.
+     */
     create: <T = ConfigSchema>() => Observable<T>;
-    createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
+    /**
+     * Return the current value of the plugin's configuration synchronously.
+     *
+     * @example
+     * ```typescript
+     * // plugins/my-plugin/server/plugin.ts
+     *
+     * export class MyPlugin implements Plugin {
+     *   constructor(private readonly initContext: PluginInitializerContext) {}
+     *   setup(core) {
+     *     const config = this.initContext.config.get<MyPluginConfigType>();
+     *     // do something with the config
+     *   }
+     * }
+     * ```
+     *
+     * @remarks This should only be used when synchronous access is an absolute necessity, such
+     *          as during the plugin's setup or start lifecycle. For all other usages,
+     *          {@link create} should be used instead.
+     */
+    get: <T = ConfigSchema>() => T;
   };
 }
 

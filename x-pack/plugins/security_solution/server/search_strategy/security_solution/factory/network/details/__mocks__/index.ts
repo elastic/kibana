@@ -139,7 +139,44 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
     aggregations: {
       host: {
         doc_count: 0,
-        results: { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] } },
+        results: {
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'auditbeat-7.8.0-2020.11.23-000004',
+                _id: 'wRCuOnYB7WTwW_GluxL8',
+                _score: null,
+                _source: {
+                  host: {
+                    hostname: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
+                    os: {
+                      kernel: '5.4.0-1030-gcp',
+                      codename: 'focal',
+                      name: 'Ubuntu',
+                      family: 'debian',
+                      version: '20.04.1 LTS (Focal Fossa)',
+                      platform: 'ubuntu',
+                    },
+                    containerized: false,
+                    ip: [
+                      '10.224.0.219',
+                      'fe80::4001:aff:fee0:db',
+                      '172.17.0.1',
+                      'fe80::42:3fff:fe35:46f8',
+                    ],
+                    name: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
+                    id: 'a4b4839036f2d1161a21f12ea786a596',
+                    mac: ['42:01:0a:e0:00:db', '02:42:3f:35:46:f8'],
+                    architecture: 'x86_64',
+                  },
+                },
+                sort: [1607302298617],
+              },
+            ],
+          },
+        },
       },
       destination: {
         meta: {},
@@ -385,7 +422,23 @@ export const formattedSearchStrategyResponse = {
         location: { lon: -77.2481, lat: 38.6583 },
       },
     },
-    host: {},
+    host: {
+      architecture: ['x86_64'],
+      containerized: ['false'],
+      hostname: ['internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773'],
+      id: ['a4b4839036f2d1161a21f12ea786a596'],
+      ip: ['10.224.0.219', 'fe80::4001:aff:fee0:db', '172.17.0.1', 'fe80::42:3fff:fe35:46f8'],
+      mac: ['42:01:0a:e0:00:db', '02:42:3f:35:46:f8'],
+      name: ['internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773'],
+      os: {
+        codename: ['focal'],
+        family: ['debian'],
+        kernel: ['5.4.0-1030-gcp'],
+        name: ['Ubuntu'],
+        platform: ['ubuntu'],
+        version: ['20.04.1 LTS (Focal Fossa)'],
+      },
+    },
   },
 };
 

@@ -10,11 +10,13 @@ import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
 import { ServerAPI } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const debugRt = t.exact(
   t.partial({
@@ -73,7 +75,10 @@ export function createApi() {
 
         const anyObject = schema.object({}, { unknowns: 'allow' });
 
-        (router[typedRouterMethod] as RouteRegistrar<typeof typedRouterMethod>)(
+        (router[typedRouterMethod] as RouteRegistrar<
+          typeof typedRouterMethod,
+          ApmPluginRequestHandlerContext
+        >)(
           {
             path,
             options,
@@ -128,6 +133,15 @@ export function createApi() {
               if (Boom.isBoom(error)) {
                 return convertBoomToKibanaResponse(error, response);
               }
+
+              if (error instanceof RequestAbortedError) {
+                return response.custom({
+                  statusCode: 499,
+                  body: {
+                    message: 'Client closed request',
+                  },
+                });
+              }
               throw error;
             }
           }
@@ -140,10 +154,10 @@ export function createApi() {
 }
 
 function convertBoomToKibanaResponse(
-  error: Boom,
+  error: Boom.Boom,
   response: KibanaResponseFactory
 ) {
-  const opts = { body: error.message };
+  const opts = { body: { message: error.message } };
   switch (error.output.statusCode) {
     case 404:
       return response.notFound(opts);
@@ -155,9 +169,6 @@ function convertBoomToKibanaResponse(
       return response.forbidden(opts);
 
     default:
-      return response.custom({
-        statusCode: error.output.statusCode,
-        ...opts,
-      });
+      throw error;
   }
 }

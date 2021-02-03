@@ -33,6 +33,7 @@ interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
+  currentFilterTags: string[];
   // eslint-disable-next-line react/no-unused-prop-types
   isLoading: boolean; // TO DO reimplement?
 }
@@ -62,8 +63,12 @@ const TagsFilterPopoverComponent = ({
   tags,
   selectedTags,
   onSelectedTagsChanged,
+  currentFilterTags,
 }: TagsFilterPopoverProps) => {
-  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
+  const sortedTags = useMemo(
+    () => caseInsensitiveSort(Array.from(new Set([...tags, ...currentFilterTags]))),
+    [tags, currentFilterTags]
+  );
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [filterTags, setFilterTags] = useState(sortedTags);

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   InventoryItemType,
   MetricsUIAggregation,

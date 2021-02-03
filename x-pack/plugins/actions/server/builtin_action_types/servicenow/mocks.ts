@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
-import { MapRecord } from '../case/types';
+import { ExternalService, ExecutorSubActionPushParams } from './types';
 
 export const serviceNowCommonFields = [
   {
@@ -34,8 +33,43 @@ export const serviceNowCommonFields = [
     element: 'sys_updated_by',
   },
 ];
+
+export const serviceNowChoices = [
+  {
+    dependent_value: '',
+    label: '1 - Critical',
+    value: '1',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '2 - High',
+    value: '2',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '3 - Moderate',
+    value: '3',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '4 - Low',
+    value: '4',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '5 - Planning',
+    value: '5',
+    element: 'priority',
+  },
+];
+
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
+    getChoices: jest.fn().mockImplementation(() => Promise.resolve(serviceNowChoices)),
     getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
@@ -69,64 +103,27 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const mapping: Map<string, Partial<MapRecord>> = new Map();
-
-mapping.set('title', {
-  target: 'short_description',
-  actionType: 'overwrite',
-});
-
-mapping.set('description', {
-  target: 'description',
-  actionType: 'overwrite',
-});
-
-mapping.set('comments', {
-  target: 'comments',
-  actionType: 'append',
-});
-
-mapping.set('short_description', {
-  target: 'title',
-  actionType: 'overwrite',
-});
-
 const executorParams: ExecutorSubActionPushParams = {
-  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
-  externalId: 'incident-3',
-  createdAt: '2020-03-13T08:34:53.450Z',
-  createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-03-13T08:34:53.450Z',
-  updatedBy: { fullName: 'Elastic User', username: 'elastic' },
-  title: 'Incident title',
-  description: 'Incident description',
-  comment: 'test-alert comment',
-  severity: '1',
-  urgency: '2',
-  impact: '3',
+  incident: {
+    externalId: 'incident-3',
+    short_description: 'Incident title',
+    description: 'Incident description',
+    severity: '1',
+    urgency: '2',
+    impact: '3',
+  },
   comments: [
     {
       commentId: 'case-comment-1',
       comment: 'A comment',
-      createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-03-13T08:34:53.450Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
     {
       commentId: 'case-comment-2',
       comment: 'Another comment',
-      createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-03-13T08:34:53.450Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
   ],
 };
 
-const apiParams: PushToServiceApiParams = {
-  ...executorParams,
-  externalObject: { short_description: 'Incident title', description: 'Incident description' },
-};
+const apiParams = executorParams;
 
-export { externalServiceMock, mapping, executorParams, apiParams };
+export { externalServiceMock, executorParams, apiParams };

@@ -5,7 +5,7 @@
  */
 
 import { ApiToken } from '../credentials/types';
-import { Schema, SchemaConflicts, IndexingStatus } from '../schema/types';
+import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
 
 export interface Engine {
   name: string;
@@ -26,7 +26,7 @@ export interface EngineDetails extends Engine {
   schema: Schema;
   schemaConflicts?: SchemaConflicts;
   unconfirmedFields?: string[];
-  activeReindexJob?: IndexingStatus;
+  activeReindexJob?: IIndexingStatus;
   invalidBoosts: boolean;
   sample?: boolean;
   isMeta: boolean;

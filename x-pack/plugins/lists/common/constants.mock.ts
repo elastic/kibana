@@ -36,10 +36,12 @@ export const TYPE = 'ip';
 export const VALUE = '127.0.0.1';
 export const VALUE_2 = '255.255.255';
 export const NAMESPACE_TYPE = 'single';
+export const NESTED_FIELD = 'parent.field';
 
 // Exception List specific
 export const ID = 'uuid_here';
 export const ITEM_ID = 'some-list-item-id';
+export const DETECTION_TYPE = 'detection';
 export const ENDPOINT_TYPE = 'endpoint';
 export const FIELD = 'host.name';
 export const OPERATOR = 'included';

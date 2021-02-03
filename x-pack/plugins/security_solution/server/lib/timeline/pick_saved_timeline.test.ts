@@ -42,7 +42,7 @@ describe('pickSavedTimeline', () => {
     templateTimelineVersion: null,
     eventType: 'all',
     filters: [],
-    sort: { sortDirection: 'desc', columnId: '@timestamp' },
+    sort: { sortDirection: 'desc', columnType: 'number', columnId: '@timestamp' },
     title: 'title',
     kqlMode: 'filter',
     timelineType: TimelineType.default,

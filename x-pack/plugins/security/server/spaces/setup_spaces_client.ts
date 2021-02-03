@@ -33,6 +33,12 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
 
   spacesClient.registerClientWrapper(
     (request, baseClient) =>
-      new SecureSpacesClientWrapper(baseClient, request, authz, spacesAuditLogger)
+      new SecureSpacesClientWrapper(
+        baseClient,
+        request,
+        authz,
+        audit.asScoped(request),
+        spacesAuditLogger
+      )
   );
 };

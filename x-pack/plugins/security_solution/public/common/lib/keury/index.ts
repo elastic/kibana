@@ -5,6 +5,7 @@
  */
 
 import { isEmpty, isString, flow } from 'lodash/fp';
+
 import {
   EsQueryConfig,
   Query,
@@ -13,10 +14,7 @@ import {
   esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-
-import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -55,17 +53,6 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
   }
 
   return val;
-};
-
-export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
-  if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
-    try {
-      esKuery.fromKueryExpression(kqlFilterQuery.expression);
-    } catch (err) {
-      return false;
-    }
-  }
-  return true;
 };
 
 const escapeWhitespace = (val: string) =>

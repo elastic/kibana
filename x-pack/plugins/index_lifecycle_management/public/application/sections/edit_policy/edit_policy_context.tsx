@@ -14,6 +14,9 @@ export interface EditPolicyContextValue {
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  license: {
+    canUseSearchableSnapshot: () => boolean;
+  };
   policyName?: string;
 }
 
@@ -29,7 +32,7 @@ export const EditPolicyContextProvider = ({
   return <EditPolicyContext.Provider value={value}>{children}</EditPolicyContext.Provider>;
 };
 
-export const useEditPolicyContext = () => {
+export const useEditPolicyContext = (): EditPolicyContextValue => {
   const ctx = useContext(EditPolicyContext);
   if (!ctx) {
     throw new Error('useEditPolicyContext can only be called inside of EditPolicyContext!');

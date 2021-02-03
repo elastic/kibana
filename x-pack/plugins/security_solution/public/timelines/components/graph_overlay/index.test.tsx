@@ -8,27 +8,34 @@ import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../common/containers/use_full_screen';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import { GraphOverlay } from '.';
 
 jest.mock('../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel.savedObjectId),
+  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
 }));
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
-  useFullScreen: jest.fn(),
+  useGlobalFullScreen: jest.fn(),
+  useTimelineFullScreen: jest.fn(),
 }));
 
 describe('GraphOverlay', () => {
   beforeEach(() => {
-    (useFullScreen as jest.Mock).mockReturnValue({
-      timelineFullScreen: false,
-      setTimelineFullScreen: jest.fn(),
+    (useGlobalFullScreen as jest.Mock).mockReturnValue({
       globalFullScreen: false,
       setGlobalFullScreen: jest.fn(),
+    });
+    (useTimelineFullScreen as jest.Mock).mockReturnValue({
+      timelineFullScreen: false,
+      setTimelineFullScreen: jest.fn(),
     });
   });
 
@@ -39,12 +46,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -55,21 +57,18 @@ describe('GraphOverlay', () => {
     });
 
     test('it has a calculated width that makes room for the Timeline flyout button when isEventViewer is true in full screen mode', async () => {
-      (useFullScreen as jest.Mock).mockReturnValue({
-        timelineFullScreen: false,
-        setTimelineFullScreen: jest.fn(),
+      (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: true, // <-- true when an events viewer is in full screen mode
         setGlobalFullScreen: jest.fn(),
+      });
+      (useTimelineFullScreen as jest.Mock).mockReturnValue({
+        timelineFullScreen: false,
+        setTimelineFullScreen: jest.fn(),
       });
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -87,12 +86,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is false and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -103,21 +97,18 @@ describe('GraphOverlay', () => {
     });
 
     test('it has 100% width when isEventViewer is false and the active timeline is in full screen mode', async () => {
-      (useFullScreen as jest.Mock).mockReturnValue({
-        timelineFullScreen: true, // <-- true when the active timeline is in full screen mode
-        setTimelineFullScreen: jest.fn(),
+      (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: false,
         setGlobalFullScreen: jest.fn(),
+      });
+      (useTimelineFullScreen as jest.Mock).mockReturnValue({
+        timelineFullScreen: true, // <-- true when the active timeline is in full screen mode
+        setTimelineFullScreen: jest.fn(),
       });
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay
-            timelineId={timelineId}
-            graphEventId="abcd"
-            isEventViewer={isEventViewer}
-            timelineType={TimelineType.default}
-          />
+          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertTypeParams } from '../../../../alerts/common';
+
 export interface Comparator {
   text: string;
   value: string;
@@ -24,8 +26,8 @@ export interface GroupByType {
   validNormalizedTypes: string[];
 }
 
-export interface IndexThresholdAlertParams {
-  index: string[];
+export interface IndexThresholdAlertParams extends AlertTypeParams {
+  index: string | string[];
   timeField?: string;
   aggType: string;
   aggField?: string;

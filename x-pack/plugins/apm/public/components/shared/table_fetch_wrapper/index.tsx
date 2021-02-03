@@ -5,7 +5,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ErrorStatePrompt } from '../ErrorStatePrompt';
 
 export function TableFetchWrapper({

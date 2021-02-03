@@ -49,8 +49,6 @@ selenium
 *.swp
 *.swo
 *.out
-/packages/kbn-ui-framework/doc_site/build/*
-!/packages/kbn-ui-framework/doc_site/build/index.html
 package-lock.json
 .yo-rc.json
 .vscode
@@ -78,3 +76,7 @@ report.asciidoc
 
 # Yarn local mirror content
 .yarn-local-mirror
+
+# Bazel
+/bazel-*
+/.bazelrc.user

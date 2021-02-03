@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-supportedTriggers(): Array<keyof TriggerContextMapping>;
+supportedTriggers(): string[];
 ```
 <b>Returns:</b>
 
-`Array<keyof TriggerContextMapping>`
+`string[]`
 

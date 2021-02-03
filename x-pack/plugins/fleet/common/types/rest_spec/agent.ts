@@ -62,7 +62,6 @@ export interface PostAgentCheckinResponse {
 export interface PostAgentEnrollRequest {
   body: {
     type: AgentType;
-    shared_id?: string;
     metadata: {
       local: Record<string, any>;
       user_provided: Record<string, any>;
@@ -206,6 +205,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
+    kuery?: string;
     policyId?: string;
   };
 }
@@ -218,5 +218,6 @@ export interface GetAgentStatusResponse {
     error: number;
     offline: number;
     other: number;
+    updating: number;
   };
 }

@@ -6,6 +6,14 @@
 import { AlertsFactory } from './alerts_factory';
 import { ALERT_CPU_USAGE } from '../../common/constants';
 
+jest.mock('../static_globals', () => ({
+  Globals: {
+    app: {
+      getLogger: () => ({ debug: jest.fn() }),
+    },
+  },
+}));
+
 describe('AlertsFactory', () => {
   const alertsClient = {
     find: jest.fn(),
@@ -16,31 +24,19 @@ describe('AlertsFactory', () => {
   });
 
   it('should get by type', async () => {
-    const id = '1abc';
     alertsClient.find = jest.fn().mockImplementation(() => {
       return {
         total: 1,
         data: [
           {
-            id,
+            id: ALERT_CPU_USAGE,
           },
         ],
       };
     });
     const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
     expect(alert).not.toBeNull();
-    expect(alert?.type).toBe(ALERT_CPU_USAGE);
-  });
-
-  it('should handle no alert found', async () => {
-    alertsClient.find = jest.fn().mockImplementation(() => {
-      return {
-        total: 0,
-      };
-    });
-    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
-    expect(alert).not.toBeNull();
-    expect(alert?.type).toBe(ALERT_CPU_USAGE);
+    expect(alert?.getId()).toBe(ALERT_CPU_USAGE);
   });
 
   it('should pass in the correct filters', async () => {
@@ -53,11 +49,5 @@ describe('AlertsFactory', () => {
     });
     await AlertsFactory.getByType(ALERT_CPU_USAGE, alertsClient as any);
     expect(filter).toBe(`alert.attributes.alertTypeId:${ALERT_CPU_USAGE}`);
-  });
-
-  it('should handle no alerts client', async () => {
-    const alert = await AlertsFactory.getByType(ALERT_CPU_USAGE, undefined);
-    expect(alert).not.toBeNull();
-    expect(alert?.type).toBe(ALERT_CPU_USAGE);
   });
 });

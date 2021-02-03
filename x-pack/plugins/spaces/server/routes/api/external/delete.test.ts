@@ -27,6 +27,7 @@ import { initDeleteSpacesApi } from './delete';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
 import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
@@ -51,6 +52,8 @@ describe('Spaces Public API', () => {
       basePath: httpService.basePath,
     });
 
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -61,9 +64,9 @@ describe('Spaces Public API', () => {
     initDeleteSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     const [routeDefinition, routeHandler] = router.delete.mock.calls[0];

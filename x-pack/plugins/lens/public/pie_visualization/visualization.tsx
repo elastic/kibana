@@ -11,12 +11,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { LayerState, PieVisualizationState } from './types';
+import { PieLayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
@@ -243,6 +243,34 @@ export const getPieVisualization = ({
       </I18nProvider>,
       domElement
     );
+  },
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const metricColumnsWithArrayValues = [];
+
+    for (const layer of state.layers) {
+      const { layerId, metric } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows || !metric) {
+        break;
+      }
+      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
+
+      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
+      if (hasArrayValues) {
+        metricColumnsWithArrayValues.push(columnToLabel || metric);
+      }
+    }
+    return metricColumnsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
   },
 
   getErrorMessages(state, frame) {

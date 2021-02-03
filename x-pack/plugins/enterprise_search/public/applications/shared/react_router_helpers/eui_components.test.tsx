@@ -8,11 +8,11 @@ import '../../__mocks__/kea.mock';
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { EuiLink, EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiPanel, EuiCard } from '@elastic/eui';
 
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
-import { EuiLinkTo, EuiButtonTo, EuiPanelTo } from './eui_components';
+import { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {
@@ -31,11 +31,24 @@ describe('EUI & React Router Component Helpers', () => {
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
 
+  it('renders an EuiButtonEmpty', () => {
+    const wrapper = shallow(<EuiButtonEmptyTo to="/" />);
+
+    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
+  });
+
   it('renders an EuiPanel', () => {
     const wrapper = shallow(<EuiPanelTo to="/" paddingSize="l" />);
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiPanel).prop('paddingSize')).toEqual('l');
+  });
+
+  it('renders an EuiCard', () => {
+    const wrapper = shallow(<EuiCardTo to="/" title="test" description="" />);
+
+    expect(wrapper.find(EuiCard)).toHaveLength(1);
+    expect(wrapper.find(EuiCard).prop('title')).toEqual('test');
   });
 
   it('passes down all ...rest props', () => {

@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:eslint
+checks-reporter-with-killswitch "Lint: eslint" \
+  node scripts/eslint --no-cache

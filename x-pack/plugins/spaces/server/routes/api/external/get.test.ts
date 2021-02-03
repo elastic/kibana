@@ -21,6 +21,7 @@ import {
 import { SpacesService } from '../../../spaces_service';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
@@ -46,6 +47,8 @@ describe('GET space', () => {
       basePath: httpService.basePath,
     });
 
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -56,9 +59,9 @@ describe('GET space', () => {
     initGetSpaceApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     return {

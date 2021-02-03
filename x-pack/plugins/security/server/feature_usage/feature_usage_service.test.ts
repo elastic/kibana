@@ -11,11 +11,12 @@ describe('#setup', () => {
     const featureUsage = { register: jest.fn() };
     const securityFeatureUsage = new SecurityFeatureUsageService();
     securityFeatureUsage.setup({ featureUsage });
-    expect(featureUsage.register).toHaveBeenCalledTimes(2);
+    expect(featureUsage.register).toHaveBeenCalledTimes(3);
     expect(featureUsage.register.mock.calls.map((c) => c[0])).toMatchInlineSnapshot(`
       Array [
         "Subfeature privileges",
         "Pre-access agreement",
+        "Audit logging",
       ]
     `);
   });
@@ -38,5 +39,14 @@ describe('start contract', () => {
     startContract.recordPreAccessAgreementUsage();
     expect(featureUsage.notifyUsage).toHaveBeenCalledTimes(1);
     expect(featureUsage.notifyUsage).toHaveBeenCalledWith('Pre-access agreement');
+  });
+
+  it('notifies when audit logging is used', () => {
+    const featureUsage = { notifyUsage: jest.fn(), getLastUsages: jest.fn() };
+    const securityFeatureUsage = new SecurityFeatureUsageService();
+    const startContract = securityFeatureUsage.start({ featureUsage });
+    startContract.recordAuditLoggingUsage();
+    expect(featureUsage.notifyUsage).toHaveBeenCalledTimes(1);
+    expect(featureUsage.notifyUsage).toHaveBeenCalledWith('Audit logging');
   });
 });

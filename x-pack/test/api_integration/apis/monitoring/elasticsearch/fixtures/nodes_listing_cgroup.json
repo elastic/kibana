@@ -139,7 +139,8 @@
           "slope": -1
         }
       },
-      "resolver": "_x_V2YzPQU-a9KRRBxUxZQ"
+      "resolver": "_x_V2YzPQU-a9KRRBxUxZQ",
+      "uuid": "_x_V2YzPQU-a9KRRBxUxZQ"
     },
     {
       "name": "hello02",
@@ -247,7 +248,8 @@
           "slope": -1
         }
       },
-      "resolver": "DAiX7fFjS3Wii7g2HYKrOg"
+      "resolver": "DAiX7fFjS3Wii7g2HYKrOg",
+      "uuid": "DAiX7fFjS3Wii7g2HYKrOg"
     }
   ],
   "totalNodeCount": 2

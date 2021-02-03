@@ -13,6 +13,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
+  TimelineKpiStrategyResponse,
 } from './events';
 import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 
@@ -28,10 +29,14 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: TimelineFactoryQueryTypes;
 }
 
+export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
+  type: string;
+}
+
 export interface TimelineRequestOptionsPaginated<Field = string>
   extends TimelineRequestBasicOptions {
   pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: SortField<Field>;
+  sort: Array<TimelineRequestSortField<Field>>;
 }
 
 export type TimelineStrategyResponseType<
@@ -40,6 +45,8 @@ export type TimelineStrategyResponseType<
   ? TimelineEventsAllStrategyResponse
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsStrategyResponse
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineKpiStrategyResponse
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeStrategyResponse
   : never;
@@ -50,6 +57,8 @@ export type TimelineStrategyRequestType<
   ? TimelineEventsAllRequestOptions
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsRequestOptions
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineRequestBasicOptions
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeRequestOptions
   : never;

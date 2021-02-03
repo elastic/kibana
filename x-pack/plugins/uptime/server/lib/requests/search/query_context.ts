@@ -5,13 +5,14 @@
  */
 
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
+import { UptimeESClient } from '../../lib';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 
 export class QueryContext {
-  callES: ElasticsearchClient;
+  callES: UptimeESClient;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -21,7 +22,7 @@ export class QueryContext {
   hasTimespanCache?: boolean;
 
   constructor(
-    database: any,
+    database: UptimeESClient,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -38,15 +39,16 @@ export class QueryContext {
     this.statusFilter = statusFilter;
   }
 
-  async search(params: any): Promise<any> {
-    return this.callES.search({ body: params.body });
+  async search<TParams>(params: TParams) {
+    return this.callES.search(params);
   }
 
   async count(params: any): Promise<any> {
-    return this.callES.count(params);
+    const { body } = await this.callES.count(params);
+    return body;
   }
 
-  async dateAndCustomFilters(): Promise<any[]> {
+  async dateAndCustomFilters(): Promise<ESFilter[]> {
     const clauses = [await this.dateRangeFilter()];
     if (this.filterClause) {
       clauses.push(this.filterClause);

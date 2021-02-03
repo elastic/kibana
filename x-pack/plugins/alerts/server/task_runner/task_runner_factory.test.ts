@@ -16,12 +16,19 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 
-const alertType = {
+const alertType: UntypedNormalizedAlertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };
@@ -68,6 +75,7 @@ describe('Task Runner Factory', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry: alertTypeRegistryMock.create(),
   };
 
   beforeEach(() => {

@@ -8,7 +8,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { memo, useMemo, Fragment } from 'react';
+import React, { memo, useMemo, Fragment, HTMLAttributes } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
@@ -29,6 +29,7 @@ import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
+import * as nodeDataModel from '../../models/node_data';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -39,23 +40,24 @@ const eventDetailRequestError = i18n.translate(
 
 export const EventDetail = memo(function EventDetail({
   nodeID,
-  eventID,
   eventCategory: eventType,
 }: {
   nodeID: string;
-  eventID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
+  const isTreeLoading = useSelector(selectors.isTreeLoading);
+  const processEvent = useSelector((state: ResolverState) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+  );
+  const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
-  const isLoading = isEventLoading || isProcessTreeLoading;
+  const isNodeDataLoading = nodeStatus === 'loading';
+  const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
+
   return isLoading ? (
     <StyledPanel>
       <PanelLoading />
@@ -90,7 +92,7 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: SafeResolverEvent | null;
+  processEvent: SafeResolverEvent | undefined;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =
@@ -220,7 +222,7 @@ function EventDetailBreadcrumbs({
   breadcrumbEventCategory: string;
 }) {
   const countByCategory = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountByCategory(state)(nodeID, breadcrumbEventCategory)
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, breadcrumbEventCategory)
   );
   const relatedEventCount: number | undefined = useSelector((state: ResolverState) =>
     selectors.relatedEventTotalCount(state)(nodeID)
@@ -244,7 +246,12 @@ function EventDetailBreadcrumbs({
     panelParameters: { nodeID, eventCategory: breadcrumbEventCategory },
   });
   const breadcrumbs = useMemo(() => {
-    const crumbs = [
+    const crumbs: Array<
+      {
+        text: JSX.Element | string;
+        'data-test-subj'?: string;
+      } & HTMLAttributes<HTMLAnchorElement>
+    > = [
       {
         text: i18n.translate(
           'xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.events',
@@ -252,6 +259,7 @@ function EventDetailBreadcrumbs({
             defaultMessage: 'Events',
           }
         ),
+        'data-test-subj': 'resolver:event-detail:breadcrumbs:node-list-link',
         ...nodesLinkNavProps,
       },
       {

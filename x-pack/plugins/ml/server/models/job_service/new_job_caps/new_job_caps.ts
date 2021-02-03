@@ -5,10 +5,11 @@
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
-interface NewJobCapsResponse {
+export interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
@@ -22,10 +23,12 @@ export function newJobCapsProvider(client: IScopedClusterClient) {
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 
+    // Remove the _doc_count field as we don't want to display this in the fields lists in the UI
+    const fieldsWithoutDocCount = fields.filter(({ id }) => id !== _DOC_COUNT);
     return {
       [indexPattern]: {
         aggs,
-        fields,
+        fields: fieldsWithoutDocCount,
       },
     };
   }

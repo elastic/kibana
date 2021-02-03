@@ -16,7 +16,44 @@ export async function fetchJourneySteps(
 ): Promise<SyntheticsJourneyApiResponse> {
   return (await apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
-    undefined,
+    { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
+}
+
+export async function fetchJourneysFailedSteps({
+  checkGroups,
+}: {
+  checkGroups: string[];
+}): Promise<SyntheticsJourneyApiResponse> {
+  return (await apiService.get(
+    `/api/uptime/journeys/failed_steps`,
+    { checkGroups },
+    SyntheticsJourneyApiResponseType
+  )) as SyntheticsJourneyApiResponse;
+}
+
+export async function getJourneyScreenshot(imgSrc: string) {
+  try {
+    const imgRequest = new Request(imgSrc);
+
+    const response = await fetch(imgRequest);
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+    const imgBlob = await response.blob();
+
+    const stepName = response.headers.get('caption-name');
+    const maxSteps = response.headers.get('max-steps');
+
+    return {
+      stepName,
+      maxSteps: Number(maxSteps ?? 0),
+      src: URL.createObjectURL(imgBlob),
+    };
+  } catch (e) {
+    return null;
+  }
 }

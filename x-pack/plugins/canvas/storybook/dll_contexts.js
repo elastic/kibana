@@ -10,6 +10,3 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 require('../../../../src/core/server/core_app/assets/legacy_light_theme.css');
-
-const json = require.context('../shareable_runtime/test/workpads', false, /\.json$/);
-json.keys().forEach((key) => json(key));

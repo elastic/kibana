@@ -10,7 +10,7 @@ import { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
 import { px, unit } from '../../../../../../style/variables';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   onDelete: () => void;
@@ -48,6 +48,7 @@ async function deleteConfig(
   try {
     await callApmApi({
       endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
+      signal: null,
       params: {
         path: { id: customLinkId },
       },

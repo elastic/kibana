@@ -8,7 +8,14 @@
 import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
 import { SortDirection } from 'src/plugins/data/common/search';
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SCALING_TYPES, MVT_FIELD_TYPE } from '../constants';
+import {
+  AGG_TYPE,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SCALING_TYPES,
+  MVT_FIELD_TYPE,
+  SOURCE_TYPES,
+} from '../constants';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -60,7 +67,13 @@ export type FieldedAggDescriptor = AbstractAggDescriptor & {
   field?: string;
 };
 
-export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor;
+export type PercentileAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.PERCENTILE;
+  field?: string;
+  percentile?: number;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
@@ -70,6 +83,12 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   geoField: string;
   requestType: RENDER_AS;
   resolution: GRID_RESOLUTION;
+};
+
+export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  geoField: string;
+  splitField: string;
+  sortField: string;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
@@ -92,6 +111,8 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
   term: string; // term field name
   whereQuery?: Query;
+  size?: number;
+  type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
@@ -143,8 +164,24 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
+export type InlineFieldDescriptor = {
+  name: string;
+  type: 'string' | 'number';
+};
+
 export type GeojsonFileSourceDescriptor = {
+  __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
   name: string;
   type: string;
 };
+
+export type TableSourceDescriptor = {
+  id: string;
+  type: SOURCE_TYPES.TABLE_SOURCE;
+  __rows: Array<{ [key: string]: string | number }>;
+  __columns: InlineFieldDescriptor[];
+  term: string;
+};
+
+export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

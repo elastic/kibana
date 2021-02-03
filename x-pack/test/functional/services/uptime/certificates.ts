@@ -59,5 +59,12 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
         await self.hasCertificates(1);
       });
     },
+    async displaysEmptyMessage() {
+      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
+      const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
+      expect(emptyText).to.eql(
+        'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+'
+      );
+    },
   };
 }

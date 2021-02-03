@@ -10,7 +10,7 @@ export const DATE_PICKER_APPLY_BUTTON =
   '[data-test-subj="globalDatePicker"] button[data-test-subj="querySubmitButton"]';
 
 export const DATE_PICKER_APPLY_BUTTON_TIMELINE =
-  '[data-test-subj="timeline-properties"] button[data-test-subj="superDatePickerApplyTimeButton"]';
+  '[data-test-subj="timeline-date-picker-container"] button[data-test-subj="superDatePickerApplyTimeButton"]';
 
 export const DATE_PICKER_ABSOLUTE_TAB = '[data-test-subj="superDatePickerAbsoluteTab"]';
 
@@ -18,10 +18,10 @@ export const DATE_PICKER_END_DATE_POPOVER_BUTTON =
   '[data-test-subj="globalDatePicker"] [data-test-subj="superDatePickerendDatePopoverButton"]';
 
 export const DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE =
-  '[data-test-subj="timeline-properties"] [data-test-subj="superDatePickerendDatePopoverButton"]';
+  '[data-test-subj="timeline-date-picker-container"] [data-test-subj="superDatePickerendDatePopoverButton"]';
 
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
   'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';
 
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE =
-  '[data-test-subj="timeline-properties"] [data-test-subj="superDatePickerstartDatePopoverButton"]';
+  '[data-test-subj="timeline-date-picker-container"] [data-test-subj="superDatePickerstartDatePopoverButton"]';

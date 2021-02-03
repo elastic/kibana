@@ -7,6 +7,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
 import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
@@ -63,9 +64,18 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent = (props: TabNavigationProps) => {
-  const { display, navTabs, pageName, tabName } = props;
-
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
+  display,
+  filters,
+  query,
+  navTabs,
+  pageName,
+  savedQuery,
+  sourcerer,
+  tabName,
+  timeline,
+  timerange,
+}) => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(
@@ -94,7 +104,6 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
     () =>
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
-        const { filters, query, savedQuery, sourcerer, timeline, timerange } = props;
         const search = getSearch(tab, {
           filters,
           query,
@@ -120,7 +129,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
           />
         );
       }),
-    [navTabs, selectedTabId, props]
+    [navTabs, selectedTabId, filters, query, savedQuery, sourcerer, timeline, timerange]
   );
 
   return <EuiTabs display={display}>{renderTabs}</EuiTabs>;
@@ -128,6 +137,19 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const TabNavigation = React.memo(TabNavigationComponent);
+export const TabNavigation = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    prevProps.display === nextProps.display &&
+    prevProps.pageName === nextProps.pageName &&
+    prevProps.savedQuery === nextProps.savedQuery &&
+    prevProps.tabName === nextProps.tabName &&
+    deepEqual(prevProps.filters, nextProps.filters) &&
+    deepEqual(prevProps.query, nextProps.query) &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    deepEqual(prevProps.sourcerer, nextProps.sourcerer) &&
+    deepEqual(prevProps.timeline, nextProps.timeline) &&
+    deepEqual(prevProps.timerange, nextProps.timerange)
+);
 
 TabNavigation.displayName = 'TabNavigation';

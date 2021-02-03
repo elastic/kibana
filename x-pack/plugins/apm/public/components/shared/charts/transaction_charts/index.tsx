@@ -6,7 +6,6 @@
 
 import {
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
@@ -14,41 +13,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-  TRANSACTION_ROUTE_CHANGE,
-} from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
-import { AnnotationsContextProvider } from '../../../../context/annotations_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
-import { LicenseContext } from '../../../../context/LicenseContext';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ITransactionChartData } from '../../../../selectors/chart_selectors';
+import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useTransactionThroughputChartsFetcher } from '../../../../hooks/use_transaction_throughput_chart_fetcher';
+import { LatencyChart } from '../latency_chart';
 import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
-import { getResponseTimeTickFormatter } from './helper';
-import { MLHeader } from './ml_header';
-import { useFormatter } from './use_formatter';
 
-interface TransactionChartProps {
-  charts: ITransactionChartData;
-  urlParams: IUrlParams;
-  fetchStatus: FETCH_STATUS;
-}
+export function TransactionCharts() {
+  const {
+    throughputChartsData,
+    throughputChartsStatus,
+  } = useTransactionThroughputChartsFetcher();
 
-export function TransactionCharts({
-  charts,
-  urlParams,
-  fetchStatus,
-}: TransactionChartProps) {
-  const { transactionType } = urlParams;
-
-  const { responseTimeSeries, tpmSeries, anomalySeries } = charts;
-
-  const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
+  const { throughputTimeseries } = throughputChartsData;
 
   return (
     <>
@@ -57,47 +37,24 @@ export function TransactionCharts({
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
               <EuiPanel>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <span>{responseTimeLabel(transactionType)}</span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <LicenseContext.Consumer>
-                    {(license) => (
-                      <MLHeader
-                        hasValidMlLicense={
-                          license?.getFeature('ml').isAvailable
-                        }
-                        mlJobId={charts.mlJobId}
-                      />
-                    )}
-                  </LicenseContext.Consumer>
-                </EuiFlexGroup>
-                <TimeseriesChart
-                  fetchStatus={fetchStatus}
-                  id="transactionDuration"
-                  timeseries={responseTimeSeries || []}
-                  yLabelFormat={getResponseTimeTickFormatter(formatter)}
-                  anomalySeries={anomalySeries}
-                  onToggleLegend={(serie) => {
-                    if (serie) {
-                      toggleSerie(serie);
-                    }
-                  }}
-                />
+                <LatencyChart />
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <EuiPanel>
                 <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span>
+                  <span>
+                    {i18n.translate(
+                      'xpack.apm.metrics.transactionChart.throughputLabel',
+                      { defaultMessage: 'Throughput' }
+                    )}
+                  </span>
                 </EuiTitle>
                 <TimeseriesChart
-                  fetchStatus={fetchStatus}
-                  id="requestPerMinutes"
-                  timeseries={tpmSeries || []}
+                  fetchStatus={throughputChartsStatus}
+                  id="transactionsPerMinute"
+                  timeseries={throughputTimeseries}
                   yLabelFormat={asTransactionRate}
                 />
               </EuiPanel>
@@ -118,46 +75,4 @@ export function TransactionCharts({
       </AnnotationsContextProvider>
     </>
   );
-}
-
-function tpmLabel(type?: string) {
-  return type === TRANSACTION_REQUEST
-    ? i18n.translate(
-        'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
-        {
-          defaultMessage: 'Requests per minute',
-        }
-      )
-    : i18n.translate(
-        'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
-        {
-          defaultMessage: 'Transactions per minute',
-        }
-      );
-}
-
-function responseTimeLabel(type?: string) {
-  switch (type) {
-    case TRANSACTION_PAGE_LOAD:
-      return i18n.translate(
-        'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
-        {
-          defaultMessage: 'Page load times',
-        }
-      );
-    case TRANSACTION_ROUTE_CHANGE:
-      return i18n.translate(
-        'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
-        {
-          defaultMessage: 'Route change times',
-        }
-      );
-    default:
-      return i18n.translate(
-        'xpack.apm.metrics.transactionChart.transactionDurationLabel',
-        {
-          defaultMessage: 'Transaction duration',
-        }
-      );
-  }
 }

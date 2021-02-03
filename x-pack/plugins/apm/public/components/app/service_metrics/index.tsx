@@ -13,10 +13,10 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
+import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
@@ -31,7 +31,9 @@ export function ServiceMetrics({
   serviceName,
 }: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { data, status } = useServiceMetricCharts(urlParams, agentName);
+  const { data, status } = useServiceMetricChartsFetcher({
+    serviceNodeName: undefined,
+  });
   const { start, end } = urlParams;
 
   const localFiltersConfig: React.ComponentProps<

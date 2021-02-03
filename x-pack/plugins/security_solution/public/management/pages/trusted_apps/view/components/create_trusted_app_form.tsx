@@ -15,35 +15,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
-import { LogicalConditionBuilder } from './logical_condition';
 import {
-  ConditionEntry,
-  ConditionEntryField,
   MacosLinuxConditionEntry,
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
-import { OS_TITLES } from '../translations';
 import {
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
+import { defaultConditionEntry, defaultNewTrustedApp } from '../../store/builders';
+import { OS_TITLES } from '../translations';
+import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
   OperatingSystem.WINDOWS,
   OperatingSystem.LINUX,
 ];
-
-const generateNewEntry = (): ConditionEntry<ConditionEntryField.HASH> => {
-  return {
-    field: ConditionEntryField.HASH,
-    operator: 'included',
-    type: 'match',
-    value: '',
-  };
-};
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -170,12 +159,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       []
     );
 
-    const [formValues, setFormValues] = useState<NewTrustedApp>({
-      name: '',
-      os: OperatingSystem.WINDOWS,
-      entries: [generateNewEntry()],
-      description: '',
-    });
+    const [formValues, setFormValues] = useState<NewTrustedApp>(defaultNewTrustedApp());
 
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateFormValues(formValues)
@@ -204,7 +188,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           if (prevState.os === OperatingSystem.WINDOWS) {
             return {
               ...prevState,
-              entries: [...prevState.entries, generateNewEntry()].filter(
+              entries: [...prevState.entries, defaultConditionEntry()].filter(
                 isWindowsTrustedAppCondition
               ),
             };
@@ -213,7 +197,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
               ...prevState,
               entries: [
                 ...prevState.entries.filter(isMacosLinuxTrustedAppCondition),
-                generateNewEntry(),
+                defaultConditionEntry(),
               ],
             };
           }
@@ -261,7 +245,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
               ) as MacosLinuxConditionEntry[])
             );
             if (updatedState.entries.length === 0) {
-              updatedState.entries.push(generateNewEntry());
+              updatedState.entries.push(defaultConditionEntry());
             }
           } else {
             updatedState.entries.push(...prevState.entries);

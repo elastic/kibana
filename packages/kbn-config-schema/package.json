@@ -3,7 +3,7 @@
   "main": "./target/out/index.js",
   "types": "./target/types/index.d.ts",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "private": true,
   "scripts": {
     "build": "../../node_modules/.bin/tsc",

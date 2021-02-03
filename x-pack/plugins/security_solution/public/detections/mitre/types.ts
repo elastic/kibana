@@ -19,3 +19,7 @@ export interface MitreTechniquesOptions extends MitreOptions {
   label: string;
   tactics: string;
 }
+
+export interface MitreSubtechniquesOptions extends MitreTechniquesOptions {
+  techniqueId: string;
+}

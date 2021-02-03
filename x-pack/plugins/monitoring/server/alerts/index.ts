@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { LargeShardSizeAlert } from './large_shard_size_alert';
+export { CCRReadExceptionsAlert } from './ccr_read_exceptions_alert';
 export { BaseAlert } from './base_alert';
 export { CpuUsageAlert } from './cpu_usage_alert';
 export { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';

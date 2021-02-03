@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
 import { getEnvironmentLabel } from '../../../common/environment_filter_values';
-import { PopoverExpression } from './ServiceAlertTrigger/PopoverExpression';
+import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 const ALL_OPTION = i18n.translate('xpack.apm.alerting.fields.all_option', {
   defaultMessage: 'All',

@@ -8,7 +8,8 @@
 import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
-import { Logger } from 'src/core/server';
+import { Logger, RequestHandlerContext } from 'src/core/server';
+import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
@@ -24,10 +25,11 @@ import {
 import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
+import { getCentroidFeatures } from '../../common/get_centroid_features';
 
 export async function getGridTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -36,17 +38,19 @@ export async function getGridTile({
   requestBody = {},
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
+  searchSessionId,
 }: {
   x: number;
   y: number;
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
   const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
@@ -78,13 +82,20 @@ export async function getGridTile({
     );
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
 
-    const esGeotileGridQuery = {
-      index,
-      body: requestBody,
-    };
-
-    const gridAggResult = await callElasticsearch('search', esGeotileGridQuery);
-    const features: Feature[] = convertRegularRespToGeoJson(gridAggResult, requestType);
+    const response = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: requestBody,
+          },
+        },
+        {
+          sessionId: searchSessionId,
+        }
+      )
+      .toPromise();
+    const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
     const featureCollection: FeatureCollection = {
       features,
       type: 'FeatureCollection',
@@ -99,7 +110,7 @@ export async function getGridTile({
 
 export async function getTile({
   logger,
-  callElasticsearch,
+  context,
   index,
   geometryFieldName,
   x,
@@ -107,112 +118,121 @@ export async function getTile({
   z,
   requestBody = {},
   geoFieldType,
+  searchSessionId,
 }: {
   x: number;
   y: number;
   z: number;
   geometryFieldName: string;
   index: string;
-  callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
+  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
+  searchSessionId?: string;
 }): Promise<Buffer | null> {
-  const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
-
-  let resultFeatures: Feature[];
+  let features: Feature[];
   try {
-    let result;
-    try {
-      const geoShapeFilter = {
-        geo_shape: {
-          [geometryFieldName]: {
-            shape: geojsonBbox,
-            relation: 'INTERSECTS',
+    requestBody.query.bool.filter.push({
+      geo_shape: {
+        [geometryFieldName]: {
+          shape: tileToGeoJsonPolygon(x, y, z),
+          relation: 'INTERSECTS',
+        },
+      },
+    });
+
+    const searchOptions = {
+      sessionId: searchSessionId,
+    };
+
+    const countResponse = await context
+      .search!.search(
+        {
+          params: {
+            index,
+            body: {
+              size: 0,
+              query: requestBody.query,
+            },
           },
         },
-      };
-      requestBody.query.bool.filter.push(geoShapeFilter);
+        searchOptions
+      )
+      .toPromise();
 
-      const esSearchQuery = {
-        index,
-        body: requestBody,
-      };
-
-      const esCountQuery = {
-        index,
-        body: {
-          query: requestBody.query,
-        },
-      };
-
-      const countResult = await callElasticsearch('count', esCountQuery);
-
-      // @ts-expect-error
-      if (countResult.count > requestBody.size) {
-        // Generate "too many features"-bounds
-        const bboxAggName = 'data_bounds';
-        const bboxQuery = {
-          index,
-          body: {
-            size: 0,
-            query: requestBody.query,
-            aggs: {
-              [bboxAggName]: {
-                geo_bounds: {
-                  field: geometryFieldName,
+    if (countResponse.rawResponse.hits.total > requestBody.size) {
+      // Generate "too many features"-bounds
+      const bboxResponse = await context
+        .search!.search(
+          {
+            params: {
+              index,
+              body: {
+                size: 0,
+                query: requestBody.query,
+                aggs: {
+                  data_bounds: {
+                    geo_bounds: {
+                      field: geometryFieldName,
+                    },
+                  },
                 },
               },
             },
           },
-        };
+          searchOptions
+        )
+        .toPromise();
 
-        const bboxResult = await callElasticsearch('search', bboxQuery);
-
-        // @ts-expect-error
-        const bboxForData = esBboxToGeoJsonPolygon(bboxResult.aggregations[bboxAggName].bounds);
-
-        resultFeatures = [
+      features = [
+        {
+          type: 'Feature',
+          properties: {
+            [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+          },
+          geometry: esBboxToGeoJsonPolygon(
+            bboxResponse.rawResponse.aggregations.data_bounds.bounds
+          ),
+        },
+      ];
+    } else {
+      const documentsResponse = await context
+        .search!.search(
           {
-            type: 'Feature',
-            properties: {
-              [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+            params: {
+              index,
+              body: requestBody,
             },
-            geometry: bboxForData,
           },
-        ];
-      } else {
-        result = await callElasticsearch('search', esSearchQuery);
+          searchOptions
+        )
+        .toPromise();
 
-        // Todo: pass in epochMillies-fields
-        const featureCollection = hitsToGeoJson(
-          // @ts-expect-error
-          result.hits.hits,
-          (hit: Record<string, unknown>) => {
-            return flattenHit(geometryFieldName, hit);
-          },
-          geometryFieldName,
-          geoFieldType,
-          []
-        );
+      // Todo: pass in epochMillies-fields
+      const featureCollection = hitsToGeoJson(
+        documentsResponse.rawResponse.hits.hits,
+        (hit: Record<string, unknown>) => {
+          return flattenHit(geometryFieldName, hit);
+        },
+        geometryFieldName,
+        geoFieldType,
+        []
+      );
 
-        resultFeatures = featureCollection.features;
+      features = featureCollection.features;
 
-        // Correct system-fields.
-        for (let i = 0; i < resultFeatures.length; i++) {
-          const props = resultFeatures[i].properties;
-          if (props !== null) {
-            props[FEATURE_ID_PROPERTY_NAME] = resultFeatures[i].id;
-          }
+      // Correct system-fields.
+      for (let i = 0; i < features.length; i++) {
+        const props = features[i].properties;
+        if (props !== null) {
+          props[FEATURE_ID_PROPERTY_NAME] = features[i].id;
         }
       }
-    } catch (e) {
-      logger.warn(e.message);
-      throw e;
     }
 
     const featureCollection: FeatureCollection = {
-      features: resultFeatures,
+      features,
       type: 'FeatureCollection',
     };
 
@@ -270,6 +290,7 @@ function createMvtTile(
   x: number,
   y: number
 ): Buffer | null {
+  featureCollection.features.push(...getCentroidFeatures(featureCollection));
   const tileIndex = geojsonvt(featureCollection, {
     maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
     tolerance: 3, // simplification tolerance (higher means simpler)

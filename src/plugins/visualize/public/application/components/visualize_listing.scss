@@ -12,6 +12,20 @@
 .visListingTable__experimentalIcon {
   width: $euiSizeL;
   vertical-align: baseline;
-  padding: 0 $euiSizeS;    
+  padding: 0 $euiSizeS;
   margin-left: $euiSizeS;
+}
+
+.visListingCallout {
+  max-width: 1000px;
+  width: 100%;
+
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: $euiSize $euiSize 0 $euiSize;
+}
+
+.visListingCallout__link {
+  text-decoration: underline;
 }

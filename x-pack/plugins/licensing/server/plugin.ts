@@ -182,7 +182,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     try {
       const response = await clusterClient.callAsInternalUser('transport.request', {
         method: 'GET',
-        path: '/_xpack',
+        path: '/_xpack?accept_enterprise=true',
       });
 
       const normalizedLicense = response.license

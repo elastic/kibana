@@ -23,7 +23,7 @@ import { notificationService } from '../../../public/application/services/notifi
 import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
-import { setExtensionsService } from '../../../public/application/store/selectors';
+import { setExtensionsService } from '../../../public/application/store/selectors/extension_service';
 import {
   MappingsEditorProvider,
   ComponentTemplatesProvider,
@@ -39,7 +39,7 @@ export const services = {
   uiMetricService: new UiMetricService('index_management'),
 };
 
-services.uiMetricService.setup({ reportUiStats() {} } as any);
+services.uiMetricService.setup({ reportUiCounter() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
 

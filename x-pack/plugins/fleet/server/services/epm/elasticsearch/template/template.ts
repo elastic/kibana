@@ -11,7 +11,6 @@ import {
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
-  DataType,
 } from '../../../../types';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 
@@ -26,8 +25,8 @@ interface MultiFields {
 export interface IndexTemplateMapping {
   [key: string]: any;
 }
-export interface CurrentIndex {
-  indexName: string;
+export interface CurrentDataStream {
+  dataStreamName: string;
   indexTemplate: IndexTemplate;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
@@ -45,6 +44,8 @@ export function getTemplate({
   pipelineName,
   packageName,
   composedOfTemplates,
+  ilmPolicy,
+  hidden,
 }: {
   type: string;
   templateName: string;
@@ -52,8 +53,18 @@ export function getTemplate({
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
+  ilmPolicy?: string | undefined;
+  hidden?: boolean;
 }): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
+  const template = getBaseTemplate(
+    type,
+    templateName,
+    mappings,
+    packageName,
+    composedOfTemplates,
+    ilmPolicy,
+    hidden
+  );
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -253,7 +264,9 @@ function getBaseTemplate(
   templateName: string,
   mappings: IndexTemplateMappings,
   packageName: string,
-  composedOfTemplates: string[]
+  composedOfTemplates: string[],
+  ilmPolicy?: string | undefined,
+  hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
@@ -277,7 +290,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: type,
+            name: ilmPolicy ? ilmPolicy : type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
@@ -321,10 +334,8 @@ function getBaseTemplate(
         properties: mappings.properties,
         _meta,
       },
-      // To be filled with the aliases that we need
-      aliases: {},
     },
-    data_stream: {},
+    data_stream: { hidden },
     composed_of: composedOfTemplates,
     _meta,
   };
@@ -336,33 +347,31 @@ export const updateCurrentWriteIndices = async (
 ): Promise<void> => {
   if (!templates.length) return;
 
-  const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  const allIndices = await queryDataStreamsFromTemplates(callCluster, templates);
   if (!allIndices.length) return;
-  return updateAllIndices(allIndices, callCluster);
+  return updateAllDataStreams(allIndices, callCluster);
 };
 
-function isCurrentIndex(item: CurrentIndex[] | undefined): item is CurrentIndex[] {
+function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
   return item !== undefined;
 }
 
-const queryIndicesFromTemplates = async (
+const queryDataStreamsFromTemplates = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
-): Promise<CurrentIndex[]> => {
-  const indexPromises = templates.map((template) => {
-    return getIndices(callCluster, template);
+): Promise<CurrentDataStream[]> => {
+  const dataStreamPromises = templates.map((template) => {
+    return getDataStreams(callCluster, template);
   });
-  const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter(isCurrentIndex).flat();
+  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
-const getIndices = async (
+const getDataStreams = async (
   callCluster: CallESAsCurrentUser,
   template: TemplateRef
-): Promise<CurrentIndex[] | undefined> => {
+): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  // Until ES provides a way to update mappings of a data stream
-  // get the last index of the data stream, which is the current write index
   const res = await callCluster('transport.request', {
     method: 'GET',
     path: `/_data_stream/${templateName}-*`,
@@ -370,26 +379,28 @@ const getIndices = async (
   const dataStreams = res.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
-    indexName: dataStream.indices[dataStream.indices.length - 1].index_name,
+    dataStreamName: dataStream.name,
     indexTemplate,
   }));
 };
 
-const updateAllIndices = async (
-  indexNameWithTemplates: CurrentIndex[],
+const updateAllDataStreams = async (
+  indexNameWithTemplates: CurrentDataStream[],
   callCluster: CallESAsCurrentUser
 ): Promise<void> => {
-  const updateIndexPromises = indexNameWithTemplates.map(({ indexName, indexTemplate }) => {
-    return updateExistingIndex({ indexName, callCluster, indexTemplate });
-  });
-  await Promise.all(updateIndexPromises);
+  const updatedataStreamPromises = indexNameWithTemplates.map(
+    ({ dataStreamName, indexTemplate }) => {
+      return updateExistingDataStream({ dataStreamName, callCluster, indexTemplate });
+    }
+  );
+  await Promise.all(updatedataStreamPromises);
 };
-const updateExistingIndex = async ({
-  indexName,
+const updateExistingDataStream = async ({
+  dataStreamName,
   callCluster,
   indexTemplate,
 }: {
-  indexName: string;
+  dataStreamName: string;
   callCluster: CallESAsCurrentUser;
   indexTemplate: IndexTemplate;
 }) => {
@@ -404,53 +415,13 @@ const updateExistingIndex = async ({
   // try to update the mappings first
   try {
     await callCluster('indices.putMapping', {
-      index: indexName,
+      index: dataStreamName,
       body: mappings,
+      write_index_only: true,
     });
     // if update fails, rollover data stream
   } catch (err) {
     try {
-      // get the data_stream values to compose datastream name
-      const searchDataStreamFieldsResponse = await callCluster('search', {
-        index: indexTemplate.index_patterns[0],
-        body: {
-          size: 1,
-          _source: ['data_stream.namespace', 'data_stream.type', 'data_stream.dataset'],
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'data_stream.type',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-      if (searchDataStreamFieldsResponse.hits.total.value === 0)
-        throw new Error('data_stream fields are missing from datastream indices');
-      const {
-        dataset,
-        namespace,
-        type,
-      }: {
-        dataset: string;
-        namespace: string;
-        type: DataType;
-      } = searchDataStreamFieldsResponse.hits.hits[0]._source.data_stream;
-      const dataStreamName = `${type}-${dataset}-${namespace}`;
       const path = `/${dataStreamName}/_rollover`;
       await callCluster('transport.request', {
         method: 'POST',
@@ -466,10 +437,10 @@ const updateExistingIndex = async ({
   if (!settings.index.default_pipeline) return;
   try {
     await callCluster('indices.putSettings', {
-      index: indexName,
+      index: dataStreamName,
       body: { index: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
-    throw new Error(`could not update index template settings for ${indexName}`);
+    throw new Error(`could not update index template settings for ${dataStreamName}`);
   }
 };

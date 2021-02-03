@@ -27,6 +27,7 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "version_conflict_threshold": 80,
       }
     `);
   });
@@ -74,6 +75,7 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "version_conflict_threshold": 80,
       }
     `);
   });
@@ -113,6 +115,7 @@ describe('config validation', () => {
         },
         "poll_interval": 3000,
         "request_capacity": 1000,
+        "version_conflict_threshold": 80,
       }
     `);
   });

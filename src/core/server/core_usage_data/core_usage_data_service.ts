@@ -1,40 +1,39 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { CoreService } from 'src/core/types';
-import { SavedObjectsServiceStart } from 'src/core/server';
+import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { HttpConfigType } from '../http';
+import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreServicesUsageData, CoreUsageData, CoreUsageDataStart } from './types';
+import {
+  CoreServicesUsageData,
+  CoreUsageData,
+  CoreUsageDataStart,
+  CoreUsageDataSetup,
+} from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
+import { coreUsageStatsType } from './core_usage_stats';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
+  http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
+  savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
 }
 
 export interface StartDeps {
@@ -60,7 +59,8 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
-export class CoreUsageDataService implements CoreService<void, CoreUsageDataStart> {
+export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
+  private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
   private httpConfig?: HttpConfigType;
@@ -69,8 +69,10 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
   private kibanaConfig?: KibanaConfigType;
+  private coreUsageStatsClient?: CoreUsageStatsClient;
 
   constructor(core: CoreContext) {
+    this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
     this.stop$ = new Subject();
   }
@@ -130,8 +132,15 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       throw new Error('Unable to read config values. Ensure that setup() has completed.');
     }
 
+    if (!this.coreUsageStatsClient) {
+      throw new Error(
+        'Core usage stats client is not initialized. Ensure that setup() has completed.'
+      );
+    }
+
     const es = this.elasticsearchConfig;
     const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
+    const coreUsageStatsData = await this.coreUsageStatsClient.getUsageStats();
 
     const http = this.httpConfig;
     return {
@@ -180,7 +189,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
           },
           xsrf: {
             disableProtection: http.xsrf.disableProtection,
-            whitelistConfigured: isConfigured.array(http.xsrf.whitelist),
+            allowlistConfigured: isConfigured.array(http.xsrf.allowlist),
           },
           requestId: {
             allowFromAnyIp: http.requestId.allowFromAnyIp,
@@ -225,10 +234,11 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       services: {
         savedObjects: soUsageData,
       },
+      ...coreUsageStatsData,
     };
   }
 
-  setup({ metrics }: SetupDeps) {
+  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -268,6 +278,24 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       .subscribe((config) => {
         this.kibanaConfig = config;
       });
+
+    const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
+      savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
+    );
+
+    const registerType = (typeRegistry: SavedObjectTypeRegistry) => {
+      typeRegistry.registerType(coreUsageStatsType);
+    };
+
+    const getClient = () => {
+      const debugLogger = (message: string) => this.logger.debug(message);
+
+      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
+    };
+
+    this.coreUsageStatsClient = getClient();
+
+    return { registerType, getClient } as CoreUsageDataSetup;
   }
 
   start({ savedObjects, elasticsearch }: StartDeps) {

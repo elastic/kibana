@@ -9,6 +9,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { ExceptionListClient } from '../../../lists/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
@@ -18,7 +19,10 @@ import {
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
-import { getPackagePolicyCreateCallback } from './ingest_integration';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyUpdateCallback,
+} from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -30,6 +34,7 @@ import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
+import { LicenseService } from '../../common/license/license';
 
 export interface MetadataService {
   queryStrategy(
@@ -85,6 +90,8 @@ export type EndpointAppContextServiceStartContract = Partial<
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
+  licenseService: LicenseService;
+  exceptionListsClient: ExceptionListClient | undefined;
 };
 
 /**
@@ -116,8 +123,15 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts
+          dependencies.alerts,
+          dependencies.licenseService,
+          dependencies.exceptionListsClient
         )
+      );
+
+      dependencies.registerIngestCallback(
+        'packagePolicyUpdate',
+        getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)
       );
     }
   }

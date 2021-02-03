@@ -14,6 +14,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 // @ts-ignore
 import { API_BASE_PATH } from './constants';
+import { DataStream } from '../../../../../plugins/index_management/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -51,12 +52,14 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  const assertDataStreamStorageSizeExists = (storageSize: string) => {
-    // Storage size of a document doesn't like it would be deterministic (could vary depending
+  const assertDataStreamStorageSizeExists = (storageSize: string, storageSizeBytes: number) => {
+    // Storage size of a document doesn't look like it would be deterministic (could vary depending
     // on how ES, Lucene, and the file system interact), so we'll just assert its presence and
     // type.
     expect(storageSize).to.be.ok();
     expect(typeof storageSize).to.be('string');
+    expect(storageSizeBytes).to.be.ok();
+    expect(typeof storageSizeBytes).to.be('number');
   };
 
   describe('Data streams', function () {
@@ -66,32 +69,41 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await createDataStream(testDataStreamName));
       after(async () => await deleteDataStream(testDataStreamName));
 
-      it('returns an array of all data streams', async () => {
+      it('returns an array of data streams', async () => {
         const { body: dataStreams } = await supertest
           .get(`${API_BASE_PATH}/data_streams`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
+        expect(dataStreams).to.be.an('array');
+
+        // returned array can contain automatically created data streams
+        const testDataStream = dataStreams.find(
+          (dataStream: DataStream) => dataStream.name === testDataStreamName
+        );
+
+        expect(testDataStream).to.be.ok();
+
         // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = dataStreams[0].indices[0];
-        expect(dataStreams).to.eql([
-          {
-            name: testDataStreamName,
-            privileges: {
-              delete_index: true,
-            },
-            timeStampField: { name: '@timestamp' },
-            indices: [
-              {
-                name: indexName,
-                uuid,
-              },
-            ],
-            generation: 1,
-            health: 'yellow',
-            indexTemplateName: testDataStreamName,
+        const { name: indexName, uuid } = testDataStream!.indices[0];
+
+        expect(testDataStream).to.eql({
+          name: testDataStreamName,
+          privileges: {
+            delete_index: true,
           },
-        ]);
+          timeStampField: { name: '@timestamp' },
+          indices: [
+            {
+              name: indexName,
+              uuid,
+            },
+          ],
+          generation: 1,
+          health: 'yellow',
+          indexTemplateName: testDataStreamName,
+          hidden: false,
+        });
       });
 
       it('includes stats when provided the includeStats query parameter', async () => {
@@ -100,12 +112,20 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = dataStreams[0].indices[0];
-        const { storageSize, ...dataStreamWithoutStorageSize } = dataStreams[0];
-        assertDataStreamStorageSizeExists(storageSize);
+        expect(dataStreams).to.be.an('array');
 
-        expect(dataStreams.length).to.be(1);
+        // returned array can contain automatically created data streams
+        const testDataStream = dataStreams.find(
+          (dataStream: DataStream) => dataStream.name === testDataStreamName
+        );
+
+        expect(testDataStream).to.be.ok();
+
+        // ES determines these values so we'll just echo them back.
+        const { name: indexName, uuid } = testDataStream!.indices[0];
+        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
+        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
+
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
           privileges: {
@@ -122,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
+          hidden: false,
         });
       });
 
@@ -133,8 +154,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ES determines these values so we'll just echo them back.
         const { name: indexName, uuid } = dataStream.indices[0];
-        const { storageSize, ...dataStreamWithoutStorageSize } = dataStream;
-        assertDataStreamStorageSizeExists(storageSize);
+        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = dataStream;
+        assertDataStreamStorageSizeExists(storageSize, storageSizeBytes);
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
@@ -152,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
+          hidden: false,
         });
       });
     });

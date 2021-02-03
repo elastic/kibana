@@ -24,10 +24,9 @@
 |  Interface | Description |
 |  --- | --- |
 |  [Action](./kibana-plugin-plugins-ui_actions-public.action.md) |  |
-|  [ActionContextMapping](./kibana-plugin-plugins-ui_actions-public.actioncontextmapping.md) |  |
 |  [ActionExecutionMeta](./kibana-plugin-plugins-ui_actions-public.actionexecutionmeta.md) | During action execution we can provide additional information, for example, trigger, that caused the action execution |
+|  [RowClickContext](./kibana-plugin-plugins-ui_actions-public.rowclickcontext.md) |  |
 |  [Trigger](./kibana-plugin-plugins-ui_actions-public.trigger.md) | This is a convenience interface used to register a \*trigger\*.<code>Trigger</code> specifies a named anchor to which <code>Action</code> can be attached. When <code>Trigger</code> is being \*called\* it creates a <code>Context</code> object and passes it to the <code>execute</code> method of an <code>Action</code>.<!-- -->More than one action can be attached to a single trigger, in which case when trigger is \*called\* it first displays a context menu for user to pick a single action to execute. |
-|  [TriggerContextMapping](./kibana-plugin-plugins-ui_actions-public.triggercontextmapping.md) |  |
 |  [UiActionsActionDefinition](./kibana-plugin-plugins-ui_actions-public.uiactionsactiondefinition.md) | A convenience interface used to register an action. |
 |  [UiActionsPresentable](./kibana-plugin-plugins-ui_actions-public.uiactionspresentable.md) | Represents something that can be displayed to user in UI. |
 |  [UiActionsServiceParams](./kibana-plugin-plugins-ui_actions-public.uiactionsserviceparams.md) |  |
@@ -40,12 +39,8 @@
 |  [ACTION\_VISUALIZE\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_field.md) |  |
 |  [ACTION\_VISUALIZE\_GEO\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_geo_field.md) |  |
 |  [ACTION\_VISUALIZE\_LENS\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_lens_field.md) |  |
-|  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.apply_filter_trigger.md) |  |
-|  [applyFilterTrigger](./kibana-plugin-plugins-ui_actions-public.applyfiltertrigger.md) |  |
-|  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.select_range_trigger.md) |  |
-|  [selectRangeTrigger](./kibana-plugin-plugins-ui_actions-public.selectrangetrigger.md) |  |
-|  [VALUE\_CLICK\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.value_click_trigger.md) |  |
-|  [valueClickTrigger](./kibana-plugin-plugins-ui_actions-public.valueclicktrigger.md) |  |
+|  [ROW\_CLICK\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.row_click_trigger.md) |  |
+|  [rowClickTrigger](./kibana-plugin-plugins-ui_actions-public.rowclicktrigger.md) |  |
 |  [VISUALIZE\_FIELD\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.visualize_field_trigger.md) |  |
 |  [VISUALIZE\_GEO\_FIELD\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.visualize_geo_field_trigger.md) |  |
 |  [visualizeFieldTrigger](./kibana-plugin-plugins-ui_actions-public.visualizefieldtrigger.md) |  |
@@ -55,12 +50,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
-|  [ActionByType](./kibana-plugin-plugins-ui_actions-public.actionbytype.md) |  |
-|  [ActionDefinitionByType](./kibana-plugin-plugins-ui_actions-public.actiondefinitionbytype.md) |  |
 |  [ActionExecutionContext](./kibana-plugin-plugins-ui_actions-public.actionexecutioncontext.md) | Action methods are executed with Context from trigger + [ActionExecutionMeta](./kibana-plugin-plugins-ui_actions-public.actionexecutionmeta.md) |
-|  [ActionType](./kibana-plugin-plugins-ui_actions-public.actiontype.md) |  |
-|  [TriggerContext](./kibana-plugin-plugins-ui_actions-public.triggercontext.md) |  |
-|  [TriggerId](./kibana-plugin-plugins-ui_actions-public.triggerid.md) |  |
 |  [UiActionsPresentableGrouping](./kibana-plugin-plugins-ui_actions-public.uiactionspresentablegrouping.md) |  |
 |  [UiActionsSetup](./kibana-plugin-plugins-ui_actions-public.uiactionssetup.md) |  |
 |  [UiActionsStart](./kibana-plugin-plugins-ui_actions-public.uiactionsstart.md) |  |

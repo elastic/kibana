@@ -18,7 +18,7 @@ interface Props {
   header: ColumnHeaderOptions;
   isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
-  sort: Sort;
+  sort: Sort[];
 }
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
@@ -53,7 +53,7 @@ CloseButton.displayName = 'CloseButton';
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoading }) => {
   return (
     <>
-      {sort.columnId === header.id && isLoading ? (
+      {sort.some((i) => i.columnId === header.id) && isLoading ? (
         <EventsHeadingExtra className="siemEventsHeading__extra--loading">
           <EventsLoading data-test-subj="timeline-loading-spinner" />
         </EventsHeadingExtra>

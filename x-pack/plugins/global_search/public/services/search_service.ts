@@ -6,6 +6,7 @@
 
 import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { uniq } from 'lodash';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'src/core/public';
@@ -24,6 +25,7 @@ import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchFindOptions } from './types';
 import { getDefaultPreference } from './utils';
 import { fetchServerResults } from './fetch_server_results';
+import { fetchServerSearchableTypes } from './fetch_server_searchable_types';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -75,6 +77,11 @@ export interface SearchServiceStart {
     params: GlobalSearchFindParams,
     options: GlobalSearchFindOptions
   ): Observable<GlobalSearchBatchedResults>;
+
+  /**
+   * Returns all the searchable types registered by the underlying result providers.
+   */
+  getSearchableTypes(): Promise<string[]>;
 }
 
 interface SetupDeps {
@@ -96,6 +103,7 @@ export class SearchService {
   private http?: HttpStart;
   private maxProviderResults = defaultMaxProviderResults;
   private licenseChecker?: ILicenseChecker;
+  private serverTypes?: string[];
 
   setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
     this.config = config;
@@ -118,7 +126,23 @@ export class SearchService {
 
     return {
       find: (params, options) => this.performFind(params, options),
+      getSearchableTypes: () => this.getSearchableTypes(),
     };
+  }
+
+  private async getSearchableTypes() {
+    const providerTypes = (
+      await Promise.all(
+        [...this.providers.values()].map((provider) => provider.getSearchableTypes())
+      )
+    ).flat();
+
+    // only need to fetch from server once
+    if (!this.serverTypes) {
+      this.serverTypes = await fetchServerSearchableTypes(this.http!);
+    }
+
+    return uniq([...providerTypes, ...this.serverTypes]);
   }
 
   private performFind(params: GlobalSearchFindParams, options: GlobalSearchFindOptions) {

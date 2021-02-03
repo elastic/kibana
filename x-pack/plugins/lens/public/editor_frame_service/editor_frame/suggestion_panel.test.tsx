@@ -98,7 +98,7 @@ describe('suggestion_panel', () => {
         .find('[data-test-subj="lnsSuggestion"]')
         .find(EuiPanel)
         .map((el) => el.parents(EuiToolTip).prop('content'))
-    ).toEqual(['Current', 'Suggestion1', 'Suggestion2']);
+    ).toEqual(['Current visualization', 'Suggestion1', 'Suggestion2']);
   });
 
   describe('uncommitted suggestions', () => {

@@ -13,5 +13,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./index_lifecycle_management'));
     loadTestFile(require.resolve('./ingest_pipelines'));
+    loadTestFile(require.resolve('./snapshot_restore'));
   });
 }

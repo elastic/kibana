@@ -79,4 +79,5 @@ export const getSearchProvider: (
       })
     );
   },
+  getSearchableTypes: () => ['application'],
 });

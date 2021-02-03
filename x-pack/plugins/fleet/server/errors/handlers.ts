@@ -12,6 +12,7 @@ import {
   KibanaResponseFactory,
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { appContextService } from '../services';
 import {
   IngestManagerError,
@@ -19,13 +20,14 @@ import {
   PackageNotFoundError,
   AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
+  ConcurrentInstallOperationError,
 } from './index';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom | Error;
+  error: IngestManagerError | Boom.Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;
@@ -51,6 +53,10 @@ export const isLegacyESClientError = (error: any): error is LegacyESClientError 
   return error instanceof LegacyESErrors._Abstract;
 };
 
+export function isESClientError(error: unknown): error is ResponseError {
+  return error instanceof ResponseError;
+}
+
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
     return 502; // Bad Gateway
@@ -64,7 +70,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
-
+  if (error instanceof ConcurrentInstallOperationError) {
+    return 409; // Conflict
+  }
   return 400; // Bad Request
 };
 

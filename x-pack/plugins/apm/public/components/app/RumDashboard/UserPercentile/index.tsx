@@ -8,7 +8,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { I18LABELS } from '../translations';
 
@@ -22,7 +22,7 @@ export function UserPercentile() {
   } = useUrlParams();
 
   const updatePercentile = useCallback(
-    (percentileN?: number) => {
+    (percentileN?: number, replaceHistory?: boolean) => {
       const newLocation = {
         ...history.location,
         search: fromQuery({
@@ -30,14 +30,18 @@ export function UserPercentile() {
           percentile: percentileN,
         }),
       };
-      history.push(newLocation);
+      if (replaceHistory) {
+        history.replace(newLocation);
+      } else {
+        history.push(newLocation);
+      }
     },
     [history]
   );
 
   useEffect(() => {
     if (!percentile) {
-      updatePercentile(DEFAULT_P);
+      updatePercentile(DEFAULT_P, true);
     }
   });
 

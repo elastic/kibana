@@ -6,7 +6,7 @@
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../lib/lib';
 
 interface Props {

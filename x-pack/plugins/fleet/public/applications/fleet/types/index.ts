@@ -12,6 +12,7 @@ export {
   AgentPolicy,
   NewAgentPolicy,
   AgentEvent,
+  SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
   NewPackagePolicy,

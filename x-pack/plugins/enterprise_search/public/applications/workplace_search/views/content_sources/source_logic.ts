@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys, pickBy } from 'lodash';
-
 import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
@@ -17,68 +15,32 @@ import {
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { AppLogic } from '../../app_logic';
-import { NOT_FOUND_PATH } from '../../routes';
-import {
-  ContentSourceFullData,
-  CustomSource,
-  Meta,
-  DocumentSummaryItem,
-  SourceContentItem,
-} from '../../types';
+import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
-  setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
   setContentFilterValue(contentFilterValue: string): string;
   setActivePage(activePage: number): number;
-  setClientIdValue(clientIdValue: string): string;
-  setClientSecretValue(clientSecretValue: string): string;
-  setBaseUrlValue(baseUrlValue: string): string;
-  setCustomSourceNameValue(customSourceNameValue: string): string;
-  setSourceLoginValue(loginValue: string): string;
-  setSourcePasswordValue(passwordValue: string): string;
-  setSourceSubdomainValue(subdomainValue: string): string;
-  setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
-  setCustomSourceData(data: CustomSource): CustomSource;
-  setPreContentSourceConfigData(data: PreContentSourceResponse): PreContentSourceResponse;
-  setSelectedGithubOrganizations(option: string): string;
   searchContentSourceDocuments(sourceId: string): { sourceId: string };
   updateContentSource(
     sourceId: string,
     source: { name: string }
   ): { sourceId: string; source: { name: string } };
   resetSourceState(): void;
-  removeContentSource(
-    sourceId: string,
-    successCallback: () => void
-  ): { sourceId: string; successCallback(): void };
-  createContentSource(
-    serviceType: string,
-    successCallback: () => void,
-    errorCallback?: () => void
-  ): { serviceType: string; successCallback(): void; errorCallback?(): void };
-  saveSourceConfig(
-    isUpdating: boolean,
-    successCallback?: () => void
-  ): { isUpdating: boolean; successCallback?(): void };
-  initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
+  removeContentSource(sourceId: string): { sourceId: string };
+  initializeSource(sourceId: string): { sourceId: string };
   getSourceConfigData(serviceType: string): { serviceType: string };
-  getSourceConnectData(
-    serviceType: string,
-    successCallback: (oauthUrl: string) => string
-  ): { serviceType: string; successCallback(oauthUrl: string): void };
-  getSourceReConnectData(sourceId: string): { sourceId: string };
-  getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
   setButtonNotLoading(): void;
 }
 
@@ -100,15 +62,6 @@ interface SourceConfigData {
   accountContextOnly?: boolean;
 }
 
-interface SourceConnectData {
-  oauthUrl: string;
-  serviceType: string;
-}
-
-interface OrganizationsMap {
-  [key: string]: string | boolean;
-}
-
 interface SourceValues {
   contentSource: ContentSourceFullData;
   dataLoading: boolean;
@@ -117,32 +70,12 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
-  customSourceNameValue: string;
-  clientIdValue: string;
-  clientSecretValue: string;
-  baseUrlValue: string;
-  loginValue: string;
-  passwordValue: string;
-  subdomainValue: string;
-  indexPermissionsValue: boolean;
   sourceConfigData: SourceConfigData;
-  sourceConnectData: SourceConnectData;
-  newCustomSource: CustomSource;
-  currentServiceType: string;
-  githubOrganizations: string[];
-  selectedGithubOrganizationsMap: OrganizationsMap;
-  selectedGithubOrganizations: string[];
 }
 
 interface SearchResultsResponse {
   results: SourceContentItem[];
   meta: Meta;
-}
-
-interface PreContentSourceResponse {
-  id: string;
-  serviceType: string;
-  githubOrganizations: string[];
 }
 
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
@@ -151,46 +84,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
-    setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
-    setClientIdValue: (clientIdValue: string) => clientIdValue,
-    setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
-    setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
-    setCustomSourceNameValue: (customSourceNameValue: string) => customSourceNameValue,
-    setSourceLoginValue: (loginValue: string) => loginValue,
-    setSourcePasswordValue: (passwordValue: string) => passwordValue,
-    setSourceSubdomainValue: (subdomainValue: string) => subdomainValue,
-    setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
-    setCustomSourceData: (data: CustomSource) => data,
-    setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
-    setSelectedGithubOrganizations: (option: string) => option,
-    initializeSource: (sourceId: string, history: object) => ({ sourceId, history }),
+    initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
-    removeContentSource: (sourceId: string, successCallback: () => void) => ({
+    removeContentSource: (sourceId: string) => ({
       sourceId,
-      successCallback,
     }),
     getSourceConfigData: (serviceType: string) => ({ serviceType }),
-    getSourceConnectData: (serviceType: string, successCallback: (oauthUrl: string) => string) => ({
-      serviceType,
-      successCallback,
-    }),
-    getSourceReConnectData: (sourceId: string) => ({ sourceId }),
-    getPreContentSourceConfigData: (preContentSourceId: string) => ({ preContentSourceId }),
-    saveSourceConfig: (isUpdating: boolean, successCallback?: () => void) => ({
-      isUpdating,
-      successCallback,
-    }),
-    createContentSource: (
-      serviceType: string,
-      successCallback: () => void,
-      errorCallback?: () => void
-    ) => ({ serviceType, successCallback, errorCallback }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
   },
@@ -215,41 +120,28 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
       },
     ],
-    sourceConnectData: [
-      {} as SourceConnectData,
-      {
-        setSourceConnectData: (_, sourceConnectData) => sourceConnectData,
-      },
-    ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [
@@ -273,103 +165,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         resetSourceState: () => '',
       },
     ],
-    clientIdValue: [
-      '',
-      {
-        setClientIdValue: (_, clientIdValue) => clientIdValue,
-        setSourceConfigData: (_, { configuredFields: { clientId } }) => clientId || '',
-        resetSourceState: () => '',
-      },
-    ],
-    clientSecretValue: [
-      '',
-      {
-        setClientSecretValue: (_, clientSecretValue) => clientSecretValue,
-        setSourceConfigData: (_, { configuredFields: { clientSecret } }) => clientSecret || '',
-        resetSourceState: () => '',
-      },
-    ],
-    baseUrlValue: [
-      '',
-      {
-        setBaseUrlValue: (_, baseUrlValue) => baseUrlValue,
-        setSourceConfigData: (_, { configuredFields: { baseUrl } }) => baseUrl || '',
-        resetSourceState: () => '',
-      },
-    ],
-    loginValue: [
-      '',
-      {
-        setSourceLoginValue: (_, loginValue) => loginValue,
-        resetSourceState: () => '',
-      },
-    ],
-    passwordValue: [
-      '',
-      {
-        setSourcePasswordValue: (_, passwordValue) => passwordValue,
-        resetSourceState: () => '',
-      },
-    ],
-    subdomainValue: [
-      '',
-      {
-        setSourceSubdomainValue: (_, subdomainValue) => subdomainValue,
-        resetSourceState: () => '',
-      },
-    ],
-    indexPermissionsValue: [
-      false,
-      {
-        setSourceIndexPermissionsValue: (_, indexPermissionsValue) => indexPermissionsValue,
-        resetSourceState: () => false,
-      },
-    ],
-    customSourceNameValue: [
-      '',
-      {
-        setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
-        resetSourceState: () => '',
-      },
-    ],
-    newCustomSource: [
-      {} as CustomSource,
-      {
-        setCustomSourceData: (_, newCustomSource) => newCustomSource,
-        resetSourceState: () => ({} as CustomSource),
-      },
-    ],
-    currentServiceType: [
-      '',
-      {
-        setPreContentSourceConfigData: (_, { serviceType }) => serviceType,
-        resetSourceState: () => '',
-      },
-    ],
-    githubOrganizations: [
-      [],
-      {
-        setPreContentSourceConfigData: (_, { githubOrganizations }) => githubOrganizations,
-        resetSourceState: () => [],
-      },
-    ],
-    selectedGithubOrganizationsMap: [
-      {} as OrganizationsMap,
-      {
-        setSelectedGithubOrganizations: (state, option) => ({
-          ...state,
-          ...{ [option]: !state[option] },
-        }),
-        resetSourceState: () => ({}),
-      },
-    ],
   },
-  selectors: ({ selectors }) => ({
-    selectedGithubOrganizations: [
-      () => [selectors.selectedGithubOrganizationsMap],
-      (orgsMap) => keys(pickBy(orgsMap)),
-    ],
-  }),
   listeners: ({ actions, values }) => ({
     initializeSource: async ({ sourceId }) => {
       const { isOrganization } = AppLogic.values;
@@ -438,8 +234,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       }
     },
-    removeContentSource: async ({ sourceId, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+    removeContentSource: async ({ sourceId }) => {
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
@@ -456,7 +252,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
             }
           )
         );
-        successCallback();
+        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       } catch (e) {
         flashAPIErrors(e);
       } finally {
@@ -473,147 +269,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       }
     },
-    getSourceConnectData: async ({ serviceType, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-      const { isOrganization } = AppLogic.values;
-      const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
-
-      const route = isOrganization
-        ? `/api/workplace_search/org/sources/${serviceType}/prepare`
-        : `/api/workplace_search/account/sources/${serviceType}/prepare`;
-
-      const params = new URLSearchParams();
-      if (subdomain) params.append('subdomain', subdomain);
-      if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
-
-      try {
-        const response = await HttpLogic.values.http.get(`${route}?${params}`);
-        actions.setSourceConnectData(response);
-        successCallback(response.oauthUrl);
-      } catch (e) {
-        flashAPIErrors(e);
-      } finally {
-        actions.setButtonNotLoading();
-      }
-    },
-    getSourceReConnectData: async ({ sourceId }) => {
-      const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
-        : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
-
-      try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setSourceConnectData(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
-    getPreContentSourceConfigData: async ({ preContentSourceId }) => {
-      const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
-        : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;
-
-      try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setPreContentSourceConfigData(response);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
-    saveSourceConfig: async ({ isUpdating, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-      const {
-        sourceConfigData: { serviceType },
-        baseUrlValue,
-        clientIdValue,
-        clientSecretValue,
-        sourceConfigData,
-      } = values;
-
-      const route = isUpdating
-        ? `/api/workplace_search/org/settings/connectors/${serviceType}`
-        : '/api/workplace_search/org/settings/connectors';
-
-      const http = isUpdating ? HttpLogic.values.http.put : HttpLogic.values.http.post;
-
-      const params = {
-        base_url: baseUrlValue || undefined,
-        client_id: clientIdValue || undefined,
-        client_secret: clientSecretValue || undefined,
-        service_type: serviceType,
-        private_key: sourceConfigData.configuredFields?.privateKey,
-        public_key: sourceConfigData.configuredFields?.publicKey,
-        consumer_key: sourceConfigData.configuredFields?.consumerKey,
-      };
-
-      try {
-        const response = await http(route, {
-          body: JSON.stringify({ params }),
-        });
-        if (isUpdating) {
-          setSuccessMessage(
-            i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceConfigUpdated',
-              {
-                defaultMessage: 'Successfully updated configuration.',
-              }
-            )
-          );
-        }
-        actions.setSourceConfigData(response);
-        if (successCallback) successCallback();
-      } catch (e) {
-        flashAPIErrors(e);
-        if (!isUpdating) throw new Error(e);
-      } finally {
-        actions.setButtonNotLoading();
-      }
-    },
-    createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-      const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? '/api/workplace_search/org/create_source'
-        : '/api/workplace_search/account/create_source';
-
-      const {
-        selectedGithubOrganizations: githubOrganizations,
-        customSourceNameValue,
-        loginValue,
-        passwordValue,
-        indexPermissionsValue,
-      } = values;
-
-      const params = {
-        service_type: serviceType,
-        name: customSourceNameValue || undefined,
-        login: loginValue || undefined,
-        password: passwordValue || undefined,
-        organizations: githubOrganizations.length > 0 ? githubOrganizations : undefined,
-        indexPermissions: indexPermissionsValue || undefined,
-      } as {
-        [key: string]: string | string[] | undefined;
-      };
-
-      // Remove undefined values from params
-      Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
-
-      try {
-        const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ ...params }),
-        });
-        actions.setCustomSourceData(response);
-        successCallback();
-      } catch (e) {
-        flashAPIErrors(e);
-        if (errorCallback) errorCallback();
-        throw new Error('Auth Error');
-      } finally {
-        actions.setButtonNotLoading();
-      }
-    },
     onUpdateSourceName: (name: string) => {
       setSuccessMessage(
         i18n.translate(
@@ -626,7 +281,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       );
     },
     resetSourceState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

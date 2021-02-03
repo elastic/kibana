@@ -13,6 +13,7 @@ import {
   alertParamsSchema,
   alertStateSchema,
   AlertTaskParams,
+  AlertTypeParams,
 } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -23,9 +24,9 @@ export interface AlertTaskInstance extends ConcreteTaskInstance {
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
-export function taskInstanceToAlertTaskInstance(
+export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
   taskInstance: ConcreteTaskInstance,
-  alert?: SanitizedAlert
+  alert?: SanitizedAlert<Params>
 ): AlertTaskInstance {
   return {
     ...taskInstance,

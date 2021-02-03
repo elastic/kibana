@@ -6,22 +6,27 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
-  buildRecoveredAlertReason,
+  // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
+import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
+import {
+  MetricThresholdAlertExecutorOptions,
+  MetricThresholdAlertType,
+} from './register_metric_threshold_alert_type';
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function (options: AlertExecutorOptions) {
+export const createMetricThresholdExecutor = (
+  libs: InfraBackendLibs
+): MetricThresholdAlertType['executor'] =>
+  async function (options: MetricThresholdAlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -36,7 +41,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
-    const alertResults = await evaluateAlert(services.callCluster, params, config);
+    const alertResults = await evaluateAlert(
+      services.callCluster,
+      params as EvaluatedAlertParams,
+      config
+    );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults)!);
@@ -68,9 +77,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
           .join('\n');
       } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
-        reason = alertResults
-          .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
-          .join('\n');
+        /*
+         * Custom recovery actions aren't yet available in the alerting framework
+         * Uncomment the code below once they've been implemented
+         * Reference: https://github.com/elastic/kibana/issues/87048
+         */
+        // reason = alertResults
+        //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
+        //   .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -89,7 +103,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         const actionGroupId =
-          nextState === AlertStates.OK ? ResolvedActionGroup.id : FIRED_ACTIONS.id;
+          nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],

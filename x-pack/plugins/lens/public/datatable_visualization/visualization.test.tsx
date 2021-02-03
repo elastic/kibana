@@ -306,6 +306,41 @@ describe('Datatable Visualization', () => {
         ],
       });
     });
+
+    it('should handle correctly the sorting state on removing dimension', () => {
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'b', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: undefined,
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer], sorting: { columnId: 'c', direction: 'asc' } },
+          layerId: 'layer1',
+          columnId: 'b',
+        })
+      ).toEqual({
+        sorting: { columnId: 'c', direction: 'asc' },
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['c'],
+          },
+        ],
+      });
+    });
   });
 
   describe('#setDimension', () => {
@@ -371,6 +406,9 @@ describe('Datatable Visualization', () => {
       expect(tableArgs).toHaveLength(1);
       expect(tableArgs[0].arguments).toEqual({
         columnIds: ['c', 'b'],
+        sortBy: [''],
+        sortDirection: ['none'],
+        columnWidth: [],
       });
     });
 
@@ -428,6 +466,82 @@ describe('Datatable Visualization', () => {
       const error = datatableVisualization.getErrorMessages({ layers: [layer] }, frame);
 
       expect(error).toBeUndefined();
+    });
+  });
+
+  describe('#onEditAction', () => {
+    it('should add a sort column to the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'sort', columnId: 'saved', direction: 'none' },
+        })
+      ).toEqual({
+        ...currentState,
+        sorting: {
+          columnId: 'saved',
+          direction: 'none',
+        },
+      });
+    });
+
+    it('should add a custom width to a column in the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'resize', columnId: 'saved', width: 500 },
+        })
+      ).toEqual({
+        ...currentState,
+        columnWidth: [
+          {
+            columnId: 'saved',
+            width: 500,
+          },
+        ],
+      });
+    });
+
+    it('should clear custom width value for the column from the state', () => {
+      const currentState: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'foo',
+            columns: ['saved'],
+          },
+        ],
+        columnWidth: [
+          {
+            columnId: 'saved',
+            width: 500,
+          },
+        ],
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'resize', columnId: 'saved', width: undefined },
+        })
+      ).toEqual({
+        ...currentState,
+        columnWidth: [],
+      });
     });
   });
 });

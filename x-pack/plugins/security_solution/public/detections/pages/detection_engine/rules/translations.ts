@@ -353,7 +353,7 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
 export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
-    defaultMessage: 'Gap (if any)',
+    defaultMessage: 'Last Gap (if any)',
   }
 );
 
@@ -374,7 +374,14 @@ export const RULES_TAB = i18n.translate(
 export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
-    defaultMessage: 'Monitoring',
+    defaultMessage: 'Rule Monitoring',
+  }
+);
+
+export const EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
+  {
+    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -589,3 +596,9 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
     defaultMessage: 'Refresh settings',
   }
 );
+
+export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
+    values: { totalLists },
+    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
+  });

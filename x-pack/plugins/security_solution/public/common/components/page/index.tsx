@@ -26,6 +26,11 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
+  // fixes double scrollbar on views with EventsTable
+  #kibana-body {
+    overflow: hidden;
+  }
+
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -78,6 +83,25 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
     max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
+  }
+
+  /*
+     EuiScreenReaderOnly has a default 1px height and width. These extra pixels
+     were adding additional height to every table row in the alerts table on the
+     Detections page. As a result of this extra height, the Detections page was
+     displaying unnecessary scroll bars and unnecessary empty space bellow the
+     alerts table. Thus, we set the height and width of all EuiScreenReaderOnly
+     to zero.
+  */
+  .euiScreenReaderOnly {
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 `;
 

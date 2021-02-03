@@ -47,6 +47,7 @@ import {
 } from '../helpers';
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
+import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -100,7 +101,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
   const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
@@ -117,7 +118,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     memoSignalIndexName
   );
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
+  const memoMlJobIds = useMemo(
+    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
+    [maybeRule]
+  );
+  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return ruleIndices;
+    }
+  }, [jobs, ruleIndices]);
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -280,69 +295,75 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
           <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
         )}
-        {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
-          <>
-            <ModalBodySection className="builder-section">
-              {isRuleEQLSequenceStatement && (
-                <>
-                  <EuiCallOut
-                    data-test-subj="eql-sequence-callout"
-                    title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
-                  />
-                  <EuiSpacer />
-                </>
-              )}
-              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
-              <EuiSpacer />
-              <ExceptionBuilderComponent
-                exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
-                listId={exceptionItem.list_id}
-                listNamespaceType={exceptionItem.namespace_type}
-                ruleName={ruleName}
-                isOrDisabled
-                isAndDisabled={false}
-                isNestedDisabled={false}
-                data-test-subj="edit-exception-modal-builder"
-                id-aria="edit-exception-modal-builder"
-                onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
-                ruleType={maybeRule?.type}
-              />
-
-              <EuiSpacer />
-
-              <AddExceptionComments
-                exceptionItemComments={exceptionItem.comments}
-                newCommentValue={comment}
-                newCommentOnChange={onCommentChange}
-              />
-            </ModalBodySection>
-            <EuiHorizontalRule />
-            <ModalBodySection>
-              <EuiFormRow fullWidth>
-                <EuiCheckbox
-                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
-                  id="close-alert-on-add-edit-exception-checkbox"
-                  label={
-                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
-                  }
-                  checked={shouldBulkCloseAlert}
-                  onChange={onBulkCloseAlertCheckboxChange}
-                  disabled={shouldDisableBulkClose}
+        {!isSignalIndexLoading &&
+          !addExceptionIsLoading &&
+          !isIndexPatternLoading &&
+          !isRuleLoading &&
+          !mlJobLoading && (
+            <>
+              <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
+                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+                <EuiSpacer />
+                <ExceptionBuilderComponent
+                  exceptionListItems={[exceptionItem]}
+                  listType={exceptionListType}
+                  listId={exceptionItem.list_id}
+                  listNamespaceType={exceptionItem.namespace_type}
+                  ruleName={ruleName}
+                  isOrDisabled
+                  isAndDisabled={false}
+                  isNestedDisabled={false}
+                  data-test-subj="edit-exception-modal-builder"
+                  id-aria="edit-exception-modal-builder"
+                  onChange={handleBuilderOnChange}
+                  indexPatterns={indexPatterns}
+                  ruleType={maybeRule?.type}
                 />
-              </EuiFormRow>
-              {exceptionListType === 'endpoint' && (
-                <>
-                  <EuiSpacer />
-                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
-                    {i18n.ENDPOINT_QUARANTINE_TEXT}
-                  </EuiText>
-                </>
-              )}
-            </ModalBodySection>
-          </>
-        )}
+
+                <EuiSpacer />
+
+                <AddExceptionComments
+                  exceptionItemComments={exceptionItem.comments}
+                  newCommentValue={comment}
+                  newCommentOnChange={onCommentChange}
+                />
+              </ModalBodySection>
+              <EuiHorizontalRule />
+              <ModalBodySection>
+                <EuiFormRow fullWidth>
+                  <EuiCheckbox
+                    data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                    id="close-alert-on-add-edit-exception-checkbox"
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
+                    checked={shouldBulkCloseAlert}
+                    onChange={onBulkCloseAlertCheckboxChange}
+                    disabled={shouldDisableBulkClose}
+                  />
+                </EuiFormRow>
+                {exceptionListType === 'endpoint' && (
+                  <>
+                    <EuiSpacer />
+                    <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
+                      {i18n.ENDPOINT_QUARANTINE_TEXT}
+                    </EuiText>
+                  </>
+                )}
+              </ModalBodySection>
+            </>
+          )}
         {updateError != null && (
           <ModalBodySection>
             <ErrorCallout

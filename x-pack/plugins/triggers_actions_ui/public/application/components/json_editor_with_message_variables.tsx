@@ -5,6 +5,8 @@
  */
 import React, { useState } from 'react';
 import { EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+
+import 'brace/theme/github';
 import { XJsonMode } from '@kbn/ace';
 
 import './add_message_variables.scss';
@@ -12,6 +14,7 @@ import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 
 import { AddMessageVariables } from './add_message_variables';
 import { ActionVariable } from '../../types';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -43,8 +46,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
-  const onSelectMessageVariable = (variable: string) => {
-    const templatedVar = `{{${variable}}}`;
+  const onSelectMessageVariable = (variable: ActionVariable) => {
+    const templatedVar = templateActionVariable(variable);
     let newValue = '';
     if (cursorPosition) {
       const cursor = cursorPosition.getCursor();
@@ -71,7 +74,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       labelAppend={
         <AddMessageVariables
           messageVariables={messageVariables}
-          onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+          onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
         />
       }

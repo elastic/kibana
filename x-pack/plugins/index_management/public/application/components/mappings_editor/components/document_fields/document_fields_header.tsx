@@ -25,7 +25,7 @@ export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }:
             defaultMessage="Define the fields for your indexed documents. {docsLink}"
             values={{
               docsLink: (
-                <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
+                <EuiLink href={documentationService.getMappingTypesLink()} target="_blank" external>
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
                     defaultMessage: 'Learn more.',
                   })}

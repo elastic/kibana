@@ -8,14 +8,9 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tint } from 'polished';
 import React, { Fragment } from 'react';
-// @ts-expect-error
-import sql from 'react-syntax-highlighter/dist/languages/sql';
-import SyntaxHighlighter, {
-  registerLanguage,
-  // @ts-expect-error
-} from 'react-syntax-highlighter/dist/light';
-// @ts-expect-error
-import { xcode } from 'react-syntax-highlighter/dist/styles';
+import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
+import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import styled from 'styled-components';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import {
@@ -28,7 +23,7 @@ import {
 } from '../../../../../../../style/variables';
 import { TruncateHeightSection } from './TruncateHeightSection';
 
-registerLanguage('sql', sql);
+SyntaxHighlighter.registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
   padding: ${px(units.half)} ${px(unit)};

@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
 
   describe('Kibana users page a11y tests', () => {
@@ -52,24 +53,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for roles drop down', async () => {
-      await testSubjects.setValue('userFormUserNameInput', 'a11y');
-      await testSubjects.setValue('passwordInput', 'password');
-      await testSubjects.setValue('passwordConfirmationInput', 'password');
-      await testSubjects.setValue('userFormFullNameInput', 'a11y user');
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+      await PageObjects.security.clickElasticsearchUsers();
+      await PageObjects.security.clickCreateNewUser();
+      await PageObjects.security.fillUserForm({
+        username: 'a11y',
+        password: 'password',
+        confirm_password: 'password',
+        full_name: 'a11y user',
+        email: 'example@example.com',
+        roles: ['apm_user'],
+      });
       await testSubjects.click('rolesDropdown');
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for display of delete button on users page ', async () => {
-      await testSubjects.setValue('userFormUserNameInput', 'deleteA11y');
-      await testSubjects.setValue('passwordInput', 'password');
-      await testSubjects.setValue('passwordConfirmationInput', 'password');
-      await testSubjects.setValue('userFormFullNameInput', 'DeleteA11y user');
-      await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-      await testSubjects.click('rolesDropdown');
-      await testSubjects.setValue('rolesDropdown', 'roleOption-apm_user');
-      await testSubjects.click('userFormSaveButton');
+    it('a11y test for display of delete button on users page', async () => {
+      await PageObjects.security.createUser({
+        username: 'deleteA11y',
+        password: 'password',
+        confirm_password: 'password',
+        full_name: 'DeleteA11y user',
+        email: 'example@example.com',
+        roles: ['apm_user'],
+      });
       await testSubjects.click('checkboxSelectRow-deleteA11y');
       await a11y.testAppSnapshot();
     });
@@ -77,17 +83,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for delete user panel ', async () => {
       await testSubjects.click('deleteUserButton');
       await a11y.testAppSnapshot();
+      await testSubjects.click('confirmModalCancelButton');
     });
 
     it('a11y test for edit user panel', async () => {
-      await testSubjects.click('confirmModalCancelButton');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for Change password screen', async () => {
+    it('a11y test for change password screen', async () => {
       await PageObjects.settings.clickLinkText('deleteA11y');
-      await testSubjects.click('changePassword');
+      await find.clickByButtonText('Change password');
+      await a11y.testAppSnapshot();
+      await testSubjects.click('formFlyoutCancelButton');
+    });
+
+    it('a11y test for deactivate user screen', async () => {
+      await PageObjects.settings.clickLinkText('deleteA11y');
+      await find.clickByButtonText('Deactivate user');
       await a11y.testAppSnapshot();
     });
   });

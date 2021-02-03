@@ -22,14 +22,29 @@ export interface ForcemergeFields {
 }
 
 interface HotPhaseMetaFields extends ForcemergeFields {
-  useRollover: boolean;
-  maxStorageSizeUnit?: string;
-  maxAgeUnit?: string;
+  /**
+   * By default rollover is enabled with set values for max age, max size and max docs. In this policy form
+   * opting in to default rollover overrides custom rollover values.
+   */
+  isUsingDefaultRollover: boolean;
+
+  readonlyEnabled: boolean;
+
+  /**
+   * If a policy has defined values other than the default rollover {@link defaultRolloverAction}, we store
+   * them here.
+   */
+  customRollover: {
+    enabled: boolean;
+    maxStorageSizeUnit?: string;
+    maxAgeUnit?: string;
+  };
 }
 
 interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
+  readonlyEnabled: boolean;
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {

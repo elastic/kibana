@@ -21,6 +21,7 @@ describe('createMonitoringStatsStream', () => {
     index: 'foo',
     max_attempts: 9,
     poll_interval: 6000000,
+    version_conflict_threshold: 80,
     monitored_stats_required_freshness: 6000000,
     max_poll_inactivity_cycles: 10,
     request_capacity: 1000,

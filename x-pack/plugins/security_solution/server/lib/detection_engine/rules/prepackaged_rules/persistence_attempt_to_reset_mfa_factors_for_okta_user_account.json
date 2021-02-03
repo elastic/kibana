@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "An adversary may attempt to remove the multi-factor authentication (MFA) factors registered on an Okta user's account in order to register new MFA factors and abuse the account to blend in with normal activity in the victim's environment.",
+  "description": "Detects attempts to reset an Okta user's enrolled multi-factor authentication (MFA) factors. An adversary may attempt to reset the MFA factors for an Okta user's account in order to register new MFA factors and abuse the account to blend in with normal activity in the victim's environment.",
   "false_positives": [
     "Consider adding exceptions to this rule to filter false positives if the MFA factors for Okta user accounts are regularly reset in your organization."
   ],
@@ -12,8 +12,8 @@
   ],
   "language": "kuery",
   "license": "Elastic License",
-  "name": "Attempt to Reset MFA Factors for Okta User Account",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
+  "name": "Attempt to Reset MFA Factors for an Okta User Account",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:user.mfa.factor.reset_all",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
@@ -48,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

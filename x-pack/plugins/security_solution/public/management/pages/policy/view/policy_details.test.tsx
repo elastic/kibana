@@ -12,7 +12,7 @@ import '../../../../common/mock/match_media.ts';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
-import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
+import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../../common/components/link_to');
@@ -293,7 +293,7 @@ describe('Policy Details', () => {
         policyView = render(<PolicyDetails />);
       });
 
-      it('malware popup and message customization options are shown', () => {
+      it('malware popup, message customization options and tooltip are shown', () => {
         // use query for finding stuff, if it doesn't find it, just returns null
         const userNotificationCheckbox = policyView.find(
           'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
@@ -301,8 +301,15 @@ describe('Policy Details', () => {
         const userNotificationCustomMessageTextArea = policyView.find(
           'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
         );
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="malwareTooltip"]');
         expect(userNotificationCheckbox).toHaveLength(1);
         expect(userNotificationCustomMessageTextArea).toHaveLength(1);
+        expect(tooltip).toHaveLength(1);
+      });
+
+      it('ransomware card is shown', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(1);
       });
     });
     describe('when the subscription tier is gold or lower', () => {
@@ -311,15 +318,22 @@ describe('Policy Details', () => {
         policyView = render(<PolicyDetails />);
       });
 
-      it('malware popup and message customization options are hidden', () => {
+      it('malware popup, message customization options, and tooltip are hidden', () => {
         const userNotificationCheckbox = policyView.find(
           'EuiCheckbox[data-test-subj="malwareUserNotificationCheckbox"]'
         );
         const userNotificationCustomMessageTextArea = policyView.find(
           'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
         );
+        const tooltip = policyView.find('EuiIconTip');
         expect(userNotificationCheckbox).toHaveLength(0);
         expect(userNotificationCustomMessageTextArea).toHaveLength(0);
+        expect(tooltip).toHaveLength(0);
+      });
+
+      it('ransomware card is hidden', () => {
+        const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
+        expect(ransomware).toHaveLength(0);
       });
     });
   });

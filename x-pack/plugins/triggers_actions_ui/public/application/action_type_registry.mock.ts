@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeRegistryContract } from '../types';
+import React, { lazy, Fragment } from 'react';
+import uuid from 'uuid';
+import { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {
@@ -16,6 +18,27 @@ const createActionTypeRegistryMock = () => {
   return mocked;
 };
 
+const mockedActionParamsFields = lazy(async () => ({
+  default() {
+    return React.createElement(Fragment);
+  },
+}));
+
+const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): ActionTypeModel => {
+  const id = uuid.v4();
+  return {
+    id,
+    iconClass: `iconClass-${id}`,
+    selectMessage: `selectMessage-${id}`,
+    validateConnector: jest.fn(),
+    validateParams: jest.fn(),
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+    ...actionType,
+  };
+};
+
 export const actionTypeRegistryMock = {
   create: createActionTypeRegistryMock,
+  createMockActionTypeModel,
 };

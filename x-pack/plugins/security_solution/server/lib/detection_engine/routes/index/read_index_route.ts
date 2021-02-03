@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
 import { getIndexVersion } from './get_index_version';
+import { isOutdated } from '../../migrations/helpers';
 
-export const readIndexRoute = (router: IRouter) => {
+export const readIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_INDEX_URL,
@@ -38,7 +39,10 @@ export const readIndexRoute = (router: IRouter) => {
           let mappingOutdated: boolean | null = null;
           try {
             const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
-            mappingOutdated = indexVersion !== SIGNALS_TEMPLATE_VERSION;
+            mappingOutdated = isOutdated({
+              current: indexVersion,
+              target: SIGNALS_TEMPLATE_VERSION,
+            });
           } catch (err) {
             const error = transformError(err);
             // Some users may not have the view_index_metadata permission necessary to check the index mapping version

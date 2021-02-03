@@ -19,7 +19,7 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import { VisualizationType } from '../index';
+import { VisualizationType } from '../types';
 import { FittingFunction } from './fitting_functions';
 
 export interface LegendConfig {
@@ -372,7 +372,7 @@ export interface YConfig {
   color?: string;
 }
 
-export interface LayerConfig {
+export interface XYLayerConfig {
   hide?: boolean;
   layerId: string;
   xAccessor?: string;
@@ -383,11 +383,11 @@ export interface LayerConfig {
   palette?: PaletteOutput;
 }
 
-export interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
+export interface ValidLayer extends XYLayerConfig {
+  xAccessor: NonNullable<XYLayerConfig['xAccessor']>;
 }
 
-export type LayerArgs = LayerConfig & {
+export type LayerArgs = XYLayerConfig & {
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
@@ -420,7 +420,7 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
-  layers: LayerConfig[];
+  layers: XYLayerConfig[];
   xTitle?: string;
   yTitle?: string;
   yRightTitle?: string;

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -56,11 +56,14 @@ const NetworkDetailsComponent: React.FC = () => {
     detailName: string;
     flowTarget: FlowTarget;
   }>();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
 
-  const query = useShallowEqualSelector(getGlobalQuerySelector);
-  const filters = useShallowEqualSelector(getGlobalFiltersQuerySelector);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(

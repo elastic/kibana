@@ -14,14 +14,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { IBasePath } from '../../../../../../src/core/public';
 import { AlertType } from '../../../common/alert_types';
-import { AlertingFlyout } from '../../components/alerting/AlertingFlyout';
+import { AlertingFlyout } from '../../components/alerting/alerting_flyout';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts',
 });
 const transactionDurationLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionDuration',
-  { defaultMessage: 'Transaction duration' }
+  { defaultMessage: 'Latency' }
 );
 const transactionErrorRateLabel = i18n.translate(
   'xpack.apm.home.alertsMenu.transactionErrorRate',
@@ -112,7 +112,7 @@ export function AlertingPopoverAndFlyout({
       ],
     },
 
-    // transaction duration panel
+    // latency panel
     {
       id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
       title: transactionDurationLabel,

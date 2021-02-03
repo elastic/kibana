@@ -15,6 +15,15 @@ import { TestProviders } from '../../mock';
 
 import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('DraggableLegendItem', () => {

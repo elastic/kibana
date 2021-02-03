@@ -195,12 +195,15 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<
+    AlertUpdates,
+    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyWhen'
+  >;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {
     body: JSON.stringify(
-      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
     ),
   });
 }
@@ -279,6 +282,10 @@ export async function unmuteAlerts({
   await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
 }
 
-export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+export async function alertingFrameworkHealth({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<AlertingFrameworkHealth> {
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

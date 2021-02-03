@@ -16,9 +16,10 @@ import {
 import { CoreVitalItem } from './core_vital_item';
 import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
+import { CoreVitalProps } from '../types';
 
 export interface UXMetrics {
-  cls: string | null;
+  cls: number | null;
   fid?: number | null;
   lcp?: number | null;
   tbt: number;
@@ -29,7 +30,7 @@ export interface UXMetrics {
   clsRanks: number[];
 }
 
-export function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
+function formatToSec(value?: number | string, fromUnit = 'MicroSec'): string {
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 
   if (valueInMs < 1000) {
@@ -38,36 +39,28 @@ export function formatToSec(value?: number | string, fromUnit = 'MicroSec'): str
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
 
-const CoreVitalsThresholds = {
-  LCP: { good: '2.5s', bad: '4.0s' },
-  FID: { good: '100ms', bad: '300ms' },
-  CLS: { good: '0.1', bad: '0.25' },
-};
-
-interface Props {
-  loading: boolean;
-  data?: UXMetrics | null;
-  displayServiceName?: boolean;
-  serviceName?: string;
-  totalPageViews?: number;
-  displayTrafficMetric?: boolean;
-}
-
-function formatValue(value?: number | null) {
+function formatToMilliseconds(value?: number | null) {
   if (typeof value === 'undefined' || value === null) {
     return null;
   }
   return formatToSec(value, 'ms');
 }
 
-export function CoreVitals({
+const CoreVitalsThresholds = {
+  LCP: { good: '2.5s', bad: '4.0s' },
+  FID: { good: '100ms', bad: '300ms' },
+  CLS: { good: '0.1', bad: '0.25' },
+};
+
+// eslint-disable-next-line import/no-default-export
+export default function CoreVitals({
   data,
   loading,
   displayServiceName,
   serviceName,
   totalPageViews,
   displayTrafficMetric = false,
-}: Props) {
+}: CoreVitalProps) {
   const { lcp, lcpRanks, fid, fidRanks, cls, clsRanks, coreVitalPages } = data || {};
 
   return (
@@ -85,7 +78,7 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={LCP_LABEL}
-            value={formatValue(lcp)}
+            value={formatToMilliseconds(lcp)}
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
@@ -95,7 +88,7 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={FID_LABEL}
-            value={formatValue(fid)}
+            value={formatToMilliseconds(fid)}
             ranks={fidRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
@@ -105,7 +98,7 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls ?? null}
+            value={cls?.toFixed(3) ?? null}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}

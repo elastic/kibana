@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alertType alert type creation structure is the expected value 1`] = `
+Object {
+  "context": Array [
+    Object {
+      "description": "The entity ID of the document that triggered the alert",
+      "name": "entityId",
+    },
+    Object {
+      "description": "The date the entity was recorded in the boundary",
+      "name": "entityDateTime",
+    },
+    Object {
+      "description": "The id of the contained entity document",
+      "name": "entityDocumentId",
+    },
+    Object {
+      "description": "The alert interval end time this change was recorded",
+      "name": "detectionDateTime",
+    },
+    Object {
+      "description": "The location of the entity",
+      "name": "entityLocation",
+    },
+    Object {
+      "description": "The id of the boundary containing the entity",
+      "name": "containingBoundaryId",
+    },
+    Object {
+      "description": "The boundary the entity is currently located within",
+      "name": "containingBoundaryName",
+    },
+  ],
+}
+`;

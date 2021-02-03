@@ -20,10 +20,8 @@ describe('Tag attributes validation', () => {
       );
     });
 
-    it('returns an error message if the name contains invalid characters', () => {
-      expect(validateTagName('t^ag+name&')).toMatchInlineSnapshot(
-        `"Tag name can only include a-z, 0-9, _, -,:."`
-      );
+    it('does not return an error message if the name contains special characters', () => {
+      expect(validateTagName('t^ag+name&')).toBeUndefined();
     });
   });
 

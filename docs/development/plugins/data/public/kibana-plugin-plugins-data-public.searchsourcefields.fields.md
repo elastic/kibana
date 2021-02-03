@@ -4,8 +4,10 @@
 
 ## SearchSourceFields.fields property
 
+Retrieve fields via the search Fields API
+
 <b>Signature:</b>
 
 ```typescript
-fields?: NameList;
+fields?: SearchFieldValue[];
 ```

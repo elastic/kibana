@@ -14,3 +14,9 @@ export const getEntryMatchAnyMock = (): EntryMatchAny => ({
   type: MATCH_ANY,
   value: [ENTRY_VALUE],
 });
+
+export const getEntryMatchAnyExcludeMock = (): EntryMatchAny => ({
+  ...getEntryMatchAnyMock(),
+  operator: 'excluded',
+  value: [ENTRY_VALUE, 'some other host name'],
+});

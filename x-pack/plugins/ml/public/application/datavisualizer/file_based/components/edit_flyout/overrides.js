@@ -268,8 +268,7 @@ class OverridesUI extends Component {
 
     const fieldOptions = getSortedFields(fields);
     const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
-    const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
+    const docsUrl = this.props.kibana.services.docLinks.links.aggs.date_format_pattern;
 
     const timestampFormatHelp = (
       <EuiText size="xs">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
@@ -14,6 +14,7 @@ import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
 ) {
@@ -36,6 +37,7 @@ export async function reassignAgent(
 
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -55,7 +57,7 @@ export async function reassignAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })

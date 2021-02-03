@@ -75,7 +75,6 @@ describe('ResilientActionConnectorFields renders', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="case-resilient-mappings"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-resilient-orgId-form-input"]').length > 0

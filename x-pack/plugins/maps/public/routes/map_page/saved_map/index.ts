@@ -5,7 +5,7 @@
  */
 
 export { SavedMap } from './saved_map';
-export { getInitialLayersFromUrlParam } from './get_initial_layers';
+export { getInitialLayersFromUrlParam } from './get_initial_layers_from_url_param';
 export { getInitialQuery } from './get_initial_query';
 export { getInitialRefreshConfig } from './get_initial_refresh_config';
 export { getInitialTimeFilters } from './get_initial_time_filters';

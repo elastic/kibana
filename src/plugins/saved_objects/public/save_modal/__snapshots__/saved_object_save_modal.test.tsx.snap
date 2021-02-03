@@ -25,7 +25,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm>
-          <EuiSpacer />
           <EuiFormRow
             describedByIds={Array []}
             display="row"
@@ -71,6 +70,314 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
               value=""
             />
           </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          isDisabled={false}
+          isLoading={false}
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </form>
+</EuiOverlayMask>
+`;
+
+exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 1`] = `
+<EuiOverlayMask>
+  <form
+    onSubmit={[Function]}
+  >
+    <EuiModal
+      className="kbnSavedObjectSaveModal"
+      data-test-subj="savedObjectSaveModal"
+      onClose={[Function]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Title"
+                id="savedObjects.saveModal.titleLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiFieldText
+              autoFocus={true}
+              data-test-subj="savedObjectTitle"
+              fullWidth={true}
+              isInvalid={false}
+              onChange={[Function]}
+              value="Saved Object title"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Description"
+                id="savedObjects.saveModal.descriptionLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiTextArea
+              data-test-subj="viewDescription"
+              onChange={[Function]}
+              value=""
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          isDisabled={true}
+          isLoading={false}
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </form>
+</EuiOverlayMask>
+`;
+
+exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 2`] = `
+<EuiOverlayMask>
+  <form
+    onSubmit={[Function]}
+  >
+    <EuiModal
+      className="kbnSavedObjectSaveModal"
+      data-test-subj="savedObjectSaveModal"
+      onClose={[Function]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Title"
+                id="savedObjects.saveModal.titleLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiFieldText
+              autoFocus={true}
+              data-test-subj="savedObjectTitle"
+              fullWidth={true}
+              isInvalid={false}
+              onChange={[Function]}
+              value="Saved Object title"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Description"
+                id="savedObjects.saveModal.descriptionLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiTextArea
+              data-test-subj="viewDescription"
+              onChange={[Function]}
+              value=""
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          data-test-subj="saveCancelButton"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          isDisabled={false}
+          isLoading={false}
+          type="submit"
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </form>
+</EuiOverlayMask>
+`;
+
+exports[`SavedObjectSaveModal should render matching snapshot when given options 1`] = `
+<EuiOverlayMask>
+  <form
+    onSubmit={[Function]}
+  >
+    <EuiModal
+      className="kbnSavedObjectSaveModal kbnSavedObjectsSaveModal--wide"
+      data-test-subj="savedObjectSaveModal"
+      onClose={[Function]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFlexGroup
+            gutterSize="m"
+          >
+            <EuiFlexItem>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={true}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                label={
+                  <FormattedMessage
+                    defaultMessage="Title"
+                    id="savedObjects.saveModal.titleLabel"
+                    values={Object {}}
+                  />
+                }
+                labelType="label"
+              >
+                <EuiFieldText
+                  autoFocus={true}
+                  data-test-subj="savedObjectTitle"
+                  fullWidth={true}
+                  isInvalid={false}
+                  onChange={[Function]}
+                  value="Saved Object title"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={true}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                label={
+                  <FormattedMessage
+                    defaultMessage="Description"
+                    id="savedObjects.saveModal.descriptionLabel"
+                    values={Object {}}
+                  />
+                }
+                labelType="label"
+              >
+                <EuiTextArea
+                  data-test-subj="viewDescription"
+                  onChange={[Function]}
+                  value=""
+                />
+              </EuiFormRow>
+              <div>
+                Hello! Main options
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div>
+                Hey there! Options on the right
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>

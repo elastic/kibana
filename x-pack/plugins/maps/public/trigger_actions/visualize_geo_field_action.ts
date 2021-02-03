@@ -21,7 +21,8 @@ import {
 import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
 
-export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_FIELD>({
+export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
+  id: ACTION_VISUALIZE_GEO_FIELD,
   type: ACTION_VISUALIZE_GEO_FIELD,
   getDisplayName: () =>
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {

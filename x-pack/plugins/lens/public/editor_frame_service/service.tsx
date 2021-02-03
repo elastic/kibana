@@ -125,6 +125,12 @@ export class EditorFrameService {
         collectAsyncDefinitions(this.visualizations),
       ]);
 
+      const unmount = () => {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      };
+
       return {
         mount: async (
           element,
@@ -138,8 +144,12 @@ export class EditorFrameService {
             onChange,
             showNoDataPopover,
             initialContext,
+            searchSessionId,
           }
         ) => {
+          if (domElement !== element) {
+            unmount();
+          }
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
@@ -172,16 +182,13 @@ export class EditorFrameService {
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
+                searchSessionId={searchSessionId}
               />
             </I18nProvider>,
             domElement
           );
         },
-        unmount() {
-          if (domElement) {
-            unmountComponentAtNode(domElement);
-          }
-        },
+        unmount,
       };
     };
 

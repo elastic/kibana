@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { Expression, Props } from '../components/duration/expression';
+import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types/alerts';
@@ -23,16 +23,15 @@ interface ThreadPoolRejectionAlertDetails {
 }
 
 export function createThreadPoolRejectionsAlertType(
-  alertType: string,
+  alertId: string,
   threadPoolAlertDetails: ThreadPoolRejectionAlertDetails
 ): AlertTypeModel {
   return {
-    id: alertType,
-    name: threadPoolAlertDetails.label,
+    id: alertId,
     description: threadPoolAlertDetails.description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html`;
+      return `${docLinks.links.monitoring.alertsKibana}`;
     },
     alertParamsExpression: (props: Props) => (
       <>

@@ -5,7 +5,7 @@
  */
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
-import { EuiTheme } from '../../../../../observability/public';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import {
   SERVICE_NAME,
@@ -15,8 +15,8 @@ import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
 } from '../../../../common/service_health_status';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { defaultIcon, iconForNode } from './icons';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { iconForNode } from './icons';
 
 export const popoverWidth = 280;
 
@@ -116,9 +116,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'background-color': theme.eui.euiColorGhost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
-        'background-image': isIE11
-          ? undefined
-          : (el: cytoscape.NodeSingular) => iconForNode(el) ?? defaultIcon,
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'background-height': (el: cytoscape.NodeSingular) =>
           isService(el) ? '60%' : '40%',
         'background-width': (el: cytoscape.NodeSingular) =>
@@ -129,7 +127,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
             ? theme.eui.euiColorPrimaryText
-            : theme.eui.textColors.text,
+            : theme.eui.euiTextColor,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',

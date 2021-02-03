@@ -46,6 +46,9 @@ function useCreateApiKeyForm(
           policy_id: policyIdInput.value,
         }),
       });
+      if (res.error) {
+        throw res.error;
+      }
       policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);

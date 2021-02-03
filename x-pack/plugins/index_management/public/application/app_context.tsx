@@ -8,10 +8,8 @@ import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
-import { FleetSetup } from '../../../fleet/public';
-import { IndexMgmtMetricsType } from '../types';
+import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
 import { SharePluginStart } from '../../../../../src/plugins/share/public';
@@ -25,10 +23,10 @@ export interface AppDependencies {
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
-    fleet?: FleetSetup;
+    isFleetEnabled: boolean;
   };
   services: {
-    uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+    uiMetricService: UiMetricService;
     extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;
@@ -37,6 +35,7 @@ export interface AppDependencies {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: CoreSetup['uiSettings'];
   urlGenerators: SharePluginStart['urlGenerators'];
+  docLinks: CoreStart['docLinks'];
 }
 
 export const AppContextProvider = ({

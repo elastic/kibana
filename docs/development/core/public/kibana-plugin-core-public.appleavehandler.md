@@ -11,5 +11,5 @@ See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for 
 <b>Signature:</b>
 
 ```typescript
-export declare type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export declare type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 ```

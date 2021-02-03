@@ -46,7 +46,7 @@ export function getLensTopNavConfig(options: {
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
-        defaultMessage: 'cancel',
+        defaultMessage: 'Cancel',
       }),
       run: actions.cancel,
       testId: 'lnsApp_cancelButton',

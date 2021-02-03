@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import * as Rx from 'rxjs';
@@ -29,8 +18,10 @@ import { getRenderersRegistry } from './services';
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export interface ExpressionRenderHandlerParams {
-  onRenderError: RenderErrorHandlerFnType;
-  renderMode: RenderMode;
+  onRenderError?: RenderErrorHandlerFnType;
+  renderMode?: RenderMode;
+  syncColors?: boolean;
+  hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
 export interface ExpressionRendererEvent {
@@ -59,7 +50,12 @@ export class ExpressionRenderHandler {
 
   constructor(
     element: HTMLElement,
-    { onRenderError, renderMode }: Partial<ExpressionRenderHandlerParams> = {}
+    {
+      onRenderError,
+      renderMode,
+      syncColors,
+      hasCompatibleActions = async () => false,
+    }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
 
@@ -96,17 +92,21 @@ export class ExpressionRenderHandler {
       getRenderMode: () => {
         return renderMode || 'display';
       },
+      isSyncColorsEnabled: () => {
+        return syncColors || false;
+      },
+      hasCompatibleActions,
     };
   }
 
-  render = async (data: any, uiState: any = {}) => {
-    if (!data || typeof data !== 'object') {
+  render = async (value: any, uiState?: any) => {
+    if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
 
-    if (data.type !== 'render' || !data.as) {
-      if (data.type === 'error') {
-        return this.handleRenderError(data.error);
+    if (value.type !== 'render' || !value.as) {
+      if (value.type === 'error') {
+        return this.handleRenderError(value.error);
       } else {
         return this.handleRenderError(
           new Error('invalid data provided to the expression renderer')
@@ -114,15 +114,15 @@ export class ExpressionRenderHandler {
       }
     }
 
-    if (!getRenderersRegistry().get(data.as)) {
-      return this.handleRenderError(new Error(`invalid renderer id '${data.as}'`));
+    if (!getRenderersRegistry().get(value.as)) {
+      return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
-        .get(data.as)!
-        .render(this.element, data.value, {
+        .get(value.as)!
+        .render(this.element, value.value, {
           ...this.handlers,
           uiState,
         } as any);
@@ -152,7 +152,7 @@ export class ExpressionRenderHandler {
 export function render(
   element: HTMLElement,
   data: any,
-  options?: Partial<ExpressionRenderHandlerParams>
+  options?: ExpressionRenderHandlerParams
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);
   handler.render(data);

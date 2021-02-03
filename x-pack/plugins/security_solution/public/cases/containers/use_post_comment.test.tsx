@@ -28,7 +28,7 @@ describe('usePostComment', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment(basicCaseId)
+        usePostComment()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -44,11 +44,11 @@ describe('usePostComment', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment(basicCaseId)
+        usePostComment()
       );
       await waitForNextUpdate();
 
-      result.current.postComment(samplePost, updateCaseCallback);
+      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
       await waitForNextUpdate();
       expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
     });
@@ -57,10 +57,10 @@ describe('usePostComment', () => {
   it('post case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment(basicCaseId)
+        usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(samplePost, updateCaseCallback);
+      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -73,10 +73,10 @@ describe('usePostComment', () => {
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment(basicCaseId)
+        usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(samplePost, updateCaseCallback);
+      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -90,10 +90,10 @@ describe('usePostComment', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment(basicCaseId)
+        usePostComment()
       );
       await waitForNextUpdate();
-      result.current.postComment(samplePost, updateCaseCallback);
+      result.current.postComment(basicCaseId, samplePost, updateCaseCallback);
 
       expect(result.current).toEqual({
         isLoading: false,

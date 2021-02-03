@@ -11,6 +11,10 @@ import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { Color } from '../../../../../common/color_palette';
 import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
+import {
+  useKibanaTimefilterTime,
+  useSyncKibanaTimeFilterTime,
+} from '../../../../hooks/use_kibana_timefilter_time';
 
 const metricsExplorerOptionsMetricRT = t.intersection([
   metricsExplorerMetricRT,
@@ -145,14 +149,29 @@ function useStateWithLocalStorage<State>(
 }
 
 export const useMetricsExplorerOptions = () => {
+  const TIME_DEFAULTS = { from: 'now-1h', to: 'now' };
+  const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
+  const { from, to } = getTime();
+  const defaultTimeRange = {
+    from,
+    to,
+    interval: DEFAULT_TIMERANGE.interval,
+  };
+
   const [options, setOptions] = useStateWithLocalStorage<MetricsExplorerOptions>(
     'MetricsExplorerOptions',
     DEFAULT_OPTIONS
   );
   const [currentTimerange, setTimeRange] = useStateWithLocalStorage<MetricsExplorerTimeOptions>(
     'MetricsExplorerTimeRange',
-    DEFAULT_TIMERANGE
+    defaultTimeRange
   );
+
+  useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
+    from: currentTimerange.from,
+    to: currentTimerange.to,
+  });
+
   const [chartOptions, setChartOptions] = useStateWithLocalStorage<MetricsExplorerChartOptions>(
     'MetricsExplorerChartOptions',
     DEFAULT_CHART_OPTIONS
@@ -177,7 +196,7 @@ export const useMetricsExplorerOptions = () => {
     defaultViewState: {
       options: DEFAULT_OPTIONS,
       chartOptions: DEFAULT_CHART_OPTIONS,
-      currentTimerange: DEFAULT_TIMERANGE,
+      currentTimerange: defaultTimeRange,
     },
     options,
     chartOptions,

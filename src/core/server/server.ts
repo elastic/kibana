@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import apm from 'elastic-apm-node';
@@ -31,7 +20,7 @@ import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from './saved_objects';
+import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
@@ -53,6 +42,7 @@ import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { config as externalUrlConfig } from './external_url';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -77,6 +67,9 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+
+  private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -109,6 +102,10 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+
+    this.savedObjectsStartPromise = new Promise((resolve) => {
+      this.resolveSavedObjectsStartPromise = resolve;
+    });
   }
 
   public async setup() {
@@ -155,17 +152,24 @@ export class Server {
       http: httpSetup,
     });
 
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
+    const coreUsageDataSetup = this.coreUsageData.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
+      savedObjectsStartPromise: this.savedObjectsStartPromise,
+    });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
       savedObjects: savedObjectsSetup,
     });
-
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const statusSetup = await this.status.setup({
       elasticsearch: elasticsearchServiceSetup,
@@ -190,8 +194,6 @@ export class Server {
     const loggingSetup = this.logging.setup({
       loggingSystem: this.loggingSystem,
     });
-
-    this.coreUsageData.setup({ metrics: metricsSetup });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -235,6 +237,8 @@ export class Server {
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
     });
+    await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
+
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
@@ -290,17 +294,18 @@ export class Server {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
-      async (context, req, res): Promise<RequestHandlerContext['core']> => {
+      (context, req, res): RequestHandlerContext['core'] => {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
 
-  public async setupCoreConfig() {
+  public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
       elasticsearchConfig,
+      externalUrlConfig,
       loggingConfig,
       httpConfig,
       pluginsConfig,
@@ -320,7 +325,7 @@ export class Server {
       if (descriptor.deprecations) {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
-      await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

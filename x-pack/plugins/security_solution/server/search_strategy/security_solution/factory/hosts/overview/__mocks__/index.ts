@@ -322,7 +322,7 @@ export const formattedSearchStrategyResponse = {
     endgameSecurity: 0,
     filebeatSystemModule: 1793,
     winlogbeatSecurity: 42,
-    winlogbeatMWSysmonOperational: null,
+    winlogbeatMWSysmonOperational: 1781,
   },
 };
 

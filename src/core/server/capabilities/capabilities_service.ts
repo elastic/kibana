@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
@@ -76,7 +65,19 @@ export interface CapabilitiesSetup {
    * ```ts
    * // my-plugin/server/plugin.ts
    * public setup(core: CoreSetup, deps: {}) {
-   *    core.capabilities.registerSwitcher((request, capabilities) => {
+   *    core.capabilities.registerSwitcher((request, capabilities, useDefaultCapabilities) => {
+   *      // useDefaultCapabilities is a special case that switchers typically don't have to concern themselves with.
+   *      // The default capabilities are typically the ones you provide in your CapabilitiesProvider, but this flag
+   *      // gives each switcher an opportunity to change the default capabilities of other plugins' capabilities.
+   *      // For example, you may decide to flip another plugin's capability to false if today is Tuesday,
+   *      // but you wouldn't want to do this when we are requesting the default set of capabilities.
+   *      if (useDefaultCapabilities) {
+   *        return {
+   *          somePlugin: {
+   *            featureEnabledByDefault: true
+   *          }
+   *        }
+   *      }
    *      if(myPluginApi.shouldRestrictSomePluginBecauseOf(request)) {
    *        return {
    *          somePlugin: {
@@ -93,6 +94,18 @@ export interface CapabilitiesSetup {
 }
 
 /**
+ * Defines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.
+ *
+ * @public
+ */
+export interface ResolveCapabilitiesOptions {
+  /**
+   * Indicates if capability switchers are supposed to return a default set of capabilities.
+   */
+  useDefaultCapabilities: boolean;
+}
+
+/**
  * APIs to access the application {@link Capabilities}.
  *
  * @public
@@ -101,7 +114,10 @@ export interface CapabilitiesStart {
   /**
    * Resolve the {@link Capabilities} to be used for given request
    */
-  resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+  resolveCapabilities(
+    request: KibanaRequest,
+    options?: ResolveCapabilitiesOptions
+  ): Promise<Capabilities>;
 }
 
 interface SetupDeps {
@@ -150,7 +166,8 @@ export class CapabilitiesService {
 
   public start(): CapabilitiesStart {
     return {
-      resolveCapabilities: (request) => this.resolveCapabilities(request, []),
+      resolveCapabilities: (request, options) =>
+        this.resolveCapabilities(request, [], options?.useDefaultCapabilities ?? false),
     };
   }
 }

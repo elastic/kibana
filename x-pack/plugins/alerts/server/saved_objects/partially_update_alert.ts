@@ -20,6 +20,7 @@ export type PartiallyUpdateableAlertAttributes = Partial<
 >;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
+  refresh?: SavedObjectsUpdateOptions['refresh'];
   version?: string;
   ignore404?: boolean;
   namespace?: string; // only should be used  with ISavedObjectsRepository
@@ -38,7 +39,7 @@ export async function partiallyUpdateAlert(
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
   const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version');
+  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
 
   try {
     await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);

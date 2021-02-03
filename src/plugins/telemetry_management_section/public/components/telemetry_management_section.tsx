@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -37,6 +26,7 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 import { LazyField } from '../../../advanced_settings/public';
 import { ToastsStart } from '../../../../core/public';
+import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -48,7 +38,7 @@ interface Props {
   isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
-  query?: any;
+  query?: { text: string };
   toasts: ToastsStart;
 }
 
@@ -61,32 +51,40 @@ interface State {
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
-  state: State = {
-    processing: false,
-    showExample: false,
-    showSecurityExample: false,
-    queryMatches: null,
-    enabled: this.props.telemetryService.getIsOptedIn() || false,
-  };
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      processing: false,
+      showExample: false,
+      showSecurityExample: false,
+      queryMatches: props.query ? this.checkQueryMatch(props.query) : null,
+      enabled: this.props.telemetryService.getIsOptedIn() || false,
+    };
+  }
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const { query } = nextProps;
+    const queryMatches = this.checkQueryMatch(query);
 
-    const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches =
-      this.props.telemetryService.getCanChangeOptInStatus() &&
-      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0);
-
-    if (searchTermMatches !== this.state.queryMatches) {
+    if (queryMatches !== this.state.queryMatches) {
       this.setState(
         {
-          queryMatches: searchTermMatches,
+          queryMatches,
         },
         () => {
-          this.props.onQueryMatchChange(searchTermMatches);
+          this.props.onQueryMatchChange(queryMatches);
         }
       );
     }
+  }
+
+  checkQueryMatch(query?: { text: string }): boolean {
+    const searchTerm = (query?.text ?? '').toLowerCase();
+    return (
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0)
+    );
   }
 
   render() {
@@ -105,13 +103,17 @@ export class TelemetryManagementSection extends Component<Props, State> {
     return (
       <Fragment>
         {showExample && (
-          <OptInExampleFlyout
-            fetchExample={telemetryService.fetchExample}
-            onClose={this.toggleExample}
-          />
+          <TrackApplicationView viewId="optInExampleFlyout">
+            <OptInExampleFlyout
+              fetchExample={telemetryService.fetchExample}
+              onClose={this.toggleExample}
+            />
+          </TrackApplicationView>
         )}
         {showSecurityExample && securityExampleEnabled && (
-          <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          <TrackApplicationView viewId="optInSecurityExampleFlyout">
+            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+          </TrackApplicationView>
         )}
         <EuiPanel paddingSize="l">
           <EuiForm>

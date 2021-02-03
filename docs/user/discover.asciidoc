@@ -38,7 +38,7 @@ image::images/Discover-Start.png[Discover]
 
 [float]
 [[whats-you-goal-in-discover]]
-=== Step 1. Define your goal
+=== Define your goal
 
 When you explore your data in **Discover**, it's common to start with one or two goals:
 
@@ -56,7 +56,7 @@ know the top-selling products and on what day of the week these products sell th
 
 [float]
 [[find-the-data-you-want-to-use]]
-=== Step 2. Find your data
+=== Find your data
 
 Tell {kib} where to find the data you want to explore, and then specify the time range in which to view that data.
 
@@ -82,7 +82,7 @@ click and drag the mouse over the histogram.
 
 [float]
 [[explore-fields-in-your-data]]
-=== Step 3. Explore the fields in your data
+=== Explore the fields in your data
 
 **Discover** includes a table that shows all the documents that match your search.
 By default, the table includes columns for the time field and the document `_source`,
@@ -110,7 +110,7 @@ column header, and then use the move and sort controls.
 
 [float]
 [[search-in-discover]]
-=== Step 4. Search your data
+=== Search your data
 
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
@@ -129,7 +129,7 @@ Search the ecommerce data for documents where the country matches US:
 
 [float]
 [[filter-in-discover]]
-=== Step 5. Filter your data
+=== Filter your data
 
 Whereas the query defines the set of documents you are interested in,
 filters enable you to zero in on different subsets of those documents.
@@ -148,7 +148,7 @@ click the close icon (x) next to its name in the filter bar.
 
 [float]
 [[look-inside-a-document]]
-=== Step 6.  Look inside a document
+=== Look inside a document
 
 Dive into an individual document to view its fields and the documents
 that occurred before and after it.
@@ -169,7 +169,7 @@ You can bookmark this document and share the link.
 
 [float]
 [[save-your-search]]
-=== Step 7.  Save your search for later use
+=== Save your search for later use
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query and the filters.
@@ -179,7 +179,7 @@ Saving a search saves the query and the filters.
 . Give your search a title, and then click **Save**.
 
 [float]
-=== Step 8. Visualize your findings
+=== Visualize your findings
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 

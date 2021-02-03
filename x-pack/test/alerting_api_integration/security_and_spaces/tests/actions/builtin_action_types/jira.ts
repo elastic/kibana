@@ -15,24 +15,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-const mapping = [
-  {
-    source: 'title',
-    target: 'summary',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -43,7 +25,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'www.jiraisinkibanaactions.com',
       projectKey: 'CK',
-      incidentConfiguration: { mapping },
     },
     secrets: {
       apiToken: 'elastic',
@@ -52,23 +33,15 @@ export default function jiraTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        savedObjectId: '123',
-        title: 'a title',
-        description: 'a description',
-        createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: 'elastic' },
-        updatedAt: null,
-        updatedBy: null,
-        externalId: null,
+        incident: {
+          summary: 'a title',
+          description: 'a description',
+          externalId: null,
+        },
         comments: [
           {
-            commentId: '456',
-            version: 'WzU3LDFd',
             comment: 'first comment',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: { fullName: 'Elastic User', username: 'elastic' },
-            updatedAt: null,
-            updatedBy: null,
+            commentId: '456',
           },
         ],
       },
@@ -94,8 +67,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             config: {
               ...mockJira.config,
               apiUrl: jiraSimulatorURL,
-              incidentConfiguration: mockJira.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockJira.secrets,
           })
@@ -109,8 +80,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
-            incidentConfiguration: mockJira.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
 
@@ -126,8 +95,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: mockJira.config.projectKey,
-            incidentConfiguration: mockJira.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
       });
@@ -182,7 +149,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: 'http://jira.mynonexistent.com',
               projectKey: mockJira.config.projectKey,
-              incidentConfiguration: mockJira.config.incidentConfiguration,
             },
             secrets: mockJira.secrets,
           })
@@ -207,7 +173,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: jiraSimulatorURL,
               projectKey: mockJira.config.projectKey,
-              incidentConfiguration: mockJira.config.incidentConfiguration,
             },
           })
           .expect(400)
@@ -219,56 +184,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 'error validating action type secrets: [email]: expected value of type [string] but got [undefined]',
             });
           });
-      });
-
-      it('should respond with a 400 Bad Request when creating a jira action with empty mapping', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A jira action',
-            actionTypeId: '.jira',
-            config: {
-              apiUrl: jiraSimulatorURL,
-              projectKey: mockJira.config.projectKey,
-              incidentConfiguration: { mapping: [] },
-            },
-            secrets: mockJira.secrets,
-          })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
-            });
-          });
-      });
-
-      it('should respond with a 400 Bad Request when creating a jira action with wrong actionType', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A jira action',
-            actionTypeId: '.jira',
-            config: {
-              apiUrl: jiraSimulatorURL,
-              projectKey: mockJira.config.projectKey,
-              incidentConfiguration: {
-                mapping: [
-                  {
-                    source: 'title',
-                    target: 'description',
-                    actionType: 'non-supported',
-                  },
-                ],
-              },
-            },
-            secrets: mockJira.secrets,
-          })
-          .expect(400);
       });
     });
 
@@ -287,7 +202,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: jiraSimulatorURL,
               projectKey: mockJira.config.projectKey,
-              incidentConfiguration: mockJira.config.incidentConfiguration,
             },
             secrets: mockJira.secrets,
           });
@@ -375,7 +289,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -388,7 +302,10 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  savedObjectId: 'success',
+                  incident: {
+                    description: 'success',
+                  },
+                  comments: [],
                 },
               },
             })
@@ -398,7 +315,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.title]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
               });
             });
         });
@@ -411,12 +328,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  ...mockJira.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{}],
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    description: 'success',
+                    summary: 'success',
+                  },
+                  comments: [{ comment: 'comment' }],
                 },
               },
             })
@@ -439,11 +356,10 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  ...mockJira.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    summary: 'success',
+                  },
                   comments: [{ commentId: 'success' }],
                 },
               },
@@ -469,9 +385,11 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockJira.params,
                 subActionParams: {
-                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    issueType: '10006',
+                  },
                   comments: [],
-                  issueType: '10006',
                 },
               },
             })

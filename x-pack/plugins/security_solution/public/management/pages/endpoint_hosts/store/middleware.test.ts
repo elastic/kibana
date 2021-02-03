@@ -23,7 +23,7 @@ import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
-jest.mock('../../policy/store/policy_list/services/ingest', () => ({
+jest.mock('../../policy/store/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),

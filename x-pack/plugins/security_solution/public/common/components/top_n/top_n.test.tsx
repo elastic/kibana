@@ -9,7 +9,6 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { allEvents, defaultOptions } from './helpers';
 import { TopN, Props as TopNProps } from './top_n';
@@ -105,7 +104,6 @@ describe('TopN', () => {
     indexPattern: mockIndexPattern,
     options: defaultOptions,
     query,
-    setAbsoluteRangeDatePicker,
     setAbsoluteRangeDatePickerTarget: 'global',
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',

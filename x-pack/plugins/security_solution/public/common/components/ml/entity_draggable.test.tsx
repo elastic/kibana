@@ -11,6 +11,16 @@ import '../../mock/match_media';
 import { EntityDraggableComponent } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 describe('entity_draggable', () => {
   const mount = useMountAppended();
 

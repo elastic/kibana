@@ -9,7 +9,7 @@ import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { useFindLists, ListSchema } from '../../../lists_plugin_deps';
 import { useKibana } from '../../../common/lib/kibana';
-import { getGenericComboBoxProps } from './helpers';
+import { filterFieldToList, getGenericComboBoxProps } from './helpers';
 import * as i18n from './translations';
 
 interface AutocompleteFieldListsProps {
@@ -41,17 +41,10 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   const { loading, result, start } = useFindLists();
   const getLabel = useCallback(({ name }) => name, []);
 
-  const optionsMemo = useMemo(() => {
-    if (
-      selectedField != null &&
-      selectedField.esTypes != null &&
-      selectedField.esTypes.length > 0
-    ) {
-      return lists.filter(({ type }) => selectedField.esTypes?.includes(type));
-    } else {
-      return [];
-    }
-  }, [lists, selectedField]);
+  const optionsMemo = useMemo(() => filterFieldToList(lists, selectedField), [
+    lists,
+    selectedField,
+  ]);
   const selectedOptionsMemo = useMemo(() => {
     if (selectedValue != null) {
       const list = lists.filter(({ id }) => id === selectedValue);

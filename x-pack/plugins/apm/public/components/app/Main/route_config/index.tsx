@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { ApmServiceContextProvider } from '../../../../context/apm_service_context';
+import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { APMRouteDefinition } from '../../../../application/routes';
@@ -27,6 +27,8 @@ import {
   CreateAgentConfigurationRouteHandler,
   EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
+import { enableServiceOverview } from '../../../../../common/ui_settings_keys';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 /**
  * Given a path, redirect to that location, preserving the search and maintaining
@@ -143,6 +145,17 @@ function SettingsCustomizeUI(props: RouteComponentProps<{}>) {
   );
 }
 
+function DefaultServicePageRouteHandler(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  const { uiSettings } = useApmPluginContext().core;
+  const { serviceName } = props.match.params;
+  if (uiSettings.get(enableServiceOverview)) {
+    return renderAsRedirectTo(`/services/${serviceName}/overview`)(props);
+  }
+  return renderAsRedirectTo(`/services/${serviceName}/transactions`)(props);
+}
+
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
@@ -217,10 +230,7 @@ export const routes: APMRouteDefinition[] = [
     exact: true,
     path: '/services/:serviceName',
     breadcrumb: ({ match }) => match.params.serviceName,
-    render: (props: RouteComponentProps<{ serviceName: string }>) =>
-      renderAsRedirectTo(
-        `/services/${props.match.params.serviceName}/transactions`
-      )(props),
+    component: DefaultServicePageRouteHandler,
   } as APMRouteDefinition<{ serviceName: string }>,
   {
     exact: true,

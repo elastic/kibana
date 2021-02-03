@@ -96,3 +96,10 @@ export const TRANSFORM_MODE = {
 
 const transformModes = Object.values(TRANSFORM_MODE);
 export type TransformMode = typeof transformModes[number];
+
+export const TRANSFORM_FUNCTION = {
+  PIVOT: 'pivot',
+  LATEST: 'latest',
+} as const;
+
+export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];

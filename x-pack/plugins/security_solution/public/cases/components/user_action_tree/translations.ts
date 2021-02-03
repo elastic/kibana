@@ -33,3 +33,31 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate(
     defaultMessage: 'Highlight the referenced comment',
   }
 );
+
+export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
+  'xpack.securitySolution.case.caseView.alertCommentLabelTitle',
+  {
+    defaultMessage: 'added an alert from',
+  }
+);
+
+export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.case.caseView.alertRuleDeletedLabelTitle',
+  {
+    defaultMessage: 'added an alert',
+  }
+);
+
+export const SHOW_ALERT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.showAlertTooltip',
+  {
+    defaultMessage: 'Show alert details',
+  }
+);
+
+export const ALERT_NOT_FOUND_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.showAlertDeletedTooltip',
+  {
+    defaultMessage: 'Alert not found',
+  }
+);

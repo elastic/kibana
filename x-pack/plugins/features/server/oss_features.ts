@@ -71,6 +71,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -204,6 +231,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['search-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
                 },
               ],
             },

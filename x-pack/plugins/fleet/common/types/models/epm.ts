@@ -8,6 +8,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
+  ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
   defaultPackages,
@@ -15,6 +16,7 @@ import {
   requiredPackages,
 } from '../../constants';
 import { ValueOf } from '../../types';
+import { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -44,6 +46,7 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 /*
@@ -55,6 +58,7 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
 }
 
 export enum ElasticsearchAssetType {
@@ -63,67 +67,68 @@ export enum ElasticsearchAssetType {
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
+  dataStreamIlmPolicy = 'data_stream_ilm_policy',
 }
 
 export type DataType = typeof dataTypes;
 
-export type RegistryRelease = 'ga' | 'beta' | 'experimental';
+export type InstallablePackage = RegistryPackage | ArchivePackage;
 
-// Fields common to packages that come from direct upload and the registry
-export interface InstallablePackage {
-  name: string;
-  title?: string;
-  version: string;
-  release?: RegistryRelease;
-  readme?: string;
-  description: string;
-  type: string;
-  categories: string[];
-  screenshots?: RegistryImage[];
-  icons?: RegistryImage[];
-  assets?: string[];
-  internal?: boolean;
-  format_version: string;
-  data_streams?: RegistryDataStream[];
-  policy_templates?: RegistryPolicyTemplate[];
-}
+export type ArchivePackage = PackageSpecManifest &
+  // should an uploaded package be able to specify `internal`?
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal'>;
 
-// Uploaded package archives don't have extra fields
-// Linter complaint disabled because this extra type is meant for better code readability
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ArchivePackage extends InstallablePackage {}
+export type RegistryPackage = PackageSpecManifest &
+  Partial<RegistryOverridesToOptional> &
+  RegistryAdditionalProperties &
+  RegistryOverridePropertyValue;
 
 // Registry packages do have extra fields.
 // cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-export interface RegistryPackage extends InstallablePackage {
-  requirement: RequirementsByServiceName;
+type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'>;
+
+// our current types have `download`, & `path` as required but they're are optional (have `omitempty`) according to
+// https://github.com/elastic/package-registry/blob/master/util/package.go#L57
+// & https://github.com/elastic/package-registry/blob/master/util/package.go#L80-L81
+// However, they are always present in every registry response I checked. Chose to keep types unchanged for now
+// and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
+interface RegistryAdditionalProperties {
+  assets?: string[];
   download: string;
   path: string;
+  readme?: string;
+  internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
+  data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+}
+interface RegistryOverridePropertyValue {
+  icons?: RegistryImage[];
+  screenshots?: RegistryImage[];
 }
 
-interface RegistryImage {
+export type RegistryRelease = PackageSpecManifest['release'];
+export interface RegistryImage {
   src: string;
   path: string;
   title?: string;
   size?: string;
   type?: string;
 }
+
 export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
-  inputs: RegistryInput[];
+  inputs?: RegistryInput[];
   multiple?: boolean;
 }
-
 export interface RegistryInput {
   type: string;
   title: string;
-  description?: string;
-  vars?: RegistryVarsEntry[];
+  description: string;
   template_path?: string;
+  condition?: string;
+  vars?: RegistryVarsEntry[];
 }
-
 export interface RegistryStream {
   input: string;
   title: string;
@@ -152,15 +157,15 @@ export type RegistrySearchResult = Pick<
   | 'release'
   | 'description'
   | 'type'
-  | 'icons'
-  | 'internal'
   | 'download'
   | 'path'
+  | 'icons'
+  | 'internal'
   | 'data_streams'
   | 'policy_templates'
 >;
 
-export type ScreenshotItem = RegistryImage;
+export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
@@ -172,7 +177,7 @@ export interface CategorySummaryItem {
   count: number;
 }
 
-export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
+export type RequirementsByServiceName = PackageSpecManifest['conditions'];
 export interface AssetParts {
   pkgkey: string;
   dataset?: string;
@@ -184,8 +189,8 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
->;
-// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+> &
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -205,6 +210,8 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface RegistryDataStream {
   type: string;
+  ilm_policy?: string;
+  hidden?: boolean;
   dataset: string;
   title: string;
   release: string;
@@ -220,6 +227,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape
@@ -227,7 +235,7 @@ export interface RegistryVarsEntry {
   name: string;
   title?: string;
   description?: string;
-  type: string;
+  type: RegistryVarType;
   required?: boolean;
   show_user?: boolean;
   multi?: boolean;
@@ -241,12 +249,15 @@ export interface RegistryVarsEntry {
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them
-interface PackageAdditions {
+export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
   removable?: boolean;
 }
+
+type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, keyof SecondType>> &
+  SecondType;
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
@@ -254,22 +265,13 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult>;
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
-  | Installable<
-      // remove the properties we'll be altering/replacing from the base type
-      Omit<RegistryPackage, keyof PackageAdditions> &
-        // now add our replacement definitions
-        PackageAdditions
-    >
-  | Installable<
-      // remove the properties we'll be altering/replacing from the base type
-      Omit<ArchivePackage, keyof PackageAdditions> &
-        // now add our replacement definitions
-        PackageAdditions
-    >;
+  | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
+  | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
+  package_assets: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -277,6 +279,10 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+}
+
+export interface PackageUsageStats {
+  agent_policy_count: number;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -299,6 +305,10 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
 
+export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: typeof ASSETS_SAVED_OBJECT_TYPE;
+};
+
 export type RequiredPackage = typeof requiredPackages;
 
 export type DefaultPackages = typeof defaultPackages;
@@ -316,9 +326,8 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    aliases: object;
   };
-  data_stream: object;
+  data_stream: { hidden?: boolean };
   composed_of: string[];
   _meta: object;
 }

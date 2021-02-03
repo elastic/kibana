@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../common';
+import { AlertType, RecoveredActionGroup } from '../common';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { loadAlert, loadAlertType, loadAlertTypes } from './alert_api';
 import uuid from 'uuid';
@@ -22,6 +22,8 @@ describe('loadAlertTypes', () => {
         actionVariables: ['var1'],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
       },
     ];
@@ -45,6 +47,8 @@ describe('loadAlertType', () => {
       actionVariables: ['var1'],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
@@ -65,6 +69,8 @@ describe('loadAlertType', () => {
       actionVariables: [],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
@@ -80,6 +86,8 @@ describe('loadAlertType', () => {
         actionVariables: [],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: RecoveredActionGroup,
         producer: 'alerts',
       },
     ]);

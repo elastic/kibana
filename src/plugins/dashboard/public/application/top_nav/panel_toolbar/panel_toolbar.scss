@@ -1,0 +1,12 @@
+.panelToolbar {
+  padding: 0 $euiSizeS $euiSizeS;
+  flex-grow: 0;
+}
+
+.panelToolbarButton {
+  line-height: $euiButtonHeight; // Keeps alignment of text and chart icon
+  background-color: $euiColorEmptyShade;
+
+  // Lighten the border color for all states
+  border-color: $euiBorderColor !important; // sass-lint:disable-line no-important
+}

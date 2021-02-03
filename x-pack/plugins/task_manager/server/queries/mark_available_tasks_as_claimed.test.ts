@@ -50,6 +50,7 @@ describe('mark_available_tasks_as_claimed', () => {
         update: updateFieldsAndMarkAsFailed(
           fieldUpdates,
           claimTasksById || [],
+          definitions.getAllTypes(),
           Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
             return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
           }, {})
@@ -114,12 +115,16 @@ if (doc['task.runAt'].size()!=0) {
       seq_no_primary_term: true,
       script: {
         source: `
-  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-      .join(' ')}
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
   } else {
-    ctx._source.task.status = "failed";
+    ctx._source.task.status = "unrecognized";
   }
   `,
         lang: 'painless',
@@ -129,6 +134,7 @@ if (doc['task.runAt'].size()!=0) {
             retryAt: claimOwnershipUntil,
           },
           claimTasksById: [],
+          registeredTaskTypes: ['sampleTask', 'otherTask'],
           taskMaxAttempts: {
             sampleTask: 5,
             otherTask: 1,

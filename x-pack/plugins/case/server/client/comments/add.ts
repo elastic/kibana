@@ -11,7 +11,14 @@ import { identity } from 'fp-ts/lib/function';
 
 import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
-import { throwErrors, CaseResponseRt, CommentRequestRt, CaseResponse } from '../../../common/api';
+import {
+  throwErrors,
+  CaseResponseRt,
+  CommentRequestRt,
+  CaseResponse,
+  CommentType,
+  CaseStatuses,
+} from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
@@ -23,11 +30,11 @@ export const addComment = ({
   userActionService,
   request,
 }: CaseClientFactoryArguments) => async ({
+  caseClient,
   caseId,
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
-    // TODO: Excess CommentRequestRt when the excess() function supports union types
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
@@ -38,6 +45,11 @@ export const addComment = ({
     client: savedObjectsClient,
     caseId,
   });
+
+  // An alert cannot be attach to a closed case.
+  if (query.type === CommentType.alert && myCase.attributes.status === CaseStatuses.closed) {
+    throw Boom.badRequest('Alert cannot be attached to a closed case');
+  }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
@@ -71,6 +83,14 @@ export const addComment = ({
       version: myCase.version,
     }),
   ]);
+
+  // If the case is synced with alerts the newly attached alert must match the status of the case.
+  if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
+    caseClient.updateAlertsStatus({
+      ids: [newComment.attributes.alertId],
+      status: myCase.attributes.status,
+    });
+  }
 
   const totalCommentsFindByCases = await caseService.getAllCaseComments({
     client: savedObjectsClient,

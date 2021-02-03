@@ -4,6 +4,8 @@
 
 ## IndexPatternSpec interface
 
+Static index pattern format Serialized data object, representing index pattern attributes and state
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,15 +16,17 @@ export interface IndexPatternSpec
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-public.indexpatternspec.allownoindex.md) | <code>boolean</code> |  |
 |  [fieldAttrs](./kibana-plugin-plugins-data-public.indexpatternspec.fieldattrs.md) | <code>FieldAttrs</code> |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.indexpatternspec.fieldformats.md) | <code>Record&lt;string, SerializedFieldFormat&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-public.indexpatternspec.fields.md) | <code>IndexPatternFieldMap</code> |  |
-|  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-plugins-data-public.indexpatternspec.id.md) | <code>string</code> | saved object id |
 |  [intervalName](./kibana-plugin-plugins-data-public.indexpatternspec.intervalname.md) | <code>string</code> |  |
+|  [runtimeFieldMap](./kibana-plugin-plugins-data-public.indexpatternspec.runtimefieldmap.md) | <code>Record&lt;string, RuntimeField&gt;</code> |  |
 |  [sourceFilters](./kibana-plugin-plugins-data-public.indexpatternspec.sourcefilters.md) | <code>SourceFilter[]</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpatternspec.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpatternspec.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpatternspec.type.md) | <code>string</code> |  |
 |  [typeMeta](./kibana-plugin-plugins-data-public.indexpatternspec.typemeta.md) | <code>TypeMeta</code> |  |
-|  [version](./kibana-plugin-plugins-data-public.indexpatternspec.version.md) | <code>string</code> |  |
+|  [version](./kibana-plugin-plugins-data-public.indexpatternspec.version.md) | <code>string</code> | saved object version string |
 

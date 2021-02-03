@@ -15,11 +15,7 @@ import React from 'react';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import {
-  CODE_PATH_BEATS,
-  BEATS_SYSTEM_ID,
-  ALERT_MISSING_MONITORING_DATA,
-} from '../../../../common/constants';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
@@ -51,22 +47,12 @@ uiRoutes.when('/beats/beats', {
         reactNodeId: 'monitoringBeatsInstancesApp',
         $scope,
         $injector,
-        alerts: {
-          shouldFetch: true,
-          options: {
-            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: BEATS_SYSTEM_ID,
-              },
-            ],
-          },
-        },
       });
 
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
+      this.onTableChangeRender = this.renderComponent;
 
       $scope.$watch(
         () => this.data,
@@ -87,7 +73,6 @@ uiRoutes.when('/beats/beats', {
               <Listing
                 stats={this.data.stats}
                 data={this.data.listing}
-                alerts={this.alerts}
                 setupMode={setupMode}
                 sorting={this.sorting || sorting}
                 pagination={this.pagination || pagination}

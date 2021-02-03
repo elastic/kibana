@@ -15,6 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
 
   describe('Monitoring is turned off', function () {
+    // You no longer enable monitoring through Kibana on cloud https://github.com/elastic/kibana/pull/88375
+    this.tags(['skipCloud']);
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
@@ -48,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
 
       // Here we are checking that once Monitoring is enabled,
       // it moves on to the cluster overview page.
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(20000, async () => {
         // Click the refresh button
         await testSubjects.click('querySubmitButton');
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);

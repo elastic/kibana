@@ -9,7 +9,6 @@ import { RawValue } from '../../common/constants';
 import { DatatableColumnType } from '../../../../../src/plugins/expressions';
 
 export function isUrlDrilldown(action: Action) {
-  // @ts-expect-error
   return action.type === 'URL_DRILLDOWN';
 }
 

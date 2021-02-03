@@ -25,6 +25,7 @@ interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
+  currentFilterTags: string[];
 }
 
 /**
@@ -37,6 +38,7 @@ const RulesTableFiltersComponent = ({
   onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
+  currentFilterTags,
 }: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -94,6 +96,7 @@ const RulesTableFiltersComponent = ({
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
             tags={tags}
+            currentFilterTags={currentFilterTags}
             data-test-subj="allRulesTagPopover"
           />
         </EuiFilterGroup>

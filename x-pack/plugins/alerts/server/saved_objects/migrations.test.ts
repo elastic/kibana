@@ -277,6 +277,7 @@ describe('7.11.0', () => {
       attributes: {
         ...alert.attributes,
         updatedAt: alert.updated_at,
+        notifyWhen: 'onActiveAlert',
       },
     });
   });
@@ -289,6 +290,33 @@ describe('7.11.0', () => {
       attributes: {
         ...alert.attributes,
         updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onActiveAlert',
+      },
+    });
+  });
+
+  test('add notifyWhen=onActiveAlert when throttle is null', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({});
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onActiveAlert',
+      },
+    });
+  });
+
+  test('add notifyWhen=onActiveAlert when throttle is set', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({ throttle: '5m' });
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onThrottleInterval',
       },
     });
   });

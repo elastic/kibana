@@ -20,6 +20,7 @@ export const mapSavedObjects: SavedObjectsType = {
       mapStateJSON: { type: 'text' },
       layerListJSON: { type: 'text' },
       uiStateJSON: { type: 'text' },
+      bounds: { dynamic: false, properties: {} }, // Disable removed field
     },
   },
   management: {

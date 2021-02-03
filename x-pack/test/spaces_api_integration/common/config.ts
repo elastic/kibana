@@ -9,8 +9,6 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { TestInvoker } from './lib/types';
-// @ts-ignore
-import { LegacyEsProvider } from './services/legacy_es';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -35,7 +33,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
-        legacyEs: LegacyEsProvider,
+        es: config.kibana.api.get('services.es'),
+        legacyEs: config.kibana.api.get('services.legacyEs'),
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),

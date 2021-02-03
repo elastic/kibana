@@ -5,12 +5,13 @@
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { AppState } from '../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-export const mockStore = {
+export const mockState: AppState = {
   overviewFilters: {
     filters: {
       locations: [],
@@ -66,7 +67,6 @@ export const mockStore = {
     loading: false,
     pingList: {
       total: 0,
-      locations: [],
       pings: [],
     },
   },
@@ -80,7 +80,6 @@ export const mockStore = {
       prevPagePagination: null,
       nextPagePagination: null,
       summaries: [],
-      totalSummaryCount: 0,
     },
     loading: false,
   },
@@ -113,8 +112,11 @@ export const mockStore = {
   alerts: {
     alertDeletion: { data: null, loading: false },
     anomalyAlert: { data: null, loading: false },
+    anomalyAlertDeletion: { data: null, loading: false },
     alerts: { data: null, loading: false },
     connectors: { data: null, loading: false },
     newAlert: { data: null, loading: false },
   },
+  journeys: {},
+  networkEvents: {},
 };

@@ -84,6 +84,9 @@ export type APMQueryParams = {
   refreshInterval?: string | number;
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
+  latencyAggregationType?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

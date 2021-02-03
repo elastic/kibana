@@ -52,7 +52,7 @@ import {
   unsavedChangesWarning,
 } from '../saved_map';
 
-interface Props {
+export interface Props {
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
   saveCounter: number;
@@ -83,7 +83,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-interface State {
+export interface State {
   initialized: boolean;
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;

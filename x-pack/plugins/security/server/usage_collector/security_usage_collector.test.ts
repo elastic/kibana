@@ -31,6 +31,7 @@ describe('Security UsageCollector', () => {
     license.getFeatures.mockReturnValue({
       allowAccessAgreement,
       allowAuditLogging,
+      allowLegacyAuditLogging: allowAuditLogging,
       allowRbac,
     } as SecurityLicenseFeatures);
     return license;

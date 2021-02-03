@@ -6,6 +6,7 @@
 
 import { mapKeys, snakeCase } from 'lodash/fp';
 import { AlertInstance } from '../../../../../alerts/server';
+import { SignalSource } from '../signals/types';
 import { RuleTypeParams } from '../types';
 
 export type NotificationRuleTypeParams = RuleTypeParams & {
@@ -18,6 +19,7 @@ interface ScheduleNotificationActions {
   signalsCount: number;
   resultsLink: string;
   ruleParams: NotificationRuleTypeParams;
+  signals: SignalSource[];
 }
 
 export const scheduleNotificationActions = ({
@@ -25,6 +27,7 @@ export const scheduleNotificationActions = ({
   signalsCount,
   resultsLink = '',
   ruleParams,
+  signals,
 }: ScheduleNotificationActions): AlertInstance =>
   alertInstance
     .replaceState({
@@ -33,4 +36,5 @@ export const scheduleNotificationActions = ({
     .scheduleActions('default', {
       results_link: resultsLink,
       rule: mapKeys(snakeCase, ruleParams),
+      alerts: signals,
     });

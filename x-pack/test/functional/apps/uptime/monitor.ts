@@ -32,23 +32,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       });
 
+      it('should select the ping list location filter', async () => {
+        await uptimeService.common.selectFilterItem('location', 'mpls');
+      });
+
+      it('should set the status filter', async () => {
+        await uptimeService.common.setStatusFilterUp();
+      });
+
       it('displays ping data as expected', async () => {
-        await uptime.checkPingListInteractions(
-          [
-            'XZtoHm0B0I9WX_CznN-6',
-            '7ZtoHm0B0I9WX_CzJ96M',
-            'pptnHm0B0I9WX_Czst5X',
-            'I5tnHm0B0I9WX_CzPd46',
-            'y5tmHm0B0I9WX_Czx93x',
-            'XZtmHm0B0I9WX_CzUt3H',
-            '-JtlHm0B0I9WX_Cz3dyX',
-            'k5tlHm0B0I9WX_CzaNxm',
-            'NZtkHm0B0I9WX_Cz89w9',
-            'zJtkHm0B0I9WX_CzftsN',
-          ],
-          'mpls',
-          'up'
-        );
+        await uptime.checkPingListInteractions([
+          'XZtoHm0B0I9WX_CznN-6',
+          '7ZtoHm0B0I9WX_CzJ96M',
+          'pptnHm0B0I9WX_Czst5X',
+          'I5tnHm0B0I9WX_CzPd46',
+          'y5tmHm0B0I9WX_Czx93x',
+          'XZtmHm0B0I9WX_CzUt3H',
+          '-JtlHm0B0I9WX_Cz3dyX',
+          'k5tlHm0B0I9WX_CzaNxm',
+          'NZtkHm0B0I9WX_Cz89w9',
+          'zJtkHm0B0I9WX_CzftsN',
+        ]);
       });
     });
   });

@@ -4,30 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEqual } from 'lodash';
+import { Reducer } from 'react';
+import { UserConfiguredActionConnector } from '../../../types';
 
-interface CommandType {
-  type: 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
+export type InitialConnector<Config, Secrets> = Partial<
+  UserConfiguredActionConnector<Config, Secrets>
+> &
+  Pick<UserConfiguredActionConnector<Config, Secrets>, 'actionTypeId' | 'config' | 'secrets'>;
+
+interface CommandType<
+  T extends 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty'
+> {
+  type: T;
 }
 
-export interface ActionState {
-  connector: any;
+interface Payload<Keys, Value> {
+  key: Keys;
+  value: Value;
 }
 
-export interface ReducerAction {
-  command: CommandType;
-  payload: {
-    key: string;
-    value: any;
-  };
+interface TPayload<T, Key extends keyof T> {
+  key: Key;
+  value: T[Key] | null;
 }
 
-export const connectorReducer = (state: ActionState, action: ReducerAction) => {
-  const { command, payload } = action;
+export type ConnectorReducerAction<Config, Secrets> =
+  | {
+      command: CommandType<'setConnector'>;
+      payload: Payload<'connector', InitialConnector<Config, Secrets>>;
+    }
+  | {
+      command: CommandType<'setProperty'>;
+      payload: TPayload<
+        UserConfiguredActionConnector<Config, Secrets>,
+        keyof UserConfiguredActionConnector<Config, Secrets>
+      >;
+    }
+  | {
+      command: CommandType<'setConfigProperty'>;
+      payload: TPayload<Config, keyof Config>;
+    }
+  | {
+      command: CommandType<'setSecretsProperty'>;
+      payload: TPayload<Secrets, keyof Secrets>;
+    };
+
+export type ConnectorReducer<Config, Secrets> = Reducer<
+  { connector: UserConfiguredActionConnector<Config, Secrets> },
+  ConnectorReducerAction<Config, Secrets>
+>;
+
+export const createConnectorReducer = <Config, Secrets>() => <
+  ConnectorPhase extends
+    | InitialConnector<Config, Secrets>
+    | UserConfiguredActionConnector<Config, Secrets>
+>(
+  state: { connector: ConnectorPhase },
+  action: ConnectorReducerAction<Config, Secrets>
+) => {
   const { connector } = state;
 
-  switch (command.type) {
+  switch (action.command.type) {
     case 'setConnector': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as Payload<'connector', ConnectorPhase>;
       if (key === 'connector') {
         return {
           ...state,
@@ -38,7 +77,10 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
       }
     }
     case 'setProperty': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as TPayload<
+        UserConfiguredActionConnector<Config, Secrets>,
+        keyof UserConfiguredActionConnector<Config, Secrets>
+      >;
       if (isEqual(connector[key], value)) {
         return state;
       } else {
@@ -52,7 +94,7 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
       }
     }
     case 'setConfigProperty': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as TPayload<Config, keyof Config>;
       if (isEqual(connector.config[key], value)) {
         return state;
       } else {
@@ -61,7 +103,7 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
           connector: {
             ...connector,
             config: {
-              ...connector.config,
+              ...(connector.config as Config),
               [key]: value,
             },
           },
@@ -69,7 +111,7 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
       }
     }
     case 'setSecretsProperty': {
-      const { key, value } = payload;
+      const { key, value } = action.payload as TPayload<Secrets, keyof Secrets>;
       if (isEqual(connector.secrets[key], value)) {
         return state;
       } else {
@@ -78,7 +120,7 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
           connector: {
             ...connector,
             secrets: {
-              ...connector.secrets,
+              ...(connector.secrets as Secrets),
               [key]: value,
             },
           },

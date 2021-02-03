@@ -12,3 +12,4 @@ export * from './monitor';
 export * from './overview_filters';
 export * from './ping';
 export * from './snapshot';
+export * from './network_events';

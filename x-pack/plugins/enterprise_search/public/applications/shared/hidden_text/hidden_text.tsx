@@ -25,7 +25,9 @@ export const HiddenText: React.FC<Props> = ({ text, children }) => {
     defaultMessage: 'Hidden text',
   });
   const hiddenText = isHidden ? (
-    <span aria-label={hiddenLabel}>{text.replace(/./g, '•')}</span>
+    <span aria-label={hiddenLabel}>
+      <span aria-hidden={true}>{text.replace(/./g, '•')}</span>
+    </span>
   ) : (
     text
   );

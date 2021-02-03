@@ -45,6 +45,8 @@ import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
+import { IESAggField } from '../classes/fields/agg';
+import { IField } from '../classes/fields/field';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -274,6 +276,24 @@ export function updateLayerOrder(newLayerOrder: number[]) {
   };
 }
 
+function updateMetricsProp(layerId: string, value: unknown) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    const previousFields = await (layer as IVectorLayer).getFields();
+    await dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName: 'metrics',
+      value,
+    });
+    await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
+    dispatch(syncDataForLayerId(layerId));
+  };
+}
+
 export function updateSourceProp(
   layerId: string,
   propName: string,
@@ -281,6 +301,12 @@ export function updateSourceProp(
   newLayerType?: LAYER_TYPE
 ) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    if (propName === 'metrics') {
+      if (newLayerType) {
+        throw new Error('May not change layer-type when modifying metrics source-property');
+      }
+      return await dispatch(updateMetricsProp(layerId, value));
+    }
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -290,7 +316,6 @@ export function updateSourceProp(
     if (newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
-    await dispatch(clearMissingStyleProperties(layerId));
     dispatch(syncDataForLayerId(layerId));
   };
 }
@@ -422,7 +447,7 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-export function clearMissingStyleProperties(layerId: string) {
+function updateStyleProperties(layerId: string, previousFields: IField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -441,8 +466,9 @@ export function clearMissingStyleProperties(layerId: string) {
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = await (style as IVectorStyle).getDescriptorWithMissingStylePropsRemoved(
+    } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
       nextFields,
+      previousFields,
       getMapColors(getState())
     );
     if (hasChanges && nextStyleDescriptor) {
@@ -485,13 +511,13 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 
 export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    const previousFields = await (layer as IVectorLayer).getFields();
     await dispatch({
       type: SET_JOINS,
       layer,
       joins,
     });
-
-    await dispatch(clearMissingStyleProperties(layer.getId()));
+    await dispatch(updateStyleProperties(layer.getId(), previousFields));
     dispatch(syncDataForLayerId(layer.getId()));
   };
 }

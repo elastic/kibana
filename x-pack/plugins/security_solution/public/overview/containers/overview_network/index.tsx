@@ -55,20 +55,7 @@ export const useNetworkOverview = ({
   const [
     overviewNetworkRequest,
     setNetworkRequest,
-  ] = useState<NetworkOverviewRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.overview,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkOverviewRequestOptions | null>(null);
 
   const [overviewNetworkResponse, setNetworkOverviewResponse] = useState<NetworkOverviewArgs>({
     overviewNetwork: {},
@@ -153,12 +140,12 @@ export const useNetworkOverview = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);

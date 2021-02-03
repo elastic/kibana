@@ -4,32 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
+import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { TimeFormatter } from '../../../../../common/utils/formatters';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
-  return (t: number) => {
-    return formatter(t).formatted;
-  };
+  return (t: number) => formatter(t).formatted;
 }
 
-export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
-  return (coordinate: Coordinate) => {
-    return isValidCoordinateValue(coordinate.y)
-      ? formatter(coordinate.y).formatted
-      : NOT_AVAILABLE_LABEL;
-  };
-}
+export function getMaxY(specs?: Array<APMChartSpec<Coordinate>>) {
+  const values = specs
+    ?.flatMap((spec) => spec.data)
+    .map((coord) => coord.y)
+    .filter(isFiniteNumber);
 
-export function getMaxY(timeSeries: TimeSeries[]) {
-  const coordinates = flatten(
-    timeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-  );
-
-  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
-
-  return Math.max(...numbers, 0);
+  if (values?.length) {
+    return Math.max(...values, 0);
+  }
+  return 0;
 }

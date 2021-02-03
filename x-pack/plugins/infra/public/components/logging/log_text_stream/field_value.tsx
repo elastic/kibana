@@ -6,15 +6,20 @@
 
 import stringify from 'json-stable-stringify';
 import React from 'react';
-import { euiStyled } from '../../../../../observability/public';
-import { JsonArray, JsonValue } from '../../../../common/typed_json';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
 export const FieldValue: React.FC<{
   highlightTerms: string[];
   isActiveHighlight: boolean;
   value: JsonArray;
-}> = React.memo(({ highlightTerms, isActiveHighlight, value }) => {
+  render?: (value: JsonValue) => React.ReactNode;
+}> = React.memo(({ highlightTerms, isActiveHighlight, value, render }) => {
+  if (render) {
+    return <>{render(value.length === 1 ? value[0] : value)}</>;
+  }
+
   if (value.length === 1) {
     return (
       <>

@@ -49,6 +49,15 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
 

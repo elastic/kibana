@@ -20,8 +20,8 @@ import {
 import { LicensingPluginSetup } from '../../licensing/server';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService, SpacesServiceStart } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service';
+import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { UsageStatsService } from './usage_stats';
 import { ConfigType } from './config';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
@@ -36,6 +36,7 @@ import {
   SpacesClientService,
   SpacesClientWrapper,
 } from './spaces_client';
+import type { SpacesRequestHandlerContext } from './types';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -99,6 +100,10 @@ export class Plugin {
       return this.spacesServiceStart;
     };
 
+    const usageStatsServicePromise = new UsageStatsService(this.log).setup({
+      getStartServices: core.getStartServices,
+    });
+
     const savedObjectsService = new SpacesSavedObjectsService();
     savedObjectsService.setup({ core, getSpacesService });
 
@@ -119,16 +124,16 @@ export class Plugin {
       logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter();
+    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initExternalSpacesApi({
       externalRouter,
       log: this.log,
       getStartServices: core.getStartServices,
-      getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       getSpacesService,
+      usageStatsServicePromise,
     });
 
-    const internalRouter = core.http.createRouter();
+    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
       internalRouter,
       getSpacesService,
@@ -148,6 +153,7 @@ export class Plugin {
         kibanaIndexConfig$: this.kibanaIndexConfig$,
         features: plugins.features,
         licensing: plugins.licensing,
+        usageStatsServicePromise,
       });
     }
 

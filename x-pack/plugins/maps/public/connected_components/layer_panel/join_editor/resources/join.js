@@ -17,6 +17,7 @@ import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox'
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 import { getIndexPatternService } from '../../../../kibana_services';
+import { SOURCE_TYPES } from '../../../../../common/constants';
 
 export class Join extends Component {
   state = {
@@ -77,12 +78,15 @@ export class Join extends Component {
       loadError: undefined,
     });
     this._loadRightFields(indexPatternId);
+    // eslint-disable-next-line no-unused-vars
+    const { term, ...restOfRight } = this.props.join.right;
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
-        id: this.props.join.right.id,
+        ...restOfRight,
         indexPatternId,
         indexPatternTitle,
+        type: SOURCE_TYPES.ES_TERM_SOURCE,
       },
     });
   };
@@ -93,6 +97,16 @@ export class Join extends Component {
       right: {
         ...this.props.join.right,
         term,
+      },
+    });
+  };
+
+  _onRightSizeChange = (size) => {
+    this.props.onChange({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        size,
       },
     });
   };
@@ -161,7 +175,7 @@ export class Join extends Component {
       );
       globalFilterCheckbox = (
         <GlobalFilterCheckbox
-          applyGlobalQuery={right.applyGlobalQuery}
+          applyGlobalQuery={right.applyGlobalQuery === 'undefined' ? true : right.applyGlobalQuery}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global filter to join`,
@@ -209,8 +223,10 @@ export class Join extends Component {
               rightSourceName={rightSourceName}
               onRightSourceChange={this._onRightSourceChange}
               rightValue={right.term}
+              rightSize={right.size}
               rightFields={rightFields}
               onRightFieldChange={this._onRightFieldChange}
+              onRightSizeChange={this._onRightSizeChange}
             />
           </EuiFlexItem>
 

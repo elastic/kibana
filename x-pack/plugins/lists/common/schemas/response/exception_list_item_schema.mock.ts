@@ -43,6 +43,10 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   updated_by: USER,
 });
 
+export const getExceptionListItemSchemaXMock = (count = 1): ExceptionListItemSchema[] => {
+  return new Array(count).fill(null).map(() => getExceptionListItemSchemaMock());
+};
+
 /**
  * This is useful for end to end tests where we remove the auto generated parts for comparisons
  * such as created_at, updated_at, and id.

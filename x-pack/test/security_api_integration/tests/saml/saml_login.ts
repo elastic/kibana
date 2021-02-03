@@ -9,6 +9,7 @@ import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
+import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
   getSAMLRequestId,
@@ -75,7 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('does not prevent basic login', async () => {
-      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username, password },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
 
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', request.cookie(cookies[0])!.cookieString())
         .expect(200);
 
-      expect(user.username).to.eql(username);
+      expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
       // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
@@ -582,12 +582,12 @@ export default function ({ getService }: FtrProviderContext) {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('legacyEs').deleteByQuery({
+        const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          q: 'doc_type:token',
+          body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -666,12 +666,12 @@ export default function ({ getService }: FtrProviderContext) {
         [
           'when access token document is missing',
           async () => {
-            const esResponse = await getService('legacyEs').deleteByQuery({
+            const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
-              q: 'doc_type:token',
+              body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse).to.have.property('deleted').greaterThan(0);
+            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];

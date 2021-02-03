@@ -59,20 +59,7 @@ export const useNetworkKpiTlsHandshakes = ({
   const [
     networkKpiTlsHandshakesRequest,
     setNetworkKpiTlsHandshakesRequest,
-  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(null);
 
   const [
     networkKpiTlsHandshakesResponse,
@@ -90,7 +77,7 @@ export const useNetworkKpiTlsHandshakes = ({
 
   const networkKpiTlsHandshakesSearch = useCallback(
     (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
       let didCancel = false;
@@ -146,7 +133,7 @@ export const useNetworkKpiTlsHandshakes = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -162,12 +149,12 @@ export const useNetworkKpiTlsHandshakes = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiTlsHandshakesSearch(networkKpiTlsHandshakesRequest);

@@ -8,13 +8,13 @@ import { shallow } from 'enzyme';
 import React, { ReactNode } from 'react';
 import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 import { TraceLink } from './';
-import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../context/ApmPluginContext/MockApmPluginContext';
-import * as hooks from '../../../hooks/useFetcher';
-import * as urlParamsHooks from '../../../hooks/useUrlParams';
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
+import * as hooks from '../../../hooks/use_fetcher';
+import * as urlParamsHooks from '../../../context/url_params_context/use_url_params';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -60,12 +60,13 @@ describe('TraceLink', () => {
   describe('when no transaction is found', () => {
     it('renders a trace page', () => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction: undefined },
@@ -87,12 +88,13 @@ describe('TraceLink', () => {
   describe('transaction page', () => {
     beforeAll(() => {
       jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
+        rangeId: 0,
+        refreshTimeRange: jest.fn(),
+        uiFilters: {},
         urlParams: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
         },
-        refreshTimeRange: jest.fn(),
-        uiFilters: {},
       });
     });
 

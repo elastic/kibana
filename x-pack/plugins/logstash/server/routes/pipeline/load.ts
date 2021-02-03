@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { LogstashPluginRouter } from '../../types';
 
 import { Pipeline } from '../../models/pipeline';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerPipelineLoadRoute(router: IRouter) {
+export function registerPipelineLoadRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipeline/{id}',

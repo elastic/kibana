@@ -90,6 +90,38 @@ export const getMessages = once(() => {
       url:
         'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
+    cardinality_no_results: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityNoResultsHeading',
+        {
+          defaultMessage: 'Field cardinality',
+        }
+      ),
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityNoResultsMessage', {
+        defaultMessage: `Cardinality checks could not be run. The query to validate fields didn't return any documents.`,
+      }),
+    },
+    cardinality_field_not_exists: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityFieldNotExistsHeading',
+        {
+          defaultMessage: 'Field cardinality',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityFieldNotExistsMessage',
+        {
+          defaultMessage: `Cardinality checks could not be run for field {fieldName}. The query to validate the field didn't return any documents.`,
+          values: {
+            fieldName: '"{{fieldName}}"',
+          },
+        }
+      ),
+      url:
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
+    },
     cardinality_by_field: {
       status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityByFieldMessage', {

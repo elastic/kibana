@@ -5,9 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { getInvalidFieldMessage } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -29,6 +32,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -64,14 +69,19 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
           : undefined,
     };
   },
-  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: 'count',
-    schema: 'metric',
-    params: {},
-  }),
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    adjustTimeScaleOnOtherColumnChange<CountIndexPatternColumn>(
+      layer,
+      thisColumnId,
+      changedColumnId
+    ),
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggCount']>('aggCount', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
+    }).toAst();
+  },
   isTransferable: () => {
     return true;
   },

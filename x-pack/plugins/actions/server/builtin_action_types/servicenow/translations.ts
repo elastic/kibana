@@ -6,8 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
+export const SERVICENOW = i18n.translate('xpack.actions.builtin.serviceNowTitle', {
   defaultMessage: 'ServiceNow',
+});
+
+export const SERVICENOW_ITSM = i18n.translate('xpack.actions.builtin.serviceNowITSMTitle', {
+  defaultMessage: 'ServiceNow ITSM',
+});
+
+export const SERVICENOW_SIR = i18n.translate('xpack.actions.builtin.serviceNowSIRTitle', {
+  defaultMessage: 'ServiceNow SIR',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
@@ -17,11 +25,3 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
-
-// TODO: remove when Case mappings will be removed
-export const MAPPING_EMPTY = i18n.translate(
-  'xpack.actions.builtin.servicenow.configuration.emptyMapping',
-  {
-    defaultMessage: '[incidentConfiguration.mapping]: expected non-empty but got empty',
-  }
-);

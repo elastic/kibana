@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { SavedObjectsRepository } from './repository';
@@ -24,7 +13,9 @@ import { ALL_NAMESPACES_STRING } from './utils';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
+import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
 const { nodeTypes } = esKuery;
@@ -54,6 +45,7 @@ describe('SavedObjectsRepository', () => {
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
   const mockVersion = encodeHitVersion(mockVersionProps);
 
+  const KIBANA_VERSION = '2.0.0';
   const CUSTOM_INDEX_TYPE = 'customIndex';
   const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
   const MULTI_NAMESPACE_TYPE = 'shareableType';
@@ -152,7 +144,7 @@ describe('SavedObjectsRepository', () => {
 
   const documentMigrator = new DocumentMigrator({
     typeRegistry: registry,
-    kibanaVersion: '2.0.0',
+    kibanaVersion: KIBANA_VERSION,
     log: {},
   });
 
@@ -215,10 +207,10 @@ describe('SavedObjectsRepository', () => {
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = {
-      migrateDocument: jest.fn().mockImplementation(documentMigrator.migrate),
-      runMigrations: async () => ({ status: 'skipped' }),
-    };
+    migrator = mockKibanaMigrator.create();
+    documentMigrator.prepareMigrations();
+    migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+    migrator.runMigrations = async () => ({ status: 'skipped' });
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = {
@@ -226,6 +218,7 @@ describe('SavedObjectsRepository', () => {
       rawToSavedObject: jest.fn(),
       savedObjectToRaw: jest.fn(),
       generateRawId: jest.fn(),
+      generateRawLegacyUrlAliasId: jest.fn(),
       trimIdPrefix: jest.fn(),
     };
     const _serializer = new SavedObjectsSerializer(registry);
@@ -511,6 +504,7 @@ describe('SavedObjectsRepository', () => {
     const expectSuccessResult = (obj) => ({
       ...obj,
       migrationVersion: { [obj.type]: '1.1.1' },
+      coreMigrationVersion: KIBANA_VERSION,
       version: mockVersion,
       namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
       ...mockTimestampFields,
@@ -964,6 +958,7 @@ describe('SavedObjectsRepository', () => {
           ...response.items[0].create,
           _source: {
             ...response.items[0].create._source,
+            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[0].create._source.namespaces,
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
@@ -972,6 +967,7 @@ describe('SavedObjectsRepository', () => {
           ...response.items[1].create,
           _source: {
             ...response.items[1].create._source,
+            coreMigrationVersion: '2.0.0', // the document migrator adds this to all objects before creation
             namespaces: response.items[1].create._source.namespaces,
           },
         });
@@ -1831,19 +1827,14 @@ describe('SavedObjectsRepository', () => {
     };
 
     describe('client calls', () => {
-      it(`should use the ES create action if ID is undefined and overwrite=true`, async () => {
+      it(`should use the ES index action if overwrite=true`, async () => {
         await createSuccess(type, attributes, { overwrite: true });
-        expect(client.create).toHaveBeenCalled();
+        expect(client.index).toHaveBeenCalled();
       });
 
-      it(`should use the ES create action if ID is undefined and overwrite=false`, async () => {
+      it(`should use the ES create action if overwrite=false`, async () => {
         await createSuccess(type, attributes);
         expect(client.create).toHaveBeenCalled();
-      });
-
-      it(`should use the ES index action if ID is defined and overwrite=true`, async () => {
-        await createSuccess(type, attributes, { id, overwrite: true });
-        expect(client.index).toHaveBeenCalled();
       });
 
       it(`should use the ES index with version if ID and version are defined and overwrite=true`, async () => {
@@ -2155,6 +2146,7 @@ describe('SavedObjectsRepository', () => {
           references,
           namespaces: [namespace ?? 'default'],
           migrationVersion: { [type]: '1.1.1' },
+          coreMigrationVersion: KIBANA_VERSION,
         });
       });
     });
@@ -2739,6 +2731,7 @@ describe('SavedObjectsRepository', () => {
               'type',
               'references',
               'migrationVersion',
+              'coreMigrationVersion',
               'updated_at',
               'originId',
               'title',
@@ -3269,6 +3262,231 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
+  describe('#resolve', () => {
+    const type = 'index-pattern';
+    const id = 'logstash-*';
+    const aliasTargetId = 'some-other-id'; // only used for 'aliasMatch' and 'conflict' outcomes
+    const namespace = 'foo-namespace';
+
+    const getMockAliasDocument = (resolveCounter) => ({
+      body: {
+        get: {
+          _source: {
+            [LEGACY_URL_ALIAS_TYPE]: {
+              targetId: aliasTargetId,
+              ...(resolveCounter && { resolveCounter }),
+              // other fields are not used by the repository
+            },
+          },
+        },
+      },
+    });
+
+    describe('outcomes', () => {
+      describe('error', () => {
+        const expectNotFoundError = async (type, id, options) => {
+          await expect(savedObjectsRepository.resolve(type, id, options)).rejects.toThrowError(
+            createGenericNotFoundError(type, id)
+          );
+        };
+
+        it('because type is invalid', async () => {
+          await expectNotFoundError('unknownType', id);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because type is hidden', async () => {
+          await expectNotFoundError(HIDDEN_TYPE, id);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because alias is not used and actual object is not found', async () => {
+          const options = { namespace: undefined };
+          const response = { found: false };
+          client.get.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          await expectNotFoundError(type, id, options);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+          expect(client.mget).not.toHaveBeenCalled();
+        });
+
+        it('because actual object and alias object are both not found', async () => {
+          const options = { namespace };
+          const objectResults = [
+            { type, id, found: false },
+            { type, id: aliasTargetId, found: false },
+          ];
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          await expectNotFoundError(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+        });
+      });
+
+      describe('exactMatch', () => {
+        it('because namespace is undefined', async () => {
+          const options = { namespace: undefined };
+          const response = getMockGetResponse({ type, id });
+          client.get.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).not.toHaveBeenCalled();
+          expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+          expect(client.mget).not.toHaveBeenCalled();
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id }),
+            outcome: 'exactMatch',
+          });
+        });
+
+        describe('because alias is not used', () => {
+          const expectExactMatchResult = async (aliasResult) => {
+            const options = { namespace };
+            client.update.mockResolvedValueOnce(aliasResult); // for alias object
+            const response = getMockGetResponse({ type, id }, options.namespace);
+            client.get.mockResolvedValueOnce(
+              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target
+            );
+
+            const result = await savedObjectsRepository.resolve(type, id, options);
+            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.get).toHaveBeenCalledTimes(1); // retrieved actual target
+            expect(client.mget).not.toHaveBeenCalled();
+            expect(result).toEqual({
+              saved_object: expect.objectContaining({ type, id }),
+              outcome: 'exactMatch',
+            });
+          };
+
+          it('since alias call resulted in 404', async () => {
+            await expectExactMatchResult({ statusCode: 404 });
+          });
+
+          it('since alias is not found', async () => {
+            await expectExactMatchResult({ body: { get: { found: false } } });
+          });
+
+          it('since alias is disabled', async () => {
+            await expectExactMatchResult({
+              body: { get: { _source: { [LEGACY_URL_ALIAS_TYPE]: { disabled: true } } } },
+            });
+          });
+        });
+
+        describe('because alias is used', () => {
+          const expectExactMatchResult = async (objectResults) => {
+            const options = { namespace };
+            client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+            const response = getMockMgetResponse(objectResults, options.namespace);
+            client.mget.mockResolvedValueOnce(
+              elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+            );
+
+            const result = await savedObjectsRepository.resolve(type, id, options);
+            expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+            expect(client.get).not.toHaveBeenCalled();
+            expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+            expect(result).toEqual({
+              saved_object: expect.objectContaining({ type, id }),
+              outcome: 'exactMatch',
+            });
+          };
+
+          it('but alias target is not found', async () => {
+            const objects = [
+              { type, id },
+              { type, id: aliasTargetId, found: false },
+            ];
+            await expectExactMatchResult(objects);
+          });
+
+          it('but alias target does not exist in this namespace', async () => {
+            const objects = [
+              { type: MULTI_NAMESPACE_TYPE, id }, // correct namespace field is added by getMockMgetResponse
+              { type: MULTI_NAMESPACE_TYPE, id: aliasTargetId, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
+            ];
+            await expectExactMatchResult(objects);
+          });
+        });
+      });
+
+      describe('aliasMatch', () => {
+        const expectAliasMatchResult = async (objectResults) => {
+          const options = { namespace };
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id: aliasTargetId }),
+            outcome: 'aliasMatch',
+          });
+        };
+
+        it('because actual target is not found', async () => {
+          const objects = [
+            { type, id, found: false },
+            { type, id: aliasTargetId },
+          ];
+          await expectAliasMatchResult(objects);
+        });
+
+        it('because actual target does not exist in this namespace', async () => {
+          const objects = [
+            { type: MULTI_NAMESPACE_TYPE, id, namespace: `not-${namespace}` }, // overrides namespace field that would otherwise be added by getMockMgetResponse
+            { type: MULTI_NAMESPACE_TYPE, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
+          ];
+          await expectAliasMatchResult(objects);
+        });
+      });
+
+      describe('conflict', () => {
+        it('because actual target and alias target are both found', async () => {
+          const options = { namespace };
+          const objectResults = [
+            { type, id }, // correct namespace field is added by getMockMgetResponse
+            { type, id: aliasTargetId }, // correct namespace field is added by getMockMgetResponse
+          ];
+          client.update.mockResolvedValueOnce(getMockAliasDocument()); // for alias object
+          const response = getMockMgetResponse(objectResults, options.namespace);
+          client.mget.mockResolvedValueOnce(
+            elasticsearchClientMock.createSuccessTransportRequestPromise(response) // for actual target and alias target
+          );
+
+          const result = await savedObjectsRepository.resolve(type, id, options);
+          expect(client.update).toHaveBeenCalledTimes(1); // retrieved alias object
+          expect(client.get).not.toHaveBeenCalled();
+          expect(client.mget).toHaveBeenCalledTimes(1); // retrieved actual target and alias target
+          expect(result).toEqual({
+            saved_object: expect.objectContaining({ type, id }),
+            outcome: 'conflict',
+          });
+        });
+      });
+    });
+  });
+
   describe('#incrementCounter', () => {
     const type = 'config';
     const id = 'one';
@@ -3412,11 +3630,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
-      it(`throws when counterFieldName is not a string`, async () => {
+      it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field) => {
           await expect(
             savedObjectsRepository.incrementCounter(type, id, field)
-          ).rejects.toThrowError(`"counterFieldNames" argument must be an array of strings`);
+          ).rejects.toThrowError(
+            `"counterFields" argument must be of type Array<string | { incrementBy?: number; fieldName: string }>`
+          );
           expect(client.update).not.toHaveBeenCalled();
         };
 
@@ -3425,6 +3645,7 @@ describe('SavedObjectsRepository', () => {
         await test([false]);
         await test([{}]);
         await test([{}, false, 42, null, 'string']);
+        await test([{ fieldName: 'string' }, false, null, 'string']);
       });
 
       it(`throws when type is invalid`, async () => {
@@ -3512,6 +3733,25 @@ describe('SavedObjectsRepository', () => {
           },
           originId,
         });
+      });
+
+      it('increments counter by incrementBy config', async () => {
+        await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 3 }]);
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  counterFieldNames: [counterFields[0]],
+                  counts: [3],
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
       });
     });
   });

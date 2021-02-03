@@ -1,30 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
@@ -104,8 +93,30 @@ export abstract class Embeddable<
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
    * input data did not change.
+   *
+   * In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
+   *
+   * The order would be as follows:
+   * input$
+   * output$
+   * reload()
+   * ----
+   * updated$
    */
   public abstract reload(): void;
+
+  /**
+   * Merges input$ and output$ streams and debounces emit till next macro-task.
+   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
+   * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
+   * which allows to skip any state handling in case `reload` already handled it.
+   */
+  public getUpdated$(): Readonly<Rx.Observable<void>> {
+    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
+      debounceTime(0),
+      mapTo(undefined)
+    );
+  }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
     return this.input$.asObservable();
@@ -225,7 +236,7 @@ export abstract class Embeddable<
     this.onResetInput(newInput);
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [];
   }
 }

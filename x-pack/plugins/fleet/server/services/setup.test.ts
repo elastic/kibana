@@ -41,8 +41,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsError();
       soClient.get = mockedMethodThrowsError();
       soClient.update = mockedMethodThrowsError();
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
@@ -53,8 +54,9 @@ describe('setupIngestManager', () => {
       soClient.find = mockedMethodThrowsCustom();
       soClient.get = mockedMethodThrowsCustom();
       soClient.update = mockedMethodThrowsCustom();
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-      const setupPromise = setupIngestManager(soClient, jest.fn());
+      const setupPromise = setupIngestManager(soClient, esClient, jest.fn());
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

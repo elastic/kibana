@@ -5,6 +5,7 @@
  */
 
 import http from 'http';
+import https from 'https';
 import { Plugin, CoreSetup, IRouter } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
@@ -37,6 +38,10 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
     getExternalServiceSimulatorPath(service)
   );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_choice`);
+  allPaths.push(
+    `/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/sys_dictionary`
+  );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/createmeta`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.RESILIENT}/rest/orgs/201/incidents`);
@@ -44,7 +49,13 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 }
 
 export async function getWebhookServer(): Promise<http.Server> {
-  return await initWebhook();
+  const { httpServer } = await initWebhook();
+  return httpServer;
+}
+
+export async function getHttpsWebhookServer(): Promise<https.Server> {
+  const { httpsServer } = await initWebhook();
+  return httpsServer;
 }
 
 export async function getSlackServer(): Promise<http.Server> {

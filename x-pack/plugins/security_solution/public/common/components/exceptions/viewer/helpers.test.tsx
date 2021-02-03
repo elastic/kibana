@@ -100,7 +100,7 @@ describe('Exception viewer helpers', () => {
           value: undefined,
         },
         {
-          fieldName: 'host.name',
+          fieldName: 'parent.field',
           isNested: false,
           operator: undefined,
           value: undefined,

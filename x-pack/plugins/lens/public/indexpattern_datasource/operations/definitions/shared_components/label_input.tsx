@@ -47,7 +47,7 @@ export const LabelInput = ({
           inputRef.current = node;
         }
       }}
-      onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
+      onKeyUp={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
         if (keys.ENTER === key && onSubmit) {
           onSubmit();
         }

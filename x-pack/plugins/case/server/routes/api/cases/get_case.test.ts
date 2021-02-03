@@ -104,7 +104,7 @@ describe('GET case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
-    expect(response.payload.comments).toHaveLength(4);
+    expect(response.payload.comments).toHaveLength(5);
   });
 
   it(`returns an error when thrown from getAllCaseComments`, async () => {

@@ -4,24 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiCommentProps, EuiIconTip } from '@elastic/eui';
 
-import { CaseFullExternalService, ActionConnector } from '../../../../../case/common/api';
+import {
+  CaseFullExternalService,
+  ActionConnector,
+  CaseStatuses,
+} from '../../../../../case/common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
-import * as i18n from '../case_view/translations';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
+import { Status, statuses } from '../status';
+import { UserActionShowAlert } from './user_action_show_alert';
+import * as i18n from './translations';
+import { Alert } from '../case_view';
+import { AlertCommentEvent } from './user_action_alert_comment_event';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
+
+const getStatusTitle = (id: string, status: CaseStatuses) => {
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems={'center'}
+      data-test-subj={`${id}-user-action-status-title`}
+    >
+      <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Status type={status} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const isStatusValid = (status: string): status is CaseStatuses =>
+  Object.prototype.hasOwnProperty.call(statuses, status);
 
 export const getLabelTitle = ({ action, field }: LabelTitle) => {
   if (field === 'tags') {
@@ -33,9 +59,12 @@ export const getLabelTitle = ({ action, field }: LabelTitle) => {
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (field === 'status' && action.action === 'update') {
-    return `${
-      action.newValue === 'open' ? i18n.REOPENED_CASE.toLowerCase() : i18n.CLOSED_CASE.toLowerCase()
-    } ${i18n.CASE}`;
+    const status = action.newValue ?? '';
+    if (isStatusValid(status)) {
+      return getStatusTitle(action.actionId, status);
+    }
+
+    return '';
   } else if (field === 'comment' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }
@@ -120,6 +149,16 @@ export const getPushInfo = (
         parsedConnectorName: 'none',
       };
 
+const getUpdateActionIcon = (actionField: string): string => {
+  if (actionField === 'tags') {
+    return 'tag';
+  } else if (actionField === 'status') {
+    return 'folderClosed';
+  }
+
+  return 'dot';
+};
+
 export const getUpdateAction = ({
   action,
   label,
@@ -139,7 +178,7 @@ export const getUpdateAction = ({
   event: label,
   'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+  timelineIcon: getUpdateActionIcon(action.actionField[0]),
   actions: (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -153,3 +192,52 @@ export const getUpdateAction = ({
     </EuiFlexGroup>
   ),
 });
+
+export const getAlertComment = ({
+  action,
+  alert,
+  onShowAlertDetails,
+}: {
+  action: CaseUserActions;
+  alert: Alert | undefined;
+  onShowAlertDetails: (alertId: string, index: string) => void;
+}): EuiCommentProps => {
+  return {
+    username: (
+      <UserActionUsernameWithAvatar
+        username={action.actionBy.username}
+        fullName={action.actionBy.fullName}
+      />
+    ),
+    className: 'comment-alert',
+    type: 'update',
+    event: <AlertCommentEvent alert={alert} />,
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {alert != null ? (
+            <UserActionShowAlert
+              id={action.actionId}
+              alert={alert}
+              onShowAlertDetails={onShowAlertDetails}
+            />
+          ) : (
+            <EuiIconTip
+              aria-label={i18n.ALERT_NOT_FOUND_TOOLTIP}
+              size="l"
+              type="alert"
+              color="danger"
+              content={i18n.ALERT_NOT_FOUND_TOOLTIP}
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};

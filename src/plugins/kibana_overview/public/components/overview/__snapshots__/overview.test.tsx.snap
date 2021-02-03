@@ -204,6 +204,7 @@ exports[`Overview render 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  onClick={[Function]}
                   title="Kibana"
                   titleElement="h3"
                   titleSize="xs"
@@ -229,6 +230,7 @@ exports[`Overview render 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  onClick={[Function]}
                   title="Solution two"
                   titleElement="h3"
                   titleSize="xs"
@@ -254,6 +256,7 @@ exports[`Overview render 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  onClick={[Function]}
                   title="Solution three"
                   titleElement="h3"
                   titleSize="xs"
@@ -279,6 +282,7 @@ exports[`Overview render 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  onClick={[Function]}
                   title="Solution four"
                   titleElement="h3"
                   titleSize="xs"
@@ -358,6 +362,8 @@ exports[`Overview render 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>
@@ -624,6 +630,7 @@ exports[`Overview without features 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_kibana_light_2x.png"
+                  onClick={[Function]}
                   title="Kibana"
                   titleElement="h3"
                   titleSize="xs"
@@ -649,6 +656,7 @@ exports[`Overview without features 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_2_light_2x.png"
+                  onClick={[Function]}
                   title="Solution two"
                   titleElement="h3"
                   titleSize="xs"
@@ -674,6 +682,7 @@ exports[`Overview without features 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_3_light_2x.png"
+                  onClick={[Function]}
                   title="Solution three"
                   titleElement="h3"
                   titleSize="xs"
@@ -699,6 +708,7 @@ exports[`Overview without features 1`] = `
                     />
                   }
                   image="/plugins/kibanaOverview/assets/solutions_solution_4_light_2x.png"
+                  onClick={[Function]}
                   title="Solution four"
                   titleElement="h3"
                   titleSize="xs"
@@ -834,6 +844,8 @@ exports[`Overview without features 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>
@@ -1215,6 +1227,8 @@ exports[`Overview without solutions 1`] = `
           ],
         }
       }
+      onChangeDefaultRoute={[Function]}
+      onSetDefaultRoute={[Function]}
       path="/app/kibana_overview"
     />
   </div>

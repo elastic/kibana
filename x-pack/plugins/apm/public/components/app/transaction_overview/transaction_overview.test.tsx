@@ -10,13 +10,13 @@ import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
-import { ApmServiceContextProvider } from '../../../context/apm_service_context';
-import { UrlParamsProvider } from '../../../context/UrlParamsContext';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import * as useFetcherHook from '../../../hooks/useFetcher';
-import * as useServiceTransactionTypesHook from '../../../hooks/use_service_transaction_types';
-import * as useServiceAgentNameHook from '../../../hooks/use_service_agent_name';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { IUrlParams } from '../../../context/url_params_context/types';
+import * as useFetcherHook from '../../../hooks/use_fetcher';
+import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
+import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_name_fetcher';
 import {
   disableConsoleWarning,
   renderWithTheme,
@@ -25,7 +25,7 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const history = createMemoryHistory();
@@ -46,15 +46,17 @@ function setup({
 
   // mock transaction types
   jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
+    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
     .mockReturnValue(serviceTransactionTypes);
 
   // mock agent
-  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentName').mockReturnValue({
-    agentName: 'nodejs',
-    error: undefined,
-    status: useFetcherHook.FETCH_STATUS.SUCCESS,
-  });
+  jest
+    .spyOn(useServiceAgentNameHook, 'useServiceAgentNameFetcher')
+    .mockReturnValue({
+      agentName: 'nodejs',
+      error: undefined,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
@@ -128,7 +130,7 @@ describe('TransactionOverview', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
+        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=yesterday'
       );
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
@@ -137,7 +139,7 @@ describe('TransactionOverview', () => {
 
       expect(history.push).toHaveBeenCalled();
       expect(history.location.search).toEqual(
-        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
+        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&comparisonType=yesterday'
       );
     });
   });

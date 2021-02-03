@@ -13,7 +13,7 @@ import {
   singleEntryThreat,
   containsInvalidItems,
 } from '../../../../common/components/threat_match/helpers';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
@@ -216,16 +216,25 @@ export const schema: FormSchema<DefineStepRule> = {
       ),
       validations: [
         {
-          validator: fieldValidators.numberGreaterThanField({
-            than: 1,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
-              {
-                defaultMessage: 'Value must be greater than or equal to one.',
-              }
-            ),
-            allowEquality: true,
-          }),
+          validator: (
+            ...args: Parameters<ValidationFunc>
+          ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+            const [{ formData }] = args;
+            const needsValidation = isThresholdRule(formData.ruleType);
+            if (!needsValidation) {
+              return;
+            }
+            return fieldValidators.numberGreaterThanField({
+              than: 1,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+                {
+                  defaultMessage: 'Value must be greater than or equal to one.',
+                }
+              ),
+              allowEquality: true,
+            })(...args);
+          },
         },
       ],
     },

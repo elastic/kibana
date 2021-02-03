@@ -25,6 +25,9 @@ import { JobSelector } from '../components/job_selector';
 import { NavigationMenu } from '../components/navigation_menu';
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 
+import { HelpMenu } from '../components/help_menu';
+import { useMlKibana } from '../contexts/kibana';
+
 interface TimeSeriesExplorerPageProps {
   dateFormatTz: string;
   resizeRef?: any;
@@ -35,6 +38,10 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
   dateFormatTz,
   resizeRef,
 }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
       <NavigationMenu tabId="anomaly_detection" />
@@ -78,6 +85,7 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
             {children}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </div>
     </>
   );

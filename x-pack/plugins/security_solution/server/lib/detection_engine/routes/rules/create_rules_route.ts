@@ -5,9 +5,9 @@
  */
 
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
@@ -19,8 +19,13 @@ import { createRulesSchema } from '../../../../../common/detection_engine/schema
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { RuleTypeParams } from '../../types';
+import { Alert } from '../../../../../../alerts/common';
 
-export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
+export const createRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml']
+): void => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -85,9 +90,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const createdRule = await alertsClient.create({
+        /**
+         * TODO: Remove this use of `as` by utilizing the proper type
+         */
+        const createdRule = (await alertsClient.create({
           data: internalRule,
-        });
+        })) as Alert<RuleTypeParams>;
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,

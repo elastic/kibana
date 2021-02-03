@@ -44,6 +44,7 @@ interface OfExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  helpText?: string | JSX.Element;
 }
 
 export const OfExpression = ({
@@ -55,6 +56,7 @@ export const OfExpression = ({
   display = 'inline',
   customAggTypesOptions,
   popupPosition,
+  helpText,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -104,6 +106,7 @@ export const OfExpression = ({
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
@@ -118,6 +121,8 @@ export const OfExpression = ({
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
+              data-test-subj="availablefieldsOptionsFormRow"
+              helpText={helpText}
             >
               <EuiComboBox
                 fullWidth

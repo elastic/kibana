@@ -52,6 +52,14 @@ export {
   GlobalFlyout,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
 
-export { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
+export { documentationService } from '../../services/documentation';
 
-export { RUNTIME_FIELD_OPTIONS, RuntimeType } from '../../../../../runtime_fields/public';
+export {
+  RuntimeField,
+  RuntimeFieldEditorFlyoutContent,
+  RuntimeFieldEditorFlyoutContentProps,
+} from '../../../../../runtime_fields/public';
+
+export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+
+export { DocLinksStart } from '../../../../../../../src/core/public';

@@ -1,0 +1,355 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { cloneDeep, isEqual } from 'lodash';
+import { kea, MakeLogicType } from 'kea';
+
+import { HttpLogic } from '../../../../../shared/http';
+
+import { TEXT } from '../../../../../shared/constants/field_types';
+import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
+import { OptionValue } from '../../../../types';
+
+import {
+  flashAPIErrors,
+  setSuccessMessage,
+  clearFlashMessages,
+} from '../../../../../shared/flash_messages';
+
+import { AppLogic } from '../../../../app_logic';
+import { SourceLogic } from '../../source_logic';
+
+import {
+  SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
+  SCHEMA_FIELD_ADDED_MESSAGE,
+  SCHEMA_UPDATED_MESSAGE,
+} from './constants';
+
+interface SchemaActions {
+  onInitializeSchema(schemaProps: SchemaInitialData): SchemaInitialData;
+  onInitializeSchemaFieldErrors(
+    fieldCoercionErrorsProps: SchemaChangeErrorsProps
+  ): SchemaChangeErrorsProps;
+  onSchemaSetSuccess(schemaProps: SchemaResponseProps): SchemaResponseProps;
+  onSchemaSetFormErrors(errors: string[]): string[];
+  updateNewFieldType(newFieldType: SchemaTypes): SchemaTypes;
+  onFieldUpdate({
+    schema,
+    formUnchanged,
+  }: {
+    schema: Schema;
+    formUnchanged: boolean;
+  }): { schema: Schema; formUnchanged: boolean };
+  onIndexingComplete(numDocumentsWithErrors: number): number;
+  resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
+  setFieldName(rawFieldName: string): string;
+  setFilterValue(filterValue: string): string;
+  addNewField(
+    fieldName: string,
+    newFieldType: SchemaTypes
+  ): { fieldName: string; newFieldType: SchemaTypes };
+  updateFields(): void;
+  openAddFieldModal(): void;
+  closeAddFieldModal(): void;
+  resetSchemaState(): void;
+  initializeSchema(): void;
+  initializeSchemaFieldErrors(
+    activeReindexJobId: string,
+    sourceId: string
+  ): { activeReindexJobId: string; sourceId: string };
+  updateExistingFieldType(
+    fieldName: string,
+    newFieldType: SchemaTypes
+  ): { fieldName: string; newFieldType: SchemaTypes };
+  setServerField(
+    updatedSchema: Schema,
+    operation: TOperation
+  ): { updatedSchema: Schema; operation: TOperation };
+}
+
+interface SchemaValues {
+  sourceId: string;
+  activeSchema: Schema;
+  serverSchema: Schema;
+  filterValue: string;
+  filteredSchemaFields: Schema;
+  dataTypeOptions: OptionValue[];
+  showAddFieldModal: boolean;
+  addFieldFormErrors: string[] | null;
+  mostRecentIndexJob: IndexJob;
+  fieldCoercionErrors: FieldCoercionErrors;
+  newFieldType: string;
+  rawFieldName: string;
+  formUnchanged: boolean;
+  dataLoading: boolean;
+}
+
+interface SchemaResponseProps {
+  schema: Schema;
+  mostRecentIndexJob: IndexJob;
+}
+
+export interface SchemaInitialData extends SchemaResponseProps {
+  sourceId: string;
+}
+
+interface FieldCoercionError {
+  external_id: string;
+  error: string;
+}
+
+export interface FieldCoercionErrors {
+  [key: string]: FieldCoercionError[];
+}
+
+interface SchemaChangeErrorsProps {
+  fieldCoercionErrors: FieldCoercionErrors;
+}
+
+export const dataTypeOptions = [
+  { value: 'text', text: 'Text' },
+  { value: 'date', text: 'Date' },
+  { value: 'number', text: 'Number' },
+  { value: 'geolocation', text: 'Geo Location' },
+];
+
+export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
+  actions: {
+    onInitializeSchema: (schemaProps: SchemaInitialData) => schemaProps,
+    onInitializeSchemaFieldErrors: (fieldCoercionErrorsProps: SchemaChangeErrorsProps) =>
+      fieldCoercionErrorsProps,
+    onSchemaSetSuccess: (schemaProps: SchemaResponseProps) => schemaProps,
+    onSchemaSetFormErrors: (errors: string[]) => errors,
+    updateNewFieldType: (newFieldType: string) => newFieldType,
+    onFieldUpdate: ({ schema, formUnchanged }: { schema: Schema; formUnchanged: boolean }) => ({
+      schema,
+      formUnchanged,
+    }),
+    onIndexingComplete: (numDocumentsWithErrors: number) => numDocumentsWithErrors,
+    resetMostRecentIndexJob: (emptyReindexJob: IndexJob) => emptyReindexJob,
+    setFieldName: (rawFieldName: string) => rawFieldName,
+    setFilterValue: (filterValue: string) => filterValue,
+    openAddFieldModal: () => true,
+    closeAddFieldModal: () => true,
+    resetSchemaState: () => true,
+    initializeSchema: () => true,
+    initializeSchemaFieldErrors: (activeReindexJobId: string, sourceId: string) => ({
+      activeReindexJobId,
+      sourceId,
+    }),
+    addNewField: (fieldName: string, newFieldType: SchemaTypes) => ({ fieldName, newFieldType }),
+    updateExistingFieldType: (fieldName: string, newFieldType: string) => ({
+      fieldName,
+      newFieldType,
+    }),
+    updateFields: () => true,
+    setServerField: (updatedSchema: Schema, operation: TOperation) => ({
+      updatedSchema,
+      operation,
+    }),
+  },
+  reducers: {
+    dataTypeOptions: [dataTypeOptions],
+    sourceId: [
+      '',
+      {
+        onInitializeSchema: (_, { sourceId }) => sourceId,
+      },
+    ],
+    activeSchema: [
+      {},
+      {
+        onInitializeSchema: (_, { schema }) => schema,
+        onSchemaSetSuccess: (_, { schema }) => schema,
+        onFieldUpdate: (_, { schema }) => schema,
+      },
+    ],
+    serverSchema: [
+      {},
+      {
+        onInitializeSchema: (_, { schema }) => schema,
+        onSchemaSetSuccess: (_, { schema }) => schema,
+      },
+    ],
+    mostRecentIndexJob: [
+      {} as IndexJob,
+      {
+        onInitializeSchema: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
+        resetMostRecentIndexJob: (_, emptyReindexJob) => emptyReindexJob,
+        onSchemaSetSuccess: (_, { mostRecentIndexJob }) => mostRecentIndexJob,
+        onIndexingComplete: (state, numDocumentsWithErrors) => ({
+          ...state,
+          numDocumentsWithErrors,
+          percentageComplete: 100,
+          hasErrors: numDocumentsWithErrors > 0,
+          isActive: false,
+        }),
+        updateFields: (state) => ({
+          ...state,
+          percentageComplete: 0,
+        }),
+      },
+    ],
+    newFieldType: [
+      TEXT,
+      {
+        updateNewFieldType: (_, newFieldType) => newFieldType,
+        onSchemaSetSuccess: () => TEXT,
+      },
+    ],
+    addFieldFormErrors: [
+      null,
+      {
+        onSchemaSetSuccess: () => null,
+        closeAddFieldModal: () => null,
+        onSchemaSetFormErrors: (_, addFieldFormErrors) => addFieldFormErrors,
+      },
+    ],
+    filterValue: [
+      '',
+      {
+        setFilterValue: (_, filterValue) => filterValue,
+      },
+    ],
+    formUnchanged: [
+      true,
+      {
+        onSchemaSetSuccess: () => true,
+        onFieldUpdate: (_, { formUnchanged }) => formUnchanged,
+      },
+    ],
+    showAddFieldModal: [
+      false,
+      {
+        onSchemaSetSuccess: () => false,
+        openAddFieldModal: () => true,
+        closeAddFieldModal: () => false,
+      },
+    ],
+    dataLoading: [
+      true,
+      {
+        onSchemaSetSuccess: () => false,
+        onInitializeSchema: () => false,
+        resetSchemaState: () => true,
+      },
+    ],
+    rawFieldName: [
+      '',
+      {
+        setFieldName: (_, rawFieldName) => rawFieldName,
+        onSchemaSetSuccess: () => '',
+      },
+    ],
+    fieldCoercionErrors: [
+      {},
+      {
+        onInitializeSchemaFieldErrors: (_, { fieldCoercionErrors }) => fieldCoercionErrors,
+      },
+    ],
+  },
+  selectors: ({ selectors }) => ({
+    filteredSchemaFields: [
+      () => [selectors.activeSchema, selectors.filterValue],
+      (activeSchema, filterValue) => {
+        const filteredSchema = {} as Schema;
+        Object.keys(activeSchema)
+          .filter((x) => x.includes(filterValue))
+          .forEach((k) => (filteredSchema[k] = activeSchema[k]));
+        return filteredSchema;
+      },
+    ],
+  }),
+  listeners: ({ actions, values }) => ({
+    initializeSchema: async () => {
+      const { isOrganization } = AppLogic.values;
+      const { http } = HttpLogic.values;
+      const {
+        contentSource: { id: sourceId },
+      } = SourceLogic.values;
+
+      const route = isOrganization
+        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
+        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+
+      try {
+        const response = await http.get(route);
+        actions.onInitializeSchema({ sourceId, ...response });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    initializeSchemaFieldErrors: async ({ activeReindexJobId, sourceId }) => {
+      const { isOrganization } = AppLogic.values;
+      const { http } = HttpLogic.values;
+      const route = isOrganization
+        ? `/api/workplace_search/org/sources/${sourceId}/reindex_job/${activeReindexJobId}`
+        : `/api/workplace_search/account/sources/${sourceId}/reindex_job/${activeReindexJobId}`;
+
+      try {
+        await actions.initializeSchema();
+        const response = await http.get(route);
+        actions.onInitializeSchemaFieldErrors({
+          fieldCoercionErrors: response.fieldCoercionErrors,
+        });
+      } catch (e) {
+        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
+      }
+    },
+    addNewField: ({ fieldName, newFieldType }) => {
+      const schema = cloneDeep(values.activeSchema);
+      schema[fieldName] = newFieldType;
+      actions.setServerField(schema, ADD);
+    },
+    updateExistingFieldType: ({ fieldName, newFieldType }) => {
+      const schema = cloneDeep(values.activeSchema);
+      schema[fieldName] = newFieldType;
+      actions.onFieldUpdate({ schema, formUnchanged: isEqual(values.serverSchema, schema) });
+    },
+    updateFields: () => actions.setServerField(values.activeSchema, UPDATE),
+    setServerField: async ({ updatedSchema, operation }) => {
+      const { isOrganization } = AppLogic.values;
+      const { http } = HttpLogic.values;
+      const isAdding = operation === ADD;
+      const { sourceId } = values;
+      const successMessage = isAdding ? SCHEMA_FIELD_ADDED_MESSAGE : SCHEMA_UPDATED_MESSAGE;
+      const route = isOrganization
+        ? `/api/workplace_search/org/sources/${sourceId}/schemas`
+        : `/api/workplace_search/account/sources/${sourceId}/schemas`;
+
+      const emptyReindexJob = {
+        percentageComplete: 100,
+        numDocumentsWithErrors: 0,
+        activeReindexJobId: '',
+        isActive: false,
+      };
+
+      actions.resetMostRecentIndexJob(emptyReindexJob);
+
+      try {
+        const response = await http.post(route, {
+          body: JSON.stringify({ ...updatedSchema }),
+        });
+        actions.onSchemaSetSuccess(response);
+        setSuccessMessage(successMessage);
+      } catch (e) {
+        window.scrollTo(0, 0);
+        if (isAdding) {
+          actions.onSchemaSetFormErrors(e?.message);
+        } else {
+          flashAPIErrors(e);
+        }
+      }
+    },
+    resetMostRecentIndexJob: () => {
+      clearFlashMessages();
+    },
+    resetSchemaState: () => {
+      clearFlashMessages();
+    },
+  }),
+});

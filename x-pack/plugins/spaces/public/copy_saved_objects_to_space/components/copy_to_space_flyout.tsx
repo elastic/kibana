@@ -27,7 +27,7 @@ import {
   processImportResponse,
   SavedObjectsManagementRecord,
 } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
@@ -42,7 +42,7 @@ interface Props {
 }
 
 const INCLUDE_RELATED_DEFAULT = true;
-const CREATE_NEW_COPIES_DEFAULT = false;
+const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {

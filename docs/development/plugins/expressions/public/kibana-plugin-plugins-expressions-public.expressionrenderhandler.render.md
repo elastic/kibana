@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-render: (data: any, uiState?: any) => Promise<void>;
+render: (value: any, uiState?: any) => Promise<void>;
 ```

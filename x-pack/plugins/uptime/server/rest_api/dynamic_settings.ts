@@ -20,12 +20,8 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
   method: 'GET',
   path: '/api/uptime/dynamic_settings',
   validate: false,
-  handler: async ({ savedObjectsClient }, _context, _request, response): Promise<any> => {
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
-
-    return response.ok({
-      body: dynamicSettings,
-    });
+  handler: async ({ savedObjectsClient }): Promise<any> => {
+    return savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
   },
 });
 
@@ -60,7 +56,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
+  handler: async ({ savedObjectsClient, request, response }): Promise<any> => {
     const decoded = DynamicSettingsType.decode(request.body);
     const certThresholdErrors = validateCertsValues(request.body as DynamicSettings);
 

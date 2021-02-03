@@ -117,28 +117,6 @@ describe('Reporting server createConfig$', () => {
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
   });
 
-  it('show warning when kibanaServer.hostName === "0"', async () => {
-    mockInitContext = makeMockInitContext({
-      encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
-      kibanaServer: { hostname: '0' },
-    });
-    const mockConfig$: any = mockInitContext.config.create();
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.kibanaServer).toMatchInlineSnapshot(`
-      Object {
-        "hostname": "0.0.0.0",
-        "port": 5601,
-        "protocol": "http",
-      }
-    `);
-    expect((mockLogger.warn as any).mock.calls.length).toBe(1);
-    expect((mockLogger.warn as any).mock.calls[0]).toMatchObject([
-      `Found 'server.host: \"0\"' in Kibana configuration. This is incompatible with Reporting. To enable Reporting to work, 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' is being automatically ` +
-        `to the configuration. You can change the setting to 'server.host: 0.0.0.0' or add 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' in kibana.yml to prevent this message.`,
-    ]);
-  });
-
   it('uses user-provided disableSandbox: false', async () => {
     mockInitContext = makeMockInitContext({
       encryptionKey: '888888888888888888888888888888888',

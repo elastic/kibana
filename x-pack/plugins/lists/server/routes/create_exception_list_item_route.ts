@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -19,7 +18,7 @@ import { getExceptionListClient } from './utils/get_exception_list_client';
 import { endpointDisallowedFields } from './endpoint_disallowed_fields';
 import { validateEndpointExceptionItemEntries, validateExceptionListSize } from './validate';
 
-export const createExceptionListItemRoute = (router: IRouter): void => {
+export const createExceptionListItemRoute = (router: ListsPluginRouter): void => {
   router.post(
     {
       options: {

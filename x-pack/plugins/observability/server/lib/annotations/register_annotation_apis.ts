@@ -15,6 +15,7 @@ import {
 } from '../../../common/annotations';
 import { ScopedAnnotationsClient } from './bootstrap_annotations';
 import { createAnnotationsClient } from './create_annotations_client';
+import type { ObservabilityRequestHandlerContext } from '../../types';
 
 const unknowns = schema.object({}, { unknowns: 'allow' });
 
@@ -30,8 +31,12 @@ export function registerAnnotationAPIs({
   function wrapRouteHandler<TType extends t.Type<any>>(
     types: TType,
     handler: (params: { data: t.TypeOf<TType>; client: ScopedAnnotationsClient }) => Promise<any>
-  ): RequestHandler {
-    return async (...args: Parameters<RequestHandler>) => {
+  ): RequestHandler<unknown, unknown, unknown, ObservabilityRequestHandlerContext> {
+    return async (
+      ...args: Parameters<
+        RequestHandler<unknown, unknown, unknown, ObservabilityRequestHandlerContext>
+      >
+    ) => {
       const [context, request, response] = args;
 
       const rt = types;
@@ -50,11 +55,11 @@ export function registerAnnotationAPIs({
         });
       }
 
-      const apiCaller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
 
       const client = createAnnotationsClient({
         index,
-        apiCaller,
+        esClient,
         logger,
         license: context.licensing?.license,
       });
@@ -79,7 +84,7 @@ export function registerAnnotationAPIs({
     };
   }
 
-  const router = core.http.createRouter();
+  const router = core.http.createRouter<ObservabilityRequestHandlerContext>();
 
   router.post(
     {

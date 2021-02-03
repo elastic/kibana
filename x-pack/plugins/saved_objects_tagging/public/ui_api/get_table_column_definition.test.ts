@@ -6,7 +6,7 @@
 
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { taggingApiMock } from '../../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
-import { tagsCacheMock } from '../tags/tags_cache.mock';
+import { tagsCacheMock } from '../services/tags/tags_cache.mock';
 import { createTagReference, createSavedObject, createTag } from '../../common/test_utils';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
 

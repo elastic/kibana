@@ -24,7 +24,7 @@ import { HttpStart } from 'src/core/public';
 import { LoadingPage } from '../../loading_page';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrialStatus } from '../../../hooks/use_trial_status';
 
 export const SubscriptionSplashContent: React.FC = () => {

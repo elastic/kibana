@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { InfraNodeType } from '../../../../plugins/infra/server/graphql/types';
 import {
   InfraMetadata,
   InfraMetadataRequest,
@@ -50,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: 'demo-stack-mysql-01',
-          nodeType: InfraNodeType.host,
+          nodeType: 'host',
           timeRange: timeRange700,
         });
         if (metadata) {
@@ -70,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         const metadata = await fetchMetadata({
           sourceId: 'default',
           nodeId: '631f36a845514442b93c3fdd2dc91bcd8feb680b8ac5832c7fb8fdc167bb938e',
-          nodeType: InfraNodeType.container,
+          nodeType: 'container',
           timeRange: timeRange660,
         });
         if (metadata) {
@@ -92,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -108,6 +107,13 @@ export default function ({ getService }: FtrProviderContext) {
                 provider: 'gcp',
                 machine: { type: 'n1-standard-4' },
                 project: { id: 'elastic-observability' },
+              },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-f0zc',
+                id: 'c91c0d2b-6483-46bb-9731-f06afd32bb59',
+                ephemeral_id: '7cb259b1-795c-4c76-beaf-2eb8f18f5b02',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-f0zc',
@@ -133,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'ip-172-31-47-9.us-east-2.compute.internal',
-            nodeType: InfraNodeType.host,
+            nodeType: 'host',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -149,6 +155,13 @@ export default function ({ getService }: FtrProviderContext) {
                 machine: { type: 't2.micro' },
                 region: 'us-east-2',
                 account: { id: '015351775590' },
+              },
+              agent: {
+                hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
+                id: 'd0943b36-d0d3-426d-892b-7d79c071b44b',
+                ephemeral_id: '64c94244-88b8-4a37-adc0-30428fefaf53',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'ip-172-31-47-9.us-east-2.compute.internal',
@@ -175,7 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: '14887487-99f8-11e9-9a96-42010a84004d',
-            nodeType: InfraNodeType.pod,
+            nodeType: 'pod',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -196,6 +209,13 @@ export default function ({ getService }: FtrProviderContext) {
                 project: {
                   id: 'elastic-observability',
                 },
+              },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-ngmh',
+                id: '66dc19e6-da36-49d2-9471-2c9475503178',
+                ephemeral_id: 'a0c3a9ff-470a-41a0-bf43-d1af6b7a3b5b',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-ngmh',
@@ -221,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
           const metadata = await fetchMetadata({
             sourceId: 'default',
             nodeId: 'c74b04834c6d7cc1800c3afbe31d0c8c0c267f06e9eb45c2b0c2df3e6cee40c5',
-            nodeType: InfraNodeType.container,
+            nodeType: 'container',
             timeRange: timeRange800withAws,
           });
           if (metadata) {
@@ -243,6 +263,13 @@ export default function ({ getService }: FtrProviderContext) {
                 project: {
                   id: 'elastic-observability',
                 },
+              },
+              agent: {
+                hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',
+                id: 'c58a514c-e971-4590-8206-385400e184dd',
+                ephemeral_id: 'e9d46cb0-2e89-469d-bd3b-6f32d7c96cc0',
+                type: 'metricbeat',
+                version: '8.0.0',
               },
               host: {
                 hostname: 'gke-observability-8--observability-8--bc1afd95-nhhw',

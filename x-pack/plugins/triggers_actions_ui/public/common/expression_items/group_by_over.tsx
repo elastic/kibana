@@ -115,6 +115,7 @@ export const GroupByExpression = ({
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setGroupByPopoverOpen(false)}>

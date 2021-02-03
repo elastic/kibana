@@ -56,4 +56,35 @@ export const graphMigrations = {
     doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
     return doc;
   },
+  '7.11.0': (doc: SavedObjectUnsanitizedDoc<any>) => {
+    const wsState = get(doc, 'attributes.wsState');
+    if (typeof wsState !== 'string') {
+      return doc;
+    }
+    let state;
+    try {
+      state = JSON.parse(JSON.parse(wsState));
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+      return doc;
+    }
+    const indexPatternRefName = state.indexPatternRefName;
+    const indexPatternReference = doc.references?.find(
+      (reference) => reference.name === indexPatternRefName
+    );
+    if (!indexPatternReference) {
+      // This saved object doesn't have an reference, there's something corrupted here,
+      // leave it as is
+      return doc;
+    }
+    const indexPatternTitle = indexPatternReference.id;
+    // remove index pattern title from workspace state (this should always be the id)
+    delete state.indexPatternRefName;
+    // add index pattern title as legacyIndexPatternRef so it can get resolved to the id on next open
+    doc.attributes.legacyIndexPatternRef = indexPatternTitle;
+    doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
+    // remove references
+    doc.references = [];
+    return doc;
+  },
 };

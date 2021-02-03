@@ -132,6 +132,7 @@ export function createMockFramePublicAPI(): FrameMock {
       get: () => palette,
       getAll: () => [palette],
     },
+    searchSessionId: 'sessionId',
   };
 }
 

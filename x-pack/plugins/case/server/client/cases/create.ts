@@ -64,7 +64,7 @@ export const create = ({
         actionAt: createdDate,
         actionBy: { username, full_name, email },
         caseId: newCase.id,
-        fields: ['description', 'status', 'tags', 'title', 'connector'],
+        fields: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
         newValue: JSON.stringify(query),
       }),
     ],

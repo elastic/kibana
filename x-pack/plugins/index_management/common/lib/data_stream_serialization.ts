@@ -16,9 +16,11 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     template,
     ilm_policy: ilmPolicyName,
     store_size: storageSize,
+    store_size_bytes: storageSizeBytes,
     maximum_timestamp: maxTimeStamp,
     _meta,
     privileges,
+    hidden,
   } = dataStreamFromEs;
 
   return {
@@ -36,9 +38,11 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     indexTemplateName: template,
     ilmPolicyName,
     storageSize,
+    storageSizeBytes,
     maxTimeStamp,
     _meta,
     privileges,
+    hidden,
   };
 }
 

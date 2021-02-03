@@ -28,7 +28,6 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsStatus } from '../../../alerts/status';
 
 function getColumns(alerts, setupMode) {
   return [
@@ -69,29 +68,6 @@ function getColumns(alerts, setupMode) {
             </EuiLink>
             {setupModeStatus}
           </Fragment>
-        );
-      },
-    },
-    {
-      name: i18n.translate('xpack.monitoring.beats.instances.alertsColumnTitle', {
-        defaultMessage: 'Alerts',
-      }),
-      field: 'alerts',
-      width: '175px',
-      sortable: true,
-      render: (_field, beat) => {
-        return (
-          <AlertsStatus
-            showBadge={true}
-            alerts={alerts}
-            stateFilter={(state) => state.stackProductUuid === beat.uuid}
-            nextStepsFilter={(nextStep) => {
-              if (nextStep.text.includes('APM servers')) {
-                return false;
-              }
-              return true;
-            }}
-          />
         );
       },
     },

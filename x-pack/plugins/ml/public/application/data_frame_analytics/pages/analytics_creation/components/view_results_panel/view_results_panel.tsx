@@ -7,9 +7,8 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlUrlGenerator } from '../../../../../contexts/kibana';
+import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;
@@ -17,19 +16,13 @@ interface Props {
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
-  const urlGenerator = useMlUrlGenerator();
-  const navigateToPath = useNavigateToPath();
-
-  const redirectToAnalyticsExplorationPage = async () => {
-    const path = await urlGenerator.createUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-      pageState: {
-        jobId,
-        analysisType,
-      },
-    });
-    await navigateToPath(path);
-  };
+  const analyticsExplorationPageLink = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+    pageState: {
+      jobId,
+      analysisType,
+    },
+  });
 
   return (
     <Fragment>
@@ -45,7 +38,7 @@ export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
             defaultMessage: 'View results for the analytics job.',
           }
         )}
-        onClick={redirectToAnalyticsExplorationPage}
+        href={analyticsExplorationPageLink}
         data-test-subj="analyticsWizardViewResultsCard"
       />
     </Fragment>

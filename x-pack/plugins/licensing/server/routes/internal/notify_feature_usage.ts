@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { LicensingRouter } from '../../types';
 
-export function registerNotifyFeatureUsageRoute(router: IRouter) {
+export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
   router.post(
     {
       path: '/internal/licensing/feature_usage/notify',

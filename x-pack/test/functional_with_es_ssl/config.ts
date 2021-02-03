@@ -7,7 +7,6 @@
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
@@ -39,7 +38,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const returnedObject = {
     ...xpackFunctionalConfig.getAll(),
     servers,
-    services,
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
@@ -87,6 +85,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           },
         })}`,
       ],
+    },
+    security: {
+      roles: {
+        alerts_and_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 

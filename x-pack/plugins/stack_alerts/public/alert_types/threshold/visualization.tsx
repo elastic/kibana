@@ -29,15 +29,14 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { FieldFormatsStart } from 'src/plugins/data/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   getThresholdAlertVisualizationData,
   GetThresholdAlertVisualizationDataParams,
 } from './index_threshold_api';
-import {
-  AlertsContextValue,
-  AggregationType,
-  Comparator,
-} from '../../../../triggers_actions_ui/public';
+import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
 import { parseDuration } from '../../../../alerts/common/parse_duration';
 
@@ -94,8 +93,9 @@ interface Props {
   comparators: {
     [key: string]: Comparator;
   };
-  alertsContext: AlertsContextValue;
   refreshRateInMilliseconds?: number;
+  charts: ChartsPluginSetup;
+  dataFieldsFormats: FieldFormatsStart;
 }
 
 const DEFAULT_REFRESH_RATE = 5000;
@@ -112,8 +112,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   alertInterval,
   aggregationTypes,
   comparators,
-  alertsContext,
   refreshRateInMilliseconds = DEFAULT_REFRESH_RATE,
+  charts,
+  dataFieldsFormats,
 }) => {
   const {
     index,
@@ -128,8 +129,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
   } = alertParams;
-  const { http, toastNotifications, charts, uiSettings, dataFieldsFormats } = alertsContext;
-
+  const { http, notifications, uiSettings } = useKibana().services;
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
   const [error, setError] = useState<undefined | Error>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
@@ -150,11 +150,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       try {
         setLoadingState(loadingState ? LoadingStateType.Refresh : LoadingStateType.FirstLoad);
         setVisualizationData(
-          await getVisualizationData(alertWithoutActions, visualizeOptions, http)
+          await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
         );
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
+        if (notifications) {
+          notifications.toasts.addDanger({
             title: i18n.translate(
               'xpack.stackAlerts.threshold.ui.visualization.unableToLoadVisualizationMessage',
               { defaultMessage: 'Unable to load visualization' }

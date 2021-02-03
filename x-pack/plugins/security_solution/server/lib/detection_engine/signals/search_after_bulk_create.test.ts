@@ -19,10 +19,11 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import uuid from 'uuid';
-import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { BulkResponse } from './types';
+import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
+import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -39,7 +40,7 @@ describe('searchAfterAndBulkCreate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     listClient = listMock.getListClient();
-    listClient.getListItemByValues = jest.fn().mockResolvedValue([]);
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
     mockService = alertsMock.createAlertServices();
   });
@@ -53,9 +54,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -67,9 +65,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -83,9 +78,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -97,9 +89,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -164,9 +153,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -179,9 +165,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -193,40 +176,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits())
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -276,8 +225,8 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(12);
-    expect(createdSignalsCount).toEqual(5);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(7);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -289,9 +238,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -362,9 +308,12 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when all search results are in the allowlist and with sortId present', async () => {
-    listClient.getListItemByValues = jest
-      .fn()
-      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const searchListItems: SearchListItemArraySchema = [
+      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
+      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+      { ...getSearchListItemResponseMock(), value: '3.3.3.3' },
+    ];
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster
       .mockResolvedValueOnce(
@@ -423,9 +372,14 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when all search results are in the allowlist and no sortId present', async () => {
-    listClient.getListItemByValues = jest
-      .fn()
-      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const searchListItems: SearchListItemArraySchema = [
+      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
+      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+    ];
+
+    listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster.mockResolvedValueOnce(
       repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
@@ -482,7 +436,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
-      'sortIds was empty on searchResult'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -494,9 +448,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -566,7 +517,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
-      'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -578,9 +529,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -605,10 +553,10 @@ describe('searchAfterAndBulkCreate', () => {
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -711,10 +659,10 @@ describe('searchAfterAndBulkCreate', () => {
     ];
     const sampleParams = sampleRuleAlertParams(30);
     mockService.callCluster.mockResolvedValueOnce(sampleEmptyDocSearchResults());
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -759,9 +707,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -771,10 +716,10 @@ describe('searchAfterAndBulkCreate', () => {
       .mockImplementation(() => {
         throw Error('Fake Error'); // throws the exception we are testing
       });
-    listClient.getListItemByValues = jest.fn(({ value }) =>
+    listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
         value.slice(0, 2).map((item) => ({
-          ...getListItemResponseMock(),
+          ...getSearchListItemResponseMock(),
           value: item,
         }))
       )
@@ -854,9 +799,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -869,9 +811,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -883,9 +822,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,

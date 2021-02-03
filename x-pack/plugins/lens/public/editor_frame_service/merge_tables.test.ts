@@ -7,8 +7,12 @@
 import moment from 'moment';
 import { mergeTables } from './merge_tables';
 import { ExpressionValueSearchContext } from 'src/plugins/data/public';
-import { Datatable, ExecutionContext } from 'src/plugins/expressions';
-import { LensInspectorAdapters } from './types';
+import {
+  Datatable,
+  ExecutionContext,
+  DefaultInspectorAdapters,
+  TablesAdapter,
+} from 'src/plugins/expressions';
 
 describe('lens_merge_tables', () => {
   const sampleTable1: Datatable = {
@@ -50,12 +54,15 @@ describe('lens_merge_tables', () => {
   });
 
   it('should store the current tables in the tables inspector', () => {
-    const adapters: LensInspectorAdapters = { tables: {} };
+    const adapters: DefaultInspectorAdapters = {
+      tables: new TablesAdapter(),
+      requests: {} as never,
+    };
     mergeTables.fn(null, { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] }, {
       inspectorAdapters: adapters,
-    } as ExecutionContext<LensInspectorAdapters, ExpressionValueSearchContext>);
-    expect(adapters.tables!.first).toBe(sampleTable1);
-    expect(adapters.tables!.second).toBe(sampleTable2);
+    } as ExecutionContext<DefaultInspectorAdapters, ExpressionValueSearchContext>);
+    expect(adapters.tables!.tables.first).toBe(sampleTable1);
+    expect(adapters.tables!.tables.second).toBe(sampleTable2);
   });
 
   it('should pass the date range along', () => {

@@ -40,8 +40,13 @@ describe('slack connector validation', () => {
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: [],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: [],
+        },
       },
     });
   });
@@ -56,8 +61,13 @@ describe('slack connector validation', () => {
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is required.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is required.'],
+        },
       },
     });
   });
@@ -74,8 +84,13 @@ describe('slack connector validation', () => {
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL must start with https://.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL must start with https://.'],
+        },
       },
     });
   });
@@ -92,8 +107,13 @@ describe('slack connector validation', () => {
     } as SlackActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is invalid.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is invalid.'],
+        },
       },
     });
   });

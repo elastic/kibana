@@ -11,12 +11,19 @@ import {
   ReturnUseCaseConfigure,
   ConnectorConfiguration,
 } from './use_configure';
-import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
+import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('./api');
-
+const mockErrorToToaster = jest.fn();
+jest.mock('../../../common/components/toasters', () => {
+  const original = jest.requireActual('../../../common/components/toasters');
+  return {
+    ...original,
+    errorToToaster: () => mockErrorToToaster(),
+  };
+});
 const configuration: ConnectorConfiguration = {
   connector: {
     id: '456',
@@ -46,7 +53,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -66,15 +73,16 @@ describe('useConfigure', () => {
           closureType: caseConfigurationCamelCaseResponseMock.closureType,
           connector: caseConfigurationCamelCaseResponseMock.connector,
         },
-        version: caseConfigurationCamelCaseResponseMock.version,
+        mappings: [],
         firstLoad: true,
         loading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
+        refetchCaseConfigure: result.current.refetchCaseConfigure,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
+        version: caseConfigurationCamelCaseResponseMock.version,
       });
     });
   });
@@ -100,9 +108,9 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(result.current.mapping).toEqual(null);
-      result.current.setMapping(mapping);
-      expect(result.current.mapping).toEqual(mapping);
+      expect(result.current.mappings).toEqual([]);
+      result.current.setMappings(mappings);
+      expect(result.current.mappings).toEqual(mappings);
     });
   });
 
@@ -155,12 +163,67 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
 
       expect(result.current.connector.id).toEqual('123');
       await waitForNextUpdate();
       expect(result.current.connector.id).toEqual('456');
+    });
+  });
+
+  test('Displays error when present - getCaseConfigure', async () => {
+    const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
+    spyOnGetCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        error: 'uh oh homeboy',
+        version: '',
+      })
+    );
+
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).toHaveBeenCalled();
+    });
+  });
+
+  test('Displays error when present - postCaseConfigure', async () => {
+    // When there is no version, a configuration is created. Otherwise is updated.
+    const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
+    spyOnGetCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        version: '',
+      })
+    );
+
+    const spyOnPostCaseConfigure = jest.spyOn(api, 'postCaseConfigure');
+    spyOnPostCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        ...configuration,
+        error: 'uh oh homeboy',
+      })
+    );
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
+
+      result.current.persistCaseConfigure(configuration);
+      expect(mockErrorToToaster).not.toHaveBeenCalled();
+      await waitForNextUpdate();
+      expect(mockErrorToToaster).toHaveBeenCalled();
     });
   });
 
@@ -205,13 +268,13 @@ describe('useConfigure', () => {
       expect(result.current).toEqual({
         ...initialState,
         loading: false,
+        persistCaseConfigure: result.current.persistCaseConfigure,
         persistLoading: false,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -249,12 +312,13 @@ describe('useConfigure', () => {
         },
         firstLoad: true,
         loading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
+        mappings: [],
         persistCaseConfigure: result.current.persistCaseConfigure,
-        setCurrentConfiguration: result.current.setCurrentConfiguration,
-        setConnector: result.current.setConnector,
+        refetchCaseConfigure: result.current.refetchCaseConfigure,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setConnector: result.current.setConnector,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setMappings: result.current.setMappings,
       });
     });
   });

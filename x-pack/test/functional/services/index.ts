@@ -42,6 +42,7 @@ import { PipelineEditorProvider } from './pipeline_editor';
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { AceEditorProvider } from './ace_editor';
+import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
@@ -56,7 +57,6 @@ import {
   DashboardDrilldownsManageProvider,
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
-import { SendToBackgroundProvider } from './data';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -94,6 +94,7 @@ export const services = {
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
   aceEditor: AceEditorProvider,
+  canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
@@ -104,5 +105,4 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
-  sendToBackground: SendToBackgroundProvider,
 };

@@ -17,8 +17,79 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
     <div
       className="euiSpacer euiSpacer--s"
     />
+    <h6
+      className="euiTitle euiTitle--xxsmall"
+    >
+      Options
+    </h6>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiSwitch"
+        >
+          <button
+            aria-checked={false}
+            aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
+            className="euiSwitch__button"
+            data-test-subj="reportModeToggle"
+            id="generated-id"
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            role="switch"
+            type="button"
+          >
+            <span
+              className="euiSwitch__body"
+            >
+              <span
+                className="euiSwitch__thumb"
+              />
+              <span
+                className="euiSwitch__track"
+              >
+                <span
+                  className="euiSwitch__icon"
+                  data-euiicon-type="cross"
+                  size="m"
+                />
+                <span
+                  className="euiSwitch__icon euiSwitch__icon--checked"
+                  data-euiicon-type="check"
+                  size="m"
+                />
+              </span>
+            </span>
+          </button>
+          <span
+            className="euiSwitch__label"
+            id="generated-id"
+            onClick={[Function]}
+          >
+            Full page layout
+          </span>
+        </div>
+        <div
+          className="euiFormHelpText euiFormRow__text"
+          id="generated-id-help"
+        >
+          Remove borders and footer logo
+        </div>
+      </div>
+    </div>
     <button
       className="euiButton euiButton--primary euiButton--small euiButton--fill"
+      data-test-subj="generateReportButton"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -38,52 +109,50 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         </span>
       </span>
     </button>
-    <div
-      className="euiSpacer euiSpacer--s"
-    />
-    <div
-      className="euiText euiText--small"
-    >
-      <p>
-        Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-      </p>
-    </div>
-    <div
-      className="euiSpacer euiSpacer--s"
-    />
-    <div
-      className="canvasClipboard"
-      onClick={[Function]}
-      onKeyPress={[Function]}
-      role="button"
-      tabIndex={0}
-    >
-      <button
-        aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Press Enter to copy the URL to clipboard."
-        className="euiButton euiButton--primary euiButton--small"
-        style={
-          Object {
-            "minWidth": undefined,
-            "width": "100%",
-          }
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+      style={
+        Object {
+          "marginLeft": "-16px",
+          "marginRight": "-16px",
+          "width": "auto",
         }
-        type="button"
+      }
+    />
+    <div
+      className="euiAccordion"
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
       >
-        <span
-          className="euiButtonContent euiButton__content"
+        <button
+          aria-controls="advanced-options"
+          aria-expanded={false}
+          className="euiAccordion__button"
+          id="generated-id"
+          onClick={[Function]}
+          type="button"
         >
           <span
-            className="euiButtonContent__icon"
-            data-euiicon-type="copy"
-            size="m"
-          />
-          <span
-            className="euiButton__text"
+            className="euiAccordion__iconWrapper"
           >
-            Copy POST URL
+            <span
+              className="euiAccordion__icon"
+              data-euiicon-type="arrowRight"
+              size="m"
+            />
           </span>
-        </span>
-      </button>
+          <span
+            className="euiIEFlexWrapFix"
+          >
+            Advanced options
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiAccordion__childWrapper"
+        id="advanced-options"
+      />
     </div>
   </div>
 </div>

@@ -25,13 +25,13 @@ const Status = {
   ),
   Inactive: (
     <EuiBadge color="default">
-      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
+      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiBadge>
   ),
   Unhealthy: (
     <EuiBadge color="warning">
       <FormattedMessage
-        id="xpack.fleet.agentHealth.inactiveStatusText"
+        id="xpack.fleet.agentHealth.unhealthyStatusText"
         defaultMessage="Unhealthy"
       />
     </EuiBadge>

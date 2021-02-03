@@ -19,7 +19,7 @@ function mockInit(getVal: any = { attributes: {} }): any {
   };
 }
 
-describe('file upload plugin telemetry', () => {
+describe('ml plugin telemetry', () => {
   describe('getTelemetry', () => {
     it('should get existing telemetry', async () => {
       const internalRepo = mockInit();
@@ -34,7 +34,9 @@ describe('file upload plugin telemetry', () => {
     it('should update existing telemetry', async () => {
       const internalRepo = mockInit({
         attributes: {
-          filesUploadedTotalCount: 2,
+          file_upload: {
+            index_creation_count: 2,
+          },
         },
       });
 

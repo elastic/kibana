@@ -1,39 +1,37 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
 import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
-
 import { Subscription } from 'rxjs';
+
 import { I18nStart } from 'kibana/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { VisualizationContainer } from '../../visualizations/public';
+import { FilterManager, Filter } from '../../data/public';
+
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
-import { FilterManager, Filter } from '../../data/public';
-import { VisParams, ExprVis } from '../../visualizations/public';
+import { InputControlVisParams } from './types';
 
-export const createInputControlVisController = (deps: InputControlVisDependencies) => {
+export type InputControlVisControllerType = InstanceType<
+  ReturnType<typeof createInputControlVisController>
+>;
+
+export const createInputControlVisController = (
+  deps: InputControlVisDependencies,
+  handlers: IInterpreterRenderHandlers
+) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
     private _isLoaded = false;
@@ -43,9 +41,9 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     filterManager: FilterManager;
     updateSubsciption: any;
     timeFilterSubscription: Subscription;
-    visParams?: VisParams;
+    visParams?: InputControlVisParams;
 
-    constructor(public el: Element, public vis: ExprVis) {
+    constructor(public el: Element) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -63,7 +61,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         });
     }
 
-    async render(visData: any, visParams: VisParams) {
+    async render(visParams: InputControlVisParams) {
       if (!this.I18nContext) {
         const [{ i18n }] = await deps.core.getStartServices();
         this.I18nContext = i18n.Context;
@@ -71,7 +69,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       if (!this._isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
-        this.controls = await this.initControls();
+        this.controls = await this.initControls(visParams);
         this._isLoaded = true;
       }
       this.drawVis();
@@ -91,34 +89,34 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
       render(
         <this.I18nContext>
-          <InputControlVis
-            updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
-            controls={this.controls}
-            stageFilter={this.stageFilter}
-            submitFilters={this.submitFilters}
-            resetControls={this.updateControlsFromKbn}
-            clearControls={this.clearControls}
-            hasChanges={this.hasChanges}
-            hasValues={this.hasValues}
-            refreshControl={this.refreshControl}
-          />
+          <VisualizationContainer handlers={handlers}>
+            <InputControlVis
+              updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
+              controls={this.controls}
+              stageFilter={this.stageFilter}
+              submitFilters={this.submitFilters}
+              resetControls={this.updateControlsFromKbn}
+              clearControls={this.clearControls}
+              hasChanges={this.hasChanges}
+              hasValues={this.hasValues}
+              refreshControl={this.refreshControl}
+            />
+          </VisualizationContainer>
         </this.I18nContext>,
         this.el
       );
     };
 
-    async initControls() {
-      const controlParamsList = (this.visParams?.controls as ControlParams[])?.filter(
-        (controlParams) => {
-          // ignore controls that do not have indexPattern or field
-          return controlParams.indexPattern && controlParams.fieldName;
-        }
-      );
+    async initControls(visParams: InputControlVisParams) {
+      const controlParamsList = visParams.controls.filter((controlParams) => {
+        // ignore controls that do not have indexPattern or field
+        return controlParams.indexPattern && controlParams.fieldName;
+      });
 
       const controlFactoryPromises = controlParamsList.map((controlParams) => {
         const factory = getControlFactory(controlParams);
 
-        return factory(controlParams, this.visParams?.useTimeFilter, deps);
+        return factory(controlParams, visParams.useTimeFilter, deps);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 

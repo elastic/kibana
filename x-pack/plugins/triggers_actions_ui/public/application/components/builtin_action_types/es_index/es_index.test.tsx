@@ -42,8 +42,13 @@ describe('index connector validation', () => {
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        index: [],
+      config: {
+        errors: {
+          index: [],
+        },
+      },
+      secrets: {
+        errors: {},
       },
     });
   });
@@ -62,8 +67,13 @@ describe('index connector validation with minimal config', () => {
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        index: [],
+      config: {
+        errors: {
+          index: [],
+        },
+      },
+      secrets: {
+        errors: {},
       },
     });
   });

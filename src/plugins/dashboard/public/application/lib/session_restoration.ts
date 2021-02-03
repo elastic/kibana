@@ -1,24 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DataPublicPluginStart } from '../../services/data';
 import { DashboardAppState } from '../../types';
 
 export function createSessionRestorationDataProvider(deps: {
@@ -32,8 +21,8 @@ export function createSessionRestorationDataProvider(deps: {
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
-        initialState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
-        restoreState: getUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+        initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
+        restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
       };
     },
   };
@@ -43,17 +32,19 @@ function getUrlGeneratorState({
   data,
   getAppState,
   getDashboardId,
-  forceAbsoluteTime, // TODO: not implemented
+  shouldRestoreSearchSession,
 }: {
   data: DataPublicPluginStart;
   getAppState: () => DashboardAppState;
   getDashboardId: () => string;
-  forceAbsoluteTime: boolean;
+  shouldRestoreSearchSession: boolean;
 }): DashboardUrlGeneratorState {
   const appState = getAppState();
   return {
     dashboardId: getDashboardId(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
+    timeRange: shouldRestoreSearchSession
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
     query: data.query.queryString.formatQuery(appState.query),
     savedQuery: appState.savedQuery,
@@ -61,6 +52,12 @@ function getUrlGeneratorState({
     preserveSavedFilters: false,
     viewMode: appState.viewMode,
     panels: getDashboardId() ? undefined : appState.panels,
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
+    refreshInterval: shouldRestoreSearchSession
+      ? {
+          pause: true, // force pause refresh interval when restoring a session
+          value: 0,
+        }
+      : undefined,
   };
 }

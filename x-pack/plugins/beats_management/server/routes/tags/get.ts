@@ -5,13 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerGetTagsWithIdsRoute = (router: IRouter) => {
+export const registerGetTagsWithIdsRoute = (router: BeatsManagementRouter) => {
   router.get(
     {
       path: '/api/beats/tags/{tagIds}',

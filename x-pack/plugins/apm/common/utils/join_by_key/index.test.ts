@@ -101,4 +101,65 @@ describe('joinByKey', () => {
       },
     ]);
   });
+
+  it('uses the custom merge fn to replace items', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-java',
+          values: ['a'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['a'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['b'],
+        },
+        {
+          serviceName: 'opbeans-node',
+          values: ['c'],
+        },
+      ],
+      'serviceName',
+      (a, b) => ({
+        ...a,
+        ...b,
+        values: a.values.concat(b.values),
+      })
+    );
+
+    expect(
+      joined.find((item) => item.serviceName === 'opbeans-node')?.values
+    ).toEqual(['a', 'b', 'c']);
+  });
+
+  it('deeply merges objects', () => {
+    const joined = joinByKey(
+      [
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            foo: '',
+          },
+        },
+        {
+          serviceName: 'opbeans-node',
+          properties: {
+            bar: '',
+          },
+        },
+      ],
+      'serviceName'
+    );
+
+    expect(joined[0]).toEqual({
+      serviceName: 'opbeans-node',
+      properties: {
+        foo: '',
+        bar: '',
+      },
+    });
+  });
 });

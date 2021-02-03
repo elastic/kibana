@@ -10,7 +10,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
-import { useApmPluginContext } from '../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
@@ -28,6 +28,7 @@ export function ActionMenu() {
     canSaveAlerts,
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, capabilities);
+  const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -52,7 +53,7 @@ export function ActionMenu() {
         <AlertingPopoverAndFlyout
           basePath={basePath}
           canReadAlerts={canReadAlerts}
-          canSaveAlerts={canSaveAlerts}
+          canSaveAlerts={canSaveApmAlerts}
           canReadAnomalies={canReadAnomalies}
           includeTransactionDuration={serviceName !== undefined}
         />

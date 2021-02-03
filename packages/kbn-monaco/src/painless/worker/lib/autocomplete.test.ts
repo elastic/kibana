@@ -1,60 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { PainlessCompletionItem } from '../../types';
-import { lexerRules } from '../../lexer_rules';
 
 import {
   getStaticSuggestions,
   getFieldSuggestions,
   getClassMemberSuggestions,
-  getPrimitives,
   getConstructorSuggestions,
+  getKeywords,
+  getTypeSuggestions,
   Suggestion,
 } from './autocomplete';
 
-const keywords: PainlessCompletionItem[] = lexerRules.keywords.map((keyword) => {
-  return {
-    label: keyword,
-    kind: 'keyword',
-    documentation: 'Keyword: char',
-    insertText: keyword,
-  };
-});
+const keywords: PainlessCompletionItem[] = getKeywords();
 
 const testSuggestions: Suggestion[] = [
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: boolean',
-    insertText: 'boolean',
-    kind: 'type',
-    label: 'boolean',
-  },
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: int',
-    insertText: 'int',
-    kind: 'type',
-    label: 'int',
-  },
   {
     properties: [
       {
@@ -101,21 +67,9 @@ const testSuggestions: Suggestion[] = [
 describe('Autocomplete lib', () => {
   describe('Static suggestions', () => {
     test('returns static suggestions', () => {
-      expect(getStaticSuggestions(testSuggestions, false)).toEqual({
+      expect(getStaticSuggestions({ suggestions: testSuggestions })).toEqual({
         isIncomplete: false,
         suggestions: [
-          {
-            documentation: 'Primitive: boolean',
-            insertText: 'boolean',
-            kind: 'type',
-            label: 'boolean',
-          },
-          {
-            documentation: 'Primitive: int',
-            insertText: 'int',
-            kind: 'type',
-            label: 'int',
-          },
           {
             documentation: 'Class: Math',
             insertText: 'Math',
@@ -129,22 +83,31 @@ describe('Autocomplete lib', () => {
             label: 'ArithmeticException',
           },
           ...keywords,
+          ...getTypeSuggestions(),
         ],
       });
     });
 
     test('returns doc keyword when fields exist', () => {
-      const autocompletion = getStaticSuggestions(testSuggestions, true);
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        hasFields: true,
+      });
       const docSuggestion = autocompletion.suggestions.find(
         (suggestion) => suggestion.label === 'doc'
       );
       expect(Boolean(docSuggestion)).toBe(true);
     });
-  });
 
-  describe('getPrimitives()', () => {
-    test('returns primitive values', () => {
-      expect(getPrimitives(testSuggestions)).toEqual(['boolean', 'int']);
+    test('returns emit keyword for runtime fields', () => {
+      const autocompletion = getStaticSuggestions({
+        suggestions: testSuggestions,
+        isRuntimeContext: true,
+      });
+      const emitSuggestion = autocompletion.suggestions.find(
+        (suggestion) => suggestion.label === 'emit'
+      );
+      expect(Boolean(emitSuggestion)).toBe(true);
     });
   });
 

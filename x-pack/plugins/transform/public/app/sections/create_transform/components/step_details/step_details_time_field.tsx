@@ -23,7 +23,7 @@ export const StepDetailsTimeField: FC<Props> = ({
   const noTimeFieldLabel = i18n.translate(
     'xpack.transform.stepDetailsForm.noTimeFieldOptionLabel',
     {
-      defaultMessage: "I don't want to use the time filter",
+      defaultMessage: "I don't want to use the time field option",
     }
   );
 
@@ -43,7 +43,7 @@ export const StepDetailsTimeField: FC<Props> = ({
       label={
         <FormattedMessage
           id="xpack.transform.stepDetailsForm.indexPatternTimeFieldLabel"
-          defaultMessage="Time field"
+          defaultMessage="Time field for Kibana index pattern"
         />
       }
       helpText={

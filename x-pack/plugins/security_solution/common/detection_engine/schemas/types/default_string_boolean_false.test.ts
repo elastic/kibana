@@ -75,7 +75,7 @@ describe('default_string_boolean_false', () => {
     expect(message.schema).toEqual(true);
   });
 
-  test('it should not work with a strong of junk "junk"', () => {
+  test('it should not work with a string of junk "junk"', () => {
     const payload = 'junk';
     const decoded = DefaultStringBooleanFalse.decode(payload);
     const message = pipe(decoded, foldLeftRight);

@@ -5,6 +5,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiBasicTable,
   EuiButton,
@@ -31,12 +32,27 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { buildColumns } from './table_helpers';
 import { ValueListsForm } from './form';
-import { AutoDownload } from './auto_download';
+import { ReferenceErrorModal } from './reference_error_modal';
+import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 
 interface ValueListsModalProps {
   onClose: () => void;
   showModal: boolean;
 }
+
+interface ReferenceModalState {
+  contentText: string;
+  exceptionListReferences: string[];
+  isLoading: boolean;
+  valueListId: string;
+}
+
+const referenceModalInitialState: ReferenceModalState = {
+  contentText: '',
+  exceptionListReferences: [],
+  isLoading: false,
+  valueListId: '',
+};
 
 export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   onClose,
@@ -47,23 +63,41 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
-  const { start: deleteList, result: deleteResult } = useDeleteList();
+  const { start: deleteList, result: deleteResult, error: deleteError } = useDeleteList();
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { addError, addSuccess } = useAppToasts();
+  const [showReferenceErrorModal, setShowReferenceErrorModal] = useState<boolean>(false);
+  const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
+    referenceModalInitialState
+  );
 
   const fetchLists = useCallback(() => {
     findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
   }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
-    ({ id }: { id: string }) => {
+    ({
+      deleteReferences,
+      id,
+    }: {
+      deleteReferences?: boolean;
+      id: string;
+      ignoreReferences?: boolean;
+    }) => {
       setDeletingListIds([...deletingListIds, id]);
-      deleteList({ http, id });
+      deleteList({ deleteReferences, http, id });
     },
     [deleteList, deletingListIds, http]
   );
+
+  const handleReferenceDelete = useCallback(async () => {
+    setShowReferenceErrorModal(false);
+    deleteList({ deleteReferences: true, http, id: referenceModalState.valueListId });
+    setReferenceModalState(referenceModalInitialState);
+    setDeletingListIds([]);
+  }, [deleteList, http, referenceModalState.valueListId]);
 
   useEffect(() => {
     if (deleteResult != null) {
@@ -71,6 +105,26 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
       fetchLists();
     }
   }, [deleteResult, fetchLists]);
+
+  useEffect(() => {
+    if (!isEmpty(deleteError)) {
+      const references: string[] =
+        // @ts-ignore-next-line deleteError response unknown message.error.references
+        deleteError?.body?.message?.error?.references?.map(
+          // @ts-ignore-next-line response not typed
+          (ref) => ref?.exception_list.name
+        ) ?? [];
+      const uniqueExceptionListReferences = Array.from(new Set(references));
+      setShowReferenceErrorModal(true);
+      setReferenceModalState({
+        contentText: i18n.referenceErrorMessage(uniqueExceptionListReferences.length),
+        exceptionListReferences: uniqueExceptionListReferences,
+        isLoading: false,
+        // @ts-ignore-next-line deleteError response unknown
+        valueListId: deleteError?.body?.message?.error?.value_list_id,
+      });
+    }
+  }, [deleteError]);
 
   const handleExport = useCallback(
     async ({ id }: { id: string }) => {
@@ -126,6 +180,17 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     }
   }, [lists.loading, lists.result, setCursor]);
 
+  const handleCloseReferenceErrorModal = useCallback(() => {
+    setDeletingListIds([]);
+    setShowReferenceErrorModal(false);
+    setReferenceModalState({
+      contentText: '',
+      exceptionListReferences: [],
+      isLoading: false,
+      valueListId: '',
+    });
+  }, []);
+
   if (!showModal) {
     return null;
   }
@@ -173,6 +238,17 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
+      <ReferenceErrorModal
+        cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
+        confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
+        contentText={referenceModalState.contentText}
+        onCancel={handleCloseReferenceErrorModal}
+        onClose={handleCloseReferenceErrorModal}
+        onConfirm={handleReferenceDelete}
+        references={referenceModalState.exceptionListReferences}
+        showModal={showReferenceErrorModal}
+        titleText={i18n.REFERENCE_MODAL_TITLE}
+      />
       <AutoDownload
         blob={exportDownload.blob}
         name={exportDownload.name}

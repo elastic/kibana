@@ -6,17 +6,22 @@
 
 import React, { useEffect } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
-import { Route, Switch, useHistory, useParams } from 'react-router-dom';
+import { Route, Switch, useParams } from 'react-router-dom';
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { NAV } from '../../constants';
+
+import {
+  SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
+} from './constants';
 
 import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
@@ -46,14 +51,13 @@ import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
 
 export const SourceRouter: React.FC = () => {
-  const history = useHistory() as History;
   const { sourceId } = useParams() as { sourceId: string };
   const { initializeSource } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    initializeSource(sourceId, history);
+    initializeSource(sourceId);
   }, []);
 
   if (dataLoading) return <Loading />;
@@ -69,30 +73,24 @@ export const SourceRouter: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const pageHeader = (
-    <div>
-      <span className="eui-textOverflowWrap" title={name}>
-        {name}
-
-        <SourceInfoCard
-          sourceName={serviceName}
-          sourceType={serviceType}
-          dateCreated={moment(createdAt).format('MMMM D, YYYY')}
-          isFederatedSource={isFederatedSource}
-        />
-      </span>
-    </div>
+    <>
+      <SourceInfoCard
+        sourceName={serviceName}
+        sourceType={serviceType}
+        dateCreated={moment(createdAt).format('MMMM D, YYYY')}
+        isFederatedSource={isFederatedSource}
+      />
+      <EuiHorizontalRule />
+    </>
   );
 
   const callout = (
     <>
-      <EuiCallOut title="Content source is disabled" color="warning" iconType="alert">
-        <p>
-          Your organization&apos;s license level changed and no longer supports document-level
-          permissions.{' '}
-        </p>
-        <p>Don&apos;t worry: your data is safe. Search has been disabled.</p>
-        <p>Upgrade to a Platinum license to re-enable this source.</p>
-        <EuiButton href={ENT_SEARCH_LICENSE_MANAGEMENT}>Explore Platinum license</EuiButton>
+      <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
+        <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
+        <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+          {SOURCE_DISABLED_CALLOUT_BUTTON}
+        </EuiButton>
       </EuiCallOut>
       <EuiSpacer />
     </>
@@ -101,7 +99,6 @@ export const SourceRouter: React.FC = () => {
   return (
     <>
       {!supportedByLicense && callout}
-      {/* TODO: Figure out with design how to make this look better */}
       {pageHeader}
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>

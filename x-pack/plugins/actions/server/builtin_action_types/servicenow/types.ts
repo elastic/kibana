@@ -8,17 +8,18 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  ExecutorParamsSchema,
+  ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionPushParamsSchemaITSM,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchemaSIR,
+  ExecutorSubActionPushParamsSchemaSIR,
+  ExecutorSubActionGetChoicesParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceCommentResponse } from '../case/types';
-import { IncidentConfigurationSchema } from '../case/schema';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -32,16 +33,29 @@ export type ExecutorSubActionCommonFieldsParams = TypeOf<
   typeof ExecutorSubActionCommonFieldsParamsSchema
 >;
 
-export type ServiceNowExecutorResultData = PushToServiceResponse | GetCommonFieldsResponse;
+export type ExecutorSubActionGetChoicesParams = TypeOf<
+  typeof ExecutorSubActionGetChoicesParamsSchema
+>;
+
+export type ServiceNowExecutorResultData =
+  | PushToServiceResponse
+  | GetCommonFieldsResponse
+  | GetChoicesResponse;
 
 export interface CreateCommentRequest {
   [key: string]: string;
 }
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorParams =
+  | TypeOf<typeof ExecutorParamsSchemaITSM>
+  | TypeOf<typeof ExecutorParamsSchemaSIR>;
 
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
+export type ExecutorSubActionPushParamsITSM = TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>;
+export type ExecutorSubActionPushParamsSIR = TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>;
+
+export type ExecutorSubActionPushParams =
+  | ExecutorSubActionPushParamsITSM
+  | ExecutorSubActionPushParamsSIR;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -66,20 +80,20 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
-  getFields: () => Promise<GetCommonFieldsResponse>;
+  getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
 }
 
-export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
-  externalObject: Record<string, any>;
-}
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
+export type PushToServiceApiParamsITSM = ExecutorSubActionPushParamsITSM;
+export type PushToServiceApiParamsSIR = ExecutorSubActionPushParamsSIR;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
@@ -90,12 +104,17 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams,
-  'description' | 'severity' | 'urgency' | 'impact'
-> & {
-  short_description: string;
-};
+export type ServiceNowITSMIncident = Omit<
+  TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
+  'externalId'
+>;
+
+export type ServiceNowSIRIncident = Omit<
+  TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
+  'externalId'
+>;
+
+export type Incident = ServiceNowITSMIncident | ServiceNowSIRIncident;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
@@ -112,23 +131,41 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 }
 export interface ExternalServiceFields {
   column_label: string;
-  name: string;
-  internal_type: {
-    link: string;
-    value: string;
-  };
+  mandatory: string;
   max_length: string;
   element: string;
 }
+
+export interface ExternalServiceChoices {
+  value: string;
+  label: string;
+  dependent_value: string;
+  element: string;
+}
+
 export type GetCommonFieldsResponse = ExternalServiceFields[];
+export type GetChoicesResponse = ExternalServiceChoices[];
+
 export interface GetCommonFieldsHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionCommonFieldsParams;
 }
 
+export interface GetChoicesHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetChoicesParams;
+}
+
 export interface ExternalServiceApi {
+  getChoices: (args: GetChoicesHandlerArgs) => Promise<GetChoicesResponse>;
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

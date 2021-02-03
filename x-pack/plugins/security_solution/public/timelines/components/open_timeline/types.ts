@@ -25,9 +25,11 @@ export interface FavoriteTimelineResult {
 }
 
 export interface TimelineResultNote {
+  eventId?: string | null;
   savedObjectId?: string | null;
   note?: string | null;
   noteId?: string | null;
+  timelineId?: string | null;
   updated?: number | null;
   updatedBy?: string | null;
 }

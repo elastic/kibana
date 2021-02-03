@@ -9,11 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useApmService } from '../../../hooks/use_apm_service';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function ServiceOverviewThroughputChart({
@@ -24,34 +23,37 @@ export function ServiceOverviewThroughputChart({
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const { transactionType } = useApmService();
+  const { transactionType } = useApmServiceContext();
   const { start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (serviceName && transactionType && start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-        params: {
-          path: {
-            serviceName,
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && transactionType && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters, transactionType]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters, transactionType]
+  );
 
   return (
     <EuiPanel>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Traffic',
+            defaultMessage: 'Throughput',
           })}
         </h2>
       </EuiTitle>
@@ -66,10 +68,8 @@ export function ServiceOverviewThroughputChart({
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
-              'xpack.apm.serviceOverview.throughputChart.currentPeriodLabel',
-              {
-                defaultMessage: 'Current period',
-              }
+              'xpack.apm.serviceOverview.throughtputChartTitle',
+              { defaultMessage: 'Throughput' }
             ),
           },
         ]}

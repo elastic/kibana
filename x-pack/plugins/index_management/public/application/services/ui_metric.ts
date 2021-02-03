@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UiStatsMetricType } from '@kbn/analytics';
-
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
-import { IndexMgmtMetricsType } from '../../types';
 
-let uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+let uiMetricService: UiMetricService;
 
-export class UiMetricService<T extends string> {
+export class UiMetricService {
   private appName: string;
   private usageCollection: UsageCollectionSetup | undefined;
 
@@ -22,16 +20,12 @@ export class UiMetricService<T extends string> {
     this.usageCollection = usageCollection;
   }
 
-  private track(type: T, name: string) {
+  public trackMetric(type: UiCounterMetricType, eventName: string) {
     if (!this.usageCollection) {
       // Usage collection might have been disabled in Kibana config.
       return;
     }
-    this.usageCollection.reportUiStats(this.appName, type as UiStatsMetricType, name);
-  }
-
-  public trackMetric(type: T, eventName: string) {
-    return this.track(type, eventName);
+    return this.usageCollection.reportUiCounter(this.appName, type, eventName);
   }
 }
 
@@ -42,7 +36,7 @@ export class UiMetricService<T extends string> {
  * TODO: Refactor the api.ts (convert it to a class with setup()) and detail_panel.ts (reducer) to explicitely declare their dependency on the UiMetricService
  * @param instance UiMetricService instance from our plugin.ts setup()
  */
-export const setUiMetricServiceInstance = (instance: UiMetricService<IndexMgmtMetricsType>) => {
+export const setUiMetricServiceInstance = (instance: UiMetricService) => {
   uiMetricService = instance;
 };
 

@@ -10,7 +10,7 @@ import { storiesOf } from '@storybook/react';
 import { CanvasRenderedPage } from '../../../types';
 import { ExampleContext } from '../../../test/context_example';
 import { Scrubber, ScrubberComponent } from '../scrubber';
-import { workpads } from '../../../../__tests__/fixtures/workpads';
+import { workpads } from '../../../../__fixtures__/workpads';
 
 storiesOf('shareables/Footer/Scrubber', module)
   .add('contextual: hello', () => (

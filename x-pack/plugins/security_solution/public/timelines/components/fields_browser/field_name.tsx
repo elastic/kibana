@@ -78,62 +78,84 @@ FieldNameContainer.displayName = 'FieldNameContainer';
 export const FieldName = React.memo<{
   categoryId: string;
   categoryColumns: ColumnHeaderOptions[];
+  closePopOverTrigger: boolean;
   fieldId: string;
   highlight?: string;
+  handleClosePopOverTrigger: () => void;
+  hoverActionsOwnFocus: boolean;
+  onCloseRequested: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ fieldId, highlight = '' }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
-  const [showTopN, setShowTopN] = useState<boolean>(false);
-  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-  const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
+}>(
+  ({
+    closePopOverTrigger,
+    fieldId,
+    highlight = '',
+    handleClosePopOverTrigger,
+    hoverActionsOwnFocus,
+    onCloseRequested,
+  }) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [showTopN, setShowTopN] = useState<boolean>(false);
+    const [goGetTimelineId, setGoGetTimelineId] = useState(false);
+    const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
 
-  const toggleTopN = useCallback(() => {
-    setShowTopN((prevShowTopN) => !prevShowTopN);
-  }, []);
+    const toggleTopN = useCallback(() => {
+      setShowTopN((prevShowTopN) => {
+        const newShowTopN = !prevShowTopN;
+        if (newShowTopN === false) {
+          handleClosePopOverTrigger();
+        }
+        return newShowTopN;
+      });
+    }, [handleClosePopOverTrigger]);
 
-  const handleClosePopOverTrigger = useCallback(
-    () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
-    []
-  );
+    const hoverContent = useMemo(
+      () => (
+        <DraggableWrapperHoverContent
+          closePopOver={handleClosePopOverTrigger}
+          field={fieldId}
+          ownFocus={hoverActionsOwnFocus}
+          showTopN={showTopN}
+          toggleTopN={toggleTopN}
+          goGetTimelineId={setGoGetTimelineId}
+          timelineId={timelineIdFind}
+        />
+      ),
+      [
+        fieldId,
+        handleClosePopOverTrigger,
+        hoverActionsOwnFocus,
+        showTopN,
+        timelineIdFind,
+        toggleTopN,
+      ]
+    );
 
-  const hoverContent = useMemo(
-    () => (
-      <DraggableWrapperHoverContent
-        closePopOver={handleClosePopOverTrigger}
-        field={fieldId}
-        showTopN={showTopN}
-        toggleTopN={toggleTopN}
-        goGetTimelineId={setGoGetTimelineId}
-        timelineId={timelineIdFind}
-      />
-    ),
-    [fieldId, handleClosePopOverTrigger, showTopN, timelineIdFind, toggleTopN]
-  );
+    const render = useCallback(
+      () => (
+        <EuiText size="xs">
+          <FieldNameContainer>
+            <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
+              {fieldId}
+            </EuiHighlight>
+          </FieldNameContainer>
+        </EuiText>
+      ),
+      [fieldId, highlight]
+    );
 
-  const render = useCallback(
-    () => (
-      <EuiText size="xs">
-        <FieldNameContainer>
-          <EuiHighlight data-test-subj={`field-name-${fieldId}`} search={highlight}>
-            {fieldId}
-          </EuiHighlight>
-        </FieldNameContainer>
-      </EuiText>
-    ),
-    [fieldId, highlight]
-  );
-
-  return (
-    <div ref={containerRef}>
-      <WithHoverActions
-        alwaysShow={showTopN}
-        closePopOverTrigger={closePopOverTrigger}
-        hoverContent={hoverContent}
-        render={render}
-      />
-    </div>
-  );
-});
+    return (
+      <div ref={containerRef}>
+        <WithHoverActions
+          alwaysShow={showTopN || hoverActionsOwnFocus}
+          closePopOverTrigger={closePopOverTrigger}
+          hoverContent={hoverContent}
+          onCloseRequested={onCloseRequested}
+          render={render}
+        />
+      </div>
+    );
+  }
+);
 
 FieldName.displayName = 'FieldName';

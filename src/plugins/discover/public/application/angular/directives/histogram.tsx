@@ -1,41 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import moment from 'moment-timezone';
-import { unitOfTime } from 'moment';
+import moment, { unitOfTime } from 'moment-timezone';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
 
 import {
-  AnnotationDomainTypes,
   Axis,
   Chart,
   HistogramBarSeries,
-  LineAnnotation,
   Position,
   ScaleType,
   Settings,
-  RectAnnotation,
-  TooltipValue,
   TooltipType,
   ElementClickListener,
   XYChartElementEvent,
@@ -43,12 +24,17 @@ import {
   Theme,
 } from '@elastic/charts';
 
-import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription, combineLatest } from 'rxjs';
 import { getServices } from '../../../kibana_services';
 import { Chart as IChart } from '../helpers/point_series';
+import {
+  CurrentTime,
+  Endzones,
+  getAdjustedInterval,
+  renderEndzoneTooltip,
+} from '../../../../../charts/public';
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
@@ -60,34 +46,6 @@ interface DiscoverHistogramState {
   chartsBaseTheme: Theme;
 }
 
-function findIntervalFromDuration(
-  dateValue: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
-  timeZone: string
-) {
-  const date = moment.tz(dateValue, timeZone);
-  const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
-  const endOfDate = moment.tz(date, timeZone).startOf(esUnit).add(esValue, esUnit);
-  return endOfDate.valueOf() - startOfDate.valueOf();
-}
-
-function getIntervalInMs(
-  value: number,
-  esValue: number,
-  esUnit: unitOfTime.Base,
-  timeZone: string
-): number {
-  switch (esUnit) {
-    case 's':
-      return 1000 * esValue;
-    case 'ms':
-      return 1 * esValue;
-    default:
-      return findIntervalFromDuration(value, esValue, esUnit, timeZone);
-  }
-}
-
 function getTimezone(uiSettings: IUiSettingsClient) {
   if (uiSettings.isDefault('dateFormat:tz')) {
     const detectedTimezone = moment.tz.guess();
@@ -96,27 +54,6 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   } else {
     return uiSettings.get('dateFormat:tz', 'Browser');
   }
-}
-
-export function findMinInterval(
-  xValues: number[],
-  esValue: number,
-  esUnit: string,
-  timeZone: string
-): number {
-  return xValues.reduce((minInterval, currentXvalue, index) => {
-    let currentDiff = minInterval;
-    if (index > 0) {
-      currentDiff = Math.abs(xValues[index - 1] - currentXvalue);
-    }
-    const singleUnitInterval = getIntervalInMs(
-      currentXvalue,
-      esValue,
-      esUnit as unitOfTime.Base,
-      timeZone
-    );
-    return Math.min(minInterval, singleUnitInterval, currentDiff);
-  }, Number.MAX_SAFE_INTEGER);
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
@@ -132,10 +69,10 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   };
 
   componentDidMount() {
-    this.subscription = combineLatest(
+    this.subscription = combineLatest([
       getServices().theme.chartsTheme$,
-      getServices().theme.chartsBaseTheme$
-    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
+      getServices().theme.chartsBaseTheme$,
+    ]).subscribe(([chartsTheme, chartsBaseTheme]) =>
       this.setState({ chartsTheme, chartsBaseTheme })
     );
   }
@@ -171,40 +108,6 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     return moment(val).format(xAxisFormat);
   };
 
-  public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
-    headerData: TooltipValue
-  ): JSX.Element | string => {
-    const headerDataValue = headerData.value;
-    const formattedValue = this.formatXValue(headerDataValue);
-
-    const partialDataText = i18n.translate('discover.histogram.partialData.bucketTooltipText', {
-      defaultMessage:
-        'The selected time range does not include this entire bucket, it may contain partial data.',
-    });
-
-    if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
-      return (
-        <React.Fragment>
-          <EuiFlexGroup
-            alignItems="center"
-            className="dscHistogram__header--partial"
-            responsive={false}
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>{partialDataText}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <p>{formattedValue}</p>
-        </React.Fragment>
-      );
-    }
-
-    return formattedValue;
-  };
-
   public render() {
     const uiSettings = getServices().uiSettings;
     const timeZone = getTimezone(uiSettings);
@@ -216,8 +119,9 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     }
 
     const data = chartData.values;
+    const isDarkMode = uiSettings.get('theme:darkMode');
 
-    /**
+    /*
      * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
@@ -232,63 +136,27 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const domainStart = domain.min.valueOf();
     const domainEnd = domain.max.valueOf();
 
-    const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
-    const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
+    const domainMin = Math.min(data[0]?.x, domainStart);
+    const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: findMinInterval(xValues, intervalESValue, intervalESUnit, timeZone),
+      minInterval: getAdjustedInterval(
+        xValues,
+        intervalESValue,
+        intervalESUnit as unitOfTime.Base,
+        timeZone
+      ),
     };
-
-    // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
-    // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
-    const now = moment();
-    const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
-    const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
-
-    const lineAnnotationData = [
-      {
-        dataValue: lineAnnotationValue,
-      },
-    ];
-    const isDarkMode = uiSettings.get('theme:darkMode');
-
-    const lineAnnotationStyle = {
-      line: {
-        strokeWidth: 2,
-        stroke: isDarkMode ? darkEuiTheme.euiColorDanger : lightEuiTheme.euiColorDanger,
-        opacity: 0.7,
-      },
-    };
-
-    const rectAnnotations = [];
-    if (domainStart !== domainMin) {
-      rectAnnotations.push({
-        coordinates: {
-          x1: domainStart,
-        },
-      });
-    }
-    if (domainEnd !== domainMax) {
-      rectAnnotations.push({
-        coordinates: {
-          x0: domainEnd,
-        },
-      });
-    }
-
-    const rectAnnotationStyle = {
-      stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
-      strokeWidth: 0,
-      opacity: isDarkMode ? 0.6 : 0.2,
-      fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
-    };
-
     const tooltipProps = {
-      headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
+      headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, this.formatXValue),
       type: TooltipType.VerticalCursor,
     };
+
+    const xAxisFormatter = getServices().data.fieldFormats.deserialize(
+      this.props.chartData.yAxisFormat
+    );
 
     return (
       <Chart size="100%">
@@ -305,6 +173,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           position={Position.Left}
           ticks={5}
           title={chartData.yAxisLabel}
+          integersOnly
+          tickFormat={(value) => xAxisFormatter.convert(value)}
         />
         <Axis
           id="discover-histogram-bottom-axis"
@@ -313,19 +183,14 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           tickFormat={this.formatXValue}
           ticks={10}
         />
-        <LineAnnotation
-          id="line-annotation"
-          domainType={AnnotationDomainTypes.XDomain}
-          dataValues={lineAnnotationData}
-          hideTooltips={true}
-          style={lineAnnotationStyle}
-        />
-        <RectAnnotation
-          dataValues={rectAnnotations}
-          id="rect-annotation"
-          zIndex={2}
-          style={rectAnnotationStyle}
-          hideTooltips={true}
+        <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />
+        <Endzones
+          isDarkMode={isDarkMode}
+          domainStart={domainStart}
+          domainEnd={domainEnd}
+          interval={xDomain.minInterval}
+          domainMin={xDomain.min}
+          domainMax={xDomain.max}
         />
         <HistogramBarSeries
           id="discover-histogram"

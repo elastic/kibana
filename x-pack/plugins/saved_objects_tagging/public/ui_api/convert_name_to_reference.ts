@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../tags';
+import { ITagsCache } from '../services';
 import { convertTagNameToId } from '../utils';
 
 export interface BuildConvertNameToReferenceOptions {

@@ -1187,7 +1187,7 @@ function GraphWorkspace(options) {
 
     // Search for connections between the selected nodes.
     searcher(self.options.indexName, searchReq, function (data) {
-      const numDocsMatched = data.hits.total;
+      const numDocsMatched = data.hits.total.value;
       const buckets = data.aggregations.matrix.buckets;
       const vertices = nodesForLinking.map(function (existingNode) {
         return {

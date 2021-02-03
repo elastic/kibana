@@ -5,6 +5,8 @@
  */
 
 import {
+  LargeShardSizeAlert,
+  CCRReadExceptionsAlert,
   CpuUsageAlert,
   MissingMonitoringDataAlert,
   DiskUsageAlert,
@@ -32,8 +34,11 @@ import {
   ALERT_LOGSTASH_VERSION_MISMATCH,
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
+import { Alert } from '../../../alerts/common';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
@@ -48,33 +53,31 @@ const BY_TYPE = {
   [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,
   [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
+  [ALERT_CCR_READ_EXCEPTIONS]: CCRReadExceptionsAlert,
+  [ALERT_LARGE_SHARD_SIZE]: LargeShardSizeAlert,
 };
 
 export class AlertsFactory {
   public static async getByType(
     type: string,
     alertsClient: AlertsClient | undefined
-  ): Promise<BaseAlert | null> {
+  ): Promise<BaseAlert | undefined> {
     const alertCls = BY_TYPE[type];
-    if (!alertCls) {
-      return null;
+    if (!alertCls || !alertsClient) {
+      return;
     }
-    if (alertsClient) {
-      const alertClientAlerts = await alertsClient.find({
-        options: {
-          filter: `alert.attributes.alertTypeId:${type}`,
-        },
-      });
+    const alertClientAlerts = await alertsClient.find({
+      options: {
+        filter: `alert.attributes.alertTypeId:${type}`,
+      },
+    });
 
-      if (alertClientAlerts.total === 0) {
-        return new alertCls();
-      }
-
-      const rawAlert = alertClientAlerts.data[0];
-      return new alertCls(rawAlert as BaseAlert['rawAlert']);
+    if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
+      return;
     }
 
-    return new alertCls();
+    const [rawAlert] = alertClientAlerts.data as [Alert];
+    return new alertCls(rawAlert) as BaseAlert;
   }
 
   public static getAll() {

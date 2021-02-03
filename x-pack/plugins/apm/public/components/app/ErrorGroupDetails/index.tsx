@@ -21,14 +21,14 @@ import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { SearchBar } from '../../shared/search_bar';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
+import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -69,43 +69,32 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
-        params: {
-          path: {
-            serviceName,
-            groupId,
+  const { data: errorGroupData } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          params: {
+            path: {
+              serviceName,
+              groupId,
+            },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, groupId, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, groupId, uiFilters]
+  );
 
-  const { data: errorDistributionData } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            groupId,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, groupId, uiFilters]);
+  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId,
+  });
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });

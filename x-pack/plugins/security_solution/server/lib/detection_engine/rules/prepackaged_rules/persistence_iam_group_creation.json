@@ -42,13 +42,20 @@
       },
       "technique": [
         {
-          "id": "T1108",
-          "name": "Redundant Access",
-          "reference": "https://attack.mitre.org/techniques/T1108/"
+          "id": "T1136",
+          "name": "Create Account",
+          "reference": "https://attack.mitre.org/techniques/T1136/",
+          "subtechnique": [
+            {
+              "id": "T1136.003",
+              "name": "Cloud Account",
+              "reference": "https://attack.mitre.org/techniques/T1136/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-visualizeFieldTrigger: Trigger<'VISUALIZE_FIELD_TRIGGER'>
+visualizeFieldTrigger: Trigger
 ```

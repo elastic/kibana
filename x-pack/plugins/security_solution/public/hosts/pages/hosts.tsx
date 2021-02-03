@@ -5,9 +5,10 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
-import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -20,14 +21,14 @@ import { SiemNavigation } from '../../common/components/navigation';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useFullScreen } from '../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors, State } from '../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { inputsSelectors } from '../../common/store';
+import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { esQuery } from '../../../../../../src/plugins/data/public';
@@ -37,156 +38,188 @@ import { Display } from './display';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import { HostsComponentProps } from './types';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
-import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { isTab } from '../../common/components/accessibility/helpers';
+import {
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../timelines/store/timeline/model';
 import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 
-export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
-    const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-    const { globalFullScreen } = useFullScreen();
-    const capabilities = useMlCapabilities();
-    const kibana = useKibana();
-    const { tabName } = useParams<{ tabName: string }>();
-    const tabsFilters = React.useMemo(() => {
-      if (tabName === HostsTableType.alerts) {
-        return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
+
+const HostsComponent = () => {
+  const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const graphEventId = useShallowEqualSelector(
+    (state) =>
+      (
+        getTimeline(state, TimelineId.hostsPageEvents) ??
+        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
+        timelineDefaults
+      ).graphEventId
+  );
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
+  const { globalFullScreen } = useGlobalFullScreen();
+  const capabilities = useMlCapabilities();
+  const { uiSettings } = useKibana().services;
+  const { tabName } = useParams<{ tabName: string }>();
+  const tabsFilters = React.useMemo(() => {
+    if (tabName === HostsTableType.alerts) {
+      return filters.length > 0 ? [...filters, ...filterHostData] : filterHostData;
+    }
+    return filters;
+  }, [tabName, filters]);
+  const narrowDateRange = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
       }
-      return filters;
-    }, [tabName, filters]);
-    const narrowDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
+      const [min, max] = x;
+      dispatch(
         setAbsoluteRangeDatePicker({
           id: 'global',
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
+        })
+      );
+    },
+    [dispatch]
+  );
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const filterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      }),
+    [filters, indexPattern, uiSettings, query]
+  );
+  const tabsFilterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
+        indexPattern,
+        queries: [query],
+        filters: tabsFilters,
+      }),
+    [indexPattern, query, tabsFilters, uiSettings]
+  );
+
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    containerElement.current
+      ?.querySelector<HTMLButtonElement>('.inspectButtonComponent:last-of-type')
+      ?.focus();
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
         });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-    const filterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters,
-    });
-    const tabsFilterQuery = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      indexPattern,
-      queries: [query],
-      filters: tabsFilters,
-    });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
 
-    return (
-      <>
-        {indicesExist ? (
-          <>
-            <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
-            </FiltersGlobal>
+  return (
+    <>
+      {indicesExist ? (
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
+          <EuiWindowEvent event="resize" handler={noop} />
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <SiemSearchBar indexPattern={indexPattern} id="global" />
+          </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={
-                    <LastEventTime
-                      docValueFields={docValueFields}
-                      indexKey={LastEventIndexKey.hosts}
-                      indexNames={selectedPatterns}
-                    />
-                  }
-                  title={i18n.PAGE_TITLE}
-                />
-
-                <HostsKpiComponent
-                  filterQuery={filterQuery}
-                  indexNames={selectedPatterns}
-                  from={from}
-                  setQuery={setQuery}
-                  to={to}
-                  skip={isInitializing}
-                  narrowDateRange={narrowDateRange}
-                />
-
-                <EuiSpacer />
-
-                <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
-
-                <EuiSpacer />
-              </Display>
-
-              <HostsTabs
-                deleteQuery={deleteQuery}
-                docValueFields={docValueFields}
-                to={to}
-                filterQuery={tabsFilterQuery}
-                isInitializing={isInitializing}
-                indexNames={selectedPatterns}
-                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                setQuery={setQuery}
-                from={from}
-                type={hostsModel.HostsType.page}
-                hostsPagePath={hostsPagePath}
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <HeaderPage
+                border
+                subtitle={
+                  <LastEventTime
+                    docValueFields={docValueFields}
+                    indexKey={LastEventIndexKey.hosts}
+                    indexNames={selectedPatterns}
+                  />
+                }
+                title={i18n.PAGE_TITLE}
               />
-            </WrapperPage>
-          </>
-        ) : (
-          <WrapperPage>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
 
-            <OverviewEmpty />
+              <HostsKpiComponent
+                filterQuery={filterQuery}
+                indexNames={selectedPatterns}
+                from={from}
+                setQuery={setQuery}
+                to={to}
+                skip={isInitializing}
+                narrowDateRange={narrowDateRange}
+              />
+
+              <EuiSpacer />
+
+              <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+
+              <EuiSpacer />
+            </Display>
+
+            <HostsTabs
+              deleteQuery={deleteQuery}
+              docValueFields={docValueFields}
+              to={to}
+              filterQuery={tabsFilterQuery}
+              isInitializing={isInitializing}
+              indexNames={selectedPatterns}
+              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+              setQuery={setQuery}
+              from={from}
+              type={hostsModel.HostsType.page}
+            />
           </WrapperPage>
-        )}
+        </StyledFullHeightContainer>
+      ) : (
+        <WrapperPage>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
 
-        <SpyRoute pageName={SecurityPageName.hosts} />
-      </>
-    );
-  }
-);
+          <OverviewEmpty />
+        </WrapperPage>
+      )}
+
+      <SpyRoute pageName={SecurityPageName.hosts} />
+    </>
+  );
+};
 HostsComponent.displayName = 'HostsComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State) => {
-    const hostsPageEventsTimeline: TimelineModel =
-      getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults;
-    const { graphEventId: hostsPageEventsGraphEventId } = hostsPageEventsTimeline;
-
-    const hostsPageExternalAlertsTimeline: TimelineModel =
-      getTimeline(state, TimelineId.hostsPageExternalAlerts) ?? timelineDefaults;
-    const { graphEventId: hostsPageExternalAlertsGraphEventId } = hostsPageExternalAlertsTimeline;
-
-    return {
-      query: getGlobalQuerySelector(state),
-      filters: getGlobalFiltersQuerySelector(state),
-      graphEventId: hostsPageEventsGraphEventId ?? hostsPageExternalAlertsGraphEventId,
-    };
-  };
-
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const Hosts = connector(HostsComponent);
+export const Hosts = React.memo(HostsComponent);

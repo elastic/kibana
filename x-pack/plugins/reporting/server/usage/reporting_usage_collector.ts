@@ -26,9 +26,9 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector<ReportingUsageType>({
     type: 'reporting',
-    fetch: ({ callCluster }: CollectorFetchContext) => {
+    fetch: ({ esClient }: CollectorFetchContext) => {
       const config = reporting.getConfig();
-      return getReportingUsage(config, getLicense, callCluster, exportTypesRegistry);
+      return getReportingUsage(config, getLicense, esClient, exportTypesRegistry);
     },
     isReady,
     schema: reportingSchema,

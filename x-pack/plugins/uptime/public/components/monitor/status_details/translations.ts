@@ -13,17 +13,6 @@ export const healthStatusMessageAriaLabel = i18n.translate(
   }
 );
 
-export const upLabel = i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel', {
-  defaultMessage: 'Up',
-});
-
-export const downLabel = i18n.translate(
-  'xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel',
-  {
-    defaultMessage: 'Down',
-  }
-);
-
 export const typeLabel = i18n.translate('xpack.uptime.monitorStatusBar.type.label', {
   defaultMessage: 'Type',
 });

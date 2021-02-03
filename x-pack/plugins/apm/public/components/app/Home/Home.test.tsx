@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 describe('Home component', () => {
   it('should render services', () => {

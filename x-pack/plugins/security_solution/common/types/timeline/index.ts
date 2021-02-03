@@ -143,10 +143,16 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 /*
  *  Sort Types
  */
-const SavedSortRuntimeType = runtimeTypes.partial({
+
+const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
+  columnType: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
+const SavedSortRuntimeType = runtimeTypes.union([
+  runtimeTypes.array(SavedSortObject),
+  SavedSortObject,
+]);
 
 /*
  *  Timeline Statuses
@@ -271,6 +277,7 @@ export enum TimelineId {
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
+  casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
 }
 
@@ -402,13 +409,23 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 
-export interface TimelineExpandedEventType {
-  eventId: string;
-  indexName: string;
-  loading: boolean;
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
-export type TimelineExpandedEvent = TimelineExpandedEventType | EmptyObject;
+export type TimelineExpandedEventType =
+  | {
+      eventId: string;
+      indexName: string;
+    }
+  | EmptyObject;
+
+export type TimelineExpandedEvent = {
+  [tab in TimelineTabs]?: TimelineExpandedEventType;
+};

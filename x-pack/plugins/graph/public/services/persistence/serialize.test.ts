@@ -184,7 +184,7 @@ describe('serialize', () => {
           "timeoutMillis": 5000,
           "useSignificance": true,
         },
-        "indexPattern": "Testindexpattern",
+        "indexPattern": "123",
         "links": Array [
           Object {
             "label": "",

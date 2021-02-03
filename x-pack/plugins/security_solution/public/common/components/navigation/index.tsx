@@ -103,4 +103,6 @@ const SiemNavigationContainer: React.FC<SiemNavigationProps> = (props) => {
   return <SiemNavigationRedux {...stateNavReduxProps} />;
 };
 
-export const SiemNavigation = SiemNavigationContainer;
+export const SiemNavigation = React.memo(SiemNavigationContainer, (prevProps, nextProps) =>
+  deepEqual(prevProps.navTabs, nextProps.navTabs)
+);

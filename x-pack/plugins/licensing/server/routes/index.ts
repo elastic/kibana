@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from 'src/core/server';
 import { LicensingPluginStart } from '../types';
 import { FeatureUsageServiceSetup } from '../services';
 import { registerInfoRoute } from './info';
 import { registerFeatureUsageRoute } from './feature_usage';
 import { registerNotifyFeatureUsageRoute, registerRegisterFeatureRoute } from './internal';
+import { LicensingRouter } from '../types';
 
 export function registerRoutes(
-  router: IRouter,
+  router: LicensingRouter,
   featureUsageSetup: FeatureUsageServiceSetup,
   getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
 ) {

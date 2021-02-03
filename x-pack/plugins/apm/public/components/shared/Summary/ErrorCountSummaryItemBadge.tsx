@@ -7,7 +7,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiBadge } from '@elastic/eui';
-import { useTheme } from '../../../hooks/useTheme';
+import { useTheme } from '../../../hooks/use_theme';
 import { px } from '../../../../public/style/variables';
 import { units } from '../../../style/variables';
 

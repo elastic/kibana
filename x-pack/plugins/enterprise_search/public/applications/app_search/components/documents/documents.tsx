@@ -6,23 +6,26 @@
 
 import React from 'react';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContent,
-  EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationButton } from './document_creation_button';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { DOCUMENTS_TITLE } from './constants';
+import { EngineLogic } from '../engine';
+import { AppLogic } from '../../app_logic';
+import { SearchExperience } from './search_experience';
 
 interface Props {
   engineBreadcrumb: string[];
 }
 
 export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
+  const { isMetaEngine } = useValues(EngineLogic);
+  const { myRole } = useValues(AppLogic);
+
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE]} />
@@ -32,12 +35,36 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
             <h1>{DOCUMENTS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
+        {myRole.canManageEngineDocuments && !isMetaEngine && (
+          <EuiPageHeaderSection>
+            <DocumentCreationButton />
+          </EuiPageHeaderSection>
+        )}
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <FlashMessages />
-        </EuiPageContentBody>
-      </EuiPageContent>
+      <FlashMessages />
+      {isMetaEngine && (
+        <>
+          <EuiCallOut
+            data-test-subj="MetaEnginesCallout"
+            iconType="iInCircle"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.metaEngineCallout.title',
+              {
+                defaultMessage: 'You are within a Meta Engine.',
+              }
+            )}
+          >
+            <p>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.documents.metaEngineCallout', {
+                defaultMessage:
+                  'Meta Engines have many Source Engines. Visit your Source Engines to alter their documents.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      <SearchExperience />
     </>
   );
 };

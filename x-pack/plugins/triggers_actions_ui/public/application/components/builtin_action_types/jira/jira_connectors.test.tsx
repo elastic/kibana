@@ -74,7 +74,6 @@ describe('JiraActionConnectorFields renders', () => {
         consumer={'case'}
       />
     );
-    expect(wrapper.find('[data-test-subj="case-jira-mappings"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="apiUrlFromInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="connector-jira-project-key-form-input"]').length > 0

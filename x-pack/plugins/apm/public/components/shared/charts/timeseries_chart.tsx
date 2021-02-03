@@ -24,20 +24,20 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useAnnotations } from '../../../hooks/use_annotations';
-import { useChartPointerEvent } from '../../../hooks/use_chart_pointer_event';
-import { AnomalySeries } from '../../../selectors/chart_selectors';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../style/variables';
 import { ChartContainer } from './chart_container';
-import { onBrushEnd } from './helper/helper';
+import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 
 interface Props {
   id: string;
@@ -55,7 +55,9 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalySeries?: AnomalySeries;
+  anomalyTimeseries?: ReturnType<
+    typeof getLatencyChartSelector
+  >['anomalyTimeseries'];
 }
 
 export function TimeseriesChart({
@@ -68,38 +70,27 @@ export function TimeseriesChart({
   yTickFormat,
   showAnnotations = true,
   yDomain,
-  anomalySeries,
+  anomalyTimeseries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
-  const { annotations } = useAnnotations();
+  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
+  const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
   const { start, end } = urlParams;
-
-  useEffect(() => {
-    if (pointerEvent && pointerEvent?.chartId !== id && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [pointerEvent, chartRef, id]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const isEmpty = timeseries
-    .map((serie) => serie.data)
-    .flat()
-    .every(
-      ({ y }: { x?: number | null; y?: number | null }) =>
-        y === null || y === undefined
-    );
+  const isEmpty = isTimeseriesEmpty(timeseries);
 
   const annotationColor = theme.eui.euiColorSecondary;
+
+  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
@@ -114,7 +105,7 @@ export function TimeseriesChart({
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: { visible: true, placement: Placement.Right },
           }}
           showLegend
           showLegendExtra
@@ -161,7 +152,7 @@ export function TimeseriesChart({
           />
         )}
 
-        {timeseries.map((serie) => {
+        {allSeries.map((serie) => {
           const Series = serie.type === 'area' ? AreaSeries : LineSeries;
 
           return (
@@ -175,37 +166,28 @@ export function TimeseriesChart({
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
+              hideInLegend={serie.hideLegend}
+              fit={serie.fit ?? undefined}
+              filterSeriesInTooltip={
+                serie.hideTooltipValue ? () => false : undefined
+              }
+              stackAccessors={serie.stackAccessors ?? undefined}
+              areaSeriesStyle={serie.areaSeriesStyle}
+              lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
 
-        {anomalySeries?.bounderies && (
-          <AreaSeries
-            key={anomalySeries.bounderies.title}
-            id={anomalySeries.bounderies.title}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor="x"
-            yAccessors={['y']}
-            y0Accessors={['y0']}
-            data={anomalySeries.bounderies.data}
-            color={anomalySeries.bounderies.color}
-            curve={CurveType.CURVE_MONOTONE_X}
-            hideInLegend
-            filterSeriesInTooltip={() => false}
-          />
-        )}
-
-        {anomalySeries?.scores && (
+        {anomalyTimeseries?.scores && (
           <RectAnnotation
-            key={anomalySeries.scores.title}
+            key={anomalyTimeseries.scores.title}
             id="score_anomalies"
-            dataValues={(anomalySeries.scores.data as RectCoordinate[]).map(
+            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
               ({ x0, x: x1 }) => ({
                 coordinates: { x0, x1 },
               })
             )}
-            style={{ fill: anomalySeries.scores.color }}
+            style={{ fill: anomalyTimeseries.scores.color }}
           />
         )}
       </Chart>

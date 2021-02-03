@@ -7,17 +7,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
+import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
   invalidLicenseMessage,
-  isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useLicense } from '../../../hooks/useLicense';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/LicensePrompt';
 import { Controls } from './Controls';
@@ -39,21 +38,34 @@ const ServiceMapDatePickerFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
 `;
 
+function DatePickerSection() {
+  return (
+    <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <DatePicker />
+      </EuiFlexItem>
+    </ServiceMapDatePickerFlexGroup>
+  );
+}
+
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      // Set the height to give it some top margin
-      style={{ height: '60vh' }}
-    >
-      <EuiFlexItem
-        grow={false}
-        style={{ width: 600, textAlign: 'center' as const }}
+    <>
+      <DatePickerSection />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceAround"
+        // Set the height to give it some top margin
+        style={{ height: '60vh' }}
       >
-        {children}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          style={{ width: 600, textAlign: 'center' as const }}
+        >
+          {children}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
@@ -70,31 +82,34 @@ export function ServiceMap({
   serviceName,
 }: PropsWithChildren<ServiceMapProps>) {
   const theme = useTheme();
-  const license = useLicense();
+  const license = useLicenseContext();
   const { urlParams } = useUrlParams();
 
-  const { data = { elements: [] }, status, error } = useFetcher(() => {
-    // When we don't have a license or a valid license, don't make the request.
-    if (!license || !isActivePlatinumLicense(license)) {
-      return;
-    }
+  const { data = { elements: [] }, status, error } = useFetcher(
+    (callApmApi) => {
+      // When we don't have a license or a valid license, don't make the request.
+      if (!license || !isActivePlatinumLicense(license)) {
+        return;
+      }
 
-    const { start, end, environment } = urlParams;
-    if (start && end) {
-      return callApmApi({
-        isCachable: false,
-        endpoint: 'GET /api/apm/service-map',
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            serviceName,
+      const { start, end, environment } = urlParams;
+      if (start && end) {
+        return callApmApi({
+          isCachable: false,
+          endpoint: 'GET /api/apm/service-map',
+          params: {
+            query: {
+              start,
+              end,
+              environment,
+              serviceName,
+            },
           },
-        },
-      });
-    }
-  }, [license, serviceName, urlParams]);
+        });
+      }
+    },
+    [license, serviceName, urlParams]
+  );
 
   const { ref, height } = useRefDimensions();
 
@@ -137,11 +152,7 @@ export function ServiceMap({
 
   return (
     <>
-      <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </ServiceMapDatePickerFlexGroup>
+      <DatePickerSection />
       <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
         <Cytoscape
           elements={data.elements}

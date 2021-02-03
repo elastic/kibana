@@ -20,7 +20,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../../observability/public';
 import {
@@ -28,14 +28,14 @@ import {
   asPercent,
 } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useTheme } from '../../../../hooks/useTheme';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useAnnotations } from '../../../../hooks/use_annotations';
-import { useChartPointerEvent } from '../../../../hooks/use_chart_pointer_event';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useAnnotationsContext } from '../../../../context/annotations/use_annotations_context';
+import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../charts/chart_container';
-import { onBrushEnd } from '../../charts/helper/helper';
+import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -51,23 +51,13 @@ export function TransactionBreakdownChartContents({
   timeseries,
 }: Props) {
   const history = useHistory();
-  const chartRef = React.createRef<Chart>();
-  const { annotations } = useAnnotations();
+  const { annotations } = useAnnotationsContext();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
+
+  const { chartRef, setPointerEvent } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
   const { start, end } = urlParams;
-
-  useEffect(() => {
-    if (
-      pointerEvent &&
-      pointerEvent.chartId !== 'timeSpentBySpan' &&
-      chartRef.current
-    ) {
-      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
-    }
-  }, [chartRef, pointerEvent]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
@@ -76,9 +66,11 @@ export function TransactionBreakdownChartContents({
 
   const annotationColor = theme.eui.euiColorSecondary;
 
+  const isEmpty = isTimeseriesEmpty(timeseries);
+
   return (
-    <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
-      <Chart ref={chartRef} id="timeSpentBySpan">
+    <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
+      <Chart ref={chartRef}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
