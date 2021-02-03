@@ -11,7 +11,7 @@ const META_FIELDS = ['_type', '_source'];
 
 export function getFieldListFromIndexPattern(indexPattern: IndexPattern) {
   const { sourceFilters, fields } = indexPattern;
-  if (!sourceFilters) {
+  if (!sourceFilters || sourceFilters.length === 0) {
     return ['*'];
   }
   const sourceFiltersValues = sourceFilters.map((sourceFilter) => sourceFilter.value);
