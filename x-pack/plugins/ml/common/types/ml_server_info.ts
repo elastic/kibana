@@ -31,3 +31,8 @@ export interface MlInfoResponse {
   upgrade_mode: boolean;
   cloudId?: string;
 }
+
+export interface MlNodeCount {
+  count: number;
+  lazyNodeCount: number;
+}

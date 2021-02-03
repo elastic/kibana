@@ -207,6 +207,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
+        awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -490,6 +491,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       );
     }
     return false;
+  }
+
+  function isJobAwaitingNodeAssignment(job: CombinedJobWithStats) {
+    return job.node === undefined && job.state === JOB_STATE.OPENING;
   }
 
   return {
