@@ -5,10 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 import { TagValidationError } from '../../services/tags';
 
-export const registerCreateTagRoute = (router: IRouter) => {
+export const registerCreateTagRoute = (router: TagsPluginRouter) => {
   router.post(
     {
       path: '/api/saved_objects_tagging/tags/create',

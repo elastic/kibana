@@ -51,7 +51,7 @@ export function createReindexWorker({
   savedObjects,
   licensing,
 }: CreateReindexWorker) {
-  const esClient = elasticsearchService.legacy.client;
+  const esClient = elasticsearchService.client;
   return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
 }
 
@@ -100,9 +100,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: {
-              legacy: { client: esClient },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -142,9 +140,7 @@ export function registerReindexIndicesRoutes(
     async (
       {
         core: {
-          elasticsearch: {
-            legacy: { client: esClient },
-          },
+          elasticsearch: { client: esClient },
           savedObjects,
         },
       },
@@ -152,7 +148,7 @@ export function registerReindexIndicesRoutes(
       response
     ) => {
       const { client } = savedObjects;
-      const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
+      const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
@@ -184,9 +180,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: {
-              legacy: { client: esClient },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -245,9 +239,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: {
-              legacy: { client: esClient },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -255,14 +247,9 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { client } = savedObjects;
         const { indexName } = request.params;
-        const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
-        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing
-        );
+        const asCurrentUser = esClient.asCurrentUser;
+        const reindexActions = reindexActionsFactory(client, asCurrentUser);
+        const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
         try {
           const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
@@ -303,9 +290,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: {
-              legacy: { client: esClient },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -313,7 +298,7 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params;
         const { client } = savedObjects;
-        const callAsCurrentUser = esClient.callAsCurrentUser.bind(esClient);
+        const callAsCurrentUser = esClient.asCurrentUser;
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
         const reindexService = reindexServiceFactory(
           callAsCurrentUser,

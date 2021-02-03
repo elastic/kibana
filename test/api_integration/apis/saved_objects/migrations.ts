@@ -1,30 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 /*
  * Smokescreen tests for core migration logic
  */
 
+import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { ElasticsearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsType } from 'src/core/server';
 import { SearchResponse } from '../../../../src/core/server/elasticsearch/client';
 import {
   DocumentMigrator,
@@ -38,6 +28,26 @@ import {
   SavedObjectTypeRegistry,
 } from '../../../../src/core/server/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const KIBANA_VERSION = '99.9.9';
+const FOO_TYPE: SavedObjectsType = {
+  name: 'foo',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+};
+const BAR_TYPE: SavedObjectsType = {
+  name: 'bar',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+};
+const BAZ_TYPE: SavedObjectsType = {
+  name: 'baz',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+};
 
 function getLogMock() {
   return {
@@ -72,16 +82,22 @@ export default ({ getService }: FtrProviderContext) => {
         bar: { properties: { mynum: { type: 'integer' } } },
       };
 
-      const migrations: Record<string, SavedObjectMigrationMap> = {
-        foo: {
-          '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+      const savedObjectTypes: SavedObjectsType[] = [
+        {
+          ...FOO_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          },
         },
-        bar: {
-          '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+            '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+            '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          },
         },
-      };
+      ];
 
       await createIndex({ esClient, index });
       await createDocs({ esClient, index, docs: originalDocs });
@@ -118,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
       const result = await migrateIndex({
         esClient,
         index,
-        migrations,
+        savedObjectTypes,
         mappingProperties,
         obsoleteIndexTemplatePattern: 'migration_a*',
       });
@@ -140,13 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // The docs in the original index are unchanged
-      expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
-        { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
-        { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
-        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
-        { id: 'foo:a', type: 'foo', foo: { name: 'Foo A' } },
-        { id: 'foo:e', type: 'foo', foo: { name: 'Fooey' } },
-      ]);
+      expect(await fetchDocs(esClient, `${index}_1`)).to.eql(originalDocs.sort(sortByTypeAndId));
 
       // The docs in the alias have been migrated
       expect(await fetchDocs(esClient, index)).to.eql([
@@ -156,6 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 68 },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'bar:o',
@@ -163,14 +174,22 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 6 },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
-        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' }, references: [] },
+        {
+          id: 'baz:u',
+          type: 'baz',
+          baz: { title: 'Terrific!' },
+          references: [],
+          coreMigrationVersion: KIBANA_VERSION,
+        },
         {
           id: 'foo:a',
           type: 'foo',
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOO A' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'foo:e',
@@ -178,6 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOOEY' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
       ]);
     });
@@ -196,28 +216,46 @@ export default ({ getService }: FtrProviderContext) => {
         bar: { properties: { mynum: { type: 'integer' } } },
       };
 
-      const migrations: Record<string, SavedObjectMigrationMap> = {
-        foo: {
-          '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+      let savedObjectTypes: SavedObjectsType[] = [
+        {
+          ...FOO_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          },
         },
-        bar: {
-          '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+            '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+            '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          },
         },
-      };
+      ];
 
       await createIndex({ esClient, index });
       await createDocs({ esClient, index, docs: originalDocs });
 
-      await migrateIndex({ esClient, index, migrations, mappingProperties });
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
 
       // @ts-expect-error name doesn't exist on mynum type
       mappingProperties.bar.properties.name = { type: 'keyword' };
-      migrations.foo['2.0.1'] = (doc) => set(doc, 'attributes.name', `${doc.attributes.name}v2`);
-      migrations.bar['2.3.4'] = (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`);
+      savedObjectTypes = [
+        {
+          ...FOO_TYPE,
+          migrations: {
+            '2.0.1': (doc) => set(doc, 'attributes.name', `${doc.attributes.name}v2`),
+          },
+        },
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '2.3.4': (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`),
+          },
+        },
+      ];
 
-      await migrateIndex({ esClient, index, migrations, mappingProperties });
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
       expect(await fetchDocs(esClient, `${index}_2`)).to.eql([
@@ -227,6 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 68 },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'bar:o',
@@ -234,6 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 6 },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'foo:a',
@@ -241,6 +281,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOO A' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'foo:e',
@@ -248,6 +289,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOOEY' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
       ]);
 
@@ -259,6 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 68, name: 'NAME i' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'bar:o',
@@ -266,6 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 6, name: 'NAME o' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'foo:a',
@@ -273,6 +317,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '2.0.1' },
           foo: { name: 'FOO Av2' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
         {
           id: 'foo:e',
@@ -280,6 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '2.0.1' },
           foo: { name: 'FOOEYv2' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
       ]);
     });
@@ -292,18 +338,21 @@ export default ({ getService }: FtrProviderContext) => {
         foo: { properties: { name: { type: 'text' } } },
       };
 
-      const migrations: Record<string, SavedObjectMigrationMap> = {
-        foo: {
-          '1.0.0': (doc) => set(doc, 'attributes.name', 'LOTR'),
+      const savedObjectTypes: SavedObjectsType[] = [
+        {
+          ...FOO_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.name', 'LOTR'),
+          },
         },
-      };
+      ];
 
       await createIndex({ esClient, index });
       await createDocs({ esClient, index, docs: originalDocs });
 
       const result = await Promise.all([
-        migrateIndex({ esClient, index, migrations, mappingProperties }),
-        migrateIndex({ esClient, index, migrations, mappingProperties }),
+        migrateIndex({ esClient, index, savedObjectTypes, mappingProperties }),
+        migrateIndex({ esClient, index, savedObjectTypes, mappingProperties }),
       ]);
 
       // The polling instance and the migrating instance should both
@@ -338,8 +387,169 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'LOTR' },
           references: [],
+          coreMigrationVersion: KIBANA_VERSION,
         },
       ]);
+    });
+
+    it('Correctly applies reference transforms and conversion transforms', async () => {
+      const index = '.migration-d';
+      const originalDocs = [
+        { id: 'foo:1', type: 'foo', foo: { name: 'Foo 1 default' } },
+        { id: 'spacex:foo:1', type: 'foo', foo: { name: 'Foo 1 spacex' }, namespace: 'spacex' },
+        {
+          id: 'bar:1',
+          type: 'bar',
+          bar: { nomnom: 1 },
+          references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
+        },
+        {
+          id: 'spacex:bar:1',
+          type: 'bar',
+          bar: { nomnom: 2 },
+          references: [{ type: 'foo', id: '1', name: 'Foo 1 spacex' }],
+          namespace: 'spacex',
+        },
+        {
+          id: 'baz:1',
+          type: 'baz',
+          baz: { title: 'Baz 1 default' },
+          references: [{ type: 'bar', id: '1', name: 'Bar 1 default' }],
+        },
+        {
+          id: 'spacex:baz:1',
+          type: 'baz',
+          baz: { title: 'Baz 1 spacex' },
+          references: [{ type: 'bar', id: '1', name: 'Bar 1 spacex' }],
+          namespace: 'spacex',
+        },
+      ];
+
+      const mappingProperties = {
+        foo: { properties: { name: { type: 'text' } } },
+        bar: { properties: { nomnom: { type: 'integer' } } },
+        baz: { properties: { title: { type: 'keyword' } } },
+      };
+
+      const savedObjectTypes: SavedObjectsType[] = [
+        {
+          ...FOO_TYPE,
+          namespaceType: 'multiple',
+          convertToMultiNamespaceTypeVersion: '1.0.0',
+        },
+        {
+          ...BAR_TYPE,
+          namespaceType: 'multiple',
+          convertToMultiNamespaceTypeVersion: '2.0.0',
+        },
+        BAZ_TYPE, // must be registered for reference transforms to be applied to objects of this type
+      ];
+
+      await createIndex({ esClient, index });
+      await createDocs({ esClient, index, docs: originalDocs });
+
+      await migrateIndex({
+        esClient,
+        index,
+        savedObjectTypes,
+        mappingProperties,
+        obsoleteIndexTemplatePattern: 'migration_a*',
+      });
+
+      // The docs in the original index are unchanged
+      expect(await fetchDocs(esClient, `${index}_1`)).to.eql(originalDocs.sort(sortByTypeAndId));
+
+      // The docs in the alias have been migrated
+      const migratedDocs = await fetchDocs(esClient, index);
+
+      // each newly converted multi-namespace object in a non-default space has its ID deterministically regenerated, and a legacy-url-alias
+      // object is created which links the old ID to the new ID
+      const newFooId = uuidv5('spacex:foo:1', uuidv5.DNS);
+      const newBarId = uuidv5('spacex:bar:1', uuidv5.DNS);
+
+      expect(migratedDocs).to.eql(
+        [
+          {
+            id: 'foo:1',
+            type: 'foo',
+            foo: { name: 'Foo 1 default' },
+            references: [],
+            namespaces: ['default'],
+            migrationVersion: { foo: '1.0.0' },
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            id: `foo:${newFooId}`,
+            type: 'foo',
+            foo: { name: 'Foo 1 spacex' },
+            references: [],
+            namespaces: ['spacex'],
+            originId: '1',
+            migrationVersion: { foo: '1.0.0' },
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            // new object
+            id: 'legacy-url-alias:spacex:foo:1',
+            type: 'legacy-url-alias',
+            'legacy-url-alias': {
+              targetId: newFooId,
+              targetNamespace: 'spacex',
+              targetType: 'foo',
+            },
+            migrationVersion: {},
+            references: [],
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            id: 'bar:1',
+            type: 'bar',
+            bar: { nomnom: 1 },
+            references: [{ type: 'foo', id: '1', name: 'Foo 1 default' }],
+            namespaces: ['default'],
+            migrationVersion: { bar: '2.0.0' },
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            id: `bar:${newBarId}`,
+            type: 'bar',
+            bar: { nomnom: 2 },
+            references: [{ type: 'foo', id: newFooId, name: 'Foo 1 spacex' }],
+            namespaces: ['spacex'],
+            originId: '1',
+            migrationVersion: { bar: '2.0.0' },
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            // new object
+            id: 'legacy-url-alias:spacex:bar:1',
+            type: 'legacy-url-alias',
+            'legacy-url-alias': {
+              targetId: newBarId,
+              targetNamespace: 'spacex',
+              targetType: 'bar',
+            },
+            migrationVersion: {},
+            references: [],
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            id: 'baz:1',
+            type: 'baz',
+            baz: { title: 'Baz 1 default' },
+            references: [{ type: 'bar', id: '1', name: 'Bar 1 default' }],
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+          {
+            id: 'spacex:baz:1',
+            type: 'baz',
+            baz: { title: 'Baz 1 spacex' },
+            references: [{ type: 'bar', id: newBarId, name: 'Bar 1 spacex' }],
+            namespace: 'spacex',
+            coreMigrationVersion: KIBANA_VERSION,
+          },
+        ].sort(sortByTypeAndId)
+      );
     });
   });
 };
@@ -351,6 +561,30 @@ async function createIndex({ esClient, index }: { esClient: ElasticsearchClient;
     foo: { properties: { name: { type: 'keyword' } } },
     bar: { properties: { nomnom: { type: 'integer' } } },
     baz: { properties: { title: { type: 'keyword' } } },
+    'legacy-url-alias': {
+      properties: {
+        targetNamespace: { type: 'text' },
+        targetType: { type: 'text' },
+        targetId: { type: 'text' },
+        lastResolved: { type: 'date' },
+        resolveCounter: { type: 'integer' },
+        disabled: { type: 'boolean' },
+      },
+    },
+    namespace: { type: 'keyword' },
+    namespaces: { type: 'keyword' },
+    originId: { type: 'keyword' },
+    references: {
+      type: 'nested',
+      properties: {
+        name: { type: 'keyword' },
+        type: { type: 'keyword' },
+        id: { type: 'keyword' },
+      },
+    },
+    coreMigrationVersion: {
+      type: 'keyword',
+    },
   };
   await esClient.indices.create({
     index,
@@ -380,30 +614,33 @@ async function createDocs({
 async function migrateIndex({
   esClient,
   index,
-  migrations,
+  savedObjectTypes,
   mappingProperties,
   obsoleteIndexTemplatePattern,
 }: {
   esClient: ElasticsearchClient;
   index: string;
-  migrations: Record<string, SavedObjectMigrationMap>;
+  savedObjectTypes: SavedObjectsType[];
   mappingProperties: SavedObjectsTypeMappingDefinitions;
   obsoleteIndexTemplatePattern?: string;
 }) {
   const typeRegistry = new SavedObjectTypeRegistry();
-  const types = migrationsToTypes(migrations);
-  types.forEach((type) => typeRegistry.registerType(type));
+  savedObjectTypes.forEach((type) => typeRegistry.registerType(type));
 
   const documentMigrator = new DocumentMigrator({
-    kibanaVersion: '99.9.9',
+    kibanaVersion: KIBANA_VERSION,
     typeRegistry,
+    minimumConvertVersion: '0.0.0', // bypass the restriction of a minimum version of 8.0.0 for these integration tests
     log: getLogMock(),
   });
+
+  documentMigrator.prepareMigrations();
 
   const migrator = new IndexMigrator({
     client: createMigrationEsClient(esClient, getLogMock()),
     documentMigrator,
     index,
+    kibanaVersion: KIBANA_VERSION,
     obsoleteIndexTemplatePattern,
     mappingProperties,
     batchSize: 10,
@@ -416,18 +653,6 @@ async function migrateIndex({
   return await migrator.migrate();
 }
 
-function migrationsToTypes(
-  migrations: Record<string, SavedObjectMigrationMap>
-): SavedObjectsType[] {
-  return Object.entries(migrations).map(([type, migrationsMap]) => ({
-    name: type,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: { properties: {} },
-    migrations: { ...migrationsMap },
-  }));
-}
-
 async function fetchDocs(esClient: ElasticsearchClient, index: string) {
   const { body } = await esClient.search<SearchResponse<any>>({ index });
 
@@ -436,5 +661,9 @@ async function fetchDocs(esClient: ElasticsearchClient, index: string) {
       ...h._source,
       id: h._id,
     }))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort(sortByTypeAndId);
+}
+
+function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
+  return a.type.localeCompare(b.type) || a.id.localeCompare(b.id);
 }

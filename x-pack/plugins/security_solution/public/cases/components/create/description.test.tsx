@@ -10,13 +10,17 @@ import { act } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../../shared_imports';
 import { Description } from './description';
+import { schema, FormProps } from './schema';
 
 describe('Description', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ description: string }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { description: 'My description' },
+      schema: {
+        description: schema.description,
+      },
     });
 
     globalForm = form;
@@ -41,7 +45,7 @@ describe('Description', () => {
   it('it changes the description', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Description isLoading={true} />
+        <Description isLoading={false} />
       </MockHookWrapperComponent>
     );
 

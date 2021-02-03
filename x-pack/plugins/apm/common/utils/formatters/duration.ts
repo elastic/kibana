@@ -186,9 +186,9 @@ export function asDuration(
  * `asDuration`, but this is used in places like tables where we always want
  * the same units.
  */
-export function asMillisecondDuration(time: number) {
+export function asMillisecondDuration(value: Maybe<number>) {
   return convertTo({
     unit: 'milliseconds',
-    microseconds: time,
+    microseconds: value,
   }).formatted;
 }

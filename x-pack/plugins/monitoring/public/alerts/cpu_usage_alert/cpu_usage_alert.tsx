@@ -16,7 +16,7 @@ export function createCpuUsageAlertType(): AlertTypeModel<MonitoringAlertTypePar
     description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-cpu-threshold`;
+      return `${docLinks.links.monitoring.alertsKibanaCpuThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CPU_USAGE].paramDetails} />

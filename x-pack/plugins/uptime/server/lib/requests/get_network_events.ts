@@ -12,11 +12,16 @@ interface GetNetworkEventsParams {
   stepIndex: string;
 }
 
+export const secondsToMillis = (seconds: number) =>
+  // -1 is a special case where a value was unavailable
+  seconds === -1 ? -1 : seconds * 1000;
+
 export const getNetworkEvents: UMElasticsearchQueryFn<
   GetNetworkEventsParams,
-  NetworkEvent[]
+  { events: NetworkEvent[]; total: number }
 > = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
   const params = {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [
@@ -34,26 +39,28 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
 
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const microToMillis = (micro: number): number => (micro === -1 ? -1 : micro * 1000);
+  return {
+    total: result.hits.total.value,
+    events: result.hits.hits.map<NetworkEvent>((event: any) => {
+      const requestSentTime = secondsToMillis(event._source.synthetics.payload.request_sent_time);
+      const loadEndTime = secondsToMillis(event._source.synthetics.payload.load_end_time);
+      const requestStartTime =
+        event._source.synthetics.payload.response &&
+        event._source.synthetics.payload.response.timing
+          ? secondsToMillis(event._source.synthetics.payload.response.timing.request_time)
+          : undefined;
 
-  return result.hits.hits.map<NetworkEvent>((event: any) => {
-    const requestSentTime = microToMillis(event._source.synthetics.payload.request_sent_time);
-    const loadEndTime = microToMillis(event._source.synthetics.payload.load_end_time);
-    const requestStartTime =
-      event._source.synthetics.payload.response && event._source.synthetics.payload.response.timing
-        ? microToMillis(event._source.synthetics.payload.response.timing.request_time)
-        : undefined;
-
-    return {
-      timestamp: event._source['@timestamp'],
-      method: event._source.synthetics.payload?.method,
-      url: event._source.synthetics.payload?.url,
-      status: event._source.synthetics.payload?.status,
-      mimeType: event._source.synthetics.payload?.response?.mime_type,
-      requestSentTime,
-      requestStartTime,
-      loadEndTime,
-      timings: event._source.synthetics.payload.timings,
-    };
-  });
+      return {
+        timestamp: event._source['@timestamp'],
+        method: event._source.synthetics.payload?.method,
+        url: event._source.synthetics.payload?.url,
+        status: event._source.synthetics.payload?.status,
+        mimeType: event._source.synthetics.payload?.response?.mime_type,
+        requestSentTime,
+        requestStartTime,
+        loadEndTime,
+        timings: event._source.synthetics.payload.timings,
+      };
+    }),
+  };
 };

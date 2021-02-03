@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
@@ -648,12 +638,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // alias_not_found_exception another instance has completed a
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-      } else if (
-        left.type === 'remove_index_not_a_concrete_index' ||
-        left.type === 'index_not_found_exception'
-      ) {
-        // We don't handle these errors as the migration algorithm will never
-        // cause them to occur (these are only relevant to the LEGACY_DELETE
+      } else if (left.type === 'index_not_found_exception') {
+        if (left.index === stateP.tempIndex) {
+          // another instance has already completed the migration and deleted
+          // the temporary index
+          return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+        } else {
+          // The migration algorithm will never cause a
+          // index_not_found_exception for an index other than the temporary
+          // index handled above.
+          throwBadResponse(stateP, left as never);
+        }
+      } else if (left.type === 'remove_index_not_a_concrete_index') {
+        // We don't handle this error as the migration algorithm will never
+        // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
       } else {

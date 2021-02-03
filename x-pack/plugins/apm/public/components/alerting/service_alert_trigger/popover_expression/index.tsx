@@ -30,6 +30,7 @@ export function PopoverExpression(props: Props) {
           onClick={() => setPopoverOpen(true)}
         />
       }
+      repositionOnScroll
     >
       {children}
     </EuiPopover>

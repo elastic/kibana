@@ -16,8 +16,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-core-server.plugininitializercontext.config.md) | <code>{</code><br/><code>        legacy: {</code><br/><code>            globalConfig$: Observable&lt;SharedGlobalConfig&gt;;</code><br/><code>        };</code><br/><code>        create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;;</code><br/><code>        createIfExists: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T &#124; undefined&gt;;</code><br/><code>    }</code> |  |
+|  [config](./kibana-plugin-core-server.plugininitializercontext.config.md) | <code>{</code><br/><code>        legacy: {</code><br/><code>            globalConfig$: Observable&lt;SharedGlobalConfig&gt;;</code><br/><code>            get: () =&gt; SharedGlobalConfig;</code><br/><code>        };</code><br/><code>        create: &lt;T = ConfigSchema&gt;() =&gt; Observable&lt;T&gt;;</code><br/><code>        get: &lt;T = ConfigSchema&gt;() =&gt; T;</code><br/><code>    }</code> | Accessors for the plugin's configuration |
 |  [env](./kibana-plugin-core-server.plugininitializercontext.env.md) | <code>{</code><br/><code>        mode: EnvironmentMode;</code><br/><code>        packageInfo: Readonly&lt;PackageInfo&gt;;</code><br/><code>        instanceUuid: string;</code><br/><code>    }</code> |  |
-|  [logger](./kibana-plugin-core-server.plugininitializercontext.logger.md) | <code>LoggerFactory</code> |  |
+|  [logger](./kibana-plugin-core-server.plugininitializercontext.logger.md) | <code>LoggerFactory</code> |  instance already bound to the plugin's logging context |
 |  [opaqueId](./kibana-plugin-core-server.plugininitializercontext.opaqueid.md) | <code>PluginOpaqueId</code> |  |
 

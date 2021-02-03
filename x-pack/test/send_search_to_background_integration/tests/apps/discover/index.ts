@@ -17,6 +17,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 
+    loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./sessions_in_space'));
   });
 }

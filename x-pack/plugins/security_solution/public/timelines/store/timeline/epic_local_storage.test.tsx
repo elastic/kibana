@@ -61,6 +61,7 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -168,6 +169,7 @@ describe('epicLocalStorage', () => {
         sort: [
           {
             columnId: 'event.severity',
+            columnType: 'number',
             sortDirection: Direction.desc,
           },
         ],

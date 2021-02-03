@@ -5,7 +5,7 @@
  */
 
 // @ts-expect-error no @typed def; Elastic library
-import { evaluate } from 'tinymath';
+import { evaluate } from '@kbn/tinymath';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { Datatable, isDatatable, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';

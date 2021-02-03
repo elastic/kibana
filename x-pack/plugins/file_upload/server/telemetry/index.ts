@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
-export { fileUploadTelemetryMappingsType } from './mappings';
+export { initFileUploadTelemetry } from './usage_collector';
+export { updateTelemetry } from './telemetry';

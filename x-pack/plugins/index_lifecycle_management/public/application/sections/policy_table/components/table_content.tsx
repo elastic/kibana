@@ -301,7 +301,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
         style={{ width: 150 }}
       >
         <EuiPopover
-          id="contextMenuPolicy"
+          id={`contextMenuPolicy-${name}`}
           button={button}
           isOpen={isPolicyPopoverOpen(policy.name)}
           closePopover={closePolicyPopover}

@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent, AgentPolicy } from '../../../../../types';
 import { AgentDetailsOverviewSection } from './agent_details_overview';
 import { AgentDetailsIntegrationsSection } from './agent_details_integrations';
+
+// Allows child text to be truncated
+const FlexItemWithMinWidth = styled(EuiFlexItem)`
+  min-width: 0px;
+`;
 
 export const AgentDetailsContent: React.FunctionComponent<{
   agent: Agent;
@@ -17,7 +23,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem>
+        <FlexItemWithMinWidth>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -28,8 +34,8 @@ export const AgentDetailsContent: React.FunctionComponent<{
           </EuiTitle>
           <EuiSpacer size="s" />
           <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        </FlexItemWithMinWidth>
+        <FlexItemWithMinWidth>
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -40,7 +46,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
           </EuiTitle>
           <EuiSpacer size="s" />
           <AgentDetailsIntegrationsSection agent={agent} agentPolicy={agentPolicy} />
-        </EuiFlexItem>
+        </FlexItemWithMinWidth>
       </EuiFlexGroup>
     </>
   );

@@ -429,7 +429,9 @@ export const CaseComponent = React.memo<CaseProps>(
             {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
-                {initLoadingData && <EuiLoadingContent lines={8} />}
+                {initLoadingData && (
+                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                )}
                 {!initLoadingData && (
                   <>
                     <UserActionTree

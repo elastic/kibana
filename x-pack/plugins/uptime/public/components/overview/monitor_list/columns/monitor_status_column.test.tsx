@@ -5,20 +5,18 @@
  */
 
 import React from 'react';
-import moment from 'moment';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
 import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
-import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';
+import { render } from '../../../../lib/helper/rtl_helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => 'Thu May 09 2019 10:15:11 GMT-0400');
-    moment.prototype.fromNow = jest.fn(() => 'a few seconds ago');
-    // Only for testing purposes we allow extending Date here
-    // eslint-disable-next-line no-extend-native
-    Date.prototype.toString = jest.fn(() => 'Tue, 01 Jan 2019 00:00:00 GMT');
+    mockDate();
+    mockMoment();
   });
 
   let upChecks: Ping[];
@@ -227,33 +225,53 @@ describe('MonitorListStatusColumn', () => {
     ];
   });
 
-  it('provides expected tooltip and display times', () => {
-    const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp="2314123" summaryPings={[]} />
+  it('provides expected tooltip and display times', async () => {
+    const { getByText } = render(
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn status="up" timestamp="2314123" summaryPings={[]} />
+      </EuiThemeProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    const timestamp = getByText('Sept 4, 2020', { exact: false });
+    expect(timestamp.innerHTML).toEqual('Checked Sept 4, 2020  9:31:38 AM');
+
+    fireEvent.mouseOver(timestamp);
+
+    await waitFor(() => screen.getByText('Thu May 09 2019 10:15:11 GMT-0400'));
   });
 
   it('can handle a non-numeric timestamp value', () => {
-    const component = shallowWithIntl(
-      <MonitorListStatusColumn status="up" timestamp={new Date().toString()} summaryPings={[]} />
+    const { getByText } = render(
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn status="up" timestamp={new Date().toString()} summaryPings={[]} />
+      </EuiThemeProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    expect(getByText('Sept 4, 2020', { exact: false }).innerHTML).toEqual(
+      'Checked Sept 4, 2020  9:31:38 AM'
+    );
   });
 
-  it('will display location status', () => {
-    const component = shallowWithIntl(
-      <MonitorListStatusColumn
-        status="up"
-        timestamp={new Date().toString()}
-        summaryPings={summaryPings}
-      />
+  it('displays single location status', async () => {
+    const { getByText } = render(
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn
+          status="up"
+          timestamp={new Date().toString()}
+          summaryPings={summaryPings.filter((ping) => ping.observer!.geo!.name! === 'Islamabad')}
+        />
+      </EuiThemeProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    const locationsContainer = getByText('in 0/1 location', { exact: false });
+
+    fireEvent.mouseOver(locationsContainer);
+
+    await waitFor(() => screen.getByText('Down in Islamabad'));
   });
 
-  it('will render display location status', () => {
-    const component = renderWithIntl(
+  it('will display location status', async () => {
+    const { getByText } = render(
       <EuiThemeProvider darkMode={false}>
         <MonitorListStatusColumn
           status="up"
@@ -262,10 +280,33 @@ describe('MonitorListStatusColumn', () => {
         />
       </EuiThemeProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    const locationsContainer = getByText('in 1/3 locations', { exact: false });
+
+    fireEvent.mouseOver(locationsContainer);
+
+    await waitFor(() => screen.getByText('Up in Berlin'));
+    await waitFor(() => screen.getByText('Down in Islamabad, st-paul'));
   });
 
-  it(' will test getLocationStatus location', () => {
+  it('will render display location status', async () => {
+    const { getByText } = render(
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn
+          status="up"
+          timestamp={new Date().toString()}
+          summaryPings={summaryPings}
+        />
+      </EuiThemeProvider>
+    );
+
+    const timestamp = getByText('Sept 4, 2020', { exact: false });
+
+    expect(timestamp.innerHTML).toEqual('Checked Sept 4, 2020  9:31:38 AM');
+    expect(getByText('in 1/3 locations,'));
+  });
+
+  it('will test getLocationStatus location', () => {
     let { statusMessage } = getLocationStatus(summaryPings, STATUS.UP);
 
     expect(statusMessage).toBe('in 1/3 locations');

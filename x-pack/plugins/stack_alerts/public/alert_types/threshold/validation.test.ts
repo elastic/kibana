@@ -32,7 +32,7 @@ describe('expression params validation', () => {
   });
   test('if aggField property is invalid should return proper error message', () => {
     const initialParams: IndexThresholdAlertParams = {
-      index: ['test'],
+      index: 'test',
       aggType: 'avg',
       threshold: [],
       timeWindowSize: 1,

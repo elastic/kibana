@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -24,15 +13,14 @@ import { orderBy } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
-import { Table } from '../table_vis_response_handler';
-import { TableVisConfig, TableVisUseUiStateProps } from '../types';
-import { useFormattedColumnsAndRows, usePagination } from '../utils';
+import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
+import { usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
-  table: Table;
+  table: TableContext;
   visConfig: TableVisConfig;
   title?: string;
   uiStateProps: TableVisUseUiStateProps;
@@ -46,7 +34,7 @@ export const TableVisBasic = memo(
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
   }: TableVisBasicProps) => {
-    const { columns, rows } = useFormattedColumnsAndRows(table, visConfig);
+    const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
     const sortedRows = useMemo(
@@ -58,13 +46,19 @@ export const TableVisBasic = memo(
     );
 
     // renderCellValue is a component which renders a cell based on column and row indexes
-    const renderCellValue = useMemo(() => createTableVisCell(columns, sortedRows), [
-      columns,
+    const renderCellValue = useMemo(() => createTableVisCell(sortedRows, formattedColumns), [
+      formattedColumns,
       sortedRows,
     ]);
 
     // Columns config
-    const gridColumns = createGridColumns(table, columns, columnsWidth, sortedRows, fireEvent);
+    const gridColumns = createGridColumns(
+      columns,
+      sortedRows,
+      formattedColumns,
+      columnsWidth,
+      fireEvent
+    );
 
     // Pagination config
     const pagination = usePagination(visConfig, rows.length);
@@ -137,10 +131,9 @@ export const TableVisBasic = memo(
               additionalControls: (
                 <TableVisControls
                   dataGridAriaLabel={dataGridAriaLabel}
-                  cols={columns}
+                  columns={columns}
                   // csv exports sorted table
                   rows={sortedRows}
-                  table={table}
                   filename={visConfig.title}
                 />
               ),
@@ -149,8 +142,7 @@ export const TableVisBasic = memo(
           renderCellValue={renderCellValue}
           renderFooterCellValue={
             visConfig.showTotal
-              ? // @ts-expect-error
-                ({ colIndex }) => columns[colIndex].formattedTotal || null
+              ? ({ columnId }) => formattedColumns[columnId].formattedTotal || null
               : undefined
           }
           pagination={pagination}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -22,6 +23,11 @@ import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';
 import { LinkAndRevision } from '../../../../../components';
 
+// Allows child text to be truncated
+const FlexItemWithMinWidth = styled(EuiFlexItem)`
+  min-width: 0px;
+`;
+
 export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
@@ -30,7 +36,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   const kibanaVersion = useKibanaVersion();
   return (
     <EuiPanel>
-      <EuiDescriptionList>
+      <EuiDescriptionList compressed>
         {[
           {
             title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
@@ -161,16 +167,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
           },
         ].map(({ title, description }) => {
           return (
-            <EuiDescriptionList compressed>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={3}>
-                  <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={7}>
-                  <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionList>
+            <EuiFlexGroup>
+              <FlexItemWithMinWidth grow={3}>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+              </FlexItemWithMinWidth>
+              <FlexItemWithMinWidth grow={7}>
+                <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
+              </FlexItemWithMinWidth>
+            </EuiFlexGroup>
           );
         })}
       </EuiDescriptionList>

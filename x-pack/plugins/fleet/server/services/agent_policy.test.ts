@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { Output } from '../types';
@@ -78,7 +78,9 @@ describe('agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      await agentPolicyService.bumpRevision(soClient, 'agent-policy');
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy');
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });
@@ -90,7 +92,9 @@ describe('agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      await agentPolicyService.bumpAllAgentPolicies(soClient);
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, undefined);
 
       expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
     });

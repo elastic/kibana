@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled, useTrackPageview } from '../../../../../observability/public';
-import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useTrackPageview } from '../../../../../observability/public';
+import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
@@ -87,6 +88,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     isLoadingTopLogEntryCategories,
     logEntryCategoryDatasets,
     topLogEntryCategories,
+    sortOptions,
+    changeSortOptions,
   } = useLogEntryCategoriesResults({
     categoriesCount: 25,
     endTime: categoryQueryTimeRange.timeRange.endTime,
@@ -145,7 +148,12 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 
   useEffect(() => {
     getTopLogEntryCategories();
-  }, [getTopLogEntryCategories, categoryQueryDatasets, categoryQueryTimeRange.lastChangedTime]);
+  }, [
+    getTopLogEntryCategories,
+    categoryQueryDatasets,
+    categoryQueryTimeRange.lastChangedTime,
+    sortOptions,
+  ]);
 
   useEffect(() => {
     getLogEntryCategoryDatasets();
@@ -219,6 +227,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
                 sourceId={sourceId}
                 timeRange={categoryQueryTimeRange.timeRange}
                 topCategories={topLogEntryCategories}
+                sortOptions={sortOptions}
+                changeSortOptions={changeSortOptions}
               />
             </EuiPanel>
           </EuiFlexItem>

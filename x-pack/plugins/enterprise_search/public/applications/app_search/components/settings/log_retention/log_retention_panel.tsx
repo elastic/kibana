@@ -12,9 +12,7 @@ import { useActions, useValues } from 'kea';
 
 import { DOCS_PREFIX } from '../../../routes';
 
-import { LogRetentionLogic } from './log_retention_logic';
-import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from './messaging';
-import { LogRetentionOptions } from './types';
+import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
@@ -66,7 +64,7 @@ export const LogRetentionPanel: React.FC = () => {
               {': '}
               {hasILM && (
                 <EuiTextColor color="subdued">
-                  <AnalyticsLogRetentionMessage />
+                  <LogRetentionMessage type={LogRetentionOptions.Analytics} />
                 </EuiTextColor>
               )}
             </>
@@ -93,7 +91,7 @@ export const LogRetentionPanel: React.FC = () => {
               {': '}
               {hasILM && (
                 <EuiTextColor color="subdued">
-                  <ApiLogRetentionMessage />
+                  <LogRetentionMessage type={LogRetentionOptions.API} />
                 </EuiTextColor>
               )}
             </>

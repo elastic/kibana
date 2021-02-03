@@ -6,22 +6,42 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMQueryParams } from '../url_helpers';
-import { APMLinkExtendProps, useAPMHref } from './APMLink';
+import { useLocation } from 'react-router-dom';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { APMLinkExtendProps, getAPMHref } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  latencyAggregationType?: string;
 }
 
-const persistedFilters: Array<keyof APMQueryParams> = [
-  'latencyAggregationType',
-];
+export function useTransactionsOverviewHref({
+  serviceName,
+  latencyAggregationType,
+}: {
+  serviceName: string;
+  latencyAggregationType?: string;
+}) {
+  const { core } = useApmPluginContext();
+  const location = useLocation();
+  const { search } = location;
 
-export function useTransactionsOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/transactions`, persistedFilters);
+  return getAPMHref({
+    basePath: core.http.basePath,
+    path: `/services/${serviceName}/transactions`,
+    query: { ...(latencyAggregationType ? { latencyAggregationType } : {}) },
+    search,
+  });
 }
 
-export function TransactionOverviewLink({ serviceName, ...rest }: Props) {
-  const href = useTransactionsOverviewHref(serviceName);
+export function TransactionOverviewLink({
+  serviceName,
+  latencyAggregationType,
+  ...rest
+}: Props) {
+  const href = useTransactionsOverviewHref({
+    serviceName,
+    latencyAggregationType,
+  });
   return <EuiLink href={href} {...rest} />;
 }

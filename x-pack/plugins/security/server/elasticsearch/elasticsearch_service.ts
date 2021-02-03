@@ -6,29 +6,15 @@
 
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operators';
-import {
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-  Logger,
-  ServiceStatusLevels,
-  StatusServiceSetup,
-  ElasticsearchServiceSetup as CoreElasticsearchServiceSetup,
-} from '../../../../../src/core/server';
+import { Logger, ServiceStatusLevels, StatusServiceSetup } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
-import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export interface ElasticsearchServiceSetupParams {
-  readonly elasticsearch: CoreElasticsearchServiceSetup;
   readonly status: StatusServiceSetup;
   readonly license: SecurityLicense;
 }
 
-export interface ElasticsearchServiceSetup {
-  readonly clusterClient: ILegacyClusterClient;
-}
-
 export interface ElasticsearchServiceStart {
-  readonly clusterClient: ILegacyClusterClient;
   readonly watchOnlineStatus$: () => Observable<OnlineStatusRetryScheduler>;
 }
 
@@ -41,22 +27,13 @@ export interface OnlineStatusRetryScheduler {
  */
 export class ElasticsearchService {
   readonly #logger: Logger;
-  #clusterClient?: ILegacyCustomClusterClient;
   #coreStatus$!: Observable<boolean>;
 
   constructor(logger: Logger) {
     this.#logger = logger;
   }
 
-  setup({
-    elasticsearch,
-    status,
-    license,
-  }: ElasticsearchServiceSetupParams): ElasticsearchServiceSetup {
-    this.#clusterClient = elasticsearch.legacy.createClient('security', {
-      plugins: [elasticsearchClientPlugin],
-    });
-
+  setup({ status, license }: ElasticsearchServiceSetupParams) {
     this.#coreStatus$ = combineLatest([status.core$, license.features$]).pipe(
       map(
         ([coreStatus]) =>
@@ -64,14 +41,10 @@ export class ElasticsearchService {
       ),
       shareReplay(1)
     );
-
-    return { clusterClient: this.#clusterClient };
   }
 
   start(): ElasticsearchServiceStart {
     return {
-      clusterClient: this.#clusterClient!,
-
       // We'll need to get rid of this as soon as Core's Elasticsearch service exposes this
       // functionality in the scope of https://github.com/elastic/kibana/issues/41983.
       watchOnlineStatus$: () => {
@@ -119,12 +92,5 @@ export class ElasticsearchService {
         );
       },
     };
-  }
-
-  stop() {
-    if (this.#clusterClient) {
-      this.#clusterClient.close();
-      this.#clusterClient = undefined;
-    }
   }
 }

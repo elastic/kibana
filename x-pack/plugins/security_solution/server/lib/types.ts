@@ -5,8 +5,8 @@
  */
 
 import { AuthenticatedUser } from '../../../security/common/model';
-import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
 
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -36,7 +36,7 @@ export interface AppBackendLibs extends AppDomainLibs {
 
 export interface SiemContext {
   req: FrameworkRequest;
-  context: RequestHandlerContext;
+  context: SecuritySolutionRequestHandlerContext;
   user: AuthenticatedUser | null;
 }
 

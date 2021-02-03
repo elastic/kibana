@@ -40,7 +40,7 @@ const EXPECTED_DATA = [
     category: 'traefik',
     field: 'traefik.access.geoip.location',
     values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['[{"coordinates":[-122.3341,47.6103],"type":"Point"}]'],
+    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
   },
   {
     category: 'suricata',
@@ -318,7 +318,7 @@ const EXPECTED_DATA = [
     category: 'source',
     field: 'source.geo.location',
     values: ['{"long":-122.3341,"lat":47.6103}'],
-    originalValue: ['[{"coordinates":[-122.3341,47.6103],"type":"Point"}]'],
+    originalValue: ['{"coordinates":[-122.3341,47.6103],"type":"Point"}'],
   },
   {
     category: 'source',
@@ -558,6 +558,14 @@ const EXPECTED_DATA = [
   },
 ];
 
+const EXPECTED_KPI_COUNTS = {
+  destinationIpCount: 154,
+  hostCount: 1,
+  processCount: 0,
+  sourceIpCount: 121,
+  userCount: 0,
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -586,6 +594,25 @@ export default function ({ getService }: FtrProviderContext) {
           return rest;
         })
       ).to.eql(sortBy(EXPECTED_DATA, 'name'));
+    });
+
+    it('Make sure that we get kpi data', async () => {
+      const {
+        body: { destinationIpCount, hostCount, processCount, sourceIpCount, userCount },
+      } = await supertest
+        .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: TimelineEventsQueries.kpi,
+          docValueFields: [],
+          indexName: INDEX_NAME,
+          inspect: false,
+          eventId: ID,
+        })
+        .expect(200);
+      expect({ destinationIpCount, hostCount, processCount, sourceIpCount, userCount }).to.eql(
+        EXPECTED_KPI_COUNTS
+      );
     });
   });
 }

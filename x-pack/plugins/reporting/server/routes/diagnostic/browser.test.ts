@@ -12,6 +12,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
 import { registerDiagnoseBrowser } from './browser';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 jest.mock('child_process');
 jest.mock('readline');
@@ -47,7 +48,11 @@ describe('POST /diagnose/browser', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     const mockSetupDeps = ({
       elasticsearch: {

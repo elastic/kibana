@@ -5,7 +5,7 @@
  */
 
 import { tap } from 'rxjs/operators';
-import type { Logger } from 'kibana/server';
+import type { IScopedClusterClient, Logger } from 'kibana/server';
 import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
 import type {
   EqlSearchStrategyRequest,
@@ -21,10 +21,14 @@ import { EqlSearchResponse } from './types';
 export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    await esClient.asCurrentUser.asyncSearch.delete({ id });
+  }
+
   return {
     cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      await esClient.asCurrentUser.eql.delete({ id });
+      await cancelAsyncSearch(id, esClient);
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
@@ -54,7 +58,13 @@ export const eqlSearchStrategyProvider = (
         return toEqlKibanaSearchResponse(response);
       };
 
-      return pollSearch(search, options).pipe(tap((response) => (id = response.id)));
+      const cancel = async () => {
+        if (id) {
+          await cancelAsyncSearch(id, esClient);
+        }
+      };
+
+      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
     },
 
     extend: async (id, keepAlive, options, { esClient }) => {

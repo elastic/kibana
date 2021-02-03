@@ -6,7 +6,7 @@
 
 import { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import { InfraWaffleMapOptions, InfraWaffleMapNode } from '../../../../../../lib/lib';
-import { euiStyled } from '../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface TabProps {
   options: InfraWaffleMapOptions;

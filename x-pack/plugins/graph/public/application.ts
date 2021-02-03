@@ -20,7 +20,6 @@ import 'angular-sanitize';
 import 'angular-route';
 // type imports
 import {
-  AppMountContext,
   ChromeStart,
   CoreStart,
   PluginInitializerContext,
@@ -55,10 +54,10 @@ import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public'
 export interface GraphDependencies {
   pluginInitializerContext: PluginInitializerContext;
   core: CoreStart;
+  coreStart: CoreStart;
   element: HTMLElement;
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
-  coreStart: AppMountContext['core'];
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
@@ -91,12 +90,12 @@ export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: Graph
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      deps.coreStart.notifications.toasts.addDanger(info.message);
+      deps.core.notifications.toasts.addDanger(info.message);
       // This has to happen in the next tick because otherwise the original navigation
       // bringing us to the graph app in the first place
       // never completes and the browser enters are redirect loop
       setTimeout(() => {
-        deps.coreStart.application.navigateToApp('home');
+        deps.core.application.navigateToApp('home');
       }, 0);
     }
   });

@@ -38,9 +38,16 @@
       },
       "technique": [
         {
-          "id": "T1159",
-          "name": "Launch Agent",
-          "reference": "https://attack.mitre.org/techniques/T1159/"
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.001",
+              "name": "Launch Agent",
+              "reference": "https://attack.mitre.org/techniques/T1543/001/"
+            }
+          ]
         }
       ]
     }

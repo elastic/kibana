@@ -20,5 +20,5 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useTraceOverviewHref() {
-  return useAPMHref('/traces', persistedFilters);
+  return useAPMHref({ path: '/traces', persistedFilters });
 }

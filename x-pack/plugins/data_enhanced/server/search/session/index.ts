@@ -5,3 +5,4 @@
  */
 
 export * from './session_service';
+export { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
@@ -82,13 +71,15 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspect = aspects.y.find(({ aggId }) => aggId === paramId);
-
-      if (!show || !yAspect || yAspect.accessor === null) {
+      const yAspects = aspects.y.filter(
+        ({ aggId, accessor }) => aggId?.includes(paramId) && accessor !== null
+      );
+      if (!show || !yAspects.length) {
         return null;
       }
+      const yAccessors = yAspects.map((aspect) => aspect.accessor) as string[];
 
-      const id = `${type}-${yAspect.accessor}`;
+      const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
       const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
@@ -105,13 +96,13 @@ export const renderAllSeries = (
               id={id}
               name={getSeriesName}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               groupId={pseudoGroupId}
               useDefaultGroupDomain={useDefaultGroupDomain}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}
@@ -136,7 +127,7 @@ export const renderAllSeries = (
               id={id}
               fit={fittingFunction}
               color={getSeriesColor}
-              tickFormat={yAspect.formatter}
+              tickFormat={yAspects[0].formatter}
               name={getSeriesName}
               curve={getCurveType(interpolate)}
               groupId={pseudoGroupId}
@@ -144,7 +135,7 @@ export const renderAllSeries = (
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
-              yAccessors={[yAspect.accessor]}
+              yAccessors={yAccessors}
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}

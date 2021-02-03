@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
@@ -21,6 +21,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -178,8 +179,7 @@ function getValueLabelDisableReason({
     defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
   });
 }
-
-export function XyToolbar(props: VisualizationToolbarProps<State>) {
+export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
 
   const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
@@ -327,9 +327,25 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               {isFittingEnabled ? (
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                    defaultMessage: 'Missing values',
-                  })}
+                  label={
+                    <>
+                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                        defaultMessage: 'Missing values',
+                      })}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                          defaultMessage: `Gaps in the data are not shown by default, but can be represented as dotted lines with different modes.`,
+                        })}
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </>
+                  }
                 >
                   <EuiSuperSelect
                     data-test-subj="lnsMissingValuesSelect"
@@ -468,7 +484,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
+
 const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(
@@ -636,7 +653,7 @@ const ColorPicker = ({
     }
   };
 
-  const updateColorInState: EuiColorPickerProps['onChange'] = React.useMemo(
+  const updateColorInState: EuiColorPickerProps['onChange'] = useMemo(
     () =>
       debounce((text, output) => {
         const newYConfigs = [...(layer.yConfig || [])];

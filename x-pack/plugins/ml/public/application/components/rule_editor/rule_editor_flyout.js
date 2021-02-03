@@ -479,8 +479,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
-    const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
+    const docsUrl = this.props.kibana.services.docLinks.links.ml.customRules;
     const {
       isFlyoutVisible,
       job,

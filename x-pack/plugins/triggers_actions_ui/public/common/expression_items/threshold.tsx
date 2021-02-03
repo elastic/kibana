@@ -111,6 +111,7 @@ export const ThresholdExpression = ({
       ownFocus
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>

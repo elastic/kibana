@@ -13,7 +13,7 @@ import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'k
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
-import { createMockedIndexPattern } from '../mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
 import { insertOrReplaceColumn } from '../operations';
 import { FieldSelect } from './field_select';
@@ -260,6 +260,48 @@ describe('reference editor', () => {
     );
   });
 
+  it("should show the sub-function as invalid if there's no field compatible with it", () => {
+    // This may happen for saved objects after changing the type of a field
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        currentIndexPattern={createMockedIndexPatternWithoutType('number')}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'avg',
+              sourceField: 'bytes',
+            },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const subFunctionSelect = wrapper
+      .find('[data-test-subj="indexPattern-reference-function"]')
+      .first();
+
+    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(subFunctionSelect.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          'data-test-subj': 'lns-indexPatternDimension-avg incompatible',
+          label: 'Average',
+          value: 'avg',
+        }),
+      ])
+    );
+  });
+
   it('should hide the function selector when using a field-only selection style', () => {
     wrapper = mount(
       <ReferenceEditor
@@ -365,6 +407,38 @@ describe('reference editor', () => {
     expect(fieldSelect.prop('selectedOperationType')).toBeUndefined();
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
     expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(true);
+  });
+
+  it('should show the FieldSelect as invalid if the selected field is missing', () => {
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        layer={{
+          indexPatternId: '1',
+          columnOrder: ['ref'],
+          columns: {
+            ref: {
+              label: 'Average of missing',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'avg',
+              sourceField: 'missing',
+            },
+          },
+        }}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const fieldSelect = wrapper.find(FieldSelect);
+    expect(fieldSelect.prop('fieldIsInvalid')).toEqual(true);
+    expect(fieldSelect.prop('selectedField')).toEqual('missing');
+    expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
+    expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
+    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
 
   it('should show the ParamEditor for functions that offer one', () => {

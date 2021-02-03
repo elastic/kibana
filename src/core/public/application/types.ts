@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -23,16 +12,7 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
-import { ChromeStart } from '../chrome';
-import { IContextProvider } from '../context';
-import { DocLinksStart } from '../doc_links';
-import { HttpStart } from '../http';
-import { I18nStart } from '../i18n';
-import { NotificationsStart } from '../notifications';
-import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
-import { IUiSettingsClient } from '../ui_settings';
-import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
 
@@ -202,14 +182,9 @@ export interface App<HistoryLocationState = unknown> {
   chromeless?: boolean;
 
   /**
-   * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
-   * {@link AppMountDeprecated}.
-   *
-   * @remarks
-   * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
-   * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
+   * A mount function called when the user navigates to this app's route.
    */
-  mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
+  mount: AppMount<HistoryLocationState>;
 
   /**
    * Override the application's routing path from `/app/${id}`.
@@ -369,67 +344,6 @@ export type AppMount<HistoryLocationState = unknown> = (
  * @public
  */
 export type AppUnmount = () => void;
-
-/**
- * A mount function called when the user navigates to this app's route.
- *
- * @remarks
- * When function has two arguments, it will be called with a {@link AppMountContext | context} as the first argument.
- * This behavior is **deprecated**, and consumers should instead use {@link CoreSetup.getStartServices}.
- *
- * @param context The mount context for this app. Deprecated, use {@link CoreSetup.getStartServices}.
- * @param params {@link AppMountParameters}
- * @returns An unmounting function that will be called to unmount the application. See {@link AppUnmount}.
- *
- * @deprecated
- * @public
- */
-export type AppMountDeprecated<HistoryLocationState = unknown> = (
-  context: AppMountContext,
-  params: AppMountParameters<HistoryLocationState>
-) => AppUnmount | Promise<AppUnmount>;
-
-/**
- * The context object received when applications are mounted to the DOM. Deprecated, use
- * {@link CoreSetup.getStartServices}.
- *
- * @deprecated
- * @public
- */
-export interface AppMountContext {
-  /**
-   * Core service APIs available to mounted applications.
-   */
-  core: {
-    /** {@link ApplicationStart} */
-    application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
-    /** {@link ChromeStart} */
-    chrome: ChromeStart;
-    /** {@link DocLinksStart} */
-    docLinks: DocLinksStart;
-    /** {@link HttpStart} */
-    http: HttpStart;
-    /** {@link I18nStart} */
-    i18n: I18nStart;
-    /** {@link NotificationsStart} */
-    notifications: NotificationsStart;
-    /** {@link OverlayStart} */
-    overlays: OverlayStart;
-    /** {@link SavedObjectsStart} */
-    savedObjects: SavedObjectsStart;
-    /** {@link IUiSettingsClient} */
-    uiSettings: IUiSettingsClient;
-    /**
-     * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-     * use *only* to retrieve config values. There is no way to set injected values
-     * in the new platform. Use the legacy platform API instead.
-     * @deprecated
-     * */
-    injectedMetadata: {
-      getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
-  };
-}
 
 /** @public */
 export interface AppMountParameters<HistoryLocationState = unknown> {
@@ -735,19 +649,6 @@ export interface ApplicationSetup {
    * ```
    */
   registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
-
-  /**
-   * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
-   *
-   * @deprecated
-   * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
-   * @param provider - A {@link IContextProvider} function
-   */
-  registerMountContext<T extends keyof AppMountContext>(
-    contextName: T,
-    provider: IContextProvider<AppMountDeprecated, T>
-  ): void;
 }
 
 /** @internal */
@@ -760,21 +661,6 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   register<HistoryLocationState = unknown>(
     plugin: PluginOpaqueId,
     app: App<HistoryLocationState>
-  ): void;
-
-  /**
-   * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
-   *
-   * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
-   * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
-   * @param provider - A {@link IContextProvider} function
-   */
-  registerMountContext<T extends keyof AppMountContext>(
-    pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: IContextProvider<AppMountDeprecated, T>
   ): void;
 }
 
@@ -874,41 +760,13 @@ export interface ApplicationStart {
   getUrlForApp(appId: string, options?: { path?: string; absolute?: boolean }): string;
 
   /**
-   * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
-   *
-   * @deprecated
-   * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
-   * @param provider - A {@link IContextProvider} function
-   */
-  registerMountContext<T extends keyof AppMountContext>(
-    contextName: T,
-    provider: IContextProvider<AppMountDeprecated, T>
-  ): void;
-
-  /**
    * An observable that emits the current application id and each subsequent id update.
    */
   currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */
-export interface InternalApplicationStart extends Omit<ApplicationStart, 'registerMountContext'> {
-  /**
-   * Register a context provider for application mounting. Will only be available to applications that depend on the
-   * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
-   *
-   * @deprecated
-   * @param pluginOpaqueId - The opaque ID of the plugin that is registering the context.
-   * @param contextName - The key of {@link AppMountContext} this provider's return value should be attached to.
-   * @param provider - A {@link IContextProvider} function
-   */
-  registerMountContext<T extends keyof AppMountContext>(
-    pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: IContextProvider<AppMountDeprecated, T>
-  ): void;
-
+export interface InternalApplicationStart extends ApplicationStart {
   // Internal APIs
   getComponent(): JSX.Element | null;
 

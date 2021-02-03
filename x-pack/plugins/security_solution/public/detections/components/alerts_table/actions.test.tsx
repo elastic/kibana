@@ -111,6 +111,7 @@ describe('alert actions', () => {
               {
                 columnHeaderType: 'not-filtered',
                 id: '@timestamp',
+                type: 'number',
                 width: 190,
               },
               {
@@ -207,6 +208,7 @@ describe('alert actions', () => {
             sort: [
               {
                 columnId: '@timestamp',
+                columnType: 'number',
                 sortDirection: 'desc',
               },
             ],

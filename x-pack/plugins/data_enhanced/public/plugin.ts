@@ -8,10 +8,13 @@ import React from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { SharePluginStart } from '../../../../src/plugins/share/public';
 
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
+import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
@@ -19,9 +22,11 @@ import { ConfigSchema } from '../config';
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;
   data: DataPublicPluginSetup;
+  management: ManagementSetup;
 }
 export interface DataEnhancedStartDependencies {
   data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
@@ -30,12 +35,13 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
+  private config!: ConfigSchema;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
-    { bfetch, data }: DataEnhancedSetupDependencies
+    { bfetch, data, management }: DataEnhancedSetupDependencies
   ) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
@@ -57,12 +63,18 @@ export class DataEnhancedPlugin
         searchInterceptor: this.enhancedSearchInterceptor,
       },
     });
+
+    this.config = this.initializerContext.config.get<ConfigSchema>();
+    if (this.config.search.sessions.enabled) {
+      const sessionsConfig = this.config.search.sessions;
+      registerSearchSessionsMgmt(core, sessionsConfig, { management });
+    }
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
 
-    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+    if (this.config.search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(

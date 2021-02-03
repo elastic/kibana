@@ -187,12 +187,13 @@ export const StepDefineSummary: FC<Props> = ({
           copyToClipboardDescription={i18n.translate(
             'xpack.transform.pivotPreview.copyClipboardTooltip',
             {
-              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+              defaultMessage:
+                'Copy Dev Console statement of the transform preview to the clipboard.',
             }
           )}
           dataTestSubj="transformPivotPreview"
-          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
-            defaultMessage: 'Transform pivot preview',
+          title={i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
+            defaultMessage: 'Transform preview',
           })}
           toastNotifications={toastNotifications}
         />

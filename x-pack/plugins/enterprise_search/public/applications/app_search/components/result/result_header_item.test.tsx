@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { mount } from 'enzyme';
 
 import { ResultHeaderItem } from './result_header_item';

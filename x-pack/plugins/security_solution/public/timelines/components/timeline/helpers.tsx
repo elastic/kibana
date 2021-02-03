@@ -242,3 +242,40 @@ export const onTimelineTabKeyPressed = ({
     });
   }
 };
+
+export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
+export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
+export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
+
+/**
+ * This function focuses the active timeline button on the next tick. Focus
+ * is updated on the next tick because this function is typically
+ * invoked in `onClick` handlers that also dispatch Redux actions (that
+ * in-turn update focus states).
+ */
+export const focusActiveTimelineButton = () => {
+  setTimeout(() => {
+    document
+      .querySelector<HTMLButtonElement>(
+        `div.${FLYOUT_BUTTON_BAR_CLASS_NAME} .${ACTIVE_TIMELINE_BUTTON_CLASS_NAME}`
+      )
+      ?.focus();
+  }, 0);
+};
+
+/**
+ * Focuses the utility bar action contained by the provided `containerElement`
+ * when a valid container is provided
+ */
+export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
+  containerElement
+    ?.querySelector<HTMLButtonElement>('div.siemUtilityBar__action:last-of-type button')
+    ?.focus();
+};
+
+/**
+ * Resets keyboard focus on the page
+ */
+export const resetKeyboardFocus = () => {
+  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
+};

@@ -5,11 +5,15 @@
  */
 
 import axios from 'axios';
-import HttpProxyAgent from 'http-proxy-agent';
+import { Agent as HttpsAgent } from 'https';
 import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { getCustomAgents } from './get_custom_agents';
+
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const configurationUtilities = actionsConfigMock.create();
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 
@@ -27,6 +31,7 @@ describe('addTimeZoneToDate', () => {
 
 describe('request', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     axiosMock.mockImplementation(() => ({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -39,17 +44,15 @@ describe('request', () => {
       axios,
       url: '/test',
       logger,
+      configurationUtilities,
     });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'get',
       data: {},
-      headers: undefined,
       httpAgent: undefined,
-      httpsAgent: undefined,
-      params: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -58,26 +61,52 @@ describe('request', () => {
     });
   });
 
-  test('it have been called with proper proxy agent', async () => {
+  test('it have been called with proper proxy agent for a valid url', async () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyRejectUnauthorizedCertificates: true,
+      proxyUrl: 'https://localhost:1212',
+    });
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
+
     const res = await request({
       axios,
-      url: '/testProxy',
+      url: 'http://testProxy',
       logger,
-      proxySettings: {
-        proxyUrl: 'http://localhost:1212',
-        proxyRejectUnauthorizedCertificates: false,
-      },
+      configurationUtilities,
     });
 
-    expect(axiosMock).toHaveBeenCalledWith('/testProxy', {
+    expect(axiosMock).toHaveBeenCalledWith('http://testProxy', {
       method: 'get',
       data: {},
-      headers: undefined,
-      httpAgent: new HttpProxyAgent('http://localhost:1212'),
-      httpsAgent: new HttpProxyAgent('http://localhost:1212'),
-      params: undefined,
+      httpAgent,
+      httpsAgent,
       proxy: false,
-      validateStatus: undefined,
+    });
+    expect(res).toEqual({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    });
+  });
+
+  test('it have been called with proper proxy agent for an invalid url', async () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: ':nope:',
+      proxyRejectUnauthorizedCertificates: false,
+    });
+    const res = await request({
+      axios,
+      url: 'https://testProxy',
+      logger,
+      configurationUtilities,
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('https://testProxy', {
+      method: 'get',
+      data: {},
+      httpAgent: undefined,
+      httpsAgent: expect.any(HttpsAgent),
+      proxy: false,
     });
     expect(res).toEqual({
       status: 200,
@@ -87,17 +116,21 @@ describe('request', () => {
   });
 
   test('it fetch correctly', async () => {
-    const res = await request({ axios, url: '/test', method: 'post', logger, data: { id: '123' } });
+    const res = await request({
+      axios,
+      url: '/test',
+      method: 'post',
+      logger,
+      data: { id: '123' },
+      configurationUtilities,
+    });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'post',
       data: { id: '123' },
-      headers: undefined,
       httpAgent: undefined,
-      httpsAgent: undefined,
-      params: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
-      validateStatus: undefined,
     });
     expect(res).toEqual({
       status: 200,
@@ -116,16 +149,13 @@ describe('patch', () => {
   });
 
   test('it fetch correctly', async () => {
-    await patch({ axios, url: '/test', data: { id: '123' }, logger });
+    await patch({ axios, url: '/test', data: { id: '123' }, logger, configurationUtilities });
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'patch',
       data: { id: '123' },
-      headers: undefined,
       httpAgent: undefined,
-      httpsAgent: undefined,
-      params: undefined,
+      httpsAgent: expect.any(HttpsAgent),
       proxy: false,
-      validateStatus: undefined,
     });
   });
 });

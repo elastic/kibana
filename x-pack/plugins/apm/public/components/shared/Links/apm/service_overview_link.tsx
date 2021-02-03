@@ -15,20 +15,34 @@ import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useServiceOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/overview`, persistedFilters);
+export function useServiceOverviewHref(
+  serviceName: string,
+  environment?: string
+) {
+  const query = environment
+    ? {
+        environment,
+      }
+    : {};
+  return useAPMHref({
+    path: `/services/${serviceName}/overview`,
+    persistedFilters,
+    query,
+  });
 }
 
 export function ServiceOverviewLink({
   serviceName,
+  environment,
   ...rest
 }: ServiceOverviewLinkProps) {
-  const href = useServiceOverviewHref(serviceName);
+  const href = useServiceOverviewHref(serviceName, environment);
   return <EuiLink href={href} {...rest} />;
 }

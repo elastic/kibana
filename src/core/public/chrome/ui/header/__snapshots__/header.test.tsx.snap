@@ -186,7 +186,6 @@ exports[`Header renders 1`] = `
       },
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
-      "registerMountContext": [MockFunction],
     }
   }
   badge$={
@@ -4944,6 +4943,7 @@ exports[`Header renders 1`] = `
                           listItems={
                             Array [
                               Object {
+                                "data-test-subj": "homeLink",
                                 "href": "/",
                                 "iconType": "home",
                                 "label": "Home",
@@ -4965,6 +4965,7 @@ exports[`Header renders 1`] = `
                           >
                             <EuiListGroupItem
                               color="text"
+                              data-test-subj="homeLink"
                               href="/"
                               iconType="home"
                               key="title-0"
@@ -4979,6 +4980,7 @@ exports[`Header renders 1`] = `
                               >
                                 <a
                                   className="euiListGroupItem__button"
+                                  data-test-subj="homeLink"
                                   href="/"
                                   onClick={[Function]}
                                   rel="noreferrer"

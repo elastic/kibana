@@ -8,11 +8,12 @@ import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ActionGroup, AlertActionParam, AlertTypeParams } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import { AlertType as CommonAlertType } from '../../alerts/common';
 import {
+  ActionGroup,
+  AlertActionParam,
   SanitizedAlert,
   AlertAction,
   AlertAggregations,
@@ -22,6 +23,7 @@ import {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 } from '../../alerts/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -38,6 +40,7 @@ export {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
+  AlertTypeParams,
 };
 export { ActionType };
 

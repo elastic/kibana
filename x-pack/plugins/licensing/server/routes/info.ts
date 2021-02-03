@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'src/core/server';
+import { LicensingRouter } from '../types';
 
-export function registerInfoRoute(router: IRouter) {
+export function registerInfoRoute(router: LicensingRouter) {
   router.get({ path: '/api/licensing/info', validate: false }, (context, request, response) => {
     return response.ok({
       body: context.licensing.license,

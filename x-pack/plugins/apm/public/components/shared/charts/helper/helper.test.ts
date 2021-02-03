@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { onBrushEnd } from './helper';
+import { onBrushEnd, isTimeseriesEmpty } from './helper';
 import { History } from 'history';
+import { TimeSeries } from '../../../../../typings/timeseries';
 
 describe('Chart helper', () => {
   describe('onBrushEnd', () => {
@@ -34,6 +35,62 @@ describe('Chart helper', () => {
         search:
           'foo=bar&rangeFrom=2020-06-29T05:44:08.167Z&rangeTo=2020-06-29T07:28:47.797Z',
       });
+    });
+  });
+
+  describe('isTimeseriesEmpty', () => {
+    it('returns true when timeseries is undefined', () => {
+      expect(isTimeseriesEmpty()).toBeTruthy();
+    });
+    it('returns true when timeseries data is empty', () => {
+      const timeseries = [
+        {
+          title: 'foo',
+          data: [],
+          type: 'line',
+          color: 'red',
+        },
+      ] as TimeSeries[];
+      expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
+    });
+    it('returns true when y coordinate is null', () => {
+      const timeseries = [
+        {
+          title: 'foo',
+          data: [{ x: 1, y: null }],
+          type: 'line',
+          color: 'red',
+        },
+      ] as TimeSeries[];
+      expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
+    });
+    it('returns true when y coordinate is undefined', () => {
+      const timeseries = [
+        {
+          title: 'foo',
+          data: [{ x: 1, y: undefined }],
+          type: 'line',
+          color: 'red',
+        },
+      ] as TimeSeries[];
+      expect(isTimeseriesEmpty(timeseries)).toBeTruthy();
+    });
+    it('returns false when at least one coordinate is filled', () => {
+      const timeseries = [
+        {
+          title: 'foo',
+          data: [{ x: 1, y: undefined }],
+          type: 'line',
+          color: 'red',
+        },
+        {
+          title: 'bar',
+          data: [{ x: 1, y: 1 }],
+          type: 'line',
+          color: 'green',
+        },
+      ] as TimeSeries[];
+      expect(isTimeseriesEmpty(timeseries)).toBeFalsy();
     });
   });
 });

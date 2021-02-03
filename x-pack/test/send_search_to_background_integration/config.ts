@@ -23,13 +23,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './tests/apps/dashboard/async_search'),
       resolve(__dirname, './tests/apps/discover'),
+      resolve(__dirname, './tests/apps/management/search_sessions'),
+      resolve(__dirname, './tests/apps/lens'),
     ],
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.data_enhanced.search.sendToBackground.enabled=true', // enable WIP send to background UI
+        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
       ],
     },
     services: {

@@ -13,9 +13,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import {
-  asDuration,
+  ENVIRONMENT_ALL,
+  getNextEnvironmentUrlParam,
+} from '../../../../../common/environment_filter_values';
+import {
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
@@ -23,7 +26,6 @@ import {
 import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -40,6 +42,10 @@ interface Props {
 }
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
+  const {
+    urlParams: { start, end, environment },
+  } = useUrlParams();
+
   const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
     {
       field: 'name',
@@ -64,7 +70,13 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {item.type === 'service' ? (
-                    <ServiceOverviewLink serviceName={item.serviceName}>
+                    <ServiceOverviewLink
+                      serviceName={item.serviceName}
+                      environment={getNextEnvironmentUrlParam({
+                        requestedEnvironment: item.environment,
+                        currentEnvironmentUrlParam: environment,
+                      })}
+                    >
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (
@@ -92,7 +104,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency.timeseries}
-            valueLabel={asDuration(latency.value)}
+            valueLabel={asMillisecondDuration(latency.value)}
           />
         );
       },
@@ -102,9 +114,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       field: 'throughputValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
-        {
-          defaultMessage: 'Traffic',
-        }
+        { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
       render: (_, { throughput }) => {
@@ -156,30 +166,29 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     },
   ];
 
-  const {
-    urlParams: { start, end, environment },
-  } = useUrlParams();
+  const { data = [], status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
 
-  const { data = [], status } = useFetcher(() => {
-    if (!start || !end) {
-      return;
-    }
-
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-      params: {
-        path: {
-          serviceName,
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
+        params: {
+          path: {
+            serviceName,
+          },
+          query: {
+            start,
+            end,
+            environment: environment || ENVIRONMENT_ALL.value,
+            numBuckets: 20,
+          },
         },
-        query: {
-          start,
-          end,
-          environment: environment || ENVIRONMENT_ALL.value,
-          numBuckets: 20,
-        },
-      },
-    });
-  }, [start, end, serviceName, environment]);
+      });
+    },
+    [start, end, serviceName, environment]
+  );
 
   // need top-level sortable fields for the managed table
   const items = data.map((item) => ({

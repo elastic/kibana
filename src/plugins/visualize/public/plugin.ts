@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -31,6 +20,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   Storage,
   createKbnUrlTracker,
@@ -44,23 +34,14 @@ import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/pub
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisEditorConstructor, VisualizeServices } from './application/types';
+import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
-import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import {
-  setUISettings,
-  setApplication,
-  setIndexPatterns,
-  setQueryService,
-  setShareService,
-  setDefaultEditor,
-} from './services';
-import { visualizeFieldAction } from './actions/visualize_field_action';
-import { createVisualizeUrlGenerator } from './url_generator';
+import { setVisEditorsRegistry, setUISettings } from './services';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -72,6 +53,7 @@ export interface VisualizePluginStartDependencies {
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -79,11 +61,10 @@ export interface VisualizePluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
-  uiActions: UiActionsSetup;
 }
 
 export interface VisualizePluginSetup {
-  setDefaultEditor: (editor: VisEditorConstructor) => void;
+  visEditorsRegistry: VisEditorsRegistry;
 }
 
 export class VisualizePlugin
@@ -98,11 +79,13 @@ export class VisualizePlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
 
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, urlForwarding, data, share, uiActions }: VisualizePluginSetupDependencies
+    { home, urlForwarding, data }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -135,19 +118,8 @@ export class VisualizePlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
-    if (share) {
-      share.urlGenerators.registerUrlGenerator(
-        createVisualizeUrlGenerator(async () => {
-          const [coreStart] = await core.getStartServices();
-          return {
-            appBasePath: coreStart.application.getUrlForApp('visualize'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-          };
-        })
-      );
-    }
+
     setUISettings(core.uiSettings);
-    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
       id: 'visualize',
@@ -212,6 +184,7 @@ export class VisualizePlugin
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          presentationUtil: pluginsStart.presentationUtil,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -244,19 +217,12 @@ export class VisualizePlugin
     }
 
     return {
-      setDefaultEditor: (editor) => {
-        setDefaultEditor(editor);
-      },
+      visEditorsRegistry: this.visEditorsRegistry,
     } as VisualizePluginSetup;
   }
 
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
-    setApplication(core.application);
-    setIndexPatterns(plugins.data.indexPatterns);
-    setQueryService(plugins.data.query);
-    if (plugins.share) {
-      setShareService(plugins.share);
-    }
+    setVisEditorsRegistry(this.visEditorsRegistry);
   }
 
   stop() {

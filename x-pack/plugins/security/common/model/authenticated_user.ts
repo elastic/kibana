@@ -8,7 +8,7 @@ import type { AuthenticationProvider, User } from '.';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 
-interface UserRealm {
+export interface UserRealm {
   name: string;
   type: string;
 }

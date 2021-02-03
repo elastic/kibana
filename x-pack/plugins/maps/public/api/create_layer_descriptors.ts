@@ -6,6 +6,7 @@
 
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 
 export const createLayerDescriptors = {
   async createSecurityLayerDescriptors(
@@ -18,5 +19,11 @@ export const createLayerDescriptors = {
   async createBasemapLayerDescriptor(): Promise<LayerDescriptor | null> {
     const mapModules = await lazyLoadMapModules();
     return mapModules.createBasemapLayerDescriptor();
+  },
+  async createESSearchSourceLayerDescriptor(
+    params: CreateLayerDescriptorParams
+  ): Promise<LayerDescriptor> {
+    const mapModules = await lazyLoadMapModules();
+    return mapModules.createESSearchSourceLayerDescriptor(params);
   },
 };

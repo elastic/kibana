@@ -4,6 +4,13 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "expressions", "visualizations", "visDefaultEditor"],
-  "requiredBundles": ["kibanaReact"]
+  "requiredPlugins": [
+    "data",
+    "expressions",
+    "visDefaultEditor",
+    "visualizations"
+  ],
+  "requiredBundles": [
+    "kibanaReact"
+  ]
 }

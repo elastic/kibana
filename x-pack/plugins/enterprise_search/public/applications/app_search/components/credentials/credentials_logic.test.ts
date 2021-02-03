@@ -4,24 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
-
-import { mockHttpValues } from '../../../__mocks__';
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: mockHttpValues },
-}));
-const { http } = mockHttpValues;
-
-jest.mock('../../../shared/flash_messages', () => ({
-  FlashMessagesLogic: { actions: { clearFlashMessages: jest.fn() } },
-  setSuccessMessage: jest.fn(),
-  flashAPIErrors: jest.fn(),
-}));
-import {
-  FlashMessagesLogic,
-  setSuccessMessage,
-  flashAPIErrors,
-} from '../../../shared/flash_messages';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: {
@@ -29,12 +12,19 @@ jest.mock('../../app_logic', () => ({
     values: { myRole: jest.fn(() => ({})) },
   },
 }));
-import { AppLogic } from '../../app_logic';
 
+import { nextTick } from '@kbn/test/jest';
+
+import { AppLogic } from '../../app_logic';
 import { ApiTokenTypes } from './constants';
+
 import { CredentialsLogic } from './credentials_logic';
 
 describe('CredentialsLogic', () => {
+  const { mount } = new LogicMounter(CredentialsLogic);
+  const { http } = mockHttpValues;
+  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+
   const DEFAULT_VALUES = {
     activeApiToken: {
       name: '',
@@ -56,8 +46,6 @@ describe('CredentialsLogic', () => {
     shouldShowCredentialsForm: false,
     fullEngineAccessChecked: false,
   };
-
-  const { mount } = new LogicMounter(CredentialsLogic);
 
   const newToken = {
     id: 1,
@@ -956,7 +944,7 @@ describe('CredentialsLogic', () => {
       describe('listener side-effects', () => {
         it('should clear flashMessages whenever the credentials form flyout is opened', () => {
           CredentialsLogic.actions.showCredentialsForm();
-          expect(FlashMessagesLogic.actions.clearFlashMessages).toHaveBeenCalled();
+          expect(clearFlashMessages).toHaveBeenCalled();
         });
       });
     });
@@ -1074,8 +1062,7 @@ describe('CredentialsLogic', () => {
       it('will call an API endpoint and set the results with the `setCredentialsData` action', async () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
-        const promise = Promise.resolve({ meta, results });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve({ meta, results }));
 
         CredentialsLogic.actions.fetchCredentials(2);
         expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
@@ -1083,21 +1070,18 @@ describe('CredentialsLogic', () => {
             'page[current]': 2,
           },
         });
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.setCredentialsData).toHaveBeenCalledWith(meta, results);
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.fetchCredentials();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1107,12 +1091,11 @@ describe('CredentialsLogic', () => {
         jest
           .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
           .mockImplementationOnce(() => {});
-        const promise = Promise.resolve(credentialsDetails);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(credentialsDetails));
 
         CredentialsLogic.actions.fetchDetails();
         expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
           credentialsDetails
         );
@@ -1120,15 +1103,12 @@ describe('CredentialsLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.fetchDetails();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1138,27 +1118,23 @@ describe('CredentialsLogic', () => {
       it('will call an API endpoint and set the results with the `onApiKeyDelete` action', async () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
-        const promise = Promise.resolve();
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve());
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
         expect(http.delete).toHaveBeenCalledWith(`/api/app_search/credentials/${tokenName}`);
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1172,14 +1148,13 @@ describe('CredentialsLogic', () => {
           activeApiToken: createdToken,
         });
         jest.spyOn(CredentialsLogic.actions, 'onApiTokenCreateSuccess');
-        const promise = Promise.resolve(createdToken);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(createdToken));
 
         CredentialsLogic.actions.onApiTokenChange();
         expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
           body: JSON.stringify(createdToken),
         });
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.onApiTokenCreateSuccess).toHaveBeenCalledWith(createdToken);
         expect(setSuccessMessage).toHaveBeenCalled();
       });
@@ -1200,29 +1175,25 @@ describe('CredentialsLogic', () => {
           },
         });
         jest.spyOn(CredentialsLogic.actions, 'onApiTokenUpdateSuccess');
-        const promise = Promise.resolve(updatedToken);
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve(updatedToken));
 
         CredentialsLogic.actions.onApiTokenChange();
         expect(http.put).toHaveBeenCalledWith('/api/app_search/credentials/test-key', {
           body: JSON.stringify(updatedToken),
         });
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.onApiTokenUpdateSuccess).toHaveBeenCalledWith(updatedToken);
         expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.onApiTokenChange();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
 
       describe('token type data', () => {

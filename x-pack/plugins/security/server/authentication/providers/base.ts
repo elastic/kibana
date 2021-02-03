@@ -10,8 +10,8 @@ import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  ILegacyClusterClient,
   Headers,
+  IClusterClient,
 } from '../../../../../../src/core/server';
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';
@@ -25,7 +25,7 @@ import { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
-  client: ILegacyClusterClient;
+  client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {
@@ -111,9 +111,11 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
-      await this.options.client
-        .asScoped({ headers: { ...request.headers, ...authHeaders } })
-        .callAsCurrentUser('shield.authenticate')
+      (
+        await this.options.client
+          .asScoped({ headers: { ...request.headers, ...authHeaders } })
+          .asCurrentUser.security.authenticate<AuthenticationInfo>()
+      ).body
     );
   }
 

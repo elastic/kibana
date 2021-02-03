@@ -30,6 +30,11 @@ readonly links: {
         readonly metricbeat: {
             readonly base: string;
         };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
+        };
         readonly heartbeat: {
             readonly base: string;
         };
@@ -108,12 +113,39 @@ readonly links: {
         readonly ml: Record<string, string>;
         readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
-        readonly apis: Record<string, string>;
+        readonly apis: Readonly<{
+            createIndex: string;
+            createSnapshotLifecyclePolicy: string;
+            createRoleMapping: string;
+            createRoleMappingTemplates: string;
+            createApiKey: string;
+            createPipeline: string;
+            createTransformRequest: string;
+            executeWatchActionModes: string;
+            indexExists: string;
+            openIndex: string;
+            putComponentTemplate: string;
+            painlessExecute: string;
+            putComponentTemplateMetadata: string;
+            putWatch: string;
+            updateTransform: string;
+        }>;
         readonly observability: Record<string, string>;
         readonly alerting: Record<string, string>;
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
-        readonly security: Record<string, string>;
+        readonly security: Readonly<{
+            apiKeyServiceSettings: string;
+            clusterPrivileges: string;
+            elasticsearchSettings: string;
+            elasticsearchEnableSecurity: string;
+            indicesPrivileges: string;
+            kibanaTLS: string;
+            kibanaPrivileges: string;
+            mappingRoles: string;
+            mappingRolesFieldRules: string;
+            runAsPrivilege: string;
+        }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
     };

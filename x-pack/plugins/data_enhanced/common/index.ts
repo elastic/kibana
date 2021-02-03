@@ -13,7 +13,6 @@ export {
   IAsyncSearchOptions,
   pollSearch,
   SearchSessionSavedObjectAttributes,
-  SearchSessionFindOptions,
   SearchSessionStatus,
   SearchSessionRequestInfo,
 } from './search';

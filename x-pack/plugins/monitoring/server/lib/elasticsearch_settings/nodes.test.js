@@ -10,6 +10,15 @@ describe('Elasticsearch Nodes Settings', () => {
   const getReq = (response) => {
     return {
       server: {
+        newPlatform: {
+          setup: {
+            plugins: {
+              cloud: {
+                isCloudEnabled: false,
+              },
+            },
+          },
+        },
         plugins: {
           elasticsearch: {
             getCluster() {

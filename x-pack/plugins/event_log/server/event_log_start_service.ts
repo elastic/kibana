@@ -5,14 +5,14 @@
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {

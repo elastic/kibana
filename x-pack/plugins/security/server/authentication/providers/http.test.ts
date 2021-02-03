@@ -4,29 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import {
-  LegacyElasticsearchErrorHelpers,
-  ILegacyClusterClient,
-  ScopeableRequest,
-} from '../../../../../../src/core/server';
+import { ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthenticationProvider } from './http';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
   expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
 
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+  expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
 }
 
 describe('HTTPAuthenticationProvider', () => {
@@ -58,7 +56,6 @@ describe('HTTPAuthenticationProvider', () => {
       await expect(provider.login()).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
   });
 
@@ -73,7 +70,6 @@ describe('HTTPAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('does not handle authentication for requests with empty scheme in `authorization` header.', async () => {
@@ -88,7 +84,6 @@ describe('HTTPAuthenticationProvider', () => {
       ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('does not handle authentication via `authorization` header if scheme is not supported.', async () => {
@@ -112,7 +107,6 @@ describe('HTTPAuthenticationProvider', () => {
       }
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('succeeds if authentication via `authorization` header with supported scheme succeeds.', async () => {
@@ -126,8 +120,10 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+          securityMock.createApiResponse({ body: user })
+        );
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 
@@ -149,7 +145,7 @@ describe('HTTPAuthenticationProvider', () => {
     });
 
     it('fails if authentication via `authorization` header with supported scheme fails.', async () => {
-      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      const failureReason = new errors.ResponseError(securityMock.createApiResponse({ body: {} }));
       for (const { schemes, header } of [
         { schemes: ['basic'], header: 'Basic xxx' },
         { schemes: ['bearer'], header: 'Bearer xxx' },
@@ -159,8 +155,10 @@ describe('HTTPAuthenticationProvider', () => {
       ]) {
         const request = httpServerMock.createKibanaRequest({ headers: { authorization: header } });
 
-        const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-        mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+          failureReason
+        );
         mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
         mockOptions.client.asScoped.mockClear();
 
@@ -188,7 +186,6 @@ describe('HTTPAuthenticationProvider', () => {
       await expect(provider.logout()).resolves.toEqual(DeauthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
   });
 

@@ -1,39 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 jest.useFakeTimers();
-
-jest.mock('./lib/parse_querystring', () => ({
-  parseQueryString: () => {
-    return {
-      // Can not access local variable from within a mock
-      // @ts-ignore
-      forceNow: global.nowTime,
-    };
-  },
-}));
 
 import sinon from 'sinon';
 import moment from 'moment';
 import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
 import { TimeRange, RefreshInterval } from '../../../common';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
@@ -42,16 +22,16 @@ const timefilterConfig = {
   timeDefaults: { from: 'now-15m', to: 'now' },
   refreshIntervalDefaults: { pause: false, value: 0 },
 };
-const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history);
+
+const nowProviderMock = createNowProviderMock();
+const timefilter = new Timefilter(timefilterConfig, timefilterSetupMock.history, nowProviderMock);
 
 function stubNowTime(nowTime: any) {
-  // @ts-ignore
-  global.nowTime = nowTime;
+  nowProviderMock.get.mockImplementation(() => (nowTime ? new Date(nowTime) : new Date()));
 }
 
 function clearNowTimeStub() {
-  // @ts-ignore
-  delete global.nowTime;
+  nowProviderMock.get.mockReset();
 }
 
 test('isTimeTouched is initially set to false', () => {

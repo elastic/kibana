@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { createSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
@@ -20,7 +20,7 @@ import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_b
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
 export const createSignalsMigrationRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
   router.post(

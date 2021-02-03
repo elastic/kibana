@@ -109,6 +109,7 @@ describe('copySavedObjectsToSpaces', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         };
 
         return Promise.resolve(response);
@@ -166,6 +167,7 @@ describe('copySavedObjectsToSpaces', () => {
     `);
 
     expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
       excludeExportDetails: true,
       includeReferencesDeep: true,
       namespace,
@@ -201,6 +203,7 @@ describe('copySavedObjectsToSpaces', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         });
       },
     });

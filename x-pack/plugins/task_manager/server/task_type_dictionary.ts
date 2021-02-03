@@ -3,23 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
-import { TaskDefinition, validateTaskDefinition } from './task';
+import { TaskDefinition, taskDefinitionSchema } from './task';
 import { Logger } from '../../../../src/core/server';
 
-/*
- * The TaskManager is the public interface into the task manager system. This glues together
- * all of the disparate modules in one integration point. The task manager operates in two different ways:
- *
- * - pre-init, it allows middleware registration, but disallows task manipulation
- * - post-init, it disallows middleware registration, but allows task manipulation
- *
- * Due to its complexity, this is mostly tested by integration tests (see readme).
- */
-
-/**
- * The public interface into the task manager system.
- */
+export type TaskDefinitionRegistry = Record<
+  string,
+  Omit<TaskDefinition, 'type' | 'timeout'> & Pick<Partial<TaskDefinition>, 'timeout'>
+>;
 export class TaskTypeDictionary {
   private definitions = new Map<string, TaskDefinition>();
   private logger: Logger;
@@ -57,7 +47,7 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>) {
+  public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
@@ -79,10 +69,8 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeTaskDefinitions(
-  taskDefinitions: Record<string, Omit<TaskDefinition, 'type'>>
-): TaskDefinition[] {
-  return Object.entries(taskDefinitions).map(([type, rawDefinition]) =>
-    Joi.attempt<TaskDefinition>({ type, ...rawDefinition }, validateTaskDefinition)
-  );
+export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
+  return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
+    return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
+  });
 }

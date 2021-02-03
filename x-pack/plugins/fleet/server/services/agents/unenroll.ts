@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { getAgent } from './crud';
@@ -25,6 +25,7 @@ export async function unenrollAgent(soClient: SavedObjectsClientContract, agentI
 
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -38,7 +39,7 @@ export async function unenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -70,8 +71,12 @@ export async function unenrollAgents(
   );
 }
 
-export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
+export async function forceUnenrollAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agent = await getAgent(soClient, esClient, agentId);
 
   await Promise.all([
     agent.access_api_key_id
@@ -90,6 +95,7 @@ export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, a
 
 export async function forceUnenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -103,7 +109,7 @@ export async function forceUnenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })

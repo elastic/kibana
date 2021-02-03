@@ -228,7 +228,6 @@ export class FileDataVisualizerView extends Component {
   };
 
   setOverrides = (overrides) => {
-    console.log('setOverrides', overrides);
     this.setState(
       {
         loading: true,

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { ConfigType } from '../config';
 
 import {
@@ -46,7 +45,7 @@ import {
   updateListRoute,
 } from '.';
 
-export const initRoutes = (router: IRouter, config: ConfigType): void => {
+export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void => {
   // lists
   createListRoute(router);
   readListRoute(router);

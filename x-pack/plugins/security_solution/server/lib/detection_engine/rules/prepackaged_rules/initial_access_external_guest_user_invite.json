@@ -8,13 +8,14 @@
   ],
   "from": "now-25m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-azure*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Azure External Guest User Invitation",
   "note": "The Azure Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Invite external user\" and azure.auditlogs.properties.target_resources.*.display_name:guest and event.outcome:Success",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Invite external user\" and azure.auditlogs.properties.target_resources.*.display_name:guest and event.outcome:(Success or success)",
   "references": [
     "https://docs.microsoft.com/en-us/azure/governance/policy/samples/cis-azure-1-1-0"
   ],
@@ -62,5 +63,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

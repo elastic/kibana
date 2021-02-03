@@ -14,5 +14,8 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useServiceNodeOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/nodes`, persistedFilters);
+  return useAPMHref({
+    path: `/services/${serviceName}/nodes`,
+    persistedFilters,
+  });
 }

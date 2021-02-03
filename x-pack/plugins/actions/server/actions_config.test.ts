@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsConfigType } from './types';
+import { ActionsConfig } from './config';
 import {
   getActionsConfigurationUtilities,
   AllowedHosts,
   EnabledActionTypes,
 } from './actions_config';
 
-const DefaultActionsConfig: ActionsConfigType = {
+const defaultActionsConfig: ActionsConfig = {
   enabled: false,
   allowedHosts: [],
   enabledActionTypes: [],
+  preconfigured: {},
+  proxyRejectUnauthorizedCertificates: true,
+  rejectUnauthorized: true,
 };
 
 describe('ensureUriAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
@@ -30,7 +34,7 @@ describe('ensureUriAllowed', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('https://github.com/elastic/kibana')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -39,7 +43,7 @@ describe('ensureUriAllowed', () => {
   });
 
   test('throws when the uri cannot be parsed as a valid URI', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureUriAllowed('github.com/elastic')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -48,7 +52,8 @@ describe('ensureUriAllowed', () => {
   });
 
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
@@ -61,7 +66,8 @@ describe('ensureUriAllowed', () => {
 
 describe('ensureHostnameAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
@@ -72,7 +78,7 @@ describe('ensureHostnameAllowed', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureHostnameAllowed('github.com')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -81,7 +87,8 @@ describe('ensureHostnameAllowed', () => {
   });
 
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
@@ -94,7 +101,8 @@ describe('ensureHostnameAllowed', () => {
 
 describe('isUriAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
@@ -105,21 +113,22 @@ describe('isUriAllowed', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(false);
   });
 
   test('throws when the uri cannot be parsed as a valid URI', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(getActionsConfigurationUtilities(config).isUriAllowed('github.com/elastic')).toEqual(
       false
     );
   });
 
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
@@ -132,7 +141,8 @@ describe('isUriAllowed', () => {
 
 describe('isHostnameAllowed', () => {
   test('returns true when "any" hostnames are allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [AllowedHosts.Any],
       enabledActionTypes: [],
@@ -141,12 +151,13 @@ describe('isHostnameAllowed', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the allowedHosts', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(getActionsConfigurationUtilities(config).isHostnameAllowed('github.com')).toEqual(false);
   });
 
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: ['github.com'],
       enabledActionTypes: [],
@@ -157,7 +168,8 @@ describe('isHostnameAllowed', () => {
 
 describe('isActionTypeEnabled', () => {
   test('returns true when "any" actionTypes are allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', EnabledActionTypes.Any],
@@ -166,7 +178,8 @@ describe('isActionTypeEnabled', () => {
   });
 
   test('returns false when no actionType is allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: [],
@@ -175,7 +188,8 @@ describe('isActionTypeEnabled', () => {
   });
 
   test('returns false when the actionType is not in the enabled list', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['foo'],
@@ -184,7 +198,8 @@ describe('isActionTypeEnabled', () => {
   });
 
   test('returns true when the actionType is in the enabled list', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', 'foo'],
@@ -195,7 +210,8 @@ describe('isActionTypeEnabled', () => {
 
 describe('ensureActionTypeEnabled', () => {
   test('does not throw when any actionType is allowed', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', EnabledActionTypes.Any],
@@ -204,7 +220,7 @@ describe('ensureActionTypeEnabled', () => {
   });
 
   test('throws when no actionType is not allowed', () => {
-    const config: ActionsConfigType = DefaultActionsConfig;
+    const config: ActionsConfig = defaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -213,7 +229,8 @@ describe('ensureActionTypeEnabled', () => {
   });
 
   test('throws when actionType is not enabled', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore'],
@@ -226,7 +243,8 @@ describe('ensureActionTypeEnabled', () => {
   });
 
   test('does not throw when actionType is enabled', () => {
-    const config: ActionsConfigType = {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
       enabled: false,
       allowedHosts: [],
       enabledActionTypes: ['ignore', 'foo'],

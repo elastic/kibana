@@ -10,7 +10,7 @@
   &__imageContainer {
     max-height: 115px;
     overflow: hidden;
-    background-color: #0076cc;
+    background-color: #0076CC;
 
     @include euiBreakpoint('s', 'm', 'l', 'xl') {
       max-height: none;

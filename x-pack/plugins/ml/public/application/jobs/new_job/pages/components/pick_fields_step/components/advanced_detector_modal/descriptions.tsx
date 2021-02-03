@@ -46,7 +46,7 @@ export const FieldDescription: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.fieldSelect.description"
-          defaultMessage="Required for functions: sum, mean, median, max, min, info_content, distinct_count."
+          defaultMessage="Required for functions: sum, mean, median, max, min, info_content, distinct_count, lat_long."
         />
       }
     >

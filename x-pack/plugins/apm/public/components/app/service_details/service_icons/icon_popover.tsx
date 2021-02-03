@@ -35,10 +35,7 @@ export function IconPopover({
   if (!icon) {
     return null;
   }
-  const isLoading =
-    detailsFetchStatus === FETCH_STATUS.LOADING ||
-    detailsFetchStatus === FETCH_STATUS.PENDING;
-
+  const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
   return (
     <EuiPopover
       anchorPosition="downCenter"

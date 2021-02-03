@@ -20,7 +20,7 @@ cd kibana
 
 Install the version of Node.js listed in the `.node-version` file. This
 can be automated with tools such as
-https://github.com/creationix/nvm[nvm],
+https://github.com/nvm-sh/nvm[nvm],
 https://github.com/coreybutler/nvm-windows[nvm-windows] or
 https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
 you can switch to the correct version when using nvm by running:

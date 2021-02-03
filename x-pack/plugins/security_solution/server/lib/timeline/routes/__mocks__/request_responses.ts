@@ -73,7 +73,7 @@ export const inputTimeline: SavedTimeline = {
   templateTimelineVersion: 1,
   dateRange: { start: '2020-03-26T12:50:05.527Z', end: '2020-03-27T12:50:05.527Z' },
   savedQueryId: null,
-  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
 };
 
 export const inputTemplateTimeline = {
@@ -289,7 +289,7 @@ export const mockTimelines = () => ({
       title: 'test no.2',
       dateRange: { start: '2020-02-24T10:09:11.145Z', end: '2020-02-25T10:09:11.145Z' },
       savedQueryId: null,
-      sort: { columnId: '@timestamp', sortDirection: 'desc' },
+      sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
       created: 1582625382448,
       createdBy: 'elastic',
       updated: 1583741197521,
@@ -371,7 +371,7 @@ export const mockTimelines = () => ({
       title: 'test no.3',
       dateRange: { start: '2020-02-24T10:09:11.145Z', end: '2020-02-25T10:09:11.145Z' },
       savedQueryId: null,
-      sort: { columnId: '@timestamp', sortDirection: 'desc' },
+      sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
       created: 1582642817439,
       createdBy: 'elastic',
       updated: 1583741175216,

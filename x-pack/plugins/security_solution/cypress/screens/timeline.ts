@@ -70,6 +70,8 @@ export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
+export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
+
 export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
@@ -82,7 +84,7 @@ export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
+  '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
 
 export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 
@@ -110,6 +112,8 @@ export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiPro
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
+
+export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
 
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';

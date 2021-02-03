@@ -6,28 +6,25 @@
 
 import '../../../__mocks__/react_router_history.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
-jest.mock('../../../shared/flash_messages', () => ({
-  setQueuedErrorMessage: jest.fn(),
-}));
-import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
+import { AnalyticsRouter } from '../analytics';
 
-import { EngineRouter } from './';
+import { EngineRouter } from './engine_router';
 
 describe('EngineRouter', () => {
   const values = {
+    ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
     myRole: {},
-    engineName: 'some-engine',
   };
   const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
 
@@ -57,6 +54,7 @@ describe('EngineRouter', () => {
   });
 
   it('redirects to engines list and flashes an error if the engine param was not found', () => {
+    const { setQueuedErrorMessage } = mockFlashMessageHelpers;
     setMockValues({ ...values, engineNotFound: true, engineName: '404-engine' });
     const wrapper = shallow(<EngineRouter />);
 
@@ -93,6 +91,6 @@ describe('EngineRouter', () => {
     setMockValues({ ...values, myRole: { canViewEngineAnalytics: true } });
     const wrapper = shallow(<EngineRouter />);
 
-    expect(wrapper.find('[data-test-subj="AnalyticsTODO"]')).toHaveLength(1);
+    expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
   });
 });

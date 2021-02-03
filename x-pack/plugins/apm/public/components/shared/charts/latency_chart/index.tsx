@@ -100,7 +100,7 @@ export function LatencyChart({ height }: Props) {
           id="latencyChart"
           timeseries={latencyTimeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalySeries={anomalyTimeseries}
+          anomalyTimeseries={anomalyTimeseries}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

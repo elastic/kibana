@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import { EuiTheme } from '../../../../../../xpack_legacy/common';
+import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 
 type SpacingOptions = keyof EuiTheme['eui']['spacerSizes'];
 

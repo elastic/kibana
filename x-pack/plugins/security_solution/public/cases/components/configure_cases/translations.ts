@@ -162,7 +162,7 @@ export const SAVE = i18n.translate('xpack.securitySolution.case.configureCases.s
 export const SAVE_CLOSE = i18n.translate(
   'xpack.securitySolution.case.configureCases.saveAndCloseButton',
   {
-    defaultMessage: 'Save & Close',
+    defaultMessage: 'Save & close',
   }
 );
 

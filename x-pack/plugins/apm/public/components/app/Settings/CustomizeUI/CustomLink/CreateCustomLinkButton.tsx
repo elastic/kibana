@@ -6,24 +6,14 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { NO_PERMISSION_LABEL } from '../../../../../../common/custom_link';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
   const { core } = useApmPluginContext();
   const canSave = core.application.capabilities.apm.save;
   return (
-    <EuiToolTip
-      content={
-        !canSave &&
-        i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.noPermissionTooltipLabel',
-          {
-            defaultMessage:
-              "Your user role doesn't have permissions to create custom links",
-          }
-        )
-      }
-    >
+    <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
       <EuiButton
         color="primary"
         fill

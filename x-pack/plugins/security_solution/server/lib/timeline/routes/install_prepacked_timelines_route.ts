@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../common/constants';
 
@@ -22,7 +22,7 @@ import { checkTimelineStatusRt } from './schemas/check_timelines_status_schema';
 import { buildFrameworkRequest } from './utils/common';
 
 export const installPrepackedTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {

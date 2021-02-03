@@ -83,6 +83,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     typeof LocalUIFilters
   > = useMemo(
     () => ({
+      shouldFetch: !!transactionType,
       filterNames: [
         'transactionResult',
         'host',
@@ -101,13 +102,13 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName || !transactionType) {
+  if (!serviceName) {
     return null;
   }
 
   return (
     <>
-      <SearchBar />
+      <SearchBar showTimeComparison />
 
       <EuiPage>
         <EuiFlexGroup>
@@ -122,7 +123,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           <EuiFlexItem grow={7}>
             {transactionType === TRANSACTION_PAGE_LOAD && (
               <>
-                <UserExperienceCallout />
+                <UserExperienceCallout serviceName={serviceName} />
                 <EuiSpacer size="s" />
               </>
             )}

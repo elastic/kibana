@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-
+import type { ListsPluginRouter } from '../types';
 import { EXCEPTION_LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { exportExceptionListQuerySchema } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils';
 
-export const exportExceptionListRoute = (router: IRouter): void => {
+export const exportExceptionListRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {

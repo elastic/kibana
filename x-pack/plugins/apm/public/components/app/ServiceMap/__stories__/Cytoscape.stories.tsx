@@ -7,7 +7,7 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Cytoscape } from '../Cytoscape';
 import { iconForNode } from '../icons';
 import { Centerer } from './centerer';
@@ -186,6 +186,13 @@ export function NodeIcons() {
     },
     {
       data: {
+        id: 'erlang',
+        'service.name': 'erlang service',
+        'agent.name': 'erlang',
+      },
+    },
+    {
+      data: {
         id: 'go',
         'service.name': 'go service',
         'agent.name': 'go',
@@ -217,6 +224,13 @@ export function NodeIcons() {
         id: 'nodejs',
         'service.name': 'nodejs service',
         'agent.name': 'nodejs',
+      },
+    },
+    {
+      data: {
+        id: 'ocaml',
+        'service.name': 'ocaml service',
+        'agent.name': 'ocaml',
       },
     },
     {

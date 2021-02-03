@@ -309,8 +309,7 @@ export class ValidateJobUI extends Component {
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
-    const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
+    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

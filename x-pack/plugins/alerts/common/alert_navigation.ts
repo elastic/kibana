@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JsonObject } from '../../infra/common/typed_json';
+import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
+
 export interface AlertUrlNavigation {
   path: string;
 }

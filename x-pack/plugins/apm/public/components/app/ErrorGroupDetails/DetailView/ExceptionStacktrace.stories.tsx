@@ -5,7 +5,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
 import { ExceptionStacktrace } from './ExceptionStacktrace';
 

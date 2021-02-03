@@ -14,7 +14,7 @@ import { deepFreeze } from '@kbn/std';
 import { Space } from '../../../spaces/server';
 import { authorizationMock } from '../authorization/index.mock';
 import { AuthorizationServiceSetup } from '../authorization';
-import { GetAllSpacesPurpose } from '../../../spaces/common/model/types';
+import { GetAllSpacesPurpose } from '../../../spaces/server';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SavedObjectsErrorHelpers } from 'src/core/server';

@@ -356,12 +356,16 @@ function mockHealthStats(overrides = {}) {
           timestamp: new Date().toISOString(),
           value: {
             drift: [1000, 60000],
+            load: [0, 100, 75],
             execution: {
               duration: [],
               result_frequency_percent_as_number: [],
             },
             polling: {
               last_successful_poll: new Date().toISOString(),
+              duration: [500, 400, 3000],
+              claim_conflicts: [0, 100, 75],
+              claim_mismatches: [0, 100, 75],
               result_frequency_percent_as_number: [
                 'NoTasksClaimed',
                 'NoTasksClaimed',

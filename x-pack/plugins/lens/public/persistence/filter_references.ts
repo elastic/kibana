@@ -22,14 +22,18 @@ export function extractFilterReferences(
       type: 'index-pattern',
       id: filterRow.meta.index,
     });
-    return {
+    const newFilter = {
       ...filterRow,
       meta: {
         ...filterRow.meta,
         indexRefName: refName,
-        index: undefined,
       },
     };
+    // remove index because it's specified by indexRefName
+    delete newFilter.meta.index;
+    // remove value because it can't be persisted
+    delete newFilter.meta.value;
+    return newFilter;
   });
 
   return { persistableFilters, references };

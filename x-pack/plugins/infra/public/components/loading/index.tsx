@@ -7,7 +7,7 @@
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 interface InfraLoadingProps {
   text: string | JSX.Element;

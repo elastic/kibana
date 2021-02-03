@@ -3,23 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    watcher?: WatcherContext;
-  }
-}
-
 import {
   CoreSetup,
   ILegacyCustomClusterClient,
-  ILegacyScopedClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from 'kibana/server';
 import { PLUGIN, INDEX_NAMES } from '../common/constants';
-import { Dependencies, LicenseStatus, RouteDependencies } from './types';
+import type {
+  Dependencies,
+  LicenseStatus,
+  RouteDependencies,
+  WatcherRequestHandlerContext,
+} from './types';
 
 import { registerSettingsRoutes } from './routes/api/settings';
 import { registerIndicesRoutes } from './routes/api/indices';
@@ -29,10 +26,6 @@ import { registerWatchRoutes } from './routes/api/watch';
 import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
 import { elasticsearchJsPlugin } from './lib/elasticsearch_js_plugin';
-
-export interface WatcherContext {
-  client: ILegacyScopedClusterClient;
-}
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
@@ -53,7 +46,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   }
 
   async setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies) {
-    const router = http.createRouter();
+    const router = http.createRouter<WatcherRequestHandlerContext>();
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
@@ -85,12 +78,15 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('watcher', async (ctx, request) => {
-      this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.watcherESClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<WatcherRequestHandlerContext, 'watcher'>(
+      'watcher',
+      async (ctx, request) => {
+        this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.watcherESClient.asScoped(request),
+        };
+      }
+    );
 
     registerListFieldsRoute(routeDependencies);
     registerLoadHistoryRoute(routeDependencies);

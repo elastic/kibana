@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { InfraRequestHandlerContext } from '../../types';
+import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
 import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
@@ -13,12 +12,11 @@ import {
   logEntryCategoriesJobTypes,
   logEntryRateJobTypes,
   jobCustomSettingsRT,
-} from '../../../common/log_analysis';
-import {
-  Sort,
+  LogEntryAnomalyDatasets,
+  AnomaliesSort,
   Pagination,
-  GetLogEntryAnomaliesRequestPayload,
-} from '../../../common/http_api/log_analysis';
+  isCategoryAnomaly,
+} from '../../../common/log_analysis';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
 import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
@@ -92,13 +90,13 @@ async function getCompatibleAnomaliesJobIds(
 }
 
 export async function getLogEntryAnomalies(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
   endTime: number,
-  sort: Sort,
+  sort: AnomaliesSort,
   pagination: Pagination,
-  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+  datasets?: LogEntryAnomalyDatasets
 ) {
   const finalizeLogEntryAnomaliesSpan = startTracingSpan('get log entry anomalies');
 
@@ -132,7 +130,7 @@ export async function getLogEntryAnomalies(
     datasets
   );
 
-  const data = anomalies.map((anomaly) => {
+  const parsedAnomalies = anomalies.map((anomaly) => {
     const { jobId } = anomaly;
 
     if (!anomaly.categoryId) {
@@ -142,10 +140,41 @@ export async function getLogEntryAnomalies(
     }
   });
 
+  const categoryIds = parsedAnomalies.reduce<number[]>((acc, anomaly) => {
+    return isCategoryAnomaly(anomaly) ? [...acc, parseInt(anomaly.categoryId, 10)] : acc;
+  }, []);
+
+  const logEntryCategoriesCountJobId = getJobId(
+    context.infra.spaceId,
+    sourceId,
+    logEntryCategoriesJobTypes[0]
+  );
+
+  const { logEntryCategoriesById } = await fetchLogEntryCategories(
+    context,
+    logEntryCategoriesCountJobId,
+    categoryIds
+  );
+
+  const parsedAnomaliesWithExpandedCategoryInformation = parsedAnomalies.map((anomaly) => {
+    if (isCategoryAnomaly(anomaly)) {
+      if (logEntryCategoriesById[parseInt(anomaly.categoryId, 10)]) {
+        const {
+          _source: { regex, terms },
+        } = logEntryCategoriesById[parseInt(anomaly.categoryId, 10)];
+        return { ...anomaly, ...{ categoryRegex: regex, categoryTerms: terms } };
+      } else {
+        return { ...anomaly, ...{ categoryRegex: '', categoryTerms: '' } };
+      }
+    } else {
+      return anomaly;
+    }
+  });
+
   const logEntryAnomaliesSpan = finalizeLogEntryAnomaliesSpan();
 
   return {
-    data,
+    data: parsedAnomaliesWithExpandedCategoryInformation,
     paginationCursors,
     hasMoreEntries,
     timing: {
@@ -209,9 +238,9 @@ async function fetchLogEntryAnomalies(
   jobIds: string[],
   startTime: number,
   endTime: number,
-  sort: Sort,
+  sort: AnomaliesSort,
   pagination: Pagination,
-  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+  datasets?: LogEntryAnomalyDatasets
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -291,7 +320,7 @@ async function fetchLogEntryAnomalies(
 }
 
 export async function getLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -353,7 +382,7 @@ export async function getLogEntryExamples(
 }
 
 export async function fetchLogEntryExamples(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
+  context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   indices: string,
   timestampField: string,

@@ -10,13 +10,17 @@ import { act, waitFor } from '@testing-library/react';
 
 import { useForm, Form } from '../../../shared_imports';
 import { SubmitCaseButton } from './submit_button';
+import { schema, FormProps } from './schema';
 
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ title: string }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { title: 'My title' },
+      schema: {
+        title: schema.title,
+      },
       onSubmit,
     });
 

@@ -9,7 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { CopyModeControl } from './copy_mode_control';
@@ -177,6 +177,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -195,6 +196,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -259,10 +261,12 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
     });
 
@@ -319,6 +323,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 5,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -359,6 +364,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -366,6 +372,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-2': {
         success: true,
         successCount: 2,
+        warnings: [],
       },
     });
 
@@ -490,6 +497,7 @@ describe('CopyToSpaceFlyout', () => {
           },
         ],
         successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+        warnings: [],
       },
     });
 
@@ -571,6 +579,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -583,6 +592,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 

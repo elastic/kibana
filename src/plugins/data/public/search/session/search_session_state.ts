@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import uuid from 'uuid';
@@ -105,6 +94,11 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
    * If user has explicitly canceled search requests
    */
   isCanceled: boolean;
+
+  /**
+   * Start time of current session
+   */
+  startTime?: Date;
 }
 
 const createSessionDefaultState: <
@@ -132,7 +126,11 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => () => ({ ...createSessionDefaultState(), sessionId: uuid.v4() }),
+  start: (state) => () => ({
+    ...createSessionDefaultState(),
+    sessionId: uuid.v4(),
+    startTime: new Date(),
+  }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
     sessionId,
@@ -216,6 +214,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
 ): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SearchSessionState>;
+  sessionStartTime$: Observable<Date | undefined>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -229,8 +228,16 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     distinctUntilChanged(),
     shareReplay(1)
   );
+
+  const sessionStartTime$: Observable<Date | undefined> = stateContainer.state$.pipe(
+    map(() => stateContainer.get().startTime),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   return {
     stateContainer,
     sessionState$,
+    sessionStartTime$,
   };
 };

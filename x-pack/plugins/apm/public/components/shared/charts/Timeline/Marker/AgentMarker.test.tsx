@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { AgentMarker } from './AgentMarker';
 import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
-import { EuiThemeProvider } from '../../../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 describe('AgentMarker', () => {
   const mark = {

@@ -82,6 +82,7 @@ export const Controls: FC<Props> = React.memo(
     const [isPopoverOpen, setPopover] = useState<boolean>(false);
     const [didUntag, setDidUntag] = useState<boolean>(false);
 
+    const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
     const {
@@ -201,6 +202,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiContextMenuItem
               key={`${nodeId}-delete`}
               icon="trash"
+              disabled={!canDeleteDataFrameAnalytics}
               onClick={() => {
                 openDeleteJobCheckModal({ config: details[nodeId], stats: details[nodeId]?.stats });
               }}
@@ -210,7 +212,12 @@ export const Controls: FC<Props> = React.memo(
                 defaultMessage="Delete job"
               />
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key={`${nodeId}-clone`} icon="copy" onClick={onCloneJobClick}>
+            <EuiContextMenuItem
+              key={`${nodeId}-clone`}
+              icon="copy"
+              disabled={!canCreateDataFrameAnalytics}
+              onClick={onCloneJobClick}
+            >
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
                 defaultMessage="Clone job"
@@ -221,6 +228,7 @@ export const Controls: FC<Props> = React.memo(
       ...(nodeType === JOB_MAP_NODE_TYPES.INDEX
         ? [
             <EuiContextMenuItem
+              disabled={!canCreateDataFrameAnalytics}
               key={`${nodeId}-create`}
               icon="plusInCircle"
               onClick={onCreateJobClick}

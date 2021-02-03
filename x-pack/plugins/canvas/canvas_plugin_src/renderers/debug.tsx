@@ -26,9 +26,11 @@ export const debug: RendererFactory<any> = () => ({
 
     ReactDOM.render(renderDebug(), domNode, () => handlers.done());
 
-    handlers.onResize(() => {
-      ReactDOM.render(renderDebug(), domNode, () => handlers.done());
-    });
+    if (handlers.onResize) {
+      handlers.onResize(() => {
+        ReactDOM.render(renderDebug(), domNode, () => handlers.done());
+      });
+    }
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UserInputError } from 'apollo-server-errors';
-
-import { JsonObject } from '../../common/typed_json';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
 export const parseFilterQuery = (
   filterQuery: string | null | undefined
@@ -26,9 +24,6 @@ export const parseFilterQuery = (
       return undefined;
     }
   } catch (err) {
-    throw new UserInputError(`Failed to parse query: ${err}`, {
-      query: filterQuery,
-      originalError: err,
-    });
+    throw new Error(`Failed to parse query: ${err}`);
   }
 };

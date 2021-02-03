@@ -406,6 +406,18 @@ export const AlertsList: React.FunctionComponent = () => {
       selectedStatuses={alertStatusesFilter}
       onChange={(ids: string[]) => setAlertStatusesFilter(ids)}
     />,
+    <EuiButtonEmpty
+      data-test-subj="refreshAlertsButton"
+      iconType="refresh"
+      onClick={loadAlertsData}
+      name="refresh"
+      color="primary"
+    >
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
+        defaultMessage="Refresh"
+      />
+    </EuiButtonEmpty>,
   ];
 
   const authorizedToModifySelectedAlerts = selectedIds.length

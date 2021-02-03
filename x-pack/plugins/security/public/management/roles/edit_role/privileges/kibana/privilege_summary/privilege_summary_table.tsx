@@ -18,7 +18,7 @@ import {
   EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { FeatureTableCell } from '../feature_table_cell';

@@ -12,6 +12,7 @@ import 'moment-timezone';
 import ReactDOM from 'react-dom';
 
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+// @ts-ignore
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
@@ -52,6 +53,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
   };
 });
 
+// @ts-ignore
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');

@@ -56,9 +56,11 @@ describe('health check', () => {
   });
 
   it('renders children if keys are enabled', async () => {
-    useKibanaMock().services.http.get = jest
-      .fn()
-      .mockResolvedValue({ isSufficientlySecure: true, hasPermanentEncryptionKey: true });
+    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+      isAlertsAvailable: true,
+    });
     const { queryByText } = render(
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
@@ -72,10 +74,11 @@ describe('health check', () => {
     expect(queryByText('should render')).toBeInTheDocument();
   });
 
-  test('renders warning if keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
+  test('renders warning if TLS is required', async () => {
+    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       isSufficientlySecure: false,
       hasPermanentEncryptionKey: true,
+      isAlertsAvailable: true,
     }));
     const { queryAllByText } = render(
       <HealthContextProvider>
@@ -104,9 +107,10 @@ describe('health check', () => {
   });
 
   test('renders warning if encryption key is ephemeral', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
+    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: false,
+      isAlertsAvailable: true,
     }));
     const { queryByText, queryByRole } = render(
       <HealthContextProvider>
@@ -121,7 +125,7 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how.(opens in a new tab or window)"`
+      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. Learn how.(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
@@ -132,9 +136,10 @@ describe('health check', () => {
   });
 
   test('renders warning if encryption key is ephemeral and keys are disabled', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementationOnce(async () => ({
+    useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       isSufficientlySecure: false,
       hasPermanentEncryptionKey: false,
+      isAlertsAvailable: true,
     }));
 
     const { queryByText } = render(

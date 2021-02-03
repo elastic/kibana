@@ -7,6 +7,7 @@
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
 
 export interface MapsStartApi {
   createLayerDescriptors: {
@@ -15,6 +16,9 @@ export interface MapsStartApi {
       indexPatternTitle: string
     ) => Promise<LayerDescriptor[]>;
     createBasemapLayerDescriptor: () => Promise<LayerDescriptor | null>;
+    createESSearchSourceLayerDescriptor: (
+      params: CreateLayerDescriptorParams
+    ) => Promise<LayerDescriptor>;
   };
   registerLayerWizard(layerWizard: LayerWizard): Promise<void>;
   registerSource(entry: SourceRegistryEntry): Promise<void>;

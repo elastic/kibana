@@ -19,6 +19,8 @@ export {
   isRoleDeprecated,
   isRoleReadOnly,
   isRoleReserved,
+  isRoleSystem,
+  isRoleAdmin,
   isRoleEnabled,
   prepareRoleClone,
   getExtendedRoleDeprecationNotice,

@@ -20,9 +20,8 @@ export interface IKbnUrlStateStorage extends IStateStorage
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [cancel](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.cancel.md) | <code>() =&gt; void</code> | cancels any pending url updates |
 |  [change$](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.change_.md) | <code>&lt;State = unknown&gt;(key: string) =&gt; Observable&lt;State &#124; null&gt;</code> |  |
-|  [flush](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.flush.md) | <code>(opts?: {</code><br/><code>        replace?: boolean;</code><br/><code>    }) =&gt; boolean</code> | Synchronously runs any pending url updates, returned boolean indicates if change occurred. |
 |  [get](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.get.md) | <code>&lt;State = unknown&gt;(key: string) =&gt; State &#124; null</code> |  |
+|  [kbnUrlControls](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.kbnurlcontrols.md) | <code>IKbnUrlControls</code> | Lower level wrapper around history library that handles batching multiple URL updates into one history change |
 |  [set](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.set.md) | <code>&lt;State&gt;(key: string, state: State, opts?: {</code><br/><code>        replace: boolean;</code><br/><code>    }) =&gt; Promise&lt;string &#124; undefined&gt;</code> |  |
 

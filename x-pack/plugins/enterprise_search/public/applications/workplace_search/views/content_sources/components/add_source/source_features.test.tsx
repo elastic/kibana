@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../../__mocks__/kea.mock';
-import '../../../../../__mocks__/shallow_useeffect.mock';
-
 import { mountAsync, setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';

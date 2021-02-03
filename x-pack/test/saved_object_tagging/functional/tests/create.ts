@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await tagModal.openCreate();
       await tagModal.fillForm(
         {
-          name: 'invalid&$%name',
+          name: 'a',
           description: 'The name will fails validation',
           color: '#FF00CC',
         },
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await tagModal.openCreate();
       await tagModal.fillForm(
         {
-          name: 'invalid&$%name',
+          name: 'a',
           description: 'The name will fails validation',
           color: '#FF00CC',
         },

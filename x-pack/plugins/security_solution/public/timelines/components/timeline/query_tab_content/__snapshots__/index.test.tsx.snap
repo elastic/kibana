@@ -283,6 +283,7 @@ In other use cases the message field can be used to concatenate different values
     Array [
       Object {
         "columnId": "@timestamp",
+        "columnType": "number",
         "sortDirection": "desc",
       },
     ]

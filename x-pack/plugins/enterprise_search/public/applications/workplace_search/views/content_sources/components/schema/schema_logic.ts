@@ -17,7 +17,7 @@ import { OptionValue } from '../../../../types';
 import {
   flashAPIErrors,
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
@@ -46,7 +46,6 @@ interface SchemaActions {
   }): { schema: Schema; formUnchanged: boolean };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
-  showFieldSuccess(successMessage: string): string;
   setFieldName(rawFieldName: string): string;
   setFilterValue(filterValue: string): string;
   addNewField(
@@ -111,7 +110,7 @@ interface SchemaChangeErrorsProps {
   fieldCoercionErrors: FieldCoercionErrors;
 }
 
-const dataTypeOptions = [
+export const dataTypeOptions = [
   { value: 'text', text: 'Text' },
   { value: 'date', text: 'Date' },
   { value: 'number', text: 'Number' },
@@ -132,7 +131,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     }),
     onIndexingComplete: (numDocumentsWithErrors: number) => numDocumentsWithErrors,
     resetMostRecentIndexJob: (emptyReindexJob: IndexJob) => emptyReindexJob,
-    showFieldSuccess: (successMessage: string) => successMessage,
     setFieldName: (rawFieldName: string) => rawFieldName,
     setFilterValue: (filterValue: string) => filterValue,
     openAddFieldModal: () => true,
@@ -326,7 +324,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const emptyReindexJob = {
         percentageComplete: 100,
         numDocumentsWithErrors: 0,
-        activeReindexJobId: 0,
+        activeReindexJobId: '',
         isActive: false,
       };
 
@@ -348,10 +346,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       }
     },
     resetMostRecentIndexJob: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetSchemaState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

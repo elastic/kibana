@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject } from 'rxjs';
 import {
   Embeddable,
   LensByValueInput,
@@ -13,13 +12,7 @@ import {
   LensEmbeddableInput,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import {
-  Query,
-  TimeRange,
-  Filter,
-  TimefilterContract,
-  IndexPatternsContract,
-} from 'src/plugins/data/public';
+import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
@@ -213,8 +206,6 @@ describe('embeddable', () => {
       filters,
       searchSessionId: 'searchSessionId',
     });
-
-    expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -537,50 +528,5 @@ describe('embeddable', () => {
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-  });
-
-  it('should re-render on auto refresh fetch observable', async () => {
-    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
-
-    const autoRefreshFetchSubject = new Subject();
-    const timefilter = ({
-      getAutoRefreshFetch$: () => autoRefreshFetchSubject.asObservable(),
-    } as unknown) as TimefilterContract;
-
-    const embeddable = new Embeddable(
-      {
-        timefilter,
-        attributeService,
-        expressionRenderer,
-        basePath,
-        indexPatternService: {} as IndexPatternsContract,
-        editable: true,
-        getTrigger,
-        documentToExpression: () =>
-          Promise.resolve({
-            type: 'expression',
-            chain: [
-              { type: 'function', function: 'my', arguments: {} },
-              { type: 'function', function: 'expression', arguments: {} },
-            ],
-          }),
-      },
-      { id: '123', timeRange, query, filters } as LensEmbeddableInput
-    );
-    await embeddable.initializeSavedVis({
-      id: '123',
-      timeRange,
-      query,
-      filters,
-    } as LensEmbeddableInput);
-    embeddable.render(mountpoint);
-
-    act(() => {
-      autoRefreshFetchSubject.next();
-    });
-
-    expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 });

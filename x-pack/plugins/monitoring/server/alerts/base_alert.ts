@@ -290,7 +290,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;

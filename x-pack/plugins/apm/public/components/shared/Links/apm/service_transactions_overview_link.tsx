@@ -17,18 +17,28 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useServiceOrTransactionsOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}`, persistedFilters);
+export function useServiceOrTransactionsOverviewHref(
+  serviceName: string,
+  environment?: string
+) {
+  const query = environment ? { environment } : {};
+  return useAPMHref({
+    path: `/services/${serviceName}`,
+    persistedFilters,
+    query,
+  });
 }
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
 }
 
 export function ServiceOrTransactionsOverviewLink({
   serviceName,
+  environment,
   ...rest
 }: Props) {
-  const href = useServiceOrTransactionsOverviewHref(serviceName);
+  const href = useServiceOrTransactionsOverviewHref(serviceName, environment);
   return <EuiLink href={href} {...rest} />;
 }

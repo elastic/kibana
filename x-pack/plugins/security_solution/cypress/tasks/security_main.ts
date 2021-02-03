@@ -5,6 +5,7 @@
  */
 
 import {
+  CLOSE_TIMELINE_BUTTON,
   MAIN_PAGE,
   TIMELINE_TOGGLE_BUTTON,
   TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON,
@@ -16,6 +17,10 @@ export const openTimelineUsingToggle = () => {
 
 export const closeTimelineUsingToggle = () => {
   cy.get(TIMELINE_TOGGLE_BUTTON).filter(':visible').click();
+};
+
+export const closeTimelineUsingCloseButton = () => {
+  cy.get(CLOSE_TIMELINE_BUTTON).filter(':visible').click();
 };
 
 export const openTimelineIfClosed = () =>

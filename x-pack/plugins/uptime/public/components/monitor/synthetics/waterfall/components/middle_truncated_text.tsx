@@ -7,6 +7,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { FIXED_AXIS_HEIGHT } from './constants';
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -29,10 +30,12 @@ const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 const LastChunk = styled.span`
   flex-shrink: 0;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 export const getChunks = (text: string) => {

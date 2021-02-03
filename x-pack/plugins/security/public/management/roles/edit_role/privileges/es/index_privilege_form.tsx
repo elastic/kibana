@@ -128,6 +128,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
+                onCreateOption={this.onCreateCustomPrivilege}
                 isDisabled={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
@@ -387,6 +388,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
+    });
+  };
+
+  private onCreateCustomPrivilege = (customPrivilege: string) => {
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      privileges: [...this.props.indexPrivilege.privileges, customPrivilege],
     });
   };
 

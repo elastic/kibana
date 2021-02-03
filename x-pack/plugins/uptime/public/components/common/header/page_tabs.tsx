@@ -10,6 +10,8 @@ import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
+import { useGetUrlParams } from '../../../hooks';
+import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 
 const tabs = [
   {
@@ -39,6 +41,8 @@ export const PageTabs = () => {
 
   const history = useHistory();
 
+  const params = useGetUrlParams();
+
   const isOverView = useRouteMatch(OVERVIEW_ROUTE);
   const isSettings = useRouteMatch(SETTINGS_ROUTE);
   const isCerts = useRouteMatch(CERTIFICATES_ROUTE);
@@ -58,6 +62,15 @@ export const PageTabs = () => {
     }
   }, [isCerts, isSettings, isOverView]);
 
+  const createHrefForTab = (id: string) => {
+    if (selectedTabId === OVERVIEW_ROUTE && id === OVERVIEW_ROUTE) {
+      // If we are already on overview route and user clicks again on overview tabs,
+      // we will reset the filters
+      return history.createHref({ pathname: id });
+    }
+    return history.createHref({ pathname: id, search: stringifyUrlParams(params, true) });
+  };
+
   const renderTabs = () => {
     return tabs.map(({ dataTestSubj, name, id }, index) => (
       <EuiTab
@@ -65,7 +78,7 @@ export const PageTabs = () => {
         isSelected={id === selectedTabId}
         key={index}
         data-test-subj={dataTestSubj}
-        href={history.createHref({ pathname: id })}
+        href={createHrefForTab(id)}
       >
         {name}
       </EuiTab>

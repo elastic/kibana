@@ -32,9 +32,16 @@
       },
       "technique": [
         {
-          "id": "T1085",
-          "name": "Rundll32",
-          "reference": "https://attack.mitre.org/techniques/T1085/"
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.011",
+              "name": "Rundll32",
+              "reference": "https://attack.mitre.org/techniques/T1218/011/"
+            }
+          ]
         }
       ]
     }

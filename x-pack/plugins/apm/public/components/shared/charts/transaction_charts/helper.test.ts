@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getResponseTimeTickFormatter,
-  getResponseTimeTooltipFormatter,
-  getMaxY,
-} from './helper';
+import { getResponseTimeTickFormatter, getMaxY } from './helper';
 
 import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import {
@@ -25,35 +21,26 @@ describe('transaction chart helper', () => {
         '1.0 min'
       );
     });
+
     it('formattes time tick in seconds', () => {
       const formatter = getDurationFormatter(toMicroseconds(11, 'seconds'));
       const timeTickFormatter = getResponseTimeTickFormatter(formatter);
       expect(timeTickFormatter(toMicroseconds(6, 'seconds'))).toEqual('6.0 s');
     });
   });
-  describe('getResponseTimeTooltipFormatter', () => {
-    const formatter = getDurationFormatter(toMicroseconds(11, 'minutes'));
-    const tooltipFormatter = getResponseTimeTooltipFormatter(formatter);
-    it("doesn't format invalid y coordinate", () => {
-      expect(tooltipFormatter({ x: 1, y: undefined })).toEqual('N/A');
-      expect(tooltipFormatter({ x: 1, y: null })).toEqual('N/A');
-    });
-    it('formattes tooltip in minutes', () => {
-      expect(
-        tooltipFormatter({ x: 1, y: toMicroseconds(60, 'seconds') })
-      ).toEqual('1.0 min');
-    });
-  });
+
   describe('getMaxY', () => {
     it('returns zero when empty time series', () => {
       expect(getMaxY([])).toEqual(0);
     });
+
     it('returns zero for invalid y coordinate', () => {
       const timeSeries = ([
         { data: [{ x: 1 }, { x: 2 }, { x: 3, y: -1 }] },
       ] as unknown) as Array<TimeSeries<Coordinate>>;
       expect(getMaxY(timeSeries)).toEqual(0);
     });
+
     it('returns the max y coordinate', () => {
       const timeSeries = ([
         {
