@@ -53,6 +53,7 @@
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Interface for an index pattern saved object |
+|  [IScopedSessionService](./kibana-plugin-plugins-data-server.iscopedsessionservice.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
@@ -65,8 +66,6 @@
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
 |  [SearchStrategyDependencies](./kibana-plugin-plugins-data-server.searchstrategydependencies.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
-|  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
-|  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
 
 ## Variables
 
@@ -111,6 +110,5 @@
 |  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
-|  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 

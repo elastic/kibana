@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana*' }, { ignore: [404] })
+          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
       );
 
       it('should return basic 404 without mentioning index', async () =>
