@@ -29,8 +29,8 @@ export class ReportingPlugin
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
+    this.reportingCore = new ReportingCore(this.logger, context);
     this.initializerContext = context;
-    this.reportingCore = new ReportingCore(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {

@@ -12,6 +12,7 @@ import {
   BasePath,
   ElasticsearchServiceSetup,
   KibanaRequest,
+  PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
@@ -24,6 +25,7 @@ import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
@@ -60,29 +62,10 @@ export class ReportingCore {
   private config?: ReportingConfig;
   private executing: Set<string>;
 
-  constructor(private logger: LevelLogger) {
-    // FIXME: need sync access to config: https://github.com/elastic/kibana/issues/74179
-    const fakeConfig = {
-      get: (...args: string[]) => {
-        const argKey = args.join('.');
-        switch (argKey) {
-          case 'queue.timeout':
-            return 121234;
-          case 'queue.concurrency':
-            return 1;
-          case 'queue.pollInterval':
-            return 3123;
-          case 'capture.browser.type':
-            return 'chromium';
-          case 'capture.maxAttempts':
-            return 3;
-          default:
-            throw new Error(`no def for ${argKey} in tasks' fake config`);
-        }
-      },
-    } as ReportingConfig;
-    this.executeTask = new ExecuteReportTask(this, fakeConfig, this.logger);
-    this.monitorTask = new MonitorReportsTask(this, fakeConfig, this.logger);
+  constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    const config = context.config.get<ReportingConfigType>();
+    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
     this.executing = new Set();
   }
 

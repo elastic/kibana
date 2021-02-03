@@ -8,7 +8,7 @@ import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { LevelLogger } from '../';
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingCore } from '../../';
 import {
   RunContext,
   TaskManagerStartContract,
@@ -16,6 +16,7 @@ import {
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
+import { ReportingConfigType } from '../../config';
 import { BasePayload, RunTaskFn } from '../../types';
 import { Report, ReportingStore } from '../store';
 import {
@@ -47,7 +48,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   constructor(
     private reporting: ReportingCore,
-    private config: ReportingConfig,
+    private config: ReportingConfigType,
     logger: LevelLogger
   ) {
     this.logger = logger.clone(['task-run']);
@@ -114,21 +115,21 @@ export class ExecuteReportTask implements ReportingTask {
     const m = moment();
 
     // check if job has exceeded maxAttempts and somehow hasn't been marked as failed yet
-    const maxAttempts = this.config.get('capture', 'maxAttempts');
+    const maxAttempts = this.config.capture.maxAttempts;
     if (report.attempts >= maxAttempts) {
       const err = new Error(`Max attempts reached (${maxAttempts}). Queue timeout reached.`);
       await this._failJob(task, err);
       throw err;
     }
 
-    const queueTimeout = durationToNumber(this.config.get('queue', 'timeout'));
+    const queueTimeout = durationToNumber(this.config.queue.timeout);
     const startTime = m.toISOString();
     const expirationTime = m.add(queueTimeout).toISOString();
 
     const stats = {
       kibana_id: this.kibanaId,
       kibana_name: this.kibanaName,
-      browser_type: this.config.get('capture', 'browser', 'type'),
+      browser_type: this.config.capture.browser.type,
       attempts: report.attempts + 1,
       started_at: startTime,
       timeout: queueTimeout,
@@ -205,7 +206,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
-    const queueTimeout = durationToNumber(this.config.get('queue', 'timeout'));
+    const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.from(runner(task.id, task.payload, cancellationToken))
       .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
       .toPromise();
@@ -298,7 +299,7 @@ export class ExecuteReportTask implements ReportingTask {
           } catch (failedToExecuteErr) {
             cancellationToken.cancel();
 
-            const maxAttempts = this.config.get('capture', 'maxAttempts');
+            const maxAttempts = this.config.capture.maxAttempts;
             if (attempts < maxAttempts) {
               // attempts remain - reschedule
               try {
@@ -343,8 +344,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   public getTaskDefinition() {
     // round up from ms to the nearest second
-    const queueTimeout =
-      Math.ceil(numberToDuration(this.config.get('queue', 'timeout')).asSeconds()) + 's';
+    const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
 
     return {
       type: REPORTING_EXECUTE_TYPE,

@@ -5,28 +5,22 @@
  */
 
 import { ExecuteReportTask } from '.';
-import { ReportingConfig, ReportingCore } from '../..';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { ReportingCore } from '../..';
+import { ReportingConfigType } from '../../config';
+import { createMockConfigSchema, createMockLevelLogger } from '../../test_helpers';
 
 const logger = createMockLevelLogger();
 
 describe('Execute Report Logger', () => {
   let mockReporting: ReportingCore;
-  let mockConfig: ReportingConfig;
+  let mockSchema: ReportingConfigType;
   beforeAll(async () => {
-    const mockSchema = createMockConfigSchema();
-    mockConfig = createMockConfig(mockSchema);
-    mockReporting = await createMockReportingCore(mockConfig);
+    mockSchema = createMockConfigSchema();
   });
 
   it('Is great', () => {
     // FIXME
-    const task = new ExecuteReportTask(mockReporting, mockConfig, logger);
+    const task = new ExecuteReportTask(mockReporting, mockSchema, logger);
     expect(task);
   });
 });

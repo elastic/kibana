@@ -11,6 +11,7 @@ jest.mock('../browsers');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
+import { coreMock } from 'src/core/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import {
@@ -74,7 +75,7 @@ interface ReportingConfigTestType {
 
 export const createMockConfigSchema = (
   overrides: Partial<ReportingConfigTestType> = {}
-): ReportingConfigTestType => {
+): ReportingConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
     index: '.reporting',
@@ -96,13 +97,14 @@ export const createMockConfigSchema = (
     queue: {
       indexInterval: 'week',
       pollEnabled: true,
+      pollInterval: 3000,
       timeout: 120000,
       ...overrides.queue,
     },
     csv: {
       ...overrides.csv,
     },
-  };
+  } as any;
 };
 
 export const createMockConfig = (
@@ -122,24 +124,20 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = {
-    getConfig: () => config,
-    getElasticsearchService: () => setupDepsMock?.elasticsearch,
-  } as ReportingCore;
-
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
   }
-  if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(mockReportingCore, {});
-  }
 
   config = config || {};
-  const core = new ReportingCore(logger);
-
-  core.pluginSetup(setupDepsMock);
+  const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
+  const core = new ReportingCore(logger, context);
   core.setConfig(config);
+  core.pluginSetup(setupDepsMock);
   await core.pluginSetsUp();
+
+  if (!startDepsMock) {
+    startDepsMock = createMockPluginStart(core, context);
+  }
 
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();

@@ -69,8 +69,7 @@ describe('Reporting Plugin', () => {
     expect(plugin.setup(coreSetup, pluginSetup)).not.toHaveProperty('then');
   });
 
-  it('logs setup issues', async () => {
-    initContext.config = null;
+  it.skip('logs setup issues', async () => {
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger
     plugin.logger.error = jest.fn();

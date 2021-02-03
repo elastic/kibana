@@ -6,9 +6,10 @@
 
 import moment from 'moment';
 import { LevelLogger, ReportingStore } from '../';
-import { ReportingConfig, ReportingCore } from '../../';
+import { ReportingCore } from '../../';
 import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { numberToDuration } from '../../../common/schema_utils';
+import { ReportingConfigType } from '../../config';
 import { Report } from '../store';
 import {
   ReportingExecuteTaskInstance,
@@ -34,11 +35,11 @@ export class MonitorReportsTask implements ReportingTask {
 
   constructor(
     private reporting: ReportingCore,
-    private config: ReportingConfig,
+    private config: ReportingConfigType,
     parentLogger: LevelLogger
   ) {
     this.logger = parentLogger.clone(['monitored-expired']);
-    this.timeout = numberToDuration(config.get('queue', 'timeout'));
+    this.timeout = numberToDuration(config.queue.timeout);
   }
 
   private async getStore(): Promise<ReportingStore> {
@@ -56,7 +57,7 @@ export class MonitorReportsTask implements ReportingTask {
     // Round the interval up to the nearest second since Task Manager doesn't
     // support milliseconds
     const scheduleInterval =
-      Math.ceil(numberToDuration(this.config.get('queue', 'pollInterval')).asSeconds()) + 's';
+      Math.ceil(numberToDuration(this.config.queue.pollInterval).asSeconds()) + 's';
 
     await taskManager.ensureScheduled({
       id: this.TYPE,
