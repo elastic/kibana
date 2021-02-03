@@ -290,7 +290,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
-      urlSyncStrategy.kbnUrlControls.cancel();
+      urlSyncStrategy.cancel();
 
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
@@ -301,6 +301,32 @@ describe('state_sync', () => {
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
 
       stop();
+    });
+
+    it('cancels pending URL updates when sync stops', async () => {
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
+        },
+      ]);
+      start();
+
+      const startHistoryLength = history.length;
+      container.transitions.add({ id: 2, text: '2', completed: false });
+      container.transitions.add({ id: 3, text: '3', completed: false });
+      container.transitions.completeAll();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      stop();
+
+      await tick();
+
+      expect(history.length).toBe(startHistoryLength);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
     });
 
     it("should preserve reference to unchanged state slices if them didn't change", async () => {
