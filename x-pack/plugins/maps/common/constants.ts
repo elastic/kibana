@@ -43,9 +43,9 @@ export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
-// Identifies vector tile "too many features" feature.
-// "too many features" feature is a box showing area that contains too many features for single ES search response
-export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
+// Identifies "incomplete data" feature.
+// "incomplete data" feature is a box showing an area where incomplete data is displayed
+export const KBN_IS_INCOMPLETE_DATA_FEATURE = '__kbn_is_incomplete_data_feature__';
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';

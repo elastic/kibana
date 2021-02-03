@@ -21,7 +21,7 @@ import {
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_IS_INCOMPLETE_DATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
@@ -935,7 +935,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
+    const incompleteDataLayerId = this._getMbIncompleteDataLayerId();
 
     const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
@@ -962,9 +962,9 @@ export class VectorLayer extends AbstractLayer {
       }
       mbMap.addLayer(mbLayer);
     }
-    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
+    if (!mbMap.getLayer(incompleteDataLayerId)) {
       const mbLayer: MbLayer = {
-        id: tooManyFeaturesLayerId,
+        id: incompleteDataLayerId,
         type: 'line',
         source: sourceId,
         paint: {
@@ -977,14 +977,10 @@ export class VectorLayer extends AbstractLayer {
         mbLayer['source-layer'] = mvtSourceLayer;
       }
       mbMap.addLayer(mbLayer);
-      mbMap.setFilter(tooManyFeaturesLayerId, [
-        '==',
-        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
-        true,
-      ]);
-      mbMap.setLayoutProperty(tooManyFeaturesLayerId, 'line-join', 'bevel');
+      mbMap.setFilter(incompleteDataLayerId, ['==', ['get', KBN_IS_INCOMPLETE_DATA_FEATURE], true]);
+      mbMap.setLayoutProperty(incompleteDataLayerId, 'line-join', 'bevel');
     }
-    mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha() * 0.6);
+    mbMap.setPaintProperty(incompleteDataLayerId, 'line-opacity', this.getAlpha() * 0.6);
 
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -1007,8 +1003,8 @@ export class VectorLayer extends AbstractLayer {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
 
-    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
+    this.syncVisibilityWithMb(mbMap, incompleteDataLayerId);
+    mbMap.setLayerZoomRange(incompleteDataLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _setMbCentroidProperties(mbMap: MbMap, mvtSourceLayer?: string) {
@@ -1101,8 +1097,8 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('fill');
   }
 
-  _getMbTooManyFeaturesLayerId() {
-    return this.makeMbLayerId('toomanyfeatures');
+  _getMbIncompleteDataLayerId() {
+    return this.makeMbLayerId('kbn_incomplete_data_features');
   }
 
   getMbLayerIds() {
@@ -1113,7 +1109,7 @@ export class VectorLayer extends AbstractLayer {
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
-      this._getMbTooManyFeaturesLayerId(),
+      this._getMbIncompleteDataLayerId(),
     ];
   }
 

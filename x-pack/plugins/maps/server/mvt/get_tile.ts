@@ -15,7 +15,7 @@ import {
   ES_GEO_FIELD_TYPE,
   FEATURE_ID_PROPERTY_NAME,
   GEOTILE_GRID_AGG_NAME,
-  KBN_TOO_MANY_FEATURES_PROPERTY,
+  KBN_IS_INCOMPLETE_DATA_FEATURE,
   MAX_ZOOM,
   MVT_SOURCE_LAYER_NAME,
   RENDER_AS,
@@ -203,7 +203,7 @@ export async function getTile({
       featureCollection.features.push({
         type: 'Feature',
         properties: {
-          [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+          [KBN_IS_INCOMPLETE_DATA_FEATURE]: true,
         },
         geometry: esBboxToGeoJsonPolygon(bboxResponse.rawResponse.aggregations.data_bounds.bounds),
       });

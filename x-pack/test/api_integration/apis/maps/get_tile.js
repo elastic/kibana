@@ -46,7 +46,7 @@ export default function ({ getService }) {
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
     });
 
-    it('should return vector tile containing bounds when count exceeds size', async () => {
+    it('should return vector tile containing incomplete data boundary when count exceeds size', async () => {
       const resp = await supertest
         // requestBody sets size=1 to force count exceeded
         .get(

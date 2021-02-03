@@ -59,7 +59,7 @@ test('should not create centroid for too many features polygon', () => {
       ],
     },
     properties: {
-      __kbn_too_many_features__: true,
+      __kbn_is_incomplete_data_feature__: true,
       prop0: 'value0',
       prop1: 0.0,
     },
