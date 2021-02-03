@@ -67,6 +67,7 @@ export const transactionGroupsOverviewRoute = createRoute({
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
+      environmentRt,
       rangeRt,
       uiFiltersRt,
       t.type({
@@ -99,6 +100,7 @@ export const transactionGroupsOverviewRoute = createRoute({
     const {
       path: { serviceName },
       query: {
+        environment,
         latencyAggregationType,
         numBuckets,
         pageIndex,
@@ -110,6 +112,7 @@ export const transactionGroupsOverviewRoute = createRoute({
     } = context.params;
 
     return getServiceTransactionGroups({
+      environment,
       setup,
       serviceName,
       pageIndex,
@@ -155,17 +158,12 @@ export const transactionLatencyChatsRoute = createRoute({
       latencyAggregationType,
     } = context.params.query;
 
-    if (!environment) {
-      throw Boom.badRequest(
-        `environment is a required parameter for transactions/charts/latency.`
-      );
-    }
-
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     const options = {
+      environment,
       serviceName,
       transactionType,
       transactionName,

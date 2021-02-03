@@ -32,6 +32,7 @@ interface TopTransactionOptions {
 }
 
 interface TopTraceOptions {
+  environment?: string;
   type: 'top_traces';
   transactionName?: string;
   searchAggregatedTransactions: boolean;

@@ -24,6 +24,7 @@ import {
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getLatencyAggregation } from '../../helpers/latency_aggregation_type';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export type TransactionGroupTimeseriesData = PromiseReturnType<
   typeof getTimeseriesDataForTransactionGroups
@@ -31,6 +32,7 @@ export type TransactionGroupTimeseriesData = PromiseReturnType<
 
 export async function getTimeseriesDataForTransactionGroups({
   apmEventClient,
+  environment,
   start,
   end,
   serviceName,
@@ -43,6 +45,7 @@ export async function getTimeseriesDataForTransactionGroups({
   latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
+  environment?: string;
   start: number;
   end: number;
   serviceName: string;
@@ -80,6 +83,7 @@ export async function getTimeseriesDataForTransactionGroups({
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

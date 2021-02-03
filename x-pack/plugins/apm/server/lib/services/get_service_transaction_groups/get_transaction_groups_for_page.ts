@@ -26,6 +26,7 @@ import {
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -40,6 +41,7 @@ export type TransactionGroupWithoutTimeseriesData = ValuesType<
 
 export async function getTransactionGroupsForPage({
   apmEventClient,
+  environment,
   searchAggregatedTransactions,
   serviceName,
   start,
@@ -53,6 +55,7 @@ export async function getTransactionGroupsForPage({
   latencyAggregationType,
 }: {
   apmEventClient: APMEventClient;
+  environment?: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   start: number;
@@ -85,6 +88,7 @@ export async function getTransactionGroupsForPage({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

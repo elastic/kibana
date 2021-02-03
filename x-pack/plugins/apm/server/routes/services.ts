@@ -313,6 +313,7 @@ export const serviceThroughputRoute = createRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -321,12 +322,13 @@ export const serviceThroughputRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const { environment, transactionType } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     return getThroughput({
+      environment,
       searchAggregatedTransactions,
       serviceName,
       setup,

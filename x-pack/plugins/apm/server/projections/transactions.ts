@@ -15,14 +15,17 @@ import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
 } from '../lib/helpers/aggregated_transactions';
+import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
 export function getTransactionsProjection({
+  environment,
   setup,
   serviceName,
   transactionName,
   transactionType,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   transactionName?: string;
@@ -48,6 +51,7 @@ export function getTransactionsProjection({
       ...transactionTypeFilter,
       ...serviceNameFilter,
       ...esFilter,
+      ...getEnvironmentFilter(environment),
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),

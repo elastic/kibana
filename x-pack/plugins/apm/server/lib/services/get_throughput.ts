@@ -18,8 +18,10 @@ import {
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 
 interface Options {
+  environment?: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
   setup: Setup & SetupTimeRange;
@@ -41,6 +43,7 @@ function transform(options: Options, response: ESResponse) {
 }
 
 async function fetcher({
+  environment,
   searchAggregatedTransactions,
   serviceName,
   setup,
@@ -55,6 +58,7 @@ async function fetcher({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    ...getEnvironmentFilter(environment),
     ...setup.esFilter,
   ];
 

@@ -19,6 +19,7 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -28,6 +29,7 @@ export type LatencyChartsSearchResponse = PromiseReturnType<
 >;
 
 async function searchLatency({
+  environment,
   serviceName,
   transactionType,
   transactionName,
@@ -35,6 +37,7 @@ async function searchLatency({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -51,6 +54,7 @@ async function searchLatency({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    ...getEnvironmentFilter(environment),
     ...setup.esFilter,
   ];
 
@@ -99,6 +103,7 @@ async function searchLatency({
 }
 
 export async function getLatencyTimeseries({
+  environment,
   serviceName,
   transactionType,
   transactionName,
@@ -106,6 +111,7 @@ export async function getLatencyTimeseries({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -114,6 +120,7 @@ export async function getLatencyTimeseries({
   latencyAggregationType: LatencyAggregationType;
 }) {
   const response = await searchLatency({
+    environment,
     serviceName,
     transactionType,
     transactionName,

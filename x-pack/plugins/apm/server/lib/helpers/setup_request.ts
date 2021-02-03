@@ -108,10 +108,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
         : undefined,
     config,
     uiFilters,
-    esFilter: [
-      ...getEsFilter(uiFilters),
-      ...getEnvironmentFilter(query.environment),
-    ],
+    esFilter: getEsFilter(uiFilters),
   };
 
   return {

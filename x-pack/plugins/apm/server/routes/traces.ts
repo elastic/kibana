@@ -21,11 +21,13 @@ export const tracesRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const { environment } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
+
     return getTransactionGroupList(
-      { type: 'top_traces', searchAggregatedTransactions },
+      { environment, type: 'top_traces', searchAggregatedTransactions },
       setup
     );
   },

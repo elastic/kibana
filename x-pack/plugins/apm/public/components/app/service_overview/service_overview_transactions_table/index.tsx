@@ -83,7 +83,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
   const { transactionType } = useApmServiceContext();
   const {
     uiFilters,
-    urlParams: { start, end, latencyAggregationType },
+    urlParams: { environment, start, end, latencyAggregationType },
   } = useUrlParams();
 
   const [tableOptions, setTableOptions] = useState<{
@@ -119,6 +119,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
         params: {
           path: { serviceName },
           query: {
+            environment,
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
@@ -146,6 +147,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       });
     },
     [
+      environment,
       serviceName,
       start,
       end,
