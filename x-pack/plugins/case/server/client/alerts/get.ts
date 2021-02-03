@@ -16,6 +16,10 @@ export const get = ({ alertsService, request, context }: CaseClientFactoryArgume
     throw Boom.notFound('securitySolutionClient client have not been found');
   }
 
+  if (ids.length === 0) {
+    return [];
+  }
+
   const index = securitySolutionClient.getSignalsIndex();
   const alerts = await alertsService.getAlerts({ ids, index, request });
   return alerts.hits.hits.map((alert) => ({
