@@ -23,7 +23,7 @@ const PrependContainer = styled.div`
   padding: 0 ${px(unit)};
 `;
 
-const weekDurationInHours = moment.duration(7, 'days').asHours();
+const weekDurationInHours = 24 * 7;
 
 function formatPreviousPeriodDates({
   momentStart,
@@ -33,11 +33,19 @@ function formatPreviousPeriodDates({
   momentEnd: moment.Moment;
 }) {
   const isDifferentYears = momentStart.get('year') !== momentEnd.get('year');
-  const dateFormat = isDifferentYears ? 'DD/MM/YY' : 'DD/MM';
+  const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
 }
 
-function getSelectOptions({ start, end }: { start?: string; end?: string }) {
+function getSelectOptions({
+  start,
+  end,
+  rangeTo,
+}: {
+  start?: string;
+  end?: string;
+  rangeTo?: string;
+}) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
 
@@ -55,24 +63,27 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
     }),
   };
 
+  const dateDiffInHours = getDateDifference(momentStart, momentEnd, 'hours');
+  const isRangeToNow = rangeTo === 'now';
+
+  if (isRangeToNow) {
+    // Less than or equals to one day
+    if (dateDiffInHours <= 24) {
+      return [yesterdayOption, aWeekAgoOption];
+    }
+
+    // Less than or equals to one week
+    if (dateDiffInHours <= weekDurationInHours) {
+      return [aWeekAgoOption];
+    }
+  }
+
   const prevPeriodOption = {
     value: 'previousPeriod',
     text: formatPreviousPeriodDates({ momentStart, momentEnd }),
   };
 
-  const dateDiffInHours = getDateDifference(momentStart, momentEnd, 'hours');
-
-  // Less than one day
-  if (dateDiffInHours <= 24) {
-    return [yesterdayOption, aWeekAgoOption];
-  }
-
-  // Less than one week
-  if (dateDiffInHours <= weekDurationInHours) {
-    return [aWeekAgoOption];
-  }
-
-  // above one week
+  // above one week or when rangeTo is not "now"
   return [prevPeriodOption];
 }
 
@@ -80,10 +91,10 @@ export function TimeComparison() {
   const history = useHistory();
   const { isMedium, isLarge } = useBreakPoints();
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType },
+    urlParams: { start, end, comparisonEnabled, comparisonType, rangeTo },
   } = useUrlParams();
 
-  const selectOptions = getSelectOptions({ start, end });
+  const selectOptions = getSelectOptions({ start, end, rangeTo });
 
   // Sets default values
   if (comparisonEnabled === undefined || comparisonType === undefined) {
