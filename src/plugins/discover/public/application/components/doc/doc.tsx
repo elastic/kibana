@@ -36,7 +36,7 @@ export interface DocProps {
 
 export function Doc(props: DocProps) {
   const [reqState, hit, indexPattern] = useEsDocSearch(props);
-
+  const indexExistsLink = getServices().docLinks.links.apis.indexExists;
   return (
     <I18nProvider>
       <EuiPage>
@@ -91,12 +91,7 @@ export function Doc(props: DocProps) {
                 defaultMessage="{indexName} is missing."
                 values={{ indexName: props.index }}
               />{' '}
-              <EuiLink
-                href={`https://www.elastic.co/guide/en/elasticsearch/reference/${
-                  getServices().metadata.branch
-                }/indices-exists.html`}
-                target="_blank"
-              >
+              <EuiLink href={indexExistsLink} target="_blank">
                 <FormattedMessage
                   id="discover.doc.somethingWentWrongDescriptionAddon"
                   defaultMessage="Please ensure the index exists."

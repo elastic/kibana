@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 
@@ -18,6 +18,8 @@ export function TableDimensionEditor(
   const { state, setState, frame, accessor } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
 
+  if (!column) return null;
+
   // either read config state or use same logic as chart itself
   const currentAlignment =
     column?.alignment ||
@@ -28,60 +30,94 @@ export function TableDimensionEditor(
       : 'left');
 
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('xpack.lens.table.alignment.label', {
-        defaultMessage: 'Text alignment',
-      })}
-    >
-      <EuiButtonGroup
-        isFullWidth
-        legend={i18n.translate('xpack.lens.table.alignment.label', {
+    <>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.table.alignment.label', {
           defaultMessage: 'Text alignment',
         })}
-        data-test-subj="lnsDatatable_alignment_groups"
-        name="alignment"
-        buttonSize="compressed"
-        options={[
-          {
-            id: `${idPrefix}left`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-              defaultMessage: 'Left',
-            }),
-            'data-test-subj': 'lnsDatatable_alignment_groups_left',
-          },
-          {
-            id: `${idPrefix}center`,
-            label: i18n.translate('xpack.lens.table.alignment.center', {
-              defaultMessage: 'Center',
-            }),
-            'data-test-subj': 'lnsDatatable_alignment_groups_center',
-          },
-          {
-            id: `${idPrefix}right`,
-            label: i18n.translate('xpack.lens.table.alignment.right', {
-              defaultMessage: 'Right',
-            }),
-            'data-test-subj': 'lnsDatatable_alignment_groups_right',
-          },
-        ]}
-        idSelected={`${idPrefix}${currentAlignment}`}
-        onChange={(id) => {
-          const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'center';
-          const newColumns = state.columns.map((currentColumn) => {
-            if (currentColumn.columnId === accessor) {
-              return {
-                ...currentColumn,
-                alignment: newMode,
-              };
-            } else {
-              return currentColumn;
-            }
-          });
-          setState({ ...state, columns: newColumns });
-        }}
-      />
-    </EuiFormRow>
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.table.alignment.label', {
+            defaultMessage: 'Text alignment',
+          })}
+          data-test-subj="lnsDatatable_alignment_groups"
+          name="alignment"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}left`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                defaultMessage: 'Left',
+              }),
+              'data-test-subj': 'lnsDatatable_alignment_groups_left',
+            },
+            {
+              id: `${idPrefix}center`,
+              label: i18n.translate('xpack.lens.table.alignment.center', {
+                defaultMessage: 'Center',
+              }),
+              'data-test-subj': 'lnsDatatable_alignment_groups_center',
+            },
+            {
+              id: `${idPrefix}right`,
+              label: i18n.translate('xpack.lens.table.alignment.right', {
+                defaultMessage: 'Right',
+              }),
+              'data-test-subj': 'lnsDatatable_alignment_groups_right',
+            },
+          ]}
+          idSelected={`${idPrefix}${currentAlignment}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'center';
+            const newColumns = state.columns.map((currentColumn) => {
+              if (currentColumn.columnId === accessor) {
+                return {
+                  ...currentColumn,
+                  alignment: newMode,
+                };
+              } else {
+                return currentColumn;
+              }
+            });
+            setState({ ...state, columns: newColumns });
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
+          defaultMessage: 'Column hidden in table',
+        })}
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          compressed
+          label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
+            defaultMessage: 'Column hidden in table',
+          })}
+          showLabel={false}
+          data-test-subj="lns-table-column-hidden"
+          checked={Boolean(column?.hidden)}
+          onChange={() => {
+            const newState = {
+              ...state,
+              columns: state.columns.map((currentColumn) => {
+                if (currentColumn.columnId === accessor) {
+                  return {
+                    ...currentColumn,
+                    hidden: !column.hidden,
+                  };
+                } else {
+                  return currentColumn;
+                }
+              }),
+            };
+            setState(newState);
+          }}
+        />
+      </EuiFormRow>
+    </>
   );
 }

@@ -16,7 +16,6 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { TableToolbar } from './components/toolbar';
 import { TableDimensionEditor } from './components/dimension_editor';
 
 export interface ColumnState {
@@ -141,6 +140,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
 
+    const columnMap: Record<string, ColumnState> = {};
+    state.columns.forEach((column) => {
+      columnMap[column.columnId] = column;
+    });
+
     if (!sortedColumns) {
       return { groups: [] };
     }
@@ -155,7 +159,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({ columnId: accessor })),
+            .map((accessor) => ({
+              columnId: accessor,
+              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+            })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
@@ -196,15 +203,6 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
-  renderToolbar(domElement, props) {
-    render(
-      <I18nProvider>
-        <TableToolbar {...props} />
-      </I18nProvider>,
-      domElement
-    );
-  },
-
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>

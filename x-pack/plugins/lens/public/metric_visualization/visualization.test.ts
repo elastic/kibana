@@ -5,14 +5,14 @@
  */
 
 import { metricVisualization } from './visualization';
-import { State } from './types';
+import { MetricState } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
-function exampleState(): State {
+function exampleState(): MetricState {
   return {
     accessor: 'a',
     layerId: 'l1',

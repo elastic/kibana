@@ -107,7 +107,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   if (options.createDockerContexts) {
-    // control w/ --docker-contexts or --skip-os-packages
+    // control w/ --skip-docker-contexts
     await run(Tasks.CreateDockerContexts);
   }
 

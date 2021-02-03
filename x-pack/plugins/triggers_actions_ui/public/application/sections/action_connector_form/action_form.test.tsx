@@ -550,7 +550,9 @@ describe('action_form', () => {
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
       expect(wrapper.find(EuiAccordion)).toHaveLength(3);
-      expect(wrapper.find(`div[data-test-subj="alertActionAccordionCallout"]`)).toHaveLength(2);
+      expect(
+        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
+      ).toHaveLength(2);
     });
   });
 });
