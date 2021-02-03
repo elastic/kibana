@@ -17,7 +17,7 @@ export const SERVICENOW_ITSM_DESC = i18n.translate(
 export const SERVICENOW_SIR_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
   {
-    defaultMessage: 'Create an incident in ServiceNow SIR.',
+    defaultMessage: 'Create an incident in ServiceNow SecOps.',
   }
 );
 
@@ -31,7 +31,7 @@ export const SERVICENOW_ITSM_TITLE = i18n.translate(
 export const SERVICENOW_SIR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
   {
-    defaultMessage: 'ServiceNow SIR',
+    defaultMessage: 'ServiceNow SecOps',
   }
 );
 

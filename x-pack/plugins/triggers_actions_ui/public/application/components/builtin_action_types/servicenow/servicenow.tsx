@@ -104,7 +104,7 @@ export function getServiceNowSIRActionType(): ActionTypeModel<
   return {
     id: '.servicenow-sir',
     iconClass: logo,
-    selectMessage: i18n.SERVICENOW_SIR_TITLE,
+    selectMessage: i18n.SERVICENOW_SIR_DESC,
     actionTypeTitle: i18n.SERVICENOW_SIR_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
