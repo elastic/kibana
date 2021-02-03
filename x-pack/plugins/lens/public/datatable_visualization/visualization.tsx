@@ -16,7 +16,7 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { TableToolbar } from './components/toolbar';
+import { TableDimensionEditor } from './components/dimension_editor';
 
 export interface ColumnState {
   columnId: string;
@@ -165,6 +165,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+          enableDimensionEditor: true,
         },
         {
           groupId: 'metrics',
@@ -179,6 +180,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           filterOperations: (op) => !op.isBucketed,
           required: true,
           dataTestSubj: 'lnsDatatable_metrics',
+          enableDimensionEditor: true,
         },
       ],
     };
@@ -200,10 +202,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
-  renderToolbar(domElement, props) {
+  renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <TableToolbar {...props} />
+        <TableDimensionEditor {...props} />
       </I18nProvider>,
       domElement
     );
