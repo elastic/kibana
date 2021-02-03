@@ -24,10 +24,7 @@ export function getDashboardTitle(
 ): string {
   const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
-  const newDashboardTitle = i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
-  });
-  const dashboardTitle = isNew ? newDashboardTitle : title;
+  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
 
   if (isEditMode && isDirty) {
     displayTitle = i18n.translate('dashboard.strings.dashboardUnsavedEditTitle', {
@@ -176,6 +173,11 @@ export const dashboardReplacePanelAction = {
 /*
   Dashboard Editor
 */
+export const getNewDashboardTitle = () =>
+  i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+    defaultMessage: 'New Dashboard',
+  });
+
 export const shareModalStrings = {
   getTopMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -242,6 +244,44 @@ export const leaveConfirmStrings = {
     }),
 };
 
+export const createConfirmStrings = {
+  getCreateTitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'New dashboard already in progress',
+    }),
+  getCreateSubtitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+    }),
+  getStartOverButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Start over',
+    }),
+  getContinueButtonText: () => leaveConfirmStrings.getCancelButtonText(),
+  getCancelButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
+export const panelStorageErrorStrings = {
+  getPanelsGetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while fetching unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsSetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.setError', {
+      defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsClearError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.clearError', {
+      defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
+    }),
+};
+
 /*
   Empty Screen
 */
@@ -305,5 +345,39 @@ export const dashboardListingTable = {
   getDescriptionColumnName: () =>
     i18n.translate('dashboard.listing.table.descriptionColumnName', {
       defaultMessage: 'Description',
+    }),
+};
+
+export const dashboardUnsavedListingStrings = {
+  getUnsavedChangesTitle: (plural = false) =>
+    i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
+      defaultMessage: 'You have unsaved changes in the following {dash}.',
+      values: {
+        dash: plural
+          ? dashboardListingTable.getEntityNamePlural()
+          : dashboardListingTable.getEntityName(),
+      },
+    }),
+  getLoadingTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.loading', {
+      defaultMessage: 'Loading',
+    }),
+  getEditAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.editAria', {
+      defaultMessage: 'Continue editing {title}',
+      values: { title },
+    }),
+  getEditTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.editTitle', {
+      defaultMessage: 'Continue editing',
+    }),
+  getDiscardAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.discardAria', {
+      defaultMessage: 'Discard changes to {title}',
+      values: { title },
+    }),
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.discardTitle', {
+      defaultMessage: 'Discard changes',
     }),
 };
