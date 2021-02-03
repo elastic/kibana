@@ -64,7 +64,7 @@ export class SeriesEditor extends Component {
   };
 
   render() {
-    const { limit, model, name, fields, colorPicker } = this.props;
+    const { limit, model, name, fields, colorPicker, uiState } = this.props;
     const list = model[name].filter((val, index) => index < (limit || Infinity));
 
     return (
@@ -92,6 +92,7 @@ export class SeriesEditor extends Component {
                   onDelete={() => handleDelete(this.props, row)}
                   model={row}
                   panel={model}
+                  uiState={uiState}
                   dragHandleProps={provided.dragHandleProps}
                 />
               )}

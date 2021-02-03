@@ -153,6 +153,7 @@ class TimeseriesPanelConfigUi extends Component {
           model={this.props.model}
           name={this.props.name}
           onChange={this.props.onChange}
+          uiState={this.props.uiState}
         />
       );
     } else if (selectedTab === 'annotations') {

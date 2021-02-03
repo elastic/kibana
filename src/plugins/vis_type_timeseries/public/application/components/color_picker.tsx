@@ -9,16 +9,16 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 // The color picker is not yet accessible.
 
-import React, { useState } from 'react';
-import {
-  EuiIconTip,
-  EuiColorPicker,
-  EuiColorPickerProps,
-  EuiColorPickerSwatch,
-} from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EuiIconTip, EuiColorPicker, EuiColorPickerSwatch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
+
+interface OverwriteColors {
+  id: string;
+  overwrite: { [key: string]: string };
+}
 
 interface ColorProps {
   [key: string]: string | null;
@@ -29,7 +29,9 @@ export interface ColorPickerProps {
   value: string | null;
   disableTrash?: boolean;
   onChange: (props: ColorProps) => void;
-  hide?: boolean;
+  seriesName?: string;
+  uiState?: any;
+  seriesId?: string;
 }
 
 export function ColorPicker({
@@ -37,21 +39,58 @@ export function ColorPicker({
   value,
   disableTrash = false,
   onChange,
-  hide = false,
+  seriesName,
+  uiState,
+  seriesId,
 }: ColorPickerProps) {
-  const initialColorValue = value?.includes('rgba')
-    ? value.replace(COMMAS_NUMS_ONLY_RE, '')
-    : value;
-  const [color, setColor] = useState(initialColorValue || '');
-  if (hide) {
-    return null;
-  }
-  const handleColorChange: EuiColorPickerProps['onChange'] = (text: string, { rgba, hex }) => {
-    setColor(text);
-    const part: ColorProps = {};
-    part[name] = hex ? `rgba(${rgba.join(',')})` : '';
-    onChange(part);
-  };
+  const [color, setColor] = useState('');
+
+  const handleColorChange = useCallback(
+    (text: string, { rgba, hex }) => {
+      setColor(text);
+      const part: ColorProps = {};
+      part[name] = hex ? `rgba(${rgba.join(',')})` : '';
+      onChange(part);
+      if (uiState && seriesName) {
+        const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
+        const colors: OverwriteColors | undefined = seriesColors.find(({ id }) => id === seriesId);
+        if (colors?.overwrite[seriesName]) {
+          delete colors.overwrite[seriesName];
+        }
+
+        uiState.setSilent('vis.colors', null);
+        uiState.set('vis.colors', seriesColors);
+        uiState.emit('colorChanged');
+      }
+    },
+    [name, onChange, seriesId, seriesName, uiState]
+  );
+
+  useEffect(() => {
+    const updateColor = () => {
+      const seriesColors: OverwriteColors[] = uiState?.get('vis.colors', []);
+      const colors: OverwriteColors | undefined = seriesColors?.find(({ id }) => id === seriesId);
+      if (
+        seriesName &&
+        colors &&
+        Object.keys(colors).length !== 0 &&
+        colors.overwrite?.[seriesName]
+      ) {
+        setColor(colors.overwrite[seriesName]);
+      } else {
+        const initialColorValue = value?.includes('rgba')
+          ? value.replace(COMMAS_NUMS_ONLY_RE, '')
+          : value;
+        setColor(initialColorValue || '');
+      }
+    };
+    updateColor();
+    uiState?.on('change', updateColor);
+
+    return () => {
+      uiState?.off('change', updateColor);
+    };
+  }, [value, seriesId, seriesName, uiState]);
 
   const handleClear = () => {
     setColor('');

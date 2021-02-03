@@ -36,8 +36,7 @@ export const useColorPicker = (
   ) => void
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const selectedSeries = series.filter((s) => s.id === seriesIdentifier.specId);
-  // allow the user to change colors only for groupBy terms
-  if (!selectedSeries.length || !selectedSeries[0].isSplitByTerms) {
+  if (!selectedSeries.length) {
     return null;
   }
   let seriesName = selectedSeries[0].label.toString();

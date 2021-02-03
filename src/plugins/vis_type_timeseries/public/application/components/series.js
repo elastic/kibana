@@ -100,6 +100,7 @@ export class Series extends Component {
               visible={this.state.visible}
               dragHandleProps={this.props.dragHandleProps}
               indexPatternForQuery={panel.index_pattern || panel.default_index_pattern}
+              uiState={this.props.uiState}
             />
           );
         }}

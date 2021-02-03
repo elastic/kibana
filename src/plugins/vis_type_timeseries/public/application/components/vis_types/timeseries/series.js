@@ -25,6 +25,7 @@ import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { PANEL_TYPES } from '../../../../../common/panel_types';
+import { calculateLabel } from '../../../../../common/calculate_label';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -41,6 +42,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     name,
     uiRestrictions,
     seriesQuantity,
+    uiState,
   } = props;
 
   const defaults = {
@@ -55,6 +57,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
   if (!visible) caretIcon = 'arrowRight';
 
   let body = null;
+
   if (visible) {
     let seriesBody;
 
@@ -78,6 +81,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
               model={model}
               uiRestrictions={uiRestrictions}
               seriesQuantity={seriesQuantity}
+              uiState={uiState}
             />
           </div>
         </div>
@@ -118,14 +122,19 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       </div>
     );
   }
+  const { metrics, label } = model;
+  const seriesName =
+    label || calculateLabel(metrics[0], metrics, fields[props.indexPatternForQuery]);
 
-  const colorPicker = (
+  const colorPicker = model.split_mode !== 'terms' && model.split_mode !== 'filters' && (
     <ColorPicker
-      hide={model.split_mode === 'terms'}
       disableTrash={true}
       onChange={props.onChange}
       name="color"
       value={model.color}
+      seriesName={seriesName}
+      uiState={uiState}
+      seriesId={model.id}
     />
   );
 

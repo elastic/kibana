@@ -14,18 +14,6 @@ import { useColorPicker } from './use_color_picker';
 import { ColorPicker } from '../../../../../../../charts/public';
 import { PanelData } from '../../../../../../common/types';
 
-const seriesNoSplit = [
-  {
-    id: '61ca57f1-469d-11e7-af02-69e470af7417',
-    label: 'Count',
-    data: [
-      [1608544800000, 0],
-      [1608588000000, 0],
-    ],
-    isSplitByTerms: false,
-  },
-] as PanelData[];
-
 const seriesWithTermsSplit = [
   {
     id: '61ca57f1-469d-11e7-af02-69e470af7417:0',
@@ -35,7 +23,6 @@ const seriesWithTermsSplit = [
       [1610532000000, 10],
       [1610542800000, 40],
     ],
-    isSplitByTerms: true,
   },
   {
     id: '61ca57f1-469d-11e7-af02-69e470af7417:1',
@@ -45,7 +32,6 @@ const seriesWithTermsSplit = [
       [1610532000000, 0],
       [1610542800000, 7],
     ],
-    isSplitByTerms: true,
   },
 ] as PanelData[];
 
@@ -80,31 +66,12 @@ describe('useColorPicker', function () {
     };
   });
 
-  it('not renders the color picker if series are not grouped by terms', () => {
-    const ComponentNoSplit: ComponentType<LegendColorPickerProps> = useColorPicker(
-      'left',
-      seriesNoSplit,
-      jest.fn()
-    );
-    const newProps = {
-      ...wrapperProps,
-      seriesIdentifier: { key: 'key', specId: '61ca57f1-469d-11e7-af02-69e470af7417' },
-    };
-    wrapper = mount(<ComponentNoSplit {...newProps} />);
-    expect(wrapper.find(ColorPicker).length).toBe(0);
-  });
-
   it('not renders the color picker if series id and specId not match', () => {
-    const ComponentNoSplit: ComponentType<LegendColorPickerProps> = useColorPicker(
-      'left',
-      seriesNoSplit,
-      jest.fn()
-    );
     const newProps = {
       ...wrapperProps,
       seriesIdentifier: { key: 'key', specId: '61ca57f1-469d-11e7-af02-69e470af7417:test' },
     };
-    wrapper = mount(<ComponentNoSplit {...newProps} />);
+    wrapper = mount(<Component {...newProps} />);
     expect(wrapper.find(ColorPicker).length).toBe(0);
   });
 

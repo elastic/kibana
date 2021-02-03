@@ -153,7 +153,6 @@ class TimeseriesVisualization extends Component {
 
     seriesModel.forEach((seriesGroup) => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
-      const isSplitByTerms = seriesGroup.split_mode === 'terms';
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
       const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
       const domain = hasSeparateAxis
@@ -183,7 +182,6 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.isSplitByTerms = isSplitByTerms;
         });
 
       if (isCustomDomain) {

@@ -162,6 +162,7 @@ export class VisEditor extends Component {
               <CoreStartContextProvider value={this.coreContext}>
                 <PanelConfig
                   fields={this.state.visFields}
+                  uiState={this.uiState}
                   model={model}
                   visData$={this.visData$}
                   onChange={this.handleChange}

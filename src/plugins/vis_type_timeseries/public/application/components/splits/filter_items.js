@@ -63,6 +63,9 @@ class FilterItemsUi extends Component {
             onChange={handleChange}
             name="color"
             value={model.color}
+            uiState={this.props.uiState}
+            seriesId={`${this.props.model.id}:${model.id}`}
+            seriesName={model.label || model.filter.query}
           />
         </EuiFlexItem>
         <EuiFlexItem>
