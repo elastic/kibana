@@ -31,10 +31,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_index_pattern_results_sort'));
       loadTestFile(require.resolve('./_index_pattern_popularity'));
       loadTestFile(require.resolve('./_kibana_settings'));
-      loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
       loadTestFile(require.resolve('./_index_patterns_empty'));
+      loadTestFile(require.resolve('./_scripted_fields'));
     });
 
     describe('', function () {
