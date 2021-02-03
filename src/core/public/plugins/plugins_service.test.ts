@@ -264,7 +264,7 @@ describe('PluginsService', () => {
         jest.runAllTimers(); // setup plugins
 
         await expect(promise).rejects.toMatchInlineSnapshot(
-          `[Error: Setup lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+          `[Error: Setup lifecycle of "pluginA" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
         );
       });
     });
@@ -344,7 +344,7 @@ describe('PluginsService', () => {
         jest.runAllTimers();
 
         await expect(promise).rejects.toMatchInlineSnapshot(
-          `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+          `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
         );
       });
     });

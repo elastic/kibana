@@ -433,7 +433,7 @@ describe('setup', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+  it('throws timeout error if "setup" was not completed in 10 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
     jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
@@ -443,7 +443,7 @@ describe('setup', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
@@ -470,7 +470,7 @@ describe('start', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "start" was not completed in 30 sec.', async () => {
+  it('throws timeout error if "start" was not completed in 10 sec.', async () => {
     const plugin = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
     jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
@@ -484,7 +484,7 @@ describe('start', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
