@@ -10,7 +10,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/38137
   describe('maps loaded from sample data', () => {
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
@@ -21,13 +20,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       past.setMonth(past.getMonth() - 6);
       const future = new Date();
       future.setMonth(future.getMonth() + 6);
-      await PageObjects.maps.setAbsoluteRange(
-        PageObjects.timePicker.formatDateToAbsoluteTimeString(past),
-        PageObjects.timePicker.formatDateToAbsoluteTimeString(future)
-      );
+      await PageObjects.maps.setAbsoluteRange(past.toISOString(), future.toISOString());
     }
 
-    // Skipped because EMS vectors are not accessible in CI
     describe('ecommerce', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -59,7 +54,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'ecommerce_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.05);
+        expect(percentDifference).to.be.lessThan(0.06);
       });
     });
 
@@ -94,7 +89,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
     });
 
-    // Skipped because EMS vectors are not accessible in CI
     describe('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
