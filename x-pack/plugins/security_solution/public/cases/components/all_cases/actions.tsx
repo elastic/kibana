@@ -18,12 +18,16 @@ interface GetActions {
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
+const hasSubCases = (subCases: Case[] | null | undefined) =>
+  subCases != null && subCases?.length > 0;
+
 export const getActions = ({
   caseStatus,
   dispatchUpdate,
   deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
+    available: (item) => !hasSubCases(item.subCases),
     description: i18n.DELETE_CASE,
     icon: 'trash',
     name: i18n.DELETE_CASE,
@@ -31,33 +35,34 @@ export const getActions = ({
     type: 'icon',
     'data-test-subj': 'action-delete',
   },
-  caseStatus === CaseStatuses.open
-    ? {
-        description: i18n.CLOSE_CASE,
-        icon: 'folderCheck',
-        name: i18n.CLOSE_CASE,
-        onClick: (theCase: Case) =>
-          dispatchUpdate({
-            updateKey: 'status',
-            updateValue: CaseStatuses.closed,
-            caseId: theCase.id,
-            version: theCase.version,
-          }),
-        type: 'icon',
-        'data-test-subj': 'action-close',
-      }
-    : {
-        description: i18n.REOPEN_CASE,
-        icon: 'folderExclamation',
-        name: i18n.REOPEN_CASE,
-        onClick: (theCase: Case) =>
-          dispatchUpdate({
-            updateKey: 'status',
-            updateValue: CaseStatuses.open,
-            caseId: theCase.id,
-            version: theCase.version,
-          }),
-        type: 'icon',
-        'data-test-subj': 'action-open',
-      },
+  {
+    available: (item) => caseStatus === CaseStatuses.open && !hasSubCases(item.subCases),
+    description: i18n.CLOSE_CASE,
+    icon: 'folderCheck',
+    name: i18n.CLOSE_CASE,
+    onClick: (theCase: Case) =>
+      dispatchUpdate({
+        updateKey: 'status',
+        updateValue: CaseStatuses.closed,
+        caseId: theCase.id,
+        version: theCase.version,
+      }),
+    type: 'icon',
+    'data-test-subj': 'action-close',
+  },
+  {
+    available: (item) => caseStatus !== CaseStatuses.open && !hasSubCases(item.subCases),
+    description: i18n.REOPEN_CASE,
+    icon: 'folderExclamation',
+    name: i18n.REOPEN_CASE,
+    onClick: (theCase: Case) =>
+      dispatchUpdate({
+        updateKey: 'status',
+        updateValue: CaseStatuses.open,
+        caseId: theCase.id,
+        version: theCase.version,
+      }),
+    type: 'icon',
+    'data-test-subj': 'action-open',
+  },
 ];

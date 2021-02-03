@@ -18,7 +18,6 @@ import {
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { filter } from 'lodash/fp';
 import { CaseStatuses } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case } from '../../containers/types';
@@ -26,7 +25,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
 import { STATUS } from '../case_view/translations';
-import { Status, statuses } from '../status';
+import { Status } from '../status';
+import { getSubCasesStatusCountsBadges } from './helpers';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -191,18 +191,8 @@ export const getCasesColumns = (
         if (theCase?.subCases == null || theCase.subCases.length === 0) {
           return <Status type={theCase.status} />;
         }
-        const openCases = filter({ status: CaseStatuses.open }, theCase.subCases);
-        const inProgress = filter({ status: CaseStatuses['in-progress'] }, theCase.subCases);
-        const closed = filter({ status: CaseStatuses.closed }, theCase.subCases);
-        return (
-          <>
-            <EuiBadge color={statuses[CaseStatuses.open].color}>{openCases.length}</EuiBadge>
-            <EuiBadge color={statuses[CaseStatuses['in-progress']].color}>
-              {inProgress.length}
-            </EuiBadge>
-            <EuiBadge color={statuses[CaseStatuses.closed].color}>{closed.length}</EuiBadge>
-          </>
-        );
+        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+        return badges.map(({ color, count }) => <EuiBadge color={color}>{count}</EuiBadge>);
       },
     },
     {
