@@ -202,7 +202,7 @@ export function populateValidationMessages(
   }
 }
 
-function invalidTimeIntervalMessage(value: string | undefined) {
+export function invalidTimeIntervalMessage(value: string | undefined) {
   return i18n.translate(
     'xpack.ml.newJob.wizard.validateJob.frequencyInvalidTimeIntervalFormatErrorMessage',
     {

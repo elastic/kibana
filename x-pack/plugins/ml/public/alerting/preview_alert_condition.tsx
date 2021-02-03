@@ -19,6 +19,9 @@ import {
 } from '@elastic/eui';
 import type { AlertingApiService } from '../application/services/ml_api_service/alerting';
 import { MlAnomalyThresholdAlertParams, PreviewResponse } from '../../common/types/alerts';
+import { composeValidators } from '../../common';
+import { requiredValidator, timeIntervalInputValidator } from '../../common/util/validators';
+import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 
 export interface PreviewAlertConditionProps {
   alertingApiService: AlertingApiService;
@@ -88,13 +91,19 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
     return <EuiDescriptionList type={'column'} compressed={true} listItems={listItems} />;
   }
 );
-
 export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   alertingApiService,
   alertParams,
 }) => {
-  const [lookBehindInterval, setLookBehindInterval] = useState<string>('');
+  const [lookBehindInterval, setLookBehindInterval] = useState<string>();
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
+
+  const validators = useMemo(
+    () => composeValidators(requiredValidator(), timeIntervalInputValidator()),
+    []
+  );
+
+  const errors = useMemo(() => validators(lookBehindInterval), [lookBehindInterval]);
 
   useEffect(
     function resetPreview() {
@@ -107,7 +116,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     try {
       const response = await alertingApiService.preview({
         alertParams,
-        timeRange: lookBehindInterval,
+        timeRange: lookBehindInterval!,
       });
       setPreviewResponse(response);
     } catch (e) {
@@ -129,7 +138,9 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       alertParams.jobSelection?.groupIds?.length! > 0) &&
     !!alertParams.resultType &&
     !!alertParams.severity &&
-    !!lookBehindInterval;
+    errors === null;
+
+  const isInvalid = lookBehindInterval !== undefined && !!errors;
 
   return (
     <>
@@ -139,9 +150,11 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.previewAlert.intervalLabel"
-                defaultMessage="Interval to check"
+                defaultMessage="Check the alert condition with an interval"
               />
             }
+            isInvalid={isInvalid}
+            error={invalidTimeIntervalMessage(lookBehindInterval)}
           >
             <EuiFieldText
               placeholder="15d, 6m"
@@ -149,6 +162,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
               onChange={(e) => {
                 setLookBehindInterval(e.target.value);
               }}
+              isInvalid={isInvalid}
             />
           </EuiFormRow>
         </EuiFlexItem>
