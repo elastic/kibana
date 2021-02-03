@@ -54,7 +54,7 @@ export const getSections = ({
   urlParams: IUrlParams;
 }) => {
   const hostName = transaction.host?.hostname;
-  const podId = transaction.kubernetes?.pod.uid;
+  const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 
   const time = Math.round(transaction.timestamp.us / 1000);

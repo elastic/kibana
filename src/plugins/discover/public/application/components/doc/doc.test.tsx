@@ -29,6 +29,13 @@ jest.mock('../../../kibana_services', () => {
           search: mockSearchApi,
         },
       },
+      docLinks: {
+        links: {
+          apis: {
+            indexExists: 'mockUrl',
+          },
+        },
+      },
     }),
     getDocViewsRegistry: () => ({
       addDocView(view: any) {

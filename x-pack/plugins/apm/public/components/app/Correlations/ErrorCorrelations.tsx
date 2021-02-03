@@ -25,10 +25,7 @@ import {
 } from '@elastic/eui';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { px } from '../../../style/variables';
 import { SignificantTermsTable } from './SignificantTermsTable';
 import { ChartContainer } from '../../shared/charts/chart_container';
@@ -65,32 +62,35 @@ export function ErrorCorrelations() {
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/correlations/failed_transactions',
-        params: {
-          query: {
-            serviceName,
-            transactionName,
-            transactionType,
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-            fieldNames: fieldNames.map((field) => field.label).join(','),
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/correlations/failed_transactions',
+          params: {
+            query: {
+              serviceName,
+              transactionName,
+              transactionType,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              fieldNames: fieldNames.map((field) => field.label).join(','),
+            },
           },
-        },
-      });
-    }
-  }, [
-    serviceName,
-    start,
-    end,
-    transactionName,
-    transactionType,
-    uiFilters,
-    fieldNames,
-  ]);
+        });
+      }
+    },
+    [
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+      fieldNames,
+    ]
+  );
 
   return (
     <>

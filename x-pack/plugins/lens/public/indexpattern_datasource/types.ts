@@ -8,6 +8,29 @@ import { IFieldType } from 'src/plugins/data/common';
 import { IndexPatternColumn, IncompleteColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 
+export {
+  IndexPatternColumn,
+  OperationType,
+  IncompleteColumn,
+  FiltersIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MinIndexPatternColumn,
+  MaxIndexPatternColumn,
+  AvgIndexPatternColumn,
+  CardinalityIndexPatternColumn,
+  SumIndexPatternColumn,
+  MedianIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  CountIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  CumulativeSumIndexPatternColumn,
+  CounterRateIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+} from './operations';
+
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
@@ -43,6 +66,7 @@ export interface IndexPatternPersistedState {
   layers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>>;
 }
 
+export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'>;
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;

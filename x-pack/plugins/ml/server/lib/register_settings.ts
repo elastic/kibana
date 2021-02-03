@@ -14,7 +14,7 @@ import {
   DEFAULT_AD_RESULTS_TIME_FILTER,
   DEFAULT_ENABLE_AD_RESULTS_TIME_FILTER,
 } from '../../common/constants/settings';
-import { MAX_FILE_SIZE } from '../../common/constants/file_datavisualizer';
+import { MAX_FILE_SIZE } from '../../../file_upload/common';
 
 export function registerKibanaSettings(coreSetup: CoreSetup) {
   coreSetup.uiSettings.register({
