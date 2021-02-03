@@ -5,7 +5,7 @@
  */
 import React, { FunctionComponent } from 'react';
 
-import { UseField } from '../../../../../shared_imports';
+import { UseField } from '../../form';
 
 import {
   DescribedFormRow,
