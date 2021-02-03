@@ -129,7 +129,13 @@ describe('Parser', () => {
     });
 
     it('named only', () => {
-      expect(parse('foo(q=10)')).toEqual(functionEqual('foo', [namedArgumentEqual('q', '10')]));
+      expect(parse('foo(q=10)')).toEqual(functionEqual('foo', [namedArgumentEqual('q', 10)]));
+    });
+
+    it('named argument is numeric', () => {
+      expect(parse('foo(q=10.1234e5)')).toEqual(
+        functionEqual('foo', [namedArgumentEqual('q', 10.1234e5)])
+      );
     });
 
     it('named and positional', () => {
