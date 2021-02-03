@@ -16,7 +16,7 @@ import type {
   DatasourcePublicAPI,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { TableToolbar } from './components/toolbar';
+import { TableDimensionEditor } from './components/dimension_editor';
 
 export interface ColumnState {
   columnId: string;
@@ -145,6 +145,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
 
+    const columnMap: Record<string, ColumnState> = {};
+    state.columns.forEach((column) => {
+      columnMap[column.columnId] = column;
+    });
+
     if (!sortedColumns) {
       return { groups: [] };
     }
@@ -167,6 +172,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_columns',
+          enableDimensionEditor: true,
           hideGrouping: true,
         },
         {
@@ -181,10 +187,14 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                 datasource!.getOperationForColumnId(c)?.isBucketed &&
                 !state.columns.find((col) => col.columnId === c)?.isTransposed
             )
-            .map((accessor) => ({ columnId: accessor })),
+            .map((accessor) => ({
+              columnId: accessor,
+              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+            })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_rows',
+          enableDimensionEditor: true,
           hideGrouping: true,
         },
         {
@@ -200,6 +210,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           filterOperations: (op) => !op.isBucketed,
           required: true,
           dataTestSubj: 'lnsDatatable_metrics',
+          enableDimensionEditor: true,
         },
       ],
     };
@@ -229,10 +240,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
-  renderToolbar(domElement, props) {
+  renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <TableToolbar {...props} />
+        <TableDimensionEditor {...props} />
       </I18nProvider>,
       domElement
     );
