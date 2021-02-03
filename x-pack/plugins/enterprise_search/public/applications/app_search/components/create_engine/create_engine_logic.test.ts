@@ -11,6 +11,7 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__';
 
+import { nextTick } from '@kbn/test/jest';
 import { generatePath } from 'react-router-dom';
 
 import { ENGINE_PATH } from '../../routes';
@@ -37,37 +38,13 @@ describe('CreateEngineLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onCreateEngineSuccess', () => {
-      beforeAll(() => {
-        mount();
-        // setup local state
-        CreateEngineLogic.actions.setLanguage('English');
-        CreateEngineLogic.actions.setRawName('test');
-        // call action
-        CreateEngineLogic.actions.onCreateEngineSuccess();
-      });
-
-      it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(CREATE_ENGINE_SUCCESS_MESSAGE);
-      });
-
-      it('should navigate the user to the engine page', () => {
-        const enginePath = generatePath(ENGINE_PATH, { engineName: CreateEngineLogic.values.name });
-        expect(navigateToUrl).toHaveBeenCalledWith(enginePath);
-      });
-    });
-
     describe('setLanguage', () => {
-      const newLanguage = 'English';
-
-      beforeAll(() => {
+      it('sets language to the provided value', () => {
         mount();
-        CreateEngineLogic.actions.setLanguage(newLanguage);
-      });
-
-      describe('language', () => {
-        it('should be set to provided value', () => {
-          expect(CreateEngineLogic.values.language).toEqual(newLanguage);
+        CreateEngineLogic.actions.setLanguage('English');
+        expect(CreateEngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          language: 'English',
         });
       });
     });
@@ -93,13 +70,28 @@ describe('CreateEngineLogic', () => {
         });
       });
     });
+  });
+
+  describe('listeners', () => {
+    describe('onCreateEngineSuccess', () => {
+      beforeAll(() => {
+        mount({ language: 'English', rawName: 'test' });
+        CreateEngineLogic.actions.onCreateEngineSuccess();
+      });
+
+      it('should set a success message', () => {
+        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(CREATE_ENGINE_SUCCESS_MESSAGE);
+      });
+
+      it('should navigate the user to the engine page', () => {
+        const enginePath = generatePath(ENGINE_PATH, { engineName: CreateEngineLogic.values.name });
+        expect(navigateToUrl).toHaveBeenCalledWith(enginePath);
+      });
+    });
 
     describe('submitEngine', () => {
       beforeAll(() => {
-        mount();
-        // setup local state
-        CreateEngineLogic.actions.setLanguage('English');
-        CreateEngineLogic.actions.setRawName('test');
+        mount({ language: 'English', rawName: 'test' });
       });
 
       it('POSTS to /api/app_search/engines', () => {
@@ -113,24 +105,16 @@ describe('CreateEngineLogic', () => {
 
       it('calls onCreateEngineSuccess on valid submission', async () => {
         jest.spyOn(CreateEngineLogic.actions, 'onCreateEngineSuccess');
-        const promise = (http.post as jest.Mock).mockReturnValueOnce({});
+        http.post.mockReturnValueOnce(Promise.resolve({}));
         await CreateEngineLogic.actions.submitEngine();
-        await promise;
+        await nextTick();
         expect(CreateEngineLogic.actions.onCreateEngineSuccess).toHaveBeenCalledTimes(1);
       });
 
       it('calls flashAPIErrors on API Error', async () => {
-        const promise = (http.post as jest.Mock).mockReturnValueOnce(
-          Promise.reject({
-            body: {
-              statusCode: 400,
-              error: 'Bad Request',
-              message: 'Invalid request payload JSON format',
-            },
-          })
-        );
+        http.post.mockReturnValueOnce(Promise.reject());
         await CreateEngineLogic.actions.submitEngine();
-        await promise;
+        await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
     });
