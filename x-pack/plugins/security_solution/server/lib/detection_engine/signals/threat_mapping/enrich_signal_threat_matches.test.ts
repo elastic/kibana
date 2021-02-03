@@ -7,7 +7,11 @@
 import { get } from 'lodash';
 
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
-import { buildMatchedIndicator, enrichSignalThreatMatches } from './enrich_signal_threat_matches';
+import {
+  buildMatchedIndicator,
+  enrichSignalThreatMatches,
+  groupAndMergeSignalMatches,
+} from './enrich_signal_threat_matches';
 import {
   getNamedQueryMock,
   getSignalHitMock,
@@ -15,6 +19,56 @@ import {
 } from './enrich_signal_threat_matches.mock';
 import { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
+
+describe('groupAndMergeSignalMatches', () => {
+  it('returns an empty array if there are no signals', () => {
+    expect(groupAndMergeSignalMatches([])).toEqual([]);
+  });
+
+  it('returns the same list if there are no duplicates', () => {
+    const signals = [getSignalHitMock({ _id: '1' }), getSignalHitMock({ _id: '2' })];
+    const expectedSignals = [...signals];
+    expect(groupAndMergeSignalMatches(signals)).toEqual(expectedSignals);
+  });
+
+  it('deduplicates signals with the same ID', () => {
+    const signals = [getSignalHitMock({ _id: '1' }), getSignalHitMock({ _id: '1' })];
+    const expectedSignals = [signals[0]];
+    expect(groupAndMergeSignalMatches(signals)).toEqual(expectedSignals);
+  });
+
+  it('merges the matched_queries of duplicate signals', () => {
+    const signals = [
+      getSignalHitMock({ _id: '1', matched_queries: ['query1'] }),
+      getSignalHitMock({ _id: '1', matched_queries: ['query3', 'query4'] }),
+    ];
+    const [mergedSignal] = groupAndMergeSignalMatches(signals);
+    expect(mergedSignal.matched_queries).toEqual(['query1', 'query3', 'query4']);
+  });
+
+  it('does not deduplicate identical named queries on duplicate signals', () => {
+    const signals = [
+      getSignalHitMock({ _id: '1', matched_queries: ['query1'] }),
+      getSignalHitMock({ _id: '1', matched_queries: ['query1', 'query2'] }),
+    ];
+    const [mergedSignal] = groupAndMergeSignalMatches(signals);
+    expect(mergedSignal.matched_queries).toEqual(['query1', 'query1', 'query2']);
+  });
+
+  it('merges the matched_queries of multiple signals', () => {
+    const signals = [
+      getSignalHitMock({ _id: '1', matched_queries: ['query1'] }),
+      getSignalHitMock({ _id: '1', matched_queries: ['query3', 'query4'] }),
+      getSignalHitMock({ _id: '2', matched_queries: ['query1', 'query2'] }),
+      getSignalHitMock({ _id: '2', matched_queries: ['query5', 'query6'] }),
+    ];
+    const mergedSignals = groupAndMergeSignalMatches(signals);
+    expect(mergedSignals.map((signal) => signal.matched_queries)).toEqual([
+      ['query1', 'query3', 'query4'],
+      ['query1', 'query2', 'query5', 'query6'],
+    ]);
+  });
+});
 
 describe('buildMatchedIndicator', () => {
   let threats: ThreatListItem[];
@@ -96,7 +150,7 @@ describe('buildMatchedIndicator', () => {
     expect(indicators).toHaveLength(queries.length);
   });
 
-  it('returns the indicator data the specified at threat.indicator by default', () => {
+  it('returns the indicator data specified at threat.indicator by default', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
@@ -260,12 +314,21 @@ describe('enrichSignalThreatMatches', () => {
     const indicators = get(enrichedHit._source, 'threat.indicator');
 
     expect(indicators).toEqual([
-      { existing: 'indicator' },
       {
         domain: 'domain_1',
         matched: { atomic: 'domain_1', field: 'threat.indicator.domain', type: 'type_1' },
         other: 'other_1',
         type: 'type_1',
+      },
+      {
+        domain: 'domain_2',
+        matched: {
+          atomic: 'domain_2',
+          field: 'threat.indicator.domain',
+          type: 'type_2',
+        },
+        other: 'other_2',
+        type: 'type_2',
       },
     ]);
   });

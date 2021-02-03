@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-import type { SignalSearchResponse } from '../types';
+import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
   GetMatchedThreats,
   ThreatIndicator,
@@ -14,6 +14,28 @@ import type {
   ThreatMatchNamedQuery,
 } from './types';
 import { extractNamedQueries } from './utils';
+
+const getSignalId = (signal: SignalSourceHit): string => signal._id;
+
+export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
+  const dedupedHitsMap = signalHits.reduce<Map<unknown, SignalSourceHit>>((acc, signalHit) => {
+    const signalId = getSignalId(signalHit);
+    if (!acc.has(signalId)) {
+      acc.set(signalId, signalHit);
+    } else {
+      const existingSignalHit = acc.get(signalId) as SignalSourceHit;
+      const existingQueries = existingSignalHit?.matched_queries ?? [];
+      const newQueries = signalHit.matched_queries ?? [];
+      existingSignalHit.matched_queries = [...existingQueries, ...newQueries];
+
+      acc.set(signalId, existingSignalHit);
+    }
+
+    return acc;
+  }, new Map());
+  const dedupedHits = Array.from(dedupedHitsMap.values());
+  return dedupedHits;
+};
 
 export const buildMatchedIndicator = ({
   queries,
@@ -47,16 +69,16 @@ export const enrichSignalThreatMatches = async (
   if (signalHits.length === 0) {
     return signals;
   }
-  // TODO: merge duplicate signals
 
-  const matches = signalHits.map((signalHit) => extractNamedQueries(signalHit));
-  const matchedThreatIds = [...new Set(matches.flat().map(({ id }) => id))];
+  const uniqueHits = groupAndMergeSignalMatches(signalHits);
+  const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
+  const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-  const matchedIndicators = matches.map((queries) =>
+  const matchedIndicators = signalMatches.map((queries) =>
     buildMatchedIndicator({ queries, threats: matchedThreats })
   );
 
-  const enrichedSignals = signalHits.map((signalHit, i) => {
+  const enrichedSignals = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
     const existingIndicators = get(signalHit._source, 'threat.indicator') ?? [];
 
