@@ -123,7 +123,7 @@ describe('When on the Trusted Apps Page', () => {
 
   afterEach(() => reactTestingLibrary.cleanup());
 
-  describe('and there is trusted app entries', () => {
+  describe('and there are trusted app entries', () => {
     const renderWithListData = async () => {
       const renderResult = render();
       await act(async () => {
@@ -144,9 +144,50 @@ describe('When on the Trusted Apps Page', () => {
       const addButton = await getByTestId('trustedAppsListAddButton');
       expect(addButton.textContent).toBe('Add Trusted Application');
     });
+
+    describe('and the edit trusted app button is clicked', () => {
+      let renderResult: ReturnType<AppContextTestRender['render']>;
+
+      beforeEach(async () => {
+        renderResult = await renderWithListData();
+        act(() => {
+          fireEvent.click(renderResult.getByTestId('trustedAppEditButton'));
+        });
+      });
+
+      it('should display the Edit flyout', () => {
+        expect(renderResult.getByTestId('addTrustedAppFlyout'));
+      });
+
+      it('should NOT display the about info for trusted apps', () => {
+        expect(renderResult.queryByTestId('addTrustedAppFlyout-about')).toBeNull();
+      });
+
+      it('should show correct flyout title', () => {
+        expect(renderResult.getByTestId('addTrustedAppFlyout-headerTitle').textContent).toBe(
+          'Edit trusted application'
+        );
+      });
+
+      it('should display the expected text for the Save button', () => {
+        expect(renderResult.getByTestId('addTrustedAppFlyout-createButton').textContent).toEqual(
+          'Save'
+        );
+      });
+
+      describe('and when Save is clicked', () => {
+        // Will be unskiped once PUT API is created
+        it.skip('should call the correct api (PUT)', () => {
+          act(() => {
+            fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'));
+          });
+          expect(coreStart.http.put).toHaveBeenCalledWith({});
+        });
+      });
+    });
   });
 
-  describe('when the Add Trusted App button is clicked', () => {
+  describe('and the Add Trusted App button is clicked', () => {
     const renderAndClickAddButton = async (): Promise<
       ReturnType<AppContextTestRender['render']>
     > => {
@@ -181,6 +222,8 @@ describe('When on the Trusted Apps Page', () => {
 
       const flyoutTitle = getByTestId('addTrustedAppFlyout-headerTitle');
       expect(flyoutTitle.textContent).toBe('Add trusted application');
+
+      expect(getByTestId('addTrustedAppFlyout-about'));
     });
 
     it('should update the URL to indicate the flyout is opened', async () => {
