@@ -21,4 +21,4 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateEdit), testBedConfig);
 
-export const setup = formSetup.bind(null, initTestBed);
+export const setup: any = formSetup.bind(null, initTestBed);
