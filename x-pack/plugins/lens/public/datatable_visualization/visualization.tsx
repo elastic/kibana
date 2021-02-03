@@ -139,6 +139,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
 
+    const columnMap: Record<string, ColumnState> = {};
+    state.columns.forEach((column) => {
+      columnMap[column.columnId] = column;
+    });
+
     if (!sortedColumns) {
       return { groups: [] };
     }
@@ -153,7 +158,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({ columnId: accessor })),
+            .map((accessor) => ({
+              columnId: accessor,
+              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+            })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',

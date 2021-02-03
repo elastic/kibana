@@ -48,6 +48,16 @@ export function ColorIndicator({
             })}
           />
         )}
+        {accessorConfig.triggerIcon === 'invisible' && (
+          <EuiIcon
+            {...baseIconProps}
+            type="eyeClosed"
+            color="subdued"
+            aria-label={i18n.translate('xpack.lens.editorFrame.invisibleIndicatorLabel', {
+              defaultMessage: 'This dimension is currently not visible in the chart',
+            })}
+          />
+        )}
         {accessorConfig.triggerIcon === 'colorBy' && (
           <EuiIcon
             {...baseIconProps}
