@@ -315,16 +315,22 @@ export function replaceColumn({
 
       const basicLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
       // rebuild the references again for the specific AST generated
-      const newLayer = newColumn.params?.ast
-        ? regenerateLayerFromAst(
-            newColumn.params.ast,
-            basicLayer,
-            columnId,
-            newColumn,
-            indexPattern,
-            operationDefinitionMap
-          )
-        : basicLayer;
+      let newLayer;
+
+      try {
+        newLayer = newColumn.params.formula
+          ? regenerateLayerFromAst(
+              newColumn.params.formula,
+              basicLayer,
+              columnId,
+              newColumn,
+              indexPattern,
+              operationDefinitionMap
+            )
+          : basicLayer;
+      } catch (e) {
+        newLayer = basicLayer;
+      }
 
       return updateDefaultLabels(
         {

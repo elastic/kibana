@@ -7,7 +7,7 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { GenericOperationDefinition, IndexPatternColumn, operationDefinitionMap } from '.';
+import { IndexPatternColumn, operationDefinitionMap } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
 

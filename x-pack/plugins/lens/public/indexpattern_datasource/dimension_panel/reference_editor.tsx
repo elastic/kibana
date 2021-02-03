@@ -39,7 +39,7 @@ const operationPanels = getOperationDisplay();
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
-  selectionStyle: 'full' | 'field';
+  selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
   updateLayer: (newLayer: IndexPatternLayer) => void;
@@ -191,6 +191,10 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     return;
   }
 
+  if (selectionStyle === 'hidden') {
+    return null;
+  }
+
   const selectedOption = incompleteOperation
     ? [functionOptions.find(({ value }) => value === incompleteOperation)!]
     : column
@@ -323,6 +327,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               columnId={columnId}
               indexPattern={currentIndexPattern}
               dateRange={dateRange}
+              operationDefinitionMap={operationDefinitionMap}
               {...services}
             />
           </>

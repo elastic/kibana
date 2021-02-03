@@ -74,6 +74,7 @@ const defaultOptions = {
       { name: sourceField, type: 'number', displayName: sourceField },
     ]),
   },
+  operationDefinitionMap: {},
 };
 
 describe('ranges', () => {

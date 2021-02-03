@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
+import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
+import { isObject } from 'lodash';
+import { OperationDefinition, GenericOperationDefinition } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 
@@ -14,7 +15,7 @@ const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
   params: {
-    tinymathAst: any;
+    tinymathAst: TinymathAST | string;
     // last value on numeric fields can be formatted
     format?: {
       id: string;
@@ -115,7 +116,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
       isBucketed: false,
       scale: 'ratio',
       params: {
-        tinymathAst: {},
+        tinymathAst: '',
       },
       references: [],
     };
@@ -126,44 +127,41 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   },
 };
 
-function astToString(ast: any) {
+function astToString(ast: TinymathAST | string): string | number {
   if (typeof ast === 'number' || typeof ast === 'string') {
     return ast;
+  }
+  if (ast.type === 'variable') {
+    return ast.value;
+  }
+  if (ast.type === 'namedArgument') {
+    return `${ast.name}=${ast.value}`;
   }
   return `${ast.name}(${ast.args.map(astToString).join(',')})`;
 }
 
-export function sanifyOperationNames(
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-): Record<string, GenericOperationDefinition> {
-  return Object.keys(operationDefinitionMap).reduce((memo, operationTypeSnakeCase) => {
-    const operationType = operationTypeSnakeCase.replace(/([_][a-z])/, (group) =>
-      group.replace('_', '')
-    );
-    memo[operationType] = operationDefinitionMap[operationTypeSnakeCase];
-    return memo;
-  }, {} as Record<string, GenericOperationDefinition>);
-}
-
-function findMathNodes(root: any, operations: Record<string, GenericOperationDefinition>) {
-  function flattenMathNodes(node: any) {
-    if (typeof node === 'string' || typeof node === 'number' || operations[node.name]) {
+function findMathNodes(
+  root: TinymathAST | string,
+  operations: Record<string, GenericOperationDefinition>
+): TinymathFunction[] {
+  function flattenMathNodes(node: TinymathAST | string): TinymathFunction[] {
+    if (!isObject(node) || node.type !== 'function' || operations[node.name]) {
       return [];
     }
-    return [node, ...node.args.flatMap(findMathNodes)].filter(Boolean);
+    return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
   }
   return flattenMathNodes(root);
 }
 
 export function hasMathNode(
-  root: any,
+  root: TinymathAST,
   operations: Record<string, GenericOperationDefinition>
 ): boolean {
   return Boolean(findMathNodes(root, operations).length);
 }
 
 function hasInvalidOperations(
-  node: { name: string; args: any[] },
+  node: TinymathAST | string,
   operations: Record<string, GenericOperationDefinition>
 ) {
   // avoid duplicates
@@ -177,21 +175,27 @@ function hasInvalidOperations(
 }
 
 // traverse a tree and find all string leaves
-export function findVariables(node: any): string[] {
+export function findVariables(node: TinymathAST | string | undefined): string[] {
+  if (node == null) {
+    return [];
+  }
   if (typeof node === 'string') {
-    // leaf node
     return [node];
   }
-  if (typeof node === 'number') {
+  if (typeof node === 'number' || node.type === 'namedArgument') {
     return [];
+  }
+  if (node.type === 'variable') {
+    // leaf node
+    return [node.value];
   }
   return node.args.flatMap(findVariables);
 }
 
-function getMathNode(layer: IndexPatternLayer, ast: string | { name: string; args: any[] }) {
+function getMathNode(layer: IndexPatternLayer, ast: TinymathAST | string) {
   if (typeof ast === 'string') {
     const refColumn = layer.columns[ast];
-    if (refColumn) {
+    if (refColumn && 'sourceField' in refColumn) {
       return refColumn.sourceField;
     }
   }
