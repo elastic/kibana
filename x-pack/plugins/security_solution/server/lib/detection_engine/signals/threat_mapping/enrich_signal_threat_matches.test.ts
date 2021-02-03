@@ -357,6 +357,24 @@ describe('enrichSignalThreatMatches', () => {
     ]);
   });
 
+  // TODO note in PR
+  it('provides only match data if the matched threat cannot be found', async () => {
+    getMatchedThreats = async () => [];
+    const signalHit = getSignalHitMock({
+      matched_queries: [matchedQuery],
+    });
+    const signals = getSignalsResponseMock([signalHit]);
+    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const [enrichedHit] = enrichedSignals.hits.hits;
+    const indicators = get(enrichedHit._source, 'threat.indicator');
+
+    expect(indicators).toEqual([
+      {
+        matched: { atomic: undefined, field: 'event.field', type: undefined },
+      },
+    ]);
+  });
+
   it('preserves an existing threat.indicator object on signals', async () => {
     const signalHit = getSignalHitMock({
       _source: { '@timestamp': 'mocked', threat: { indicator: { existing: 'indicator' } } },
