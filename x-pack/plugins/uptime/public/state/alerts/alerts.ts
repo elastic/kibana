@@ -111,51 +111,6 @@ export const alertsReducer = handleActions<AlertState>(
         pendingAlertRequests: nextPendingAlertRequests,
       };
     },
-    // ...{
-    //   [String(createAlertAction.get)]: (state: any, action: Action<any>) => {
-    //     const {
-    //       payload: { monitorId, monitorName },
-    //     } = action;
-    //     const newState = {
-    //       ...state,
-    //       newAlert: {
-    //         ...(state as any).newAlert,
-    //         pendingMonitorIds: [{ [monitorId]: monitorName }],
-    //         loading: true,
-    //       },
-    //     };
-    //     return newState;
-    //   },
-    //   [String(createAlertAction.success)]: (state: any, action: any) => {
-    //     return {
-    //       ...state,
-    //       newAlert: {
-    //         ...(state as any).newAlert,
-    //         data: action.payload,
-    //         loading: false,
-    //       },
-    //     };
-    //   },
-    //   [String(createAlertAction.fail)]: (state: any, action: any) => {
-    //     const {
-    //       payload: { monitorId },
-    //     } = action;
-    //     const {
-    //       newAlert: { pendingMonitorIds },
-    //     } = state;
-
-    //     return {
-    //       ...state,
-    //       newAlert: {
-    //         ...(state as any).newAlert,
-    //         pendingMonitorIds: pendingMonitorIds.filter((item) => !item[monitorId]),
-    //         data: null,
-    //         error: action.payload,
-    //         loading: false,
-    //       },
-    //     };
-    //   },
-    // },
   },
   initialState
 );
