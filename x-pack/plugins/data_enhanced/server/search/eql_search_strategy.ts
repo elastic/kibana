@@ -22,7 +22,8 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    await esClient.asCurrentUser.asyncSearch.delete({ id });
+    const client = esClient.asCurrentUser.eql;
+    await client.delete({ id });
   }
 
   return {
@@ -41,11 +42,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams()
+          ? getDefaultAsyncGetParams(options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(),
+              ...getDefaultAsyncGetParams(options),
               ...request.params,
             };
         const promise = id

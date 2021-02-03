@@ -14,7 +14,7 @@ export function isRequestTimeout(error: { name: string }) {
   return error.name === REQUEST_TIMEOUT_NAME;
 }
 
-interface Results {
+export interface Results {
   [id: string]: {
     [status: string]: any;
     error?: any;

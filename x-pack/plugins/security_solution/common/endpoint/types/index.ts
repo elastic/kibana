@@ -425,13 +425,8 @@ export type HostInfo = Immutable<{
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {

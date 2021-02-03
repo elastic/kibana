@@ -7,10 +7,8 @@
  */
 
 import { postSnapshot } from '@percy/agent/dist/utils/sdk-utils';
-import { Test } from 'mocha';
-
 import testSubjSelector from '@kbn/test-subj-selector';
-
+import { Test } from '@kbn/test/types/ftr';
 import { pkg } from '../../../../src/core/server/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

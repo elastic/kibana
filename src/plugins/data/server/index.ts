@@ -213,10 +213,6 @@ export {
   IEsSearchRequest,
   IEsSearchResponse,
   ES_SEARCH_STRATEGY,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export {
@@ -233,10 +229,9 @@ export {
   searchUsageObserver,
   shimAbortSignal,
   SearchUsage,
-  SessionService,
-  ISessionService,
-  IScopedSessionService,
-  DataApiRequestHandlerContext,
+  SearchSessionService,
+  ISearchSessionService,
+  SearchRequestHandlerContext,
   DataRequestHandlerContext,
 } from './search';
 
