@@ -30,6 +30,7 @@
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
     { "path": "./plugins/ml/tsconfig.json" },
+    { "path": "./plugins/observability/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/reporting/tsconfig.json" },
     { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
@@ -42,9 +43,6 @@
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
-    { "path": "./plugins/spaces/tsconfig.json" },
-    { "path": "./plugins/security/tsconfig.json" },
-    { "path": "./plugins/stack_alerts/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "./plugins/watcher/tsconfig.json" }
   ]

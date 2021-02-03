@@ -65,6 +65,7 @@
     { "path": "../plugins/cloud/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
     { "path": "../plugins/global_search_bar/tsconfig.json" },
+    { "path": "../plugins/observability/tsconfig.json" },
     { "path": "../plugins/ingest_pipelines/tsconfig.json" },
     { "path": "../plugins/license_management/tsconfig.json" },
     { "path": "../plugins/snapshot_restore/tsconfig.json" },
