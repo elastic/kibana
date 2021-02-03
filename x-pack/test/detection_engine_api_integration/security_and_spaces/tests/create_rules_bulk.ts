@@ -28,6 +28,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('create_rules_bulk', () => {
     describe('validation errors', () => {
@@ -54,11 +55,13 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('creating rules in bulk', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
