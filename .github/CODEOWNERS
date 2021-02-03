@@ -214,9 +214,8 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-core
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/kibana-core
-src/plugins/telemetry/schema/oss_plugins.json @elastic/kibana-core
-x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-core
+src/plugins/telemetry/schema/ @elastic/kibana-core @thesmallestduck @elastic/infra-telemetry
+x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @thesmallestduck @elastic/infra-telemetry
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
