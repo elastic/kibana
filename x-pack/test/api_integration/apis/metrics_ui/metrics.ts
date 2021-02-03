@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
+import { InfraTimerangeInput } from '../../../../plugins/infra/common/http_api/snapshot_api';
 import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
-import { InfraNodeType, InfraTimerangeInput } from '../../../../plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
@@ -19,7 +19,7 @@ const { min, max } = DATES['7.0.0'].hosts;
 interface NodeDetailsRequest {
   metrics: InventoryMetric[];
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: string;
   sourceId: string;
   timerange: InfraTimerangeInput;
   cloudId?: string;
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       return response.body;
     };
 
-    it('should basically work', () => {
+    it('should basically work', async () => {
       const data = fetchNodeDetails({
         sourceId: 'default',
         metrics: ['hostCpuUsage'],
@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should support multiple metrics', () => {
+    it('should support multiple metrics', async () => {
       const data = fetchNodeDetails({
         sourceId: 'default',
         metrics: ['hostCpuUsage', 'hostLoad'],
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           interval: '>=1m',
         },
         nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host' as InfraNodeType,
+        nodeType: 'host',
       });
       return data.then((resp) => {
         if (!resp) {

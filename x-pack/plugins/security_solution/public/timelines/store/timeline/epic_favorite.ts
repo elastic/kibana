@@ -27,6 +27,7 @@ import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { inputsModel } from '../../../common/store/inputs';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
@@ -48,6 +49,9 @@ export const epicPersistTimelineFavorite = (
       fetchPolicy: 'no-cache',
       variables: {
         timelineId: myEpicTimelineId.getTimelineId(),
+        templateTimelineId: timeline[action.payload.id].templateTimelineId,
+        templateTimelineVersion: timeline[action.payload.id].templateTimelineVersion,
+        timelineType: timeline[action.payload.id].timelineType ?? TimelineType.default,
       },
       refetchQueries,
     })
@@ -95,6 +99,12 @@ export const epicPersistTimelineFavorite = (
             );
             myEpicTimelineId.setTimelineVersion(
               updatedTimeline[get('payload.id', checkAction)].version
+            );
+            myEpicTimelineId.setTemplateTimelineId(
+              updatedTimeline[get('payload.id', checkAction)].templateTimelineId
+            );
+            myEpicTimelineId.setTemplateTimelineVersion(
+              updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
             );
             return true;
           }
