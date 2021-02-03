@@ -20,10 +20,16 @@ import { DslQuery, isEsQueryString } from './es_query_dsl';
 
 export function decorateQuery(
   query: DslQuery,
-  queryStringOptions: Record<string, any>,
+  queryStringOptions: Record<string, any> | string,
   dateFormatTZ?: string
 ) {
   if (isEsQueryString(query)) {
+    // NOTE queryStringOptions comes from UI Settings and, in server context, is a serialized string
+    // https://github.com/elastic/kibana/issues/89902
+    if (typeof queryStringOptions === 'string') {
+      queryStringOptions = JSON.parse(queryStringOptions);
+    }
+
     extend(query.query_string, queryStringOptions);
     if (dateFormatTZ) {
       defaults(query.query_string, {
