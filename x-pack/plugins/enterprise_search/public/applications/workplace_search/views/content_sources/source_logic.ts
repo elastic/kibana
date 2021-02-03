@@ -180,7 +180,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           actions.initializeFederatedSummary(sourceId);
         }
       } catch (e) {
-        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
         if (e.response.status === 404) {
           KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
         } else {
