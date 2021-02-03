@@ -3253,11 +3253,77 @@
                   "job_id": {
                     "type": "keyword"
                   },
-                  "time_start": {
-                    "type": "long"
+                  "open_time": {
+                    "type": "keyword"
                   },
-                  "time_finish": {
-                    "type": "long"
+                  "state": {
+                    "type": "keyword"
+                  },
+                  "data_counts": {
+                    "properties": {
+                      "bucket_count": {
+                        "type": "long"
+                      },
+                      "empty_bucket_count": {
+                        "type": "long"
+                      },
+                      "input_bytes": {
+                        "type": "long"
+                      },
+                      "input_record_count": {
+                        "type": "long"
+                      },
+                      "last_data_time": {
+                        "type": "long"
+                      },
+                      "processed_record_count": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "model_size_stats": {
+                    "properties": {
+                      "bucket_allocation_failures_count": {
+                        "type": "long"
+                      },
+                      "model_bytes": {
+                        "type": "long"
+                      },
+                      "model_bytes_exceeded": {
+                        "type": "long"
+                      },
+                      "model_bytes_memory_limit": {
+                        "type": "long"
+                      },
+                      "peak_model_bytes": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "timing_stats": {
+                    "properties": {
+                      "average_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "bucket_count": {
+                        "type": "long"
+                      },
+                      "exponential_average_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "exponential_average_bucket_processing_time_per_hour_ms": {
+                        "type": "long"
+                      },
+                      "maximum_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "minimum_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "total_bucket_processing_time_ms": {
+                        "type": "long"
+                      }
+                    }
                   }
                 }
               }
