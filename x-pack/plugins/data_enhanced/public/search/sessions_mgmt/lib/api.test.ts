@@ -160,7 +160,7 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to cancel the search session!' }
+        { title: 'Failed to delete the search session!' }
       );
     });
   });
