@@ -34,6 +34,7 @@ import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -164,6 +165,7 @@ export class MonitoringPlugin
       )
     );
     alertTypeRegistry.register(createCCRReadExceptionsAlertType());
+    alertTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

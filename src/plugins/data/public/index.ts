@@ -344,10 +344,6 @@ export {
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
   KibanaContext,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export type { AggConfigs, AggConfig } from '../common';
