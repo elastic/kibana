@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from './Links/url_helpers';
+import * as urlHelpers from './Links/url_helpers';
 
 // The default transaction type (for non-RUM services) is "request". Set the
 // min-width on here to the width when "request" is loaded so it doesn't start
@@ -30,14 +30,9 @@ export function TransactionTypeSelect() {
   const handleChange = useCallback(
     (event: FormEvent<HTMLSelectElement>) => {
       const selectedTransactionType = event.currentTarget.value;
-      const newLocation = {
-        ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          transactionType: selectedTransactionType,
-        }),
-      };
-      history.push(newLocation);
+      urlHelpers.push(history, {
+        query: { transactionType: selectedTransactionType },
+      });
     },
     [history]
   );
