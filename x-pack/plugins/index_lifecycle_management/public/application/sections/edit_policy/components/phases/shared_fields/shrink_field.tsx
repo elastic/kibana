@@ -36,7 +36,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.shrinkIndexExplanationText"
-            defaultMessage="Shrink the index into a new index with fewer primary shards."
+            defaultMessage="Shrink the index to a new index with fewer primary shards."
           />{' '}
           <LearnMoreLink docPath="ilm-shrink.html" />
         </EuiTextColor>

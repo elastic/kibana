@@ -57,7 +57,7 @@ const i18nTexts = {
     defaultMessage: 'Policy Summary',
   }),
   description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
-    defaultMessage: 'An estimate of the time data will remain in a phase.',
+    defaultMessage: 'This policy moves data through the following phases.',
   }),
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',

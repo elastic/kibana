@@ -66,7 +66,7 @@ export const HotPhase: FunctionComponent = () => {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                  defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
+                  defaultMessage="Start writing to a new index when the current index reaches a certain size, document count, or age. Enables you to optimize performance and manage resource usage when working with time series data."
                 />
               </p>
             </EuiTextColor>
