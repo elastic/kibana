@@ -19,7 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
+  const savedObjects = getService('savedObjects');
+  const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -27,7 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+
+      await esArchiver.load('empty_kibana');
+      await savedObjects.import('discover')(log)(supertest);
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
