@@ -450,7 +450,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http(route, {
-          body: JSON.stringify({ ...params }),
+          body: JSON.stringify(params),
         });
         if (successCallback) successCallback();
         if (isUpdating) {

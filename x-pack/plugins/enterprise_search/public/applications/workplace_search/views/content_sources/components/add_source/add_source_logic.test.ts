@@ -289,7 +289,7 @@ describe('AddSourceLogic', () => {
       it('sends params to server and calls correct methods', async () => {
         const setAddedSourceSpy = jest.spyOn(SourcesLogic.actions, 'setAddedSource');
         const { serviceName, indexPermissions, serviceType } = response;
-        http.get.mockReturnValue(Promise.resolve({ ...response }));
+        http.get.mockReturnValue(Promise.resolve(response));
         AddSourceLogic.actions.saveSourceParams(params);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
           query: {
@@ -483,7 +483,7 @@ describe('AddSourceLogic', () => {
             http.put
           ).toHaveBeenCalledWith(
             `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
-            { body: JSON.stringify({ ...params }) }
+            { body: JSON.stringify(params) }
           );
 
           await nextTick();
@@ -506,7 +506,7 @@ describe('AddSourceLogic', () => {
           };
 
           expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors', {
-            body: JSON.stringify({ ...createParams }),
+            body: JSON.stringify(createParams),
           });
         });
 
