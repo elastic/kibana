@@ -219,6 +219,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             index: [ES_TEST_INDEX_NAME],
             timeField: params.timeField || 'date',
             esQuery: params.esQuery,
+            size: params.size,
             timeWindowSize: params.timeWindowSize || ALERT_INTERVAL_SECONDS * 5,
             timeWindowUnit: 's',
             thresholdComparator: params.thresholdComparator,
