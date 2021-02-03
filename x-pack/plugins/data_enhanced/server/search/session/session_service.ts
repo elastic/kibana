@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -49,7 +47,7 @@ function sleep(ms: number) {
 }
 export class SearchSessionService
   implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
-  private config!: SearchSessionsConfig;
+  private sessionConfig!: SearchSessionsConfig;
 
   constructor(private readonly logger: Logger, private readonly config: ConfigSchema) {
     this.sessionConfig = this.config.search.sessions;
@@ -70,8 +68,12 @@ export class SearchSessionService
   public stop() {}
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
-    if (this.config.enabled) {
-      scheduleSearchSessionsTasks(deps.taskManager, this.logger, this.config.trackingInterval);
+    if (this.sessionConfig.enabled) {
+      scheduleSearchSessionsTasks(
+        deps.taskManager,
+        this.logger,
+        this.sessionConfig.trackingInterval
+      );
     }
   };
 
@@ -103,7 +105,7 @@ export class SearchSessionService
         } catch (createError) {
           if (
             SavedObjectsErrorHelpers.isConflictError(createError) &&
-            retry < this.config.maxUpdateRetries
+            retry < this.sessionConfig.maxUpdateRetries
           ) {
             return await retryOnConflict(createError);
           } else {
@@ -112,7 +114,7 @@ export class SearchSessionService
         }
       } else if (
         SavedObjectsErrorHelpers.isConflictError(e) &&
-        retry < this.config.maxUpdateRetries
+        retry < this.sessionConfig.maxUpdateRetries
       ) {
         return await retryOnConflict(e);
       } else {
@@ -160,7 +162,7 @@ export class SearchSessionService
         sessionId,
         status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
-          Date.now() + this.config.defaultExpiration.asMilliseconds()
+          Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
         created: new Date().toISOString(),
         touched: new Date().toISOString(),
