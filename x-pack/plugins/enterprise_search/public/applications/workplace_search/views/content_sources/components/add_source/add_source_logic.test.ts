@@ -586,7 +586,6 @@ describe('AddSourceLogic', () => {
 
       it('getSourceConnectData', () => {
         const query = {
-          index_permissions: false,
           kibana_host: '',
         };
 
