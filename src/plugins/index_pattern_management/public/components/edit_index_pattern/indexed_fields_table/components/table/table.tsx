@@ -246,7 +246,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         dataType: 'string',
         sortable: true,
         render: (value: string, field: IndexedFieldItem) => {
-          return this.renderFieldType(value, field.type === 'conflict');
+          return this.renderFieldType(value, field.kbnType === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },
