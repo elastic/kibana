@@ -1,0 +1,17 @@
+.relevanceTuningForm {
+  .boostSelect {
+    min-width: $euiSizeXXL * 4;
+  }
+}
+
+.boostSelectOption {
+
+  .euiContextMenuItem__text {
+    display: flex;
+    align-items: center;
+
+    .euiToken {
+      margin-right: $euiSizeS;
+    }
+  }
+}

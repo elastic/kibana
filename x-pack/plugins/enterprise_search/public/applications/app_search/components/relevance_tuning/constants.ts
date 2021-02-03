@@ -39,8 +39,30 @@ export const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
     defaultMessage: 'Are you sure you want to delete this boost?',
   }
 );
+export const PROXIMITY = 'proximity';
+export const PROXIMITY_DISPLAY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.proximityDropDownOptionLabel',
+  {
+    defaultMessage: 'Proximity',
+  }
+);
+export const FUNCTIONAL = 'functional';
+export const FUNCTIONAL_DISPLAY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.functionalDropDownOptionLabel',
+  {
+    defaultMessage: 'Functional',
+  }
+);
+export const VALUE = 'value';
+export const VALUE_DISPLAY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.valueDropDownOptionLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
 export const BOOST_TYPE_TO_ICON_MAP = {
-  value: 'tokenNumber',
-  functional: 'tokenFunction',
-  proximity: 'tokenGeo',
+  [VALUE]: 'tokenNumber',
+  [FUNCTIONAL]: 'tokenFunction',
+  [PROXIMITY]: 'tokenGeo',
 };

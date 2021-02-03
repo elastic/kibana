@@ -13,6 +13,7 @@ import { SchemaTypes } from '../../../../../shared/types';
 import { SearchField } from '../../types';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
+import { Boosts } from './boosts';
 
 import './relevance_tuning_item_content.scss';
 interface Props {
@@ -30,6 +31,7 @@ export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, field 
           {field && <WeightSlider name={name} field={field} />}
         </EuiPageContentBody>
       </EuiPageContent>
+      <Boosts name={name} type={type} />
     </>
   );
 };
