@@ -60,17 +60,18 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
           (variable) => !indexPattern.getFieldByName(variable) && !layer.columns[variable]
         );
         // need to check the arguments here: check only strings for now
-
-        errors.push(
-          i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-            defaultMessage:
-              '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-            values: {
-              variablesLength: missingOperations.length,
-              variablesList: missingVariables.join(', '),
-            },
-          })
-        );
+        if (missingVariables.length) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+              defaultMessage:
+                '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
+              values: {
+                variablesLength: missingOperations.length,
+                variablesList: missingVariables.join(', '),
+              },
+            })
+          );
+        }
       }
     }
     return errors.length ? errors : undefined;

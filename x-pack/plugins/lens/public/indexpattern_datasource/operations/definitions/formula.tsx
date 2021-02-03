@@ -283,17 +283,18 @@ function addASTValidation(
             },
           })
         );
-      }
-      const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
-      if (!indexPattern.getFieldByName(fieldName.value)) {
-        errors.push(
-          i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
-            defaultMessage: 'The field {field} was not found.',
-            values: {
-              field: fieldName.value,
-            },
-          })
-        );
+      } else {
+        const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
+        if (!indexPattern.getFieldByName(fieldName.value)) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
+              defaultMessage: 'The field {field} was not found.',
+              values: {
+                field: fieldName.value,
+              },
+            })
+          );
+        }
       }
       const missingParameters = validateParams(nodeOperation, namedArguments).filter(
         ({ isMissing }) => isMissing
@@ -501,7 +502,7 @@ function validateParams(
   operation:
     | OperationDefinition<IndexPatternColumn, 'field'>
     | OperationDefinition<IndexPatternColumn, 'fullReference'>,
-  params: TinymathNamedArgument[]
+  params: TinymathNamedArgument[] = []
 ) {
   const paramsObj = getOperationParams(operation, params);
   const formalArgs = operation.operationParams || [];
@@ -514,7 +515,7 @@ function getOperationParams(
   operation:
     | OperationDefinition<IndexPatternColumn, 'field'>
     | OperationDefinition<IndexPatternColumn, 'fullReference'>,
-  params: TinymathNamedArgument[]
+  params: TinymathNamedArgument[] = []
 ): Record<string, string | number> {
   const formalArgs: Record<string, string> = (operation.operationParams || []).reduce(
     (memo: Record<string, string>, { name, type }) => {
