@@ -22,6 +22,7 @@ import {
   generateMappings,
   generateTemplateName,
   getTemplate,
+  getTemplatePriority,
 } from './template';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
@@ -299,6 +300,8 @@ export async function installTemplate({
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataStream);
   const indexPatternName = generateIndexPatternName(dataStream);
+  const templatePriority = getTemplatePriority(dataStream);
+
   let pipelineName;
   if (dataStream.ingest_pipeline) {
     pipelineName = getPipelineNameForInstallation({
@@ -316,12 +319,12 @@ export async function installTemplate({
 
   const template = getTemplate({
     type: dataStream.type,
-    templateName,
     indexPatternName,
     mappings,
     pipelineName,
     packageName,
     composedOfTemplates,
+    templatePriority,
     ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });

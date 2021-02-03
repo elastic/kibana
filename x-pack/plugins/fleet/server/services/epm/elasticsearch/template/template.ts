@@ -33,6 +33,10 @@ export interface CurrentDataStream {
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
 
+// see discussion in https://github.com/elastic/kibana/issues/88307
+const DEFAULT_TEMPLATE_PRIORITY = 200;
+const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
+
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
@@ -40,32 +44,32 @@ const DEFAULT_IGNORE_ABOVE = 1024;
  */
 export function getTemplate({
   type,
-  templateName,
   indexPatternName,
   mappings,
   pipelineName,
   packageName,
   composedOfTemplates,
+  templatePriority,
   ilmPolicy,
   hidden,
 }: {
   type: string;
-  templateName: string;
   indexPatternName: string;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
+  templatePriority: number;
   ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
     type,
-    templateName,
     indexPatternName,
     mappings,
     packageName,
     composedOfTemplates,
+    templatePriority,
     ilmPolicy,
     hidden
   );
@@ -255,6 +259,25 @@ export function generateIndexPatternName(dataStream: RegistryDataStream): string
   }
 }
 
+// Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
+// See also https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
+//
+// Built-in templates like logs-*-* and metrics-*-* have priority 100
+//
+// EPM generated templates for data streams have priority 200 (DEFAULT_TEMPLATE_PRIORITY)
+//
+// EPM generated templates for data streams with dataset_is_prefix: true have priority 150 (DATASET_IS_PREFIX_TEMPLATE_PRIORITY)
+
+export function getTemplatePriority(dataStream: RegistryDataStream): number {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return DEFAULT_TEMPLATE_PRIORITY;
+  } else {
+    return DATASET_IS_PREFIX_TEMPLATE_PRIORITY;
+  }
+}
+
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
@@ -275,11 +298,11 @@ export function generateESIndexPatterns(
 
 function getBaseTemplate(
   type: string,
-  templateName: string,
   indexPatternName: string,
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
+  templatePriority: number,
   ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
@@ -293,11 +316,7 @@ function getBaseTemplate(
   };
 
   return {
-    // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
-    // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
-    // is created. I'm using 200 here to give some room for users to create their own template and fit it between the
-    // default and the one the ingest manager uses.
-    priority: 200,
+    priority: templatePriority,
     // To be completed with the correct index patterns
     index_patterns: [indexPatternName],
     template: {

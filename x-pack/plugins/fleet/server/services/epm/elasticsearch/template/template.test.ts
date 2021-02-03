@@ -23,16 +23,15 @@ expect.addSnapshotSerializer({
 });
 
 test('get template', () => {
-  const templateName = 'logs-nginx-access-abcd';
   const indexPatternName = 'logs-nginx-access-abcd-*';
 
   const template = getTemplate({
     type: 'logs',
-    templateName,
     indexPatternName,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
   });
   expect(template.index_patterns).toStrictEqual([indexPatternName]);
 });
@@ -42,11 +41,11 @@ test('adds composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    templateName: 'name',
     indexPatternName: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
+    templatePriority: 200,
   });
   expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
@@ -56,39 +55,36 @@ test('adds empty composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    templateName: 'name',
     indexPatternName: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
+    templatePriority: 200,
   });
   expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
 
 test('adds hidden field correctly', () => {
-  const templateWithHiddenName = 'logs-nginx-access-abcd';
   const indexPatternName = 'logs-nginx-access-abcd-*';
 
   const templateWithHidden = getTemplate({
     type: 'logs',
-    templateName: templateWithHiddenName,
     indexPatternName,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
     hidden: true,
   });
   expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
-  const templateWithoutHiddenName = 'logs-nginx-access-efgh';
-
   const templateWithoutHidden = getTemplate({
     type: 'logs',
-    templateName: templateWithoutHiddenName,
     indexPatternName,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
   });
   expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
 });
@@ -102,11 +98,11 @@ test('tests loading base.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    templateName: 'foo',
     indexPatternName: 'foo-*',
     packageName: 'nginx',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -121,11 +117,11 @@ test('tests loading coredns.logs.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    templateName: 'foo',
     indexPatternName: 'foo-*',
     packageName: 'coredns',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -140,11 +136,11 @@ test('tests loading system.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'metrics',
-    templateName: 'whatsthis',
     indexPatternName: 'whatsthis-*',
     packageName: 'system',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));

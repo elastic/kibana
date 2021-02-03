@@ -25,11 +25,11 @@ export default function ({ getService }: FtrProviderContext) {
     it('can be loaded', async () => {
       const template = getTemplate({
         type: 'logs',
-        templateName,
         indexPatternName,
         mappings,
         packageName: 'system',
         composedOfTemplates: [],
+        templatePriority: 200,
       });
 
       // This test is not an API integration test with Kibana
