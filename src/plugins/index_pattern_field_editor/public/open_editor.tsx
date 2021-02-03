@@ -45,9 +45,6 @@ export const getFieldEditorOpener = (
   let overlayRef: OverlayRef | null = null;
 
   const openEditor = ({ onSave, fieldName, ctx }: OpenFieldEditorOptions): CloseEditor => {
-    // TODO (Matt): here will come the logic to define the internal field type (concrete|runtime)
-    const fieldTypeToProcess: InternalFieldType = 'runtime';
-
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -78,6 +75,11 @@ export const getFieldEditorOpener = (
       notifications.toasts.addDanger(err);
       return closeEditor;
     }
+
+    const isNewRuntimeField = !fieldName;
+    const isExistingRuntimeField = field && field.runtimeField && !field.isMapped;
+    const fieldTypeToProcess: InternalFieldType =
+      isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
     overlayRef = overlays.openFlyout(
       toMountPoint(

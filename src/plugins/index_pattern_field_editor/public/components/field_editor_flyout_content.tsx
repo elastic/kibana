@@ -111,6 +111,8 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onSave, submit]);
 
+  const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -129,7 +131,7 @@ const FieldEditorFlyoutContentComponent = ({
             links={getLinks(docLinks)}
             field={field}
             onChange={setFormState}
-            ctx={{ fieldTypeToProcess }}
+            ctx={{ fieldTypeToProcess, namesNotAllowed }}
           />
         )}
       </EuiFlyoutBody>
