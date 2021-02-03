@@ -57,6 +57,7 @@ $ilmDeletePhaseColor: shadeOrTint($euiColorVis5, 40%, 40%);
   &__colorBar {
     display: inline-block;
     height: $ilmTimelineBarHeight;
+    margin-bottom: $euiSizeXS;
     border-radius: calc(#{$ilmTimelineBarHeight} / 2);
     width: 100%;
   }

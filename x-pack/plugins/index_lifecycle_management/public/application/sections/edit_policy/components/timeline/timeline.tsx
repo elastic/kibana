@@ -139,7 +139,7 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
-        <InfinityIcon aria-label={i18nTexts.foreverIcon.ariaLabel} />
+        <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
       ) : null;
 
     return (
