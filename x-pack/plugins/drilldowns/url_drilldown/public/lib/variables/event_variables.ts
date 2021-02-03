@@ -161,10 +161,10 @@ const valueClickVariables: readonly UrlTemplateEditorVariable[] = [
   {
     label: 'event.key',
     sortText: sortPrefix + 'event.key',
-    title: i18n.translate('xpack.urlDrilldown.click.event.value.title', {
+    title: i18n.translate('xpack.urlDrilldown.click.event.key.title', {
       defaultMessage: 'Name of clicked field.',
     }),
-    documentation: i18n.translate('xpack.urlDrilldown.click.event.value.documentation', {
+    documentation: i18n.translate('xpack.urlDrilldown.click.event.key.documentation', {
       defaultMessage: 'Field name behind clicked data point.',
     }),
     kind,

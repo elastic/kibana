@@ -407,7 +407,7 @@ describe('UrlDrilldown', () => {
         ];
 
         for (const expectedItem of expectedList) {
-          expect(list.includes(expectedItem)).toBe(true);
+          expect(!!list.find(({ label }) => label === expectedItem)).toBe(true);
         }
       });
 
@@ -437,7 +437,7 @@ describe('UrlDrilldown', () => {
         ];
 
         for (const expectedItem of expectedList) {
-          expect(list.includes(expectedItem)).toBe(true);
+          expect(!!list.find(({ label }) => label === expectedItem)).toBe(true);
         }
       });
     });
