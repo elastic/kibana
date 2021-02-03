@@ -30,7 +30,7 @@ export function TableDimensionEditor(
       <EuiSwitch
         compressed
         label={i18n.translate('xpack.lens.table.columnVisibilityLabel', {
-          defaultMessage: 'Column hidden',
+          defaultMessage: 'Column hidden in table',
         })}
         showLabel={false}
         data-test-subj="lns-table-column-hidden"
