@@ -303,8 +303,10 @@ export class SearchSessionService implements ISessionService {
     const session = await this.get(sessionId, deps);
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
+      this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
       throw new Error('No search ID in this session matching the given search request');
     }
+    this.logger.debug(`getId | ${sessionId} | ${requestHash}`);
 
     return session.attributes.idMapping[requestHash].id;
   };
