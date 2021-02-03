@@ -34,12 +34,12 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
 
-const toSanitizedFieldType = (fields: FieldSpec[]) => {
+export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields
     .filter(
       (field) =>
         // Make sure to only include mapped fields, e.g. no index pattern runtime fields
-        field.isMapped && field.aggregatable && !indexPatterns.isNestedField(field)
+        !field.runtimeField && field.aggregatable && !indexPatterns.isNestedField(field)
     )
     .map(
       (field) =>
