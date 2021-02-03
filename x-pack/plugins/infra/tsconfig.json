@@ -28,7 +28,7 @@
     { "path": "../alerts/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },
-    // { "path": "../ml/tsconfig.json" },
+    { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" }
