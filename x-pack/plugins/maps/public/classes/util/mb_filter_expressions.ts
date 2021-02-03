@@ -11,12 +11,16 @@ import {
   KBN_IS_INCOMPLETE_DATA_FEATURE,
 } from '../../../common/constants';
 
-export const EXCLUDE_TOO_MANY_FEATURES_BOX = ['!=', ['get', KBN_IS_INCOMPLETE_DATA_FEATURE], true];
+export const EXCLUDE_INCOMPLETE_DATA_FEATURES = [
+  '!=',
+  ['get', KBN_IS_INCOMPLETE_DATA_FEATURE],
+  true,
+];
 const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
 
 const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
 // Kibana features are features added by kibana that do not exist in real data
-const EXCLUDE_KBN_FEATURES = ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES];
+const EXCLUDE_KBN_FEATURES = ['all', EXCLUDE_INCOMPLETE_DATA_FEATURES, EXCLUDE_CENTROID_FEATURES];
 
 const CLOSED_SHAPE_MB_FILTER = [
   ...EXCLUDE_KBN_FEATURES,
