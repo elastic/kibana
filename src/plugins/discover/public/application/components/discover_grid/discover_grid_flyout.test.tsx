@@ -21,7 +21,7 @@ import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_
 describe('Discover flyout', function () {
   setDocViewsRegistry(new DocViewsRegistry());
 
-  const timefilterMock: Timefilter = {
+  const timefilterMock = {
     createFilter: jest.fn((indexPattern, timeRange) => ({
       range: { from: timeRange.from, to: timeRange.to },
     })),
