@@ -6,9 +6,9 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostCase, UsePostCase } from './use_post_case';
-import { basicCasePost } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
+import { basicCasePost } from './mock';
 
 jest.mock('./api');
 
@@ -40,7 +40,6 @@ describe('usePostCase', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        caseData: null,
         postCase: result.current.postCase,
       });
     });
@@ -59,6 +58,16 @@ describe('usePostCase', () => {
     });
   });
 
+  it('calls postCase with correct result', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
+      await waitForNextUpdate();
+
+      const postData = await result.current.postCase(samplePost);
+      expect(postData).toEqual(basicCasePost);
+    });
+  });
+
   it('post case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UsePostCase>(() => usePostCase());
@@ -66,7 +75,6 @@ describe('usePostCase', () => {
       result.current.postCase(samplePost);
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        caseData: basicCasePost,
         isLoading: false,
         isError: false,
         postCase: result.current.postCase,
@@ -96,7 +104,6 @@ describe('usePostCase', () => {
       result.current.postCase(samplePost);
 
       expect(result.current).toEqual({
-        caseData: null,
         isLoading: false,
         isError: true,
         postCase: result.current.postCase,

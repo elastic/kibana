@@ -46,7 +46,7 @@ interface ResolvedArgs {
   [keys: string]: any;
 }
 
-interface ElementsLoadedTelemetryProps extends PropsFromRedux {
+export interface ElementsLoadedTelemetryProps extends PropsFromRedux {
   workpad: Workpad;
 }
 

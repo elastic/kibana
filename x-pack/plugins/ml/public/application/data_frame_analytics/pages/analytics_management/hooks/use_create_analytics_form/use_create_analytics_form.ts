@@ -14,11 +14,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 import { DuplicateIndexPatternError } from '../../../../../../../../../../src/plugins/data/public';
 
-import {
-  useRefreshAnalyticsList,
-  DataFrameAnalyticsId,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
+import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
@@ -79,9 +75,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const setIsJobStarted = (isJobStarted: boolean) => {
     dispatch({ type: ACTION.SET_IS_JOB_STARTED, isJobStarted });
   };
-
-  const setJobIds = (jobIds: DataFrameAnalyticsId[]) =>
-    dispatch({ type: ACTION.SET_JOB_IDS, jobIds });
 
   const resetRequestMessages = () => dispatch({ type: ACTION.RESET_REQUEST_MESSAGES });
 
@@ -180,25 +173,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const prepareFormValidation = async () => {
-    // re-fetch existing analytics job IDs and indices for form validation
-    try {
-      setJobIds(
-        (await ml.dataFrameAnalytics.getDataFrameAnalytics()).data_frame_analytics.map(
-          (job: DataFrameAnalyticsConfig) => job.id
-        )
-      );
-    } catch (e) {
-      addRequestMessage({
-        error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList',
-          {
-            defaultMessage: 'An error occurred getting the existing data frame analytics job IDs:',
-          }
-        ),
-      });
-    }
-
     try {
       // Set the existing index pattern titles.
       const indexPatternsMap: SourceIndexMap = {};
