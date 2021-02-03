@@ -235,7 +235,7 @@ exports.Cluster = class Cluster {
    * @private
    * @param {String} installPath
    * @param {Object} options
-   * @property {Array} options.esArgs
+   * @property {string|Array} options.esArgs
    * @return {undefined}
    */
   _exec(installPath, options = {}) {
@@ -246,7 +246,7 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = ['action.destructive_requires_name=true', ...(options.esArgs || [])];
+    const esArgs = ['action.destructive_requires_name=true'].concat(options.esArgs || []);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
