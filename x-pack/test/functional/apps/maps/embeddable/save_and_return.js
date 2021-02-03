@@ -81,6 +81,19 @@ export default function ({ getPageObjects, getService }) {
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(2);
         });
+
+        it('should lose its connection to the dashboard when creating new map', async () => {
+          await PageObjects.maps.gotoMapListingPage();
+          await PageObjects.maps.openNewMap();
+          await PageObjects.maps.expectMissingSaveAndReturnButton();
+
+          // return to origin should not be present in save modal
+          await testSubjects.click('mapSaveButton');
+          const redirectToOriginCheckboxExists = await testSubjects.exists(
+            'returnToOriginModeSwitch'
+          );
+          expect(redirectToOriginCheckboxExists).to.be(false);
+        });
       });
 
       describe('save as', () => {
