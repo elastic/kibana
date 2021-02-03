@@ -7,11 +7,7 @@
  */
 
 import { labelDateFormatter } from './label_date_formatter';
-
-interface OverwriteColors {
-  id: string;
-  overwrite: { [key: string]: string };
-}
+import type { OverwriteColors } from '../color_picker';
 
 export const getSeriesColor = (
   overwriteColors: OverwriteColors[],

@@ -12,10 +12,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiIconTip, EuiColorPicker, EuiColorPickerSwatch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { PersistedState } from '../../../../visualizations/public';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
 
-interface OverwriteColors {
+export interface OverwriteColors {
   id: string;
   overwrite: { [key: string]: string };
 }
@@ -30,7 +31,7 @@ export interface ColorPickerProps {
   disableTrash?: boolean;
   onChange: (props: ColorProps) => void;
   seriesName?: string;
-  uiState?: any;
+  uiState?: PersistedState;
   seriesId?: string;
 }
 

@@ -38,7 +38,7 @@ function sortSeries(visData, model) {
 }
 
 function TopNVisualization(props) {
-  const { backgroundColor, model, visData, uiState } = props;
+  const { backgroundColor, model, visData } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(/:/));
@@ -75,7 +75,6 @@ function TopNVisualization(props) {
   const params = {
     series: series,
     reversed: isBackgroundInverted(panelBackgroundColor),
-    uiState: uiState,
   };
 
   if (model.drilldown_url) {

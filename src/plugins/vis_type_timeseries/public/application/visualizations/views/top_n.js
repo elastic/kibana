@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
-import { getSeriesColor } from '../../components/lib/get_series_color';
 import reactcss from 'reactcss';
 
 const RENDER_MODES = {
@@ -74,9 +73,9 @@ export class TopN extends Component {
     return {};
   };
 
-  static calcInnerBarDivStyles = (color, width, isPositive) => {
+  static calcInnerBarDivStyles = (item, width, isPositive) => {
     return {
-      backgroundColor: color,
+      backgroundColor: item.color,
       width: width + '%',
       float: isPositive ? 'left' : 'right',
     };
@@ -105,11 +104,6 @@ export class TopN extends Component {
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
 
-      const overwriteColors = this.props.uiState
-        .get('vis.colors', [])
-        .filter((color) => color.id === item.id);
-      const overwriteColor = getSeriesColor(overwriteColors, item.label, item.labelFormatted);
-
       const styles = reactcss(
         {
           default: {
@@ -117,7 +111,7 @@ export class TopN extends Component {
               ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
             },
             innerBarValue: {
-              ...TopN.calcInnerBarDivStyles(overwriteColor ?? item.color, width, isPositiveValue),
+              ...TopN.calcInnerBarDivStyles(item, width, isPositiveValue),
             },
             label: {
               maxWidth: this.state.labelMaxWidth,
