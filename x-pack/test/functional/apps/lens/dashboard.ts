@@ -189,6 +189,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         updatedPanel
       );
       expect(libraryActionExists).to.be(true);
+
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.existsByLinkText('lnsPieVis');
     });
   });
 }
