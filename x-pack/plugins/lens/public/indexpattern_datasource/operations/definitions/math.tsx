@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { isObject } from 'lodash';
 import { OperationDefinition, GenericOperationDefinition } from './index';
 import { ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPattern } from '../../types';
 
 const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
 
@@ -33,48 +32,6 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   input: 'managedReference',
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
-  },
-  getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap) {
-    const column = layer.columns[columnId] as MathIndexPatternColumn;
-    if (!column.params.tinymathAst || !operationDefinitionMap) {
-      return;
-    }
-    const errors: string[] = [];
-    if (typeof column.params.tinymathAst !== 'string') {
-      const node = getMathNode(layer, column.params.tinymathAst);
-      if (node) {
-        const missingOperations = hasInvalidOperations(node, operationDefinitionMap);
-        if (missingOperations.length) {
-          errors.push(
-            i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
-              defaultMessage:
-                '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
-              values: {
-                operationLength: missingOperations.length,
-                operationsList: missingOperations.join(', '),
-              },
-            })
-          );
-        }
-        const missingVariables = findVariables(node).filter(
-          (variable) => !indexPattern.getFieldByName(variable) && !layer.columns[variable]
-        );
-        // need to check the arguments here: check only strings for now
-        if (missingVariables.length) {
-          errors.push(
-            i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
-              defaultMessage:
-                '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-              values: {
-                variablesLength: missingOperations.length,
-                variablesList: missingVariables.join(', '),
-              },
-            })
-          );
-        }
-      }
-    }
-    return errors.length ? errors : undefined;
   },
   getPossibleOperation() {
     return {
@@ -141,12 +98,13 @@ function astToString(ast: TinymathAST | string): string | number {
   return `${ast.name}(${ast.args.map(astToString).join(',')})`;
 }
 
-function findMathNodes(
-  root: TinymathAST | string,
-  operations: Record<string, GenericOperationDefinition>
-): TinymathFunction[] {
+export function isMathNode(node: TinymathAST) {
+  return isObject(node) && node.type === 'function' && tinymathValidOperators.has(node.name);
+}
+
+function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
   function flattenMathNodes(node: TinymathAST | string): TinymathFunction[] {
-    if (!isObject(node) || node.type !== 'function' || operations[node.name]) {
+    if (!isObject(node) || node.type !== 'function' || !isMathNode(node)) {
       return [];
     }
     return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
@@ -154,22 +112,29 @@ function findMathNodes(
   return flattenMathNodes(root);
 }
 
-export function hasMathNode(
-  root: TinymathAST,
-  operations: Record<string, GenericOperationDefinition>
-): boolean {
-  return Boolean(findMathNodes(root, operations).length);
+export function hasMathNode(root: TinymathAST): boolean {
+  return Boolean(findMathNodes(root).length);
 }
 
-function hasInvalidOperations(
+function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
+  function flattenFunctionNodes(node: TinymathAST | string): TinymathFunction[] {
+    if (!isObject(node) || node.type !== 'function') {
+      return [];
+    }
+    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
+  }
+  return flattenFunctionNodes(root);
+}
+
+export function hasInvalidOperations(
   node: TinymathAST | string,
   operations: Record<string, GenericOperationDefinition>
 ) {
   // avoid duplicates
   return Array.from(
     new Set(
-      findMathNodes(node, operations)
-        .filter(({ name }) => !tinymathValidOperators.has(name))
+      findFunctionNodes(node)
+        .filter((v) => !isMathNode(v) && !operations[v.name])
         .map(({ name }) => name)
     )
   );
@@ -191,14 +156,4 @@ export function findVariables(node: TinymathAST | string | undefined): string[] 
     return [node.value];
   }
   return node.args.flatMap(findVariables);
-}
-
-function getMathNode(layer: IndexPatternLayer, ast: TinymathAST | string) {
-  if (typeof ast === 'string') {
-    const refColumn = layer.columns[ast];
-    if (refColumn && 'sourceField' in refColumn) {
-      return refColumn.sourceField;
-    }
-  }
-  return ast;
 }

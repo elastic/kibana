@@ -13,7 +13,13 @@ import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } f
 import { ReferenceBasedIndexPatternColumn } from './column_types';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { getColumnOrder } from '../layer_helpers';
-import { mathOperation, hasMathNode, findVariables } from './math';
+import {
+  mathOperation,
+  hasMathNode,
+  findVariables,
+  isMathNode,
+  hasInvalidOperations,
+} from './math';
 import { documentField } from '../../document_field';
 
 type GroupedNodes = {
@@ -72,7 +78,54 @@ export const formulaOperation: OperationDefinition<
         }),
       ];
     }
-    const errors = addASTValidation(ast, indexPattern, operationDefinitionMap);
+    const missingErrors: string[] = [];
+    const missingOperations = hasInvalidOperations(ast, operationDefinitionMap);
+
+    if (missingOperations.length) {
+      missingErrors.push(
+        i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
+          defaultMessage:
+            '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
+          values: {
+            operationLength: missingOperations.length,
+            operationsList: missingOperations.join(', '),
+          },
+        })
+      );
+    }
+    const missingVariables = findVariables(ast).filter(
+      // filter empty string as well?
+      (variable) => !indexPattern.getFieldByName(variable) && !layer.columns[variable]
+    );
+
+    // need to check the arguments here: check only strings for now
+    if (missingVariables.length) {
+      missingErrors.push(
+        i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+          defaultMessage:
+            '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
+          values: {
+            variablesLength: missingOperations.length,
+            variablesList: missingVariables.join(', '),
+          },
+        })
+      );
+    }
+    const invalidVariableErrors = [];
+    // TODO: add check for Math operation of fields as well
+    if (isObject(ast) && ast.type === 'variable' && !missingVariables.includes(ast.value)) {
+      invalidVariableErrors.push(
+        i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
+          defaultMessage: 'The field {field} cannot be used without operation',
+          values: {
+            field: ast.value,
+          },
+        })
+      );
+    }
+
+    const invalidFunctionErrors = addASTValidation(ast, indexPattern, operationDefinitionMap);
+    const errors = [...missingErrors, ...invalidVariableErrors, ...invalidFunctionErrors];
     return errors.length ? errors : undefined;
   },
   getPossibleOperation() {
@@ -271,10 +324,11 @@ function addASTValidation(
 
     const errors: string[] = [];
     const { namedArguments, variables, functions } = groupArgsByType(node.args);
+    const [firstArg] = node?.args || [];
 
     if (nodeOperation.input === 'field') {
       if (shouldHaveFieldArgument(node)) {
-        if (!isFirstArgumentValidType(node.args, 'variable')) {
+        if (!isFirstArgumentValidType(firstArg, 'variable')) {
           errors.push(
             i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
               defaultMessage:
@@ -282,30 +336,16 @@ function addASTValidation(
               values: {
                 operation: node.name,
                 type: 'field',
-                argument: getValueOrName(node.args[0]),
+                argument: getValueOrName(firstArg),
               },
             })
           );
         }
-
-        const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
-        if (fieldName) {
-          if (!indexPattern.getFieldByName(fieldName.value)) {
-            errors.push(
-              i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
-                defaultMessage: 'The field {field} was not found.',
-                values: {
-                  field: fieldName.value,
-                },
-              })
-            );
-          }
-        }
       } else {
-        if (node?.args[0]) {
+        if (firstArg) {
           errors.push(
-            i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
-              defaultMessage: 'The operation {operation} does not accept any parameter',
+            i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
+              defaultMessage: 'The operation {operation} does not accept any field as argument',
               values: {
                 operation: node.name,
               },
@@ -313,57 +353,80 @@ function addASTValidation(
           );
         }
       }
-      const missingParameters = validateParams(nodeOperation, namedArguments).filter(
-        ({ isMissing }) => isMissing
-      );
-      if (missingParameters.length) {
+      if (!canHaveParams(nodeOperation) && namedArguments.length) {
         errors.push(
-          i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
-            defaultMessage:
-              'The operation {operation} in the Formula is missing the following parameters: {params}',
+          i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
+            defaultMessage: 'The operation {operation} does not accept any parameter',
             values: {
               operation: node.name,
-              params: missingParameters.map(({ name }) => name).join(', '),
             },
           })
         );
+      } else {
+        const missingParameters = validateParams(nodeOperation, namedArguments).filter(
+          ({ isMissing }) => isMissing
+        );
+        if (missingParameters.length) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+              defaultMessage:
+                'The operation {operation} in the Formula is missing the following parameters: {params}',
+              values: {
+                operation: node.name,
+                params: missingParameters.map(({ name }) => name).join(', '),
+              },
+            })
+          );
+        }
       }
       return errors;
     }
     if (nodeOperation.input === 'fullReference') {
-      if (!isFirstArgumentValidType(node.args, 'function')) {
+      if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg)) {
         errors.push(
           i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
             defaultMessage:
               'The first argument for {operation} should be a {type} name. Found {argument}',
             values: {
               operation: node.name,
-              type: 'field',
+              type: 'function',
               argument: getValueOrName(node.args[0]),
             },
           })
         );
       }
-      const missingParameters = validateParams(nodeOperation, namedArguments).filter(
-        ({ isMissing }) => isMissing
-      );
-      if (missingParameters.length) {
+      if (!canHaveParams(nodeOperation) && namedArguments.length) {
         errors.push(
-          i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
-            defaultMessage:
-              'The operation {operation} in the Formula is missing the following parameters: {params}',
+          i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
+            defaultMessage: 'The operation {operation} does not accept any parameter',
             values: {
               operation: node.name,
-              params: missingParameters.map(({ name }) => name).join(', '),
             },
           })
         );
+      } else {
+        const missingParameters = validateParams(nodeOperation, namedArguments).filter(
+          ({ isMissing }) => isMissing
+        );
+        if (missingParameters.length) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+              defaultMessage:
+                'The operation {operation} in the Formula is missing the following parameters: {params}',
+              values: {
+                operation: node.name,
+                params: missingParameters.map(({ name }) => name).join(', '),
+              },
+            })
+          );
+        }
       }
       // maybe validate params here?
       return errors.concat(validateNode(functions[0]));
     }
     return [];
   }
+
   return validateNode(ast);
 }
 
@@ -421,11 +484,13 @@ function extractColumns(
 
     // split the args into types for better TS experience
     const { namedArguments, variables, functions } = groupArgsByType(node.args);
+    // the first argument is a special one
+    const [firstArg] = node?.args || [];
 
     // operation node
     if (nodeOperation.input === 'field') {
       if (shouldHaveFieldArgument(node)) {
-        if (!isFirstArgumentValidType(node.args, 'variable')) {
+        if (!isFirstArgumentValidType(firstArg, 'variable')) {
           throw Error('field as first argument not found');
         }
       } else {
@@ -465,7 +530,7 @@ function extractColumns(
     }
 
     if (nodeOperation.input === 'fullReference') {
-      if (!isFirstArgumentValidType(node.args, 'function')) {
+      if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg, operations)) {
         throw Error('first argument not valid for full reference');
       }
       const [referencedOp] = functions;
@@ -504,6 +569,10 @@ function extractColumns(
 
     throw Error('unexpected node');
   }
+  // a special check on the root node
+  if (isObject(ast) && ast.type === 'variable') {
+    throw Error('field cannot be used without operation');
+  }
   const root = parseNode(ast);
   const variables = findVariables(root);
   const mathColumn = mathOperation.buildColumn({
@@ -525,6 +594,14 @@ function getSafeFieldName(fieldName: string | undefined) {
     return '';
   }
   return fieldName;
+}
+
+function canHaveParams(
+  operation:
+    | OperationDefinition<IndexPatternColumn, 'field'>
+    | OperationDefinition<IndexPatternColumn, 'fullReference'>
+) {
+  return Boolean((operation.operationParams || []).length);
 }
 
 function validateParams(
@@ -566,6 +643,6 @@ function shouldHaveFieldArgument(node: TinymathFunction) {
   return !['count'].includes(node.name);
 }
 
-function isFirstArgumentValidType(args: TinymathAST[], type: TinymathNodeTypes['type']) {
-  return args?.length >= 1 && isObject(args[0]) && args[0].type === type;
+function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTypes['type']) {
+  return isObject(arg) && arg.type === type;
 }

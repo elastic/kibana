@@ -4,31 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+// import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
+// import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+// import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { FormulaIndexPatternColumn } from './formula';
+// import { FormulaIndexPatternColumn } from './formula';
 import { formulaOperation, GenericOperationDefinition } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
 
-const defaultProps = {
-  storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
-  savedObjectsClient: {} as SavedObjectsClientContract,
-  dateRange: { fromDate: 'now-1d', toDate: 'now' },
-  data: dataPluginMock.createStartContract(),
-  http: {} as HttpSetup,
-  indexPattern: {
-    ...createMockedIndexPattern(),
-    hasRestrictions: false,
-  } as IndexPattern,
-  operationDefinitionMap: { avg: {} },
-};
+// const defaultProps = {
+//   storage: {} as IStorageWrapper,
+//   uiSettings: {} as IUiSettingsClient,
+//   savedObjectsClient: {} as SavedObjectsClientContract,
+//   dateRange: { fromDate: 'now-1d', toDate: 'now' },
+//   data: dataPluginMock.createStartContract(),
+//   http: {} as HttpSetup,
+//   indexPattern: {
+//     ...createMockedIndexPattern(),
+//     hasRestrictions: false,
+//   } as IndexPattern,
+//   operationDefinitionMap: { avg: {} },
+// };
 
 describe('formula', () => {
   let layer: IndexPatternLayer;
-  const InlineOptions = formulaOperation.paramEditor!;
+  //   const InlineOptions = formulaOperation.paramEditor!;
 
   beforeEach(() => {
     layer = {
@@ -146,14 +146,15 @@ describe('formula', () => {
         )
       ).toEqual(undefined);
 
-      expect(
-        formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('moving_average(avg("bytes"), "window"=7)'),
-          'col1',
-          indexPattern,
-          operationDefinitionMap
-        )
-      ).toEqual(undefined);
+      // Not sure it will be supported
+      //   expect(
+      //     formulaOperation.getErrorMessage!(
+      //       getNewLayerWithFormula('moving_average(avg("bytes"), "window"=7)'),
+      //       'col1',
+      //       indexPattern,
+      //       operationDefinitionMap
+      //     )
+      //   ).toEqual(undefined);
     });
 
     it('returns an error if field is used with no Lens wrapping operation', () => {
@@ -165,6 +166,16 @@ describe('formula', () => {
           operationDefinitionMap
         )
       ).toEqual([`The field bytes cannot be used without operation`]);
+
+      // TODO: enable this later
+      //   expect(
+      //     formulaOperation.getErrorMessage!(
+      //       getNewLayerWithFormula('bytes + bytes'),
+      //       'col1',
+      //       indexPattern,
+      //       operationDefinitionMap
+      //     )
+      //   ).toEqual([`The field bytes cannot be used without operation`]);
     });
 
     it('returns an error if parsing a syntax invalid formula', () => {
@@ -189,9 +200,8 @@ describe('formula', () => {
       }
     });
 
-    it('returns an error for scenarios where the field is missing', () => {
-      // noField, avg(noField), noField + 1, moving_average(noField), moving_average(avg(noField))
-      const formulas = ['noField', 'avg(noField)', 'noField + 1', 'moving_average(avg(noField))'];
+    it('returns an error if the field is missing', () => {
+      const formulas = ['noField', 'avg(noField)', 'noField + 1', 'derivative(avg(noField))'];
 
       for (const formula of formulas) {
         expect(
@@ -201,7 +211,35 @@ describe('formula', () => {
             indexPattern,
             operationDefinitionMap
           )
-        ).toEqual(['The field noField was not found.']);
+        ).toEqual(['Fields noField not found']);
+      }
+    });
+
+    it('returns an error if an operation is unknown', () => {
+      const formulas = ['noFn()', 'noFn(bytes)', 'avg(bytes) + noFn()', 'derivative(noFn())'];
+
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operation noFn not found']);
+      }
+
+      const multipleFnFormulas = ['noFn() + noFnTwo()', 'noFn(noFnTwo())'];
+
+      for (const formula of multipleFnFormulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(['Operations noFn, noFnTwo not found']);
       }
     });
 
@@ -212,9 +250,12 @@ describe('formula', () => {
         'avg(avg(bytes))',
         'avg(1 + 2)',
         'avg(bytes + 5)',
-        'derivatives(7)',
-        'derivatives(7 + 1)',
-        'derivatives(bytes + 7)',
+        'avg(bytes + bytes)',
+        'derivative(7)',
+        'derivative(7 + 1)',
+        'derivative(bytes + 7)',
+        'derivative(bytes + bytes)',
+        'derivative(bytes + avg(bytes))',
       ];
 
       for (const formula of formulas) {
@@ -234,7 +275,7 @@ describe('formula', () => {
     });
 
     it('returns an error if an argument is passed to count() operation', () => {
-      const formulas = ['count(7)', 'count("")', 'count(Records)', 'count(bytes)'];
+      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
 
       for (const formula of formulas) {
         expect(
@@ -244,7 +285,7 @@ describe('formula', () => {
             indexPattern,
             operationDefinitionMap
           )
-        ).toEqual(['The operation count does not accept any parameter']);
+        ).toEqual(['The operation count does not accept any field as argument']);
       }
     });
 
@@ -280,7 +321,7 @@ describe('formula', () => {
           indexPattern,
           operationDefinitionMap
         )
-      ).toEqual(['The operation avg in the Formula requires no parameter']);
+      ).toEqual(['The operation avg does not accept any parameter']);
     });
   });
 });
