@@ -15,7 +15,6 @@ import React, { useState } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
@@ -60,30 +59,33 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       requestId: '',
     },
     status,
-  } = useFetcher(() => {
-    if (!start || !end || !transactionType) {
-      return;
-    }
+  } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !transactionType) {
+        return;
+      }
 
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          transactionType,
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            transactionType,
+          },
         },
-      },
-    }).then((response) => {
-      return {
-        requestId: response.requestId,
-        items: response.error_groups,
-        totalItemCount: response.total_error_groups,
-      };
-    });
-  }, [start, end, serviceName, uiFilters, transactionType]);
+      }).then((response) => {
+        return {
+          requestId: response.requestId,
+          items: response.error_groups,
+          totalItemCount: response.total_error_groups,
+        };
+      });
+    },
+    [start, end, serviceName, uiFilters, transactionType]
+  );
 
   const { items, totalItemCount, requestId } = data;
   const currentPageErrorGroups = orderBy(
@@ -104,7 +106,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     data: groupIdsErrorAggResults,
     status: groupIdsErrorAggResultsStatus,
   } = useFetcher(
-    () => {
+    (callApmApi) => {
       async function fetchAggResults() {
         if (
           !isEmpty(requestId) &&
