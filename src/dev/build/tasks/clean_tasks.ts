@@ -63,7 +63,6 @@ export const CleanExtraFilesFromModules: Task = {
       '**/test',
       '**/tests',
       '**/__tests__',
-      '**/mocha.opts',
       '**/*.test.js',
       '**/*.snap',
       '**/coverage',
