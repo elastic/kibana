@@ -166,4 +166,12 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
+  validateDataFrameAnalytics(analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>) {
+    const body = JSON.stringify(analyticsConfig);
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/validate`,
+      method: 'POST',
+      body,
+    });
+  },
 };

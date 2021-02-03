@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-// import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useMlContext } from '../../../../../contexts/ml';
 import { ml } from '../../../../../services/ml_api_service';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
+import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
-import {
-  CalloutMessage,
-  INCLUDED_FIELDS_THRESHOLD,
-  TRAINING_DOCS_UPPER,
-  TRAINING_DOCS_LOWER,
-} from './validations';
 
-const statusToEuiColor = (status: string) => {
+interface CalloutMessage {
+  id?: string;
+  heading?: string;
+  status?: VALIDATION_STATUS;
+  text: string;
+  url?: string;
+}
+
+const statusToEuiColor = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'primary';
@@ -35,7 +38,7 @@ const statusToEuiColor = (status: string) => {
   }
 };
 
-const statusToEuiIconType = (status: string) => {
+const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
       return 'iInCircle';
@@ -91,97 +94,32 @@ export const ValidationStep: FC<Props> = ({ state, setCurrentStep, setValidation
   const [checksInProgress, setChecksInProgress] = useState<boolean>(false);
   const [validationMessages, setValidationMessages] = useState<CalloutMessage[]>([]);
 
-  const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext; // currentSavedSearch,
-
-  const { form } = state;
-  const { trainingPercent } = form;
-
-  const numberOfFieldsCheck = () => {
-    let message;
-    if (form.includes.length > INCLUDED_FIELDS_THRESHOLD) {
-      message = {
-        id: 'included-fields',
-        text: 'High number of analysis fields may result in long-running jobs.',
-        status: VALIDATION_STATUS.WARNING,
-        heading: 'Analysis fields',
-      };
-    } else {
-      message = {
-        id: 'included-fields',
-        text: 'Analysis fields validation successful.',
-        status: VALIDATION_STATUS.SUCCESS,
-        heading: 'Analysis fields',
-      };
-    }
-    return message;
-  };
-
-  const trainingPercentCheck = async () => {
-    let message;
-    const esSearchRequest = {
-      size: 0,
-      track_total_hits: true,
-      index: currentIndexPattern.title,
-    };
-    try {
-      const resp = await ml.esSearch(esSearchRequest);
-      const totalDocs = resp.hits.total.value;
-      const trainingDocs = totalDocs * (trainingPercent / 100);
-
-      if (trainingDocs >= TRAINING_DOCS_UPPER) {
-        message = {
-          id: 'training-percent-high',
-          text:
-            'High number of training docs may result in long-running jobs. Try reducing the tranining percent.',
-          status: VALIDATION_STATUS.WARNING,
-          heading: 'Training percent',
-        };
-      } else if (trainingDocs <= TRAINING_DOCS_LOWER) {
-        message = {
-          id: 'training-percent-low',
-          text:
-            'Low number of training docs may result in inaccurate models. Try increasing the tranining percent or using a larger dataset.',
-          status: VALIDATION_STATUS.WARNING,
-          heading: 'Training percent',
-        };
-      } else {
-        message = {
-          id: 'training-percent',
-          text: 'Training percent validation successful.',
-          status: VALIDATION_STATUS.SUCCESS,
-          heading: 'Training percent',
-        };
-      }
-      setChecksInProgress(false);
-      return message;
-    } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
-    }
-  };
+  const { form, jobConfig, isAdvancedEditorEnabled } = state;
 
   const runValidationChecks = async () => {
-    const validationResults = await Promise.all([trainingPercentCheck()]);
-    const numFieldsMessage = numberOfFieldsCheck();
+    try {
+      const analyticsJobConfig = (isAdvancedEditorEnabled
+        ? jobConfig
+        : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+      const validationResults = await ml.dataFrameAnalytics.validateDataFrameAnalytics(
+        analyticsJobConfig
+      );
 
-    if (numFieldsMessage !== undefined) {
-      validationResults.push(numFieldsMessage);
-    }
+      const validationSummary = { warning: 0, success: 0 };
+      validationResults.forEach((message: any) => {
+        if (message?.status === VALIDATION_STATUS.WARNING) {
+          validationSummary.warning++;
+        } else if (message?.status === VALIDATION_STATUS.SUCCESS) {
+          validationSummary.success++;
+        }
+      });
 
-    const validationSummary = { warning: 0, success: 0 };
-    validationResults.forEach((message) => {
-      if (message?.status === VALIDATION_STATUS.WARNING) {
-        validationSummary.warning++;
-      } else if (message?.status === VALIDATION_STATUS.SUCCESS) {
-        validationSummary.success++;
-      }
-    });
-
-    if (validationResults && validationResults.length) {
-      // @ts-ignore
       setValidationMessages(validationResults);
       setValidationSummary(validationSummary);
+      setChecksInProgress(false);
+    } catch (e) {
+      // TODO: toast or error message?
+      setChecksInProgress(false);
     }
   };
 
