@@ -253,7 +253,7 @@ describe('enrichSignalThreatMatches', () => {
     ]);
   });
 
-  it.skip('preserves an existing threat.indicator object on signals', async () => {
+  it('preserves an existing threat.indicator object on signals', async () => {
     const query = encodeThreatMatchNamedQuery(
       getNamedQueryMock({ id: '123', value: 'threat.indicator.domain' })
     );
@@ -275,6 +275,20 @@ describe('enrichSignalThreatMatches', () => {
         type: 'type_1',
       },
     ]);
+  });
+
+  it('throws an error if threat is neither an object nor undefined', async () => {
+    const query = encodeThreatMatchNamedQuery(
+      getNamedQueryMock({ id: '123', value: 'threat.indicator.domain' })
+    );
+    const signalHit = getSignalHitMock({
+      _source: { '@timestamp': 'mocked', threat: 'whoops' },
+      matched_queries: [query],
+    });
+    const signals = getSignalsResponseMock([signalHit]);
+    await expect(() => enrichSignalThreatMatches(signals, getMatchedThreats)).rejects.toThrowError(
+      'Expected threat field to be an object, but found: whoops'
+    );
   });
 
   it('merges duplicate matched signals into a single signal with multiple indicators', async () => {

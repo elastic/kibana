@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, isObject } from 'lodash';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -81,7 +81,11 @@ export const enrichSignalThreatMatches = async (
 
   const enrichedSignals = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
-    const existingIndicators = get(signalHit._source, 'threat.indicator') ?? [];
+    if (!isObject(threat)) {
+      throw new Error(`Expected threat field to be an object, but found: ${threat}`);
+    }
+    const existingIndicatorValue = get(signalHit._source, 'threat.indicator') ?? [];
+    const existingIndicators = [existingIndicatorValue].flat(); // ensure indicators is an array
 
     return {
       ...signalHit,
