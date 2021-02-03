@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   total_results: schema.number(),
 });
 
-const oAuthConfigSchema = schema.object({
+const oauthConfigSchema = schema.object({
   base_url: schema.maybe(schema.string()),
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
@@ -759,7 +759,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/api/workplace_search/org/settings/connectors',
       validate: {
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -771,7 +771,7 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/api/workplace_search/org/settings/connectors',
       validate: {
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -805,7 +805,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -820,7 +820,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
