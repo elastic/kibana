@@ -99,3 +99,6 @@ export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
 export const journeySelector = ({ journeys }: AppState) => journeys;
 
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
+
+export const pendingSimpleAlertCreationSelector = (state: AppState) =>
+  state?.alerts?.newAlert?.pendingMonitorIds ?? [];

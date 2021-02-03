@@ -9,7 +9,10 @@ import React, { useEffect, useState } from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectDynamicSettings } from '../../../../state/selectors';
+import {
+  selectDynamicSettings,
+  pendingSimpleAlertCreationSelector,
+} from '../../../../state/selectors';
 import {
   alertsSelector,
   connectorsSelector,
@@ -28,7 +31,7 @@ interface Props {
 }
 
 export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const { settings } = useSelector(selectDynamicSettings);
 
@@ -39,6 +42,8 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const { data: actionConnectors } = useSelector(connectorsSelector);
 
   const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
+  const d = useSelector(pendingSimpleAlertCreationSelector);
+  const isLoading = d.some((f) => !!f[monitorId]);
 
   const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
@@ -69,7 +74,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
         monitorName,
       })
     );
-    setIsLoading(true);
+    // setIsLoading(true);
   };
 
   const disableAlert = () => {
@@ -79,13 +84,13 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
           alertId: hasAlert.id,
         })
       );
-      setIsLoading(true);
+      // setIsLoading(true);
     }
   };
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [hasAlert, deletedAlertId]);
+  // useEffect(() => {
+  //   setIsLoading(false);
+  // }, [hasAlert, deletedAlertId]);
 
   const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 
