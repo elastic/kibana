@@ -9,6 +9,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
@@ -481,10 +482,14 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={trustedApp.description}
             onChange={handleDomChangeEvents}
             fullWidth
+            compressed
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
         </EuiFormRow>
+
+        <EuiHorizontalRule />
+
         <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
           <EffectedPolicySelect
             isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
