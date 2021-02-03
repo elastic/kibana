@@ -10,7 +10,7 @@ import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
 import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
-const setup = (props?: Props) =>
+const setup = (props: Props = defaultProps) =>
   registerTestBed(FieldEditorFlyoutContent, {
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
@@ -20,7 +20,7 @@ const defaultProps: Props = {
   onCancel: noop,
   docLinks,
   FieldEditor: null,
-  indexPattern: {} as any,
+  indexPattern: { fields: [] } as any,
   uiSettings: {} as any,
   fieldFormats: {} as any,
   fieldFormatEditors: {} as any,
