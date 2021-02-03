@@ -26,8 +26,17 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
     };
 
     const renderDebug = () => (
-      <div style={{ width: domNode.offsetWidth, height: domNode.offsetHeight }}>
-        <EuiButton data-test-subj="testExpressionButton" onClick={buttonClick}>
+      <div
+        style={{
+          width: domNode.offsetWidth,
+          height: domNode.offsetHeight,
+        }}
+      >
+        <EuiButton
+          data-test-subj="testExpressionButton"
+          onClick={buttonClick}
+          style={{ backgroundColor: config.color || 'white' }}
+        >
           {config.name}
         </EuiButton>
       </div>
