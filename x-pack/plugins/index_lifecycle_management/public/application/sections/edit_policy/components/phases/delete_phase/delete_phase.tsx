@@ -9,7 +9,9 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { useFormData, UseField, ToggleField } from '../../../../../../shared_imports';
+import { useFormData, ToggleField } from '../../../../../../shared_imports';
+
+import { UseField } from '../../../form';
 
 import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
 

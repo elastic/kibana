@@ -226,6 +226,7 @@ export class DocLinksService {
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
+          indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
@@ -357,6 +358,7 @@ export interface DocLinksStart {
       createPipeline: string;
       createTransformRequest: string;
       executeWatchActionModes: string;
+      indexExists: string;
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
