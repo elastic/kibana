@@ -201,7 +201,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
       <EuiSpacer size="s" />
 
-      <WmsOptions {...props} tmsLayers={tmsLayers} />
+      <WmsOptions setValue={setValue} stateParams={stateParams} tmsLayers={tmsLayers} />
     </>
   );
 }

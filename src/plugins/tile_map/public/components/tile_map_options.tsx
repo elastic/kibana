@@ -74,7 +74,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
           />
         )}
 
-        <BasicOptions {...props} collections={collections} />
+        <BasicOptions {...props} legendPositions={collections.legendPositions} />
 
         <SwitchOption
           disabled={!vis.type.visConfig?.canDesaturate}
@@ -93,7 +93,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
 
       <EuiSpacer size="s" />
 
-      <WmsOptions {...props} tmsLayers={tmsLayers} />
+      <WmsOptions setValue={setValue} stateParams={stateParams} tmsLayers={tmsLayers} />
     </>
   );
 }

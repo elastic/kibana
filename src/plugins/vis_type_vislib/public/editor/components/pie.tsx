@@ -18,9 +18,7 @@ import { TruncateLabelsOption, getPositions } from '../../../../vis_type_xy/publ
 
 import { PieVisParams } from '../../pie';
 
-const collections = {
-  legendPositions: getPositions(),
-};
+const legendPositions = getPositions();
 
 function PieOptions(props: VisEditorOptionsProps<PieVisParams>) {
   const { stateParams, setValue } = props;
@@ -49,7 +47,7 @@ function PieOptions(props: VisEditorOptionsProps<PieVisParams>) {
           value={stateParams.isDonut}
           setValue={setValue}
         />
-        <BasicOptions {...props} collections={collections} />
+        <BasicOptions {...props} legendPositions={legendPositions} />
       </EuiPanel>
 
       <EuiSpacer size="s" />

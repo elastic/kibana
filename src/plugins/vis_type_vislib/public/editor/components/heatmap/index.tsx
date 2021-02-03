@@ -68,7 +68,7 @@ function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <BasicOptions {...props} collections={heatmapCollections} />
+        <BasicOptions {...props} legendPositions={heatmapCollections.legendPositions} />
 
         <SwitchOption
           label={i18n.translate('visTypeVislib.editors.heatmap.highlightLabel', {

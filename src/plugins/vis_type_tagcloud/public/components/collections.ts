@@ -27,19 +27,19 @@ interface Collections {
 export const collections: Collections = {
   scales: [
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.linearText', {
+      text: i18n.translate('visTypeTagCloud.scales.linearText', {
         defaultMessage: 'Linear',
       }),
       value: 'linear',
     },
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.logText', {
+      text: i18n.translate('visTypeTagCloud.scales.logText', {
         defaultMessage: 'Log',
       }),
       value: 'log',
     },
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.squareRootText', {
+      text: i18n.translate('visTypeTagCloud.scales.squareRootText', {
         defaultMessage: 'Square root',
       }),
       value: 'square root',
@@ -47,19 +47,19 @@ export const collections: Collections = {
   ],
   orientations: [
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.singleText', {
+      text: i18n.translate('visTypeTagCloud.orientations.singleText', {
         defaultMessage: 'Single',
       }),
       value: 'single',
     },
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.rightAngledText', {
+      text: i18n.translate('visTypeTagCloud.orientations.rightAngledText', {
         defaultMessage: 'Right angled',
       }),
       value: 'right angled',
     },
     {
-      text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.multipleText', {
+      text: i18n.translate('visTypeTagCloud.orientations.multipleText', {
         defaultMessage: 'Multiple',
       }),
       value: 'multiple',
