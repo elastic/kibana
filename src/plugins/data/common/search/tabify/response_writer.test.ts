@@ -144,8 +144,52 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
+        expect(response.columns[0]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'terms',
+            params: {
+              missingBucketLabel: 'Missing',
+              otherBucketLabel: 'Other',
+            },
+          },
+          field: 'geo.src',
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '1',
+            indexPatternId: '1234',
+            params: {
+              field: 'geo.src',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
+              order: 'desc',
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              size: 5,
+            },
+            type: 'terms',
+          },
+          type: 'number',
+        });
+
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
+        expect(response.columns[1]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'number',
+          },
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '2',
+            indexPatternId: '1234',
+            params: {},
+            type: 'count',
+          },
+          type: 'number',
+        });
       });
 
       test('produces correct response for no data', () => {
@@ -157,8 +201,52 @@ describe('TabbedAggResponseWriter class', () => {
         expect(response.columns.length).toEqual(2);
         expect(response.columns[0]).toHaveProperty('id', 'col-0-1');
         expect(response.columns[0]).toHaveProperty('name', 'geo.src: Descending');
+        expect(response.columns[0]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'terms',
+            params: {
+              missingBucketLabel: 'Missing',
+              otherBucketLabel: 'Other',
+            },
+          },
+          field: 'geo.src',
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '1',
+            indexPatternId: '1234',
+            params: {
+              field: 'geo.src',
+              missingBucket: false,
+              missingBucketLabel: 'Missing',
+              order: 'desc',
+              otherBucket: false,
+              otherBucketLabel: 'Other',
+              size: 5,
+            },
+            type: 'terms',
+          },
+          type: 'number',
+        });
+
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
         expect(response.columns[1]).toHaveProperty('name', 'Count');
+        expect(response.columns[1]).toHaveProperty('meta', {
+          index: 'logstash-*',
+          params: {
+            id: 'number',
+          },
+          source: 'esaggs',
+          sourceParams: {
+            enabled: true,
+            id: '2',
+            indexPatternId: '1234',
+            params: {},
+            type: 'count',
+          },
+          type: 'number',
+        });
       });
     });
   });
