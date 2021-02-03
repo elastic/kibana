@@ -6,19 +6,32 @@
  * Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { CoreStart, KibanaRequest } from 'kibana/server';
-import { ISearchStrategy } from '../types';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../../common/search';
+import {
+  CoreStart,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsUpdateResponse,
+} from 'kibana/server';
+import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
 
-export interface IScopedSessionService {
-  search: <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-    strategy: ISearchStrategy<Request, Response>,
-    ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-  ) => Observable<Response>;
-  [prop: string]: any;
+export interface IScopedSearchSessionsClient<T = unknown> {
+  getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
+  trackId: (
+    request: IKibanaSearchRequest,
+    searchId: string,
+    options: ISearchOptions
+  ) => Promise<void>;
+  getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
+  save: (sessionId: string, attributes: Partial<T>) => Promise<SavedObject<T> | undefined>;
+  get: (sessionId: string) => Promise<SavedObject<T>>;
+  find: (options: Omit<SavedObjectsFindOptions, 'type'>) => Promise<SavedObjectsFindResponse<T>>;
+  update: (sessionId: string, attributes: Partial<T>) => Promise<SavedObjectsUpdateResponse<T>>;
+  cancel: (sessionId: string) => Promise<{}>;
+  extend: (sessionId: string, expires: Date) => Promise<SavedObjectsUpdateResponse<T>>;
 }
 
-export interface ISessionService {
-  asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSessionService;
+export interface ISearchSessionService<T = unknown> {
+  asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
 }

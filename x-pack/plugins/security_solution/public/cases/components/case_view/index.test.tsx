@@ -144,7 +144,7 @@ describe('CaseView ', () => {
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useQueryAlertsMock.mockImplementation(() => ({
       loading: false,
       data: { hits: { hits: alertsHit } },
@@ -703,6 +703,40 @@ describe('CaseView ', () => {
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('settings');
       expect(updateObject.updateValue).toEqual({ syncAlerts: false });
+    });
+  });
+
+  describe('Callouts', () => {
+    it('it shows the danger callout when a connector has been deleted', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeTruthy();
+      });
+    });
+
+    it('it does NOT shows the danger callout when connectors are loading', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
+      });
     });
   });
 });
