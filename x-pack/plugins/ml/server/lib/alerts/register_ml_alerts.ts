@@ -5,7 +5,7 @@
  */
 
 import { AlertingPlugin } from '../../../../alerts/server';
-import { registerAnomalyThresholdAlertType } from './register_anomaly_threshold_alert_type';
+import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import { SharedServices } from '../../shared_services';
 
 export interface RegisterAlertParams {
@@ -14,5 +14,5 @@ export interface RegisterAlertParams {
 }
 
 export function registerMlAlerts(params: RegisterAlertParams) {
-  registerAnomalyThresholdAlertType(params);
+  registerAnomalyDetectionAlertType(params);
 }

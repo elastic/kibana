@@ -8,13 +8,13 @@ import { i18n } from '@kbn/i18n';
 import {
   ML_ALERT_TYPES,
   ML_ALERT_TYPES_CONFIG,
-  ThresholdMetActionGroupId,
+  AnomalyScoreMatchGroupId,
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
-  MlAnomalyThresholdAlertParams,
-  mlAnomalyThresholdAlertParams,
+  MlAnomalyDetectionAlertParams,
+  mlAnomalyDetectionAlertParams,
 } from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
@@ -24,9 +24,9 @@ import {
   AlertTypeState,
 } from '../../../../alerts/common';
 
-const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_THRESHOLD];
+const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
 
-export type AnomalyThresholdAlertContext = {
+export type AnomalyDetectionAlertContext = {
   name: string;
   jobIds: string[];
   timestampIso8601: string;
@@ -38,23 +38,23 @@ export type AnomalyThresholdAlertContext = {
   anomalyExplorerUrl: string;
 } & AlertInstanceContext;
 
-export function registerAnomalyThresholdAlertType({
+export function registerAnomalyDetectionAlertType({
   alerts,
   mlSharedServices,
 }: RegisterAlertParams) {
   alerts.registerType<
-    MlAnomalyThresholdAlertParams,
+    MlAnomalyDetectionAlertParams,
     AlertTypeState,
     AlertInstanceState,
-    AnomalyThresholdAlertContext,
-    ThresholdMetActionGroupId
+    AnomalyDetectionAlertContext,
+    AnomalyScoreMatchGroupId
   >({
-    id: ML_ALERT_TYPES.ANOMALY_THRESHOLD,
+    id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: mlAnomalyThresholdAlertParams,
+      params: mlAnomalyDetectionAlertParams,
     },
     actionVariables: {
       context: [

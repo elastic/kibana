@@ -13,7 +13,7 @@ export function registerMlAlerts(
   alertTypeRegistry: MlStartDependencies['triggersActionsUi']['alertTypeRegistry']
 ) {
   alertTypeRegistry.register({
-    id: ML_ALERT_TYPES.ANOMALY_THRESHOLD,
+    id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyThreshold.description', {
       defaultMessage: 'Alert when anomaly score reaches the threshold.',
     }),
@@ -21,7 +21,7 @@ export function registerMlAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/ml-alerts.html`;
     },
-    alertParamsExpression: lazy(() => import('./ml_anomaly_threshold_trigger')),
+    alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
     validate: () => ({
       errors: [],
     }),

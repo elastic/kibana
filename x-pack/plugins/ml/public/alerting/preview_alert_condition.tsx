@@ -18,14 +18,14 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import type { AlertingApiService } from '../application/services/ml_api_service/alerting';
-import { MlAnomalyThresholdAlertParams, PreviewResponse } from '../../common/types/alerts';
+import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../common/types/alerts';
 import { composeValidators } from '../../common';
 import { requiredValidator, timeIntervalInputValidator } from '../../common/util/validators';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 
 export interface PreviewAlertConditionProps {
   alertingApiService: AlertingApiService;
-  alertParams: MlAnomalyThresholdAlertParams;
+  alertParams: MlAnomalyDetectionAlertParams;
 }
 
 const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(

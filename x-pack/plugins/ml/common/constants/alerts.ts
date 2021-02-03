@@ -10,17 +10,17 @@ import { MINIMUM_FULL_LICENSE } from '../license';
 import { PLUGIN_ID } from './app';
 
 export const ML_ALERT_TYPES = {
-  ANOMALY_THRESHOLD: 'xpack.ml.anomaly_threshold',
+  ANOMALY_DETECTION: 'xpack.ml.anomaly_threshold',
 } as const;
 
 export type MlAlertType = typeof ML_ALERT_TYPES[keyof typeof ML_ALERT_TYPES];
 
-export const THRESHOLD_MET_GROUP_ID = 'anomaly_threshold_met';
-export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
-export const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
-  id: THRESHOLD_MET_GROUP_ID,
-  name: i18n.translate('xpack.apm.a.thresholdMet', {
-    defaultMessage: 'Anomaly threshold met',
+export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
+export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
+export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
+  id: ANOMALY_SCORE_MATCH_GROUP_ID,
+  name: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+    defaultMessage: 'Anomaly score matched the condition',
   }),
 };
 
@@ -28,18 +28,18 @@ export const ML_ALERT_TYPES_CONFIG: Record<
   MlAlertType,
   {
     name: string;
-    actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
-    defaultActionGroupId: ThresholdMetActionGroupId;
+    actionGroups: Array<ActionGroup<AnomalyScoreMatchGroupId>>;
+    defaultActionGroupId: AnomalyScoreMatchGroupId;
     minimumLicenseRequired: string;
     producer: string;
   }
 > = {
-  [ML_ALERT_TYPES.ANOMALY_THRESHOLD]: {
-    name: i18n.translate('xpack.apm.errorCountAlert.name', {
-      defaultMessage: 'Anomaly threshold',
+  [ML_ALERT_TYPES.ANOMALY_DETECTION]: {
+    name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
+      defaultMessage: 'Anomaly detection alert',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
+    defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     producer: PLUGIN_ID,
   },

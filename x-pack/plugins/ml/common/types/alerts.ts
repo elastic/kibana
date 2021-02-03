@@ -81,7 +81,7 @@ export function isInfluencerAnomalyAlertDoc(arg: any): arg is InfluencerAnomalyA
   return arg.hasOwnProperty('result_type') && arg.result_type === ANOMALY_RESULT_TYPE.INFLUENCER;
 }
 
-export type MlAnomalyThresholdAlertParams = {
+export type MlAnomalyDetectionAlertParams = {
   jobSelection: {
     jobIds?: string[];
     groupIds?: string[];

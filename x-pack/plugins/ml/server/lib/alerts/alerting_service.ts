@@ -8,8 +8,8 @@ import Boom from '@hapi/boom';
 import rison from 'rison-node';
 import { MlClient } from '../ml_client';
 import {
-  MlAnomalyThresholdAlertParams,
-  MlAnomalyThresholdAlertPreviewRequest,
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
@@ -23,7 +23,7 @@ import {
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { AnomalyThresholdAlertContext } from './register_anomaly_threshold_alert_type';
+import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 
 function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
@@ -256,7 +256,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
    * @param previewTimeInterval
    */
   const fetchAnomalies = async (
-    params: MlAnomalyThresholdAlertParams,
+    params: MlAnomalyDetectionAlertParams,
     previewTimeInterval?: string
   ): Promise<AlertExecutionResult[] | undefined> => {
     const jobAndGroupIds = [
@@ -447,8 +447,8 @@ export function alertingServiceProvider(mlClient: MlClient) {
      * @param params
      */
     execute: async (
-      params: MlAnomalyThresholdAlertParams
-    ): Promise<AnomalyThresholdAlertContext | undefined> => {
+      params: MlAnomalyDetectionAlertParams
+    ): Promise<AnomalyDetectionAlertContext | undefined> => {
       const res = await fetchAnomalies(params);
 
       if (!res) {
@@ -476,7 +476,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
     preview: async ({
       alertParams,
       timeRange,
-    }: MlAnomalyThresholdAlertPreviewRequest): Promise<PreviewResponse> => {
+    }: MlAnomalyDetectionAlertPreviewRequest): Promise<PreviewResponse> => {
       const res = await fetchAnomalies(alertParams, timeRange);
 
       if (!res) {

@@ -15,19 +15,15 @@ import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
-import { MlAnomalyThresholdAlertParams } from '../../common/types/alerts';
+import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 
 interface Props {
-  alertParams: MlAnomalyThresholdAlertParams;
+  alertParams: MlAnomalyDetectionAlertParams;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-const MlAlertThresholdAlertTrigger: FC<Props> = ({
-  alertParams,
-  setAlertParams,
-  setAlertProperty,
-}) => {
+const MlAnomalyAlertTrigger: FC<Props> = ({ alertParams, setAlertParams, setAlertProperty }) => {
   const {
     services: { http },
   } = useMlKibana();
@@ -36,8 +32,8 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
   const alertingApiService = alertingApiProvider(mlHttpService);
 
   const onAlertParamChange = useCallback(
-    <T extends keyof MlAnomalyThresholdAlertParams>(param: T) => (
-      update: MlAnomalyThresholdAlertParams[T]
+    <T extends keyof MlAnomalyDetectionAlertParams>(param: T) => (
+      update: MlAnomalyDetectionAlertParams[T]
     ) => {
       setAlertParams(param, update);
     },
@@ -82,4 +78,4 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default MlAlertThresholdAlertTrigger;
+export default MlAnomalyAlertTrigger;

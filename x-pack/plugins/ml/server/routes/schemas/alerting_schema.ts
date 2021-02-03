@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const mlAnomalyThresholdAlertParams = schema.object({
+export const mlAnomalyDetectionAlertParams = schema.object({
   jobSelection: schema.object(
     {
       jobIds: schema.maybe(schema.arrayOf(schema.string())),
@@ -24,16 +24,16 @@ export const mlAnomalyThresholdAlertParams = schema.object({
   resultType: schema.string(),
 });
 
-export const mlAnomalyThresholdAlertPreviewRequest = schema.object({
-  alertParams: mlAnomalyThresholdAlertParams,
+export const mlAnomalyDetectionAlertPreviewRequest = schema.object({
+  alertParams: mlAnomalyDetectionAlertParams,
   /**
    * Relative time range to look back from now, e.g. 1y, 8m, 15d
    */
   timeRange: schema.string(),
 });
 
-export type MlAnomalyThresholdAlertParams = TypeOf<typeof mlAnomalyThresholdAlertParams>;
+export type MlAnomalyDetectionAlertParams = TypeOf<typeof mlAnomalyDetectionAlertParams>;
 
-export type MlAnomalyThresholdAlertPreviewRequest = TypeOf<
-  typeof mlAnomalyThresholdAlertPreviewRequest
+export type MlAnomalyDetectionAlertPreviewRequest = TypeOf<
+  typeof mlAnomalyDetectionAlertPreviewRequest
 >;

@@ -6,14 +6,14 @@
 
 import { HttpService } from '../http_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
-import { MlAnomalyThresholdAlertParams, PreviewResponse } from '../../../../common/types/alerts';
+import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../../common/types/alerts';
 
 export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {
     preview(params: {
-      alertParams: MlAnomalyThresholdAlertParams;
+      alertParams: MlAnomalyDetectionAlertParams;
       timeRange: string;
     }): Promise<PreviewResponse> {
       const body = JSON.stringify(params);
