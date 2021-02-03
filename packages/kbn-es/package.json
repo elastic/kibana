@@ -17,7 +17,7 @@
     "node-fetch": "^2.6.1",
     "simple-git": "^1.91.0",
     "tar-fs": "^2.1.0",
-    "tree-kill": "^1.1.0",
+    "tree-kill": "^1.2.2",
     "yauzl": "^2.10.0"
   }
 }
