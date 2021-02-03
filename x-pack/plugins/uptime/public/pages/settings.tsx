@@ -145,7 +145,6 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>

@@ -6,7 +6,7 @@
 
 import React, { memo } from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 

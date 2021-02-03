@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import './discover_field_search.scss';
 
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
@@ -37,6 +27,8 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -45,6 +37,7 @@ export interface State {
   aggregatable: string;
   type: string;
   missing: boolean;
+  unmappedFields: boolean;
   [index: string]: string | boolean;
 }
 
@@ -63,13 +56,36 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
+
+  /**
+   * use new fields api
+   */
+  useNewFieldsApi?: boolean;
+
+  /**
+   * callback funtion to change the value of unmapped fields switch
+   * @param value new value to set
+   */
+  onChangeUnmappedFields?: (value: boolean) => void;
+
+  /**
+   * should unmapped fields switch be rendered
+   */
+  showUnmappedFields?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({
+  onChange,
+  value,
+  types,
+  useNewFieldsApi,
+  showUnmappedFields,
+  onChangeUnmappedFields,
+}: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -95,6 +111,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     aggregatable: 'any',
     type: 'any',
     missing: true,
+    unmappedFields: !!showUnmappedFields,
   });
 
   if (typeof value !== 'string') {
@@ -162,6 +179,14 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const handleMissingChange = (e: EuiSwitchEvent) => {
     const missingValue = e.target.checked;
     handleValueChange('missing', missingValue);
+  };
+
+  const handleUnmappedFieldsChange = (e: EuiSwitchEvent) => {
+    const unmappedFieldsValue = e.target.checked;
+    handleValueChange('unmappedFields', unmappedFieldsValue);
+    if (onChangeUnmappedFields) {
+      onChangeUnmappedFields(unmappedFieldsValue);
+    }
   };
 
   const buttonContent = (
@@ -236,6 +261,51 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     );
   };
 
+  const footer = () => {
+    if (!showUnmappedFields && useNewFieldsApi) {
+      return null;
+    }
+    return (
+      <EuiPopoverFooter>
+        {showUnmappedFields ? (
+          <EuiFlexGroup>
+            <EuiFlexItem component="span">
+              <EuiSwitch
+                label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
+                  defaultMessage: 'Show unmapped fields',
+                })}
+                checked={values.unmappedFields}
+                onChange={handleUnmappedFieldsChange}
+                data-test-subj="unmappedFieldsSwitch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem component="span" grow={false}>
+              <EuiToolTip
+                position="right"
+                content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
+                  defaultMessage:
+                    'Unmapped fields will be deprecated and removed in a future release.',
+                })}
+              >
+                <EuiIcon type="alert" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        {useNewFieldsApi ? null : (
+          <EuiSwitch
+            label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+              defaultMessage: 'Hide missing fields',
+            })}
+            checked={values.missing}
+            onChange={handleMissingChange}
+            data-test-subj="missingSwitch"
+          />
+        )}
+      </EuiPopoverFooter>
+    );
+  };
+
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
       <EuiForm data-test-subj="filterSelectionPanel">
@@ -287,16 +357,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter>
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                  defaultMessage: 'Hide missing fields',
-                })}
-                checked={values.missing}
-                onChange={handleMissingChange}
-                data-test-subj="missingSwitch"
-              />
-            </EuiPopoverFooter>
+            {footer()}
           </EuiPopover>
         </EuiFilterGroup>
       </EuiOutsideClickDetector>

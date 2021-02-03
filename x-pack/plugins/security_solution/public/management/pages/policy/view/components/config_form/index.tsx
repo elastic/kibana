@@ -58,7 +58,7 @@ export const ConfigForm: FC<ConfigFormProps> = memo(
           <ConfigFormHeading>{TITLES.type}</ConfigFormHeading>
           <EuiText size="m">{type}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={2}>
           <ConfigFormHeading>{TITLES.os}</ConfigFormHeading>
           <EuiText>{supportedOss.map((os) => OS_TITLES[os]).join(', ')}</EuiText>
         </EuiFlexItem>

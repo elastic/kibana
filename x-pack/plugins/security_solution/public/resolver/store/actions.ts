@@ -7,32 +7,6 @@ import { CameraAction } from './camera';
 import { DataAction } from './data/action';
 
 /**
- * When the user wants to bring a node front-and-center on the map.
- * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
- */
-interface UserBroughtNodeIntoView {
-  /**
-   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-   */
-  readonly type: 'userBroughtNodeIntoView';
-  /**
-   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-   */
-  readonly payload: {
-    /**
-     * Used to identify the node that should be brought into view.
-     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-     */
-    readonly nodeID: string;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-     */
-    readonly time: number;
-  };
-}
-
-/**
  * The action dispatched when the app requests related event data for one
  * subject (whose entity_id should be included as `payload`)
  */
@@ -51,8 +25,16 @@ interface UserRequestedRelatedEventData {
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
 
-  /** focused nodeID */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
 }
 
 /**
@@ -63,10 +45,16 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  /**
-   * The nodeID (aka entity_id) that was select.
-   */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
 }
 
 /**
@@ -111,7 +99,6 @@ export type ResolverAction =
   | CameraAction
   | DataAction
   | AppReceivedNewExternalProperties
-  | UserBroughtNodeIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData;

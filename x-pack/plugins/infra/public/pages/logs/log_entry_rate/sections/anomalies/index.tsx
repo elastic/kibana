@@ -14,9 +14,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { getAnnotationsForAll, getLogEntryRateCombinedSeries } from '../helpers/data_formatters';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';

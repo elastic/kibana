@@ -5,14 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../../src/core/server';
+import type { FeaturesPluginRouter } from '../types';
 import { FeatureRegistry } from '../feature_registry';
 
 /**
  * Describes parameters used to define HTTP routes.
  */
 export interface RouteDefinitionParams {
-  router: IRouter;
+  router: FeaturesPluginRouter;
   featureRegistry: FeatureRegistry;
 }
 

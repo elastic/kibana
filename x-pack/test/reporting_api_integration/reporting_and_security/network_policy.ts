@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, timeout } from 'rxjs/operators';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const archive = 'reporting/canvas_disallowed_url';
 
@@ -35,17 +34,10 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       // Retry the download URL until a "failed" response status is returned
-      const fails$: Rx.Observable<string> = Rx.interval(100).pipe(
-        switchMap(() => supertest.get(downloadPath).then((response) => response.body)),
-        filter(({ statusCode }) => statusCode === 500),
-        map(({ message }) => message),
-        first(),
-        timeout(120000)
-      );
-
-      const reportFailed = await fails$.toPromise();
-
-      expect(reportFailed).to.match(/Reporting generation failed: Error:/);
+      await retry.tryForTime(120000, async () => {
+        const { body } = await supertest.get(downloadPath).expect(500);
+        expect(body.message).to.match(/Reporting generation failed: Error:/);
+      });
     });
   });
 }

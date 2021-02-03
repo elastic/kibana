@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
-import { testTable } from './__tests__/fixtures/test_tables';
-import { fontStyle, containerStyle } from './__tests__/fixtures/test_styles';
+import { testTable } from './__fixtures__/test_tables';
+import { fontStyle, containerStyle } from './__fixtures__/test_styles';
 import { render } from './render';
 
 const renderTable = {

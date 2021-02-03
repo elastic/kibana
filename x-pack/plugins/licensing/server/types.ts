@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { ILegacyClusterClient } from 'src/core/server';
+import type { ILegacyClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -44,16 +44,22 @@ export interface RawLicense {
  * The APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing.
  * @public
  */
-export interface LicensingRequestHandlerContext {
+export interface LicensingApiRequestHandlerContext {
   featureUsage: FeatureUsageServiceStart;
   license: ILicense;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    licensing: LicensingRequestHandlerContext;
-  }
+/**
+ * @internal
+ */
+export interface LicensingRequestHandlerContext extends RequestHandlerContext {
+  licensing: LicensingApiRequestHandlerContext;
 }
+
+/**
+ * @internal
+ */
+export type LicensingRouter = IRouter<LicensingRequestHandlerContext>;
 
 /** @public */
 export interface LicensingPluginSetup {

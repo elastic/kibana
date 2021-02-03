@@ -8,12 +8,12 @@ import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import url from 'url';
 import { delay } from 'bluebird';
+import { adminTestUser } from '@kbn/test';
 import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const config = getService('config');
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
@@ -21,7 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('does not prevent basic login', async () => {
-      const [username, password] = config.get('servers.elasticsearch.auth').split(':');
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -29,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
           providerType: 'basic',
           providerName: 'basic',
           currentURL: '/',
-          params: { username, password },
+          params: { username: adminTestUser.username, password: adminTestUser.password },
         })
         .expect(200);
 
@@ -42,10 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', request.cookie(cookies[0])!.cookieString())
         .expect(200);
 
-      expect(user.username).to.eql(username);
+      expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     describe('initiating handshake', () => {

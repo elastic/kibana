@@ -29,11 +29,16 @@ export type LayerWizard = {
   checkVisibility?: () => Promise<boolean>;
   description: string;
   disabledReason?: string;
+  getIsDisabled?: () => Promise<boolean> | boolean;
   icon: string | FunctionComponent<any>;
-  getIsDisabled?: () => boolean;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+};
+
+export type LayerWizardWithMeta = LayerWizard & {
+  isVisible: boolean;
+  isDisabled: boolean;
 };
 
 const registry: LayerWizard[] = [];
@@ -43,16 +48,19 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
     checkVisibility: async () => {
       return true;
     },
+    getIsDisabled: async () => {
+      return false;
+    },
     ...layerWizard,
   });
 }
 
-export async function getLayerWizards(): Promise<LayerWizard[]> {
-  const promises = registry.map(async (layerWizard) => {
+export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
+  const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
       ...layerWizard,
-      // @ts-ignore
-      isVisible: await layerWizard.checkVisibility(),
+      isVisible: await layerWizard.checkVisibility!(),
+      isDisabled: await layerWizard.getIsDisabled!(),
     };
   });
   return (await Promise.all(promises)).filter(({ isVisible }) => {

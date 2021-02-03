@@ -26,7 +26,7 @@ export const getIndexVersion = async (
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(
-    (key) => indexAlias[key].aliases[index].is_write_index
+    (key) => indexAlias[key].aliases[index]?.is_write_index
   );
   if (writeIndex === undefined) {
     return 0;

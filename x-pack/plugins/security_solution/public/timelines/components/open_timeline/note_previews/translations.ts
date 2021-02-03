@@ -13,14 +13,12 @@ export const TOGGLE_EXPAND_EVENT_DETAILS = i18n.translate(
   }
 );
 
-export const USER_ADDED_A_NOTE = (user: string) =>
-  i18n.translate('xpack.securitySolution.timeline.userAddedANoteScreenReaderOnly', {
-    values: { user },
-    defaultMessage: '{user} added a note',
-  });
+export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.timeline.addedANoteLabel', {
+  defaultMessage: 'added a note',
+});
 
 export const AN_UNKNOWN_USER = i18n.translate(
-  'xpack.securitySolution.timeline.anUnknownUserScreenReaderOnly',
+  'xpack.securitySolution.timeline.anUnknownUserLabel',
   {
     defaultMessage: 'an unknown user',
   }

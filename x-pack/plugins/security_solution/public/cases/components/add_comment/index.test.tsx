@@ -7,14 +7,15 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
+import { noop } from 'lodash/fp';
 
-import { AddComment, AddCommentRefObject } from '.';
 import { TestProviders } from '../../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType } from '../../../../../case/common/api';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
+import { AddComment, AddCommentRefObject } from '.';
 
 jest.mock('../../containers/use_post_comment');
 jest.mock('../use_insert_timeline');
@@ -34,7 +35,7 @@ const addCommentProps = {
   showLoading: false,
 };
 
-const defaultPostCommment = {
+const defaultPostComment = {
   isLoading: false,
   isError: false,
   postComment,
@@ -48,7 +49,7 @@ const sampleData: CommentRequest = {
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    usePostCommentMock.mockImplementation(() => defaultPostCommment);
+    usePostCommentMock.mockImplementation(() => defaultPostComment);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
@@ -83,7 +84,7 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -99,7 +100,7 @@ describe('AddComment ', () => {
   });
 
   it('should disable submit button when disabled prop passed', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -141,8 +142,9 @@ describe('AddComment ', () => {
   });
 
   it('it should insert a timeline', async () => {
+    let attachTimeline = noop;
     useInsertTimelineMock.mockImplementation((comment, onTimelineAttached) => {
-      onTimelineAttached(`[title](url)`);
+      attachTimeline = onTimelineAttached;
     });
 
     const wrapper = mount(
@@ -152,6 +154,10 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
+    act(() => {
+      attachTimeline('[title](url)');
+    });
 
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');

@@ -48,6 +48,11 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   }
 `;
 
+const TabContentWrapper = styled.div`
+  height: 100%;
+  position: relative;
+`;
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
@@ -105,7 +110,9 @@ const EventDetailsComponent: React.FC<Props> = ({
         content: (
           <>
             <EuiSpacer size="m" />
-            <JsonView data={data} />
+            <TabContentWrapper>
+              <JsonView data={data} />
+            </TabContentWrapper>
           </>
         ),
       },

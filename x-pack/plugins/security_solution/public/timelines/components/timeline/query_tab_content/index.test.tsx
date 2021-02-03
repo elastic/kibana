@@ -67,6 +67,7 @@ describe('Timeline', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -144,7 +145,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
@@ -161,7 +164,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -172,7 +177,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
@@ -183,7 +190,9 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+      ).toEqual(true);
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 

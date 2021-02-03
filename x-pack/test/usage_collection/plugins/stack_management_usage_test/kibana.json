@@ -1,0 +1,9 @@
+{
+  "id": "StackManagementUsageTest",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "StackManagementUsageTest"],
+  "requiredPlugins": [],
+  "server": false,
+  "ui": true
+}

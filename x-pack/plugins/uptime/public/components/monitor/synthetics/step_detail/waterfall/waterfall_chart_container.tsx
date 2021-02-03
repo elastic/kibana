@@ -59,7 +59,10 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         </EuiFlexGroup>
       )}
       {networkEvents && !networkEvents.loading && networkEvents.events.length > 0 && (
-        <WaterfallChartWrapper data={extractItems(networkEvents.events)} />
+        <WaterfallChartWrapper
+          data={extractItems(networkEvents.events)}
+          total={networkEvents.total}
+        />
       )}
     </>
   );

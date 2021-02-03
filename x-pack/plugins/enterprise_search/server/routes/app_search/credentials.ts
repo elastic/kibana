@@ -81,11 +81,9 @@ export function registerCredentialsRoutes({
         body: tokenSchema,
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/credentials/${request.params.name}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/credentials/:name',
+    })
   );
   router.delete(
     {
@@ -96,10 +94,8 @@ export function registerCredentialsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/credentials/${request.params.name}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/credentials/:name',
+    })
   );
 }

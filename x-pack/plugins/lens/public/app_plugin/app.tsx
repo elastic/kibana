@@ -7,7 +7,7 @@
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -39,6 +39,7 @@ import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
+import { useTimeRange } from './time_range';
 
 export function App({
   history,
@@ -107,9 +108,11 @@ export function App({
     state.searchSessionId,
   ]);
 
-  // Need a stable reference for the frame component of the dateRange
-  const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
-  const currentDateRange = useMemo(() => ({ fromDate, toDate }), [fromDate, toDate]);
+  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
+    data,
+    state.lastKnownDoc,
+    setState
+  );
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -367,6 +370,11 @@ export function App({
     state.persistedDoc?.state,
   ]);
 
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
+
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
@@ -382,8 +390,11 @@ export function App({
     }
 
     let references = lastKnownDoc.references;
-    if (savedObjectsTagging && saveProps.newTags) {
-      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    if (savedObjectsTagging) {
+      references = savedObjectsTagging.ui.updateTagsReferences(
+        references,
+        saveProps.newTags || tagsIds
+      );
     }
 
     const docToSave = {
@@ -583,11 +594,6 @@ export function App({
     },
   });
 
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
-
   return (
     <>
       <div className="lnsApp">
@@ -658,7 +664,7 @@ export function App({
             render={editorFrame.mount}
             nativeProps={{
               searchSessionId: state.searchSessionId,
-              dateRange: currentDateRange,
+              dateRange: resolvedDateRange,
               query: state.query,
               filters: state.filters,
               savedQuery: state.savedQuery,
@@ -670,7 +676,7 @@ export function App({
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
-                if (!_.isEqual(state.persistedDoc, doc)) {
+                if (!_.isEqual(state.persistedDoc, doc) && !_.isEqual(state.lastKnownDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
                 }
                 if (!_.isEqual(state.activeData, activeData)) {
@@ -704,7 +710,6 @@ export function App({
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
-        savedObjectsClient={savedObjectsClient}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
         onSave={runSave}

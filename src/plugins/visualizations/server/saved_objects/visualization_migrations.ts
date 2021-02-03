@@ -1,27 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -804,6 +792,11 @@ const decorateAxes = <T extends { labels: { filter?: boolean } }>(
     },
   }));
 
+// Inlined from vis_type_xy
+const CHART_TYPE_AREA = 'area';
+const CHART_TYPE_LINE = 'line';
+const CHART_TYPE_HISTOGRAM = 'histogram';
+
 /**
  * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
  */
@@ -819,11 +812,11 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
     }
     if (
       visState &&
-      [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
+      [CHART_TYPE_AREA, CHART_TYPE_LINE, CHART_TYPE_HISTOGRAM].includes(visState?.params?.type)
     ) {
       const isHorizontalBar = visState.type === 'horizontal_bar';
       const isLineOrArea =
-        visState?.params?.type === ChartType.Area || visState?.params?.type === ChartType.Line;
+        visState?.params?.type === CHART_TYPE_AREA || visState?.params?.type === CHART_TYPE_LINE;
       return {
         ...doc,
         attributes: {
@@ -832,6 +825,10 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
               categoryAxes:
                 visState.params.categoryAxes &&
                 decorateAxes(visState.params.categoryAxes, !isHorizontalBar),

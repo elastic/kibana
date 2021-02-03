@@ -7,16 +7,18 @@
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
-import {
+import type {
   CoreSetup,
-  IRouter,
   KibanaResponseFactory,
-  RequestHandlerContext,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { SetupPlugins } from '../../plugin';
+import type {
+  SecuritySolutionRequestHandlerContext,
+  SecuritySolutionPluginRouter,
+} from '../../types';
 
 import {
   FrameworkAdapter,
@@ -27,7 +29,7 @@ import {
 import { buildSiemResponse } from '../detection_engine/routes/utils';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
-  private router: IRouter;
+  private router: SecuritySolutionPluginRouter;
   private security: SetupPlugins['security'];
 
   constructor(core: CoreSetup, plugins: SetupPlugins) {
@@ -125,7 +127,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
 export function wrapRequest(
   request: KibanaRequest,
-  context: RequestHandlerContext,
+  context: SecuritySolutionRequestHandlerContext,
   user: AuthenticatedUser | null
 ): FrameworkRequest {
   return {

@@ -16,6 +16,8 @@ export interface ReturnPrivilegeUser {
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
+  hasIndexMaintenance: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -26,13 +28,20 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
       ReturnPrivilegeUser,
-      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
+      | 'isAuthenticated'
+      | 'hasEncryptionKey'
+      | 'hasIndexManage'
+      | 'hasIndexWrite'
+      | 'hasIndexUpdateDelete'
+      | 'hasIndexMaintenance'
     >
   >({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,
     hasIndexWrite: null,
+    hasIndexUpdateDelete: null,
+    hasIndexMaintenance: null,
   });
   const [, dispatchToaster] = useStateToaster();
 
@@ -41,7 +50,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
     const abortCtrl = new AbortController();
     setLoading(true);
 
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const privilege = await getUserPrivilege({
           signal: abortCtrl.signal,
@@ -53,12 +62,14 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
               hasEncryptionKey: privilege.has_encryption_key,
-              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
+              hasIndexMaintenance: privilege.index[indexName].maintenance,
               hasIndexWrite:
                 privilege.index[indexName].create ||
                 privilege.index[indexName].create_doc ||
                 privilege.index[indexName].index ||
                 privilege.index[indexName].write,
+              hasIndexUpdateDelete: privilege.index[indexName].write,
             });
           }
         }
@@ -69,6 +80,8 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             hasEncryptionKey: false,
             hasIndexManage: false,
             hasIndexWrite: false,
+            hasIndexUpdateDelete: false,
+            hasIndexMaintenance: false,
           });
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
@@ -76,15 +89,14 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
       if (isSubscribed) {
         setLoading(false);
       }
-    }
+    };
 
     fetchData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatchToaster]);
 
   return { loading, ...privilegeUser };
 };

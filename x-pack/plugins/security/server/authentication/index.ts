@@ -5,11 +5,7 @@
  */
 
 export { canRedirectRequest } from './can_redirect_request';
-export {
-  AuthenticationService,
-  AuthenticationServiceSetup,
-  AuthenticationServiceStart,
-} from './authentication_service';
+export { AuthenticationService, AuthenticationServiceStart } from './authentication_service';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
 export {
@@ -19,6 +15,7 @@ export {
   TokenAuthenticationProvider,
   SAMLAuthenticationProvider,
   OIDCAuthenticationProvider,
+  AnonymousAuthenticationProvider,
 } from './providers';
 export {
   BasicHTTPAuthorizationHeaderCredentials,
@@ -28,6 +25,6 @@ export type {
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
-  InvalidateAPIKeyParams,
+  InvalidateAPIKeysParams,
   GrantAPIKeyResult,
 } from './api_keys';

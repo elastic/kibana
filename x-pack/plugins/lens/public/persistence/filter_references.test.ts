@@ -56,6 +56,18 @@ describe('filter saved object references', () => {
     `);
   });
 
+  it('should remove index and value from persistable filter', () => {
+    const { persistableFilters } = extractFilterReferences([
+      { ...filters[0], meta: { ...filters[0].meta, value: 'CN' } },
+      { ...filters[1], meta: { ...filters[1].meta, value: 'US' } },
+    ]);
+    expect(persistableFilters.length).toBe(2);
+    persistableFilters.forEach((filter) => {
+      expect(filter.meta.hasOwnProperty('index')).toBe(false);
+      expect(filter.meta.hasOwnProperty('value')).toBe(false);
+    });
+  });
+
   it('should restore the same filter after extracting and injecting', () => {
     const { persistableFilters, references } = extractFilterReferences(filters);
     expect(injectFilterReferences(persistableFilters, references)).toEqual(filters);

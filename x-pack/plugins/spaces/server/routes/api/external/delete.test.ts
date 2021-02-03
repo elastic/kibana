@@ -64,7 +64,6 @@ describe('Spaces Public API', () => {
     initDeleteSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,

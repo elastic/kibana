@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common']);
+  const PageObjects = getPageObjects(['maps', 'tagManagement', 'common', 'visualize']);
 
   /**
    * Select tags in the searchbar's tag filter.
@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await searchFilter.click();
   };
 
-  describe('maps integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/89073
+  describe.skip('maps integration', () => {
     before(async () => {
       await esArchiver.load('maps');
     });
@@ -78,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows to select tags for a new map', async () => {
-        await PageObjects.maps.saveMap('my-new-map', false, ['tag-1', 'tag-3']);
+        await PageObjects.maps.saveMap('my-new-map', true, ['tag-1', 'tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-1');
@@ -91,6 +92,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('mapSaveButton');
         await testSubjects.setValue('savedObjectTitle', 'map-with-new-tag');
+        await PageObjects.visualize.setSaveModalValues('map-with-new-tag', {
+          addToDashboard: false,
+          saveAsNew: true,
+        });
 
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
@@ -127,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to select tags for an existing map', async () => {
         await listingTable.clickItemLink('map', 'map 4 (tag-1)');
 
-        await PageObjects.maps.saveMap('map 4 (tag-1)', false, ['tag-3']);
+        await PageObjects.maps.saveMap('map 4 (tag-1)', true, ['tag-3']);
 
         await PageObjects.maps.gotoMapListingPage();
         await selectFilterTags('tag-3');

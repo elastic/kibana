@@ -182,6 +182,7 @@ export function userLoginEvent({
 export enum SavedObjectAction {
   CREATE = 'saved_object_create',
   GET = 'saved_object_get',
+  RESOLVE = 'saved_object_resolve',
   UPDATE = 'saved_object_update',
   DELETE = 'saved_object_delete',
   FIND = 'saved_object_find',
@@ -195,6 +196,7 @@ type VerbsTuple = [string, string, string];
 const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_create: ['create', 'creating', 'created'],
   saved_object_get: ['access', 'accessing', 'accessed'],
+  saved_object_resolve: ['resolve', 'resolving', 'resolved'],
   saved_object_update: ['update', 'updating', 'updated'],
   saved_object_delete: ['delete', 'deleting', 'deleted'],
   saved_object_find: ['access', 'accessing', 'accessed'],
@@ -210,6 +212,7 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
 const savedObjectAuditTypes: Record<SavedObjectAction, EventType> = {
   saved_object_create: EventType.CREATION,
   saved_object_get: EventType.ACCESS,
+  saved_object_resolve: EventType.ACCESS,
   saved_object_update: EventType.CHANGE,
   saved_object_delete: EventType.DELETION,
   saved_object_find: EventType.ACCESS,

@@ -21,7 +21,7 @@ export declare class UiActionsService
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [actions](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.actions.md) |  | <code>ActionRegistry</code> |  |
-|  [addTriggerAction](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.addtriggeraction.md) |  | <code>(triggerId: string, action: ActionDefinition) =&gt; void</code> | <code>addTriggerAction</code> is similar to <code>attachAction</code> as it attaches action to a trigger, but it also registers the action, if it has not been registered, yet.<code>addTriggerAction</code> also infers better typing of the <code>action</code> argument. |
+|  [addTriggerAction](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.addtriggeraction.md) |  | <code>(triggerId: string, action: ActionDefinition) =&gt; void</code> | <code>addTriggerAction</code> is similar to <code>attachAction</code> as it attaches action to a trigger, but it also registers the action, if it has not been registered, yet. |
 |  [attachAction](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.attachaction.md) |  | <code>(triggerId: string, actionId: string) =&gt; void</code> |  |
 |  [clear](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.clear.md) |  | <code>() =&gt; void</code> | Removes all registered triggers and actions. |
 |  [detachAction](./kibana-plugin-plugins-ui_actions-public.uiactionsservice.detachaction.md) |  | <code>(triggerId: string, actionId: string) =&gt; void</code> |  |

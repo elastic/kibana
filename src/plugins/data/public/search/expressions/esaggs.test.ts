@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -75,7 +64,6 @@ describe('esaggs expression function - public', () => {
       aggs: ({
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown) as jest.Mocked<AggsStart>,
-      deserializeFieldFormat: jest.fn().mockImplementation((f: any) => f),
       indexPatterns: ({
         create: jest.fn().mockResolvedValue({}),
       } as unknown) as jest.Mocked<IndexPatternsContract>,
@@ -110,10 +98,9 @@ describe('esaggs expression function - public', () => {
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
     await definition().fn(null, args, mockHandlers);
 
-    expect(handleEsaggsRequest).toHaveBeenCalledWith(null, args, {
+    expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
       aggs: { foo: 'bar' },
-      deserializeFieldFormat: startDependencies.deserializeFieldFormat,
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
@@ -141,8 +128,6 @@ describe('esaggs expression function - public', () => {
     await definition().fn(input, args, mockHandlers);
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
-      input,
-      args,
       expect.objectContaining({
         filters: input.filters,
         query: input.query,

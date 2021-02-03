@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface ActionGroupDefinition {
-  id: string;
-  name: string;
-}
+import { ActionGroup } from '../../../alerts/common';
 
-type ActionGroupDefinitions = Record<string, ActionGroupDefinition>;
-
-export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
+export const ACTION_GROUP_DEFINITIONS: {
+  MONITOR_STATUS: ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
+  TLS: ActionGroup<'xpack.uptime.alerts.actionGroups.tls'>;
+  DURATION_ANOMALY: ActionGroup<'xpack.uptime.alerts.actionGroups.durationAnomaly'>;
+} = {
   MONITOR_STATUS: {
     id: 'xpack.uptime.alerts.actionGroups.monitorStatus',
     name: 'Uptime Down Monitor',

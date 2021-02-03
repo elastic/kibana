@@ -16,7 +16,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize', 'dashboard']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -202,7 +202,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
         endIndex + 1
-      }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
+      }) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -241,6 +241,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isTopLevelAggregation() {
+      return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
+    },
     /**
      * Removes the dimension matching a specific test subject
      */
@@ -270,22 +273,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+    async save(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      addToDashboard?: boolean,
+      dashboardId?: string
+    ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
-      await testSubjects.setValue('savedObjectTitle', title);
 
-      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
-      if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
-      if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
+      await PageObjects.visualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
@@ -503,13 +506,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param index - index of th element in datatable
      */
     async getDatatableHeaderText(index = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] thead th:nth-child(${
-            index + 1
-          }) .euiTableCellContent__text`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableHeader(index);
+      return el.getVisibleText();
     },
 
     /**
@@ -519,13 +517,55 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param colIndex - index of column of the cell
      */
     async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
-            colIndex + 1
-          })`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return el.getVisibleText();
+    },
+
+    async getDatatableHeader(index = 0) {
+      return find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        })`
+      );
+    },
+
+    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+      return await find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRow"]:nth-child(${
+          rowIndex + 2 // this is a bit specific for EuiDataGrid: the first row is the Header
+        }) [data-test-subj="dataGridRowCell"]:nth-child(${colIndex + 1})`
+      );
+    },
+
+    async isDatatableHeaderSorted(index = 0) {
+      return find.existsByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        }) [data-test-subj^="dataGridHeaderCellSortingIcon"]`
+      );
+    },
+
+    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'asc' | 'desc') {
+      const el = await this.getDatatableHeader(colIndex);
+      await el.click();
+      let buttonEl;
+      if (direction !== 'none') {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+        );
+      } else {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+        );
+      }
+      return buttonEl.click();
+    },
+
+    async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      await el.focus();
+      const action = await el.findByTestSubject(actionTestSub);
+      return action.click();
     },
 
     /**
@@ -545,6 +585,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('colorPickerAnchor', color);
+    },
+
+    /**
+     * Creates and saves a lens visualization from a dashboard
+     *
+     * @param title - title for the new lens. If left undefined, the panel will be created by value
+     * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     */
+    async createAndAddLensFromDashboard({
+      title,
+      redirectToOrigin,
+    }: {
+      title?: string;
+      redirectToOrigin?: boolean;
+    }) {
+      log.debug(`createAndAddLens${title}`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.switchToEditMode();
+      }
+      await PageObjects.visualize.clickLensWidget();
+      await this.goToTimeRange();
+      await this.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+      if (title) {
+        await this.save(title, false, redirectToOrigin);
+      } else {
+        await this.saveAndReturn();
+      }
     },
   });
 }

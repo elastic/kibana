@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Expression, Props } from '../components/duration/expression';
+import { Expression, Props } from '../components/param_details_form/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { ALERT_CCR_READ_EXCEPTIONS, ALERT_DETAILS } from '../../../common/constants';
 import { AlertTypeParams } from '../../../../alerts/common';
@@ -37,7 +37,7 @@ export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptio
     description: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html`;
+      return `${docLinks.links.monitoring.alertsKibana}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].paramDetails} />

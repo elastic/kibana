@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
@@ -24,7 +13,6 @@ import {
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsExportOptions,
   KibanaRequest,
   IBasePath,
 } from '..';
@@ -40,8 +28,10 @@ export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
   Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
 /** @internal */
-export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
+export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
+  types?: string[];
+  supportedTypes: string[];
+};
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -50,6 +40,7 @@ export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
 export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
 export const FIND_STATS_PREFIX = 'apiCalls.savedObjectsFind';
 export const GET_STATS_PREFIX = 'apiCalls.savedObjectsGet';
+export const RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsResolve';
 export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
@@ -63,6 +54,7 @@ const ALL_COUNTER_FIELDS = [
   ...getFieldsForCounter(DELETE_STATS_PREFIX),
   ...getFieldsForCounter(FIND_STATS_PREFIX),
   ...getFieldsForCounter(GET_STATS_PREFIX),
+  ...getFieldsForCounter(RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(UPDATE_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getFieldsForCounter(IMPORT_STATS_PREFIX),
@@ -131,6 +123,10 @@ export class CoreUsageStatsClient {
 
   public async incrementSavedObjectsGet(options: BaseIncrementOptions) {
     await this.updateUsageStats([], GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsResolve(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], RESOLVE_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsUpdate(options: BaseIncrementOptions) {

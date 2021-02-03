@@ -12,39 +12,35 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiDescribedFormGroup,
   EuiCallOut,
-  EuiAccordion,
   EuiTextColor,
   EuiSwitch,
   EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 
-import { Phases } from '../../../../../../../common/types';
-
-import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
+import { useFormData, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, ActiveBadge, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../../';
 
 import {
   ForcemergeField,
-  SetPriorityInputField,
+  IndexPriorityField,
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
 } from '../shared_fields';
+import { Phase } from '../phase';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
-
-const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
   const { license } = useEditPolicyContext();
@@ -52,105 +48,72 @@ export const HotPhase: FunctionComponent = () => {
     watch: isUsingDefaultRolloverPath,
   });
   const { isUsingRollover } = useConfigurationIssues();
-  const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
+  const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
   return (
-    <>
-      <EuiDescribedFormGroup
-        fullWidth
-        titleSize="s"
+    <Phase phase={'hot'}>
+      <DescribedFormRow
         title={
-          <div>
-            <h2 className="eui-displayInlineBlock eui-alignMiddle">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseLabel"
-                defaultMessage="Hot phase"
-              />
-            </h2>{' '}
-            <ActiveBadge />
-          </div>
+          <h3>
+            {i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
+              defaultMessage: 'Rollover',
+            })}
+          </h3>
         }
         description={
-          <p>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
-              defaultMessage="This phase is required. You are actively querying and
-              writing to your index.  For faster updates, you can roll over the index when it gets too big or too old."
-            />
-          </p>
-        }
-      >
-        <div />
-      </EuiDescribedFormGroup>
-
-      <EuiAccordion
-        id="ilmHotPhaseAdvancedSettings"
-        buttonContent={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.advancedSettingsButton', {
-          defaultMessage: 'Advanced settings',
-        })}
-        paddingSize="m"
-      >
-        <DescribedFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.indexLifecycleMgmt.hotPhase.rolloverFieldTitle', {
-                defaultMessage: 'Rollover',
-              })}
-            </h3>
-          }
-          description={
-            <>
-              <EuiTextColor color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                    defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
-                  />{' '}
-                  <LearnMoreLink
-                    text={
+          <>
+            <EuiTextColor color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                  defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
+                />{' '}
+                <LearnMoreLink
+                  text={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
+                      defaultMessage="Learn more"
+                    />
+                  }
+                  docPath="ilm-rollover.html"
+                />
+              </p>
+            </EuiTextColor>
+            <EuiSpacer />
+            <EuiIcon type="iInCircle" />
+            &nbsp;
+            {i18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}
+            <EuiSpacer />
+            <UseField<boolean> path={isUsingDefaultRolloverPath}>
+              {(field) => (
+                <>
+                  <EuiSwitch
+                    label={field.label}
+                    checked={field.value}
+                    onChange={(e) => field.setValue(e.target.checked)}
+                    data-test-subj="useDefaultRolloverSwitch"
+                  />
+                  &nbsp;
+                  <EuiIconTip
+                    type="questionInCircle"
+                    content={
                       <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
-                        defaultMessage="Learn more"
+                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
+                        defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
                       />
                     }
-                    docPath="indices-rollover-index.html"
                   />
-                </p>
-              </EuiTextColor>
-              <EuiSpacer />
-              <UseField<boolean> path={isUsingDefaultRolloverPath}>
-                {(field) => (
-                  <>
-                    <EuiSwitch
-                      label={field.label}
-                      checked={field.value}
-                      onChange={(e) => field.setValue(e.target.checked)}
-                      data-test-subj="useDefaultRolloverSwitch"
-                    />
-                    &nbsp;
-                    <EuiIconTip
-                      type="questionInCircle"
-                      content={
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                          defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
-                        />
-                      }
-                    />
-                  </>
-                )}
-              </UseField>
-            </>
-          }
-          fullWidth
-        >
-          <div
-            aria-live="polite"
-            role="region"
-            style={{ display: isUsingDefaultRollover === false ? undefined : 'none' }}
-          >
-            <UseField<boolean> path="_meta.hot.useRollover">
+                </>
+              )}
+            </UseField>
+          </>
+        }
+        fullWidth
+      >
+        {isUsingDefaultRollover === false ? (
+          <div aria-live="polite" role="region">
+            <UseField<boolean> path="_meta.hot.customRollover.enabled">
               {(field) => (
                 <>
                   <EuiSwitch
@@ -165,7 +128,7 @@ export const HotPhase: FunctionComponent = () => {
                     content={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="Roll over to a new index when the 
+                        defaultMessage="Roll over to a new index when the
     current index meets one of the defined conditions."
                       />
                     }
@@ -202,7 +165,7 @@ export const HotPhase: FunctionComponent = () => {
                           <NumericField
                             field={field}
                             euiFieldProps={{
-                              'data-test-subj': `${hotProperty}-selectedMaxSizeStored`,
+                              'data-test-subj': `hot-selectedMaxSizeStored`,
                               min: 1,
                             }}
                           />
@@ -212,11 +175,11 @@ export const HotPhase: FunctionComponent = () => {
                   </EuiFlexItem>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <UseField
-                      key="_meta.hot.maxStorageSizeUnit"
-                      path="_meta.hot.maxStorageSizeUnit"
+                      key="_meta.hot.customRollover.maxStorageSizeUnit"
+                      path="_meta.hot.customRollover.maxStorageSizeUnit"
                       component={SelectField}
                       componentProps={{
-                        'data-test-subj': `${hotProperty}-selectedMaxSizeStoredUnits`,
+                        'data-test-subj': `hot-selectedMaxSizeStoredUnits`,
                         hasEmptyLabelSpace: true,
                         euiFieldProps: {
                           options: maxSizeStoredUnits,
@@ -239,7 +202,7 @@ export const HotPhase: FunctionComponent = () => {
                       component={NumericField}
                       componentProps={{
                         euiFieldProps: {
-                          'data-test-subj': `${hotProperty}-selectedMaxDocuments`,
+                          'data-test-subj': `hot-selectedMaxDocuments`,
                           min: 1,
                         },
                       }}
@@ -254,7 +217,7 @@ export const HotPhase: FunctionComponent = () => {
                       component={NumericField}
                       componentProps={{
                         euiFieldProps: {
-                          'data-test-subj': `${hotProperty}-selectedMaxAge`,
+                          'data-test-subj': `hot-selectedMaxAge`,
                           min: 1,
                         },
                       }}
@@ -262,11 +225,11 @@ export const HotPhase: FunctionComponent = () => {
                   </EuiFlexItem>
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <UseField
-                      key="_meta.hot.maxAgeUnit"
-                      path="_meta.hot.maxAgeUnit"
+                      key="_meta.hot.customRollover.maxAgeUnit"
+                      path="_meta.hot.customRollover.maxAgeUnit"
                       component={SelectField}
                       componentProps={{
-                        'data-test-subj': `${hotProperty}-selectedMaxAgeUnits`,
+                        'data-test-subj': `hot-selectedMaxAgeUnits`,
                         hasEmptyLabelSpace: true,
                         euiFieldProps: {
                           'aria-label': i18n.translate(
@@ -284,17 +247,19 @@ export const HotPhase: FunctionComponent = () => {
               </>
             )}
           </div>
-        </DescribedFormRow>
-        {isUsingRollover && (
-          <>
-            {<ForcemergeField phase="hot" />}
-            <ShrinkField phase="hot" />
-            {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
-            <ReadonlyField phase={'hot'} />
-          </>
+        ) : (
+          <div />
         )}
-        <SetPriorityInputField phase={hotProperty} />
-      </EuiAccordion>
-    </>
+      </DescribedFormRow>
+      {isUsingRollover && (
+        <>
+          {<ForcemergeField phase={'hot'} />}
+          <ShrinkField phase={'hot'} />
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
+          <ReadonlyField phase={'hot'} />
+        </>
+      )}
+      <IndexPriorityField phase={'hot'} />
+    </Phase>
   );
 };

@@ -25,7 +25,7 @@ import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
 import { Color } from '../../../../../../../../common/color_palette';
-import { euiStyled } from '../../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
 import { Process } from './types';
 

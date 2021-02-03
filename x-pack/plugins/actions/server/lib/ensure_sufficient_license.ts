@@ -5,14 +5,14 @@
  */
 import { ActionType } from '../types';
 import { LICENSE_TYPE } from '../../../licensing/common/types';
-import { SERVER_LOG_ACTION_TYPE_ID } from '../builtin_action_types/server_log';
-import { ES_INDEX_ACTION_TYPE_ID } from '../builtin_action_types/es_index';
-import { CASE_ACTION_TYPE_ID } from '../../../case/server';
+import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
 import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
+const CASE_ACTION_TYPE_ID = '.case';
+
 const ACTIONS_SCOPED_WITHIN_STACK = new Set([
-  SERVER_LOG_ACTION_TYPE_ID,
-  ES_INDEX_ACTION_TYPE_ID,
+  ServerLogActionTypeId,
+  IndexActionTypeId,
   CASE_ACTION_TYPE_ID,
 ]);
 

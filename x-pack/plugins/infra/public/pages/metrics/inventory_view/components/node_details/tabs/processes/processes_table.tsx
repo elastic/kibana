@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
-import { euiStyled } from '../../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
 import { ProcessRow } from './process_row';

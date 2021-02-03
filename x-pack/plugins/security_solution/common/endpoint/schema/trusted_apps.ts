@@ -6,22 +6,13 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
-
-const HASH_LENGTHS: readonly number[] = [
-  32, // MD5
-  40, // SHA1
-  64, // SHA256
-];
-const INVALID_CHARACTERS_PATTERN = /[^0-9a-f]/i;
+import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
 
 const entryFieldLabels: { [k in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: 'Hash',
   [ConditionEntryField.PATH]: 'Path',
   [ConditionEntryField.SIGNER]: 'Signer',
 };
-
-const isValidHash = (value: string) =>
-  HASH_LENGTHS.includes(value.length) && !INVALID_CHARACTERS_PATTERN.test(value);
 
 export const DeleteTrustedAppsRequestSchema = {
   params: schema.object({
@@ -36,61 +27,58 @@ export const GetTrustedAppsRequestSchema = {
   }),
 };
 
-const createNewTrustedAppForOsScheme = <O extends OperatingSystem, F extends ConditionEntryField>(
+const ConditionEntryTypeSchema = schema.literal('match');
+const ConditionEntryOperatorSchema = schema.literal('included');
+const HashConditionEntrySchema = schema.object({
+  field: schema.literal(ConditionEntryField.HASH),
+  type: ConditionEntryTypeSchema,
+  operator: ConditionEntryOperatorSchema,
+  value: schema.string({
+    validate: (hash) => (isValidHash(hash) ? undefined : `Invalid hash value [${hash}]`),
+  }),
+});
+const PathConditionEntrySchema = schema.object({
+  field: schema.literal(ConditionEntryField.PATH),
+  type: ConditionEntryTypeSchema,
+  operator: ConditionEntryOperatorSchema,
+  value: schema.string({ minLength: 1 }),
+});
+const SignerConditionEntrySchema = schema.object({
+  field: schema.literal(ConditionEntryField.SIGNER),
+  type: ConditionEntryTypeSchema,
+  operator: ConditionEntryOperatorSchema,
+  value: schema.string({ minLength: 1 }),
+});
+
+const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends ConditionEntry>(
   osSchema: Type<O>,
-  fieldSchema: Type<F>
+  entriesSchema: Type<E>
 ) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: osSchema,
-    entries: schema.arrayOf(
-      schema.object({
-        field: fieldSchema,
-        type: schema.literal('match'),
-        operator: schema.literal('included'),
-        value: schema.string({ minLength: 1 }),
-      }),
-      {
-        minSize: 1,
-        validate(entries) {
-          const usedFields = new Set();
-
-          for (const entry of entries) {
-            // unfortunately combination of generics and Type<...> for "field" causes type errors
-            const { field, value } = entry as ConditionEntry;
-
-            if (usedFields.has(field)) {
-              return `[${entryFieldLabels[field]}] field can only be used once`;
-            }
-
-            usedFields.add(field);
-
-            if (field === ConditionEntryField.HASH && !isValidHash(value)) {
-              return `Invalid hash value [${value}]`;
-            }
-          }
-        },
-      }
-    ),
+    entries: schema.arrayOf(entriesSchema, {
+      minSize: 1,
+      validate(entries) {
+        return (
+          getDuplicateFields(entries)
+            .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
+            .join(', ') || undefined
+        );
+      },
+    }),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.oneOf([
     createNewTrustedAppForOsScheme(
       schema.oneOf([schema.literal(OperatingSystem.LINUX), schema.literal(OperatingSystem.MAC)]),
-      schema.oneOf([
-        schema.literal(ConditionEntryField.HASH),
-        schema.literal(ConditionEntryField.PATH),
-      ])
+      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema])
     ),
     createNewTrustedAppForOsScheme(
       schema.literal(OperatingSystem.WINDOWS),
-      schema.oneOf([
-        schema.literal(ConditionEntryField.HASH),
-        schema.literal(ConditionEntryField.PATH),
-        schema.literal(ConditionEntryField.SIGNER),
-      ])
+      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema, SignerConditionEntrySchema])
     ),
   ]),
 };

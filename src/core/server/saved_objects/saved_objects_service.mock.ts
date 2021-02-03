@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -30,6 +19,8 @@ import type {
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
+import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -42,6 +33,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
+    createExporter: jest.fn(),
+    createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
   };
 
@@ -49,6 +42,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
+  startContrat.createExporter.mockReturnValue(savedObjectsExporterMock.create());
+  startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
 
   return startContrat;
 };
@@ -66,10 +61,7 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
-    getImportExportObjectLimit: jest.fn(),
   };
-
-  setupContract.getImportExportObjectLimit.mockReturnValue(100);
 
   return setupContract;
 };
@@ -106,4 +98,6 @@ export const savedObjectsServiceMock = {
   createStartContract: createStartContractMock,
   createMigrationContext: migrationMocks.createContext,
   createTypeRegistryMock: typeRegistryMock.create,
+  createExporter: savedObjectsExporterMock.create,
+  createImporter: savedObjectsImporterMock.create,
 };

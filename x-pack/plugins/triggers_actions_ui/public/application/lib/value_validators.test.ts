@@ -3,8 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { throwIfAbsent, throwIfIsntContained, isValidUrl } from './value_validators';
+import {
+  throwIfAbsent,
+  throwIfIsntContained,
+  isValidUrl,
+  getConnectorWithInvalidatedFields,
+  getAlertWithInvalidatedFields,
+} from './value_validators';
 import uuid from 'uuid';
+import { Alert, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
   test('throws if value is absent', () => {
@@ -91,5 +98,180 @@ describe('isValidUrl', () => {
 
   test('verifies valid url with specific protocol', () => {
     expect(isValidUrl('https://www.elastic.co/', 'https:')).toBeTruthy();
+  });
+});
+
+describe('getConnectorWithInvalidatedFields', () => {
+  test('set nulls to all required undefined fields in connector secrets', () => {
+    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> = {
+      secrets: {} as any,
+      id: 'test',
+      actionTypeId: '.slack',
+      name: 'slack',
+      config: {},
+      isPreconfigured: false,
+    };
+    const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
+    const configErrors = {};
+    const baseConnectorErrors = {};
+    getConnectorWithInvalidatedFields(connector, configErrors, secretsErrors, baseConnectorErrors);
+    expect(connector.secrets.webhookUrl).toBeNull();
+  });
+
+  test('set nulls to all required undefined fields in connector config', () => {
+    const connector: UserConfiguredActionConnector<{ apiUrl: string }, {}> = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.jira',
+      name: 'jira',
+      config: {} as any,
+      isPreconfigured: false,
+    };
+    const secretsErrors = {};
+    const configErrors = { apiUrl: ['apiUrl is required'] };
+    const baseConnectorErrors = {};
+    getConnectorWithInvalidatedFields(connector, configErrors, secretsErrors, baseConnectorErrors);
+    expect(connector.config.apiUrl).toBeNull();
+  });
+
+  test('do not set nulls to the invalid fields with values in the connector properties, config and secrets', () => {
+    const connector: UserConfiguredActionConnector<{}, { webhookUrl: string }> = {
+      secrets: {
+        webhookUrl: 'http://test',
+      },
+      id: 'test',
+      actionTypeId: '.slack',
+      name: 'slack',
+      config: {},
+      isPreconfigured: false,
+    };
+    const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
+    const configErrors = {};
+    const baseConnectorErrors = {};
+    getConnectorWithInvalidatedFields(connector, configErrors, secretsErrors, baseConnectorErrors);
+    expect(connector.secrets.webhookUrl).toEqual('http://test');
+  });
+});
+
+describe('getAlertWithInvalidatedFields', () => {
+  test('set nulls to all required undefined fields in alert', () => {
+    const alert: Alert = {
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = { name: ['Name is required.'] };
+    const actionsErrors = {};
+    const paramsErrors = {};
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(alert.name).toBeNull();
+  });
+
+  test('set nulls to all required undefined fields in alert params', () => {
+    const alert: Alert = {
+      name: 'test',
+      alertTypeId: '.threshold',
+      id: '123',
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+      createdBy: '',
+      apiKeyOwner: '',
+      createdAt: new Date(),
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date(),
+      },
+      notifyWhen: 'onActionGroupChange',
+      throttle: '',
+      updatedAt: new Date(),
+      updatedBy: '',
+    };
+    const baseAlertErrors = {};
+    const actionsErrors = {};
+    const paramsErrors = { index: ['Index is required.'] };
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(alert.params.index).toBeNull();
+  });
+
+  test('do not set nulls to the invalid fields with values in the connector properties, config and secrets', () => {
+    const alert: Alert = {
+      name: 'test',
+      id: '123',
+      params: {},
+      consumer: '@@@@',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = { consumer: ['Consumer is invalid.'] };
+    const actionsErrors = {};
+    const paramsErrors = {};
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(alert.consumer).toEqual('@@@@');
+  });
+
+  test('if complex alert action fields which is required is set to nulls if it is undefined', () => {
+    const alert: Alert = {
+      name: 'test',
+      alertTypeId: '.threshold',
+      id: '123',
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1m',
+      },
+      actions: [
+        {
+          actionTypeId: 'test',
+          group: 'qwer',
+          id: '123',
+          params: {
+            incident: {
+              field: {},
+            },
+          },
+        },
+      ],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+      createdBy: '',
+      apiKeyOwner: '',
+      createdAt: new Date(),
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date(),
+      },
+      notifyWhen: 'onActionGroupChange',
+      throttle: '',
+      updatedAt: new Date(),
+      updatedBy: '',
+    };
+    const baseAlertErrors = {};
+    const actionsErrors = { '123': { 'incident.field.name': ['Name is required.'] } };
+    const paramsErrors = {};
+    getAlertWithInvalidatedFields(alert, paramsErrors, baseAlertErrors, actionsErrors);
+    expect((alert.actions[0].params as any).incident.field.name).toBeNull();
   });
 });

@@ -38,7 +38,6 @@ import { IUiSettingsClient } from 'src/core/server';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
 import { KibanaRequest } from 'kibana/server';
 import { KibanaRequest as KibanaRequest_2 } from 'src/core/server';
-import { LegacyAPICaller } from 'src/core/server';
 import { Logger } from 'src/core/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
@@ -54,10 +53,15 @@ import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter } from 'src/plugins/inspector/common';
+import { RequestHandlerContext } from 'src/core/server';
 import { RequestStatistics } from 'src/plugins/inspector/common';
-import { SavedObject } from 'src/core/server';
+import { SavedObject } from 'kibana/server';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'kibana/server';
+import { SavedObjectsFindOptions } from 'kibana/server';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
@@ -304,6 +308,12 @@ export const castEsToKbnFieldTypeName: (esType: ES_FIELD_TYPES | string) => KBN_
 //
 // @public (undocumented)
 export const config: PluginConfigDescriptor<ConfigSchema>;
+
+// @internal (undocumented)
+export interface DataRequestHandlerContext extends RequestHandlerContext {
+    // (undocumented)
+    search: SearchRequestHandlerContext;
+}
 
 // @public (undocumented)
 export enum ES_FIELD_TYPES {
@@ -688,14 +698,11 @@ export type IMetricAggType = MetricAggType;
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
+    addRuntimeField(name: string, runtimeField: RuntimeField): void;
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
     // (undocumented)
     readonly deleteFieldFormat: (fieldName: string) => void;
-    // Warning: (ae-forgotten-export) The symbol "FieldAttrs" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    fieldAttrs: FieldAttrs;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // Warning: (ae-forgotten-export) The symbol "IIndexPatternFieldList" needs to be exported by the entry point index.d.ts
@@ -733,6 +740,7 @@ export class IndexPattern implements IIndexPattern {
         type: string | undefined;
         typeMeta: string | undefined;
         allowNoIndex: true | undefined;
+        runtimeFieldMap: string | undefined;
     };
     // (undocumented)
     getComputedFields(): {
@@ -742,6 +750,7 @@ export class IndexPattern implements IIndexPattern {
             field: any;
             format: string;
         }[];
+        runtimeFields: Record<string, RuntimeField>;
     };
     // (undocumented)
     getFieldAttrs: () => {
@@ -775,7 +784,7 @@ export class IndexPattern implements IIndexPattern {
     getTimeField(): IndexPatternField | undefined;
     // (undocumented)
     id?: string;
-    // (undocumented)
+    // @deprecated (undocumented)
     intervalName: string | undefined;
     // (undocumented)
     isTimeBased(): boolean;
@@ -783,6 +792,7 @@ export class IndexPattern implements IIndexPattern {
     isTimeNanosBased(): boolean;
     // (undocumented)
     metaFields: string[];
+    removeRuntimeField(name: string): void;
     removeScriptedField(fieldName: string): void;
     resetOriginalSavedObjectBody: () => void;
     // (undocumented)
@@ -804,22 +814,16 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     title: string;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSpec" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     toSpec(): IndexPatternSpec;
-    // (undocumented)
     type: string | undefined;
     // Warning: (ae-forgotten-export) The symbol "TypeMeta" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     typeMeta?: TypeMeta;
-    // (undocumented)
     version: string | undefined;
 }
 
 // Warning: (ae-missing-release-tag) "IndexPatternAttributes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
-// @public (undocumented)
+// @public
 export interface IndexPatternAttributes {
     allowNoIndex?: boolean;
     // (undocumented)
@@ -830,6 +834,8 @@ export interface IndexPatternAttributes {
     fields: string;
     // (undocumented)
     intervalName?: string;
+    // (undocumented)
+    runtimeFieldMap?: string;
     // (undocumented)
     sourceFilters?: string;
     // (undocumented)
@@ -906,8 +912,19 @@ export interface ISearchOptions {
     abortSignal?: AbortSignal;
     isRestore?: boolean;
     isStored?: boolean;
+    legacyHitsTotal?: boolean;
     sessionId?: string;
     strategy?: string;
+}
+
+// Warning: (ae-missing-release-tag) "ISearchSessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ISearchSessionService<T = unknown> {
+    // Warning: (ae-forgotten-export) The symbol "IScopedSearchSessionsClient" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient<T>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -934,10 +951,10 @@ export interface ISearchStart<SearchStrategyRequest extends IKibanaSearchRequest
     //
     // (undocumented)
     aggs: AggsStart;
-    // Warning: (ae-forgotten-export) The symbol "ISearchClient" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IScopedSearchClient" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    asScoped: (request: KibanaRequest_2) => ISearchClient;
+    asScoped: (request: KibanaRequest_2) => IScopedSearchClient;
     getSearchStrategy: (name?: string) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
     // (undocumented)
     searchSource: {
@@ -955,16 +972,6 @@ export interface ISearchStrategy<SearchStrategyRequest extends IKibanaSearchRequ
     extend?: (id: string, keepAlive: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
     // (undocumented)
     search: (request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) => Observable<SearchStrategyResponse>;
-}
-
-// Warning: (ae-missing-release-tag) "ISessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface ISessionService {
-    // Warning: (ae-forgotten-export) The symbol "IScopedSessionService" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSessionService;
 }
 
 // @public (undocumented)
@@ -1126,10 +1133,10 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart, DataPluginSetu
     // (undocumented)
     start(core: CoreStart_2): {
         fieldFormats: {
-            fieldFormatServiceFactory: (uiSettings: import("src/core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
+            fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("src/core/server").SavedObjectsClient, "update" | "find" | "get" | "delete" | "errors" | "create" | "bulkCreate" | "checkConflicts" | "bulkGet" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo">, elasticsearchClient: import("src/core/server").ElasticsearchClient) => Promise<import("../public").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "get" | "delete" | "create" | "update" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import("../public").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };
@@ -1228,6 +1235,28 @@ export const search: {
     tabifyGetColumns: typeof tabifyGetColumns;
 };
 
+// Warning: (ae-missing-release-tag) "SearchRequestHandlerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type SearchRequestHandlerContext = IScopedSearchClient;
+
+// @internal
+export class SearchSessionService implements ISearchSessionService {
+    constructor();
+    // (undocumented)
+    asScopedProvider(): () => {
+        getId: () => never;
+        trackId: () => Promise<void>;
+        getSearchIdMapping: () => Promise<Map<string, string>>;
+        save: () => Promise<never>;
+        get: () => Promise<never>;
+        find: () => Promise<never>;
+        update: () => Promise<never>;
+        extend: () => Promise<never>;
+        cancel: () => Promise<never>;
+    };
+}
+
 // Warning: (ae-missing-release-tag) "SearchStrategyDependencies" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1236,6 +1265,8 @@ export interface SearchStrategyDependencies {
     esClient: IScopedClusterClient;
     // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
+    // (undocumented)
+    searchSessionsClient: IScopedSearchSessionsClient;
     // (undocumented)
     uiSettingsClient: IUiSettingsClient;
 }
@@ -1258,24 +1289,11 @@ export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
     error(): void;
 };
 
-// Warning: (ae-missing-release-tag) "SessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export class SessionService implements ISessionService {
-    constructor();
-    // (undocumented)
-    asScopedProvider(core: CoreStart): (request: KibanaRequest) => {
-        search: <Request_1 extends IKibanaSearchRequest<any>, Response_1 extends IKibanaSearchResponse<any>>(strategy: ISearchStrategy<Request_1, Response_1>, request: Request_1, options: import("../../../common").ISearchOptions, deps: import("../types").SearchStrategyDependencies) => import("rxjs").Observable<Response_1>;
-    };
-    // (undocumented)
-    search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(strategy: ISearchStrategy<Request, Response>, ...args: Parameters<ISearchStrategy<Request, Response>['search']>): import("rxjs").Observable<Response>;
-}
-
 // @internal
 export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
-export function shimHitsTotal(response: SearchResponse<any>): {
+export function shimHitsTotal(response: SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): {
     hits: {
         total: any;
         max_score: number;
@@ -1284,7 +1302,7 @@ export function shimHitsTotal(response: SearchResponse<any>): {
             _type: string;
             _id: string;
             _score: number;
-            _source: any;
+            _source: unknown;
             _version?: number | undefined;
             _explanation?: import("elasticsearch").Explanation | undefined;
             fields?: any;
@@ -1305,27 +1323,6 @@ export function shimHitsTotal(response: SearchResponse<any>): {
 //
 // @public (undocumented)
 export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string): boolean;
-
-// @public (undocumented)
-export interface TabbedAggColumn {
-    // (undocumented)
-    aggConfig: IAggConfig;
-    // (undocumented)
-    id: string;
-    // (undocumented)
-    name: string;
-}
-
-// @public (undocumented)
-export type TabbedAggRow = Record<TabbedAggColumn['id'], string | number>;
-
-// @public (undocumented)
-export interface TabbedTable {
-    // (undocumented)
-    columns: TabbedAggColumn[];
-    // (undocumented)
-    rows: TabbedAggRow[];
-}
 
 // Warning: (ae-missing-release-tag) "TimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1389,50 +1386,51 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:58:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:133:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:57:23 - (ae-forgotten-export) The symbol "datatableToCSV" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:81:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:81:21 - (ae-forgotten-export) The symbol "buildEsQuery" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "FieldFormatsRegistry" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "FieldFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "BoolFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "BytesFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "ColorFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "DurationFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "IpFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "NumberFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "PercentFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "RelativeDateFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "SourceFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "StaticLookupFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "UrlFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "StringFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:111:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:137:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:137:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:252:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:252:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:252:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:252:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:254:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:255:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:264:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:265:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:266:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:270:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:271:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:275:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:278:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:279:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index_patterns/index_patterns_service.ts:70:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:90:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:112:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:42:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/es_query/filters/meta_filter.ts:43:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:52:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:29:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:29:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:46:23 - (ae-forgotten-export) The symbol "datatableToCSV" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:70:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:70:21 - (ae-forgotten-export) The symbol "buildEsQuery" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "FieldFormatsRegistry" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "FieldFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "BoolFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "BytesFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "ColorFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "DurationFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "IpFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "NumberFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "PercentFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "RelativeDateFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "SourceFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "StaticLookupFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "UrlFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "StringFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:100:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:126:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:126:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:239:20 - (ae-forgotten-export) The symbol "getRequestInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:239:20 - (ae-forgotten-export) The symbol "getResponseInspectorStats" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:239:20 - (ae-forgotten-export) The symbol "tabifyAggResponse" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:239:20 - (ae-forgotten-export) The symbol "tabifyGetColumns" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:241:1 - (ae-forgotten-export) The symbol "CidrMask" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:242:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:251:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:252:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:253:1 - (ae-forgotten-export) The symbol "Ipv4Address" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:257:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:258:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:262:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:265:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:266:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index_patterns/index_patterns_service.ts:59:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:79:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:113:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

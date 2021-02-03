@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 import { GetAssignableTypesResponse } from '../../../common/http_api_types';
 
-export const registerGetAssignableTypesRoute = (router: IRouter) => {
+export const registerGetAssignableTypesRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/internal/saved_objects_tagging/assignments/_assignable_types',

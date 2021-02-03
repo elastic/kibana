@@ -15,7 +15,7 @@ import { HttpLogic } from '../../../../../shared/http';
 import {
   flashAPIErrors,
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 
 import { staticSourceData } from '../../source_data';
@@ -348,7 +348,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       }
     },
     getSourceConnectData: async ({ serviceType, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const { subdomainValue: subdomain, indexPermissionsValue: indexPermissions } = values;
 
@@ -399,7 +399,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       }
     },
     saveSourceConfig: async ({ isUpdating, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
       const {
         sourceConfigData: { serviceType },
         baseUrlValue,
@@ -447,7 +447,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       }
     },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? '/api/workplace_search/org/create_source'

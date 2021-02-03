@@ -8,16 +8,16 @@
 // Custom Source display settings
 // --------------------------------------------------
 
-@mixin source_name {
+@mixin sourceName {
   font-size: .6875em;
   text-transform: uppercase;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: .06em;
 }
 
-@mixin example_result_box_shadow {
+@mixin exampleResultBoxShadow {
   box-shadow:
-    0 1px 3px rgba(black, 0.1),
+    0 1px 3px rgba($euiColorInk, .1),
     0 0 20px $euiColorLightestShade;
 }
 
@@ -82,7 +82,7 @@
 .example-standout-result {
   border-radius: 4px;
   overflow: hidden;
-  @include example_result_box_shadow;
+  @include exampleResultBoxShadow;
 
   &__header,
   &__content {
@@ -97,7 +97,7 @@
 
   &__source-name {
     line-height: 34px;
-    @include source_name;
+    @include sourceName;
   }
 }
 
@@ -116,7 +116,7 @@
 
   &__source-name {
     line-height: 1.75em;
-    @include source_name;
+    @include sourceName;
   }
 
   &__content {
@@ -171,7 +171,7 @@
 }
 
 .example-result-detail-card {
-  @include example_result_box_shadow;
+  @include exampleResultBoxShadow;
 
   &__header {
     position: relative;

@@ -5,8 +5,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { euiStyled } from '../../../../../observability/public';
-import { LogColumn, LogMessagePart } from '../../../../common/http_api';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
   isFieldSegment,

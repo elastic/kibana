@@ -18,7 +18,6 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
-  ServiceAnomaliesResponse,
 } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
@@ -149,7 +148,7 @@ export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
   const { logger } = options;
-  const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
+  const anomaliesPromise = getServiceAnomalies(
     options
 
     // always catch error to avoid breaking service maps if there is a problem with ML

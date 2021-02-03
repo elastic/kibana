@@ -30,6 +30,7 @@ import {
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
+  canTransition,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -121,7 +122,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
   const setStateWrapper = (layer: IndexPatternLayer) => {
-    setState(mergeLayer({ state, layerId, newLayer: layer }), Boolean(layer.columns[columnId]));
+    const hasIncompleteColumns = Boolean(layer.incompleteColumns?.[columnId]);
+    const prevOperationType =
+      operationDefinitionMap[state.layers[layerId].columns[columnId]?.operationType]?.input;
+    setState(mergeLayer({ state, layerId, newLayer: layer }), {
+      shouldReplaceDimension: Boolean(layer.columns[columnId]),
+      // clear the dimension if there's an incomplete column pending && previous operation was a fullReference operation
+      shouldRemoveDimension: Boolean(hasIncompleteColumns && prevOperationType === 'fullReference'),
+    });
   };
 
   const selectedOperationDefinition =
@@ -147,15 +155,20 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
+    const currentField =
+      selectedColumn &&
+      hasField(selectedColumn) &&
+      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
-      compatibleWithCurrentField:
-        !selectedColumn ||
-        (selectedColumn &&
-          hasField(selectedColumn) &&
-          definition.input === 'field' &&
-          fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
-        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
+      compatibleWithCurrentField: canTransition({
+        layer: state.layers[layerId],
+        columnId,
+        op: operationType,
+        indexPattern: currentIndexPattern,
+        field: currentField || undefined,
+        filterOperations: props.filterOperations,
+      }),
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
@@ -214,6 +227,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
+        [`aria-pressed`]: isActive,
         onClick() {
           if (
             operationDefinitionMap[operationType].input === 'none' ||
@@ -285,6 +299,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
     }
   );
 
+  // Need to workout early on the error to decide whether to show this or an help text
+  const fieldErrorMessage =
+    (selectedOperationDefinition?.input !== 'fullReference' ||
+      (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
+    getErrorMessage(
+      selectedColumn,
+      Boolean(incompleteOperation),
+      selectedOperationDefinition?.input,
+      currentFieldIsInvalid
+    );
+
   return (
     <div id={columnId}>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
@@ -328,6 +353,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   existingFields={state.existingFields}
                   selectionStyle={selectedOperationDefinition.selectionStyle}
                   dateRange={dateRange}
+                  labelAppend={selectedOperationDefinition?.getHelpMessage?.({
+                    data: props.data,
+                    uiSettings: props.uiSettings,
+                    currentColumn: state.layers[layerId].columns[columnId],
+                  })}
                   {...services}
                 />
               );
@@ -346,12 +376,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
             })}
             fullWidth
             isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
-            error={getErrorMessage(
-              selectedColumn,
-              Boolean(incompleteOperation),
-              selectedOperationDefinition?.input,
-              currentFieldIsInvalid
-            )}
+            error={fieldErrorMessage}
+            labelAppend={
+              !fieldErrorMessage &&
+              selectedOperationDefinition?.getHelpMessage?.({
+                data: props.data,
+                uiSettings: props.uiSettings,
+                currentColumn: state.layers[layerId].columns[columnId],
+              })
+            }
           >
             <FieldSelect
               fieldIsInvalid={currentFieldIsInvalid}

@@ -15,12 +15,12 @@ import {
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { AppLogic } from '../../app_logic';
-import { NOT_FOUND_PATH } from '../../routes';
+import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
@@ -38,11 +38,8 @@ export interface SourceActions {
     source: { name: string }
   ): { sourceId: string; source: { name: string } };
   resetSourceState(): void;
-  removeContentSource(
-    sourceId: string,
-    successCallback: () => void
-  ): { sourceId: string; successCallback(): void };
-  initializeSource(sourceId: string, history: object): { sourceId: string; history: object };
+  removeContentSource(sourceId: string): { sourceId: string };
+  initializeSource(sourceId: string): { sourceId: string };
   getSourceConfigData(serviceType: string): { serviceType: string };
   setButtonNotLoading(): void;
 }
@@ -91,13 +88,12 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
     setActivePage: (activePage: number) => activePage,
-    initializeSource: (sourceId: string, history: object) => ({ sourceId, history }),
+    initializeSource: (sourceId: string) => ({ sourceId }),
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: { name: string }) => ({ sourceId, source }),
-    removeContentSource: (sourceId: string, successCallback: () => void) => ({
+    removeContentSource: (sourceId: string) => ({
       sourceId,
-      successCallback,
     }),
     getSourceConfigData: (serviceType: string) => ({ serviceType }),
     resetSourceState: () => true,
@@ -130,29 +126,22 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     buttonLoading: [
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConnectData: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
-        saveSourceConfig: () => true,
-        getSourceConnectData: () => true,
-        createContentSource: () => true,
       },
     ],
     sectionLoading: [
       true,
       {
         searchContentSourceDocuments: () => true,
-        getPreContentSourceConfigData: () => true,
         setSearchResults: () => false,
-        setPreContentSourceConfigData: () => false,
       },
     ],
     contentItems: [
@@ -245,8 +234,8 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       }
     },
-    removeContentSource: async ({ sourceId, successCallback }) => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+    removeContentSource: async ({ sourceId }) => {
+      clearFlashMessages();
       const { isOrganization } = AppLogic.values;
       const route = isOrganization
         ? `/api/workplace_search/org/sources/${sourceId}`
@@ -263,7 +252,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
             }
           )
         );
-        successCallback();
+        KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       } catch (e) {
         flashAPIErrors(e);
       } finally {
@@ -292,7 +281,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       );
     },
     resetSourceState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

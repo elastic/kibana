@@ -10,7 +10,7 @@ import { AlertType } from '../common/alert_types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
   LicensingPluginSetup,
-  LicensingRequestHandlerContext,
+  LicensingApiRequestHandlerContext,
 } from '../../licensing/server';
 
 export const APM_FEATURE = {
@@ -97,7 +97,7 @@ export function notifyFeatureUsage({
   licensingPlugin,
   featureName,
 }: {
-  licensingPlugin: LicensingRequestHandlerContext;
+  licensingPlugin: LicensingApiRequestHandlerContext;
   featureName: FeatureName;
 }) {
   const feature = features[featureName];

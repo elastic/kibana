@@ -31,11 +31,6 @@ import {
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-  disableInteractive,
-  disableTooltipControl,
-  hideToolbarOverlay,
-  hideLayerControl,
-  hideViewControl,
   setReadOnly,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -73,7 +68,7 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput };
+export { MapEmbeddableInput, MapEmbeddableOutput };
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
@@ -87,6 +82,7 @@ export class MapEmbeddable
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -104,7 +100,7 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
   }
 
   private async _initializeSaveMap() {
@@ -115,42 +111,30 @@ export class MapEmbeddable
       return;
     }
     this._initializeStore();
-    this._initializeOutput();
+    try {
+      await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private async _initializeStore() {
+  private _initializeStore() {
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
-
-    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      store.dispatch(disableInteractive());
-    }
-
-    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      store.dispatch(disableTooltipControl());
-    }
-    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      store.dispatch(hideToolbarOverlay());
-    }
-
-    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      store.dispatch(hideLayerControl());
-    }
-
-    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      store.dispatch(hideViewControl());
-    }
 
     this._dispatchSetQuery({
       query: this.input.query,
       timeRange: this.input.timeRange,
       filters: this.input.filters,
       forceRefresh: false,
+      searchSessionId: this.input.searchSessionId,
     });
     if (this.input.refreshConfig) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
@@ -217,25 +201,24 @@ export class MapEmbeddable
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
-  onContainerStateChanged(containerState: MapEmbeddableInput) {
+  onUpdate() {
     if (
-      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-      !_.isEqual(containerState.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.query, this._prevQuery) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters) ||
+      this.input.searchSessionId !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
-        query: containerState.query,
-        timeRange: containerState.timeRange,
-        filters: containerState.filters,
+        query: this.input.query,
+        timeRange: this.input.timeRange,
+        filters: this.input.filters,
         forceRefresh: false,
+        searchSessionId: this.input.searchSessionId,
       });
     }
 
-    if (
-      containerState.refreshConfig &&
-      !_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)
-    ) {
-      this._dispatchSetRefreshConfig(containerState.refreshConfig);
+    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
   }
 
@@ -244,21 +227,25 @@ export class MapEmbeddable
     timeRange,
     filters = [],
     forceRefresh,
+    searchSessionId,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters?: Filter[];
     forceRefresh: boolean;
+    searchSessionId?: string;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
+    this._prevSearchSessionId = searchSessionId;
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         forceRefresh,
+        searchSessionId,
       })
     );
   }
@@ -396,10 +383,11 @@ export class MapEmbeddable
 
   reload() {
     this._dispatchSetQuery({
-      query: this._prevQuery,
-      timeRange: this._prevTimeRange,
-      filters: this._prevFilters ?? [],
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
       forceRefresh: true,
+      searchSessionId: this.input.searchSessionId,
     });
   }
 

@@ -35,7 +35,7 @@ import { useAnnotationsContext } from '../../../../context/annotations/use_annot
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../charts/chart_container';
-import { onBrushEnd } from '../../charts/helper/helper';
+import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
 
 interface Props {
   fetchStatus: FETCH_STATUS;
@@ -66,8 +66,10 @@ export function TransactionBreakdownChartContents({
 
   const annotationColor = theme.eui.euiColorSecondary;
 
+  const isEmpty = isTimeseriesEmpty(timeseries);
+
   return (
-    <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
+    <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}

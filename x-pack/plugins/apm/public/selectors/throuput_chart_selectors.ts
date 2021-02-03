@@ -5,7 +5,7 @@
  */
 
 import { difference, zipObject } from 'lodash';
-import { EuiTheme } from '../../../observability/public';
+import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asTransactionRate } from '../../common/utils/formatters';
 import { TimeSeries } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';

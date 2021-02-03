@@ -62,7 +62,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
         'xpack.apm.metrics.transactionChart.machineLearningTooltip',
         {
           defaultMessage:
-            'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
+            'The stream displays the expected bounds of the average latency. A red vertical annotation indicates anomalies with an anomaly score of 75 or above.',
         }
       )}
     />

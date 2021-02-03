@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
 import { merge } from 'lodash/fp';
 
+import type { ListsPluginRouter } from '../types';
 import { LIST_PRIVILEGES_URL } from '../../common/constants';
 import { buildSiemResponse, readPrivileges, transformError } from '../siem_server_deps';
 
 import { getListClient } from './utils';
 
-export const readPrivilegesRoute = (router: IRouter): void => {
+export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
   router.get(
     {
       options: {

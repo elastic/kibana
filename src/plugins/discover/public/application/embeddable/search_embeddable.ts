@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
+
 import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
@@ -29,7 +19,6 @@ import {
   Filter,
   TimeRange,
   FilterManager,
-  getTime,
   Query,
   IFieldType,
 } from '../../../../data/public';
@@ -49,7 +38,11 @@ import {
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
-import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import {
+  SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../common';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DiscoverServices } from '../../build_services';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
@@ -73,6 +66,7 @@ interface SearchScope extends ng.IScope {
   totalHitCount?: number;
   isLoading?: boolean;
   showTimeCol?: boolean;
+  useNewFieldsApi?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -98,7 +92,6 @@ export class SearchEmbeddable
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
   private searchInstance?: JQLite;
-  private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
@@ -148,10 +141,6 @@ export class SearchEmbeddable
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = this.services.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.fetch);
-
     this.subscription = this.getUpdated$().subscribe(() => {
       this.panelTitle = this.output.title || '';
 
@@ -199,9 +188,7 @@ export class SearchEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.autoRefreshFetchSubscription) {
-      this.autoRefreshFetchSubscription.unsubscribe();
-    }
+
     if (this.abortController) this.abortController.abort();
   }
 
@@ -224,7 +211,7 @@ export class SearchEmbeddable
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
       if (!this.searchScope || !this.input.timeRange) return;
-      return getTime(indexPattern, this.input.timeRange);
+      return this.services.timefilter.createFilter(indexPattern, this.input.timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -238,11 +225,14 @@ export class SearchEmbeddable
       this.updateInput({ sort });
     };
 
+    const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+    searchScope.useNewFieldsApi = useNewFieldsApi;
+
     searchScope.addColumn = (columnName: string) => {
       if (!searchScope.columns) {
         return;
       }
-      const columns = columnActions.addColumn(searchScope.columns, columnName);
+      const columns = columnActions.addColumn(searchScope.columns, columnName, useNewFieldsApi);
       this.updateInput({ columns });
     };
 
@@ -250,7 +240,7 @@ export class SearchEmbeddable
       if (!searchScope.columns) {
         return;
       }
-      const columns = columnActions.removeColumn(searchScope.columns, columnName);
+      const columns = columnActions.removeColumn(searchScope.columns, columnName, useNewFieldsApi);
       this.updateInput({ columns });
     };
 
@@ -298,10 +288,10 @@ export class SearchEmbeddable
 
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
-
+    const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     if (!this.searchScope) return;
 
-    const { searchSource } = this.savedSearch;
+    const { searchSource, pre712 } = this.savedSearch;
 
     // Abort any in-progress requests
     if (this.abortController) this.abortController.abort();
@@ -316,6 +306,20 @@ export class SearchEmbeddable
         this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
+    if (useNewFieldsApi) {
+      searchSource.removeField('fieldsFromSource');
+      const fields: Record<string, any> = { field: '*' };
+      if (pre712) {
+        fields.include_unmapped = true;
+      }
+      searchSource.setField('fields', [fields]);
+    } else {
+      searchSource.removeField('fields');
+      if (this.searchScope.indexPattern) {
+        const fieldNames = this.searchScope.indexPattern.fields.map((field) => field.name);
+        searchSource.setField('fieldsFromSource', fieldNames);
+      }
+    }
 
     // Log request to inspector
     this.inspectorAdapters.requests!.reset();

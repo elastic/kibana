@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
+import { sortBy, uniqBy } from 'lodash';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
-import {
-  getSeverity,
-  ML_ERRORS,
-  ServiceAnomalyStats,
-} from '../../../common/anomaly_detection';
+import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import {
@@ -20,7 +18,10 @@ import {
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
+export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
+  mlJobIds: [],
+  serviceAnomalies: [],
+};
 
 export type ServiceAnomaliesResponse = PromiseReturnType<
   typeof getServiceAnomalies
@@ -39,21 +40,6 @@ export async function getServiceAnomalies({
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const mlCapabilities = await ml.mlSystem.mlCapabilities();
-
-  if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
-  }
-
-  const mlJobIds = await getMLJobIds(ml.anomalyDetectors, environment);
-
-  if (!mlJobIds.length) {
-    return {
-      mlJobIds: [],
-      serviceAnomalies: {},
-    };
-  }
-
   const params = {
     body: {
       size: 0,
@@ -61,7 +47,6 @@ export async function getServiceAnomalies({
         bool: {
           filter: [
             { terms: { result_type: ['model_plot', 'record'] } },
-            { terms: { job_id: mlJobIds } },
             {
               range: {
                 timestamp: {
@@ -83,19 +68,25 @@ export async function getServiceAnomalies({
       },
       aggs: {
         services: {
-          terms: { field: 'partition_field_value' },
+          composite: {
+            size: 5000,
+            sources: [
+              { serviceName: { terms: { field: 'partition_field_value' } } },
+              { jobId: { terms: { field: 'job_id' } } },
+            ],
+          },
           aggs: {
-            top_score: {
-              top_hits: {
-                sort: { record_score: 'desc' },
-                _source: [
-                  'actual',
-                  'job_id',
-                  'by_field_value',
-                  'result_type',
-                  'record_score',
-                ],
-                size: 1,
+            metrics: {
+              top_metrics: {
+                metrics: [
+                  { field: 'actual' },
+                  { field: 'by_field_value' },
+                  { field: 'result_type' },
+                  { field: 'record_score' },
+                ] as const,
+                sort: {
+                  record_score: 'desc' as const,
+                },
               },
             },
           },
@@ -104,80 +95,54 @@ export async function getServiceAnomalies({
     },
   };
 
-  const response = await ml.mlSystem.mlAnomalySearch(params, mlJobIds);
+  const [anomalyResponse, jobIds] = await Promise.all([
+    // pass an empty array of job ids to anomaly search
+    // so any validation is skipped
+    ml.mlSystem.mlAnomalySearch(params, []),
+    getMLJobIds(ml.anomalyDetectors, environment),
+  ]);
+
+  const typedAnomalyResponse: ESSearchResponse<
+    unknown,
+    typeof params
+  > = anomalyResponse as any;
+  const relevantBuckets = uniqBy(
+    sortBy(
+      // make sure we only return data for jobs that are available in this space
+      typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
+        jobIds.includes(bucket.key.jobId as string)
+      ) ?? [],
+      // sort by job ID in case there are multiple jobs for one service to
+      // ensure consistent results
+      (bucket) => bucket.key.jobId
+    ),
+    // return one bucket per service
+    (bucket) => bucket.key.serviceName
+  );
 
   return {
-    mlJobIds,
-    serviceAnomalies: transformResponseToServiceAnomalies(
-      response as ServiceAnomaliesAggResponse
-    ),
-  };
-}
-
-interface ServiceAnomaliesAggResponse {
-  aggregations: {
-    services: {
-      buckets: Array<{
-        key: string;
-        top_score: {
-          hits: {
-            hits: Array<{
-              sort: [number];
-              _source: {
-                job_id: string;
-                by_field_value: string;
-              } & (
-                | {
-                    record_score: number | null;
-                    result_type: 'record';
-                    actual: number[];
-                  }
-                | {
-                    result_type: 'model_plot';
-                    actual?: number;
-                  }
-              );
-            }>;
-          };
-        };
-      }>;
-    };
-  };
-}
-
-function transformResponseToServiceAnomalies(
-  response: ServiceAnomaliesAggResponse
-) {
-  const serviceAnomaliesMap = (
-    response.aggregations?.services.buckets ?? []
-  ).reduce<Record<string, ServiceAnomalyStats>>(
-    (statsByServiceName, { key: serviceName, top_score: topScoreAgg }) => {
-      const mlResult = topScoreAgg.hits.hits[0]._source;
+    mlJobIds: jobIds,
+    serviceAnomalies: relevantBuckets.map((bucket) => {
+      const metrics = bucket.metrics.top[0].metrics;
 
       const anomalyScore =
-        (mlResult.result_type === 'record' && mlResult.record_score) || 0;
+        metrics.result_type === 'record' && metrics.record_score
+          ? (metrics.record_score as number)
+          : 0;
 
       const severity = getSeverity(anomalyScore);
       const healthStatus = getServiceHealthStatus({ severity });
 
       return {
-        ...statsByServiceName,
-        [serviceName]: {
-          transactionType: mlResult.by_field_value,
-          jobId: mlResult.job_id,
-          actualValue:
-            mlResult.result_type === 'record'
-              ? mlResult.actual[0]
-              : mlResult.actual,
-          anomalyScore,
-          healthStatus,
-        },
+        serviceName: bucket.key.serviceName as string,
+        jobId: bucket.key.jobId as string,
+        transactionType: metrics.by_field_value as string,
+        actualValue: metrics.actual as number | null,
+        anomalyScore,
+        healthStatus,
       };
-    },
-    {}
-  );
-
-  return serviceAnomaliesMap;
+    }),
+  };
 }
 
 export async function getMLJobs(

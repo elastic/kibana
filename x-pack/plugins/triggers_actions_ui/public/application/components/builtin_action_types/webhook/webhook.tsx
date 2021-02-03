@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import {
   WebhookActionParams,
   WebhookConfig,
@@ -34,17 +38,23 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Webhook data',
       }
     ),
-    validateConnector: (action: WebhookActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: WebhookActionConnector
+    ): ConnectorValidationResult<Pick<WebhookConfig, 'url' | 'method'>, WebhookSecrets> => {
+      const configErrors = {
         url: new Array<string>(),
         method: new Array<string>(),
+      };
+      const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = {
+        config: { errors: configErrors },
+        secrets: { errors: secretsErrors },
+      };
       if (!action.config.url) {
-        errors.url.push(
+        configErrors.url.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
             {
@@ -54,8 +64,8 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (action.config.url && !isValidUrl(action.config.url)) {
-        errors.url = [
-          ...errors.url,
+        configErrors.url = [
+          ...configErrors.url,
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
             {
@@ -65,7 +75,7 @@ export function getActionType(): ActionTypeModel<
         ];
       }
       if (!action.config.method) {
-        errors.method.push(
+        configErrors.method.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText',
             {
@@ -75,7 +85,7 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        errors.user.push(
+        secretsErrors.user.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText',
             {
@@ -85,7 +95,7 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
-        errors.password.push(
+        secretsErrors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
             {
@@ -95,7 +105,7 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (action.secrets.user && !action.secrets.password) {
-        errors.password.push(
+        secretsErrors.password.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
             {
@@ -105,7 +115,7 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (!action.secrets.user && action.secrets.password) {
-        errors.user.push(
+        secretsErrors.user.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredUserText',
             {
@@ -116,11 +126,13 @@ export function getActionType(): ActionTypeModel<
       }
       return validationResult;
     },
-    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: WebhookActionParams
+    ): GenericValidationResult<WebhookActionParams> => {
       const errors = {
         body: new Array<string>(),
       };
+      const validationResult = { errors };
       validationResult.errors = errors;
       if (!actionParams.body?.length) {
         errors.body.push(

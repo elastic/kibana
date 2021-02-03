@@ -10,12 +10,12 @@ import {
   RouteConfig,
   RouteMethod,
   SavedObjectsClientContract,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
 } from 'kibana/server';
 import { UMServerLibs, UptimeESClient } from '../lib/lib';
+import type { UptimeRequestHandlerContext } from '../types';
 
 /**
  * Defines the basic properties employed by Uptime routes.
@@ -38,7 +38,9 @@ export type UMRouteDefinition<T> = UMServerRoute<T> &
  * provided by the Kibana platform. Route objects must conform to this type in order
  * to successfully interact with the Kibana platform.
  */
-export type UMKibanaRoute = UMRouteDefinition<RequestHandler<ObjectType, ObjectType, ObjectType>>;
+export type UMKibanaRoute = UMRouteDefinition<
+  RequestHandler<ObjectType, ObjectType, ObjectType, UptimeRequestHandlerContext>
+>;
 
 /**
  * This is an abstraction over the default Kibana route type. This allows us to use custom
@@ -68,7 +70,7 @@ export type UMRouteHandler = ({
   savedObjectsClient,
 }: {
   uptimeEsClient: UptimeESClient;
-  context: RequestHandlerContext;
+  context: UptimeRequestHandlerContext;
   request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;

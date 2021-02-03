@@ -14,16 +14,16 @@ const readOnlyAccessToAlertsMessage: CallOutMessage = {
   type: 'primary',
   id: 'read-only-access-to-alerts',
   title: i18n.READ_ONLY_ALERTS_CALLOUT_TITLE,
-  description: <p>{i18n.READ_ONLY_ALERTS_CALLOUT_MSG}</p>,
+  description: i18n.readOnlyAlertsCallOutBody(),
 };
 
 const ReadOnlyAlertsCallOutComponent = () => {
-  const [{ hasIndexWrite }] = useUserData();
+  const [{ hasIndexUpdateDelete }] = useUserData();
 
   return (
     <CallOutSwitcher
       namespace="detections"
-      condition={hasIndexWrite != null && !hasIndexWrite}
+      condition={hasIndexUpdateDelete != null && !hasIndexUpdateDelete}
       message={readOnlyAccessToAlertsMessage}
     />
   );

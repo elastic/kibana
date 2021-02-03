@@ -52,7 +52,7 @@
   }
 }
 
-.lnsDragDrop__reorderableContainer {
+.lnsDragDrop__container {
   position: relative;
 }
 
@@ -63,9 +63,16 @@
   height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
-.lnsDragDrop-isReorderable {
+.lnsDragDrop-translatableDrop {
+  transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;
+}
+
+.lnsDragDrop-translatableDrag {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  position: relative;
 }
 
 // Draggable item when it is moving

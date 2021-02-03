@@ -6,7 +6,7 @@
 
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
-import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
  * The height for a table on the overview page. Is the height of a 5-row basic
@@ -58,12 +58,12 @@ export function ServiceOverviewTableContainer({
   children?: ReactNode;
   isEmptyAndLoading: boolean;
 }) {
-  const shouldUseMobileLayout = useShouldUseMobileLayout();
+  const { isMedium } = useBreakPoints();
 
   return (
     <ServiceOverviewTableContainerDiv
       isEmptyAndLoading={isEmptyAndLoading}
-      shouldUseMobileLayout={shouldUseMobileLayout}
+      shouldUseMobileLayout={isMedium}
     >
       {children}
     </ServiceOverviewTableContainerDiv>

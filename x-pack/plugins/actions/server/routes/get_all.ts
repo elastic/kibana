@@ -4,27 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
+import { IRouter } from 'kibana/server';
 import { ILicenseState, verifyApiAccess } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
+import { ActionsRequestHandlerContext } from '../types';
 
-export const getAllActionRoute = (router: IRouter, licenseState: ILicenseState) => {
+export const getAllActionRoute = (
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState
+) => {
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}`,
       validate: {},
     },
-    router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<unknown, unknown, unknown>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });

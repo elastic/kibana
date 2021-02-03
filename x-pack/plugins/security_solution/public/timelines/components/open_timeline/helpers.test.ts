@@ -246,6 +246,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -319,6 +320,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -347,6 +349,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -420,6 +423,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -448,6 +452,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -521,6 +526,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -547,6 +553,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -620,6 +627,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -652,7 +660,7 @@ describe('helpers', () => {
             example: undefined,
             id: '@timestamp',
             placeholder: undefined,
-            type: undefined,
+            type: 'number',
             width: 190,
           },
           {
@@ -760,6 +768,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -815,6 +824,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -929,6 +939,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -953,6 +964,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1026,6 +1038,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -1054,6 +1067,7 @@ describe('helpers', () => {
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1127,6 +1141,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],

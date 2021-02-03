@@ -17,7 +17,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [application](./kibana-plugin-core-public.coresetup.application.md) | <code>ApplicationSetup</code> | [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
-|  [context](./kibana-plugin-core-public.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-core-public.contextsetup.md) |
 |  [fatalErrors](./kibana-plugin-core-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) |
 |  [getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |

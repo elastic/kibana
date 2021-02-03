@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
+import type { ListsPluginRouter } from '../types';
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/shared_imports';
@@ -17,7 +17,7 @@ import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
 
 import { getListClient } from '.';
 
-export const importListItemRoute = (router: IRouter, config: ConfigType): void => {
+export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
     {
       options: {

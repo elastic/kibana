@@ -11,7 +11,6 @@ import { EuiBreadcrumb, EuiBetaBadge } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { BetaHeader, ThemedBreadcrumbs } from './styles';
 import { useColors } from '../use_colors';
-import { GeneratedText } from '../generated_text';
 
 /**
  * Breadcrumb menu
@@ -21,7 +20,8 @@ export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBre
   const crumbsWithLastSubject: EuiBreadcrumb[] = useMemo(() => {
     const lastcrumb = breadcrumbs.slice(-1).map((crumb) => {
       crumb['data-test-subj'] = 'resolver:breadcrumbs:last';
-      crumb.text = <GeneratedText>{crumb.text}</GeneratedText>;
+      // Manually set here as setting truncate={true} on ThemedBreadcrumbs truncates all parts of the full path
+      crumb.truncate = true;
       return crumb;
     });
     return [...breadcrumbs.slice(0, -1), ...lastcrumb];

@@ -74,6 +74,7 @@ async function saveApmIndices({
 }) {
   await callApmApi({
     endpoint: 'POST /api/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },
@@ -248,7 +249,7 @@ export function ApmIndices() {
                       fill
                       onClick={handleApplyChangesEvent}
                       isLoading={isSaving}
-                      disabled={!canSave}
+                      isDisabled={!canSave}
                     >
                       {i18n.translate(
                         'xpack.apm.settings.apmIndices.applyButton',

@@ -11,6 +11,7 @@ import {
   getLogEntryCategoriesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
 } from '../../../../../common/http_api/log_analysis';
+import { CategoriesSort } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
@@ -19,13 +20,14 @@ interface RequestArgs {
   endTime: number;
   categoryCount: number;
   datasets?: string[];
+  sort: CategoriesSort;
 }
 
 export const callGetTopLogEntryCategoriesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, categoryCount, datasets } = requestArgs;
+  const { sourceId, startTime, endTime, categoryCount, datasets, sort } = requestArgs;
   const intervalDuration = endTime - startTime;
 
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH, {
@@ -58,6 +60,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
               bucketCount: 1,
             },
           ],
+          sort,
         },
       })
     ),

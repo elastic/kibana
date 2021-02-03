@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
+import type { RuntimeField } from '../types';
 import { IndexPattern } from './index_pattern';
 import {
   createEnsureDefaultIndexPattern,
@@ -45,8 +35,8 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
-const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
@@ -72,6 +62,8 @@ export class IndexPatternsService {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
+  private indexPatternCache: ReturnType<typeof createIndexPatternCache>;
+
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
   constructor({
@@ -93,6 +85,8 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
+
+    this.indexPatternCache = createIndexPatternCache();
   }
 
   /**
@@ -135,6 +129,12 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  /**
+   * Find and load index patterns by title
+   * @param search
+   * @param size
+   * @returns IndexPattern[]
+   */
   find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
@@ -175,9 +175,9 @@ export class IndexPatternsService {
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
-      indexPatternCache.clear(id);
+      this.indexPatternCache.clear(id);
     } else {
-      indexPatternCache.clearAll();
+      this.indexPatternCache.clearAll();
     }
   };
 
@@ -214,6 +214,7 @@ export class IndexPatternsService {
   /**
    * Get field list by providing { pattern }
    * @param options
+   * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
@@ -229,6 +230,7 @@ export class IndexPatternsService {
   /**
    * Get field list by providing an index patttern (or spec)
    * @param options
+   * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
@@ -247,7 +249,8 @@ export class IndexPatternsService {
    */
   refreshFields = async (indexPattern: IndexPattern) => {
     try {
-      const fields = await this.getFieldsForIndexPattern(indexPattern);
+      const fields = (await this.getFieldsForIndexPattern(indexPattern)) as FieldSpec[];
+      fields.forEach((field) => (field.isMapped = true));
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       const fieldAttrs = indexPattern.getFieldAttrs();
       const fieldsWithSavedAttrs = Object.values(
@@ -274,6 +277,7 @@ export class IndexPatternsService {
    * @param id
    * @param title
    * @param options
+   * @returns Record<string, FieldSpec>
    */
   private refreshFieldSpecMap = async (
     fields: IndexPatternFieldMap,
@@ -287,6 +291,7 @@ export class IndexPatternsService {
     try {
       let updatedFieldList: FieldSpec[];
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
       // beats creating index pattern and dashboard before docs
@@ -315,7 +320,9 @@ export class IndexPatternsService {
 
   /**
    * Converts field array to map
-   * @param fields
+   * @param fields: FieldSpec[]
+   * @param fieldAttrs: FieldAttrs
+   * @returns Record<string, FieldSpec>
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
@@ -330,6 +337,7 @@ export class IndexPatternsService {
   /**
    * Converts index pattern saved object to index pattern spec
    * @param savedObject
+   * @returns IndexPatternSpec
    */
 
   savedObjectToSpec = (savedObject: SavedObject<IndexPatternAttributes>): IndexPatternSpec => {
@@ -343,6 +351,7 @@ export class IndexPatternsService {
         fields,
         sourceFilters,
         fieldFormatMap,
+        runtimeFieldMap,
         typeMeta,
         type,
         fieldAttrs,
@@ -355,6 +364,9 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
+    const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
+      ? JSON.parse(runtimeFieldMap)
+      : {};
 
     return {
       id,
@@ -369,6 +381,7 @@ export class IndexPatternsService {
       fieldFormats: parsedFieldFormatMap,
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
+      runtimeFieldMap: parsedRuntimeFieldMap,
     };
   };
 
@@ -383,7 +396,7 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta } = spec;
+    const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
@@ -402,6 +415,22 @@ export class IndexPatternsService {
         },
         spec.fieldAttrs
       );
+      // APPLY RUNTIME FIELDS
+      for (const [key, value] of Object.entries(runtimeFieldMap || {})) {
+        if (spec.fields[key]) {
+          spec.fields[key].runtimeField = value;
+        } else {
+          spec.fields[key] = {
+            name: key,
+            type: castEsToKbnFieldTypeName(value.type),
+            runtimeField: value,
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: false,
+          };
+        }
+      }
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
@@ -435,11 +464,12 @@ export class IndexPatternsService {
 
   get = async (id: string): Promise<IndexPattern> => {
     const indexPatternPromise =
-      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+      this.indexPatternCache.get(id) ||
+      this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      indexPatternCache.clear(id);
+      this.indexPatternCache.clear(id);
     });
 
     return indexPatternPromise;
@@ -449,6 +479,7 @@ export class IndexPatternsService {
    * Create a new index pattern instance
    * @param spec
    * @param skipFetchFields
+   * @returns IndexPattern
    */
   async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
@@ -503,7 +534,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
-    indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
     return indexPattern;
   }
 
@@ -586,7 +617,7 @@ export class IndexPatternsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          indexPatternCache.clear(indexPattern.id!);
+          this.indexPatternCache.clear(indexPattern.id!);
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
@@ -600,7 +631,7 @@ export class IndexPatternsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    indexPatternCache.clear(indexPatternId);
+    this.indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
   }
 }

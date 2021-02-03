@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { IRouter } from '../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
@@ -18,7 +18,7 @@ import { cleanDraftTimelineSchema } from './schemas/clean_draft_timelines_schema
 import { TimelineType } from '../../../../common/types/timeline';
 
 export const cleanDraftTimelinesRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {

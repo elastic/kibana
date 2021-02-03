@@ -200,16 +200,8 @@ describe('credentials routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      const mockRequest = {
-        params: {
-          name: 'abc123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/credentials/abc123',
+        path: '/as/credentials/:name',
       });
     });
 
@@ -311,7 +303,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path: '/api/app_search/credentials/{name}',
-        payload: 'params',
       });
 
       registerCredentialsRoutes({
@@ -321,16 +312,8 @@ describe('credentials routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      const mockRequest = {
-        params: {
-          name: 'abc123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/credentials/abc123',
+        path: '/as/credentials/:name',
       });
     });
   });

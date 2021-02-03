@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { RequestHandlerContext } from 'src/core/server';
+import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
 import { MlPluginSetup } from '../../ml/server';
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
@@ -21,8 +22,10 @@ export interface InfraSpacesRequestHandlerContext {
 export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
   InfraSpacesRequestHandlerContext;
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    infra?: InfraRequestHandlerContext;
-  }
+/**
+ * @internal
+ */
+export interface InfraPluginRequestHandlerContext extends RequestHandlerContext {
+  infra: InfraRequestHandlerContext;
+  search: SearchRequestHandlerContext;
 }

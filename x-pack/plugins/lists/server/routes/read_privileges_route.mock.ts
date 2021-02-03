@@ -49,6 +49,7 @@ interface Index {
     create: boolean;
     manage_follow_index: boolean;
     manage_leader_index: boolean;
+    maintenance: boolean;
     write: boolean;
   };
 }
@@ -113,6 +114,7 @@ export const getReadPrivilegeMock = (
         delete: booleanValues,
         delete_index: booleanValues,
         index: booleanValues,
+        maintenance: booleanValues,
         manage: booleanValues,
         manage_follow_index: booleanValues,
         manage_ilm: booleanValues,
@@ -165,6 +167,7 @@ export const getReadPrivilegeMock = (
         delete: booleanValues,
         delete_index: booleanValues,
         index: booleanValues,
+        maintenance: booleanValues,
         manage: booleanValues,
         manage_follow_index: booleanValues,
         manage_ilm: booleanValues,

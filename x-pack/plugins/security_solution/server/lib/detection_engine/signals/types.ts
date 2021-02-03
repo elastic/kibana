@@ -5,7 +5,7 @@
  */
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -141,7 +141,13 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<RuleTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
+): obj is AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+> => {
   return true;
 };
 
@@ -149,7 +155,8 @@ export type SignalRuleAlertTypeDefinition = AlertType<
   RuleTypeParams,
   AlertTypeState,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  'default'
 >;
 
 export interface Ancestor {
@@ -224,7 +231,7 @@ export interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
@@ -256,6 +263,11 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: SignalHit[];
   errors: string[];
+  totalToFromTuples?: Array<{
+    to: Moment | undefined;
+    from: Moment | undefined;
+    maxSignals: number;
+  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {

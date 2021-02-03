@@ -23,7 +23,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import {
   MLSeverityScoreCategories,
   ML_SEVERITY_COLORS,

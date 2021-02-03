@@ -146,6 +146,7 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 
 const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
+  columnType: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
 const SavedSortRuntimeType = runtimeTypes.union([

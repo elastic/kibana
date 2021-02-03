@@ -148,6 +148,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
         defaultMessage: 'Source-destination connections request',
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const { featureCollection } = convertToLines(esResponse);

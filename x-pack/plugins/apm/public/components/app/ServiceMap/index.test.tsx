@@ -5,16 +5,20 @@
  */
 
 import { render } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React, { ReactNode } from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
-import { EuiThemeProvider } from '../../../../../observability/public';
-import { FETCH_STATUS } from '../../../../../observability/public/hooks/use_fetcher';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from './';
+import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { Router } from 'react-router-dom';
+
+const history = createMemoryHistory();
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -49,7 +53,9 @@ function createWrapper(license: License | null) {
         <KibanaReactContext.Provider>
           <LicenseContext.Provider value={license || undefined}>
             <MockApmPluginContextWrapper>
-              {children}
+              <Router history={history}>
+                <UrlParamsProvider>{children}</UrlParamsProvider>
+              </Router>
             </MockApmPluginContextWrapper>
           </LicenseContext.Provider>
         </KibanaReactContext.Provider>
@@ -85,7 +91,7 @@ describe('ServiceMap', () => {
         jest.spyOn(useFetcherModule, 'useFetcher').mockReturnValueOnce({
           data: { elements: [] },
           refetch: () => {},
-          status: FETCH_STATUS.SUCCESS,
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
         });
 
         expect(

@@ -108,7 +108,7 @@ export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_NAME = 'host.hostname';
-export const CONTAINER = 'container.id';
+export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
 export const POD_NAME = 'kubernetes.pod.name';

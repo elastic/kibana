@@ -9,12 +9,16 @@ import { RouteDependencies } from '../../plugin';
 import { registerEnginesRoutes } from './engines';
 import { registerCredentialsRoutes } from './credentials';
 import { registerSettingsRoutes } from './settings';
+import { registerAnalyticsRoutes } from './analytics';
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
+import { registerSearchSettingsRoutes } from './search_settings';
 
 export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerEnginesRoutes(dependencies);
   registerCredentialsRoutes(dependencies);
   registerSettingsRoutes(dependencies);
+  registerAnalyticsRoutes(dependencies);
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerSearchSettingsRoutes(dependencies);
 };

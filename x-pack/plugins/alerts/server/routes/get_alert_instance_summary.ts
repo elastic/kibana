@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import type { AlertingRouter } from '../types';
 import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
@@ -24,7 +18,10 @@ const querySchema = schema.object({
   dateStart: schema.maybe(schema.string()),
 });
 
-export const getAlertInstanceSummaryRoute = (router: IRouter, licenseState: ILicenseState) => {
+export const getAlertInstanceSummaryRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState
+) => {
   router.get(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{id}/_instance_summary`,
@@ -33,11 +30,7 @@ export const getAlertInstanceSummaryRoute = (router: IRouter, licenseState: ILic
         query: querySchema,
       },
     },
-    router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, TypeOf<typeof querySchema>, unknown>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });

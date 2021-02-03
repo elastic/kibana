@@ -1,37 +1,54 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
-import { collectSavedObjects } from './collect_saved_objects';
-import { createObjectsFilter } from './create_objects_filter';
-import { splitOverwrites } from './split_overwrites';
+
+import { Readable } from 'stream';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportHook,
   SavedObjectsImportResponse,
-  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportSuccess,
 } from './types';
-import { regenerateIds } from './regenerate_ids';
-import { validateReferences } from './validate_references';
-import { validateRetries } from './validate_retries';
-import { createSavedObjects } from './create_saved_objects';
-import { getImportIdMapForRetries } from './check_origin_conflicts';
-import { SavedObject } from '../types';
-import { checkConflicts } from './check_conflicts';
+import {
+  collectSavedObjects,
+  createObjectsFilter,
+  splitOverwrites,
+  regenerateIds,
+  validateReferences,
+  validateRetries,
+  createSavedObjects,
+  getImportIdMapForRetries,
+  checkConflicts,
+  executeImportHooks,
+} from './lib';
+
+/**
+ * Options to control the "resolve import" operation.
+ */
+export interface ResolveSavedObjectsImportErrorsOptions {
+  /** The stream of {@link SavedObject | saved objects} to resolve errors from */
+  readStream: Readable;
+  /** The maximum number of object to import */
+  objectLimit: number;
+  /** client to use to perform the import operation */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
+  /** List of registered import hooks */
+  importHooks: Record<string, SavedObjectsImportHook[]>;
+  /** saved object import references to retry */
+  retries: SavedObjectsImportRetry[];
+  /** if specified, will import in given namespace */
+  namespace?: string;
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
+  createNewCopies: boolean;
+}
 
 /**
  * Resolve and return saved object import errors.
@@ -45,14 +62,15 @@ export async function resolveSavedObjectsImportErrors({
   retries,
   savedObjectsClient,
   typeRegistry,
+  importHooks,
   namespace,
   createNewCopies,
-}: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+}: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
 
   let successCount = 0;
-  let errorAccumulator: SavedObjectsImportError[] = [];
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
@@ -133,6 +151,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: SavedObjectsImportSuccess[] = [];
+  let successObjects: SavedObject[] = [];
   const accumulatedErrors = [...errorAccumulator];
   const bulkCreateObjects = async (
     objects: Array<SavedObject<{ title?: string }>>,
@@ -149,12 +168,18 @@ export async function resolveSavedObjectsImportErrors({
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams
     );
+    successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
-      ...createdObjects.map(({ type, id, attributes: { title }, destinationId, originId }) => {
-        const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
+      ...createdObjects.map((createdObject) => {
+        const { type, id, destinationId, originId } = createdObject;
+        const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+        const meta = {
+          title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
+          icon: typeRegistry.getType(type)?.management?.icon,
+        };
         return {
           type,
           id,
@@ -182,9 +207,15 @@ export async function resolveSavedObjectsImportErrors({
     };
   });
 
+  const warnings = await executeImportHooks({
+    objects: successObjects,
+    importHooks,
+  });
+
   return {
     successCount,
     success: errorAccumulator.length === 0,
+    warnings,
     ...(successResults.length && { successResults }),
     ...(errorResults.length && { errors: errorResults }),
   };

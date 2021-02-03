@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { LoadingPage } from '../../../../../../components/loading_page';
 import { useTrialStatus } from '../../../../../../hooks/use_trial_status';
 import { useKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { HttpStart } from '../../../../../../../../../../src/core/public';
 
 export const SubscriptionSplashContent: React.FC = () => {

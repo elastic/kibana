@@ -60,7 +60,7 @@ interface AlertOptions {
   throttle?: string | null;
   interval?: string;
   legacy?: LegacyOptions;
-  defaultParams?: CommonAlertParams;
+  defaultParams?: Partial<CommonAlertParams>;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
   accessorKey?: string;
@@ -89,11 +89,16 @@ export class BaseAlert {
     public rawAlert?: SanitizedAlert,
     public alertOptions: AlertOptions = defaultAlertOptions()
   ) {
-    this.alertOptions = { ...defaultAlertOptions(), ...this.alertOptions };
-    this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
+    const defaultOptions = defaultAlertOptions();
+    defaultOptions.defaultParams = {
+      ...defaultOptions.defaultParams,
+      ...this.alertOptions.defaultParams,
+    };
+    this.alertOptions = { ...defaultOptions, ...this.alertOptions };
+    this.scopedLogger = Globals.app.getLogger(alertOptions.id);
   }
 
-  public getAlertType(): AlertType {
+  public getAlertType(): AlertType<never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -108,8 +113,11 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
-        this.execute(options),
+      executor: (
+        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+          state: ExecutedState;
+        }
+      ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
@@ -238,7 +246,9 @@ export class BaseAlert {
     services,
     params,
     state,
-  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
+  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+    state: ExecutedState;
+  }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -285,7 +295,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -333,7 +343,7 @@ export class BaseAlert {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -387,7 +397,7 @@ export class BaseAlert {
   protected async processLegacyData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();

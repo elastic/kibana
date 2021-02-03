@@ -269,12 +269,13 @@ describe('TaskStore', () => {
       opts = {},
       hits = generateFakeTasks(1),
       claimingOpts,
+      versionConflicts = 2,
     }: {
       opts: Partial<StoreOpts>;
       hits?: unknown[];
       claimingOpts: OwnershipClaimingOpts;
+      versionConflicts?: number;
     }) {
-      const versionConflicts = 2;
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.search.mockResolvedValue(asApiResponse({ hits: { hits } }));
       esClient.updateByQuery.mockResolvedValue(
@@ -969,6 +970,77 @@ if (doc['task.runAt'].size()!=0) {
           ownerId: taskManagerId,
         },
       ]);
+    });
+
+    test('it returns version_conflicts that do not include conflicts that were proceeded against', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const maxDocs = 10;
+      const {
+        result: { stats: { tasksUpdated, tasksConflicted, tasksClaimed } = {} } = {},
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: maxDocs,
+        },
+        hits: tasks,
+        // assume there were 20 version conflists, but thanks to `conflicts="proceed"`
+        // we proceeded to claim tasks
+        versionConflicts: 20,
+      });
+
+      expect(tasksUpdated).toEqual(2);
+      // ensure we only count conflicts that *may* have counted against max_docs, no more than that
+      expect(tasksConflicted).toEqual(10 - tasksUpdated!);
+      expect(tasksClaimed).toEqual(2);
     });
 
     test('pushes error from saved objects client to errors$', async () => {

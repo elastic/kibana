@@ -3,7 +3,7 @@
 //
 
 .visEditorSidebar {
-  min-width: $vis-editor-sidebar-min-width;
+  min-width: $visEditorSidebarMinWidth;
 
   // a hack for IE, issue: https://github.com/elastic/kibana/issues/66586
   > .visEditorSidebar__formWrapper {
@@ -12,7 +12,7 @@
 }
 
 .visEditorSidebar__form {
-  @include flex-parent(1, 1, auto);
+  @include flexParent(1, 1, auto);
   max-width: 100%;
 }
 
@@ -24,7 +24,7 @@
   }
 
   @include euiBreakpoint('l', 'xl') {
-    @include flex-parent(1, 1, 1px);
+    @include flexParent(1, 1, 1px);
     @include euiScrollBar;
     overflow: auto;
   }

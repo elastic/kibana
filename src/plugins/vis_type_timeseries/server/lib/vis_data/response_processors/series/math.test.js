@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { mathAgg } from './math';
@@ -91,15 +80,16 @@ describe('math(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    mathAgg(resp, panel, series)(next)([]);
+    await mathAgg(resp, panel, series)(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('creates a series', () => {
-    const next = mathAgg(resp, panel, series)((results) => results);
-    const results = stdMetric(resp, panel, series)(next)([]);
+  test('creates a series', async () => {
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
+
     expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({
@@ -118,12 +108,12 @@ describe('math(resp, panel, series)', () => {
     });
   });
 
-  test('turns division by zero into null values', () => {
+  test('turns division by zero into null values', async () => {
     resp.aggregations.test.buckets[0].timeseries.buckets[0].mincpu = 0;
-    const next = mathAgg(resp, panel, series)((results) => results);
-    const results = stdMetric(resp, panel, series)(next)([]);
-    expect(results).toHaveLength(1);
+    const next = await mathAgg(resp, panel, series)((results) => results);
+    const results = await stdMetric(resp, panel, series)(next)([]);
 
+    expect(results).toHaveLength(1);
     expect(results[0]).toEqual(
       expect.objectContaining({
         data: [
@@ -134,15 +124,35 @@ describe('math(resp, panel, series)', () => {
     );
   });
 
-  test('throws on actual tinymath expression errors', () => {
+  test('throws on actual tinymath expression errors #1', async () => {
     series.metrics[2].script = 'notExistingFn(params.a)';
-    expect(() =>
-      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
-    ).toThrow();
 
+    try {
+      await stdMetric(
+        resp,
+        panel,
+        series
+      )(await mathAgg(resp, panel, series)((results) => results))([]);
+    } catch (e) {
+      expect(e.message).toEqual(
+        'Failed to parse expression. Expected "*", "+", "-", "/", or end of input but "(" found.'
+      );
+    }
+  });
+
+  test('throws on actual tinymath expression errors #2', async () => {
     series.metrics[2].script = 'divide(params.a, params.b';
-    expect(() =>
-      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
-    ).toThrow();
+
+    try {
+      await stdMetric(
+        resp,
+        panel,
+        series
+      )(await mathAgg(resp, panel, series)((results) => results))([]);
+    } catch (e) {
+      expect(e.message).toEqual(
+        'Failed to parse expression. Expected "*", "+", "-", "/", or end of input but "(" found.'
+      );
+    }
   });
 });

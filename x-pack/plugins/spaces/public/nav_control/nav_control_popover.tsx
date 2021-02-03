@@ -13,7 +13,7 @@ import {
 import React, { Component } from 'react';
 import { Capabilities, ApplicationStart } from 'src/core/public';
 import { Subscription } from 'rxjs';
-import { Space } from '../../common/model/space';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { SpaceAvatar } from '../space_avatar';
 import { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';

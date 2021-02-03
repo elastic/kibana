@@ -102,8 +102,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
           ...toQuery(history.location.search),
           page: options.page.index,
           pageSize: options.page.size,
-          sortField: options.sort!.field,
-          sortDirection: options.sort!.direction,
+          sortField: options.sort?.field,
+          sortDirection: options.sort?.direction,
         }),
       });
     },

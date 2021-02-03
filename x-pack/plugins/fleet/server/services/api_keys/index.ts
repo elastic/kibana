@@ -10,7 +10,7 @@ import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-export { invalidateAPIKey } from './security';
+export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
 
 export async function generateOutputApiKey(

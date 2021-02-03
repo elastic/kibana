@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { SearchResponse } from 'elasticsearch';
@@ -23,9 +12,9 @@ import { IndexPattern } from '../../index_patterns/index_patterns';
 import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 export function flattenHit(
-  hit: Record<string, any>,
+  hit: SearchResponse<unknown>['hits']['hits'][0],
   indexPattern?: IndexPattern,
-  shallow: boolean = false
+  params?: TabifyDocsOptions
 ) {
   const flat = {} as Record<string, any>;
 
@@ -35,7 +24,7 @@ export function flattenHit(
 
       const field = indexPattern?.fields.getByName(key);
 
-      if (!shallow) {
+      if (params?.shallow === false) {
         const isNestedField = field?.type === 'nested';
         if (Array.isArray(val) && !isNestedField) {
           val.forEach((v) => isPlainObject(v) && flatten(v, key + '.'));
@@ -63,7 +52,10 @@ export function flattenHit(
     }
   }
 
-  flatten(hit);
+  flatten(hit.fields);
+  if (params?.source !== false && hit._source) {
+    flatten(hit._source as Record<string, any>);
+  }
   return flat;
 }
 
@@ -81,8 +73,7 @@ export const tabifyDocs = (
 
   const rows = esResponse.hits.hits
     .map((hit) => {
-      const toConvert = params.source ? hit._source : hit.fields;
-      const flat = flattenHit(toConvert, index, params.shallow);
+      const flat = flattenHit(hit, index, params);
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
         const fieldName = field?.name || key;

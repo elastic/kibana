@@ -27,7 +27,7 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
     <Fragment>
       <EuiSpacer />
       <EuiAccordion
-        id="advanced-section"
+        id="additional-section"
         buttonContent={buttonContent}
         onToggle={setAdditionalExpanded}
         initialIsOpen={additionalExpanded}

@@ -5,13 +5,14 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { KibanaFeature } from '../../../features/server';
-import type { HttpResources, IBasePath, IRouter, Logger } from '../../../../../src/core/server';
+import type { HttpResources, IBasePath, Logger } from '../../../../../src/core/server';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
+import type { SecurityRouter } from '../types';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
@@ -26,13 +27,13 @@ import { defineViewRoutes } from './views';
  * Describes parameters used to define HTTP routes.
  */
 export interface RouteDefinitionParams {
-  router: IRouter;
+  router: SecurityRouter;
   basePath: IBasePath;
   httpResources: HttpResources;
   logger: Logger;
   config: ConfigType;
   authz: AuthorizationServiceSetup;
-  session: PublicMethodsOf<Session>;
+  getSession: () => PublicMethodsOf<Session>;
   license: SecurityLicense;
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;

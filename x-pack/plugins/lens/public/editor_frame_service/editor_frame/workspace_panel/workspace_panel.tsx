@@ -39,8 +39,8 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext } from '../../../drag_drop';
-import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
+import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -75,6 +75,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
@@ -82,8 +83,10 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
+const workspaceDropValue = { id: 'lnsWorkspace' };
+
 // Exported for testing purposes only.
-export function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -97,43 +100,12 @@ export function WorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   title,
   visualizeTriggerFieldContext,
+  getSuggestionForField,
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(
-    () => {
-      if (!dragDropContext.dragging || !activeDatasourceId) {
-        return;
-      }
-
-      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-        (datasource) => datasource.getTableSpec().length > 0
-      );
-
-      const mainPalette =
-        activeVisualizationId &&
-        visualizationMap[activeVisualizationId] &&
-        visualizationMap[activeVisualizationId].getMainPalette
-          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
-          : undefined;
-      const suggestions = getSuggestions({
-        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-        datasourceStates,
-        visualizationMap:
-          hasData && activeVisualizationId
-            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-            : visualizationMap,
-        activeVisualizationId,
-        visualizationState,
-        field: dragDropContext.dragging,
-        mainPalette,
-      });
-
-      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dragDropContext.dragging]
-  );
+  const suggestionForDraggedField =
+    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -327,10 +299,11 @@ export function WorkspacePanel({
     >
       <DragDrop
         className="lnsWorkspacePanel__dragDrop"
-        data-test-subj="lnsWorkspace"
+        dataTestSubj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
+        value={workspaceDropValue}
       >
         <div>
           {renderVisualization()}
@@ -339,7 +312,7 @@ export function WorkspacePanel({
       </DragDrop>
     </WorkspacePanelWrapper>
   );
-}
+});
 
 export const InnerVisualizationWrapper = ({
   expression,

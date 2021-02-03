@@ -23,6 +23,7 @@ import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
 import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -45,7 +46,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider
-            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+            params={{
+              rangeFrom: 'now-15m',
+              rangeTo: 'now',
+              latencyAggregationType: LatencyAggregationType.avg,
+            }}
           >
             {children}
           </MockUrlParamsContextProvider>

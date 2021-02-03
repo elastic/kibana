@@ -11,6 +11,7 @@ export const securityFeatureUsageServiceMock = {
     return {
       recordPreAccessAgreementUsage: jest.fn(),
       recordSubFeaturePrivilegeUsage: jest.fn(),
+      recordAuditLoggingUsage: jest.fn(),
     } as jest.Mocked<SecurityFeatureUsageServiceStart>;
   },
 };

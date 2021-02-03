@@ -5,10 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 import { AssignmentError } from '../../services';
 
-export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
+export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => {
   const objectReferenceSchema = schema.object({
     type: schema.string(),
     id: schema.string(),

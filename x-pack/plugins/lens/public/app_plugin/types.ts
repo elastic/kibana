@@ -38,7 +38,7 @@ import {
   EmbeddableStateTransfer,
 } from '../../../../../src/plugins/embeddable/public';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { EditorFrameInstance } from '..';
+import { EditorFrameInstance } from '../types';
 
 export interface LensAppState {
   isLoading: boolean;

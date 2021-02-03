@@ -6,10 +6,7 @@
 
 import { getSeverity } from '../../../../common/anomaly_detection';
 import { getServiceHealthStatus } from '../../../../common/service_health_status';
-import {
-  getMLJobIds,
-  getServiceAnomalies,
-} from '../../service_map/get_service_anomalies';
+import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 import {
   ServicesItemsProjection,
   ServicesItemsSetup,
@@ -29,27 +26,16 @@ export const getHealthStatuses = async (
     return [];
   }
 
-  const jobIds = await getMLJobIds(
-    setup.ml.anomalyDetectors,
-    mlAnomaliesEnvironment
-  );
-  if (!jobIds.length) {
-    return [];
-  }
-
   const anomalies = await getServiceAnomalies({
     setup,
     environment: mlAnomaliesEnvironment,
   });
 
-  return Object.keys(anomalies.serviceAnomalies).map((serviceName) => {
-    const stats = anomalies.serviceAnomalies[serviceName];
-
-    const severity = getSeverity(stats.anomalyScore);
+  return anomalies.serviceAnomalies.map((anomalyStats) => {
+    const severity = getSeverity(anomalyStats.anomalyScore);
     const healthStatus = getServiceHealthStatus({ severity });
-
     return {
-      serviceName,
+      serviceName: anomalyStats.serviceName,
       healthStatus,
     };
   });

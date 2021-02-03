@@ -7,6 +7,7 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -14,10 +15,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const log = getService('log');
   const randomness = getService('randomness');
-  const [basicUsername, basicPassword] = config.get('servers.elasticsearch.auth').split(':');
+  const { username: basicUsername, password: basicPassword } = adminTestUser;
   const kibanaServerConfig = config.get('servers.kibana');
 
   async function checkSessionCookie(
@@ -72,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
-      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
+      await esDeleteAllIndices('.kibana_security_session*');
     });
 
     it('should properly clean up session expired because of idle timeout', async function () {

@@ -9,7 +9,7 @@ import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
-import { ToolbarButton } from '../../../shared_components';
+import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 
 export function LayerSettings({
   layerId,

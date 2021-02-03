@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -144,6 +133,10 @@ const deprecations: ConfigDeprecationProvider = () => [
       log(
         `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
       );
+    } else if (es.logQueries === true) {
+      log(
+        `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers" or use "logging.verbose: true".`
+      );
     }
     return settings;
   },
@@ -174,12 +167,6 @@ export class ElasticsearchConfig {
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
    */
   public readonly apiVersion: string;
-
-  /**
-   * Specifies whether all queries to the client should be logged (status code,
-   * method, query etc.).
-   */
-  public readonly logQueries: boolean;
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
@@ -259,7 +246,6 @@ export class ElasticsearchConfig {
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
-    this.logQueries = rawConfig.logQueries;
     this.hosts = Array.isArray(rawConfig.hosts) ? rawConfig.hosts : [rawConfig.hosts];
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist

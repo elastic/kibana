@@ -57,7 +57,7 @@ Alert schedules are defined as an interval between subsequent checks, and can ra
 
 [IMPORTANT]
 ==============================================
-The intervals of alert checks in {kib} are approximate, their timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-scale-performance>> for more information. 
+The intervals of alert checks in {kib} are approximate, their timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-production-considerations>> for more information. 
 ==============================================
 
 [float]

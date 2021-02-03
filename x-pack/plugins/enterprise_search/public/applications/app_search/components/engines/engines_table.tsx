@@ -12,26 +12,20 @@ import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { getEngineRoute } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+import { ENGINE_PATH } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
+import { EngineDetails } from '../engine/types';
 
-interface EnginesTableData {
-  name: string;
-  created_at: string;
-  document_count: number;
-  field_count: number;
-  language: string | null;
-  isMeta: boolean;
-}
 interface EnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
 interface EnginesTableProps {
-  data: EnginesTableData[];
+  data: EngineDetails[];
   pagination: EnginesTablePagination;
 }
 interface OnChange {
@@ -46,8 +40,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
-  const engineLinkProps = (name: string) => ({
-    to: getEngineRoute(name),
+  const engineLinkProps = (engineName: string) => ({
+    to: generateEncodedPath(ENGINE_PATH, { engineName }),
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',
@@ -55,7 +49,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<EnginesTableData>> = [
+  const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
@@ -100,7 +94,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (language: string, engine: EnginesTableData) =>
+      render: (language: string, engine: EngineDetails) =>
         engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
     },
     {

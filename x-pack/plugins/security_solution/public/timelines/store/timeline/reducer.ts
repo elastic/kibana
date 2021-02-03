@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -41,7 +42,6 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateEventType,
   updateIndexNames,
   updateIsFavorite,
@@ -56,7 +56,7 @@ import {
   updateSort,
   updateTimeline,
   updateTimelineGraphEventId,
-  updateTitle,
+  updateTitleAndDescription,
   upsertColumn,
   toggleModalSaveTimeline,
 } from './actions';
@@ -78,7 +78,6 @@ import {
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
   updateTimelineItemsPerPage,
@@ -94,7 +93,7 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
   updateSavedQuery,
   updateGraphEventId,
@@ -360,10 +359,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(updateDescription, (state, { id, description }) => ({
-    ...state,
-    timelineById: updateTimelineDescription({ id, description, timelineById: state.timelineById }),
-  }))
   .case(updateEventType, (state, { id, eventType }) => ({
     ...state,
     timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
@@ -380,9 +375,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title, disableAutoSave }) => ({
+  .case(updateTitleAndDescription, (state, { id, title, description }) => ({
     ...state,
-    timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
+    timelineById: updateTimelineTitleAndDescription({
+      id,
+      title,
+      description,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(updateProviders, (state, { id, providers }) => ({
     ...state,

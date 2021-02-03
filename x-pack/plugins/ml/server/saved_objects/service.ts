@@ -131,8 +131,10 @@ export function jobSavedObjectServiceFactory(
       type: jobType,
     });
 
+    // * space cannot be used in a delete call, so use undefined which
+    // is the same as specifying the default space
     await internalSavedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, {
-      namespace,
+      namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
   }

@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { HeaderMenuPortal } from '../../shared/header_menu_portal';
+import HeaderMenuPortal from '../../shared/header_menu_portal';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};

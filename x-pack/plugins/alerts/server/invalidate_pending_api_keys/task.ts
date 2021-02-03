@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeyParams, SecurityPluginStart } from '../../../security/server';
+import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -27,8 +27,8 @@ import { InvalidatePendingApiKey } from '../types';
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
 
-const invalidateAPIKey = async (
-  params: InvalidateAPIKeyParams,
+const invalidateAPIKeys = async (
+  params: InvalidateAPIKeysParams,
   securityPluginStart?: SecurityPluginStart
 ): Promise<InvalidateAPIKeyResult> => {
   if (!securityPluginStart) {
@@ -193,30 +193,35 @@ async function invalidateApiKeys(
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   securityPluginStart?: SecurityPluginStart
 ) {
-  // TODO: This could probably send a single request to ES now that the invalidate API supports multiple ids in a single request
   let totalInvalidated = 0;
-  await Promise.all(
+  const apiKeyIds = await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
       const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
         'api_key_pending_invalidation',
         apiKeyObj.id
       );
-      const apiKeyId = decryptedApiKey.attributes.apiKeyId;
-      const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginStart);
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
-      } else {
-        try {
-          await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
-          totalInvalidated++;
-        } catch (err) {
-          logger.error(
-            `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
-          );
-        }
-      }
+      return decryptedApiKey.attributes.apiKeyId;
     })
   );
-  logger.debug(`Total invalidated api keys "${totalInvalidated}"`);
+  if (apiKeyIds.length > 0) {
+    const response = await invalidateAPIKeys({ ids: apiKeyIds }, securityPluginStart);
+    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+      logger.error(`Failed to invalidate API Keys [ids="${apiKeyIds.join(', ')}"]`);
+    } else {
+      await Promise.all(
+        apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
+          try {
+            await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
+            totalInvalidated++;
+          } catch (err) {
+            logger.error(
+              `Failed to delete invalidated API key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
+            );
+          }
+        })
+      );
+    }
+  }
+  logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
   return totalInvalidated;
 }

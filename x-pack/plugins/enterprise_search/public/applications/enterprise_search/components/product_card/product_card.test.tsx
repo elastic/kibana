@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/kea.mock';
-import { mockTelemetryActions } from '../../../__mocks__';
+import { setMockValues, mockTelemetryActions } from '../../../__mocks__';
 
 import React from 'react';
-import { useValues } from 'kea';
 import { shallow } from 'enzyme';
 
 import { EuiCard } from '@elastic/eui';
@@ -59,7 +57,7 @@ describe('ProductCard', () => {
   });
 
   it('renders correct button text when host not present', () => {
-    (useValues as jest.Mock).mockImplementation(() => ({ config: { host: '' } }));
+    setMockValues({ config: { host: '' } });
 
     const wrapper = shallow(<ProductCard product={WORKPLACE_SEARCH_PLUGIN} image="ws.jpg" />);
     const card = wrapper.find(EuiCard).dive().shallow();

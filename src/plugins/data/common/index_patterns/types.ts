@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
@@ -25,20 +14,41 @@ import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export interface RuntimeField {
+  type: RuntimeType;
+  script: {
+    source: string;
+  };
+}
 
+/**
+ * IIndexPattern allows for an IndexPattern OR an index pattern saved object
+ * too ambiguous, should be avoided
+ */
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
   id?: string;
+  /**
+   * Type is used for identifying rollup indices, otherwise left undefined
+   */
   type?: string;
   timeFieldName?: string;
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
+  /**
+   * Look up a formatter for a given field
+   */
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ) => FieldFormat;
 }
 
+/**
+ * Interface for an index pattern saved object
+ */
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
@@ -49,12 +59,17 @@ export interface IndexPatternAttributes {
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
+  runtimeFieldMap?: string;
   /**
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
 }
 
+/**
+ * @intenal
+ * Storage of field attributes. Necessary since the field list isn't saved.
+ */
 export interface FieldAttrs {
   [key: string]: FieldAttrSet;
 }
@@ -164,9 +179,22 @@ export interface FieldSpecExportFmt {
   indexed?: boolean;
 }
 
+/**
+ * Serialized version of IndexPatternField
+ */
 export interface FieldSpec {
+  /**
+   * Popularity count is used by discover
+   */
   count?: number;
+  /**
+   * Scripted field painless script
+   */
   script?: string;
+  /**
+   * Scripted field langauge
+   * Painless is the only valid scripted field language
+   */
   lang?: string;
   conflictDescriptions?: Record<string, string[]>;
   format?: SerializedFieldFormat;
@@ -180,16 +208,32 @@ export interface FieldSpec {
   subType?: IFieldSubType;
   indexed?: boolean;
   customLabel?: string;
+  runtimeField?: RuntimeField;
   // not persisted
   shortDotsEnable?: boolean;
+  isMapped?: boolean;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
 
+/**
+ * Static index pattern format
+ * Serialized data object, representing index pattern attributes and state
+ */
 export interface IndexPatternSpec {
+  /**
+   * saved object id
+   */
   id?: string;
+  /**
+   * saved object version string
+   */
   version?: string;
   title?: string;
+  /**
+   * @deprecated
+   * Deprecated. Was used by time range based index patterns
+   */
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -197,6 +241,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
+  runtimeFieldMap?: Record<string, RuntimeField>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
 }

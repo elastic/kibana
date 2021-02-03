@@ -20,6 +20,7 @@ import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';
+export const RecoveryActionGroupId = 'notGeoContained';
 
 const actionVariableContextEntityIdLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
@@ -97,7 +98,6 @@ export const ParamsSchema = schema.object({
   boundaryIndexId: schema.string({ minLength: 1 }),
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
   indexQuery: schema.maybe(schema.any({})),
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
@@ -113,7 +113,6 @@ export interface GeoContainmentParams extends AlertTypeParams {
   boundaryIndexId: string;
   boundaryGeoField: string;
   boundaryNameField?: string;
-  delayOffsetWithUnits?: string;
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }
@@ -141,7 +140,9 @@ export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
   GeoContainmentState,
   GeoContainmentInstanceState,
-  GeoContainmentInstanceContext
+  GeoContainmentInstanceContext,
+  typeof ActionGroupId,
+  typeof RecoveryActionGroupId
 >;
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {
@@ -161,7 +162,7 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     recoveryActionGroup: {
-      id: 'notGeoContained',
+      id: RecoveryActionGroupId,
       name: i18n.translate('xpack.stackAlerts.geoContainment.notGeoContained', {
         defaultMessage: 'No longer contained',
       }),

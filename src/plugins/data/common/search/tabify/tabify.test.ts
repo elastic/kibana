@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { tabifyAggResponse } from './tabify';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
+import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -38,6 +27,9 @@ describe('tabifyAggResponse Integration', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      getFormatterForField: () => ({
+        toJSON: () => '{}',
+      }),
     } as unknown) as IndexPattern;
 
     return new AggConfigs(indexPattern, aggs, { typesRegistry });
@@ -59,7 +51,7 @@ describe('tabifyAggResponse Integration', () => {
     expect(resp.columns).toHaveLength(1);
 
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
-    expect(resp.columns[0]).toHaveProperty('aggConfig', aggConfigs.aggs[0]);
+    expect(resp.columns[0]).toHaveProperty('name', aggConfigs.aggs[0].makeLabel());
   });
 
   describe('transforms a complex response', () => {
@@ -89,7 +81,7 @@ describe('tabifyAggResponse Integration', () => {
       expect(table.columns).toHaveLength(aggs.length);
 
       aggs.forEach((agg, i) => {
-        expect(table.columns[i]).toHaveProperty('aggConfig', agg);
+        expect(table.columns[i]).toHaveProperty('name', agg.makeLabel());
       });
     }
 

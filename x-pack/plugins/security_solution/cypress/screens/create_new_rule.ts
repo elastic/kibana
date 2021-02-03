@@ -38,6 +38,22 @@ export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
+export const THREAT_MATCH_AND_BUTTON = '[data-test-subj="andButton"]';
+
+export const THREAT_ITEM_ENTRY_DELETE_BUTTON = '[data-test-subj="itemEntryDeleteButton"]';
+
+export const THREAT_MATCH_OR_BUTTON = '[data-test-subj="orButton"]';
+
+export const THREAT_COMBO_BOX_INPUT = '[data-test-subj="fieldAutocompleteComboBox"]';
+
+export const INVALID_MATCH_CONTENT = 'All matches require both a field and threat index field.';
+
+export const AT_LEAST_ONE_VALID_MATCH = 'At least one indicator match is required.';
+
+export const AT_LEAST_ONE_INDEX_PATTERN = 'A minimum of one index pattern is required.';
+
+export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
+
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
@@ -101,7 +117,11 @@ export const REFERENCE_URLS_INPUT =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RISK_INPUT = '.euiRangeInput';
+export const DEFAULT_RISK_SCORE_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
+
+export const DEFAULT_RISK_SCORE_SLIDER =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 

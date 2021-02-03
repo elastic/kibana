@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerTagRemovalsRoute = (router: IRouter) => {
+export const registerTagRemovalsRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
   router.post(
     {
@@ -33,7 +33,7 @@ export const registerTagRemovalsRoute = (router: IRouter) => {
         requiredRoles: ['beats_admin'],
       },
       async (context, request, response) => {
-        const beatsManagement = context.beatsManagement!;
+        const beatsManagement = context.beatsManagement;
         const user = beatsManagement.framework.getUser(request);
         const { removals } = request.body;
 

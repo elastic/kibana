@@ -3,11 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { connectorReducer } from './connector_reducer';
-import { ActionConnector } from '../../../types';
+import { UserConfiguredActionConnector } from '../../../types';
+import { createConnectorReducer, ConnectorReducer } from './connector_reducer';
 
 describe('connector reducer', () => {
-  let initialConnector: ActionConnector;
+  let initialConnector: UserConfiguredActionConnector<
+    Record<string, unknown>,
+    Record<string, unknown>
+  >;
   beforeAll(() => {
     initialConnector = {
       secrets: {},
@@ -19,6 +22,11 @@ describe('connector reducer', () => {
       config: {},
     };
   });
+
+  const connectorReducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
 
   test('if property name was changed', () => {
     const updatedConnector = connectorReducer(

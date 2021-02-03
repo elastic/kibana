@@ -32,6 +32,7 @@ export const getConfiguration = ({
 export const getConfigurationOutput = (update = false): Partial<CasesConfigureResponse> => {
   return {
     ...getConfiguration(),
+    error: null,
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,

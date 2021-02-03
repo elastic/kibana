@@ -7,7 +7,7 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 import { REQUIRED_LICENSES } from '../../../common/constants';
 import {
   ConfigurationBlock,
@@ -16,7 +16,7 @@ import {
 import { ReturnTypeBulkUpsert } from '../../../common/return_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerUpsertConfigurationBlocksRoute = (router: IRouter) => {
+export const registerUpsertConfigurationBlocksRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file
   router.put(
     {
@@ -31,7 +31,7 @@ export const registerUpsertConfigurationBlocksRoute = (router: IRouter) => {
         requiredRoles: ['beats_admin'],
       },
       async (context, request, response) => {
-        const beatsManagement = context.beatsManagement!;
+        const beatsManagement = context.beatsManagement;
         const user = beatsManagement.framework.getUser(request);
         const input = request.body as ConfigurationBlock[];
 

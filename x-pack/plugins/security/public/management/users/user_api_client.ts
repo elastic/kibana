@@ -30,7 +30,7 @@ export class UserAPIClient {
     });
   }
 
-  public async changePassword(username: string, password: string, currentPassword: string) {
+  public async changePassword(username: string, password: string, currentPassword?: string) {
     const data: Record<string, string> = {
       newPassword: password,
     };
@@ -41,5 +41,13 @@ export class UserAPIClient {
     await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/password`, {
       body: JSON.stringify(data),
     });
+  }
+
+  public async disableUser(username: string) {
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_disable`);
+  }
+
+  public async enableUser(username: string) {
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/_enable`);
   }
 }

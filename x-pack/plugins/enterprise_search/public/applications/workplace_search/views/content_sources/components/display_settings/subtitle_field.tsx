@@ -10,6 +10,8 @@ import classNames from 'classnames';
 
 import { Result } from '../../../../types';
 
+import { SUBTITLE_LABEL } from './constants';
+
 interface SubtitleFieldProps {
   result: Result;
   subtitleField: string | null;
@@ -22,6 +24,7 @@ export const SubtitleField: React.FC<SubtitleFieldProps> = ({
   subtitleFieldHover,
 }) => (
   <div
+    data-test-subj="SubtitleField"
     className={classNames('example-result-content__subtitle', {
       'example-result-field-hover': subtitleFieldHover,
     })}
@@ -29,7 +32,9 @@ export const SubtitleField: React.FC<SubtitleFieldProps> = ({
     {subtitleField ? (
       <div className="eui-textTruncate">{result[subtitleField]}</div>
     ) : (
-      <span className="example-result-content-placeholder">Subtitle</span>
+      <span data-test-subj="DefaultSubtitleLabel" className="example-result-content-placeholder">
+        {SUBTITLE_LABEL}
+      </span>
     )}
   </div>
 );

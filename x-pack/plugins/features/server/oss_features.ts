@@ -89,7 +89,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: ['background-session'],
+                    all: ['search-session'],
                     read: [],
                   },
                   ui: ['storeSearchSession'],
@@ -254,7 +254,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   ),
                   includeIn: 'all',
                   savedObject: {
-                    all: ['background-session'],
+                    all: ['search-session'],
                     read: [],
                   },
                   ui: ['storeSearchSession'],

@@ -33,6 +33,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
     },
     async (context, request, response) => {
       try {
+        let error = null;
         const client = context.core.savedObjects.client;
         const query = pipe(
           CasesConfigurePatchRt.decode(request.body),
@@ -68,12 +69,18 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           if (actionsClient == null) {
             throw Boom.notFound('Action client have not been found');
           }
-          mappings = await caseClient.getMappings({
-            actionsClient,
-            caseClient,
-            connectorId: connector.id,
-            connectorType: connector.type,
-          });
+          try {
+            mappings = await caseClient.getMappings({
+              actionsClient,
+              caseClient,
+              connectorId: connector.id,
+              connectorType: connector.type,
+            });
+          } catch (e) {
+            error = e.isBoom
+              ? e.output.payload.message
+              : `Error connecting to ${connector.name} instance`;
+          }
         }
         const patch = await caseConfigureService.patch({
           client,
@@ -96,6 +103,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             ),
             mappings,
             version: patch.version ?? '',
+            error,
           }),
         });
       } catch (error) {

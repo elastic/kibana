@@ -259,7 +259,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   iconType="arrowDown"
                   iconSide="right"
                   onClick={() => {
-                    setPopoverOpen(true);
+                    setPopoverOpen(!popoverOpen);
                   }}
                 >
                   {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {

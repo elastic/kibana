@@ -5,46 +5,56 @@
  */
 
 import { lazy } from 'react';
-import { ValidationResult, ActionTypeModel } from '../../../../types';
+import {
+  GenericValidationResult,
+  ActionTypeModel,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
-const validateConnector = (action: JiraActionConnector): ValidationResult => {
-  const validationResult = {
-    errors: {
-      apiUrl: new Array<string>(),
-      projectKey: new Array<string>(),
-      email: new Array<string>(),
-      apiToken: new Array<string>(),
-    },
+const validateConnector = (
+  action: JiraActionConnector
+): ConnectorValidationResult<JiraConfig, JiraSecrets> => {
+  const configErrors = {
+    apiUrl: new Array<string>(),
+    projectKey: new Array<string>(),
   };
-  const { errors } = validationResult;
+  const secretsErrors = {
+    email: new Array<string>(),
+    apiToken: new Array<string>(),
+  };
+
+  const validationResult = {
+    config: { errors: configErrors },
+    secrets: { errors: secretsErrors },
+  };
 
   if (!action.config.apiUrl) {
-    errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
+    configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
   if (action.config.apiUrl) {
     if (!isValidUrl(action.config.apiUrl)) {
-      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_INVALID];
     } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+      configErrors.apiUrl = [...configErrors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
     }
   }
 
   if (!action.config.projectKey) {
-    errors.projectKey = [...errors.projectKey, i18n.JIRA_PROJECT_KEY_REQUIRED];
+    configErrors.projectKey = [...configErrors.projectKey, i18n.JIRA_PROJECT_KEY_REQUIRED];
   }
 
   if (!action.secrets.email) {
-    errors.email = [...errors.email, i18n.JIRA_EMAIL_REQUIRED];
+    secretsErrors.email = [...secretsErrors.email, i18n.JIRA_EMAIL_REQUIRED];
   }
 
   if (!action.secrets.apiToken) {
-    errors.apiToken = [...errors.apiToken, i18n.JIRA_API_TOKEN_REQUIRED];
+    secretsErrors.apiToken = [...secretsErrors.apiToken, i18n.JIRA_API_TOKEN_REQUIRED];
   }
 
   return validationResult;
@@ -58,18 +68,19 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
     actionTypeTitle: connectorConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./jira_connectors')),
-    validateParams: (actionParams: JiraActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (actionParams: JiraActionParams): GenericValidationResult<unknown> => {
       const errors = {
-        summary: new Array<string>(),
+        'subActionParams.incident.summary': new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = {
+        errors,
+      };
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.summary?.length
       ) {
-        errors.summary.push(i18n.SUMMARY_REQUIRED);
+        errors['subActionParams.incident.summary'].push(i18n.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

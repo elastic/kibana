@@ -156,7 +156,10 @@ export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): P
 
 export const patchCase = async (
   caseId: string,
-  updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
+  updatedCase: Pick<
+    CasePatchRequest,
+    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+  >,
   version: string,
   signal: AbortSignal
 ): Promise<Case[]> => {

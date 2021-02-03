@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { deleteSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/delete_signals_migration_schema';
@@ -14,7 +14,7 @@ import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
 export const deleteSignalsMigrationRoute = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
   router.delete(

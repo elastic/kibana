@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
 import { LicenseType, LICENSE_TYPE } from '../../../common/types';
 import { FeatureUsageServiceSetup } from '../../services';
+import { LicensingRouter } from '../../types';
 
 export function registerRegisterFeatureRoute(
-  router: IRouter,
+  router: LicensingRouter,
   featureUsageSetup: FeatureUsageServiceSetup
 ) {
   router.post(
