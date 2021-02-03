@@ -19,6 +19,35 @@ interface CustomAnnouncementsType {
   selectedTarget: Partial<{ [dropType in DropType]: AnnouncementFunction }>;
 }
 
+const selectedTargetReplace = (
+  { label }: HumanData,
+  { label: dropLabel, groupLabel, position }: HumanData
+) =>
+  i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
+    defaultMessage: `You have selected {dropLabel} in {groupLabel} group in position {position}. Press space or enter to replace {dropLabel} with {label}.`,
+    values: {
+      label,
+      dropLabel,
+      groupLabel,
+      position,
+    },
+  });
+
+const droppedReplace = (
+  { label }: HumanData,
+  { label: dropLabel, groupLabel, position }: HumanData
+) =>
+  i18n.translate('xpack.lens.dragDrop.announce.duplicated.replace', {
+    defaultMessage:
+      'You have dropped the item. You have moved {label} to {groupLabel} group to position {position}',
+    values: {
+      label,
+      dropLabel,
+      groupLabel,
+      position,
+    },
+  });
+
 export const announcements: CustomAnnouncementsType = {
   selectedTarget: {
     reorder: ({ label, position: prevPosition }, { position }) =>
@@ -48,6 +77,9 @@ export const announcements: CustomAnnouncementsType = {
           position,
         },
       }),
+    field_replace: selectedTargetReplace,
+    replace_compatible: selectedTargetReplace,
+    replace_incompatible: selectedTargetReplace,
   },
   dropped: {
     reorder: ({ label, position: prevPosition }, { position }) =>
@@ -70,6 +102,9 @@ export const announcements: CustomAnnouncementsType = {
           position,
         },
       }),
+    field_replace: droppedReplace,
+    replace_compatible: droppedReplace,
+    replace_incompatible: droppedReplace,
   },
 };
 
@@ -121,7 +156,7 @@ const defaultAnnouncements = {
         defaultMessage: `You have no target selected. Use arrow keys to select a target.`,
       });
     }
-    return groupLabel && position
+    return dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.default', {
           defaultMessage: `You have selected {dropLabel} in {dropGroupLabel} group in position {position}. Press space or enter to drop {label}`,
           values: {

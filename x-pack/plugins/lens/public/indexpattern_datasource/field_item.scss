@@ -1,4 +1,5 @@
 .lnsFieldItem {
+  width: 100%;
   .lnsFieldItem__infoIcon {
     visibility: hidden;
     opacity: 0;
@@ -13,14 +14,10 @@
       transition: opacity $euiAnimSpeedFast ease-in-out 1s;
     }
   }
-}
-
-.lnsFieldItem {
-  width: 100%;
 
   &:focus,
   &:focus-within,
-  &.kbnFieldButton-isActive  {
+  &.kbnFieldButton-isActive {
     animation: none !important; // sass-lint:disable-line no-important
   }
 
@@ -31,8 +28,6 @@
     text-decoration: underline !important;
   }
 }
-
-
 
 .kbnFieldButton__name {
   transition: background-color $euiAnimSpeedFast ease-in-out;

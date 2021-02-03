@@ -208,13 +208,7 @@ export const DragDrop = (props: BaseProps) => {
         />
       );
     } else {
-      return (
-        <DragInner
-          {...dragProps}
-          draggable={draggable}
-          ariaDescribedBy="lnsDragDrop-keyboardInstructionsWithReorder"
-        />
-      );
+      return <DragInner {...dragProps} draggable={draggable} />;
     }
   }
   if (
@@ -281,7 +275,7 @@ const DragInner = memo(function DragInner({
     setDragging(undefined);
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
-    setA11yMessage(announce.cancelled());
+    // setA11yMessage(announce.cancelled());
     if (onDragEnd) {
       onDragEnd();
     }
@@ -341,7 +335,11 @@ const DragInner = memo(function DragInner({
                 }
               } else if (e.key === keys.ESCAPE) {
                 dragEnd();
-              } else if (keyboardMode && order) {
+              } else if (
+                keyboardMode &&
+                order &&
+                (keys.ARROW_LEFT === e.key || keys.ARROW_RIGHT === e.key)
+              ) {
                 if (hasReorderingStarted) {
                   setA11yMessage(announce.blockedArrows());
                 } else {
@@ -613,6 +611,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
     >
       <DragInner
         {...props}
+        ariaDescribedBy="lnsDragDrop-keyboardInstructionsWithReorder"
         extraKeyboardHandler={extraKeyboardHandler}
         hasReorderingStarted={!!reorderedItems.length}
         onDragStart={onReorderableDragStart}
