@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable, NewTrustedApp } from '../../../../../common/endpoint/types';
+import { MaybeImmutable, NewTrustedApp } from '../../../../../common/endpoint/types';
 import { defaultNewTrustedApp } from '../store/builders';
 
 const NEW_TRUSTED_APP_KEYS: Array<keyof NewTrustedApp> = [
@@ -16,7 +16,7 @@ const NEW_TRUSTED_APP_KEYS: Array<keyof NewTrustedApp> = [
 ];
 
 export const toNewTrustedApp = <T extends NewTrustedApp>(
-  trustedApp: T | Immutable<T>
+  trustedApp: MaybeImmutable<T>
 ): NewTrustedApp => {
   const newTrustedApp = defaultNewTrustedApp();
   for (const key of NEW_TRUSTED_APP_KEYS) {
