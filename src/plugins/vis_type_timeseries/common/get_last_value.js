@@ -8,7 +8,7 @@
 
 import { isArray, last } from 'lodash';
 
-const DEFAULT_VALUE = 0;
+const DEFAULT_VALUE = null;
 const extractValue = (data) => (data && data[1]) || null;
 
 export const getLastValue = (data, defaultValue = DEFAULT_VALUE) => {
