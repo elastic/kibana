@@ -88,6 +88,7 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          data-test-subj="ofExpression"
           display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
@@ -116,6 +117,7 @@ export const OfExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
+              id="ofField"
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}

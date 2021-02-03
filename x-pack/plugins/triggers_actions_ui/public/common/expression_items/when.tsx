@@ -78,6 +78,7 @@ export const WhenExpression = ({
         </ClosablePopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
+          id="aggTypeField"
           value={aggType}
           fullWidth
           onChange={(e) => {
