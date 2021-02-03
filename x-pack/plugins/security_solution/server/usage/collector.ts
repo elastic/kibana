@@ -69,6 +69,8 @@ export const registerCollector: RegisterCollector = ({
             // @pjhampton / @jeska: these are still undecided - taking id and times for now
             job_id: { type: 'keyword' },
             open_time: { type: 'keyword' },
+            create_time: { type: 'keyword' },
+            finished_time: { type: 'keyword' },
             state: { type: 'keyword' },
             data_counts: {
               bucket_count: { type: 'long' },
@@ -127,6 +129,8 @@ export const registerCollector: RegisterCollector = ({
         fetchDetectionsMetrics(ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(internalSavedObjectsClient),
       ]);
+
+      // console.log(JSON.stringify(detectionMetrics));
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,

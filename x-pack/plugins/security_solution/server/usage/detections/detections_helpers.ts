@@ -224,45 +224,53 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobStats('security');
 
-      return securityJobStats.jobs.map(
-        (jobStat) =>
-          ({
-            job_id: jobStat.job_id,
-            open_time: jobStat.open_time,
-            state: jobStat.state,
-            data_counts: {
-              bucket_count: jobStat.data_counts.bucket_count,
-              empty_bucket_count: jobStat.data_counts.empty_bucket_count,
-              input_bytes: jobStat.data_counts.input_bytes,
-              input_record_count: jobStat.data_counts.input_record_count,
-              last_data_time: jobStat.data_counts.last_data_time,
-              processed_record_count: jobStat.data_counts.processed_record_count,
-            },
-            model_size_stats: {
-              bucket_allocation_failures_count:
-                jobStat.model_size_stats.bucket_allocation_failures_count,
-              memory_status: jobStat.model_size_stats.memory_status,
-              model_bytes: jobStat.model_size_stats.model_bytes,
-              model_bytes_exceeded: jobStat.model_size_stats.model_bytes_exceeded,
-              model_bytes_memory_limit: jobStat.model_size_stats.model_bytes_memory_limit,
-              peak_model_bytes: jobStat.model_size_stats.peak_model_bytes,
-            },
-            timing_stats: {
-              average_bucket_processing_time_ms:
-                jobStat.timing_stats.average_bucket_processing_time_ms,
-              bucket_count: jobStat.timing_stats.bucket_count,
-              exponential_average_bucket_processing_time_ms:
-                jobStat.timing_stats.exponential_average_bucket_processing_time_ms,
-              exponential_average_bucket_processing_time_per_hour_ms:
-                jobStat.timing_stats.exponential_average_bucket_processing_time_per_hour_ms,
-              maximum_bucket_processing_time_ms:
-                jobStat.timing_stats.maximum_bucket_processing_time_ms,
-              minimum_bucket_processing_time_ms:
-                jobStat.timing_stats.minimum_bucket_processing_time_ms,
-              total_bucket_processing_time_ms: jobStat.timing_stats.total_bucket_processing_time_ms,
-            },
-          } as MlJobMetric)
-      );
+      const jobDetails = await ml
+        .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
+        .jobs('security');
+
+      return securityJobStats.jobs.map((jobStat) => {
+        const jobId = jobStat.job_id;
+        const jobDetail = jobDetails.jobs.find((job) => job.job_id === jobId);
+
+        return {
+          job_id: jobId,
+          open_time: jobStat.open_time,
+          create_time: jobDetail?.create_time,
+          finished_time: jobDetail?.finished_time,
+          state: jobStat.state,
+          data_counts: {
+            bucket_count: jobStat.data_counts.bucket_count,
+            empty_bucket_count: jobStat.data_counts.empty_bucket_count,
+            input_bytes: jobStat.data_counts.input_bytes,
+            input_record_count: jobStat.data_counts.input_record_count,
+            last_data_time: jobStat.data_counts.last_data_time,
+            processed_record_count: jobStat.data_counts.processed_record_count,
+          },
+          model_size_stats: {
+            bucket_allocation_failures_count:
+              jobStat.model_size_stats.bucket_allocation_failures_count,
+            memory_status: jobStat.model_size_stats.memory_status,
+            model_bytes: jobStat.model_size_stats.model_bytes,
+            model_bytes_exceeded: jobStat.model_size_stats.model_bytes_exceeded,
+            model_bytes_memory_limit: jobStat.model_size_stats.model_bytes_memory_limit,
+            peak_model_bytes: jobStat.model_size_stats.peak_model_bytes,
+          },
+          timing_stats: {
+            average_bucket_processing_time_ms:
+              jobStat.timing_stats.average_bucket_processing_time_ms,
+            bucket_count: jobStat.timing_stats.bucket_count,
+            exponential_average_bucket_processing_time_ms:
+              jobStat.timing_stats.exponential_average_bucket_processing_time_ms,
+            exponential_average_bucket_processing_time_per_hour_ms:
+              jobStat.timing_stats.exponential_average_bucket_processing_time_per_hour_ms,
+            maximum_bucket_processing_time_ms:
+              jobStat.timing_stats.maximum_bucket_processing_time_ms,
+            minimum_bucket_processing_time_ms:
+              jobStat.timing_stats.minimum_bucket_processing_time_ms,
+            total_bucket_processing_time_ms: jobStat.timing_stats.total_bucket_processing_time_ms,
+          },
+        } as MlJobMetric;
+      });
     } catch (e) {
       // ignore failure, usage will be zeroed
     }

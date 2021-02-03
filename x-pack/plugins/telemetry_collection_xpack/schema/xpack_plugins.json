@@ -3256,6 +3256,12 @@
                   "open_time": {
                     "type": "keyword"
                   },
+                  "create_time": {
+                    "type": "keyword"
+                  },
+                  "finished_time": {
+                    "type": "keyword"
+                  },
                   "state": {
                     "type": "keyword"
                   },

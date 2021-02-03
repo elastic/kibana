@@ -143,6 +143,8 @@ describe('Detections Usage and Metrics', () => {
           ml_jobs: [
             {
               job_id: 'high_distinct_count_error_message',
+              create_time: 1603838214983,
+              finished_time: 1611739871669,
               state: 'closed',
               data_counts: {
                 bucket_count: 8612,
