@@ -127,6 +127,29 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
     async (context, request, res) => {
       const { id } = request.params;
       try {
+        await context.search!.deleteSession(id);
+
+        return res.ok();
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/cancel',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
         await context.search!.cancelSession(id);
 
         return res.ok();

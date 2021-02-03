@@ -315,6 +315,11 @@ export class SearchSessionService
     });
   };
 
+  // TODO: Throw an error if this session doesn't belong to this user
+  public delete = ({ savedObjectsClient }: SearchSessionDependencies, sessionId: string) => {
+    return savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
+  };
+
   /**
    * Tracks the given search request/search ID in the saved session (if it exists). Otherwise, just
    * store it in memory until a saved session exists.
@@ -397,6 +402,7 @@ export class SearchSessionService
         update: this.update.bind(this, deps),
         extend: this.extend.bind(this, deps),
         cancel: this.cancel.bind(this, deps),
+        delete: this.delete.bind(this, deps),
       };
     };
   };

@@ -95,7 +95,22 @@ describe('registerSessionRoutes', () => {
     expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
   });
 
-  it('delete calls cancelSession with id', async () => {
+  it('cancel calls cancelSession with id', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [[, cancelHandler]] = mockRouter.cancel.mock.calls;
+
+    cancelHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
+  });
+
+  it('delete calls deleteSession with id', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
 
@@ -107,7 +122,7 @@ describe('registerSessionRoutes', () => {
 
     deleteHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
+    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
   });
 
   it('extend calls extendSession with id', async () => {
