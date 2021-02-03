@@ -53,7 +53,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   jobForCloning(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
-      path: `${basePath()}/jobs/job_for_cloning`,
+      path: `${ML_BASE_PATH}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });
