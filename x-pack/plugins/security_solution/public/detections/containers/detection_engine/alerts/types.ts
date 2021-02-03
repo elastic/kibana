@@ -57,6 +57,7 @@ export interface Privilege {
     monitor_watcher: boolean;
     monitor_transform: boolean;
     read_ilm: boolean;
+    manage_api_key: boolean;
     manage_security: boolean;
     manage_own_api_key: boolean;
     manage_saml: boolean;
@@ -97,6 +98,7 @@ export interface Privilege {
       write: boolean;
     };
   };
+  application: {};
   is_authenticated: boolean;
   has_encryption_key: boolean;
 }

@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useEffect } from 'react';
-import useSetState from 'react-use/lib/useSetState';
+import { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import useSetState from 'react-use/lib/useSetState';
 import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
-import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { LogEntryCursor, LogEntry } from '../../../../common/log_entry';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import { useSubscription } from '../../../utils/use_observable';
 import { LogSourceConfigurationProperties } from '../log_source';
+import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
+import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
+import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
 interface LogStreamProps {
   sourceId: string;
@@ -31,16 +32,6 @@ interface LogStreamState {
   hasMoreAfter: boolean;
 }
 
-type LoadingState = 'uninitialized' | 'loading' | 'success' | 'error';
-
-interface LogStreamReturn extends LogStreamState {
-  fetchEntries: () => void;
-  fetchPreviousEntries: () => void;
-  fetchNextEntries: () => void;
-  loadingState: LoadingState;
-  pageLoadingState: LoadingState;
-}
-
 const INITIAL_STATE: LogStreamState = {
   entries: [],
   topCursor: null,
@@ -50,11 +41,7 @@ const INITIAL_STATE: LogStreamState = {
   hasMoreAfter: true,
 };
 
-const EMPTY_DATA = {
-  entries: [],
-  topCursor: null,
-  bottomCursor: null,
-};
+const LOG_ENTRIES_CHUNK_SIZE = 200;
 
 export function useLogStream({
   sourceId,
@@ -63,8 +50,7 @@ export function useLogStream({
   query,
   center,
   columns,
-}: LogStreamProps): LogStreamReturn {
-  const { services } = useKibanaContextForPlugin();
+}: LogStreamProps) {
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
 
   // Ensure the pagination keeps working when the timerange gets extended
@@ -85,175 +71,151 @@ export function useLogStream({
 
   const parsedQuery = useMemo(() => {
     if (!query) {
-      return null;
-    }
-
-    let q;
-
-    if (typeof query === 'string') {
-      q = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
+      return undefined;
+    } else if (typeof query === 'string') {
+      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
     } else if (query.language === 'kuery') {
-      q = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
+      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
     } else if (query.language === 'lucene') {
-      q = esQuery.luceneStringToDsl(query.query as string);
+      return esQuery.luceneStringToDsl(query.query as string);
+    } else {
+      return undefined;
     }
-
-    return JSON.stringify(q);
   }, [query]);
 
-  // Callbacks
-  const [entriesPromise, fetchEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        setState(INITIAL_STATE);
-        const fetchPosition = center ? { center } : { before: 'last' };
-
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: parsedQuery,
-            columns,
-            ...fetchPosition,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
-        setState((prevState) => ({
-          ...data,
-          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
-          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
-        }));
-      },
-    },
-    [sourceId, startTimestamp, endTimestamp, query]
+  const commonFetchArguments = useMemo(
+    () => ({
+      sourceId,
+      startTimestamp,
+      endTimestamp,
+      query: parsedQuery,
+      columnOverrides: columns,
+    }),
+    [columns, endTimestamp, parsedQuery, sourceId, startTimestamp]
   );
 
-  const [previousEntriesPromise, fetchPreviousEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        if (state.topCursor === null) {
-          throw new Error(
-            'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-          );
-        }
+  const {
+    fetchLogEntriesAround,
+    isRequestRunning: isLogEntriesAroundRequestRunning,
+    logEntriesAroundSearchResponses$,
+  } = useFetchLogEntriesAround(commonFetchArguments);
 
-        if (!state.hasMoreBefore) {
-          return Promise.resolve({ data: EMPTY_DATA });
-        }
-
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: parsedQuery,
-            before: state.topCursor,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
-        if (!data.entries.length) {
-          return;
-        }
+  useSubscription(logEntriesAroundSearchResponses$, {
+    next: ({ before, after, combined }) => {
+      if ((before.response.data != null || after?.response.data != null) && !combined.isPartial) {
         setState((prevState) => ({
+          ...prevState,
+          entries: combined.entries,
+          hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+          hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+          bottomCursor: combined.bottomCursor,
+          topCursor: combined.topCursor,
+        }));
+      }
+    },
+  });
+
+  const {
+    fetchLogEntriesBefore,
+    isRequestRunning: isLogEntriesBeforeRequestRunning,
+    logEntriesBeforeSearchResponse$,
+  } = useFetchLogEntriesBefore(commonFetchArguments);
+
+  useSubscription(logEntriesBeforeSearchResponse$, {
+    next: ({ response: { data, isPartial } }) => {
+      if (data != null && !isPartial) {
+        setState((prevState) => ({
+          ...prevState,
           entries: [...data.entries, ...prevState.entries],
           hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
           topCursor: data.topCursor ?? prevState.topCursor,
+          bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
         }));
-      },
+      }
     },
-    [sourceId, startTimestamp, endTimestamp, query, state.topCursor]
-  );
+  });
 
-  const [nextEntriesPromise, fetchNextEntries] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        if (state.bottomCursor === null) {
-          throw new Error(
-            'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-          );
-        }
+  const fetchPreviousEntries = useCallback(() => {
+    if (state.topCursor === null) {
+      throw new Error(
+        'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+      );
+    }
 
-        if (!state.hasMoreAfter) {
-          return Promise.resolve({ data: EMPTY_DATA });
-        }
+    if (!state.hasMoreBefore) {
+      return;
+    }
 
-        return fetchLogEntries(
-          {
-            sourceId,
-            startTimestamp,
-            endTimestamp,
-            query: parsedQuery,
-            after: state.bottomCursor,
-          },
-          services.http.fetch
-        );
-      },
-      onResolve: ({ data }) => {
-        if (!data.entries.length) {
-          return;
-        }
+    fetchLogEntriesBefore(state.topCursor, LOG_ENTRIES_CHUNK_SIZE);
+  }, [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]);
+
+  const {
+    fetchLogEntriesAfter,
+    isRequestRunning: isLogEntriesAfterRequestRunning,
+    logEntriesAfterSearchResponse$,
+  } = useFetchLogEntriesAfter(commonFetchArguments);
+
+  useSubscription(logEntriesAfterSearchResponse$, {
+    next: ({ response: { data, isPartial } }) => {
+      if (data != null && !isPartial) {
         setState((prevState) => ({
+          ...prevState,
           entries: [...prevState.entries, ...data.entries],
           hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+          topCursor: prevState.topCursor ?? data.topCursor,
           bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
         }));
-      },
+      }
     },
-    [sourceId, startTimestamp, endTimestamp, query, state.bottomCursor]
+  });
+
+  const fetchNextEntries = useCallback(() => {
+    if (state.bottomCursor === null) {
+      throw new Error(
+        'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+      );
+    }
+
+    if (!state.hasMoreAfter) {
+      return;
+    }
+
+    fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
+  }, [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]);
+
+  const fetchEntries = useCallback(() => {
+    setState(INITIAL_STATE);
+
+    if (center) {
+      fetchLogEntriesAround(center, LOG_ENTRIES_CHUNK_SIZE);
+    } else {
+      fetchLogEntriesBefore('last', LOG_ENTRIES_CHUNK_SIZE);
+    }
+  }, [center, fetchLogEntriesAround, fetchLogEntriesBefore, setState]);
+
+  const isReloading = useMemo(
+    () =>
+      isLogEntriesAroundRequestRunning ||
+      (state.bottomCursor == null && state.topCursor == null && isLogEntriesBeforeRequestRunning),
+    [
+      isLogEntriesAroundRequestRunning,
+      isLogEntriesBeforeRequestRunning,
+      state.bottomCursor,
+      state.topCursor,
+    ]
   );
 
-  const loadingState = useMemo<LoadingState>(
-    () => convertPromiseStateToLoadingState(entriesPromise.state),
-    [entriesPromise.state]
+  const isLoadingMore = useMemo(
+    () => isLogEntriesBeforeRequestRunning || isLogEntriesAfterRequestRunning,
+    [isLogEntriesAfterRequestRunning, isLogEntriesBeforeRequestRunning]
   );
-
-  const pageLoadingState = useMemo<LoadingState>(() => {
-    const states = [previousEntriesPromise.state, nextEntriesPromise.state];
-
-    if (states.includes('pending')) {
-      return 'loading';
-    }
-
-    if (states.includes('rejected')) {
-      return 'error';
-    }
-
-    if (states.includes('resolved')) {
-      return 'success';
-    }
-
-    return 'uninitialized';
-  }, [previousEntriesPromise.state, nextEntriesPromise.state]);
 
   return {
     ...state,
     fetchEntries,
-    fetchPreviousEntries,
     fetchNextEntries,
-    loadingState,
-    pageLoadingState,
+    fetchPreviousEntries,
+    isLoadingMore,
+    isReloading,
   };
-}
-
-function convertPromiseStateToLoadingState(
-  state: 'uninitialized' | 'pending' | 'resolved' | 'rejected'
-): LoadingState {
-  switch (state) {
-    case 'uninitialized':
-      return 'uninitialized';
-    case 'pending':
-      return 'loading';
-    case 'resolved':
-      return 'success';
-    case 'rejected':
-      return 'error';
-  }
 }

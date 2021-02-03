@@ -31,6 +31,7 @@ interface Props {
 const fetchTransaction = debounce(
   async (filters: Filter[], callback: (transaction: Transaction) => void) => {
     const transaction = await callApmApi({
+      signal: null,
       endpoint: 'GET /api/apm/settings/custom_links/transaction',
       params: { query: convertFiltersToQuery(filters) },
     });

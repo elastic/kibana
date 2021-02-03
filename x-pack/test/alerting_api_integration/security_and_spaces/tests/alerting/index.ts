@@ -10,7 +10,12 @@ import { setupSpacesAndUsers, tearDown } from '..';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
-    describe('legacy alerts', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/86952
+    describe.skip('legacy alerts', () => {
+      before(async () => {
+        await setupSpacesAndUsers(getService);
+      });
+
       after(async () => {
         await tearDown(getService);
       });
