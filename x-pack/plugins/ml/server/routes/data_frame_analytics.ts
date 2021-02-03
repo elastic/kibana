@@ -43,7 +43,7 @@ function getAnalyticsMap(
   client: IScopedClusterClient,
   idOptions: GetAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.getAnalyticsMap(idOptions);
 }
 
@@ -52,7 +52,7 @@ function getExtendedMap(
   client: IScopedClusterClient,
   idOptions: ExtendAnalyticsMapArgs
 ) {
-  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  const analytics = new AnalyticsManager(mlClient, client);
   return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
