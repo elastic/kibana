@@ -306,7 +306,6 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -554,7 +553,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                         Object {
                           "beatType": "beat",
                           "link": <EuiLink
-                            href="jest-metadata-mock-url"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -682,7 +680,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1018,7 +1015,6 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1361,7 +1357,6 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1604,7 +1599,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1671,7 +1665,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1695,7 +1688,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1881,7 +1873,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                         Object {
                           "beatType": "filebeat",
                           "link": <EuiLink
-                            href="jest-metadata-mock-url"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -2009,7 +2000,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
