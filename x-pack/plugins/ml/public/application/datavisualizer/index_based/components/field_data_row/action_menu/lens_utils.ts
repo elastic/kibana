@@ -7,17 +7,12 @@ import { i18n } from '@kbn/i18n';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../../common/constants/field_types';
 import type { TypedLensByValueInput } from '../../../../../../../../lens/public';
 import type { FieldVisConfig } from '../../../../stats_table/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DataType } from '../../../../../../../../lens/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { IndexPatternColumn } from '../../../../../../../../lens/public/indexpattern_datasource/operations/definitions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { LayerConfig } from '../../../../../../../../lens/public/xy_visualization/types';
+import type { IndexPatternColumn, XYLayerConfig } from '../../../../../../../../lens/public';
 import type { CombinedQuery } from '../../../common';
 import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
-  layer: LayerConfig;
+  layer: XYLayerConfig;
 }
 
 const TOP_VALUES_LABEL = i18n.translate('xpack.ml.dataVisualizer.lensChart.topValuesLabel', {
@@ -52,7 +47,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IIn
       },
     };
 
-    const layer: LayerConfig = {
+    const layer: XYLayerConfig = {
       accessors: ['col2'],
       layerId: 'layer1',
       seriesType: 'bar',
@@ -83,7 +78,7 @@ export function getNumberSettings(item: FieldVisConfig, defaultIndexPattern: IIn
     },
   };
 
-  const layer: LayerConfig = {
+  const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
     seriesType: 'line',
@@ -112,7 +107,7 @@ export function getDateSettings(item: FieldVisConfig) {
       sourceField: item.fieldName!,
     },
   };
-  const layer: LayerConfig = {
+  const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
     seriesType: 'line',
@@ -144,7 +139,7 @@ export function getKeywordSettings(item: FieldVisConfig) {
       operationType: 'count',
     },
   };
-  const layer: LayerConfig = {
+  const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
     seriesType: 'bar',
@@ -176,7 +171,7 @@ export function getBooleanSettings(item: FieldVisConfig) {
       operationType: 'count',
     },
   };
-  const layer: LayerConfig = {
+  const layer: XYLayerConfig = {
     accessors: ['col2'],
     layerId: 'layer1',
     seriesType: 'bar',
@@ -186,8 +181,8 @@ export function getBooleanSettings(item: FieldVisConfig) {
   return { columns, layer };
 }
 
-export function getCompatibleLensDataType(type: FieldVisConfig['type']): DataType | undefined {
-  let lensType: DataType | undefined;
+export function getCompatibleLensDataType(type: FieldVisConfig['type']): string | undefined {
+  let lensType: string | undefined;
   switch (type) {
     case ML_JOB_FIELD_TYPES.KEYWORD:
       lensType = 'string';
