@@ -6,27 +6,41 @@
  * Public License, v 1.
  */
 
-import { CoreStart, KibanaRequest } from 'kibana/server';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../../common';
-import { ISearchStrategy } from '../types';
-import { ISessionService } from './types';
+import { ISearchSessionService } from './types';
 
 /**
- * The OSS session service. See data_enhanced in X-Pack for the search session service.
+ * The OSS session service, which leaves most search session-related logic unimplemented.
+ * @see x-pack/plugins/data_enhanced/server/search/session/session_service.ts
+ * @internal
  */
-export class SessionService implements ISessionService {
+export class SearchSessionService implements ISearchSessionService {
   constructor() {}
 
-  public search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-    strategy: ISearchStrategy<Request, Response>,
-    ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-  ) {
-    return strategy.search(...args);
-  }
-
-  public asScopedProvider(core: CoreStart) {
-    return (request: KibanaRequest) => ({
-      search: this.search,
+  public asScopedProvider() {
+    return () => ({
+      getId: () => {
+        throw new Error('getId not implemented in OSS search session service');
+      },
+      trackId: async () => {},
+      getSearchIdMapping: async () => new Map<string, string>(),
+      save: async () => {
+        throw new Error('save not implemented in OSS search session service');
+      },
+      get: async () => {
+        throw new Error('get not implemented in OSS search session service');
+      },
+      find: async () => {
+        throw new Error('find not implemented in OSS search session service');
+      },
+      update: async () => {
+        throw new Error('update not implemented in OSS search session service');
+      },
+      extend: async () => {
+        throw new Error('extend not implemented in OSS search session service');
+      },
+      cancel: async () => {
+        throw new Error('cancel not implemented in OSS search session service');
+      },
     });
   }
 }

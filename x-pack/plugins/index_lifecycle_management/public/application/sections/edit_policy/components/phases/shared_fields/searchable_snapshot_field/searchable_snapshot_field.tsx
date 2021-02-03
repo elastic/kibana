@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 
 import {
-  UseField,
   ComboBoxField,
   useKibana,
   fieldValidators,
@@ -25,7 +24,7 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfigurationIssues } from '../../../../form';
+import { useConfigurationIssues, UseField } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 

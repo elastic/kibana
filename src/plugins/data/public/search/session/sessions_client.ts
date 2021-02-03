@@ -68,6 +68,12 @@ export class SessionsClient {
     });
   }
 
+  public extend(sessionId: string, keepAlive: string): Promise<SavedObjectsFindResponse> {
+    return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
+      body: JSON.stringify({ keepAlive }),
+    });
+  }
+
   public delete(sessionId: string): Promise<void> {
     return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
