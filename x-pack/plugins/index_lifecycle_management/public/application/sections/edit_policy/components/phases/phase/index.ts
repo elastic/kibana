@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Form } from './form';
-
-export { EnhancedUseField } from './enhanced_use_field';
+export { Phase } from './phase';
