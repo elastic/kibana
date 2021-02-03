@@ -7,6 +7,7 @@
 import { SavedObjectsType } from '../../../../../../../src/core/server';
 
 import { ArtifactConstants, ManifestConstants } from './common';
+import { migrations } from './migrations';
 
 export const exceptionsArtifactSavedObjectType = ArtifactConstants.SAVED_OBJECT_TYPE;
 export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
@@ -90,4 +91,5 @@ export const manifestType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'agnostic',
   mappings: manifestSavedObjectMappings,
+  migrations,
 };
