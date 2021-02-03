@@ -7,9 +7,9 @@
  */
 
 import { get } from 'lodash';
-import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
+import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
-import { indexPatterns as indexPatternsUtils, IndexPatternAttributes } from '../../../data/public';
+import { indexPatterns as indexPatternsUtils } from '../../../data/public';
 
 export interface Location {
   min: number;
@@ -32,7 +32,6 @@ export interface FunctionArg {
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
-  const savedObjectsClient = getSavedObjectsClient();
 
   async function getIndexPattern(functionArgs: FunctionArg[]) {
     const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
@@ -42,22 +41,9 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    const { savedObjects } = await savedObjectsClient.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['title'],
-      search: `"${indexPatternTitle}"`,
-      searchFields: ['title'],
-      perPage: 10,
-    });
-    const indexPatternSavedObject = savedObjects.find(
-      ({ attributes }) => attributes.title === indexPatternTitle
+    return (await indexPatterns.find(indexPatternTitle)).find(
+      (index) => index.title === indexPatternTitle
     );
-    if (!indexPatternSavedObject) {
-      // index argument does not match an index pattern
-      return;
-    }
-
-    return await indexPatterns.get(indexPatternSavedObject.id);
   }
 
   function containsFieldName(partial: string, field: { name: string }) {
@@ -73,18 +59,11 @@ export function getArgValueSuggestions() {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
-        const resp = await savedObjectsClient.find<IndexPatternAttributes>({
-          type: 'index-pattern',
-          fields: ['title', 'type'],
-          search: `${search}`,
-          searchFields: ['title'],
-          perPage: 25,
-        });
-        return resp.savedObjects
-          .filter((savedObject) => !savedObject.get('type'))
-          .map((savedObject) => {
-            return { name: savedObject.attributes.title };
-          });
+        const size = 25;
+
+        return (await indexPatterns.find(search, size)).map(({ title }) => ({
+          name: title,
+        }));
       },
       async metric(partial: string, functionArgs: FunctionArg[]) {
         if (!partial || !partial.includes(':')) {
