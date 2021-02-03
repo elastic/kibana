@@ -23,23 +23,9 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { AucRocChartView } from '../../../../../components/auc_roc_chart/auc_roc_chart';
 import { ErrorCallout } from '../error_callout';
-import {
-  getDependentVar,
-  getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import { isKeywordAndTextType } from '../../../../common/fields';
+import { DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
-import {
-  isResultsSearchBoolQuery,
-  isClassificationEvaluateResponse,
-  AucRocCurveItem,
-  ConfusionMatrix,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-} from '../../../../common/analytics';
+import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
@@ -49,6 +35,10 @@ import {
   MAX_COLUMNS,
   getTrailingControlColumns,
 } from './column_data';
+
+import { isTrainingFilter } from './is_training_filter';
+import { useAucRoc } from './use_auc_roc';
+import { useConfusionMatrix } from './use_confusion_matrix';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -83,7 +73,7 @@ const trainingDatasetHelpText = i18n.translate(
   }
 );
 
-function getHelpText(dataSubsetTitle: string) {
+function getHelpText(dataSubsetTitle: string): string {
   let helpText = entireDatasetHelpText;
   if (dataSubsetTitle === SUBSET_TITLE.TESTING) {
     helpText = testingDatasetHelpText;
@@ -93,86 +83,40 @@ function getHelpText(dataSubsetTitle: string) {
   return helpText;
 }
 
-interface AucRocDataRow extends AucRocCurveItem {
-  class_name: string;
-}
-
 export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, searchQuery }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
-  const [aucRocData, setAucRocData] = useState<AucRocDataRow[]>([]);
+
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
   const [popoverContents, setPopoverContents] = useState<any>([]);
-  const [docsCount, setDocsCount] = useState<null | number>(null);
-  const [error, setError] = useState<null | string>(null);
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
     columns.map(({ id }: { id: string }) => id)
   );
 
-  const index = jobConfig.dest.index;
-  const dependentVariable = getDependentVar(jobConfig.analysis);
-  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
-  // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
-  let requiresKeyword = false;
+  const isTraining = isTrainingFilter(searchQuery, resultsField);
 
-  const loadData = async ({ isTraining }: { isTraining: boolean | undefined }) => {
-    setIsLoading(true);
+  const { confusionMatrixData, docsCount, error, isLoading } = useConfusionMatrix(
+    jobConfig,
+    searchQuery
+  );
 
-    try {
-      requiresKeyword = isKeywordAndTextType(dependentVariable);
-    } catch (e) {
-      // Additional error handling due to missing field type is handled by loadEvalData
-      console.error('Unable to load new field types', error); // eslint-disable-line no-console
-    }
+  const { aucRocData } = useAucRoc(jobConfig, searchQuery, visibleColumns);
 
-    const evalData = await loadEvalData({
-      isTraining,
-      index,
-      dependentVariable,
-      resultsField,
-      predictionFieldName,
-      searchQuery,
-      jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
-      requiresKeyword,
-    });
-
-    const docsCountResp = await loadDocsCount({
-      isTraining,
-      searchQuery,
-      resultsField,
-      destIndex: jobConfig.dest.index,
-    });
-
-    if (
-      evalData.success === true &&
-      evalData.eval &&
-      isClassificationEvaluateResponse(evalData.eval)
-    ) {
-      const confusionMatrix =
-        evalData.eval?.classification?.multiclass_confusion_matrix?.confusion_matrix;
-      setError(null);
-      setConfusionMatrixData(confusionMatrix || []);
-      setIsLoading(false);
+  useEffect(() => {
+    if (isTraining === undefined) {
+      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
     } else {
-      setIsLoading(false);
-      setConfusionMatrixData([]);
-      setError(evalData.error);
+      setDataSubsetTitle(
+        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
+      );
     }
-
-    if (docsCountResp.success === true) {
-      setDocsCount(docsCountResp.docsCount);
-    } else {
-      setDocsCount(null);
-    }
-  };
+  }, [isTraining]);
 
   useEffect(() => {
     if (confusionMatrixData.length > 0) {
@@ -204,96 +148,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       });
     }
   }, [confusionMatrixData]);
-
-  useEffect(() => {
-    let isTraining: boolean | undefined;
-    const query =
-      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
-
-    if (query !== undefined && query !== false) {
-      for (let i = 0; i < query.length; i++) {
-        const clause = query[i];
-
-        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
-          isTraining = clause.match[`${resultsField}.is_training`];
-          break;
-        } else if (
-          clause.bool &&
-          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
-        ) {
-          const innerQuery = clause.bool.should || clause.bool.filter;
-          if (innerQuery !== undefined) {
-            for (let j = 0; j < innerQuery.length; j++) {
-              const innerClause = innerQuery[j];
-              if (
-                innerClause.match &&
-                innerClause.match[`${resultsField}.is_training`] !== undefined
-              ) {
-                isTraining = innerClause.match[`${resultsField}.is_training`];
-                break;
-              }
-            }
-          }
-        }
-      }
-    }
-    if (isTraining === undefined) {
-      setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
-    } else {
-      setDataSubsetTitle(
-        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
-      );
-    }
-
-    loadData({ isTraining });
-  }, [JSON.stringify(searchQuery)]);
-
-  useEffect(() => {
-    const loadAucRocData = async () => {
-      const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
-      const newAucRocData: AucRocDataRow[] = [];
-
-      try {
-        requiresKeyword = isKeywordAndTextType(dependentVariable);
-      } catch (e) {
-        // Additional error handling due to missing field type is handled by loadEvalData
-        console.error('Unable to load new field types', error); // eslint-disable-line no-console
-      }
-
-      for (let i = 0; i < classificationClasses.length; i++) {
-        const aucRocClassName = classificationClasses[i];
-        const evalData = await loadEvalData({
-          isTraining: false,
-          index,
-          dependentVariable,
-          resultsField,
-          predictionFieldName,
-          searchQuery,
-          jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
-          requiresKeyword,
-          aucRocClassName,
-          includeMulticlassConfusionMatrix: false,
-        });
-
-        if (
-          evalData.success === true &&
-          evalData.eval &&
-          isClassificationEvaluateResponse(evalData.eval)
-        ) {
-          const aucRocDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
-            (d) => ({
-              class_name: aucRocClassName,
-              ...d,
-            })
-          );
-          newAucRocData.push(...aucRocDataForClass);
-        }
-      }
-
-      setAucRocData(newAucRocData);
-    };
-    loadAucRocData();
-  }, [JSON.stringify([searchQuery, visibleColumns])]);
 
   const renderCellValue = ({
     rowIndex,
