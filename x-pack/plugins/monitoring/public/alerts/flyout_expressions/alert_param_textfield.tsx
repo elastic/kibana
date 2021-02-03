@@ -5,29 +5,27 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 interface Props {
   name: string;
-  value: number;
-  details: { [key: string]: unknown };
+  value: string;
+  placeholder?: string;
+  label: string;
   errors: string[];
-  setAlertParams: (property: string, value: number) => void;
+  setAlertParams: (property: string, value: string) => void;
 }
-export const AlertParamNumber: React.FC<Props> = (props: Props) => {
-  const { name, details, setAlertParams, errors } = props;
+export const AlertParamTextField: React.FC<Props> = (props: Props) => {
+  const { name, label, setAlertParams, errors, placeholder } = props;
   const [value, setValue] = useState(props.value);
   return (
-    <EuiFormRow label={details.label as string} error={errors} isInvalid={errors?.length > 0}>
-      <EuiFieldNumber
+    <EuiFormRow label={label} error={errors} isInvalid={errors?.length > 0}>
+      <EuiFieldText
         compressed
+        placeholder={placeholder}
         value={value}
-        append={details.append as string}
         onChange={(e) => {
-          let newValue = Number(e.target.value);
-          if (isNaN(newValue)) {
-            newValue = 0;
-          }
+          const newValue = e.target.value;
           setValue(newValue);
           setAlertParams(name, newValue);
         }}
