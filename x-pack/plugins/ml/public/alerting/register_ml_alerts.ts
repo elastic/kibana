@@ -29,8 +29,24 @@ export function registerMlAlerts(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.anomalyThreshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-- Threshold: \\{\\{context.threshold\\}\\}`,
+        defaultMessage: `Elastic Stack Machine Learning Alert:
+- Job IDs: \\{\\{#context.jobIds\\}\\}\\{\\{context.jobIds\\}\\} - \\{\\{/context.jobIds\\}\\}
+- Time: \\{\\{context.timestampIso8601\\}\\}
+- Anomaly score: \\{\\{context.score\\}\\}
+
+\\{\\{! Section might be not relevant if selected jobs don't contain influencer configuration \\}\\}
+Top influencers:
+\\{\\{#context.topInfluencers\\}\\}
+  \\{\\{influencer_field_name\\}\\} = \\{\\{influencer_field_value\\}\\} [\\{\\{score\\}\\}]
+\\{\\{/context.topInfluencers\\}\\}
+
+Top records:
+\\{\\{#context.topRecords\\}\\}
+  \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
+\\{\\{/context.topRecords\\}\\}
+
+[Open in Anomaly Explorer](\\{\\{anomalyExplorerUrl\\}\\})
+`,
       }
     ),
   });
