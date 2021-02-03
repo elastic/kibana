@@ -4,29 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, Observable } from 'rxjs';
-import { first, switchMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
+  CoreSetup,
   CoreStart,
   KibanaRequest,
   SavedObjectsClientContract,
   Logger,
-  CoreSetup,
+  SavedObject,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateResponse,
-  SavedObject,
 } from '../../../../../../src/core/server';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../src/plugins/data/common';
-import {
-  ISearchStrategy,
-  ISessionService,
-  SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+import { IKibanaSearchRequest, ISearchOptions } from '../../../../../../src/plugins/data/common';
+import { ISearchSessionService } from '../../../../../../src/plugins/data/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -56,7 +48,8 @@ interface StartDependencies {
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
-export class SearchSessionService implements ISessionService {
+export class SearchSessionService
+  implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
   private config!: SearchSessionsConfig;
 
   constructor(
@@ -86,35 +79,10 @@ export class SearchSessionService implements ISessionService {
     }
   };
 
-  public search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-    strategy: ISearchStrategy<Request, Response>,
-    searchRequest: Request,
-    options: ISearchOptions,
-    searchDeps: SearchStrategyDependencies,
-    deps: SearchSessionDependencies
-  ): Observable<Response> {
-    // If this is a restored background search session, look up the ID using the provided sessionId
-    const getSearchRequest = async () =>
-      !options.isRestore || searchRequest.id
-        ? searchRequest
-        : {
-            ...searchRequest,
-            id: await this.getId(searchRequest, options, deps),
-          };
-
-    return from(getSearchRequest()).pipe(
-      switchMap((request) => strategy.search(request, options, searchDeps)),
-      tap((response) => {
-        if (!options.sessionId || !response.id || options.isRestore) return;
-        this.trackId(searchRequest, response.id, options, deps);
-      })
-    );
-  }
-
   private updateOrCreate = async (
+    deps: SearchSessionDependencies,
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>,
-    deps: SearchSessionDependencies,
     retry: number = 1
   ): Promise<
     | SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>
@@ -125,17 +93,17 @@ export class SearchSessionService implements ISessionService {
       this.logger.debug(`Conflict error | ${sessionId}`);
       // Randomize sleep to spread updates out in case of conflicts
       await sleep(100 + Math.random() * 50);
-      return await this.updateOrCreate(sessionId, attributes, deps, retry + 1);
+      return await this.updateOrCreate(deps, sessionId, attributes, retry + 1);
     };
 
     this.logger.debug(`updateOrCreate | ${sessionId} | ${retry}`);
     try {
-      return await this.update(sessionId, attributes, deps);
+      return await this.update(deps, sessionId, attributes);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         try {
           this.logger.debug(`Object not found | ${sessionId}`);
-          return await this.create(sessionId, attributes, deps);
+          return await this.create(deps, sessionId, attributes);
         } catch (createError) {
           if (
             SavedObjectsErrorHelpers.isConflictError(createError) &&
@@ -160,6 +128,7 @@ export class SearchSessionService implements ISessionService {
   };
 
   public save = async (
+    deps: SearchSessionDependencies,
     sessionId: string,
     {
       name,
@@ -167,31 +136,26 @@ export class SearchSessionService implements ISessionService {
       urlGeneratorId,
       initialState = {},
       restoreState = {},
-    }: Partial<SearchSessionSavedObjectAttributes>,
-    deps: SearchSessionDependencies
+    }: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
-    return this.updateOrCreate(
-      sessionId,
-      {
-        name,
-        appId,
-        urlGeneratorId,
-        initialState,
-        restoreState,
-        persisted: true,
-      },
-      deps
-    );
+    return this.updateOrCreate(deps, sessionId, {
+      name,
+      appId,
+      urlGeneratorId,
+      initialState,
+      restoreState,
+      persisted: true,
+    });
   };
 
   private create = (
+    { savedObjectsClient }: SearchSessionDependencies,
     sessionId: string,
-    attributes: Partial<SearchSessionSavedObjectAttributes>,
-    { savedObjectsClient }: SearchSessionDependencies
+    attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`create | ${sessionId}`);
     return savedObjectsClient.create<SearchSessionSavedObjectAttributes>(
@@ -213,7 +177,7 @@ export class SearchSessionService implements ISessionService {
   };
 
   // TODO: Throw an error if this session doesn't belong to this user
-  public get = (sessionId: string, { savedObjectsClient }: SearchSessionDependencies) => {
+  public get = ({ savedObjectsClient }: SearchSessionDependencies, sessionId: string) => {
     this.logger.debug(`get | ${sessionId}`);
     return savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
@@ -223,8 +187,8 @@ export class SearchSessionService implements ISessionService {
 
   // TODO: Throw an error if this session doesn't belong to this user
   public find = (
-    options: Omit<SavedObjectsFindOptions, 'type'>,
-    { savedObjectsClient }: SearchSessionDependencies
+    { savedObjectsClient }: SearchSessionDependencies,
+    options: Omit<SavedObjectsFindOptions, 'type'>
   ) => {
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
@@ -234,9 +198,9 @@ export class SearchSessionService implements ISessionService {
 
   // TODO: Throw an error if this session doesn't belong to this user
   public update = (
+    { savedObjectsClient }: SearchSessionDependencies,
     sessionId: string,
-    attributes: Partial<SearchSessionSavedObjectAttributes>,
-    { savedObjectsClient }: SearchSessionDependencies
+    attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
     return savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
@@ -249,9 +213,17 @@ export class SearchSessionService implements ISessionService {
     );
   };
 
+  public extend(deps: SearchSessionDependencies, sessionId: string, expires: Date) {
+    this.logger.debug(`extend | ${sessionId}`);
+
+    return this.update(deps, sessionId, { expires: expires.toISOString() });
+  }
+
   // TODO: Throw an error if this session doesn't belong to this user
-  public delete = (sessionId: string, { savedObjectsClient }: SearchSessionDependencies) => {
-    return savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
+  public cancel = (deps: SearchSessionDependencies, sessionId: string) => {
+    return this.update(deps, sessionId, {
+      status: SearchSessionStatus.CANCELLED,
+    });
   };
 
   /**
@@ -259,10 +231,10 @@ export class SearchSessionService implements ISessionService {
    * @internal
    */
   public trackId = async (
+    deps: SearchSessionDependencies,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, strategy }: ISearchOptions,
-    deps: SearchSessionDependencies
+    { sessionId, strategy }: ISearchOptions
   ) => {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
@@ -279,8 +251,17 @@ export class SearchSessionService implements ISessionService {
       idMapping = { [requestHash]: searchInfo };
     }
 
-    return this.updateOrCreate(sessionId, { idMapping }, deps);
+    return this.updateOrCreate(deps, sessionId, { idMapping });
   };
+
+  public async getSearchIdMapping(deps: SearchSessionDependencies, sessionId: string) {
+    const searchSession = await this.get(deps, sessionId);
+    const searchIdMapping = new Map<string, string>();
+    Object.values(searchSession.attributes.idMapping).forEach((requestInfo) => {
+      searchIdMapping.set(requestInfo.id, requestInfo.strategy);
+    });
+    return searchIdMapping;
+  }
 
   /**
    * Look up an existing search ID that matches the given request in the given session so that the
@@ -288,9 +269,9 @@ export class SearchSessionService implements ISessionService {
    * @internal
    */
   public getId = async (
+    deps: SearchSessionDependencies,
     searchRequest: IKibanaSearchRequest,
-    { sessionId, isStored, isRestore }: ISearchOptions,
-    deps: SearchSessionDependencies
+    { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
     if (!sessionId) {
       throw new Error('Session ID is required');
@@ -300,7 +281,7 @@ export class SearchSessionService implements ISessionService {
       throw new Error('Get search ID is only supported when restoring a session');
     }
 
-    const session = await this.get(sessionId, deps);
+    const session = await this.get(deps, sessionId);
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
       this.logger.error(`getId | ${sessionId} | ${requestHash} not found`);
@@ -318,17 +299,15 @@ export class SearchSessionService implements ISessionService {
       });
       const deps = { savedObjectsClient };
       return {
-        search: <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-          strategy: ISearchStrategy<Request, Response>,
-          ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-        ) => this.search(strategy, ...args, deps),
-        save: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
-          this.save(sessionId, attributes, deps),
-        get: (sessionId: string) => this.get(sessionId, deps),
-        find: (options: SavedObjectsFindOptions) => this.find(options, deps),
-        update: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
-          this.update(sessionId, attributes, deps),
-        delete: (sessionId: string) => this.delete(sessionId, deps),
+        getId: this.getId.bind(this, deps),
+        trackId: this.trackId.bind(this, deps),
+        getSearchIdMapping: this.getSearchIdMapping.bind(this, deps),
+        save: this.save.bind(this, deps),
+        get: this.get.bind(this, deps),
+        find: this.find.bind(this, deps),
+        update: this.update.bind(this, deps),
+        extend: this.extend.bind(this, deps),
+        cancel: this.cancel.bind(this, deps),
       };
     };
   };

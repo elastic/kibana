@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
-import type { SearchStrategyDependencies } from '../../../../../../src/plugins/data/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SearchSessionStatus, SEARCH_SESSION_TYPE } from '../../../common';
-import { SearchSessionDependencies, SearchSessionService } from './session_service';
+import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
@@ -81,7 +80,7 @@ describe('SearchSessionService', () => {
   it('get calls saved objects client', async () => {
     savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-    const response = await service.get(sessionId, { savedObjectsClient });
+    const response = await service.get({ savedObjectsClient }, sessionId);
 
     expect(response).toBe(mockSavedObject);
     expect(savedObjectsClient.get).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId);
@@ -101,7 +100,7 @@ describe('SearchSessionService', () => {
     savedObjectsClient.find.mockResolvedValue(mockResponse);
 
     const options = { page: 0, perPage: 5 };
-    const response = await service.find(options, { savedObjectsClient });
+    const response = await service.find({ savedObjectsClient }, options);
 
     expect(response).toBe(mockResponse);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
@@ -118,7 +117,7 @@ describe('SearchSessionService', () => {
     savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
     const attributes = { name: 'new_name' };
-    const response = await service.update(sessionId, attributes, { savedObjectsClient });
+    const response = await service.update({ savedObjectsClient }, sessionId, attributes);
 
     expect(response).toBe(mockUpdateSavedObject);
 
@@ -130,94 +129,14 @@ describe('SearchSessionService', () => {
     expect(callAttributes).toHaveProperty('touched');
   });
 
-  it('delete calls saved objects client', async () => {
-    savedObjectsClient.delete.mockResolvedValue({});
+  it('cancel updates object status', async () => {
+    await service.cancel({ savedObjectsClient }, sessionId);
+    const [type, id, callAttributes] = savedObjectsClient.update.mock.calls[0];
 
-    const response = await service.delete(sessionId, { savedObjectsClient });
-
-    expect(response).toEqual({});
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith(SEARCH_SESSION_TYPE, sessionId);
-  });
-
-  describe('search', () => {
-    const mockSearch = jest.fn().mockReturnValue(of({}));
-    const mockStrategy = { search: mockSearch };
-    const mockSearchDeps = {} as SearchStrategyDependencies;
-    const mockDeps = {} as SearchSessionDependencies;
-
-    beforeEach(() => {
-      mockSearch.mockClear();
-    });
-
-    it('searches using the original request if not restoring', async () => {
-      const searchRequest = { params: {} };
-      const options = { sessionId, isStored: false, isRestore: false };
-
-      await service
-        .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-        .toPromise();
-
-      expect(mockSearch).toBeCalledWith(searchRequest, options, mockSearchDeps);
-    });
-
-    it('searches using the original request if `id` is provided', async () => {
-      const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-      const searchRequest = { id: searchId, params: {} };
-      const options = { sessionId, isStored: true, isRestore: true };
-
-      await service
-        .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-        .toPromise();
-
-      expect(mockSearch).toBeCalledWith(searchRequest, options, mockSearchDeps);
-    });
-
-    it('searches by looking up an `id` if restoring and `id` is not provided', async () => {
-      const searchRequest = { params: {} };
-      const options = { sessionId, isStored: true, isRestore: true };
-      const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
-
-      await service
-        .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-        .toPromise();
-
-      expect(mockSearch).toBeCalledWith({ ...searchRequest, id: 'my_id' }, options, mockSearchDeps);
-
-      spyGetId.mockRestore();
-    });
-
-    it('calls `trackId` for every response, if the response contains an `id` and not restoring', async () => {
-      const searchRequest = { params: {} };
-      const options = { sessionId, isStored: false, isRestore: false };
-      const spyTrackId = jest.spyOn(service, 'trackId');
-      mockSearch.mockReturnValueOnce(of({ id: 'my_id' }, { id: 'my_id' }));
-
-      await service
-        .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-        .toPromise();
-
-      expect(spyTrackId).toBeCalledTimes(2);
-      expect(spyTrackId).toBeCalledWith(searchRequest, 'my_id', options, {});
-
-      spyTrackId.mockRestore();
-    });
-
-    it('does not call `trackId` if restoring', async () => {
-      const searchRequest = { params: {} };
-      const options = { sessionId, isStored: true, isRestore: true };
-      const spyGetId = jest.spyOn(service, 'getId').mockResolvedValueOnce('my_id');
-      const spyTrackId = jest.spyOn(service, 'trackId');
-      mockSearch.mockReturnValueOnce(of({ id: 'my_id' }));
-
-      await service
-        .search(mockStrategy, searchRequest, options, mockSearchDeps, mockDeps)
-        .toPromise();
-
-      expect(spyTrackId).not.toBeCalled();
-
-      spyGetId.mockRestore();
-      spyTrackId.mockRestore();
-    });
+    expect(type).toBe(SEARCH_SESSION_TYPE);
+    expect(id).toBe(sessionId);
+    expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
+    expect(callAttributes).toHaveProperty('touched');
   });
 
   describe('trackId', () => {
@@ -232,12 +151,10 @@ describe('SearchSessionService', () => {
       };
       savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalled();
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -277,12 +194,10 @@ describe('SearchSessionService', () => {
         });
       });
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -298,12 +213,10 @@ describe('SearchSessionService', () => {
         });
       });
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       // Track ID doesn't throw errors even in cases of failure!
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
@@ -325,12 +238,10 @@ describe('SearchSessionService', () => {
       );
       savedObjectsClient.create.mockResolvedValue(mockCreatedSavedObject);
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalled();
       expect(savedObjectsClient.create).toHaveBeenCalled();
@@ -378,12 +289,10 @@ describe('SearchSessionService', () => {
         SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId)
       );
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -400,12 +309,10 @@ describe('SearchSessionService', () => {
         SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId)
       );
 
-      await service.trackId(
-        searchRequest,
-        searchId,
-        { sessionId, strategy: MOCK_STRATEGY },
-        { savedObjectsClient }
-      );
+      await service.trackId({ savedObjectsClient }, searchRequest, searchId, {
+        sessionId,
+        strategy: MOCK_STRATEGY,
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
@@ -417,7 +324,7 @@ describe('SearchSessionService', () => {
       const searchRequest = { params: {} };
 
       expect(() =>
-        service.getId(searchRequest, {}, { savedObjectsClient })
+        service.getId({ savedObjectsClient }, searchRequest, {})
       ).rejects.toMatchInlineSnapshot(`[Error: Session ID is required]`);
     });
 
@@ -425,7 +332,7 @@ describe('SearchSessionService', () => {
       const searchRequest = { params: {} };
 
       expect(() =>
-        service.getId(searchRequest, { sessionId, isStored: false }, { savedObjectsClient })
+        service.getId({ savedObjectsClient }, searchRequest, { sessionId, isStored: false })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Cannot get search ID from a session that is not stored]`
       );
@@ -435,11 +342,11 @@ describe('SearchSessionService', () => {
       const searchRequest = { params: {} };
 
       expect(() =>
-        service.getId(
-          searchRequest,
-          { sessionId, isStored: true, isRestore: false },
-          { savedObjectsClient }
-        )
+        service.getId({ savedObjectsClient }, searchRequest, {
+          sessionId,
+          isStored: true,
+          isRestore: false,
+        })
       ).rejects.toMatchInlineSnapshot(
         `[Error: Get search ID is only supported when restoring a session]`
       );
@@ -467,32 +374,63 @@ describe('SearchSessionService', () => {
       };
       savedObjectsClient.get.mockResolvedValue(mockSession);
 
-      const id = await service.getId(
-        searchRequest,
-        { sessionId, isStored: true, isRestore: true },
-        { savedObjectsClient }
-      );
+      const id = await service.getId({ savedObjectsClient }, searchRequest, {
+        sessionId,
+        isStored: true,
+        isRestore: true,
+      });
 
       expect(id).toBe(searchId);
     });
   });
 
+  describe('getSearchIdMapping', () => {
+    it('retrieves the search IDs and strategies from the saved object', async () => {
+      const mockSession = {
+        id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+        type: SEARCH_SESSION_TYPE,
+        attributes: {
+          name: 'my_name',
+          appId: 'my_app_id',
+          urlGeneratorId: 'my_url_generator_id',
+          idMapping: {
+            foo: {
+              id: 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0',
+              strategy: MOCK_STRATEGY,
+            },
+          },
+        },
+        references: [],
+      };
+      savedObjectsClient.get.mockResolvedValue(mockSession);
+      const searchIdMapping = await service.getSearchIdMapping(
+        { savedObjectsClient },
+        mockSession.id
+      );
+      expect(searchIdMapping).toMatchInlineSnapshot(`
+        Map {
+          "FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0" => "ese",
+        }
+      `);
+    });
+  });
+
   describe('save', () => {
     it('save throws if `name` is not provided', () => {
-      expect(service.save(sessionId, {}, { savedObjectsClient })).rejects.toMatchInlineSnapshot(
+      expect(service.save({ savedObjectsClient }, sessionId, {})).rejects.toMatchInlineSnapshot(
         `[Error: Name is required]`
       );
     });
 
     it('save throws if `appId` is not provided', () => {
       expect(
-        service.save(sessionId, { name: 'banana' }, { savedObjectsClient })
+        service.save({ savedObjectsClient }, sessionId, { name: 'banana' })
       ).rejects.toMatchInlineSnapshot(`[Error: AppId is required]`);
     });
 
     it('save throws if `generator id` is not provided', () => {
       expect(
-        service.save(sessionId, { name: 'banana', appId: 'nanana' }, { savedObjectsClient })
+        service.save({ savedObjectsClient }, sessionId, { name: 'banana', appId: 'nanana' })
       ).rejects.toMatchInlineSnapshot(`[Error: UrlGeneratorId is required]`);
     });
 
@@ -503,15 +441,11 @@ describe('SearchSessionService', () => {
       };
       savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
 
-      await service.save(
-        sessionId,
-        {
-          name: 'banana',
-          appId: 'nanana',
-          urlGeneratorId: 'panama',
-        },
-        { savedObjectsClient }
-      );
+      await service.save({ savedObjectsClient }, sessionId, {
+        name: 'banana',
+        appId: 'nanana',
+        urlGeneratorId: 'panama',
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalled();
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -540,15 +474,11 @@ describe('SearchSessionService', () => {
       );
       savedObjectsClient.create.mockResolvedValue(mockCreatedSavedObject);
 
-      await service.save(
-        sessionId,
-        {
-          name: 'banana',
-          appId: 'nanana',
-          urlGeneratorId: 'panama',
-        },
-        { savedObjectsClient }
-      );
+      await service.save({ savedObjectsClient }, sessionId, {
+        name: 'banana',
+        appId: 'nanana',
+        urlGeneratorId: 'panama',
+      });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
