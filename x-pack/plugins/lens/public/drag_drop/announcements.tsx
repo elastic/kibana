@@ -121,6 +121,12 @@ const defaultAnnouncements = {
     i18n.translate('xpack.lens.dragDrop.announce.cancelled', {
       defaultMessage: 'Movement cancelled',
     }),
+  noTarget: () => {
+    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.noSelected', {
+      defaultMessage: `You have no target selected. Use arrow keys to select a target.`,
+    });
+  },
+
   dropped: (
     { label }: HumanData,
     { groupLabel: dropGroupLabel, position, label: dropLabel }: HumanData
@@ -144,14 +150,9 @@ const defaultAnnouncements = {
           },
         }),
   selectedTarget: (
-    { label, groupLabel }: HumanData,
+    { label }: HumanData,
     { label: dropLabel, groupLabel: dropGroupLabel, position }: HumanData
   ) => {
-    if (label === dropLabel && groupLabel === dropGroupLabel) {
-      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.noSelected', {
-        defaultMessage: `You have no target selected. Use arrow keys to select a target.`,
-      });
-    }
     return dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.default', {
           defaultMessage: `You have selected {dropLabel} in {dropGroupLabel} group in position {position}. Press space or enter to drop {label}`,
@@ -173,9 +174,7 @@ const defaultAnnouncements = {
 };
 
 export const announce = {
-  blockedArrows: defaultAnnouncements.blockedArrows,
-  lifted: defaultAnnouncements.lifted,
-  cancelled: defaultAnnouncements.cancelled,
+  ...defaultAnnouncements,
   dropped: (draggedElement: HumanData, dropElement: HumanData, type?: DropType) =>
     (type && announcements.dropped?.[type]?.(draggedElement, dropElement)) ||
     defaultAnnouncements.dropped(draggedElement, dropElement),

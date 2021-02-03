@@ -850,12 +850,12 @@ describe('workspace_panel', () => {
         visualizationState: {},
       });
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
+      expect(instance.find(DragDrop).prop('dropType')).toBeTruthy();
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
+      expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
     });
   });
 });

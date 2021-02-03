@@ -85,7 +85,6 @@ export function EmptyDimensionButton({
         order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={(droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType)}
         dropType={dropType}
-        droppable={!!dropType}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty

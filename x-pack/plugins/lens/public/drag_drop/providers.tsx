@@ -22,15 +22,16 @@ export type DragDropIdentifier = Record<string, unknown> & {
    * The data for accessibility, consists of required label and not required groupLabel and position in group
    */
   humanData: HumanData;
-  dropType?: DropType;
 };
 
-export interface ActiveDropTarget {
-  activeDropTarget?: DragDropIdentifier;
-  dropTargetsByOrder: Record<
-    string,
-    { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
-  >;
+export type DropIdentifier = DragDropIdentifier & {
+  dropType: DropType;
+  onDrop: DropHandler;
+};
+
+export interface DropTargets {
+  activeDropTarget?: DropIdentifier;
+  dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
 }
 /**
  * The shape of the drag / drop context.
@@ -54,16 +55,12 @@ export interface DragContextState {
    */
   setDragging: (dragging?: DragDropIdentifier) => void;
 
-  activeDropTarget?: ActiveDropTarget;
+  activeDropTarget?: DropTargets;
 
-  setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
+  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
 
   setA11yMessage: (message: string) => void;
-  registerDropTarget: (
-    order: number[],
-    dropTarget: DragDropIdentifier | undefined,
-    onDrop?: DropHandler
-  ) => void;
+  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 }
 
 /**
@@ -110,20 +107,13 @@ export interface ProviderProps {
   setDragging: (dragging?: DragDropIdentifier) => void;
 
   activeDropTarget?: {
-    activeDropTarget?: DragDropIdentifier;
-    dropTargetsByOrder: Record<
-      string,
-      { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
-    >;
+    activeDropTarget?: DropIdentifier;
+    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
   };
 
-  setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
+  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
 
-  registerDropTarget: (
-    order: number[],
-    dropTarget?: DragDropIdentifier,
-    onDrop?: DropHandler
-  ) => void;
+  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 
   /**
    * The React children.
@@ -147,11 +137,8 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   const [keyboardModeState, setKeyboardModeState] = useState(false);
   const [a11yMessageState, setA11yMessageState] = useState('');
   const [activeDropTargetState, setActiveDropTargetState] = useState<{
-    activeDropTarget?: DragDropIdentifier;
-    dropTargetsByOrder: Record<
-      string,
-      { dropTarget: DragDropIdentifier; onDrop?: DropHandler } | undefined
-    >;
+    activeDropTarget?: DropIdentifier;
+    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
   }>({
     activeDropTarget: undefined,
     dropTargetsByOrder: {},
@@ -171,19 +158,19 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   );
 
   const setActiveDropTarget = useMemo(
-    () => (activeDropTarget?: DragDropIdentifier) =>
+    () => (activeDropTarget?: DropIdentifier) =>
       setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
     [setActiveDropTargetState]
   );
 
   const registerDropTarget = useMemo(
-    () => (order: number[], dropTarget?: DragDropIdentifier, onDrop?: DropHandler) => {
+    () => (order: number[], dropTarget?: DropIdentifier) => {
       return setActiveDropTargetState((s) => {
         return {
           ...s,
           dropTargetsByOrder: {
             ...s.dropTargetsByOrder,
-            [order.join(',')]: dropTarget ? { dropTarget, onDrop } : undefined,
+            [order.join(',')]: dropTarget ? dropTarget : undefined,
           },
         };
       });
@@ -229,46 +216,37 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 }
 
 export function nextValidDropTarget(
-  activeDropTarget: ActiveDropTarget | undefined,
-  draggingData: [string, { dropTarget: DragDropIdentifier }],
+  activeDropTarget: DropTargets | undefined,
+  draggingData: [string],
   filterElements?: (el?: DragDropIdentifier) => boolean,
   reverse = false
 ) {
   if (!activeDropTarget) {
     return;
   }
-  const nextDropTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder), draggingData]
-    .filter(
-      ([, target]) => !!target && !!(filterElements ? filterElements(target?.dropTarget) : true)
-    )
-    .sort(([orderA], [orderB]) => {
-      const parsedOrderA = orderA.split(',').map((v) => Number(v));
-      const parsedOrderB = orderB.split(',').map((v) => Number(v));
 
-      const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
-      return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
-    });
-  const currentActiveDropIndex = nextDropTargets.findIndex(([targetOrder, target]) => {
+  const filteredTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder)].filter(
+    ([, dropTarget]) => !!dropTarget && !!(filterElements ? filterElements(dropTarget) : true)
+  );
+
+  const nextDropTargets = [...filteredTargets, draggingData].sort(([orderA], [orderB]) => {
+    const parsedOrderA = orderA.split(',').map((v) => Number(v));
+    const parsedOrderB = orderB.split(',').map((v) => Number(v));
+
+    const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
+    return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
+  });
+
+  const currentActiveDropIndex = nextDropTargets.findIndex(([targetOrder, dropTarget]) => {
     return activeDropTarget.activeDropTarget
-      ? target?.dropTarget.id === activeDropTarget.activeDropTarget.id
+      ? dropTarget?.id === activeDropTarget.activeDropTarget.id
       : targetOrder === draggingData[0];
   });
 
   const previousElement =
     (nextDropTargets.length + currentActiveDropIndex - 1) % nextDropTargets.length;
   const nextElement = (currentActiveDropIndex + 1) % nextDropTargets.length;
-  return nextDropTargets[reverse ? previousElement : nextElement][1]?.dropTarget;
-}
-
-export function getTargetOnDrop(activeDropTarget?: ActiveDropTarget) {
-  if (!activeDropTarget?.dropTargetsByOrder || !activeDropTarget?.activeDropTarget) {
-    return;
-  }
-  const targetEl = Object.entries(activeDropTarget.dropTargetsByOrder).find(([, target]) => {
-    return target?.dropTarget.id === activeDropTarget?.activeDropTarget?.id;
-  });
-
-  return targetEl?.[1]?.onDrop;
+  return nextDropTargets[reverse ? previousElement : nextElement][1];
 }
 
 /**

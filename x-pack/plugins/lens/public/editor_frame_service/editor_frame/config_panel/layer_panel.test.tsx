@@ -509,8 +509,8 @@ describe('LayerPanel', () => {
       );
 
       expect(
-        component.find('[data-test-subj="lnsGroup"] DragDrop').first().prop('droppable')
-      ).toEqual(false);
+        component.find('[data-test-subj="lnsGroup"] DragDrop').first().prop('dropType')
+      ).toEqual(undefined);
 
       component
         .find('[data-test-subj="lnsGroup"] DragDrop')

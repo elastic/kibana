@@ -43,7 +43,10 @@ export function getDropTypes(
     ) {
       if (!currentColumn) {
         return 'field_add';
-      } else if (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name) {
+      } else if (
+        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name) ||
+        !hasField(currentColumn)
+      ) {
         return 'field_replace';
       }
     }
@@ -104,7 +107,6 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       droppedItem: droppedItem as DraggedField,
     });
   }
-
   return operationOnDropMap[dropType]({
     ...props,
     droppedItem: droppedItem as DraggedOperation,

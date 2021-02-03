@@ -13,9 +13,10 @@ import {
   DragContextState,
   ReorderProvider,
   DragDropIdentifier,
-  ActiveDropTarget,
+  DropTargets,
 } from './providers';
 import { act } from 'react-dom/test-utils';
+import { DropType } from '../types';
 
 jest.useFakeTimers();
 
@@ -47,10 +48,10 @@ describe('DragDrop', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('dragover calls preventDefault if droppable is true', () => {
+  test('dragover calls preventDefault if dropType is defined', () => {
     const preventDefault = jest.fn();
     const component = mount(
-      <DragDrop droppable value={value}>
+      <DragDrop dropType="field_add" value={value}>
         <button>Hello!</button>
       </DragDrop>
     );
@@ -60,7 +61,7 @@ describe('DragDrop', () => {
     expect(preventDefault).toBeCalled();
   });
 
-  test('dragover does not call preventDefault if droppable is false', () => {
+  test('dragover does not call preventDefault if dropType is undefined', () => {
     const preventDefault = jest.fn();
     const component = mount(
       <DragDrop value={value}>
@@ -104,7 +105,7 @@ describe('DragDrop', () => {
         dragging={{ id: '2', humanData: { label: 'label1' } }}
         setDragging={setDragging}
       >
-        <DragDrop onDrop={onDrop} droppable={true} value={value}>
+        <DragDrop onDrop={onDrop} dropType="field_add" value={value}>
           <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
@@ -120,7 +121,7 @@ describe('DragDrop', () => {
     expect(onDrop).toBeCalledWith({ id: '2', humanData: { label: 'label1' } }, 'field_add');
   });
 
-  test('drop function is not called on droppable=false', async () => {
+  test('drop function is not called on dropType undefined', async () => {
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();
     const setDragging = jest.fn();
@@ -132,7 +133,7 @@ describe('DragDrop', () => {
         dragging={{ id: 'hi', humanData: { label: 'label1' } }}
         setDragging={setDragging}
       >
-        <DragDrop onDrop={onDrop} droppable={false} value={value}>
+        <DragDrop onDrop={onDrop} dropType={undefined} value={value}>
           <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
@@ -148,13 +149,13 @@ describe('DragDrop', () => {
     expect(onDrop).not.toHaveBeenCalled();
   });
 
-  test('droppable is reflected in the className', () => {
+  test('defined dropType is reflected in the className', () => {
     const component = render(
       <DragDrop
         onDrop={(x: unknown) => {
           throw x;
         }}
-        droppable
+        dropType="field_add"
         value={value}
       >
         <button>Hello!</button>
@@ -164,7 +165,7 @@ describe('DragDrop', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('items that have droppable=false get special styling when another item is dragged', () => {
+  test('items that has dropType=undefined get special styling when another item is dragged', () => {
     const component = mount(
       <ChildDragDropProvider {...defaultContext} dragging={value}>
         <DragDrop value={value} draggable={true}>
@@ -172,7 +173,7 @@ describe('DragDrop', () => {
         </DragDrop>
         <DragDrop
           onDrop={(x: unknown) => {}}
-          droppable={false}
+          dropType={undefined}
           value={{ id: '2', humanData: { label: 'label2' } }}
         >
           <button>Hello!</button>
@@ -207,7 +208,7 @@ describe('DragDrop', () => {
         <DragDrop
           value={value}
           onDrop={(x: unknown) => {}}
-          droppable
+          dropType="field_add"
           getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
           getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
@@ -254,7 +255,7 @@ describe('DragDrop', () => {
         <DragDrop
           value={value}
           onDrop={(x: unknown) => {}}
-          droppable
+          dropType="field_add"
           getAdditionalClassesOnEnter={getAdditionalClasses}
           getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         >
@@ -277,15 +278,28 @@ describe('DragDrop', () => {
   });
 
   describe('reordering', () => {
+    const onDrop = jest.fn();
     const items = [
-      { id: '1', humanData: { label: 'label1', position: 1 } },
-      { id: '2', humanData: { label: 'label2', position: 2 } },
-      { id: '3', humanData: { label: 'label3', position: 3 } },
+      {
+        id: '1',
+        humanData: { label: 'label1', position: 1 },
+        onDrop,
+        dropType: 'reorder' as DropType,
+      },
+      {
+        id: '2',
+        humanData: { label: 'label2', position: 2 },
+        onDrop,
+        dropType: 'reorder' as DropType,
+      },
+      {
+        id: '3',
+        humanData: { label: 'label3', position: 3 },
+        onDrop,
+        dropType: 'reorder' as DropType,
+      },
     ];
-    const mountComponent = (
-      dragContext: Partial<DragContextState> | undefined,
-      onDrop: DropHandler = jest.fn()
-    ) => {
+    const mountComponent = (dragContext: Partial<DragContextState> | undefined) => {
       let dragging = dragContext?.dragging;
       let keyboardMode = !!dragContext?.keyboardMode;
       let activeDropTarget = dragContext?.activeDropTarget;
@@ -299,7 +313,7 @@ describe('DragDrop', () => {
           keyboardMode = mode;
         }),
         setActiveDropTarget: (target?: DragDropIdentifier) => {
-          activeDropTarget = { activeDropTarget: target } as ActiveDropTarget;
+          activeDropTarget = { activeDropTarget: target } as DropTargets;
         },
         activeDropTarget,
         setA11yMessage: jest.fn(),
@@ -311,9 +325,8 @@ describe('DragDrop', () => {
           <ReorderProvider id="groupId">
             <DragDrop
               draggable
-              droppable={false}
               dragType="move"
-              dropType="reorder"
+              dropType={undefined}
               reorderableGroup={items}
               value={items[0]}
               onDrop={onDrop}
@@ -323,7 +336,6 @@ describe('DragDrop', () => {
             </DragDrop>
             <DragDrop
               draggable
-              droppable
               dragType="move"
               dropType="reorder"
               reorderableGroup={items}
@@ -335,7 +347,6 @@ describe('DragDrop', () => {
             </DragDrop>
             <DragDrop
               draggable
-              droppable
               dragType="move"
               dropType="reorder"
               reorderableGroup={items}
@@ -350,17 +361,14 @@ describe('DragDrop', () => {
       );
     };
     test(`Inactive group renders properly`, () => {
-      const component = mountComponent(undefined, jest.fn());
+      const component = mountComponent(undefined);
       expect(component.find('[data-test-subj="lnsDragDrop"]')).toHaveLength(3);
     });
 
     test(`Reorderable group with lifted element renders properly`, () => {
       const setDragging = jest.fn();
       const setA11yMessage = jest.fn();
-      const component = mountComponent(
-        { dragging: items[0], setA11yMessage, setDragging },
-        jest.fn()
-      );
+      const component = mountComponent({ dragging: items[0], setA11yMessage, setDragging });
       act(() => {
         component
           .find('[data-test-subj="lnsDragDrop"]')
@@ -379,7 +387,7 @@ describe('DragDrop', () => {
     });
 
     test(`Reordered elements get extra styles to show the reorder effect when dragging`, () => {
-      const component = mountComponent({ dragging: items[0] }, jest.fn());
+      const component = mountComponent({ dragging: items[0] });
 
       act(() => {
         component
@@ -424,9 +432,8 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const preventDefault = jest.fn();
       const stopPropagation = jest.fn();
-      const onDrop = jest.fn();
 
-      const component = mountComponent({ dragging: items[0], setA11yMessage, setDragging }, onDrop);
+      const component = mountComponent({ dragging: items[0], setA11yMessage, setDragging });
 
       component
         .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
@@ -443,15 +450,14 @@ describe('DragDrop', () => {
     });
 
     test(`Keyboard navigation: user can drop element to an activeDropTarget`, () => {
-      const onDrop = jest.fn();
       const component = mountComponent({
         dragging: items[0],
         activeDropTarget: {
-          activeDropTarget: { ...items[2], dropType: 'reorder' },
+          activeDropTarget: { ...items[2], dropType: 'reorder', onDrop },
           dropTargetsByOrder: {
-            '2,0,0': { dropTarget: items[0] },
-            '2,0,1': { dropTarget: items[1] },
-            '2,0,2': { dropTarget: items[2], onDrop },
+            '2,0,0': { ...items[0], onDrop, dropType: 'reorder' },
+            '2,0,1': { ...items[1], onDrop, dropType: 'reorder' },
+            '2,0,2': { ...items[2], onDrop, dropType: 'reorder' },
           },
         },
 
@@ -471,14 +477,11 @@ describe('DragDrop', () => {
 
     test(`Keyboard Navigation: Reordered elements get extra styles to show the reorder effect`, () => {
       const setA11yMessage = jest.fn();
-      const component = mountComponent(
-        {
-          dragging: items[0],
-          keyboardMode: true,
-          setA11yMessage,
-        },
-        jest.fn()
-      );
+      const component = mountComponent({
+        dragging: items[0],
+        keyboardMode: true,
+        setA11yMessage,
+      });
 
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
       keyboardHandler.simulate('keydown', { key: 'Space' });
@@ -514,18 +517,14 @@ describe('DragDrop', () => {
     });
 
     test(`Keyboard Navigation: User cannot move an element outside of the group`, () => {
-      const onDrop = jest.fn();
       const setActiveDropTarget = jest.fn();
       const setA11yMessage = jest.fn();
-      const component = mountComponent(
-        {
-          dragging: items[0],
-          keyboardMode: true,
-          setActiveDropTarget,
-          setA11yMessage,
-        },
-        onDrop
-      );
+      const component = mountComponent({
+        dragging: items[0],
+        keyboardMode: true,
+        setActiveDropTarget,
+        setA11yMessage,
+      });
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
 
       keyboardHandler.simulate('keydown', { key: 'Space' });
@@ -551,7 +550,7 @@ describe('DragDrop', () => {
           activeDropTarget={
             {
               activeDropTarget: { id: '2', humanData: { label: 'label2' } },
-            } as ActiveDropTarget
+            } as DropTargets
           }
           dragging={items[0]}
           setActiveDropTarget={setActiveDropTarget}
@@ -560,9 +559,7 @@ describe('DragDrop', () => {
           <ReorderProvider id="groupId">
             <DragDrop
               draggable
-              droppable={false}
               dragType="move"
-              dropType="reorder"
               reorderableGroup={[items[0], items[1]]}
               value={items[0]}
             >
@@ -570,7 +567,6 @@ describe('DragDrop', () => {
             </DragDrop>
             <DragDrop
               draggable
-              droppable
               dragType="move"
               dropType="reorder"
               reorderableGroup={[items[0], items[1]]}
@@ -591,9 +587,8 @@ describe('DragDrop', () => {
 
     test(`Keyboard Navigation: Doesn't call onDrop when movement is cancelled`, () => {
       const setA11yMessage = jest.fn();
-      const onDrop = jest.fn();
 
-      const component = mountComponent({ dragging: items[0], setA11yMessage }, onDrop);
+      const component = mountComponent({ dragging: items[0], setA11yMessage });
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'Escape' });
