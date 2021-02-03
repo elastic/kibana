@@ -1158,7 +1158,10 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseString();
+            s5 = peg$parseNumber();
+            if (s5 === peg$FAILED) {
+              s5 = peg$parseString();
+            }
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {

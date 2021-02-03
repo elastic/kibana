@@ -53,6 +53,7 @@ export const logSourceColumnConfigurationRT = rt.union([
   logSourceMessageColumnConfigurationRT,
   logSourceFieldColumnConfigurationRT,
 ]);
+export type LogSourceColumnConfiguration = rt.TypeOf<typeof logSourceColumnConfigurationRT>;
 
 export const logSourceConfigurationPropertiesRT = rt.strict({
   name: rt.string,

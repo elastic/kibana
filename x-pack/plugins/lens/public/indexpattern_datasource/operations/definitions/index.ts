@@ -265,7 +265,8 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
     column: C,
     columnId: string,
     indexPattern: IndexPattern,
-    layer: IndexPatternLayer
+    layer: IndexPatternLayer,
+    uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
 }
 
@@ -316,7 +317,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     column: C,
     columnId: string,
     indexPattern: IndexPattern,
-    layer: IndexPatternLayer
+    layer: IndexPatternLayer,
+    uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
   /**
    * Optional function to return the suffix used for ES bucket paths and esaggs column id.

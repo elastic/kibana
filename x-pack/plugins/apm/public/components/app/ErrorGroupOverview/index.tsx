@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
@@ -37,27 +36,30 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
     groupId: undefined,
   });
 
-  const { data: errorGroupListData } = useFetcher(() => {
-    const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+  const { data: errorGroupListData } = useFetcher(
+    (callApmApi) => {
+      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/errors',
-        params: {
-          path: {
-            serviceName,
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/errors',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              sortField,
+              sortDirection: normalizedSortDirection,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            sortField,
-            sortDirection: normalizedSortDirection,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, sortField, sortDirection, uiFilters]
+  );
 
   useTrackPageview({
     app: 'apm',
