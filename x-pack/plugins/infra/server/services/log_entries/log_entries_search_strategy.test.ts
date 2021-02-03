@@ -17,6 +17,7 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
 import { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
@@ -307,6 +308,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  searchSessionsClient: createSearchSessionsClientMock(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,
