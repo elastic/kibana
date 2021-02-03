@@ -968,7 +968,7 @@ export class VectorLayer extends AbstractLayer {
         type: 'line',
         source: sourceId,
         paint: {
-          'line-color': 'orange',
+          'line-color': 'red',
           'line-width': 4,
           'line-dasharray': [2, 1],
         },
