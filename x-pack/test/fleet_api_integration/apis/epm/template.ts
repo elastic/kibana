@@ -11,7 +11,7 @@ import { getTemplate } from '../../../../plugins/fleet/server/services/epm/elast
 
 export default function ({ getService }: FtrProviderContext) {
   const templateName = 'bar';
-  const indexPatternName = 'bar-*';
+  const templateIndexPattern = 'bar-*';
   const es = getService('es');
   const mappings = {
     properties: {
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can be loaded', async () => {
       const template = getTemplate({
         type: 'logs',
-        indexPatternName,
+        templateIndexPattern,
         mappings,
         packageName: 'system',
         composedOfTemplates: [],
@@ -52,7 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
       // Checks if the content of the template that was loaded is as expected
       // We already know based on the above test that the template was valid
       // but we check here also if we wrote the index pattern inside the template as expected
-      expect(response2.index_templates[0].index_template.index_patterns).to.eql([indexPatternName]);
+      expect(response2.index_templates[0].index_template.index_patterns).to.eql([
+        templateIndexPattern,
+      ]);
     });
   });
 }

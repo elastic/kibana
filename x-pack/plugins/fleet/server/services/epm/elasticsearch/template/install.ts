@@ -18,9 +18,9 @@ import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import {
-  generateIndexPatternName,
   generateMappings,
   generateTemplateName,
+  generateTemplateIndexPattern,
   getTemplate,
   getTemplatePriority,
 } from './template';
@@ -299,7 +299,7 @@ export async function installTemplate({
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataStream);
-  const indexPatternName = generateIndexPatternName(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
   let pipelineName;
@@ -319,7 +319,7 @@ export async function installTemplate({
 
   const template = getTemplate({
     type: dataStream.type,
-    indexPatternName,
+    templateIndexPattern,
     mappings,
     pipelineName,
     packageName,

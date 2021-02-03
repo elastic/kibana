@@ -23,17 +23,17 @@ expect.addSnapshotSerializer({
 });
 
 test('get template', () => {
-  const indexPatternName = 'logs-nginx-access-abcd-*';
+  const templateIndexPattern = 'logs-nginx-access-abcd-*';
 
   const template = getTemplate({
     type: 'logs',
-    indexPatternName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
     templatePriority: 200,
   });
-  expect(template.index_patterns).toStrictEqual([indexPatternName]);
+  expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
 });
 
 test('adds composed_of correctly', () => {
@@ -41,7 +41,7 @@ test('adds composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    indexPatternName: 'name-*',
+    templateIndexPattern: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
@@ -55,7 +55,7 @@ test('adds empty composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    indexPatternName: 'name-*',
+    templateIndexPattern: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
@@ -65,11 +65,11 @@ test('adds empty composed_of correctly', () => {
 });
 
 test('adds hidden field correctly', () => {
-  const indexPatternName = 'logs-nginx-access-abcd-*';
+  const templateIndexPattern = 'logs-nginx-access-abcd-*';
 
   const templateWithHidden = getTemplate({
     type: 'logs',
-    indexPatternName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
@@ -80,7 +80,7 @@ test('adds hidden field correctly', () => {
 
   const templateWithoutHidden = getTemplate({
     type: 'logs',
-    indexPatternName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
@@ -98,7 +98,7 @@ test('tests loading base.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    indexPatternName: 'foo-*',
+    templateIndexPattern: 'foo-*',
     packageName: 'nginx',
     mappings,
     composedOfTemplates: [],
@@ -117,7 +117,7 @@ test('tests loading coredns.logs.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    indexPatternName: 'foo-*',
+    templateIndexPattern: 'foo-*',
     packageName: 'coredns',
     mappings,
     composedOfTemplates: [],
@@ -136,7 +136,7 @@ test('tests loading system.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'metrics',
-    indexPatternName: 'whatsthis-*',
+    templateIndexPattern: 'whatsthis-*',
     packageName: 'system',
     mappings,
     composedOfTemplates: [],

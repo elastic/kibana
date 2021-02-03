@@ -44,7 +44,7 @@ const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
  */
 export function getTemplate({
   type,
-  indexPatternName,
+  templateIndexPattern,
   mappings,
   pipelineName,
   packageName,
@@ -54,7 +54,7 @@ export function getTemplate({
   hidden,
 }: {
   type: string;
-  indexPatternName: string;
+  templateIndexPattern: string;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
@@ -65,7 +65,7 @@ export function getTemplate({
 }): IndexTemplate {
   const template = getBaseTemplate(
     type,
-    indexPatternName,
+    templateIndexPattern,
     mappings,
     packageName,
     composedOfTemplates,
@@ -249,7 +249,7 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
   return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
-export function generateIndexPatternName(dataStream: RegistryDataStream): string {
+export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
   // undefined or explicitly set to false
   // See also https://github.com/elastic/package-spec/pull/102
   if (!dataStream.dataset_is_prefix) {
@@ -291,14 +291,14 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateIndexPatternName(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
   }
   return patterns;
 }
 
 function getBaseTemplate(
   type: string,
-  indexPatternName: string,
+  templateIndexPattern: string,
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
@@ -318,7 +318,7 @@ function getBaseTemplate(
   return {
     priority: templatePriority,
     // To be completed with the correct index patterns
-    index_patterns: [indexPatternName],
+    index_patterns: [templateIndexPattern],
     template: {
       settings: {
         index: {
