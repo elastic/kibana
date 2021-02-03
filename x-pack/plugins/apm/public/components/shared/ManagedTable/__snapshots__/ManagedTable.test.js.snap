@@ -33,7 +33,6 @@ exports[`ManagedTable component should render a page-full of items, with default
       },
     ]
   }
-  loading={false}
   noItemsMessage="No items found"
   onChange={[Function]}
   pagination={
@@ -82,7 +81,6 @@ exports[`ManagedTable component should render when specifying initial values 1`]
       },
     ]
   }
-  loading={false}
   noItemsMessage="No items found"
   onChange={[Function]}
   pagination={

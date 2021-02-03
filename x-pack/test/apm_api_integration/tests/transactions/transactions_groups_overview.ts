@@ -38,7 +38,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.transactionGroups).to.empty();
         expect(response.body.isAggregationAccurate).to.be(true);
-        expect(response.body.requestId).to.not.empty();
       });
     }
   );

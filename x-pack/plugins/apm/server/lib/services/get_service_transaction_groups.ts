@@ -5,7 +5,6 @@
  */
 
 import { sortBy } from 'lodash';
-import uuid from 'uuid';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -133,7 +132,6 @@ export async function getServiceTransactionGroups({
   const sortedTransactionGroups = sortBy(transactionGroups, 'impact').reverse();
 
   return {
-    requestId: uuid(),
     transactionGroups: sortedTransactionGroups.map((transactionGroup) => ({
       ...transactionGroup,
       transactionType,

@@ -18,12 +18,13 @@ import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { TransactionGroupsOverview } from './';
 
-export type ServiceTransactionGroupItem = ValuesType<
+type TransactionGroupsOverview = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>;
+
+type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupsOverview['transactionGroups']
 >;
-type TransactionGroupMetrics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/agg_results'>;
+type TransactionGroupsStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/statistics'>;
 
 function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
@@ -50,11 +51,11 @@ function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
 export function getColumns({
   serviceName,
   latencyAggregationType,
-  transactionGroupsAggResults,
+  transactionGroupsStatistics,
 }: {
   serviceName: string;
   latencyAggregationType?: string;
-  transactionGroupsAggResults?: TransactionGroupMetrics;
+  transactionGroupsStatistics?: TransactionGroupsStatistics;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -88,8 +89,8 @@ export function getColumns({
       name: getLatencyAggregationTypeLabel(latencyAggregationType),
       width: px(unit * 10),
       render: (_, { latency, name }) => {
-        const timeseries = transactionGroupsAggResults
-          ? transactionGroupsAggResults[name]?.latency
+        const timeseries = transactionGroupsStatistics
+          ? transactionGroupsStatistics[name]?.latency
           : undefined;
         return (
           <SparkPlot
@@ -110,8 +111,8 @@ export function getColumns({
       ),
       width: px(unit * 10),
       render: (_, { throughput, name }) => {
-        const timeseries = transactionGroupsAggResults
-          ? transactionGroupsAggResults[name]?.throughput
+        const timeseries = transactionGroupsStatistics
+          ? transactionGroupsStatistics[name]?.throughput
           : undefined;
         return (
           <SparkPlot
@@ -132,8 +133,8 @@ export function getColumns({
       ),
       width: px(unit * 8),
       render: (_, { errorRate, name }) => {
-        const timeseries = transactionGroupsAggResults
-          ? transactionGroupsAggResults[name]?.errorRate
+        const timeseries = transactionGroupsStatistics
+          ? transactionGroupsStatistics[name]?.errorRate
           : undefined;
         return (
           <SparkPlot
@@ -154,8 +155,8 @@ export function getColumns({
       ),
       width: px(unit * 5),
       render: (_, { name }) => {
-        const impact = transactionGroupsAggResults
-          ? transactionGroupsAggResults[name]?.impact
+        const impact = transactionGroupsStatistics
+          ? transactionGroupsStatistics[name]?.impact
           : 0;
         return <ImpactBar value={impact} size="m" />;
       },

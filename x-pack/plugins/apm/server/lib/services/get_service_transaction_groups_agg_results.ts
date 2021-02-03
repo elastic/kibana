@@ -88,35 +88,31 @@ export async function getServiceTransactionGroupsAggResults({
       },
       aggs: {
         total_duration: { sum: { field: TRANSACTION_DURATION } },
-        transaction_name_filter: {
-          filter: { terms: { [TRANSACTION_NAME]: transactionNames } },
+        transaction_groups: {
+          terms: {
+            field: TRANSACTION_NAME,
+            include: transactionNames,
+            size: transactionNames.length,
+          },
           aggs: {
-            transaction_groups: {
-              terms: {
-                field: TRANSACTION_NAME,
-                size: transactionNames.length,
+            transaction_group_total_duration: {
+              sum: { field: TRANSACTION_DURATION },
+            },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: start,
+                  max: end,
+                },
               },
               aggs: {
-                transaction_group_total_duration: {
-                  sum: { field: TRANSACTION_DURATION },
-                },
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: start,
-                      max: end,
-                    },
-                  },
-                  aggs: {
-                    ...getLatencyAggregation(latencyAggregationType, field),
-                    [EVENT_OUTCOME]: {
-                      filter: {
-                        term: { [EVENT_OUTCOME]: EventOutcome.failure },
-                      },
-                    },
+                ...getLatencyAggregation(latencyAggregationType, field),
+                [EVENT_OUTCOME]: {
+                  filter: {
+                    term: { [EVENT_OUTCOME]: EventOutcome.failure },
                   },
                 },
               },
@@ -127,42 +123,34 @@ export async function getServiceTransactionGroupsAggResults({
     },
   });
 
-  const buckets =
-    response.aggregations?.transaction_name_filter.transaction_groups.buckets ??
-    [];
+  const buckets = response.aggregations?.transaction_groups.buckets ?? [];
 
   const totalDuration = response.aggregations?.total_duration.value;
 
   return buckets.reduce((acc, bucket) => {
     const transactionName = bucket.key;
 
-    const latency: Coordinate[] = bucket.timeseries.buckets.map(
-      (timeseriesBucket) => ({
-        x: timeseriesBucket.key,
-        y: getLatencyValue({
-          latencyAggregationType,
-          aggregation: timeseriesBucket.latency,
-        }),
-      })
-    );
+    const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y: getLatencyValue({
+        latencyAggregationType,
+        aggregation: timeseriesBucket.latency,
+      }),
+    }));
 
-    const throughput: Coordinate[] = bucket.timeseries.buckets.map(
-      (timeseriesBucket) => ({
-        x: timeseriesBucket.key,
-        y: timeseriesBucket.doc_count / deltaAsMinutes,
-      })
-    );
+    const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y: timeseriesBucket.doc_count / deltaAsMinutes,
+    }));
 
-    const errorRate: Coordinate[] = bucket.timeseries.buckets.map(
-      (timeseriesBucket) => ({
-        x: timeseriesBucket.key,
-        y:
-          timeseriesBucket.doc_count > 0
-            ? timeseriesBucket[EVENT_OUTCOME].doc_count /
-              timeseriesBucket.doc_count
-            : null,
-      })
-    );
+    const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+      x: timeseriesBucket.key,
+      y:
+        timeseriesBucket.doc_count > 0
+          ? timeseriesBucket[EVENT_OUTCOME].doc_count /
+            timeseriesBucket.doc_count
+          : null,
+    }));
 
     const transactionGroupTotalDuration =
       bucket.transaction_group_total_duration.value || 0;

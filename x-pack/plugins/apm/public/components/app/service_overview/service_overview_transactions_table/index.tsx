@@ -13,26 +13,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty, orderBy } from 'lodash';
 import React, { useState } from 'react';
+import uuid from 'uuid';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../services/rest/createCallApmApi';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
-export type TransactionGroupsOverview = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>;
-
 interface Props {
   serviceName: string;
 }
 
-const INITIAL_STATE: TransactionGroupsOverview = {
+const INITIAL_STATE = {
   transactionGroups: [],
   isAggregationAccurate: true,
   requestId: '',
@@ -66,32 +61,40 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
-  const { data = INITIAL_STATE, status } = useFetcher(() => {
-    if (!start || !end || !latencyAggregationType || !transactionType) {
-      return;
-    }
-    return callApmApi({
-      endpoint:
-        'GET /api/apm/services/{serviceName}/transactions/groups/overview',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          transactionType,
-          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+  const { data = INITIAL_STATE, status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !latencyAggregationType || !transactionType) {
+        return;
+      }
+      return callApmApi({
+        endpoint:
+          'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            transactionType,
+            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+          },
         },
-      },
-    });
-  }, [
-    serviceName,
-    start,
-    end,
-    uiFilters,
-    transactionType,
-    latencyAggregationType,
-  ]);
+      }).then((response) => {
+        return {
+          requestId: uuid(),
+          ...response,
+        };
+      });
+    },
+    [
+      serviceName,
+      start,
+      end,
+      uiFilters,
+      transactionType,
+      latencyAggregationType,
+    ]
+  );
 
   const { transactionGroups, requestId } = data;
   const currentPageTransactionGroups = orderBy(
@@ -101,46 +104,43 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
   const transactionNames = JSON.stringify(
-    currentPageTransactionGroups.map(({ name }) => name)
+    currentPageTransactionGroups.map(({ name }) => name).sort()
   );
 
   const {
-    data: transactionGroupsAggResults,
-    status: transactionGroupsAggResultsStatus,
+    data: transactionGroupsStatistics,
+    status: transactionGroupsStatisticsStatus,
   } = useFetcher(
-    () => {
-      async function fetchAggResults() {
-        if (
-          !isEmpty(requestId) &&
-          transactionNames &&
-          start &&
-          end &&
-          transactionType
-        ) {
-          const metrics = await callApmApi({
-            endpoint:
-              'GET /api/apm/services/{serviceName}/transactions/groups/agg_results',
-            params: {
-              path: { serviceName },
-              query: {
-                start,
-                end,
-                uiFilters: JSON.stringify(uiFilters),
-                numBuckets: 20,
-                transactionType,
-                latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-                transactionNames,
-              },
+    (callApmApi) => {
+      if (
+        !isEmpty(requestId) &&
+        currentPageTransactionGroups.length &&
+        start &&
+        end &&
+        transactionType
+      ) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transactions/groups/statistics',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              numBuckets: 20,
+              transactionType,
+              latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+              transactionNames,
             },
-            isCachable: true,
-          });
-
-          return { [requestId]: metrics };
-        }
+          },
+          isCachable: true,
+        }).then((result) => {
+          return { [requestId]: result };
+        });
       }
-      return fetchAggResults();
     },
-    // only fetches metrics when requestId changes or transaction names changes
+    // only fetches statistics when requestId changes or transaction names changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId, transactionNames]
   );
@@ -148,14 +148,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupsAggResults: transactionGroupsAggResults
-      ? transactionGroupsAggResults[requestId]
+    transactionGroupsStatistics: transactionGroupsStatistics
+      ? transactionGroupsStatistics[requestId]
       : undefined,
   });
 
   const isLoading =
     status === FETCH_STATUS.LOADING ||
-    transactionGroupsAggResultsStatus === FETCH_STATUS.LOADING;
+    transactionGroupsStatisticsStatus === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,
