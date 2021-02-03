@@ -18,7 +18,6 @@ import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
@@ -4342,14 +4341,8 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`throws when ES is unable to find the document during update`, async () => {
-        const notFoundError = new EsErrors.ResponseError(
-          elasticsearchClientMock.createApiResponse({
-            statusCode: 404,
-            body: { error: { type: 'es_type', reason: 'es_reason' } },
-          })
-        );
         client.update.mockResolvedValueOnce(
-          elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
         );
         await expectNotFoundError(type, id);
         expect(client.update).toHaveBeenCalledTimes(1);

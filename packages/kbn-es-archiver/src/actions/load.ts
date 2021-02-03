@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
@@ -92,15 +92,17 @@ export async function loadAction({
 
   await client.indices.refresh({
     index: '_all',
-    allowNoIndices: true,
+    allow_no_indices: true,
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
     await migrateKibanaIndex({ client, kbnClient });
+    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
       await createDefaultSpace({ client, index: '.kibana' });
+      log.debug('[%s] Ensured that default space exists in .kibana', name);
     }
   }
 

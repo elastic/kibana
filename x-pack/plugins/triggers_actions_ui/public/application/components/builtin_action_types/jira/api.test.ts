@@ -8,6 +8,7 @@ import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
 const issueTypesResponse = {
+  status: 'ok',
   data: {
     projects: [
       {
@@ -24,9 +25,11 @@ const issueTypesResponse = {
       },
     ],
   },
+  actionId: 'test',
 };
 
 const fieldsResponse = {
+  status: 'ok',
   data: {
     projects: [
       {
@@ -70,13 +73,18 @@ const fieldsResponse = {
         ],
       },
     ],
+    actionId: 'test',
   },
 };
 
 const issueResponse = {
-  id: '10267',
-  key: 'RJ-107',
-  fields: { summary: 'Test title' },
+  status: 'ok',
+  data: {
+    id: '10267',
+    key: 'RJ-107',
+    fields: { summary: 'Test title' },
+  },
+  actionId: 'test',
 };
 
 const issuesResponse = [issueResponse];

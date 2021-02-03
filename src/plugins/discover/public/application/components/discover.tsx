@@ -7,7 +7,7 @@
  */
 
 import './discover.scss';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -80,6 +80,7 @@ export function Discover({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  unmappedFieldsConfig,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -102,6 +103,13 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+  const columns = useMemo(() => {
+    if (!state.columns) {
+      return [];
+    }
+    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
+  }, [state, useNewFieldsApi]);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -127,7 +135,7 @@ export function Discover({
           <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
               <SidebarMemoized
-                columns={state.columns || []}
+                columns={columns}
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
@@ -139,6 +147,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
@@ -277,7 +286,7 @@ export function Discover({
                         </h2>
                         {isLegacy && rows && rows.length && (
                           <DocTableLegacyMemoized
-                            columns={state.columns || []}
+                            columns={columns}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
                             rows={rows}

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface State {
+export interface MetricState {
   layerId: string;
   accessor?: string;
 }
 
-export interface MetricConfig extends State {
+export interface MetricConfig extends MetricState {
   title: string;
   description: string;
   metricTitle: string;

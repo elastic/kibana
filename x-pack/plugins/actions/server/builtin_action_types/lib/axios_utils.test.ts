@@ -10,7 +10,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
-import { getProxyAgents } from './get_proxy_agents';
+import { getCustomAgents } from './get_custom_agents';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
@@ -66,7 +66,7 @@ describe('request', () => {
       proxyRejectUnauthorizedCertificates: true,
       proxyUrl: 'https://localhost:1212',
     });
-    const { httpAgent, httpsAgent } = getProxyAgents(configurationUtilities, logger);
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
 
     const res = await request({
       axios,

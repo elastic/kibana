@@ -24,6 +24,7 @@
     "src/plugins/input_control_vis/**/*",
     "src/plugins/inspector/**/*",
     "src/plugins/kibana_legacy/**/*",
+    "src/plugins/kibana_overview/**/*",
     "src/plugins/kibana_react/**/*",
     "src/plugins/kibana_usage_collection/**/*",
     "src/plugins/kibana_utils/**/*",
@@ -59,6 +60,7 @@
     "src/plugins/vis_type_xy/**/*",
     "src/plugins/visualizations/**/*",
     "src/plugins/visualize/**/*",
+    "src/plugins/index_pattern_management/**/*",
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
@@ -83,6 +85,7 @@
     { "path": "./src/plugins/home/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
     { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
+    { "path": "./src/plugins/kibana_overview/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
@@ -117,5 +120,6 @@
     { "path": "./src/plugins/vis_type_xy/tsconfig.json" },
     { "path": "./src/plugins/visualizations/tsconfig.json" },
     { "path": "./src/plugins/visualize/tsconfig.json" },
+    { "path": "./src/plugins/index_pattern_management/tsconfig.json" },
   ]
 }

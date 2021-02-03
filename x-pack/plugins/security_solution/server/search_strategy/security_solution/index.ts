@@ -37,7 +37,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
+              rawResponse: shimHitsTotal(response.rawResponse, options),
             },
           };
         }),
