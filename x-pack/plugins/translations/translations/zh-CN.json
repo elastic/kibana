@@ -2785,7 +2785,6 @@
     "indexPatternManagement.emptyIndexPatternPrompt.youHaveData": "您在 Elasticsearch 中有数据。",
     "indexPatternManagement.fieldTypeConflict": "字段类型冲突",
     "indexPatternManagement.formatHeader": "格式",
-    "indexPatternFieldEditor.formatLabel": "设置格式允许您控制特定值的显示方式。其还会导致值完全更改，并阻止 Discover 中的突出显示起作用。",
     "indexPatternManagement.frozenLabel": "已冻结",
     "indexPatternManagement.indexLabel": "索引",
     "indexPatternManagement.indexNameLabel": "索引名称",

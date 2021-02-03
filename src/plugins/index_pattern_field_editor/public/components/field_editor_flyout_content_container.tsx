@@ -52,12 +52,9 @@ export interface Props {
    */
   field?: IndexPatternField;
   /**
-   * Index pattern service
+   * Services
    */
   indexPatternService: DataPublicPluginStart['indexPatterns'];
-  /**
-   * Notification service
-   */
   notifications: NotificationsStart;
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];

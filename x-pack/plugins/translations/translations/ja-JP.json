@@ -2781,7 +2781,6 @@
     "indexPatternManagement.emptyIndexPatternPrompt.youHaveData": "Elasticsearchにデータがあります。",
     "indexPatternManagement.fieldTypeConflict": "フィールドタイプの矛盾",
     "indexPatternManagement.formatHeader": "フォーマット",
-    "indexPatternFieldEditor.formatLabel": "フォーマットは、特定の値の表示形式を管理できます。また、値を完全に変更したり、ディスカバリでのハイライト機能を無効にしたりすることも可能です。",
     "indexPatternManagement.frozenLabel": "凍結",
     "indexPatternManagement.indexLabel": "インデックス",
     "indexPatternManagement.indexNameLabel": "インデックス名",

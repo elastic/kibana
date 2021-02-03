@@ -10,7 +10,6 @@ import React from 'react';
 import { UseField, NumericField } from '../../../shared_imports';
 
 export const PopularityField = () => {
-  // TODO how to pass props down to input for functional test
   return (
     <UseField
       path="popularity"

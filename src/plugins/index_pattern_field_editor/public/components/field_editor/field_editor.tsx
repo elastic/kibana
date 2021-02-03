@@ -6,7 +6,6 @@
  * Public License, v 1.
  */
 import React, { useEffect } from 'react';
-// import { isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
@@ -168,7 +167,7 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: ['name'] });
+  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
@@ -245,7 +244,6 @@ const FieldEditorComponent = ({
         formFieldPath="__meta__.isFormatVisible"
         withDividerRule
       >
-        {/** type need to be set to kbn type, esTypes need to be set */}
         <FormatField
           indexPattern={indexPattern}
           fieldFormatEditors={fieldFormatEditors}
