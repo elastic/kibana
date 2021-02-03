@@ -21,10 +21,12 @@ import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
-  query: PivotQuery
+  query: PivotQuery,
+  overrides?: StepDefineExposedState
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -32,6 +34,7 @@ export const useIndexData = (
     ml: {
       getFieldType,
       getDataGridSchemaFromKibanaFieldType,
+      getDataGridSchemaFromESFieldType,
       getFieldsFromKibanaIndexPattern,
       getRuntimeFieldsMapping,
       showDataGridColumnChartErrorMessageToast,
@@ -46,15 +49,33 @@ export const useIndexData = (
     indexPattern,
     getFieldsFromKibanaIndexPattern,
   ]);
+  const columns: EuiDataGridColumn[] = useMemo(() => {
+    let runtimeMappingColumns: Array<{ id: string; schema: string | undefined }> = [];
+    if (overrides?.runtimeMappings !== undefined) {
+      runtimeMappingColumns = Object.keys(overrides.runtimeMappings).map((fieldName) => {
+        const field = overrides.runtimeMappings[fieldName];
+        const schema = getDataGridSchemaFromESFieldType(field.type);
+        return { id: fieldName, schema };
+      });
+    }
+    return [
+      ...indexPatternFields.map((id) => {
+        const field = indexPattern.fields.getByName(id);
+        const schema = getDataGridSchemaFromKibanaFieldType(field);
+        return { id, schema };
+      }),
+      ...runtimeMappingColumns,
+    ];
+    return columns;
+  }, [
+    indexPatternFields,
+    indexPattern.fields,
+    overrides,
+    getDataGridSchemaFromESFieldType,
+    getDataGridSchemaFromKibanaFieldType,
+  ]);
 
   // EuiDataGrid State
-  const columns: EuiDataGridColumn[] = [
-    ...indexPatternFields.map((id) => {
-      const field = indexPattern.fields.getByName(id);
-      const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema };
-    }),
-  ];
 
   const dataGrid = useDataGrid(columns);
 
@@ -96,10 +117,9 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
+        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern, overrides?.runtimeMappings),
       },
     };
-
     const resp = await api.esSearch(esSearchRequest);
 
     if (!isEsSearchResponse(resp)) {
@@ -139,7 +159,13 @@ export const useIndexData = (
     fetchDataGridData();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [
+    indexPattern.title,
+    indexPatternFields,
+    overrides?.runtimeMappings,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify([query, pagination, sortingColumns]),
+  ]);
 
   useEffect(() => {
     if (chartsVisible) {

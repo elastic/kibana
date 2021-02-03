@@ -7,6 +7,7 @@
 
 export {
   getDataGridSchemasFromFieldTypes,
+  getDataGridSchemaFromESFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getRuntimeFieldsMapping,

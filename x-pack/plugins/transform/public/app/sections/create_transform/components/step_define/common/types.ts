@@ -47,6 +47,8 @@ export interface StepDefineExposedState {
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
+  // @TODO: fix any
+  runtimeMappings?: any;
 }
 
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {

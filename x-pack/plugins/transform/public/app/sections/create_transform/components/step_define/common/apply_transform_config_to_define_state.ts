@@ -108,5 +108,7 @@ export function applyTransformConfigToDefineState(
   // applying a transform config to wizard state will always result in a valid configuration
   state.valid = true;
 
+  state.runtimeMappings = transformConfig.source.runtime_mappings;
+
   return state;
 }

@@ -65,9 +65,8 @@ export interface StepDefineFormProps {
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
-  const { searchItems } = props;
+  const { searchItems, overrides } = props;
   const { indexPattern } = searchItems;
-
   const {
     ml: { DataGrid },
   } = useAppDependencies();
@@ -87,11 +86,10 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const pivotQuery = stepDefineForm.searchBar.state.pivotQuery;
 
   const indexPreviewProps = {
-    ...useIndexData(indexPattern, stepDefineForm.searchBar.state.pivotQuery),
+    ...useIndexData(indexPattern, stepDefineForm.searchBar.state.pivotQuery, overrides),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
-
   const { requestPayload, validationStatus } =
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state

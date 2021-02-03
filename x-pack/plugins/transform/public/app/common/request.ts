@@ -60,7 +60,8 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
-  partialRequest?: StepDefineExposedState['previewRequest'] | undefined
+  partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
+  runtimeMappings?: object
 ): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
@@ -68,6 +69,7 @@ export function getPreviewTransformRequestBody(
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
+      ...(runtimeMappings && !isMatchAllQuery(query) ? { query } : {}),
     },
     ...(partialRequest ?? {}),
   };

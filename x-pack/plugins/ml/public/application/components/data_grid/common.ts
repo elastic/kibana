@@ -90,21 +90,26 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
  */
 export const getRuntimeFieldsMapping = (
   indexPatternFields: string[],
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  // @TODO
+  clonedRuntimeMappings?: any
 ) => {
   if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
-  const runtimeMappings = indexPattern.getComputedFields().runtimeFields;
-  const filteredRuntimeMappings: { [ipField: string]: any } = {};
+  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+  let combinedRuntimeMappings: { [ipField: string]: any } = {};
 
-  if (typeof runtimeMappings === 'object' && Object.keys(runtimeMappings).length > 0) {
+  if (typeof ipRuntimeMappings === 'object' && Object.keys(ipRuntimeMappings).length > 0) {
     indexPatternFields.forEach((ipField) => {
-      if (runtimeMappings.hasOwnProperty(ipField)) {
-        filteredRuntimeMappings[ipField] = runtimeMappings[ipField];
+      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
+        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
   }
-  return Object.keys(filteredRuntimeMappings).length > 0
-    ? { runtime_mappings: filteredRuntimeMappings }
+  if (typeof clonedRuntimeMappings === 'object') {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
+  }
+  return Object.keys(combinedRuntimeMappings).length > 0
+    ? { runtime_mappings: combinedRuntimeMappings }
     : {};
 };
 
@@ -157,6 +162,45 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 };
 
 export const NON_AGGREGATABLE = 'non-aggregatable';
+
+export const getDataGridSchemaFromESFieldType = (
+  fieldType: ES_FIELD_TYPES | undefined
+): string | undefined => {
+  // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+  // To fall back to the default string schema it needs to be undefined.
+  let schema;
+
+  switch (fieldType) {
+    case ES_FIELD_TYPES.GEO_POINT:
+    case ES_FIELD_TYPES.GEO_SHAPE:
+      schema = 'json';
+      break;
+    case ES_FIELD_TYPES.BOOLEAN:
+      schema = 'boolean';
+      break;
+    case ES_FIELD_TYPES.DATE:
+    case ES_FIELD_TYPES.DATE_NANOS:
+      schema = 'datetime';
+      break;
+    case ES_FIELD_TYPES.BYTE:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+    case ES_FIELD_TYPES.SHORT:
+      schema = 'numeric';
+      break;
+    // keep schema undefined for text based columns
+    case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.TEXT:
+      break;
+  }
+
+  return schema;
+};
+
 export const getDataGridSchemaFromKibanaFieldType = (
   field: IFieldType | undefined
 ): string | undefined => {
