@@ -26,6 +26,7 @@ import {
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '../../../../../../../common/constants/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -106,6 +107,7 @@ export const getAnalyticsFactory = (
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
+  setJobsAwaitingNodeCount: React.Dispatch<React.SetStateAction<number>>,
   blockRefresh: boolean,
   isManagementTable: boolean
 ): GetAnalytics => {
@@ -134,6 +136,8 @@ export const getAnalyticsFactory = (
           ? getAnalyticsJobsStats(analyticsStats)
           : undefined;
 
+        let jobsAwaitingNodeCount = 0;
+
         const tableRows = analyticsConfigs.data_frame_analytics.reduce(
           (reducedtableRows, config) => {
             const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
@@ -144,6 +148,10 @@ export const getAnalyticsFactory = (
             // If that's the case we just skip the job and don't add it to the analytics jobs list yet.
             if (!isDataFrameAnalyticsStats(stats)) {
               return reducedtableRows;
+            }
+
+            if (stats.state === DATA_FRAME_TASK_STATE.STARTING && stats.node === undefined) {
+              jobsAwaitingNodeCount++;
             }
 
             // Table with expandable rows requires `id` on the outer most level
@@ -166,6 +174,7 @@ export const getAnalyticsFactory = (
         setAnalyticsStats(analyticsStatsResult);
         setErrorMessage(undefined);
         setIsInitialized(true);
+        setJobsAwaitingNodeCount(jobsAwaitingNodeCount);
         refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
       } catch (e) {
         // An error is followed immediately by setting the state to idle.
