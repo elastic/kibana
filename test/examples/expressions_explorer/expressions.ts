@@ -7,13 +7,14 @@
  */
 
 import expect from '@kbn/expect';
-
+import testSubjSelector from '@kbn/test-subj-selector';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
   const browser = getService('browser');
 
   describe('', () => {
@@ -33,8 +34,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
     });
 
+    it('updates the variable', async () => {
+      const selector = `${testSubjSelector('expressionsVariablesTest')} ${testSubjSelector(
+        'testExpressionButton'
+      )}`;
+      await find.clickByCssSelector(selector);
+      await retry.try(async () => {
+        const el = await find.byCssSelector(selector);
+        const style = await el.getAttribute('style');
+        expect(style).to.contain('red');
+      });
+    });
+
     it('emits an action and navigates', async () => {
-      await testSubjects.click('testExpressionButton');
+      const selector = `${testSubjSelector('expressionsActionsTest')} ${testSubjSelector(
+        'testExpressionButton'
+      )}`;
+      await find.clickByCssSelector(selector);
       await retry.try(async () => {
         const text = await browser.getCurrentUrl();
         expect(text).to.be('https://www.google.com/?gws_rd=ssl');
