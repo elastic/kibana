@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
-import { UseField, SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
+import { SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
 import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
 import { DataTierAllocationType } from '../../../../../types';
+
+import { UseField } from '../../../../../form';
 
 import { NodeAllocation } from './node_allocation';
 import { SharedProps } from './types';
