@@ -116,7 +116,6 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
   } = useKibana<DashboardAppServices>();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
-  const [mounted, setMounted] = useState(true);
   const [dashboardIds, setDashboardIds] = useState<string[]>(
     dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
   );
@@ -143,16 +142,16 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
   );
 
   useEffect(() => {
-    return () => setMounted(false);
-  });
-
-  useEffect(() => {
+    if (dashboardIds?.length === 0) {
+      return;
+    }
+    let canceled = false;
     const dashPromises = dashboardIds
       .filter((id) => id !== DASHBOARD_PANELS_UNSAVED_ID)
       .map((dashboardId) => savedDashboards.get(dashboardId));
     Promise.all(dashPromises).then((dashboards: DashboardSavedObject[]) => {
       const dashboardMap = {};
-      if (!mounted) {
+      if (canceled) {
         return;
       }
       setItems(
@@ -164,7 +163,10 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
         }, dashboardMap)
       );
     });
-  }, [dashboardIds, savedDashboards, mounted]);
+    return () => {
+      canceled = true;
+    };
+  }, [dashboardIds, savedDashboards]);
 
   return dashboardIds.length === 0 ? null : (
     <>
