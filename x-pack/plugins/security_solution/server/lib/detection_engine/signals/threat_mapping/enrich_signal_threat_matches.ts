@@ -72,6 +72,7 @@ export const enrichSignalThreatMatches = async (
     return signals;
   }
 
+  // TODO update hits total to account for deduping
   const uniqueHits = groupAndMergeSignalMatches(signalHits);
   const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
