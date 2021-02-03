@@ -8,6 +8,7 @@
 import './share_mode_control.scss';
 import React from 'react';
 import {
+  EuiCallOut,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { SpaceTarget } from '../types';
@@ -125,8 +127,40 @@ export const ShareModeControl = (props: Props) => {
     onChange(updatedSpaceIds);
   };
 
+  const getPrivilegeWarning = () => {
+    if (!shareToExplicitSpaces.disabled) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiCallOut
+          size="s"
+          iconType="help"
+          title={
+            <FormattedMessage
+              id="xpack.spaces.management.shareToSpace.privilegeWarningTitle"
+              defaultMessage="Additional privileges required"
+            />
+          }
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.privilegeWarningBody"
+            defaultMessage="To edit the spaces for this {objectNoun}, you need privileges to modify it in all spaces. Contact your system administrator for more information."
+            values={{ objectNoun }}
+          />
+        </EuiCallOut>
+
+        <EuiSpacer size="m" />
+      </>
+    );
+  };
+
   return (
     <>
+      {getPrivilegeWarning()}
+
       <EuiCheckableCard
         id={shareToExplicitSpaces.id}
         label={createLabel(shareToExplicitSpaces)}
