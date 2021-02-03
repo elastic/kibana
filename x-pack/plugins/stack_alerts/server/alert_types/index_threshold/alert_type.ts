@@ -14,30 +14,10 @@ import {
   CoreQueryParamsSchemaProperties,
   TimeSeriesQuery,
 } from '../../../../triggers_actions_ui/server';
+import { ComparatorFns, getHumanReadableComparator } from '../lib';
 
 export const ID = '.index-threshold';
-
-enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  NOT_BETWEEN = 'notBetween',
-}
-
-const humanReadableComparators = new Map<string, string>([
-  [Comparator.LT, 'less than'],
-  [Comparator.LT_OR_EQ, 'less than or equal to'],
-  [Comparator.GT_OR_EQ, 'greater than or equal to'],
-  [Comparator.GT, 'greater than'],
-  [Comparator.BETWEEN, 'between'],
-  [Comparator.NOT_BETWEEN, 'not between'],
-]);
-
 const ActionGroupId = 'threshold met';
-const ComparatorFns = getComparatorFns();
-export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
 export function getAlertType(
   logger: Logger,
@@ -155,7 +135,14 @@ export function getAlertType(
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
-      throw new Error(getInvalidComparatorMessage(params.thresholdComparator));
+      throw new Error(
+        i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
+          defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+          values: {
+            comparator: params.thresholdComparator,
+          },
+        })
+      );
     }
 
     const callCluster = services.callCluster;
@@ -209,41 +196,4 @@ export function getAlertType(
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
   }
-}
-
-export function getInvalidComparatorMessage(comparator: string) {
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-    values: {
-      comparator,
-    },
-  });
-}
-
-type ComparatorFn = (value: number, threshold: number[]) => boolean;
-
-function getComparatorFns(): Map<string, ComparatorFn> {
-  const fns: Record<string, ComparatorFn> = {
-    [Comparator.LT]: (value: number, threshold: number[]) => value < threshold[0],
-    [Comparator.LT_OR_EQ]: (value: number, threshold: number[]) => value <= threshold[0],
-    [Comparator.GT_OR_EQ]: (value: number, threshold: number[]) => value >= threshold[0],
-    [Comparator.GT]: (value: number, threshold: number[]) => value > threshold[0],
-    [Comparator.BETWEEN]: (value: number, threshold: number[]) =>
-      value >= threshold[0] && value <= threshold[1],
-    [Comparator.NOT_BETWEEN]: (value: number, threshold: number[]) =>
-      value < threshold[0] || value > threshold[1],
-  };
-
-  const result = new Map<string, ComparatorFn>();
-  for (const key of Object.keys(fns)) {
-    result.set(key, fns[key]);
-  }
-
-  return result;
-}
-
-function getHumanReadableComparator(comparator: string) {
-  return humanReadableComparators.has(comparator)
-    ? humanReadableComparators.get(comparator)
-    : comparator;
 }

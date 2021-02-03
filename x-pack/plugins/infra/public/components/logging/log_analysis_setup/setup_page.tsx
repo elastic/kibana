@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const LogAnalysisSetupPage: React.FunctionComponent<CommonProps> = ({
   children,

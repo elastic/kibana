@@ -49,7 +49,7 @@ export const registerUpdateRoute = ({
       try {
         const {
           follower_indices: followerIndices,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.info', { id });
+        } = await context.crossClusterReplication.client.callAsCurrentUser('ccr.info', { id });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 

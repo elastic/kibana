@@ -13,8 +13,7 @@ import { Section } from '../../../../public/pages/metrics/metric_detail/componen
 import { SubSection } from '../../../../public/pages/metrics/metric_detail/components/sub_section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { withTheme } from '../../../../../observability/public';
+import { withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>

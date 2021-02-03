@@ -18,7 +18,7 @@ export function createDiskUsageAlertType(): AlertTypeModel<MonitoringAlertTypePa
     description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`;
+      return `${docLinks.links.monitoring.alertsKibanaDiskThreshold}`;
     },
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_DISK_USAGE].paramDetails} />

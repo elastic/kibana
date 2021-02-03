@@ -24,11 +24,9 @@ export function registerDocumentsRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/new`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/new`,
+    })
   );
 }
 
@@ -46,11 +44,9 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/:documentId`,
+    })
   );
   router.delete(
     {
@@ -62,10 +58,8 @@ export function registerDocumentRoutes({
         }),
       },
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: `/as/engines/${request.params.engineName}/documents/${request.params.documentId}`,
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: `/as/engines/:engineName/documents/:documentId`,
+    })
   );
 }

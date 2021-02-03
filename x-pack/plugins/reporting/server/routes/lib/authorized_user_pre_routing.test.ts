@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
 import { ReportingInternalSetup } from '../../core';
@@ -14,6 +14,7 @@ import {
   createMockReportingCore,
 } from '../../test_helpers';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 let mockCore: ReportingCore;
 const mockConfig: any = { 'server.basePath': '/sbp', 'roles.allow': ['reporting_user'] };
@@ -23,7 +24,7 @@ const mockReportingConfig = createMockConfig(mockReportingConfigSchema);
 const getMockContext = () =>
   (({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown) as RequestHandlerContext);
+  } as unknown) as ReportingRequestHandlerContext);
 
 const getMockRequest = () =>
   ({

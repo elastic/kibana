@@ -125,9 +125,12 @@ export const getProcessList = async (
         command: bucket.key,
       };
     });
-    const {
-      summary,
-    } = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process;
+
+    let summary: { [p: string]: number } = {};
+    if (result.aggregations!.summaryEvent.summary.hits.hits.length) {
+      summary = result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process
+        .summary;
+    }
 
     return {
       processList,

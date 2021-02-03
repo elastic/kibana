@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerGetAllTagsRoute = (router: IRouter) => {
+export const registerGetAllTagsRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags',

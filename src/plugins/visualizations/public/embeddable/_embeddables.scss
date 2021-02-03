@@ -8,10 +8,6 @@
     @include euiScrollBar; /* 2 */
   }
 
-  .visualization .visChart__container {
-    overflow: visible; /* 1 */
-  }
-
   .visLegend__toggle {
     border-bottom-right-radius: 0;
     border-top-left-radius: 0;

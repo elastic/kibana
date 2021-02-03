@@ -2,7 +2,7 @@
   "name": "@kbn/storybook",
   "version": "1.0.0",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "main": "./target/index.js",
   "kibana": {
     "devOnly": true

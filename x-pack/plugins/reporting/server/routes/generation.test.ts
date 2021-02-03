@@ -13,6 +13,7 @@ import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockReportingCore, createMockLevelLogger } from '../test_helpers';
 import { registerJobGenerationRoutes } from './generation';
+import type { ReportingRequestHandlerContext } from '../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -46,7 +47,11 @@ describe('POST /api/reporting/generate', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     callClusterStub = sinon.stub().resolves({});
 

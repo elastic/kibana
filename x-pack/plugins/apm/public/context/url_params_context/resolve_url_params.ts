@@ -49,6 +49,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm,
     percentile,
     latencyAggregationType = LatencyAggregationType.avg,
+    comparisonEnabled,
+    comparisonType,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -78,6 +80,10 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType,
+    comparisonEnabled: comparisonEnabled
+      ? toBoolean(comparisonEnabled)
+      : undefined,
+    comparisonType,
 
     // ui filters
     environment,

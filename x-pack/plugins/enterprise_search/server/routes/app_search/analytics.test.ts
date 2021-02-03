@@ -27,12 +27,8 @@ describe('analytics routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine' },
-      });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/analytics/queries',
+        path: '/as/engines/:engineName/analytics/queries',
       });
     });
 
@@ -84,12 +80,8 @@ describe('analytics routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine', query: 'some-query' },
-      });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/analytics/query/some-query',
+        path: '/as/engines/:engineName/analytics/query/:query',
       });
     });
 

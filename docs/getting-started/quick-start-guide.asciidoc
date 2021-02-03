@@ -106,7 +106,7 @@ For more information, refer to <<dashboard,*Dashboard*>>.
 [[create-a-visualization]]
 === Create a visualization panel
 
-To create a treemap panel that shows the top regions and manufacturers, use *Lens*, then add the treemap panel to the dashboard.
+Create a treemap panel that shows the top regions and manufacturers, then add the panel to the dashboard.
 
 . From the toolbar, click *Edit*, then click *Create new*.
 
@@ -132,7 +132,7 @@ The treemap appears as the last visualization panel on the dashboard.
 [role="screenshot"]
 image::getting-started/images/tutorial-final-dashboard.gif[Final dashboard with new treemap visualization]
 +
-For more information, refer to <<lens, *Lens*>>.
+For more information, refer to <<dashboard,Dashboard>>.
 
 [float]
 [[quick-start-whats-next]]

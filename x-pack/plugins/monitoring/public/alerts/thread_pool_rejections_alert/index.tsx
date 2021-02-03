@@ -31,7 +31,7 @@ export function createThreadPoolRejectionsAlertType(
     description: threadPoolAlertDetails.description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html`;
+      return `${docLinks.links.monitoring.alertsKibana}`;
     },
     alertParamsExpression: (props: Props) => (
       <>

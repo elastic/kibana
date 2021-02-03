@@ -21,7 +21,6 @@ import {
 } from '../services';
 
 import { getActionType as getCaseConnector } from './case';
-export { CASE_ACTION_TYPE_ID } from './case';
 
 export interface GetActionTypeParams {
   logger: Logger;

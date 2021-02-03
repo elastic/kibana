@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const popupVersions: Array<[string, string]> = [['malware', '7.11+']];
+const popupVersions: Array<[string, string]> = [
+  ['malware', '7.11+'],
+  ['ransomware', '7.12+'],
+];
 
 export const popupVersionsMap: ReadonlyMap<string, string> = new Map<string, string>(popupVersions);

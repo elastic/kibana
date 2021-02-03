@@ -7,8 +7,8 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-
-import { euiStyled, useUiTracker } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../../observability/public';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
 
@@ -67,12 +67,13 @@ export const BottomDrawer: React.FC<{
 
 const BottomActionContainer = euiStyled.div<{ isOpen: boolean }>`
   padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
-  position: fixed;
+  position: absolute;
+  height: ${(props) => (props.isOpen ? '244px' : '48px')};
+  overflow: ${(props) => (props.isOpen ? 'visible' : 'hidden')};
   left: 0;
   bottom: 0;
   right: 0;
-  transition: transform ${TRANSITION_MS}ms;
-  transform: translateY(${(props) => (props.isOpen ? 0 : '224px')})
+  transition: height ${TRANSITION_MS}ms;
 `;
 
 const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({

@@ -22,6 +22,7 @@ import {
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -31,13 +32,14 @@ const createAppContextMock = () => ({
   config: () => Promise.resolve(createMockConfig()),
 });
 
-const createHandlerContextMock = () => ({
-  ...xpackMocks.createRequestHandlerContext(),
-  lists: {
-    getListClient: jest.fn(),
-    getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
-  },
-});
+const createHandlerContextMock = () =>
+  (({
+    ...xpackMocks.createRequestHandlerContext(),
+    lists: {
+      getListClient: jest.fn(),
+      getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+    },
+  } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
 
 const assertResponse = <T>(
   response: jest.Mocked<KibanaResponseFactory>,

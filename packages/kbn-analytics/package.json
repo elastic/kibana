@@ -7,7 +7,7 @@
   "browser": "target/web/index.js",
   "types": "target/types/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License",
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --source-maps",

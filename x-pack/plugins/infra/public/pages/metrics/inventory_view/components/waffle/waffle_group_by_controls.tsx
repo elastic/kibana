@@ -17,7 +17,7 @@ import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';

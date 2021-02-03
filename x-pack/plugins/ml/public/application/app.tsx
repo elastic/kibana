@@ -77,6 +77,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     security: deps.security,
     licenseManagement: deps.licenseManagement,
     storage: localStorage,
+    embeddable: deps.embeddable,
+    maps: deps.maps,
     ...coreStart,
   };
 
@@ -118,6 +120,7 @@ export const renderApp = (
     http: coreStart.http,
     security: deps.security,
     urlGenerators: deps.share.urlGenerators,
+    maps: deps.maps,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

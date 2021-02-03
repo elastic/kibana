@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('send to background', () => {
     before(async function () {
@@ -26,14 +26,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
+    after(async function () {
+      await searchSessions.deleteAllSearchSessions();
+    });
+
+    it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes. Back button restores a session.', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      const url = await browser.getCurrentUrl();
+      let url = await browser.getCurrentUrl();
       const fakeSessionId = '__fake__';
       const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
       await browser.get(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
       await testSubjects.existOrFail('embeddableErrorLabel'); // expected that panel errors out because of non existing session
 
       const session1 = await dashboardPanelActions.getSearchSessionIdByTitle(
@@ -41,22 +45,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(session1).to.be(fakeSessionId);
 
-      await sendToBackground.refresh();
+      await searchSessions.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await sendToBackground.expectState('completed');
+      await searchSessions.expectState('completed');
       await testSubjects.missingOrFail('embeddableErrorLabel');
       const session2 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
       );
       expect(session2).not.to.be(fakeSessionId);
+
+      // back button should restore the session:
+      url = await browser.getCurrentUrl();
+      expect(url).not.to.contain('searchSessionId');
+
+      await browser.goBack();
+
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain('searchSessionId');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('restored');
+      expect(
+        await dashboardPanelActions.getSearchSessionIdByTitle('Sum of Bytes by Extension')
+      ).to.be(fakeSessionId);
     });
 
     it('Saves and restores a session', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
-      await sendToBackground.expectState('completed');
-      await sendToBackground.save();
-      await sendToBackground.expectState('backgroundCompleted');
+      await searchSessions.expectState('completed');
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension'
       );
@@ -69,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       // Check that session is restored
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
       await testSubjects.missingOrFail('embeddableErrorLabel');
       const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
       expect(data.length).to.be(5);
@@ -77,7 +95,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
+
+      // navigating to a listing page clears the session
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await searchSessions.missingOrFail();
     });
   });
 }

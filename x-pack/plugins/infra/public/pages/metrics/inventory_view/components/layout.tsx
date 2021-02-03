@@ -19,7 +19,7 @@ import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/source';
 import { InfraFormatterType } from '../../../../lib/lib';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { IntervalLabel } from './waffle/interval_label';

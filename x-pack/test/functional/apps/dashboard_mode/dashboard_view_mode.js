@@ -68,46 +68,36 @@ export default function ({ getService, getPageObjects }) {
 
       before('Create dashboard only mode user', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.security.clickUsersSection();
-        await PageObjects.security.clickCreateNewUser();
-        await testSubjects.setValue('userFormUserNameInput', 'dashuser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('logstash-data');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'dashuser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'dashuser',
+          roles: ['kibana_dashboard_only_user', 'logstash-data'],
+        });
       });
 
       before('Create user with mixes roles', async () => {
-        await PageObjects.security.clickCreateNewUser();
-
-        await testSubjects.setValue('userFormUserNameInput', 'mixeduser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('kibana_admin');
-        await PageObjects.security.assignRoleToUser('logstash-data');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'mixeduser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'mixeduser',
+          roles: ['kibana_dashboard_only_user', 'kibana_admin', 'logstash-data'],
+        });
       });
 
       before('Create user with dashboard and superuser role', async () => {
-        await PageObjects.security.clickCreateNewUser();
-
-        await testSubjects.setValue('userFormUserNameInput', 'mysuperuser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('superuser');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'mysuperuser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'mixeduser',
+          roles: ['kibana_dashboard_only_user', 'superuser'],
+        });
       });
 
       after(async () => {

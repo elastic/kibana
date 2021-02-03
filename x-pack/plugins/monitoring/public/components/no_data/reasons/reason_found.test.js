@@ -8,6 +8,16 @@ import React from 'react';
 import { renderWithIntl } from '@kbn/test/jest';
 import { ReasonFound } from '.';
 
+jest.mock('../../../legacy_shims', () => ({
+  Legacy: {
+    shims: {
+      docLinks: {
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+      },
+    },
+  },
+}));
+
 const enabler = {};
 
 describe('ReasonFound', () => {

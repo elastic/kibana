@@ -260,20 +260,22 @@ export const DataGrid: FC<Props> = memo(
             <EuiFlexItem>
               <DataGridTitle title={props.title} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                beforeMessage={props.copyToClipboardDescription}
-                textToCopy={props.copyToClipboard}
-              >
-                {(copy: () => void) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copyClipboard"
-                    aria-label={props.copyToClipboardDescription}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
+            {props.copyToClipboard && props.copyToClipboardDescription && (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  beforeMessage={props.copyToClipboardDescription}
+                  textToCopy={props.copyToClipboard}
+                >
+                  {(copy: () => void) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={props.copyToClipboardDescription}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         )}
         {errorCallout !== undefined && (

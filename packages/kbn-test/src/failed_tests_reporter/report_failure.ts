@@ -1,29 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import { TestFailure } from './get_failures';
 import { GithubIssueMini, GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
-
-export function getCiType() {
-  return process.env.TEAMCITY_CI ? 'TeamCity' : 'Jenkins';
-}
 
 export async function createFailureIssue(buildUrl: string, failure: TestFailure, api: GithubApi) {
   const title = `Failing test: ${failure.classname} - ${failure.name}`;
@@ -36,7 +21,7 @@ export async function createFailureIssue(buildUrl: string, failure: TestFailure,
       failure.failure,
       '```',
       '',
-      `First failure: [${getCiType()} Build](${buildUrl})`,
+      `First failure: [Jenkins Build](${buildUrl})`,
     ].join('\n'),
     {
       'test.class': failure.classname,
@@ -56,7 +41,7 @@ export async function updateFailureIssue(buildUrl: string, issue: GithubIssueMin
   });
 
   await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
-  await api.addIssueComment(issue.number, `New failure: [${getCiType()} Build](${buildUrl})`);
+  await api.addIssueComment(issue.number, `New failure: [Jenkins Build](${buildUrl})`);
 
   return newCount;
 }

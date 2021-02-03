@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
 import {
-  enableSignificantTerms,
+  enableCorrelations,
   enableServiceOverview,
 } from '../common/ui_settings_keys';
 
@@ -16,17 +16,16 @@ import {
  * uiSettings definitions for APM.
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
-  [enableSignificantTerms]: {
+  [enableCorrelations]: {
     category: ['observability'],
     name: i18n.translate('xpack.apm.enableCorrelationsExperimentName', {
-      defaultMessage: 'APM Significant terms (Platinum required)',
+      defaultMessage: 'APM correlations (Platinum required)',
     }),
     value: false,
     description: i18n.translate(
       'xpack.apm.enableCorrelationsExperimentDescription',
       {
-        defaultMessage:
-          'Enable the experimental Significant terms feature in APM',
+        defaultMessage: 'Enable the experimental correlations feature in APM',
       }
     ),
     schema: schema.boolean(),

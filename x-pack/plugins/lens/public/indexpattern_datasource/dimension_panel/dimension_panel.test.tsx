@@ -187,6 +187,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
             id: 'bytes',
             title: 'Bytes',
           }),
+          deserialize: jest.fn().mockReturnValue({
+            convert: () => 'formatted',
+          }),
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,

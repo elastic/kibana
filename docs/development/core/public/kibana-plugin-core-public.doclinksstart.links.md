@@ -30,6 +30,11 @@ readonly links: {
         readonly metricbeat: {
             readonly base: string;
         };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
+        };
         readonly heartbeat: {
             readonly base: string;
         };
@@ -117,6 +122,7 @@ readonly links: {
             createPipeline: string;
             createTransformRequest: string;
             executeWatchActionModes: string;
+            indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;

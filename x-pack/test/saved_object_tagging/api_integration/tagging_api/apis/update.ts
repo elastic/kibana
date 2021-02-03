@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post(`/api/saved_objects_tagging/tags/tag-1`)
         .send({
-          name: 'Inv%li& t@g n*me',
+          name: 'a',
           description: 'some desc',
           color: 'this is not a valid color',
         })
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
               valid: false,
               warnings: [],
               errors: {
-                name: 'Tag name can only include a-z, 0-9, _, -,:.',
+                name: 'Tag name must be at least 2 characters',
                 color: 'Tag color must be a valid hex color',
               },
             },

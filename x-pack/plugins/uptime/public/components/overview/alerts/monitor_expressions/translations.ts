@@ -54,6 +54,12 @@ export const alertFilterLabels = {
   ANY_LOCATION: i18n.translate('xpack.uptime.alerts.monitorStatus.filters.anyLocation', {
     defaultMessage: 'any location',
   }),
+
+  REMOVE_FILTER_LABEL: (title: string) =>
+    i18n.translate('xpack.uptime.alerts.monitorExpression.label', {
+      defaultMessage: 'Remove filter {title}',
+      values: { title },
+    }),
 };
 
 export const statusExpLabels = {
@@ -81,4 +87,19 @@ export const timeExpLabels = {
       defaultMessage: 'Select time range unit',
     }
   ),
+};
+
+export const filterAriaLabels = {
+  PORT: i18n.translate('xpack.uptime.alerts.monitorStatus.filters.port.label', {
+    defaultMessage: `Select port filters to apply to the alert's query.`,
+  }),
+  TAG: i18n.translate('xpack.uptime.alerts.monitorStatus.filters.tag.label', {
+    defaultMessage: `Select tag filters to apply to the alert's query.`,
+  }),
+  SCHEME: i18n.translate('xpack.uptime.alerts.monitorStatus.filters.scheme.label', {
+    defaultMessage: `Select protocol scheme filters to apply to the alert's query.`,
+  }),
+  LOCATION: i18n.translate('xpack.uptime.alerts.monitorStatus.filters.location.label', {
+    defaultMessage: `Select location filters to apply to the alert's query.`,
+  }),
 };

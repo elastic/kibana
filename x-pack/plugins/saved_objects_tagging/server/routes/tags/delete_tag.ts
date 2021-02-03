@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerDeleteTagRoute = (router: IRouter) => {
+export const registerDeleteTagRoute = (router: TagsPluginRouter) => {
   router.delete(
     {
       path: '/api/saved_objects_tagging/tags/{id}',

@@ -7,12 +7,14 @@
 import { kea, MakeLogicType } from 'kea';
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { EngineLogic } from '../engine';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
-import { FieldDetails } from './types';
 import { KibanaLogic } from '../../../shared/kibana';
-import { ENGINE_DOCUMENTS_PATH, getEngineRoute } from '../../routes';
+import { HttpLogic } from '../../../shared/http';
+
+import { ENGINE_DOCUMENTS_PATH } from '../../routes';
+import { EngineLogic, generateEnginePath } from '../engine';
+
+import { FieldDetails } from './types';
 
 interface DocumentDetailLogicValues {
   dataLoading: boolean;
@@ -26,19 +28,6 @@ interface DocumentDetailLogicActions {
 }
 
 type DocumentDetailLogicType = MakeLogicType<DocumentDetailLogicValues, DocumentDetailLogicActions>;
-
-const CONFIRM_DELETE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentDetail.confirmDelete',
-  {
-    defaultMessage: 'Are you sure you want to delete this document?',
-  }
-);
-const DELETE_SUCCESS = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccess',
-  {
-    defaultMessage: 'Successfully marked document for deletion. It will be deleted momentarily.',
-  }
-);
 
 export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
   path: ['enterprise_search', 'app_search', 'document_detail_logic'],
@@ -64,6 +53,7 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
   listeners: ({ actions }) => ({
     getDocumentDetails: async ({ documentId }) => {
       const { engineName } = EngineLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
 
       try {
         const { http } = HttpLogic.values;
@@ -76,20 +66,31 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
         // error that will prevent the page from loading, so redirect to the documents page and
         // show the error
         flashAPIErrors(e, { isQueued: true });
-        const engineRoute = getEngineRoute(engineName);
-        KibanaLogic.values.navigateToUrl(engineRoute + ENGINE_DOCUMENTS_PATH);
+        navigateToUrl(generateEnginePath(ENGINE_DOCUMENTS_PATH));
       }
     },
     deleteDocument: async ({ documentId }) => {
       const { engineName } = EngineLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+
+      const CONFIRM_DELETE = i18n.translate(
+        'xpack.enterpriseSearch.appSearch.documentDetail.confirmDelete',
+        { defaultMessage: 'Are you sure you want to delete this document?' }
+      );
+      const DELETE_SUCCESS = i18n.translate(
+        'xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccess',
+        {
+          defaultMessage:
+            'Successfully marked document for deletion. It will be deleted momentarily.',
+        }
+      );
 
       if (window.confirm(CONFIRM_DELETE)) {
         try {
           const { http } = HttpLogic.values;
           await http.delete(`/api/app_search/engines/${engineName}/documents/${documentId}`);
           setQueuedSuccessMessage(DELETE_SUCCESS);
-          const engineRoute = getEngineRoute(engineName);
-          KibanaLogic.values.navigateToUrl(engineRoute + ENGINE_DOCUMENTS_PATH);
+          navigateToUrl(generateEnginePath(ENGINE_DOCUMENTS_PATH));
         } catch (e) {
           flashAPIErrors(e);
         }

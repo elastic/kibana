@@ -18,7 +18,8 @@ describe('LoggedOut view routes', () => {
   let routeConfig: RouteConfig<any, any, any, 'get'>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    session = routeParamsMock.session;
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     defineLoggedOutRoutes(routeParamsMock);
 

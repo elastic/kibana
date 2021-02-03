@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'home',
     'timePicker',
+    'maps',
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
@@ -25,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const dashboardExpect = getService('dashboardExpect');
   const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
+  const searchSessions = getService('searchSessions');
 
   describe('send to background with relative time', () => {
     before(async () => {
@@ -60,9 +61,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await checkSampleDashboardLoaded();
 
-      await sendToBackground.expectState('completed');
-      await sendToBackground.save();
-      await sendToBackground.expectState('backgroundCompleted');
+      await searchSessions.expectState('completed');
+      await searchSessions.save();
+      await searchSessions.expectState('backgroundCompleted');
       const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
         '[Flights] Airline Carrier'
       );
@@ -80,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkSampleDashboardLoaded();
 
       // Check that session is restored
-      await sendToBackground.expectState('restored');
+      await searchSessions.expectState('restored');
     });
   });
 
@@ -112,5 +113,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking vega chart rendered');
     const tsvb = await find.existsByCssSelector('.vgaVis__view');
     expect(tsvb).to.be(true);
+    log.debug('Checking map rendered');
+    await dashboardPanelActions.openInspectorByTitle(
+      '[Flights] Origin and Destination Flight Time'
+    );
+    await testSubjects.click('inspectorRequestChooser');
+    await testSubjects.click(`inspectorRequestChooserFlight Origin Location`);
+    const requestStats = await inspector.getTableData();
+    const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+    expect(totalHits).to.equal('0');
+    await inspector.close();
   }
 }

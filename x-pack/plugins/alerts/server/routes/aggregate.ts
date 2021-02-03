@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+import type { AlertingRouter } from '../types';
 import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
@@ -38,7 +32,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const aggregateAlertRoute = (router: IRouter, licenseState: ILicenseState) => {
+export const aggregateAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ALERT_API_PATH}/_aggregate`,
@@ -46,11 +40,7 @@ export const aggregateAlertRoute = (router: IRouter, licenseState: ILicenseState
         query: querySchema,
       },
     },
-    router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<unknown, TypeOf<typeof querySchema>, unknown>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse> {
+    router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });

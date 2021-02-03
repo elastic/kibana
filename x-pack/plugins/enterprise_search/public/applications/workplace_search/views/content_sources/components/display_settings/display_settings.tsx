@@ -32,14 +32,22 @@ import { AppLogic } from '../../../../app_logic';
 import { Loading } from '../../../../../shared/loading';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
+import { SAVE_BUTTON } from '../../../../constants';
+import {
+  UNSAVED_MESSAGE,
+  DISPLAY_SETTINGS_TITLE,
+  DISPLAY_SETTINGS_DESCRIPTION,
+  DISPLAY_SETTINGS_EMPTY_TITLE,
+  DISPLAY_SETTINGS_EMPTY_BODY,
+  SEARCH_RESULTS_LABEL,
+  RESULT_DETAIL_LABEL,
+} from './constants';
+
 import { DisplaySettingsLogic } from './display_settings_logic';
 
 import { FieldEditorModal } from './field_editor_modal';
 import { ResultDetail } from './result_detail';
 import { SearchResults } from './search_results';
-
-const UNSAVED_MESSAGE =
-  'Your display settings have not been saved. Are you sure you want to leave?';
 
 interface DisplaySettingsProps {
   tabId: number;
@@ -77,12 +85,12 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
   const tabs = [
     {
       id: 'search_results',
-      name: 'Search Results',
+      name: SEARCH_RESULTS_LABEL,
       content: <SearchResults />,
     },
     {
       id: 'result_detail',
-      name: 'Result Detail',
+      name: RESULT_DETAIL_LABEL,
       content: <ResultDetail />,
     },
   ] as EuiTabbedContentTab[];
@@ -105,12 +113,12 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     <>
       <form onSubmit={handleFormSubmit}>
         <ViewContentHeader
-          title="Display Settings"
-          description="Customize the content and appearance of your Custom API Source search results."
+          title={DISPLAY_SETTINGS_TITLE}
+          description={DISPLAY_SETTINGS_DESCRIPTION}
           action={
             hasDocuments ? (
               <EuiButton type="submit" disabled={!unsavedChanges} fill={true}>
-                Save
+                {SAVE_BUTTON}
               </EuiButton>
             ) : null
           }
@@ -125,10 +133,8 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
           <EuiPanel className="euiPanel--inset">
             <EuiEmptyPrompt
               iconType="indexRollupApp"
-              title={<h2>You have no content yet</h2>}
-              body={
-                <p>You need some content to display in order to configure the display settings.</p>
-              }
+              title={<h2>{DISPLAY_SETTINGS_EMPTY_TITLE}</h2>}
+              body={<p>{DISPLAY_SETTINGS_EMPTY_BODY}</p>}
             />
           </EuiPanel>
         )}

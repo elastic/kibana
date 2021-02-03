@@ -22,9 +22,6 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/groups',
@@ -35,7 +32,9 @@ describe('groups routes', () => {
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
+    it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/groups',
       });
@@ -60,16 +59,19 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      const mockRequest = {
-        body: {
-          group_name: 'group',
-        },
-      };
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/groups',
-        ...mockRequest,
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            group_name: 'group',
+          },
+        };
+        mockRouter.shouldValidate(request);
       });
     });
   });
@@ -92,24 +94,8 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      const mockRequest = {
-        body: {
-          page: {
-            current: 1,
-            size: 1,
-          },
-          search: {
-            query: 'foo',
-            content_source_ids: ['123', '234'],
-            user_ids: ['345', '456'],
-          },
-        },
-      };
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/groups/search',
-        ...mockRequest,
       });
     });
 
@@ -150,30 +136,20 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/groups/{id}',
-        payload: 'params',
       });
 
       registerGroupRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
-      const mockRequest = {
-        params: {
-          id: '123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
+    it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123',
+        path: '/ws/org/groups/:id',
       });
     });
   });
@@ -183,15 +159,6 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    const mockPayload = {
-      group: {
-        name: 'group',
-      },
-    };
-
-    it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/groups/{id}',
@@ -202,19 +169,24 @@ describe('groups routes', () => {
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
-      const mockRequest = {
-        params: {
-          id: '123',
-        },
-        body: mockPayload,
-      };
-
-      mockRouter.callRoute(mockRequest);
-
+    it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123',
-        body: mockPayload,
+        path: '/ws/org/groups/:id',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            group: {
+              name: 'group',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
       });
     });
   });
@@ -227,7 +199,6 @@ describe('groups routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path: '/api/workplace_search/groups/{id}',
-        payload: 'params',
       });
 
       registerGroupRoute({
@@ -237,16 +208,8 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      const mockRequest = {
-        params: {
-          id: '123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123',
+        path: '/ws/org/groups/:id',
       });
     });
   });
@@ -256,30 +219,20 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/groups/{id}/group_users',
-        payload: 'params',
       });
 
       registerGroupUsersRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
-      const mockRequest = {
-        params: {
-          id: '123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
+    it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123/group_users',
+        path: '/ws/org/groups/:id/group_users',
       });
     });
   });
@@ -302,18 +255,20 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      const mockRequest = {
-        params: { id: '123' },
-        body: {
-          content_source_ids: ['123', '234'],
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123/share',
-        body: mockRequest.body,
+        path: '/ws/org/groups/:id/share',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          params: { id: '123' },
+          body: {
+            content_source_ids: ['123', '234'],
+          },
+        };
+        mockRouter.shouldValidate(request);
       });
     });
   });
@@ -336,18 +291,20 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      const mockRequest = {
-        params: { id: '123' },
-        body: {
-          user_ids: ['123', '234'],
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123/assign',
-        body: mockRequest.body,
+        path: '/ws/org/groups/:id/assign',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          params: { id: '123' },
+          body: {
+            user_ids: ['123', '234'],
+          },
+        };
+        mockRouter.shouldValidate(request);
       });
     });
   });
@@ -357,15 +314,6 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
-
-    const mockPayload = {
-      group: {
-        content_source_boosts: [['boost'], ['boost2', 'boost3']],
-      },
-    };
-
-    it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/workplace_search/groups/{id}/boosts',
@@ -376,19 +324,22 @@ describe('groups routes', () => {
         ...mockDependencies,
         router: mockRouter.router,
       });
+    });
 
-      const mockRequest = {
-        params: {
-          id: '123',
-        },
-        body: mockPayload,
-      };
-
-      mockRouter.callRoute(mockRequest);
-
+    it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/123/update_source_boosts',
-        body: mockPayload,
+        path: '/ws/org/groups/:id/update_source_boosts',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            content_source_boosts: [['boost'], ['boost2', 'boost3']],
+          },
+        };
+        mockRouter.shouldValidate(request);
       });
     });
   });

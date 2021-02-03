@@ -12,7 +12,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { UXHasDataResponse } from '../../../../typings';
-import { CoreVitals } from '../../../shared/core_web_vitals';
+import CoreVitals from '../../../shared/core_web_vitals';
 
 interface Props {
   bucketSize: string;

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InventoryColorPalette } from '../../../../../lib/lib';
 import { getColorPalette } from '../../lib/get_color_palette';
 

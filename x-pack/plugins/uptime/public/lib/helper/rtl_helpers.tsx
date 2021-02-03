@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
 import { configure } from '@testing-library/dom';
 import { mockState } from '../__mocks__/uptime_store.mock';
-import { EuiThemeProvider } from '../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   KibanaServices,

@@ -6,10 +6,9 @@
 
 import React, { useEffect } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
-import { Route, Switch, useHistory, useParams } from 'react-router-dom';
+import { Route, Switch, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
@@ -17,6 +16,12 @@ import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kiban
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { NAV } from '../../constants';
+
+import {
+  SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
+} from './constants';
 
 import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
@@ -46,14 +51,13 @@ import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
 
 export const SourceRouter: React.FC = () => {
-  const history = useHistory() as History;
   const { sourceId } = useParams() as { sourceId: string };
   const { initializeSource } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    initializeSource(sourceId, history);
+    initializeSource(sourceId);
   }, []);
 
   if (dataLoading) return <Loading />;
@@ -82,14 +86,10 @@ export const SourceRouter: React.FC = () => {
 
   const callout = (
     <>
-      <EuiCallOut title="Content source is disabled" color="warning" iconType="alert">
-        <p>
-          Your organization’s license level has changed. Your data is safe, but document-level
-          permissions are no longer supported and searching of this source has been disabled.
-          Upgrade to a Platinum license to re-enable this source.
-        </p>
+      <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
+        <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
         <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          Explore Platinum license
+          {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer />

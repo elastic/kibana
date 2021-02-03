@@ -63,6 +63,7 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { ITermJoinSource } from '../../sources/term_join_source';
 
 interface SourceResult {
   refreshed: boolean;
@@ -574,7 +575,7 @@ export class VectorLayer extends AbstractLayer {
       dynamicStyleProps: this.getCurrentStyle()
         .getDynamicPropertiesArray()
         .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getFieldName());
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
           return (
             dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
             !!matchingField &&
@@ -599,7 +600,7 @@ export class VectorLayer extends AbstractLayer {
   }: {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
-    source: IVectorSource;
+    source: IVectorSource | ITermJoinSource;
     sourceQuery?: MapQuery;
     style: IVectorStyle;
   } & DataRequestContext) {
@@ -616,6 +617,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery,
       isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
+      searchSessionId: dataFilters.searchSessionId,
     } as VectorStyleRequestMeta;
     const prevDataRequest = this.getDataRequest(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
@@ -635,6 +637,7 @@ export class VectorLayer extends AbstractLayer {
         registerCancelCallback: registerCancelCallback.bind(null, requestToken),
         sourceQuery: nextMeta.sourceQuery,
         timeFilters: nextMeta.timeFilters,
+        searchSessionId: dataFilters.searchSessionId,
       });
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
@@ -677,7 +680,7 @@ export class VectorLayer extends AbstractLayer {
       fields: style
         .getDynamicPropertiesArray()
         .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getFieldName());
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
         })
         .map((dynamicStyleProp) => {
@@ -697,7 +700,7 @@ export class VectorLayer extends AbstractLayer {
   }: {
     dataRequestId: string;
     fields: IField[];
-    source: IVectorSource;
+    source: IVectorSource | ITermJoinSource;
   } & DataRequestContext) {
     if (fields.length === 0) {
       return;

@@ -407,7 +407,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setRole({
       ...role,
-      name: e.target.value.replace(/\s/g, '_'),
+      name: e.target.value,
     });
 
   const getElasticsearchPrivileges = () => {

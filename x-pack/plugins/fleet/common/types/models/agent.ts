@@ -130,7 +130,6 @@ interface AgentBase {
   unenrollment_started_at?: string;
   upgraded_at?: string;
   upgrade_started_at?: string;
-  shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;

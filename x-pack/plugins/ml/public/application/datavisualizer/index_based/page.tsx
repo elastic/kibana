@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState, useCallback } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -45,17 +45,23 @@ import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
-import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
-import { DataVisualizerDataGrid } from '../stats_datagrid';
+import { DocumentCountContent } from './components/field_data_row/content_types/document_count_content';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
-import type { FieldRequestConfig, FieldVisConfig } from './common';
+import type { FieldRequestConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
+import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
+import { FieldVisConfig } from '../stats_table/types';
+import type {
+  MetricFieldsStats,
+  TotalFieldsStats,
+} from '../stats_table/components/field_count_stats';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -228,9 +234,7 @@ export const Page: FC = () => {
   const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
-  const [metricsStats, setMetricsStats] = useState<
-    undefined | { visibleMetricFields: number; totalMetricFields: number }
-  >();
+  const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
@@ -537,8 +541,8 @@ export const Page: FC = () => {
     });
 
     setMetricsStats({
-      totalMetricFields: allMetricFields.length,
-      visibleMetricFields: metricFieldsToShow.length,
+      totalMetricFieldsCount: allMetricFields.length,
+      visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
   }
@@ -642,7 +646,7 @@ export const Page: FC = () => {
     return combinedConfigs;
   }, [nonMetricConfigs, metricConfigs, visibleFieldTypes, visibleFieldNames]);
 
-  const fieldsCountStats = useMemo(() => {
+  const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     let _visibleFieldsCount = 0;
     let _totalFieldsCount = 0;
     Object.keys(overallStats).forEach((key) => {
@@ -661,6 +665,26 @@ export const Page: FC = () => {
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
   }, [overallStats, showEmptyFields]);
+
+  const getItemIdToExpandedRowMap = useCallback(
+    function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
+      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+        const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+        if (item !== undefined) {
+          m[fieldName] = (
+            <IndexBasedDataVisualizerExpandedRow
+              item={item}
+              indexPattern={currentIndexPattern}
+              combinedQuery={{ searchQueryLanguage, searchString }}
+            />
+          );
+        }
+        return m;
+      }, {} as ItemIdToExpandedRowMap);
+    },
+    [currentIndexPattern, searchQuery]
+  );
+
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -736,10 +760,11 @@ export const Page: FC = () => {
                     metricsStats={metricsStats}
                   />
                   <EuiSpacer size={'m'} />
-                  <DataVisualizerDataGrid
+                  <DataVisualizerTable<FieldVisConfig>
                     items={configs}
                     pageState={dataVisualizerListState}
                     updatePageState={setDataVisualizerListState}
+                    getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                   />
                 </EuiPanel>
               </EuiFlexItem>

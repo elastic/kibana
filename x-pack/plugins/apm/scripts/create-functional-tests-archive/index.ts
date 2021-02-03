@@ -121,8 +121,6 @@ async function run() {
   };
 
   const root = path.join(__dirname, '../../../../..');
-  const commonDir = path.join(root, 'x-pack/test/apm_api_integration/common');
-  const archivesDir = path.join(commonDir, 'fixtures/es_archiver');
 
   const options = parseIndexUrl(esUrl);
 
@@ -154,14 +152,14 @@ async function run() {
     ) ?? [];
 
   // create the archive
-
+  const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
     `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
       .filter((index) => !index.startsWith('.kibana'))
       .concat('.kibana')
       .join(
         ','
-      )} --dir=${archivesDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
+      )} --dir=${tmpDir} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
       query
     )}'`,
     {
@@ -173,7 +171,7 @@ async function run() {
   const currentConfig = {};
 
   // get the current metadata and extend/override metadata for the new archive
-  const configFilePath = path.join(commonDir, 'archives_metadata.ts');
+  const configFilePath = path.join(tmpDir, 'archives_metadata.ts');
 
   try {
     Object.assign(currentConfig, (await import(configFilePath)).default);
@@ -191,16 +189,35 @@ async function run() {
 
   fs.writeFileSync(
     configFilePath,
-    `export default ${JSON.stringify(newConfig, null, 2)}`,
+    `
+    /* eslint-disable import/no-default-export*/
+    export default ${JSON.stringify(newConfig, null, 2)}`,
     { encoding: 'utf-8' }
   );
 
   // run ESLint on the generated metadata files
-
   execSync('node scripts/eslint **/*/archives_metadata.ts --fix', {
     cwd: root,
     stdio: 'inherit',
   });
+
+  const esArchiverDir = 'fixtures/es_archiver/';
+
+  const apiIntegrationDir = path.join(
+    root,
+    'x-pack/test/apm_api_integration/common',
+    esArchiverDir
+  );
+  const e2eDir = path.join(__dirname, '../../ftr_e2e/cypress', esArchiverDir);
+
+  // Copy generated files to e2e test folder
+  execSync(`cp -r ${tmpDir} ${e2eDir}`);
+
+  // Copy generated files to API integration test folder
+  execSync(`cp -r ${tmpDir} ${apiIntegrationDir}`);
+
+  // Delete tmp folder
+  execSync(`rm -rf ${tmpDir}`);
 }
 
 run()

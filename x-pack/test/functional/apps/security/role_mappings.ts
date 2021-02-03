@@ -9,7 +9,7 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'roleMappings']);
+  const pageObjects = getPageObjects(['common', 'security', 'roleMappings']);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -32,8 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('allows a role mapping to be created', async () => {
       await testSubjects.click('createRoleMappingButton');
       await testSubjects.setValue('roleMappingFormNameInput', 'new_role_mapping');
-      await testSubjects.setValue('rolesDropdown', 'superuser');
-      await browser.pressKeys(browser.keys.ENTER);
+      await pageObjects.security.selectRole('superuser');
 
       await testSubjects.click('roleMappingsAddRuleButton');
 

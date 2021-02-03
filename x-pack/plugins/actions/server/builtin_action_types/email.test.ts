@@ -277,6 +277,16 @@ describe('execute()', () => {
     `);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
         "content": Object {
           "message": "a message to you
 
@@ -286,7 +296,6 @@ describe('execute()', () => {
           "subject": "the subject",
         },
         "hasAuth": true,
-        "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
             "jimmy@example.com",
@@ -327,6 +336,16 @@ describe('execute()', () => {
     await actionType.executor(customExecutorOptions);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
         "content": Object {
           "message": "a message to you
 
@@ -336,7 +355,6 @@ describe('execute()', () => {
           "subject": "the subject",
         },
         "hasAuth": false,
-        "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
             "jimmy@example.com",

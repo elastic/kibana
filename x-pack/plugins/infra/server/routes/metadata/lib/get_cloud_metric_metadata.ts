@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
@@ -19,7 +19,7 @@ export interface InfraCloudMetricsAdapterResponse {
 
 export const getCloudMetricsMetadata = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   instanceId: string,
   timeRange: { from: number; to: number }

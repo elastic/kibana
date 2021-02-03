@@ -5,14 +5,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
+import type {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
   Logger,
 } from 'src/core/server';
+import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
 
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
 import { findOptionsSchema, FindOptionsType } from '../event_log_client';
@@ -25,7 +24,7 @@ const bodySchema = schema.object({
   ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
-export const findByIdsRoute = (router: IRouter, systemLogger: Logger) => {
+export const findByIdsRoute = (router: EventLogRouter, systemLogger: Logger) => {
   router.post(
     {
       path: `${BASE_EVENT_LOG_API_PATH}/{type}/_find`,
@@ -36,7 +35,7 @@ export const findByIdsRoute = (router: IRouter, systemLogger: Logger) => {
       },
     },
     router.handleLegacyErrors(async function (
-      context: RequestHandlerContext,
+      context: EventLogRequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, FindOptionsType, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {

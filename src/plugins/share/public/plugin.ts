@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import './index.scss';
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
+import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
@@ -29,12 +19,20 @@ import {
   UrlGeneratorsStart,
 } from './url_generators/url_generator_service';
 
+export interface ShareSetupDependencies {
+  securityOss?: SecurityOssPluginSetup;
+}
+
+export interface ShareStartDependencies {
+  securityOss?: SecurityOssPluginStart;
+}
+
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private readonly urlGeneratorsService = new UrlGeneratorsService();
 
-  public setup(core: CoreSetup): SharePluginSetup {
+  public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
     core.application.register(createShortUrlRedirectApp(core, window.location));
     return {
       ...this.shareMenuRegistry.setup(),
@@ -42,9 +40,13 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     };
   }
 
-  public start(core: CoreStart): SharePluginStart {
+  public start(core: CoreStart, plugins: ShareStartDependencies): SharePluginStart {
     return {
-      ...this.shareContextMenu.start(core, this.shareMenuRegistry.start()),
+      ...this.shareContextMenu.start(
+        core,
+        this.shareMenuRegistry.start(),
+        plugins.securityOss?.anonymousAccess
+      ),
       urlGenerators: this.urlGeneratorsService.start(core),
     };
   }

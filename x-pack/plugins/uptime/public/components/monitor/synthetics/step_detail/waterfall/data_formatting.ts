@@ -50,7 +50,7 @@ const getFriendlyTooltipValue = ({
   let label = FriendlyTimingLabels[timing];
   if (timing === Timings.Receive && mimeType) {
     const formattedMimeType: MimeType = MimeTypesMap[mimeType];
-    label += ` (${FriendlyMimetypeLabels[formattedMimeType]})`;
+    label += ` (${FriendlyMimetypeLabels[formattedMimeType] || mimeType})`;
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
@@ -197,7 +197,7 @@ const buildTimingPalette = (): TimingColourPalette => {
   const palette = Object.values(Timings).reduce<Partial<TimingColourPalette>>((acc, value) => {
     switch (value) {
       case Timings.Blocked:
-        acc[value] = SAFE_PALETTE[6];
+        acc[value] = SAFE_PALETTE[16];
         break;
       case Timings.Dns:
         acc[value] = SAFE_PALETTE[0];

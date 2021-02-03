@@ -114,6 +114,7 @@ describe('SearchSessionService', () => {
           maxUpdateRetries: 3,
           defaultExpiration: moment.duration(7, 'd'),
           trackingInterval: moment.duration(10, 's'),
+          management: {} as any,
         },
       },
     });

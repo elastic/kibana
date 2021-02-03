@@ -27,13 +27,8 @@ describe('documents routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine' },
-        body: { documents: [{ foo: 'bar' }] },
-      });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/documents/new',
+        path: '/as/engines/:engineName/documents/new',
       });
     });
 
@@ -79,10 +74,8 @@ describe('document routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { engineName: 'some-engine', documentId: '1' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/documents/1',
+        path: '/as/engines/:engineName/documents/:documentId',
       });
     });
   });
@@ -104,10 +97,8 @@ describe('document routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({ params: { engineName: 'some-engine', documentId: '1' } });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/documents/1',
+        path: '/as/engines/:engineName/documents/:documentId',
       });
     });
   });

@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
-
+import type { LogstashPluginRouter } from '../../types';
 import { checkLicense } from '../../lib/check_license';
 
-export function registerPipelineDeleteRoute(router: IRouter) {
+export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
   router.delete(
     {
       path: '/api/logstash/pipeline/{id}',

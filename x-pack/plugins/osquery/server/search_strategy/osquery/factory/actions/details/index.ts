@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import {
+  ActionDetailsStrategyResponse,
+  ActionDetailsRequestOptions,
+  OsqueryQueries,
+} from '../../../../../../common/search_strategy/osquery';
+
+import { inspectStringifyObject } from '../../../../../../common/utils/build_query';
+import { OsqueryFactory } from '../../types';
+import { buildActionDetailsQuery } from './query.action_details.dsl';
+
+export const actionDetails: OsqueryFactory<OsqueryQueries.actionDetails> = {
+  buildDsl: (options: ActionDetailsRequestOptions) => {
+    return buildActionDetailsQuery(options);
+  },
+  parse: async (
+    options: ActionDetailsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<ActionDetailsStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildActionDetailsQuery(options))],
+    };
+
+    return {
+      ...response,
+      inspect,
+      actionDetails: response.rawResponse.hits.hits[0],
+    };
+  },
+};

@@ -1,25 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsRawDoc, SavedObjectSanitizedDoc } from './types';
+import {
+  SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDocParseOptions,
+} from './types';
 
 /**
  * A serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or
@@ -41,42 +35,60 @@ export class SavedObjectsSerializer {
   /**
    * Determines whether or not the raw document can be converted to a saved object.
    *
-   * @param {SavedObjectsRawDoc} rawDoc - The raw ES document to be tested
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be tested
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public isRawSavedObject(rawDoc: SavedObjectsRawDoc) {
-    const { type, namespace } = rawDoc._source;
-    const namespacePrefix =
-      namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    return Boolean(
-      type &&
-        rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
-        rawDoc._source.hasOwnProperty(type)
-    );
+  public isRawSavedObject(doc: SavedObjectsRawDoc, options: SavedObjectsRawDocParseOptions = {}) {
+    const { namespaceTreatment = 'strict' } = options;
+    const { _id, _source } = doc;
+    const { type, namespace } = _source;
+    if (!type) {
+      return false;
+    }
+    const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, namespaceTreatment);
+    return idMatchesPrefix && _source.hasOwnProperty(type);
   }
 
   /**
    * Converts a document from the format that is stored in elasticsearch to the saved object client format.
    *
-   *  @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   * @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
+   * @param {SavedObjectsRawDocParseOptions} options - Options for parsing the raw document.
    */
-  public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
+  public rawToSavedObject(
+    doc: SavedObjectsRawDoc,
+    options: SavedObjectsRawDocParseOptions = {}
+  ): SavedObjectSanitizedDoc {
+    const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace, namespaces, originId } = _source;
+    const {
+      type,
+      namespaces,
+      originId,
+      migrationVersion,
+      references,
+      coreMigrationVersion,
+    } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
         ? encodeVersion(_seq_no!, _primary_term!)
         : undefined;
+    const { id, namespace } = this.trimIdPrefix(_source.namespace, type, _id, namespaceTreatment);
+    const includeNamespace =
+      namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));
+    const includeNamespaces = this.registry.isMultiNamespace(type);
 
     return {
       type,
-      id: this.trimIdPrefix(namespace, type, _id),
-      ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
-      ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
+      id,
+      ...(includeNamespace && { namespace }),
+      ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
       attributes: _source[type],
-      references: _source.references || [],
-      ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
+      references: references || [],
+      ...(migrationVersion && { migrationVersion }),
+      ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
       ...(version && { version }),
     };
@@ -100,6 +112,7 @@ export class SavedObjectsSerializer {
       updated_at,
       version,
       references,
+      coreMigrationVersion,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -109,6 +122,7 @@ export class SavedObjectsSerializer {
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
+      ...(coreMigrationVersion && { coreMigrationVersion }),
       ...(updated_at && { updated_at }),
     };
 
@@ -132,20 +146,75 @@ export class SavedObjectsSerializer {
     return `${namespacePrefix}${type}:${id}`;
   }
 
-  private trimIdPrefix(namespace: string | undefined, type: string, id: string) {
+  /**
+   * Given a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.
+   *
+   * @param {string} namespace - The namespace of the saved object
+   * @param {string} type - The saved object type
+   * @param {string} id - The id of the saved object
+   */
+  public generateRawLegacyUrlAliasId(namespace: string, type: string, id: string) {
+    return `${LEGACY_URL_ALIAS_TYPE}:${namespace}:${type}:${id}`;
+  }
+
+  /**
+   * Given a document's source namespace, type, and raw ID, trim the ID prefix (based on the namespaceType), returning the object ID and the
+   * detected namespace. A single-namespace object is only considered to exist in a namespace if its raw ID is prefixed by that *and* it has
+   * the namespace field in its source.
+   */
+  private trimIdPrefix(
+    sourceNamespace: string | undefined,
+    type: string,
+    id: string,
+    namespaceTreatment: 'strict' | 'lax'
+  ) {
     assertNonEmptyString(id, 'document id');
     assertNonEmptyString(type, 'saved object type');
 
-    const namespacePrefix =
-      namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
-    const prefix = `${namespacePrefix}${type}:`;
+    const { prefix, idMatchesPrefix, namespace } = this.parseIdPrefix(
+      sourceNamespace,
+      type,
+      id,
+      namespaceTreatment
+    );
+    return {
+      id: idMatchesPrefix ? id.slice(prefix.length) : id,
+      namespace,
+    };
+  }
 
-    if (!id.startsWith(prefix)) {
-      return id;
+  private parseIdPrefix(
+    sourceNamespace: string | undefined,
+    type: string,
+    id: string,
+    namespaceTreatment: 'strict' | 'lax'
+  ) {
+    let prefix: string; // the prefix that is used to validate this raw object ID
+    let namespace: string | undefined; // the namespace that is in the raw object ID (only for single-namespace objects)
+    const parseFlexibly = namespaceTreatment === 'lax' && this.registry.isMultiNamespace(type);
+    if (sourceNamespace && (this.registry.isSingleNamespace(type) || parseFlexibly)) {
+      prefix = `${sourceNamespace}:${type}:`;
+      if (parseFlexibly && !checkIdMatchesPrefix(id, prefix)) {
+        prefix = `${type}:`;
+      } else {
+        // this is either a single-namespace object, or is being converted into a multi-namespace object
+        namespace = sourceNamespace;
+      }
+    } else {
+      // there is no source namespace, OR there is a source namespace but this is not a single-namespace object
+      prefix = `${type}:`;
     }
 
-    return id.slice(prefix.length);
+    return {
+      prefix,
+      idMatchesPrefix: checkIdMatchesPrefix(id, prefix),
+      namespace,
+    };
   }
+}
+
+function checkIdMatchesPrefix(id: string, prefix: string) {
+  return id.startsWith(prefix) && id.length > prefix.length;
 }
 
 function assertNonEmptyString(value: string, name: string) {

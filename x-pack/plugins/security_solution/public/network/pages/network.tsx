@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
 import { SecurityPageName } from '../../app/types';
@@ -49,6 +50,15 @@ import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ networkPagePath, hasMlUserPermissions, capabilitiesFetched }) => {
@@ -138,7 +148,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     return (
       <>
         {indicesExist ? (
-          <div onKeyDown={onKeyDown} ref={containerElement}>
+          <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
@@ -207,7 +217,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkRoutesLoading />
               )}
             </WrapperPage>
-          </div>
+          </StyledFullHeightContainer>
         ) : (
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE} />

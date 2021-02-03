@@ -34,6 +34,7 @@ export type MapContext = {
   refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
+  searchSessionId?: string;
 };
 
 export type MapSettings = {
@@ -55,6 +56,7 @@ export type MapSettings = {
   };
   maxZoom: number;
   minZoom: number;
+  showScaleControl: boolean;
   showSpatialFilters: boolean;
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;

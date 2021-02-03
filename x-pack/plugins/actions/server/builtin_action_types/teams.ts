@@ -63,7 +63,7 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
-    executor: curry(teamsExecutor)({ logger }),
+    executor: curry(teamsExecutor)({ logger, configurationUtilities }),
   };
 }
 
@@ -71,9 +71,9 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring teams action: unable to parse host name from webhookUrl',
@@ -81,7 +81,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureHostnameAllowed(url.hostname);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
       defaultMessage: 'error configuring teams action: {message}',
@@ -95,7 +95,10 @@ function validateActionTypeConfig(
 // action executor
 
 async function teamsExecutor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: TeamsActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -114,7 +117,7 @@ async function teamsExecutor(
       url: webhookUrl,
       logger,
       data,
-      proxySettings: execOptions.proxySettings,
+      configurationUtilities,
     })
   );
 

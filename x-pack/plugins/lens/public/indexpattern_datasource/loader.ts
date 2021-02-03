@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
-import { StateSetter } from '../types';
+import { InitializationOptions, StateSetter } from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -190,6 +190,7 @@ export async function loadInitialState({
   storage,
   indexPatternsService,
   initialContext,
+  options,
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
@@ -198,8 +199,10 @@ export async function loadInitialState({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
   initialContext?: VisualizeFieldContext;
+  options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
-  const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
+  const { isFullEditor } = options ?? {};
+  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(savedObjectsClient) : []);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
   const state =
@@ -210,11 +213,15 @@ export async function loadInitialState({
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
-  );
+      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id]
+  )
+    // take out the undefined from the list
+    .filter(Boolean);
 
   const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
-  setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  if (currentIndexPatternId) {
+    setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  }
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,

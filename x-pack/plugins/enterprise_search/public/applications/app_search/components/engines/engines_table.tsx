@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { getEngineRoute } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+import { ENGINE_PATH } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
@@ -39,8 +40,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
-  const engineLinkProps = (name: string) => ({
-    to: getEngineRoute(name),
+  const engineLinkProps = (engineName: string) => ({
+    to: generateEncodedPath(ENGINE_PATH, { engineName }),
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',

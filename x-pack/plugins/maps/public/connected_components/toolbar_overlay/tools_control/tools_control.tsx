@@ -50,7 +50,7 @@ const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
   }
 );
 
-interface Props {
+export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
   initiateDraw: (drawState: DrawState) => void;

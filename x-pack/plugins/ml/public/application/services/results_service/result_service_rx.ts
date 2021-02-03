@@ -156,7 +156,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       }
 
       body.aggs.byTime.aggs = {};
-      if (metricFieldName !== undefined && metricFieldName !== '') {
+
+      if (metricFieldName !== undefined && metricFieldName !== '' && metricFunction) {
         const metricAgg: any = {
           [metricFunction]: {},
         };

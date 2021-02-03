@@ -68,7 +68,27 @@ export function isRoleReserved(role: Partial<Role>) {
  * @param {role} the Role as returned by roles API
  */
 export function isRoleDeprecated(role: Partial<Role>) {
-  return role.metadata?._deprecated ?? false;
+  return (role.metadata?._deprecated as boolean) ?? false;
+}
+
+/**
+ * Returns whether given role is a system role or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isRoleSystem(role: Partial<Role>) {
+  return (isRoleReserved(role) && role.name?.endsWith('_system')) ?? false;
+}
+
+/**
+ * Returns whether given role is an admin role or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isRoleAdmin(role: Partial<Role>) {
+  return (
+    (isRoleReserved(role) && (role.name?.endsWith('_admin') || role.name === 'superuser')) ?? false
+  );
 }
 
 /**

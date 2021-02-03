@@ -6,11 +6,10 @@
 
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ILegacyCustomClusterClient } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { Plugin, PluginSetupDependencies, PluginStartDependencies } from './plugin';
 
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { coreMock } from '../../../../src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
@@ -19,7 +18,6 @@ describe('Security Plugin', () => {
   let plugin: Plugin;
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
-  let mockClusterClient: jest.Mocked<ILegacyCustomClusterClient>;
   let mockSetupDependencies: PluginSetupDependencies;
   let mockStartDependencies: PluginStartDependencies;
   beforeEach(() => {
@@ -42,9 +40,6 @@ describe('Security Plugin', () => {
       port: 80,
       protocol: 'https',
     });
-
-    mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
-    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
     mockSetupDependencies = ({
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },

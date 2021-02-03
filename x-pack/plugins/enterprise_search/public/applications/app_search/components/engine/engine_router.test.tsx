@@ -7,6 +7,7 @@
 import '../../../__mocks__/react_router_history.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -16,14 +17,14 @@ import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
 
-import { EngineRouter } from './';
+import { EngineRouter } from './engine_router';
 
 describe('EngineRouter', () => {
   const values = {
+    ...mockEngineValues,
     dataLoading: false,
     engineNotFound: false,
     myRole: {},
-    engineName: 'some-engine',
   };
   const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
 

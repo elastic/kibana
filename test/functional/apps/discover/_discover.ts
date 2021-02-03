@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -29,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -42,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
@@ -110,11 +99,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it.skip('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function () {
+        // this is the number of renderings of the histogram needed when new data is fetched
+        // this needs to be improved
+        const renderingCountInc = 3;
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart rendering complete', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+        });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-
+        await retry.waitFor('chart rendering complete after being brushed', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + 6;
+        });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
 
@@ -238,7 +241,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     describe('usage of discover:searchOnPageLoad', () => {
-      it('should fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
+      it('should not fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
@@ -246,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
       });
 
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
+      it('should fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
         await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();

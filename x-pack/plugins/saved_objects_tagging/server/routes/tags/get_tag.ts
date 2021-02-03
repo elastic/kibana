@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { TagsPluginRouter } from '../../types';
 
-export const registerGetTagRoute = (router: IRouter) => {
+export const registerGetTagRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags/{id}',

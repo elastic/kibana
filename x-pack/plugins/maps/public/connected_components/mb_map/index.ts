@@ -26,6 +26,7 @@ import {
   getSpatialFiltersLayer,
   getMapSettings,
 } from '../../selectors/map_selectors';
+import { getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 
@@ -38,6 +39,7 @@ function mapStateToProps(state: MapStoreState) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
+    isFullScreen: getIsFullScreen(state),
   };
 }
 

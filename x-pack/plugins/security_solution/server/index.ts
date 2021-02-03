@@ -57,3 +57,4 @@ export { getIndexExists } from './lib/detection_engine/index/get_index_exists';
 export { buildRouteValidation } from './utils/build_validation/route_validation';
 export { transformError, buildSiemResponse } from './lib/detection_engine/routes/utils';
 export { readPrivileges } from './lib/detection_engine/privileges/read_privileges';
+export type { AppRequestContext } from './types';

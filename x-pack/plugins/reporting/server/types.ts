@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -58,7 +58,7 @@ export interface BasePayload extends BaseParams {
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
-  context: RequestHandlerContext,
+  context: ReportingRequestHandlerContext,
   request: KibanaRequest<any, any, any, any>
 ) => Promise<JobPayloadType>;
 
@@ -89,3 +89,15 @@ export interface ExportTypeDefinition<CreateJobFnType = CreateJobFn, RunTaskFnTy
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
+
+/**
+ * @internal
+ */
+export interface ReportingRequestHandlerContext extends RequestHandlerContext {
+  reporting: ReportingStart | null;
+}
+
+/**
+ * @internal
+ */
+export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;

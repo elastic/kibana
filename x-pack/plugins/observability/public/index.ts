@@ -6,8 +6,7 @@
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
 import { Plugin, ObservabilityPluginSetup, ObservabilityPluginStart } from './plugin';
-export { HeaderMenuPortal } from './components/shared/header_menu_portal';
-export { ObservabilityPluginSetup, ObservabilityPluginStart };
+export type { ObservabilityPluginSetup, ObservabilityPluginStart };
 
 export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPluginStart> = (
   context: PluginInitializerContext
@@ -17,7 +16,8 @@ export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPl
 
 export * from './components/shared/action_menu/';
 
-export { UXMetrics, CoreVitals, formatToSec } from './components/shared/core_web_vitals/';
+export type { UXMetrics } from './components/shared/core_web_vitals/';
+export { getCoreVitalsComponent, HeaderMenuPortal } from './components/shared/';
 
 export {
   useTrackPageview,
@@ -33,3 +33,4 @@ export * from './typings';
 
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useTheme } from './hooks/use_theme';
+export { getApmTraceUrl } from './utils/get_apm_trace_url';

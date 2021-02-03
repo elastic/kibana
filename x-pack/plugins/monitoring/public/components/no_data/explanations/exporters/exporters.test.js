@@ -8,6 +8,16 @@ import React from 'react';
 import { renderWithIntl } from '@kbn/test/jest';
 import { ExplainExporters, ExplainExportersCloud } from './exporters';
 
+jest.mock('../../../../legacy_shims', () => ({
+  Legacy: {
+    shims: {
+      docLinks: {
+        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+      },
+    },
+  },
+}));
+
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
     const reason = {

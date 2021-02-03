@@ -8,7 +8,8 @@
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function getPipelineStateDocument(
   req: LegacyRequest,

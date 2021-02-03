@@ -23,6 +23,7 @@ describe('LayerWizardSelect', () => {
         {
           categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
           description: 'mock wizard without icon',
+          isDisabled: false,
           renderWizard: () => {
             return <div />;
           },
@@ -31,6 +32,7 @@ describe('LayerWizardSelect', () => {
         {
           categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS],
           description: 'mock wizard with icon',
+          isDisabled: false,
           icon: 'logoObservability',
           renderWizard: () => {
             return <div />;

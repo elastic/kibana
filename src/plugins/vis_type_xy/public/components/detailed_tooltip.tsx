@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
  */
 
 import React from 'react';
@@ -27,18 +16,19 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 
-import { BUCKET_TYPES } from '../../../data/public';
-
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
 import { fillEmptyValue } from '../utils/get_series_name_fn';
-import { COMPLEX_SPLIT_ACCESSOR } from '../utils/accessors';
+import { COMPLEX_SPLIT_ACCESSOR, isRangeAggType } from '../utils/accessors';
 
 interface TooltipData {
   label: string;
   value: string;
 }
+
+// TODO: replace when exported from elastic/charts
+const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
 
 const getTooltipData = (
   aspects: Aspects,
@@ -48,10 +38,7 @@ const getTooltipData = (
   const data: TooltipData[] = [];
 
   if (header) {
-    const xFormatter =
-      aspects.x.aggType === BUCKET_TYPES.DATE_RANGE || aspects.x.aggType === BUCKET_TYPES.RANGE
-        ? null
-        : aspects.x.formatter;
+    const xFormatter = isRangeAggType(aspects.x.aggType) ? null : aspects.x.formatter;
     data.push({
       label: aspects.x.title,
       value: xFormatter ? xFormatter(header.value) : `${header.value}`,
@@ -90,6 +77,28 @@ const getTooltipData = (
       });
     }
   });
+
+  if (
+    aspects.splitColumn &&
+    valueSeries.smHorizontalAccessorValue !== undefined &&
+    valueSeries.smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+  ) {
+    data.push({
+      label: aspects.splitColumn.title,
+      value: `${valueSeries.smHorizontalAccessorValue}`,
+    });
+  }
+
+  if (
+    aspects.splitRow &&
+    valueSeries.smVerticalAccessorValue !== undefined &&
+    valueSeries.smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE
+  ) {
+    data.push({
+      label: aspects.splitRow.title,
+      value: `${valueSeries.smVerticalAccessorValue}`,
+    });
+  }
 
   return data;
 };

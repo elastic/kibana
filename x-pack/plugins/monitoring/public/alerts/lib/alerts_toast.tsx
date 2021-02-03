@@ -81,6 +81,24 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
   });
 };
 
+const showDisabledWatcherClusterAlertsError = () => {
+  Legacy.shims.toastNotifications.addWarning({
+    title: toMountPoint(
+      <FormattedMessage
+        id="xpack.monitoring.healthCheck.disabledWatches.title"
+        defaultMessage="New alerts created"
+      />
+    ),
+    text: toMountPoint(
+      <p>
+        {i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
+          defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
+        })}
+      </p>
+    ),
+  });
+};
+
 export const showAlertsToast = (response: EnableAlertResponse) => {
   const {
     isSufficientlySecure,
@@ -92,5 +110,7 @@ export const showAlertsToast = (response: EnableAlertResponse) => {
     showTlsAndEncryptionError();
   } else if (disabledWatcherClusterAlerts === false) {
     showUnableToDisableWatcherClusterAlertsError();
+  } else if (disabledWatcherClusterAlerts === true) {
+    showDisabledWatcherClusterAlertsError();
   }
 };

@@ -28,6 +28,12 @@ timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue
 
 beforeEach(() => {
   refreshInterval$.next({ value: 0, pause: true });
+  sessionService.isSessionStorageReady.mockImplementation(() => true);
+  sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
+    isDisabled: () => ({
+      disabled: false,
+    }),
+  }));
 });
 
 test("shouldn't show indicator in case no active search session", async () => {
@@ -37,6 +43,22 @@ test("shouldn't show indicator in case no active search session", async () => {
     timeFilter,
   });
   const { getByTestId, container } = render(<SearchSessionIndicator />);
+
+  // make sure `searchSessionIndicator` isn't appearing after some time (lazy-loading)
+  await expect(
+    waitFor(() => getByTestId('searchSessionIndicator'), { timeout: 100 })
+  ).rejects.toThrow();
+  expect(container).toMatchInlineSnapshot(`<div />`);
+});
+
+test("shouldn't show indicator in case app hasn't opt-in", async () => {
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
+    sessionService,
+    application: coreStart.application,
+    timeFilter,
+  });
+  const { getByTestId, container } = render(<SearchSessionIndicator />);
+  sessionService.isSessionStorageReady.mockImplementation(() => false);
 
   // make sure `searchSessionIndicator` isn't appearing after some time (lazy-loading)
   await expect(
@@ -57,7 +79,7 @@ test('should show indicator in case there is an active search session', async ()
   await waitFor(() => getByTestId('searchSessionIndicator'));
 });
 
-test('should be disabled when permissions are off', async () => {
+test('should be disabled in case uiConfig says so ', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
   coreStart.application.currentAppId$ = new BehaviorSubject('discover');
   (coreStart.application.capabilities as any) = {
@@ -65,6 +87,12 @@ test('should be disabled when permissions are off', async () => {
       storeSearchSession: false,
     },
   };
+  sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
+    isDisabled: () => ({
+      disabled: true,
+      reasonText: 'reason',
+    }),
+  }));
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,
@@ -80,12 +108,7 @@ test('should be disabled when permissions are off', async () => {
 
 test('should be disabled during auto-refresh', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
-  coreStart.application.currentAppId$ = new BehaviorSubject('discover');
-  (coreStart.application.capabilities as any) = {
-    discover: {
-      storeSearchSession: true,
-    },
-  };
+
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,

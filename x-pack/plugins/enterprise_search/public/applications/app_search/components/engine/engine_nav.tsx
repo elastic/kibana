@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { SideNavLink, SideNavItem } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
-  getEngineRoute,
+  ENGINE_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_DOCUMENTS_PATH,
   ENGINE_SCHEMA_PATH,
@@ -40,7 +40,7 @@ import { RESULT_SETTINGS_TITLE } from '../result_settings';
 import { SEARCH_UI_TITLE } from '../search_ui';
 import { API_LOGS_TITLE } from '../api_logs';
 
-import { EngineLogic } from './';
+import { EngineLogic, generateEnginePath } from './';
 import { EngineDetails } from './types';
 
 import './engine_nav.scss';
@@ -75,7 +75,6 @@ export const EngineNav: React.FC = () => {
   if (dataLoading) return null;
   if (!engineName) return null;
 
-  const engineRoute = getEngineRoute(engineName);
   const { invalidBoosts, unsearchedUnconfirmedFields } = engine as Required<EngineDetails>;
 
   return (
@@ -99,12 +98,12 @@ export const EngineNav: React.FC = () => {
           )}
         </EuiText>
       </SideNavItem>
-      <SideNavLink to={engineRoute} data-test-subj="EngineOverviewLink">
+      <SideNavLink to={generateEnginePath(ENGINE_PATH)} data-test-subj="EngineOverviewLink">
         {OVERVIEW_TITLE}
       </SideNavLink>
       {canViewEngineAnalytics && (
         <SideNavLink
-          to={engineRoute + ENGINE_ANALYTICS_PATH}
+          to={generateEnginePath(ENGINE_ANALYTICS_PATH)}
           shouldShowActiveForSubroutes={true}
           data-test-subj="EngineAnalyticsLink"
         >
@@ -113,7 +112,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineDocuments && (
         <SideNavLink
-          to={engineRoute + ENGINE_DOCUMENTS_PATH}
+          to={generateEnginePath(ENGINE_DOCUMENTS_PATH)}
           shouldShowActiveForSubroutes={true}
           data-test-subj="EngineDocumentsLink"
         >
@@ -123,7 +122,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineSchema && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_SCHEMA_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_SCHEMA_PATH))}
           data-test-subj="EngineSchemaLink"
         >
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
@@ -158,7 +157,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineCrawler && !isMetaEngine && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_CRAWLER_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_CRAWLER_PATH))}
           data-test-subj="EngineCrawlerLink"
         >
           {CRAWLER_TITLE}
@@ -167,7 +166,7 @@ export const EngineNav: React.FC = () => {
       {canViewMetaEngineSourceEngines && isMetaEngine && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + META_ENGINE_SOURCE_ENGINES_PATH)}
+          to={getAppSearchUrl(generateEnginePath(META_ENGINE_SOURCE_ENGINES_PATH))}
           data-test-subj="MetaEngineEnginesLink"
         >
           {ENGINES_TITLE}
@@ -176,7 +175,7 @@ export const EngineNav: React.FC = () => {
       {canManageEngineRelevanceTuning && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_RELEVANCE_TUNING_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_RELEVANCE_TUNING_PATH))}
           data-test-subj="EngineRelevanceTuningLink"
         >
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
@@ -211,7 +210,7 @@ export const EngineNav: React.FC = () => {
       {canManageEngineSynonyms && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_SYNONYMS_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_SYNONYMS_PATH))}
           data-test-subj="EngineSynonymsLink"
         >
           {SYNONYMS_TITLE}
@@ -220,7 +219,7 @@ export const EngineNav: React.FC = () => {
       {canManageEngineCurations && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_CURATIONS_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_CURATIONS_PATH))}
           data-test-subj="EngineCurationsLink"
         >
           {CURATIONS_TITLE}
@@ -229,7 +228,7 @@ export const EngineNav: React.FC = () => {
       {canManageEngineResultSettings && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_RESULT_SETTINGS_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_RESULT_SETTINGS_PATH))}
           data-test-subj="EngineResultSettingsLink"
         >
           {RESULT_SETTINGS_TITLE}
@@ -238,7 +237,7 @@ export const EngineNav: React.FC = () => {
       {canManageEngineSearchUi && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_SEARCH_UI_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_SEARCH_UI_PATH))}
           data-test-subj="EngineSearchUILink"
         >
           {SEARCH_UI_TITLE}
@@ -247,7 +246,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineApiLogs && (
         <SideNavLink
           isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_API_LOGS_PATH)}
+          to={getAppSearchUrl(generateEnginePath(ENGINE_API_LOGS_PATH))}
           data-test-subj="EngineAPILogsLink"
         >
           {API_LOGS_TITLE}

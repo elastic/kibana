@@ -67,4 +67,65 @@ describe('getProxyAgentOptions', () => {
       rejectUnauthorized: undefined,
     });
   });
+  describe('auth property', () => {
+    describe('present & correct if given username and password', () => {
+      test('proxy url is http', () => {
+        const httpProxyWithAuth = {
+          proxyUrl: 'http://user:pass@example.com:8080/p/a/t/h',
+          targetUrl: 'https://epr.elastic.co/',
+        };
+        expect(getProxyAgentOptions(httpProxyWithAuth)).toEqual({
+          auth: 'user:pass',
+          headers: { Host: 'epr.elastic.co' },
+          host: 'example.com',
+          port: 8080,
+          protocol: 'http:',
+          rejectUnauthorized: undefined,
+        });
+      });
+      test('proxy url is https', () => {
+        const httpsProxyWithAuth = {
+          proxyUrl: 'https://user:pass@example.com:8080/p/a/t/h',
+          targetUrl: 'https://epr.elastic.co/',
+        };
+        expect(getProxyAgentOptions(httpsProxyWithAuth)).toEqual({
+          auth: 'user:pass',
+          headers: { Host: 'epr.elastic.co' },
+          host: 'example.com',
+          port: 8080,
+          protocol: 'https:',
+          rejectUnauthorized: undefined,
+        });
+      });
+    });
+
+    describe('missing if not given username and password', () => {
+      test('proxy url is http', () => {
+        const httpProxyWithout = {
+          proxyUrl: 'http://example.com:8080/p/a/t/h',
+          targetUrl: 'https://epr.elastic.co/',
+        };
+        expect(getProxyAgentOptions(httpProxyWithout)).toEqual({
+          headers: { Host: 'epr.elastic.co' },
+          host: 'example.com',
+          port: 8080,
+          protocol: 'http:',
+          rejectUnauthorized: undefined,
+        });
+      });
+      test('proxy url is https', () => {
+        const httpsProxyWithoutAuth = {
+          proxyUrl: 'https://example.com:8080/p/a/t/h',
+          targetUrl: 'https://epr.elastic.co/',
+        };
+        expect(getProxyAgentOptions(httpsProxyWithoutAuth)).toEqual({
+          headers: { Host: 'epr.elastic.co' },
+          host: 'example.com',
+          port: 8080,
+          protocol: 'https:',
+          rejectUnauthorized: undefined,
+        });
+      });
+    });
+  });
 });

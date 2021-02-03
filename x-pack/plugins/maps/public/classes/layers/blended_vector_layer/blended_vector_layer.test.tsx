@@ -7,7 +7,10 @@
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
 import { ESSearchSource } from '../../sources/es_search_source';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  AbstractESSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+} from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -53,27 +56,12 @@ describe('getSource', () => {
       expect(source.cloneDescriptor().type).toBe(SOURCE_TYPES.ES_GEO_GRID);
     });
 
-    test('cluster source applyGlobalQuery should be true when document source applyGlobalQuery is true', async () => {
-      const blendedVectorLayer = new BlendedVectorLayer({
-        source: new ESSearchSource(documentSourceDescriptor),
-        layerDescriptor: BlendedVectorLayer.createDescriptor(
-          {
-            sourceDescriptor: documentSourceDescriptor,
-            __dataRequests: [clusteredDataRequest],
-          },
-          mapColors
-        ),
-      });
-
-      const source = blendedVectorLayer.getSource();
-      expect((source.cloneDescriptor() as ESGeoGridSourceDescriptor).applyGlobalQuery).toBe(true);
-    });
-
-    test('cluster source applyGlobalQuery should be false when document source applyGlobalQuery is false', async () => {
+    test('cluster source AbstractESSourceDescriptor properties should mirror document source AbstractESSourceDescriptor properties', async () => {
       const blendedVectorLayer = new BlendedVectorLayer({
         source: new ESSearchSource({
           ...documentSourceDescriptor,
           applyGlobalQuery: false,
+          applyGlobalTime: false,
         }),
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
@@ -85,7 +73,27 @@ describe('getSource', () => {
       });
 
       const source = blendedVectorLayer.getSource();
-      expect((source.cloneDescriptor() as ESGeoGridSourceDescriptor).applyGlobalQuery).toBe(false);
+      const sourceDescriptor = source.cloneDescriptor() as ESGeoGridSourceDescriptor;
+      const abstractEsSourceDescriptor: AbstractESSourceDescriptor = {
+        // Purposely grabbing properties instead of using spread operator
+        // to ensure type check will fail when new properties are added to AbstractESSourceDescriptor.
+        // In the event of type check failure, ensure test is updated with new property and that new property
+        // is correctly passed to clustered source descriptor.
+        type: sourceDescriptor.type,
+        id: sourceDescriptor.id,
+        indexPatternId: sourceDescriptor.indexPatternId,
+        geoField: sourceDescriptor.geoField,
+        applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
+        applyGlobalTime: sourceDescriptor.applyGlobalTime,
+      };
+      expect(abstractEsSourceDescriptor).toEqual({
+        type: sourceDescriptor.type,
+        id: sourceDescriptor.id,
+        geoField: 'myGeoField',
+        indexPatternId: 'myIndexPattern',
+        applyGlobalQuery: false,
+        applyGlobalTime: false,
+      } as AbstractESSourceDescriptor);
     });
   });
 

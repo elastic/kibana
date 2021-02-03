@@ -151,7 +151,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('editing', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/88639
+    describe.skip('editing', () => {
       beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
