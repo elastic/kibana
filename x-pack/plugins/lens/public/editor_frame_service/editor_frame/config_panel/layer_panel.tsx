@@ -141,6 +141,7 @@ export function LayerPanel(
           groupId,
           layerId: targetLayerId,
           prevState: props.visualizationState,
+          previousColumn: typeof droppedItem.column === 'string' ? droppedItem.column : undefined,
         });
 
         if (typeof dropResult === 'object') {

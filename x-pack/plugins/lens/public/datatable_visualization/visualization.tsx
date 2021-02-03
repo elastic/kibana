@@ -109,6 +109,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         oldColumnSettings[column.columnId] = column;
       });
     }
+    const lastTransposedColumnIndex = table.columns.findIndex((c) =>
+      !oldColumnSettings[c.columnId] ? false : !oldColumnSettings[c.columnId]?.isTransposed
+    );
+    const usesTransposing = state?.columns.some((c) => c.isTransposed);
+
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
@@ -138,8 +143,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({
+          columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
+            isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
             columnId: col.columnId,
           })),
         },
@@ -225,13 +231,18 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  setDimension({ prevState, columnId, groupId }) {
-    if (prevState.columns.some((column) => column.columnId === columnId)) {
+  setDimension({ prevState, columnId, groupId, previousColumn }) {
+    if (
+      prevState.columns.some(
+        (column) =>
+          column.columnId === columnId || (previousColumn && column.columnId === previousColumn)
+      )
+    ) {
       return {
         ...prevState,
         columns: prevState.columns.map((column) => {
-          if (column.columnId === columnId) {
-            return { ...column, isTransposed: groupId === 'columns' };
+          if (column.columnId === columnId || column.columnId === previousColumn) {
+            return { ...column, columnId, isTransposed: groupId === 'columns' };
           }
           return column;
         }),
