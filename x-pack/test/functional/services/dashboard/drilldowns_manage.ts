@@ -23,7 +23,8 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
   const esArchiver = getService('esArchiver');
-
+  const find = getService('find');
+  const browser = getService('browser');
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -116,7 +117,9 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async fillInURLTemplate(destinationURLTemplate: string) {
-      await testSubjects.setValue('urlInput', destinationURLTemplate);
+      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
+      await monaco.clickMouseButton();
+      await browser.pressKeys(destinationURLTemplate);
     }
 
     async saveChanges() {
