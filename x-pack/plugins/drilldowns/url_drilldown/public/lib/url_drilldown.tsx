@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { IExternalUrl } from 'src/core/public';
+import { IExternalUrl, IUiSettingsClient } from 'src/core/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -20,6 +20,7 @@ import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../
 import {
   reactToUiComponent,
   UrlTemplateEditorVariable,
+  KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
@@ -50,6 +51,7 @@ interface UrlDrilldownDeps {
   navigateToUrl: (url: string) => Promise<void>;
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
+  uiSettings: IUiSettingsClient;
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
@@ -93,14 +95,21 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const variables = React.useMemo(() => this.getVariableList(context), [context]);
+
     return (
-      <UrlDrilldownCollectConfig
-        variables={variables}
-        config={config}
-        onConfig={onConfig}
-        syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
-        variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
-      />
+      <KibanaContextProvider
+        services={{
+          uiSettings: this.deps.uiSettings,
+        }}
+      >
+        <UrlDrilldownCollectConfig
+          variables={variables}
+          config={config}
+          onConfig={onConfig}
+          syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
+          variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
+        />
+      </KibanaContextProvider>
     );
   };
 

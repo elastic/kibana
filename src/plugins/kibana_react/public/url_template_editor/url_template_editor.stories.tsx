@@ -10,12 +10,14 @@ import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { UrlTemplateEditor } from './url_template_editor';
+import { CodeEditor } from '../code_editor/code_editor';
 
 storiesOf('UrlTemplateEditor', module)
   .add('default', () => (
     <UrlTemplateEditor
       value={'http://elastic.co/foo/{{event.value}}?foo=bar&test={{json context.panel}}'}
       onChange={action('onChange')}
+      Editor={CodeEditor}
     />
   ))
   .add('with variables', () => (
@@ -38,5 +40,6 @@ storiesOf('UrlTemplateEditor', module)
         },
       ]}
       onChange={action('onChange')}
+      Editor={CodeEditor}
     />
   ));

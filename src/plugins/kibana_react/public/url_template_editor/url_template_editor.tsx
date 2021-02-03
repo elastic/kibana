@@ -8,7 +8,8 @@
 
 import * as React from 'react';
 import { monaco } from '@kbn/monaco';
-import { CodeEditor, Props as CodeEditorProps } from '../code_editor/code_editor';
+import { Props as CodeEditorProps } from '../code_editor/code_editor';
+import { CodeEditor } from '../code_editor';
 import { LANG } from './constants';
 import { language, conf } from './language';
 
@@ -33,6 +34,7 @@ export interface UrlTemplateEditorProps {
   variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
   onEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  Editor?: React.ComponentType<CodeEditorProps>;
 }
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
@@ -41,6 +43,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   variables,
   onChange,
   onEditor,
+  Editor = CodeEditor,
 }) => {
   React.useEffect(() => {
     if (!variables) {
@@ -86,7 +89,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
 
   return (
     <div className={'urlTemplateEditor__container'}>
-      <CodeEditor
+      <Editor
         languageId={LANG}
         height={height}
         value={value}
