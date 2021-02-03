@@ -11,3 +11,4 @@ export * from './use_telemetry';
 export * from './update_kuery_string';
 export * from './use_cert_status';
 export * from './use_search_text';
+export * from './use_in_flight_alert';

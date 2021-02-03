@@ -29,6 +29,7 @@ import {
   isAnomalyAlertDeleting,
 } from '../../../state/alerts/alerts';
 import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
+import { useInFlightAlert } from '../../../hooks/use_in_flight_alert';
 
 interface Props {
   hasMLJob: boolean;
@@ -53,6 +54,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const monitorId = useMonitorId();
+  const isAlertRequestInFlight = useInFlightAlert(monitorId);
 
   const dispatch = useDispatch();
 
@@ -63,7 +65,8 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const deleteAnomalyAlert = () =>
     dispatch(deleteAnomalyAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
-  const showLoading = isMLJobCreating || isMLJobLoading || isAlertDeleting;
+  const showLoading =
+    isMLJobCreating || isMLJobLoading || isAlertDeleting || isAlertRequestInFlight;
 
   const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
 

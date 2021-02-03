@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { handleActions, Action } from 'redux-actions';
+import { createAction, handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
@@ -46,12 +46,24 @@ export const getAnomalyAlertAction = createAsyncAction<
   MonitorIdParam,
   Alert<UptimeAlertTypeParams>
 >('GET EXISTING ALERTS');
-export const deleteAlertAction = createAsyncAction<{ alertId: string }, string | null>(
-  'DELETE ALERTS'
-);
+export const deleteAlertAction = createAsyncAction<
+  { alertId: string; monitorId: string },
+  string | null
+>('DELETE ALERTS');
 export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, any>(
   'DELETE ANOMALY ALERT'
 );
+
+interface AsyncLoadingPayload {
+  monitorId: string;
+  monitorName?: string;
+}
+
+const ASYNC_REQUEST_PENDING = 'ASYNC_REQUEST_PENDING';
+const ASYNC_REQUEST_RESOLVED = 'ASYNC_REQUEST_RESOLVED';
+
+const createAsyncLoadingAction = createAction<AsyncLoadingPayload>(ASYNC_REQUEST_PENDING);
+const resolveAsyncLoadingAction = createAction<AsyncLoadingPayload>(ASYNC_REQUEST_RESOLVED);
 
 export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
@@ -60,6 +72,7 @@ export interface AlertState {
   anomalyAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alertDeletion: AsyncInitState<string>;
   anomalyAlertDeletion: AsyncInitState<boolean>;
+  pendingAlertRequests: AsyncLoadingPayload[];
 }
 
 const initialState = {
@@ -69,61 +82,80 @@ const initialState = {
   anomalyAlert: asyncInitState(),
   alertDeletion: asyncInitState(),
   anomalyAlertDeletion: asyncInitState(),
+  pendingAlertRequests: [],
 };
 
 export const alertsReducer = handleActions<AlertState>(
   {
     ...handleAsyncAction<AlertState>('connectors', getConnectorsAction),
-    // ...handleAsyncAction<AlertState>('newAlert', createAlertAction),
+    ...handleAsyncAction<AlertState>('newAlert', createAlertAction),
     ...handleAsyncAction<AlertState>('alerts', getMonitorAlertsAction),
     ...handleAsyncAction<AlertState>('anomalyAlert', getAnomalyAlertAction),
     ...handleAsyncAction<AlertState>('alertDeletion', deleteAlertAction),
     ...handleAsyncAction<AlertState>('anomalyAlertDeletion', deleteAnomalyAlertAction),
-    ...{
-      [String(createAlertAction.get)]: (state: any, action: Action<any>) => {
-        const {
-          payload: { monitorId, monitorName },
-        } = action;
-        const newState = {
-          ...state,
-          newAlert: {
-            ...(state as any).newAlert,
-            pendingMonitorIds: [{ [monitorId]: monitorName }],
-            loading: true,
-          },
-        };
-        return newState;
-      },
-      [String(createAlertAction.success)]: (state: any, action: any) => {
-        return {
-          ...state,
-          newAlert: {
-            ...(state as any).newAlert,
-            data: action.payload,
-            loading: false,
-          },
-        };
-      },
-      [String(createAlertAction.fail)]: (state: any, action: any) => {
-        const {
-          payload: { monitorId },
-        } = action;
-        const {
-          newAlert: { pendingMonitorIds },
-        } = state;
-
-        return {
-          ...state,
-          newAlert: {
-            ...(state as any).newAlert,
-            pendingMonitorIds: pendingMonitorIds.filter((item) => !item[monitorId]),
-            data: null,
-            error: action.payload,
-            loading: false,
-          },
-        };
-      },
+    [String(createAsyncLoadingAction)]: (state: any, action: any) => {
+      const { pendingAlertRequests } = state;
+      const nextPendingAR = [...pendingAlertRequests, action.payload];
+      return {
+        ...state,
+        pendingAlertRequests: nextPendingAR,
+      };
     },
+    [String(resolveAsyncLoadingAction)]: (state: any, action: any) => {
+      const { pendingAlertRequests } = state;
+      const nextPendingAlertRequests = pendingAlertRequests.filter(
+        (req: AsyncLoadingPayload) => req.monitorId !== action.payload.monitorId
+      );
+      return {
+        ...state,
+        pendingAlertRequests: nextPendingAlertRequests,
+      };
+    },
+    // ...{
+    //   [String(createAlertAction.get)]: (state: any, action: Action<any>) => {
+    //     const {
+    //       payload: { monitorId, monitorName },
+    //     } = action;
+    //     const newState = {
+    //       ...state,
+    //       newAlert: {
+    //         ...(state as any).newAlert,
+    //         pendingMonitorIds: [{ [monitorId]: monitorName }],
+    //         loading: true,
+    //       },
+    //     };
+    //     return newState;
+    //   },
+    //   [String(createAlertAction.success)]: (state: any, action: any) => {
+    //     return {
+    //       ...state,
+    //       newAlert: {
+    //         ...(state as any).newAlert,
+    //         data: action.payload,
+    //         loading: false,
+    //       },
+    //     };
+    //   },
+    //   [String(createAlertAction.fail)]: (state: any, action: any) => {
+    //     const {
+    //       payload: { monitorId },
+    //     } = action;
+    //     const {
+    //       newAlert: { pendingMonitorIds },
+    //     } = state;
+
+    //     return {
+    //       ...state,
+    //       newAlert: {
+    //         ...(state as any).newAlert,
+    //         pendingMonitorIds: pendingMonitorIds.filter((item) => !item[monitorId]),
+    //         data: null,
+    //         error: action.payload,
+    //         loading: false,
+    //       },
+    //     };
+    //   },
+    // },
   },
   initialState
 );
@@ -151,32 +183,44 @@ export function* fetchAlertsEffect() {
   );
 
   yield takeLatest(deleteAnomalyAlertAction.get, function* (action: Action<{ alertId: string }>) {
+    const monitorId = yield select(monitorIdSelector);
     try {
+      yield put(createAsyncLoadingAction({ monitorId }));
       yield call(disableAlertById, action.payload);
+      yield put(resolveAsyncLoadingAction({ monitorId }));
       yield put(deleteAnomalyAlertAction.success(action.payload.alertId));
       showAlertDisabledSuccess();
-      const monitorId = yield select(monitorIdSelector);
       yield put(getAnomalyAlertAction.get({ monitorId }));
     } catch (err) {
       showAlertDisabledFailed(err);
+      yield put(resolveAsyncLoadingAction({ monitorId }));
       yield put(deleteAnomalyAlertAction.fail(err));
     }
   });
 
-  yield takeLatest(deleteAlertAction.get, function* (action: Action<{ alertId: string }>) {
-    try {
-      yield call(disableAlertById, action.payload);
-      // clear previous state
-      yield put(createAlertAction.success(null));
-      yield put(deleteAlertAction.success(action.payload.alertId));
+  yield takeLatest(
+    deleteAlertAction.get,
+    function* (action: Action<{ alertId: string; monitorId: string }>) {
+      const {
+        payload: { monitorId },
+      } = action;
+      try {
+        yield put(createAsyncLoadingAction({ monitorId }));
+        yield call(disableAlertById, action.payload);
+        // clear previous state
+        yield put(resolveAsyncLoadingAction({ monitorId }));
+        yield put(createAlertAction.success(null));
+        yield put(deleteAlertAction.success(action.payload.alertId));
 
-      showAlertDisabledSuccess();
-      yield put(getMonitorAlertsAction.get());
-    } catch (err) {
-      showAlertDisabledFailed(err);
-      yield put(deleteAlertAction.fail(err));
+        showAlertDisabledSuccess();
+        yield put(getMonitorAlertsAction.get());
+      } catch (err) {
+        showAlertDisabledFailed(err);
+        yield put(resolveAsyncLoadingAction({ monitorId }));
+        yield put(deleteAlertAction.fail(err));
+      }
     }
-  });
+  );
 
   yield takeLatest(
     getConnectorsAction.get,
@@ -195,9 +239,11 @@ export function* fetchAlertsEffect() {
       payload: { monitorId, monitorName },
     } = action;
     try {
+      yield put(createAsyncLoadingAction({ monitorId, monitorName }));
       const response = yield call(createAlert, action.payload);
       yield put(createAlertAction.success(response));
 
+      yield put(resolveAsyncLoadingAction({ monitorId, monitorName }));
       kibanaService.core.notifications.toasts.addSuccess(
         simpleAlertEnabled(action.payload.defaultActions)
       );
@@ -208,7 +254,8 @@ export function* fetchAlertsEffect() {
           defaultMessage: 'Alert cannot be enabled!',
         }),
       });
-      yield put(createAlertAction.fail({ error, monitorId, monitorName }));
+      yield put(resolveAsyncLoadingAction({ monitorId, monitorName }));
+      yield put(createAlertAction.fail(error));
     }
   });
 }

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectDynamicSettings,
-  pendingSimpleAlertCreationSelector,
-} from '../../../../state/selectors';
+import { useInFlightAlert } from '.././../../../hooks/use_in_flight_alert';
+import { selectDynamicSettings } from '../../../../state/selectors';
 import {
   alertsSelector,
   connectorsSelector,
@@ -42,8 +40,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const { data: actionConnectors } = useSelector(connectorsSelector);
 
   const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
-  const d = useSelector(pendingSimpleAlertCreationSelector);
-  const isLoading = d.some((f) => !!f[monitorId]);
+  const isAlertRequestInFlight = useInFlightAlert(monitorId);
 
   const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
@@ -82,6 +79,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
       dispatch(
         deleteAlertAction.get({
           alertId: hasAlert.id,
+          monitorId,
         })
       );
       // setIsLoading(true);
@@ -94,7 +92,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
 
   const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 
-  const showSpinner = isLoading || (alertsLoading && !alerts);
+  const showSpinner = isAlertRequestInFlight || (alertsLoading && !alerts);
 
   const onAlertClick = () => {
     if (hasAlert) {
