@@ -84,8 +84,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
         transformFunction === TRANSFORM_FUNCTION.PIVOT
           ? pivotConfig.state.requestPayload
           : latestFunctionConfig.requestPayload,
-      runtimeMappings:
-        transformFunction === TRANSFORM_FUNCTION.PIVOT ? overrides?.runtimeMappings : 'blah2',
+      runtimeMappings: transformFunction === overrides?.runtimeMappings,
     });
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */

@@ -49,8 +49,10 @@ export const useIndexData = (
     indexPattern,
     getFieldsFromKibanaIndexPattern,
   ]);
+
   const columns: EuiDataGridColumn[] = useMemo(() => {
     let runtimeMappingColumns: Array<{ id: string; schema: string | undefined }> = [];
+
     if (overrides?.runtimeMappings !== undefined) {
       runtimeMappingColumns = Object.keys(overrides.runtimeMappings).map((fieldName) => {
         const field = overrides.runtimeMappings[fieldName];
