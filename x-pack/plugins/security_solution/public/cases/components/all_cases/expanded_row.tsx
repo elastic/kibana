@@ -21,7 +21,7 @@ const BasicTable = styled(EuiBasicTable)`
 
   tbody {
     .euiTableCellContent {
-      padding: 0 8px !important;
+      padding: 8px !important;
     }
     .euiTableRowCell {
       border: 0;

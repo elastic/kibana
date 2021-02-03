@@ -85,7 +85,7 @@ const getSortField = (field: string): SortFieldCase => {
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 const BasicTable = styled(EuiBasicTable)`
   .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
-    padding: 0 0 0 32px;
+    padding: 8px 0 8px 32px;
   }
 `;
 BasicTable.displayName = 'BasicTable';
