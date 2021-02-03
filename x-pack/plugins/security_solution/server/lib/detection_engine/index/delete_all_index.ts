@@ -39,6 +39,7 @@ export const deleteAllIndex = async (
     // delete the concrete indexes we found and try again until this pattern resolves to no indexes
     await callWithRequest('indices.delete', {
       index: indices,
+      ignoreUnavailable: true,
     });
   }
 };

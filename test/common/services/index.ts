@@ -14,7 +14,7 @@ import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
 import { RandomnessProvider } from './randomness';
 import { SecurityServiceProvider } from './security';
-import { EsDeleteIndicesProvider } from './es_delete_all_indices';
+import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
 
 export const services = {
   deployment: DeploymentProvider,
@@ -25,5 +25,5 @@ export const services = {
   retry: RetryProvider,
   randomness: RandomnessProvider,
   security: SecurityServiceProvider,
-  esDeleteAllIndices: EsDeleteIndicesProvider,
+  esDeleteAllIndices: EsDeleteAllIndicesProvider,
 };

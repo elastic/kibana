@@ -8,7 +8,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EsDeleteIndicesProvider({ getService }: FtrProviderContext) {
+export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
@@ -16,6 +16,7 @@ export function EsDeleteIndicesProvider({ getService }: FtrProviderContext) {
     try {
       await es.indices.delete({
         index: indices,
+        ignore_unavailable: true,
       });
     } catch (error) {
       log.debug(`Failed to delete indices [${indices}], but ignoring error: ${error.message}`);
