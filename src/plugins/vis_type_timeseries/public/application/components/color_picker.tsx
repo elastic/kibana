@@ -35,6 +35,13 @@ export interface ColorPickerProps {
   seriesId?: string;
 }
 
+const getOverwrittenColor = (uiState: PersistedState, seriesId: string, seriesName?: string) => {
+  const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
+  const colors: OverwriteColors | undefined = seriesColors.find(({ id }) => id === seriesId);
+  const seriesHasOverwrittenColors = colors && Object.keys(colors).length !== 0;
+  return seriesName && seriesHasOverwrittenColors && colors?.overwrite?.[seriesName];
+};
+
 export function ColorPicker({
   name,
   value,
@@ -47,7 +54,9 @@ export function ColorPicker({
   const initialColorValue = value?.includes('rgba')
     ? value.replace(COMMAS_NUMS_ONLY_RE, '')
     : value;
-  const [color, setColor] = useState(initialColorValue || '');
+  const initialOverwrittenColor =
+    uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
+  const [color, setColor] = useState(initialOverwrittenColor || initialColorValue || '');
 
   const handleColorChange = useCallback(
     (text: string, { rgba, hex }) => {
@@ -55,16 +64,15 @@ export function ColorPicker({
       const part: ColorProps = {};
       part[name] = hex ? `rgba(${rgba.join(',')})` : '';
       onChange(part);
-      if (uiState && seriesName) {
-        const seriesColors: OverwriteColors[] = uiState.get('vis.colors', []);
+      const overwrittenColor =
+        uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
+      if (overwrittenColor && seriesName) {
+        const seriesColors: OverwriteColors[] = uiState?.get('vis.colors', []);
         const colors: OverwriteColors | undefined = seriesColors.find(({ id }) => id === seriesId);
-        if (colors?.overwrite[seriesName]) {
-          delete colors.overwrite[seriesName];
-        }
-
-        uiState.setSilent('vis.colors', null);
-        uiState.set('vis.colors', seriesColors);
-        uiState.emit('colorChanged');
+        delete colors?.overwrite[seriesName];
+        uiState?.setSilent('vis.colors', null);
+        uiState?.set('vis.colors', seriesColors);
+        uiState?.emit('colorChanged');
       }
     },
     [name, onChange, seriesId, seriesName, uiState]
@@ -72,24 +80,20 @@ export function ColorPicker({
 
   useEffect(() => {
     const updateColor = () => {
-      const seriesColors: OverwriteColors[] = uiState?.get('vis.colors', []);
-      const colors: OverwriteColors | undefined = seriesColors?.find(({ id }) => id === seriesId);
-      if (
-        seriesName &&
-        colors &&
-        Object.keys(colors).length !== 0 &&
-        colors.overwrite?.[seriesName]
-      ) {
-        setColor(colors.overwrite[seriesName]);
+      const overwrittenColor =
+        uiState && seriesId ? getOverwrittenColor(uiState, seriesId, seriesName) : undefined;
+      if (seriesName && overwrittenColor) {
+        setColor(overwrittenColor);
+      } else if (initialColorValue) {
+        setColor(initialColorValue);
       }
     };
-    updateColor();
     uiState?.on('change', updateColor);
 
     return () => {
       uiState?.off('change', updateColor);
     };
-  }, [seriesId, seriesName, uiState]);
+  }, [initialColorValue, seriesId, seriesName, uiState]);
 
   const handleClear = () => {
     setColor('');
