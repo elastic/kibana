@@ -217,6 +217,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
       [
@@ -224,6 +225,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
     ]);
@@ -345,6 +347,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
     ]);
@@ -578,6 +581,7 @@ describe('test transform install', () => {
         {
           method: 'POST',
           path: '/_transform/endpoint.metadata_current-default-0.16.0-dev.0/_start',
+          ignore: [409],
         },
       ],
     ]);
