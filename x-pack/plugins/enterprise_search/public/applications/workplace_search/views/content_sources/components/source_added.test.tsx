@@ -6,22 +6,22 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions, mockFlashMessageHelpers } from '../../../../__mocks__';
+import { setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Redirect, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+
+import { Loading } from '../../../../shared/loading';
 
 import { SourceAdded } from './source_added';
 
 describe('SourceAdded', () => {
-  const { setErrorMessage } = mockFlashMessageHelpers;
-  const setAddedSource = jest.fn();
+  const saveSourceParams = jest.fn();
 
   beforeEach(() => {
-    setMockActions({ setAddedSource });
-    setMockValues({ isOrganization: true });
+    setMockActions({ saveSourceParams });
   });
 
   it('renders', () => {
@@ -29,26 +29,7 @@ describe('SourceAdded', () => {
     (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
     const wrapper = shallow(<SourceAdded />);
 
-    expect(wrapper.find(Redirect)).toHaveLength(1);
-    expect(setAddedSource).toHaveBeenCalled();
-  });
-
-  describe('hasError', () => {
-    it('passes default error to server', () => {
-      const search = '?name=foo&hasError=true&serviceType=custom&indexPermissions=false';
-      (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
-      shallow(<SourceAdded />);
-
-      expect(setErrorMessage).toHaveBeenCalledWith('foo failed to connect.');
-    });
-
-    it('passes custom error to server', () => {
-      const search =
-        '?name=foo&hasError=true&serviceType=custom&indexPermissions=false&errorMessages[]=custom error';
-      (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
-      shallow(<SourceAdded />);
-
-      expect(setErrorMessage).toHaveBeenCalledWith('custom error');
-    });
+    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(saveSourceParams).toHaveBeenCalled();
   });
 });
