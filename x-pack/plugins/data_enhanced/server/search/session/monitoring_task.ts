@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { Duration } from 'moment';
 import {
   TaskManagerSetupContract,
@@ -23,14 +21,13 @@ export const SEARCH_SESSIONS_TASK_ID = `data_enhanced_${SEARCH_SESSIONS_TASK_TYP
 interface SearchSessionTaskDeps {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
-  config$: Observable<ConfigSchema>;
+  config: ConfigSchema;
 }
 
-function searchSessionRunner(core: CoreSetup, { logger, config$ }: SearchSessionTaskDeps) {
+function searchSessionRunner(core: CoreSetup, { logger, config }: SearchSessionTaskDeps) {
   return ({ taskInstance }: RunContext) => {
     return {
       async run() {
-        const config = await config$.pipe(first()).toPromise();
         const sessionConfig = config.search.sessions;
         const [coreStart] = await core.getStartServices();
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);

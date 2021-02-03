@@ -5,7 +5,7 @@
  */
 
 import { from, Observable } from 'rxjs';
-import { first, switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import {
   CoreStart,
   KibanaRequest,
@@ -57,32 +57,33 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService implements ISessionService {
-  private config!: SearchSessionsConfig;
+  private sessionConfig!: SearchSessionsConfig;
 
-  constructor(
-    private readonly logger: Logger,
-    private readonly config$: Observable<ConfigSchema>
-  ) {}
+  constructor(private readonly logger: Logger, private readonly config: ConfigSchema) {
+    this.sessionConfig = this.config.search.sessions;
+  }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     registerSearchSessionsTask(core, {
-      config$: this.config$,
+      config: this.config,
       taskManager: deps.taskManager,
       logger: this.logger,
     });
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
-    const configPromise = await this.config$.pipe(first()).toPromise();
-    this.config = (await configPromise).search.sessions;
     return this.setupMonitoring(core, deps);
   }
 
   public stop() {}
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
-    if (this.config.enabled) {
-      scheduleSearchSessionsTasks(deps.taskManager, this.logger, this.config.trackingInterval);
+    if (this.sessionConfig.enabled) {
+      scheduleSearchSessionsTasks(
+        deps.taskManager,
+        this.logger,
+        this.sessionConfig.trackingInterval
+      );
     }
   };
 
@@ -139,7 +140,7 @@ export class SearchSessionService implements ISessionService {
         } catch (createError) {
           if (
             SavedObjectsErrorHelpers.isConflictError(createError) &&
-            retry < this.config.maxUpdateRetries
+            retry < this.sessionConfig.maxUpdateRetries
           ) {
             return await retryOnConflict(createError);
           } else {
@@ -148,7 +149,7 @@ export class SearchSessionService implements ISessionService {
         }
       } else if (
         SavedObjectsErrorHelpers.isConflictError(e) &&
-        retry < this.config.maxUpdateRetries
+        retry < this.sessionConfig.maxUpdateRetries
       ) {
         return await retryOnConflict(e);
       } else {
@@ -200,7 +201,7 @@ export class SearchSessionService implements ISessionService {
         sessionId,
         status: SearchSessionStatus.IN_PROGRESS,
         expires: new Date(
-          Date.now() + this.config.defaultExpiration.asMilliseconds()
+          Date.now() + this.sessionConfig.defaultExpiration.asMilliseconds()
         ).toISOString(),
         created: new Date().toISOString(),
         touched: new Date().toISOString(),

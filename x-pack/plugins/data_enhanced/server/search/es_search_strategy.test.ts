@@ -71,13 +71,13 @@ describe('ES search strategy', () => {
     },
   });
 
-  const mockConfig$ = new BehaviorSubject<any>({
+  const mockConfig: any = {
     search: {
       sessions: {
         defaultExpiration: moment.duration('1', 'm'),
       },
     },
-  });
+  };
 
   beforeEach(() => {
     mockApiCaller.mockClear();
@@ -88,7 +88,7 @@ describe('ES search strategy', () => {
 
   it('returns a strategy with `search and `cancel`', async () => {
     const esSearch = await enhancedEsSearchStrategyProvider(
-      mockConfig$,
+      mockConfig,
       mockLegacyConfig$,
       mockLogger
     );
@@ -103,7 +103,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -122,7 +122,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -141,7 +141,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'foo-*', body: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -159,7 +159,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'foo-程', body: {} };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -188,7 +188,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -208,7 +208,7 @@ describe('ES search strategy', () => {
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
-          mockConfig$,
+          mockConfig,
           mockLegacyConfig$,
           mockLogger
         );
@@ -236,7 +236,7 @@ describe('ES search strategy', () => {
 
       const params = { index: 'logstash-*', body: { query: {} } };
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
@@ -261,7 +261,7 @@ describe('ES search strategy', () => {
 
       const params = { index: 'logstash-*', body: { query: {} } };
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
@@ -286,7 +286,7 @@ describe('ES search strategy', () => {
 
       const id = 'some_id';
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
@@ -310,7 +310,7 @@ describe('ES search strategy', () => {
 
       const id = 'some_id';
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
@@ -337,7 +337,7 @@ describe('ES search strategy', () => {
       const id = 'some_other_id';
       const keepAlive = '1d';
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
@@ -356,7 +356,7 @@ describe('ES search strategy', () => {
       const id = 'some_other_id';
       const keepAlive = '1d';
       const esSearch = await enhancedEsSearchStrategyProvider(
-        mockConfig$,
+        mockConfig,
         mockLegacyConfig$,
         mockLogger
       );
