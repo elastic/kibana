@@ -42,53 +42,15 @@ quantities of data the frequency listed below (20000ms = 20s) or higher:
 `node ./load_tracks.js -a <YOUR_API_KEY> -f 20000`
 
 ### 5. Open required Kibana tabs
-There are 4 separate tabs you'll need for a combination of loading and viewing the
+There are 3 separate tabs you'll need for a combination of loading and viewing the
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
 - Stack Management > Index Patterns: `management/kibana/indexPatterns`
 - Stack Management > Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
-- Dev tools: `dev_tools#/console`
 - Maps: `maps`
 
-### 6. Create a new alert index in dev tools
-Execute the following two commands:
-- Create index
-```
-PUT /manhattan_mta_alerts
-```
-- Create mappings
-```
-PUT /manhattan_mta_alerts/_mapping
-{
-  "properties": {
-    "entityId": {
-      "type": "keyword"
-    },
-    "entityDateTime": {
-      "type": "date"
-    },
-    "entityDocumentId": {
-      "type": "keyword"
-    },
-    "detectionDateTime": {
-      "type": "date"
-    },    
-    "entityLocation": {
-      "type": "geo_point"
-    },
-    "containingBoundaryId": {
-      "type": "keyword"
-    },
-    "containingBoundaryName": {
-      "type": "keyword"
-    }
-  }
-}
-```
-
-### 7 Create map to monitor alerts
-- Go to the Maps app
-- Create a new map
+### 6 Create map to monitor alerts
+- Go to the Maps app and create a new map
 - Using GeoJSON Upload, upload the geojson file located in the folder of the previously 
 cloned `mta_tracks` repo: `nyc-neighborhoods.geo.json`. Accept all of the default
 settings.
@@ -98,18 +60,17 @@ _ When finished uploading and adding the layer, save the map using a name of you
 choice.
 - Keep the Maps tab open, you'll come back to this
 
-### 8. Create index pattern for generated tracks
+### 7. Create index pattern for generated tracks
 - Go to the index pattern tab to create a new index pattern.
 - Give it the index name `mtatracks*`
 - For `Time field` select `@timestamp`
 - Click `Create index pattern`
 - Leave this tab open, you'll come back to this
 
-
-### 9. Create containment alert
+### 8. Create containment alert
 - Go to the Alerts tab and click `Create Alert` > `Tracking containment`
 - Fill the side bar form top to bottom. This _should_ flow somewhat logically. In the top 
-section, set both `Check every` and `Notify every` to `2 seconds`.
+section, set both `Check every` and `Notify every` to `1 minute`.
  For `Notify`, leave
 on default selected option `Only on status change`, this will notify only on newly
 contained entities.
@@ -120,45 +81,27 @@ contained entities.
 as the index you'd like to track. Use the defaults populated under
 `Select entity` > `INDEX`, update `Select entity` > `BY` to `vehicle_ref`.
 - For `Select boundary` > `INDEX`, select `nyc-neighborhoods` and all populated defaults.
-- Under `Actions`, create an `Index` action, then create an `Index connector`. When it
-prompts you for a name, you can just call it `index connector` . For index name, use the one we 
-created earlier in dev tools: `manhattan_mta_alerts`. Accept the provided defaults and save.
+- Under `Actions`, create an `Server log` action, then create a `Connector` which you can simply name
+`Log test`.
 - For `Run when`, the default `Tracking containment met` will work here. This will track
 only points that are newly contained in the boundaries.
-- Under `Document to index`, use the following structure:
+- Leave the log level at `Info`
+- For the message, use the following sample message or one of your own:
 ```
-{
-    "entityId": "{{context.entityId}}",
-    "entityDateTime": "{{context.entityDateTime}}",
-    "entityDocumentId": "{{context.entityDocumentId}}",
-    "detectionDateTime": "{{context.detectionDateTime}}",
-    "entityLocation": "{{context.entityLocation}}",
-    "containingBoundaryId": "{{context.containingBoundaryId}}",
-    "containingBoundaryName": "{{context.containingBoundaryName}}"
-}
+Entity: {{context.entityId}} with document ID: {{context.entityDocumentId}} has been recorded at location: {{context.entityLocation}} in boundary: {{context.containingBoundaryName}}({{context.containingBoundaryId}}) at {{context.entityDateTime}}. This was detected by the alerting framework at: {{context.detectionDateTime}}. 
 ```
 - At the bottom right, click `Save`. Your alert should now be created!
+- You should now be able to see alerts generated in your Kibana console log.
 
-### 10. Create another index pattern to track the alerts you're creating
-- Go to Index patterns tab and click `Create index pattern`
-- Create new index pattern: `manhattan_mta_alerts`
-- For `Time field` select `detectionDateTime`
-- Click `Create index pattern`
-
-### 11. Create Map
+### 9. Consider ways to visually confirm your alerts
 - The map you create is entirely up to you, minimally you have the following
 source data to work with:
     - Original tracks data
-    - Generated alert data
     - Boundary data
-- Each of these data sources can be added 1 or more times with different layers
-  focusing on different aspects of the data worth illustrating
-- Minimally here are a few tips for working with live data:
-    - Consider adding multiple layers for the alerts, minimally add the tracks created
-    by the live data and the points of the alerts.
-    ![Map containment view](plugins/stack_alerts/public/alert_types/geo_containment/images/geo_containment_alert_map_view.png)
-    - If you add `mtatracks*`, consider setting the `Top Hits` setting to 1 or a larger
-    number if you want to see a trail of where it's been. Just be aware that many busses
-    moving around will create a lot of points. You could do multiple layers here where
-    small points plot the bus's trail and the larger point covers the most recent location.
-    - Consider adding tooltips to layers to better understand what layers you're looking at.
+- If you add `mtatracks*` as a layer, consider setting the `Top Hits` setting to 1 or a larger
+number if you want to see a trail of where it's been. If you do so, also set the Map's
+refresh rate to a similar interval as the alert interval so data updates similarly.
+Be aware that many busses moving around will create a lot of points. You could do multiple
+layers here where small points plot the bus's trail and the larger point just covers the
+most recent location.
+- Consider adding tooltips to layers to better understand the data in your layers.
