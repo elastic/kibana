@@ -61,10 +61,6 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/maps/server/fonts/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
   'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
-
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
 ];
 
 /**
