@@ -36,7 +36,7 @@ export const useAucRoc = (
 ) => {
   const [aucRocData, setAucRocData] = useState<AucRocDataRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<null | string>(null);
+  const [error, setError] = useState<null | string[]>(null);
 
   useEffect(() => {
     async function loadAucRocData() {
@@ -49,6 +49,7 @@ export const useAucRoc = (
       const newAucRocData: AucRocDataRow[] = [];
 
       let requiresKeyword = false;
+      const errors: string[] = [];
 
       try {
         requiresKeyword = isKeywordAndTextType(dependentVariable);
@@ -84,16 +85,18 @@ export const useAucRoc = (
             })
           );
           newAucRocData.push(...aucRocDataForClass);
+        } else if (evalData.error !== null) {
+          errors.push(evalData.error);
         }
       }
 
-      setError(null);
+      setError(errors.length > 0 ? errors : null);
       setAucRocData(newAucRocData);
       setIsLoading(false);
     }
 
     loadAucRocData();
-  }, [JSON.stringify([searchQuery, visibleColumns])]);
+  }, [JSON.stringify([jobConfig, searchQuery, visibleColumns])]);
 
   return { aucRocData, error, isLoading };
 };

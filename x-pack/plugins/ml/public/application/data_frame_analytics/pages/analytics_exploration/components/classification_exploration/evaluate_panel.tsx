@@ -101,12 +101,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const resultsField = jobConfig.dest.results_field;
   const isTraining = isTrainingFilter(searchQuery, resultsField);
 
-  const { confusionMatrixData, docsCount, error, isLoading } = useConfusionMatrix(
-    jobConfig,
-    searchQuery
-  );
-
-  const { aucRocData } = useAucRoc(jobConfig, searchQuery, visibleColumns);
+  const {
+    confusionMatrixData,
+    docsCount,
+    error: errorConfusionMatrix,
+    isLoading: isLoadingConfusionMatrix,
+  } = useConfusionMatrix(jobConfig, searchQuery);
 
   useEffect(() => {
     if (isTraining === undefined) {
@@ -148,6 +148,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       });
     }
   }, [confusionMatrixData]);
+
+  const { aucRocData, error: errorAucRoc, isLoading: isLoadingAucRoc } = useAucRoc(
+    jobConfig,
+    searchQuery,
+    visibleColumns
+  );
 
   const renderCellValue = ({
     rowIndex,
@@ -220,7 +226,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           </EuiButtonEmpty>
         }
         headerItems={
-          !isLoading
+          !isLoadingConfusionMatrix
             ? [
                 ...(jobStatus !== undefined
                   ? [
@@ -256,112 +262,124 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
         }
         contentPadding={true}
         content={
-          !isLoading ? (
-            <>
-              {error !== null && <ErrorCallout error={error} />}
-              {error === null && (
-                <>
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiTitle size="xxs">
-                      <span>{getHelpText(dataSubsetTitle)}</span>
-                    </EuiTitle>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                        content={i18n.translate(
-                          'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
-                          {
-                            defaultMessage:
-                              'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  {/* BEGIN TABLE ELEMENTS */}
-                  <EuiSpacer size="m" />
-                  <div className="mlDataFrameAnalyticsClassification__confusionMatrix">
-                    <div className="mlDataFrameAnalyticsClassification__actualLabel">
-                      <EuiText size="xs" color="subdued">
-                        <FormattedMessage
-                          id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
-                          defaultMessage="Actual label"
-                        />
-                      </EuiText>
-                    </div>
-                    <div className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
-                      {columns.length > 0 && columnsData.length > 0 && (
-                        <>
-                          <div>
-                            <EuiText size="xs" color="subdued">
-                              <FormattedMessage
-                                id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
-                                defaultMessage="Predicted label"
-                              />
-                            </EuiText>
-                          </div>
-                          <EuiSpacer size="s" />
-                          <EuiDataGrid
-                            data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
-                            aria-label={i18n.translate(
-                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
-                              {
-                                defaultMessage: 'Classification confusion matrix',
-                              }
-                            )}
-                            columns={shownColumns}
-                            columnVisibility={{ visibleColumns, setVisibleColumns }}
-                            rowCount={rowCount}
-                            renderCellValue={renderCellValue}
-                            inMemory={{ level: 'sorting' }}
-                            toolbarVisibility={{
-                              showColumnSelector: true,
-                              showStyleSelector: false,
-                              showFullScreenSelector: false,
-                              showSortSelector: false,
-                            }}
-                            popoverContents={popoverContents}
-                            gridStyle={{
-                              border: 'all',
-                              fontSize: 's',
-                              cellPadding: 's',
-                              stripes: false,
-                              rowHover: 'none',
-                              header: 'shade',
-                            }}
-                            trailingControlColumns={
-                              showTrailingColumns === true && showFullColumns === false
-                                ? getTrailingControlColumns(extraColumns, setShowFullColumns)
-                                : undefined
+          <>
+            {!isLoadingConfusionMatrix ? (
+              <>
+                {errorConfusionMatrix !== null && <ErrorCallout error={errorConfusionMatrix} />}
+                {errorConfusionMatrix === null && (
+                  <>
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiTitle size="xxs">
+                        <span>{getHelpText(dataSubsetTitle)}</span>
+                      </EuiTitle>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                          content={i18n.translate(
+                            'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
+                            {
+                              defaultMessage:
+                                'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
                             }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    {/* BEGIN TABLE ELEMENTS */}
+                    <EuiSpacer size="m" />
+                    <div className="mlDataFrameAnalyticsClassification__confusionMatrix">
+                      <div className="mlDataFrameAnalyticsClassification__actualLabel">
+                        <EuiText size="xs" color="subdued">
+                          <FormattedMessage
+                            id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
+                            defaultMessage="Actual label"
                           />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {/* END TABLE ELEMENTS */}
-                  <EuiSpacer size="m" />
-                  <EuiFlexGroup gutterSize="none">
-                    <EuiTitle size="xxs">
-                      <span>AUC ROC</span>
-                    </EuiTitle>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                        content={i18n.translate(
-                          'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
-                          {
-                            defaultMessage: 'AUC ROC Help Text',
-                          }
+                        </EuiText>
+                      </div>
+                      <div className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
+                        {columns.length > 0 && columnsData.length > 0 && (
+                          <>
+                            <div>
+                              <EuiText size="xs" color="subdued">
+                                <FormattedMessage
+                                  id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
+                                  defaultMessage="Predicted label"
+                                />
+                              </EuiText>
+                            </div>
+                            <EuiSpacer size="s" />
+                            <EuiDataGrid
+                              data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
+                              aria-label={i18n.translate(
+                                'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixLabel',
+                                {
+                                  defaultMessage: 'Classification confusion matrix',
+                                }
+                              )}
+                              columns={shownColumns}
+                              columnVisibility={{ visibleColumns, setVisibleColumns }}
+                              rowCount={rowCount}
+                              renderCellValue={renderCellValue}
+                              inMemory={{ level: 'sorting' }}
+                              toolbarVisibility={{
+                                showColumnSelector: true,
+                                showStyleSelector: false,
+                                showFullScreenSelector: false,
+                                showSortSelector: false,
+                              }}
+                              popoverContents={popoverContents}
+                              gridStyle={{
+                                border: 'all',
+                                fontSize: 's',
+                                cellPadding: 's',
+                                stripes: false,
+                                rowHover: 'none',
+                                header: 'shade',
+                              }}
+                              trailingControlColumns={
+                                showTrailingColumns === true && showFullColumns === false
+                                  ? getTrailingControlColumns(extraColumns, setShowFullColumns)
+                                  : undefined
+                              }
+                            />
+                          </>
                         )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <AucRocChartView data={aucRocData} />
-                </>
-              )}
-            </>
-          ) : null
+                      </div>
+                    </div>
+                    {/* END TABLE ELEMENTS */}
+                  </>
+                )}
+              </>
+            ) : null}
+            {/* AUC ROC Chart */}
+            {!isLoadingAucRoc ? (
+              <>
+                {Array.isArray(errorAucRoc) && errorAucRoc.map((e) => <ErrorCallout error={e} />)}
+                {errorAucRoc === null && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiTitle size="xxs">
+                        <span>AUC ROC</span>
+                      </EuiTitle>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                          content={i18n.translate(
+                            'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
+                            {
+                              defaultMessage: 'AUC ROC Help Text',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <AucRocChartView data={aucRocData} />
+                  </>
+                )}
+              </>
+            ) : null}
+          </>
         }
       />
       <EuiSpacer size="m" />

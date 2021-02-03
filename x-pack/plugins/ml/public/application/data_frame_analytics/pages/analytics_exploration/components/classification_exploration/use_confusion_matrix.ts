@@ -91,7 +91,7 @@ export const useConfusionMatrix = (
     }
 
     loadConfusionMatrixData();
-  }, [JSON.stringify(searchQuery)]);
+  }, [JSON.stringify([jobConfig, searchQuery])]);
 
   return { confusionMatrixData, docsCount, error, isLoading };
 };
