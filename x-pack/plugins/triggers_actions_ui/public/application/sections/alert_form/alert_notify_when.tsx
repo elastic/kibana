@@ -32,7 +32,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change.',
+        defaultMessage: 'Only on status change',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
