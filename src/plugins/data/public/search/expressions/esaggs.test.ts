@@ -64,7 +64,6 @@ describe('esaggs expression function - public', () => {
       aggs: ({
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown) as jest.Mocked<AggsStart>,
-      deserializeFieldFormat: jest.fn().mockImplementation((f: any) => f),
       indexPatterns: ({
         create: jest.fn().mockResolvedValue({}),
       } as unknown) as jest.Mocked<IndexPatternsContract>,
@@ -99,10 +98,9 @@ describe('esaggs expression function - public', () => {
   test('calls handleEsaggsRequest with all of the right dependencies', async () => {
     await definition().fn(null, args, mockHandlers);
 
-    expect(handleEsaggsRequest).toHaveBeenCalledWith(null, args, {
+    expect(handleEsaggsRequest).toHaveBeenCalledWith({
       abortSignal: mockHandlers.abortSignal,
       aggs: { foo: 'bar' },
-      deserializeFieldFormat: startDependencies.deserializeFieldFormat,
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
@@ -130,8 +128,6 @@ describe('esaggs expression function - public', () => {
     await definition().fn(input, args, mockHandlers);
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(
-      input,
-      args,
       expect.objectContaining({
         filters: input.filters,
         query: input.query,

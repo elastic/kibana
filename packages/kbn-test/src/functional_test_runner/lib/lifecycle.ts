@@ -8,21 +8,18 @@
 
 import { LifecyclePhase } from './lifecycle_phase';
 
-// mocha's global types mean we can't import Mocha or it will override the global jest types..............
-type ItsASuite = any;
-type ItsATest = any;
-type ItsARunnable = any;
+import { Suite, Test } from '../fake_mocha_types';
 
 export class Lifecycle {
-  public readonly beforeTests = new LifecyclePhase<[]>({
+  public readonly beforeTests = new LifecyclePhase<[Suite]>({
     singular: true,
   });
-  public readonly beforeEachRunnable = new LifecyclePhase<[ItsARunnable]>();
-  public readonly beforeTestSuite = new LifecyclePhase<[ItsASuite]>();
-  public readonly beforeEachTest = new LifecyclePhase<[ItsATest]>();
-  public readonly afterTestSuite = new LifecyclePhase<[ItsASuite]>();
-  public readonly testFailure = new LifecyclePhase<[Error, ItsATest]>();
-  public readonly testHookFailure = new LifecyclePhase<[Error, ItsATest]>();
+  public readonly beforeEachRunnable = new LifecyclePhase<[Test]>();
+  public readonly beforeTestSuite = new LifecyclePhase<[Suite]>();
+  public readonly beforeEachTest = new LifecyclePhase<[Test]>();
+  public readonly afterTestSuite = new LifecyclePhase<[Suite]>();
+  public readonly testFailure = new LifecyclePhase<[Error, Test]>();
+  public readonly testHookFailure = new LifecyclePhase<[Error, Test]>();
   public readonly cleanup = new LifecyclePhase<[]>({
     singular: true,
   });
