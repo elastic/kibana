@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiComboBoxOptionOption, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
+import { ComboBoxField, useFormData } from '../../../../../../shared_imports';
 import { useLoadSnapshotPolicies } from '../../../../../services/api';
+
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { UseField } from '../../../form';
 
 import { FieldLoadingError } from '../../';
 
