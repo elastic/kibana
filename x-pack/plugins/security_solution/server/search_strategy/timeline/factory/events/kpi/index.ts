@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { getOr } from 'lodash/fp';
+
+import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import {
+  TimelineEventsQueries,
+  TimelineRequestBasicOptions,
+  TimelineKpiStrategyResponse,
+} from '../../../../../../common/search_strategy/timeline';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { SecuritySolutionTimelineFactory } from '../../types';
+import { buildTimelineKpiQuery } from './query.kpi.dsl';
+
+export const timelineKpi: SecuritySolutionTimelineFactory<TimelineEventsQueries.kpi> = {
+  buildDsl: (options: TimelineRequestBasicOptions) => buildTimelineKpiQuery(options),
+  parse: async (
+    options: TimelineRequestBasicOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<TimelineKpiStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildTimelineKpiQuery(options))],
+    };
+
+    return {
+      ...response,
+      destinationIpCount: getOr(0, 'aggregations.destinationIpCount.value', response.rawResponse),
+      inspect,
+      hostCount: getOr(0, 'aggregations.hostCount.value', response.rawResponse),
+      processCount: getOr(0, 'aggregations.processCount.value', response.rawResponse),
+      sourceIpCount: getOr(0, 'aggregations.sourceIpCount.value', response.rawResponse),
+      userCount: getOr(0, 'aggregations.userCount.value', response.rawResponse),
+    };
+  },
+};
