@@ -35,7 +35,9 @@ const indexPattern = ({
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
 } as unknown) as IndexPattern;
 
-const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
+const mockFieldToIndexPatternField = (
+  spec: Record<string, string | string[] | boolean | undefined>
+) => {
   return new IndexPatternField((spec as unknown) as IndexPatternField['spec']);
 };
 
@@ -44,10 +46,10 @@ const fields = [
     name: 'Elastic',
     displayName: 'Elastic',
     searchable: true,
-    type: 'string',
+    esTypes: ['keyword'],
   },
-  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+  { name: 'timestamp', displayName: 'timestamp', esTypes: ['date'] },
+  { name: 'conflictingField', displayName: 'conflictingField', esTypes: ['keyword', 'long'] },
 ].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {

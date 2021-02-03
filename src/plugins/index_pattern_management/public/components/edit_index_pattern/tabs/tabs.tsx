@@ -104,7 +104,9 @@ export function Tabs({
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
-        tempIndexedFieldTypes.push(field.type);
+        if (field.esTypes) {
+          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+        }
       }
     });
 
