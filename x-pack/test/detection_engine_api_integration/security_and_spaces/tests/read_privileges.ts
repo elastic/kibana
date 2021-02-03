@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest.get(DETECTION_ENGINE_PRIVILEGES_URL).send().expect(200);
       expect(body).to.eql({
         username: 'elastic',
-        has_all_requested: true,
+        has_all_requested: false,
         cluster: {
           monitor_ml: true,
           manage_ccr: true,
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
           read_ilm: true,
           manage_api_key: true,
           manage_security: true,
-          manage_own_api_key: true,
+          manage_own_api_key: false,
           manage_saml: true,
           all: true,
           manage_ilm: true,
