@@ -9,7 +9,6 @@ import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
 
@@ -29,28 +28,31 @@ export function ServiceOverviewInstancesChartAndTable({
     uiFilters,
   } = useUrlParams();
 
-  const { data = [], status } = useFetcher(() => {
-    if (!start || !end || !transactionType) {
-      return;
-    }
+  const { data = [], status } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !transactionType) {
+        return;
+      }
 
-    return callApmApi({
-      endpoint:
-        'GET /api/apm/services/{serviceName}/service_overview_instances',
-      params: {
-        path: {
-          serviceName,
+      return callApmApi({
+        endpoint:
+          'GET /api/apm/services/{serviceName}/service_overview_instances',
+        params: {
+          path: {
+            serviceName,
+          },
+          query: {
+            start,
+            end,
+            transactionType,
+            uiFilters: JSON.stringify(uiFilters),
+            numBuckets: 20,
+          },
         },
-        query: {
-          start,
-          end,
-          transactionType,
-          uiFilters: JSON.stringify(uiFilters),
-          numBuckets: 20,
-        },
-      },
-    });
-  }, [start, end, serviceName, transactionType, uiFilters]);
+      });
+    },
+    [start, end, serviceName, transactionType, uiFilters]
+  );
 
   return (
     <>

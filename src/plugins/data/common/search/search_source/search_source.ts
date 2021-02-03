@@ -172,7 +172,49 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields() {
+  getFields(recurse = false): SearchSourceFields {
+    let thisFilter = this.fields.filter; // type is single value, array, or function
+    if (thisFilter) {
+      if (typeof thisFilter === 'function') {
+        thisFilter = thisFilter() || []; // type is single value or array
+      }
+
+      if (Array.isArray(thisFilter)) {
+        thisFilter = [...thisFilter];
+      } else {
+        thisFilter = [thisFilter];
+      }
+    } else {
+      thisFilter = [];
+    }
+
+    if (recurse) {
+      const parent = this.getParent();
+      if (parent) {
+        const parentFields = parent.getFields(recurse);
+
+        let parentFilter = parentFields.filter; // type is single value, array, or function
+        if (parentFilter) {
+          if (typeof parentFilter === 'function') {
+            parentFilter = parentFilter() || []; // type is single value or array
+          }
+
+          if (Array.isArray(parentFilter)) {
+            thisFilter.push(...parentFilter);
+          } else {
+            thisFilter.push(parentFilter);
+          }
+        }
+
+        // add combined filters to the fields
+        const thisFields = {
+          ...this.fields,
+          filter: thisFilter,
+        };
+
+        return { ...parentFields, ...thisFields };
+      }
+    }
     return { ...this.fields };
   }
 
@@ -610,9 +652,8 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields() {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
-      'sort',
+  public getSerializedFields(recurse = false) {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
       'size',
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {

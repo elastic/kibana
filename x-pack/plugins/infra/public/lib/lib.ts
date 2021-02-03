@@ -13,7 +13,7 @@ import {
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import { SourceQuery } from '../graphql/types';
+import { InfraSourceConfigurationFields } from '../../common/http_api/source_api';
 import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 export interface InfraWaffleMapNode {
@@ -123,7 +123,7 @@ export enum InfraWaffleMapRuleOperator {
 }
 
 export interface InfraWaffleMapOptions {
-  fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
+  fields?: InfraSourceConfigurationFields | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
   metric: SnapshotMetricInput;
