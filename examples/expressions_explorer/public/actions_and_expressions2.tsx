@@ -26,17 +26,20 @@ import {
 } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
 
 interface Props {
   expressions: ExpressionsStart;
   actions: UiActionsStart;
 }
 
-export function ActionsExpressionsExample({ expressions, actions }: Props) {
+export function ActionsExpressionsExample2({ expressions, actions }: Props) {
   const [expression, updateExpression] = useState(
-    'button name="click me" href="http://www.google.com"'
+    'button name="click me" href="http://www.google.com" color={var color}'
   );
+
+  const [variables, updateVariables] = useState({
+    color: 'blue',
+  });
 
   const expressionChanged = (value: string) => {
     updateExpression(value);
@@ -47,11 +50,7 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
   };
 
   const handleEvents = (event: any) => {
-    if (event.id !== 'NAVIGATE') return;
-    // enrich event context with some extra data
-    event.baseUrl = 'http://www.google.com';
-
-    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.value);
+    updateVariables({ color: event.value.href === 'http://www.google.com' ? 'red' : 'blue' });
   };
 
   return (
@@ -63,14 +62,13 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent data-test-subj="expressionsActionsTest">
-        <EuiPageContentBody>
+      <EuiPageContent>
+        <EuiPageContentBody data-test-subj="expressionsVariablesTest">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
-                Here you can play with sample `button` which takes a url as configuration and
-                displays a button which emits custom BUTTON_CLICK trigger to which we have attached
-                a custom action which performs the navigation.
+                This example is similar to previous one, but clicking the button will rerender the
+                expression with new set of variables.
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -84,9 +82,11 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
             <EuiFlexItem>
               <EuiPanel paddingSize="none" role="figure">
                 <ReactExpressionRenderer
+                  data-test-subj="expressionsVariablesTestRenderer"
                   expression={expression}
                   debug={true}
                   inspectorAdapters={inspectorAdapters}
+                  variables={variables}
                   onEvent={handleEvents}
                   renderError={(message: any) => {
                     return <div>{message}</div>;
