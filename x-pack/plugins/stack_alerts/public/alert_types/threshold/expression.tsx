@@ -123,15 +123,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     });
 
     if (indexArray.length > 0) {
-      await refreshEsFields();
+      await refreshEsFields(indexArray);
     }
   };
 
-  const refreshEsFields = async () => {
-    if (indexArray.length > 0) {
-      const currentEsFields = await getFields(http, indexArray);
-      setEsFields(currentEsFields);
-    }
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    setEsFields(currentEsFields);
   };
 
   useEffect(() => {
@@ -180,7 +178,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               timeField: '',
             });
           } else {
-            await refreshEsFields();
+            await refreshEsFields(indices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) =>
