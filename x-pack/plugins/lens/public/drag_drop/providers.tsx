@@ -296,7 +296,7 @@ export interface ReorderState {
   /**
    * Ids of the elements that are translated up or down
    */
-  reorderedItems: DragDropIdentifier[];
+  reorderedItems: Array<{ id: string; height?: number }>;
 
   /**
    * Direction of the move of dragged element in the reordered list

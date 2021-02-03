@@ -87,30 +87,10 @@ export function DraggableDimensionButton({
   // todo: simplify by id and use drop targets?
   const reorderableGroup = useMemo(
     () =>
-      group.accessors.map((g, index) => {
-        const val = {
-          columnId: g.columnId,
-          layerId,
-          groupId: group.groupId,
-          id: g.columnId,
-          dropType: 'reorder' as DropType,
-          humanData: {
-            label: `item ${index + 1}`,
-            groupLabel: group.groupLabel,
-            position: index + 1,
-          },
-        };
-        const handleDrop = (drag: DragDropIdentifier, selectedDropType?: DropType) =>
-          onDrop(drag, val, selectedDropType);
-        return { ...val, onDrop: handleDrop };
-      }),
-    [group, layerId, onDrop]
-  );
-
-  const filterSameGroup = useMemo(
-    () => (el?: DragDropIdentifier) =>
-      !!(!el || !reorderableGroup.some((el2) => el2.id === el.id && el.id !== value.id)),
-    [value, reorderableGroup]
+      group.accessors.map((g) => ({
+        id: g.columnId,
+      })),
+    [group.accessors]
   );
 
   return (
@@ -123,7 +103,6 @@ export function DraggableDimensionButton({
         dragType={isDraggedOperation(dragDropContext.dragging) ? 'move' : 'copy'}
         dropType={dropType}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
-        dropTargetsFilter={filterSameGroup}
         value={value}
         onDrop={(drag: DragDropIdentifier, selectedDropType?: DropType) =>
           onDrop(drag, value, selectedDropType)

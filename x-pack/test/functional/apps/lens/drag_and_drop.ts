@@ -113,6 +113,21 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'utc_time',
         ]);
       });
+      // TODO: mouse tests
+      // * duplicating in group
+      // * replacing in non-compatible
+      // * adding in non-compatible
+
+      // TODO: keyboard tests
+      // * moving field to workspace
+      // * moving field to add
+      // * moving field to replace
+      // * duplicating in group
+      // * reordering with keyboard (check if we don't have it)
+      // * moving to compatible
+      // * moving to incompatible
+      // * replacing incompatible
+      // * replacing compatible
     });
   });
 }

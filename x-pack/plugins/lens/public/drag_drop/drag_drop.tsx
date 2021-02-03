@@ -75,7 +75,7 @@ interface BaseProps {
   /**
    * items belonging to the same group that can be reordered
    */
-  reorderableGroup?: DropIdentifier[];
+  reorderableGroup?: Array<{ id: string }>;
 
   /**
    * Indicates to the user whether the currently dragged item
@@ -96,11 +96,7 @@ interface BaseProps {
   /**
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
-  order?: number[];
-  /**
-   * A function to filter the elements that will be used for out of group interactions
-   */
-  dropTargetsFilter?: (el?: DragDropIdentifier) => boolean;
+  order: number[];
 }
 
 /**
@@ -215,7 +211,6 @@ const DragInner = memo(function DragInner({
   keyboardMode,
   isDragging,
   activeDropTarget,
-  dropTargetsFilter,
   dragType,
   onDragStart,
   onDragEnd,
@@ -279,7 +274,7 @@ const DragInner = memo(function DragInner({
     const nextTarget = nextValidDropTarget(
       activeDropTarget,
       [order.join(',')],
-      dropTargetsFilter,
+      (el) => el?.dropType !== 'reorder',
       reversed
     );
 
@@ -459,7 +454,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
 });
 
 const ReorderableDrag = memo(function ReorderableDrag(
-  props: DragInnerProps & { reorderableGroup: DropIdentifier[]; dragging?: DragDropIdentifier }
+  props: DragInnerProps & { reorderableGroup: Array<{ id: string }>; dragging?: DragDropIdentifier }
 ) {
   const {
     reorderState: { isReorderOn, reorderedItems, direction },
@@ -475,8 +470,6 @@ const ReorderableDrag = memo(function ReorderableDrag(
     reorderableGroup,
     setA11yMessage,
   } = props;
-
-  const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
 
   const isFocusInGroup = keyboardMode
     ? isDragging &&
@@ -528,33 +521,44 @@ const ReorderableDrag = memo(function ReorderableDrag(
       }
       if (keys.ARROW_DOWN === e.key || 's' === e.key) {
         if (activeDropTargetIndex < reorderableGroup.length - 1) {
-          onReorderableDragOver(reorderableGroup[activeDropTargetIndex + 1]);
+          const nextTarget = nextValidDropTarget(
+            activeDropTarget,
+            [props.order.join(',')],
+            (el) => el?.dropType === 'reorder'
+          );
+          onReorderableDragOver(nextTarget);
         }
       } else if (keys.ARROW_UP === e.key || 'w' === e.key) {
         if (activeDropTargetIndex > 0) {
-          onReorderableDragOver(reorderableGroup[activeDropTargetIndex - 1]);
+          const nextTarget = nextValidDropTarget(
+            activeDropTarget,
+            [props.order.join(',')],
+            (el) => el?.dropType === 'reorder',
+            true
+          );
+          onReorderableDragOver(nextTarget);
         }
       }
     }
   };
 
-  const onReorderableDragOver = (target: DropIdentifier) => {
-    let droppingIndex = currentIndex;
-    if (keyboardMode && 'id' in target) {
-      setActiveDropTarget(target);
-      droppingIndex = reorderableGroup.findIndex((i) => i.id === target.id);
-    }
-    const draggingIndex = reorderableGroup.findIndex((i) => i.id === value?.id);
-    if (draggingIndex === -1) {
-      return;
-    }
-
-    if (draggingIndex === droppingIndex) {
+  const onReorderableDragOver = (target?: DropIdentifier) => {
+    if (!target) {
       setReorderState((s: ReorderState) => ({
         ...s,
         reorderedItems: [],
       }));
+      setA11yMessage(announce.selectedTarget(value.humanData, value.humanData, 'reorder'));
+      setActiveDropTarget(target);
+      return;
     }
+    const droppingIndex = reorderableGroup.findIndex((i) => i.id === target.id);
+    const draggingIndex = reorderableGroup.findIndex((i) => i.id === value?.id);
+    if (draggingIndex === -1) {
+      return;
+    }
+    setActiveDropTarget(target);
+
     setA11yMessage(announce.selectedTarget(value.humanData, target.humanData, 'reorder'));
 
     setReorderState((s: ReorderState) =>
@@ -586,9 +590,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         areItemsReordered
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
-                (acc, cur) => {
-                  return acc + Number(cur.height || 0) + lnsLayerPanelDimensionMargin;
-                },
+                (acc, cur) => acc + Number(cur.height || 0) + lnsLayerPanelDimensionMargin,
                 0
               )}px)`,
             }
@@ -608,7 +610,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
 });
 
 const ReorderableDrop = memo(function ReorderableDrop(
-  props: DropInnerProps & { reorderableGroup: DragDropIdentifier[] }
+  props: DropInnerProps & { reorderableGroup: Array<{ id: string }> }
 ) {
   const {
     onDrop,
