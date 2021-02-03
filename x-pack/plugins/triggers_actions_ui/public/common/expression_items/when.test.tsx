@@ -18,6 +18,7 @@ describe('when expression', () => {
     <EuiSelect
       data-test-subj="whenExpressionSelect"
       fullWidth={true}
+      id="aggTypeField"
       onChange={[Function]}
       options={
         Array [
@@ -75,6 +76,7 @@ describe('when expression', () => {
     <EuiSelect
       data-test-subj="whenExpressionSelect"
       fullWidth={true}
+      id="aggTypeField"
       onChange={[Function]}
       options={
         Array [

@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await aggTypeOptions[1].click();
     });
 
-    await testSubjects.click('ofExpression');
+    await testSubjects.click('ofExpressionPopover');
     const ofComboBox = await find.byCssSelector('#ofField');
     await ofComboBox.click();
     const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');

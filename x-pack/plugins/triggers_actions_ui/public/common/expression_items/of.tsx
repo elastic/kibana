@@ -90,7 +90,7 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
-          data-test-subj="ofExpression"
+          data-test-subj="ofExpressionPopover"
           display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
