@@ -27,6 +27,7 @@ import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { configMock } from '../../../__mocks__/config';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
+import { DiscoverSidebar } from './discover_sidebar';
 
 const mockServices = ({
   history: () => ({
@@ -133,5 +134,17 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('renders sidebar with unmapped fields config', function () {
+    const unmappedFieldsConfig = {
+      onChangeUnmappedFields: jest.fn(),
+      showUnmappedFields: false,
+      showUnmappedFieldsDefaultValue: false,
+    };
+    const componentProps = { ...props, unmappedFieldsConfig };
+    const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);
+    const discoverSidebar = component.find(DiscoverSidebar);
+    expect(discoverSidebar).toHaveLength(1);
+    expect(discoverSidebar.props().unmappedFieldsConfig).toEqual(unmappedFieldsConfig);
   });
 });

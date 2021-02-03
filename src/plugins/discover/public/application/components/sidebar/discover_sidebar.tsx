@@ -63,6 +63,7 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
+  unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -85,14 +86,30 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-
   const {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+    () =>
+      groupFields(
+        fields,
+        columns,
+        popularLimit,
+        fieldCounts,
+        fieldFilter,
+        useNewFieldsApi,
+        !!unmappedFieldsConfig?.showUnmappedFields
+      ),
+    [
+      fields,
+      columns,
+      popularLimit,
+      fieldCounts,
+      fieldFilter,
+      useNewFieldsApi,
+      unmappedFieldsConfig?.showUnmappedFields,
+    ]
   );
 
   const fieldTypes = useMemo(() => {
@@ -187,6 +204,9 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              useNewFieldsApi={useNewFieldsApi}
+              onChangeUnmappedFields={unmappedFieldsConfig?.onChangeUnmappedFields}
+              showUnmappedFields={unmappedFieldsConfig?.showUnmappedFieldsDefaultValue}
             />
           </form>
         </EuiFlexItem>

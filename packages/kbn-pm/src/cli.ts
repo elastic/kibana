@@ -35,7 +35,7 @@ function help() {
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --oss                   Do not include the x-pack when running command.
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
-        --no-cache              Disable the bootstrap cache
+        --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
@@ -75,7 +75,7 @@ export async function run(argv: string[]) {
       cache: true,
       validate: true,
     },
-    boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate'],
+    boolean: ['cache', 'validate'],
   });
 
   const args = options._;

@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await searchFilter.click();
   };
 
-  describe('maps integration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/89073
+  describe.skip('maps integration', () => {
     before(async () => {
       await esArchiver.load('maps');
     });

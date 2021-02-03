@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayerConfig } from './types';
+import { XYLayerConfig } from './types';
 import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 
@@ -29,7 +29,7 @@ export function isFormatterCompatible(
 }
 
 export function getAxesConfiguration(
-  layers: LayerConfig[],
+  layers: XYLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: (mapping: SerializedFieldFormat) => IFieldFormat

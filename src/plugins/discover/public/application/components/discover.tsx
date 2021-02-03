@@ -109,6 +109,7 @@ export function Discover({
   timeRange,
   topNavMenu,
   updateQuery,
+  unmappedFieldsConfig,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -214,6 +215,12 @@ export function Discover({
     [opts, state]
   );
 
+  const columns = useMemo(() => {
+    if (!state.columns) {
+      return [];
+    }
+    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
+  }, [state, useNewFieldsApi]);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -232,7 +239,7 @@ export function Discover({
             <EuiFlexItem grow={false}>
               <SidebarMemoized
                 config={config}
-                columns={state.columns || []}
+                columns={columns}
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
@@ -246,6 +253,7 @@ export function Discover({
                 state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
@@ -384,7 +392,7 @@ export function Discover({
                         </h2>
                         {isLegacy && rows && rows.length && (
                           <DocTableLegacyMemoized
-                            columns={state.columns || []}
+                            columns={columns}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
@@ -439,5 +447,3 @@ export function Discover({
     </I18nProvider>
   );
 }
-
-export const DiscoverMemoized = React.memo(Discover);
