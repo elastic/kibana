@@ -16,7 +16,7 @@
  * //... later
  * resetEnv();
  */
-export const forceHTMLElementOffsetWith = (width: number = 100): (() => void) => {
+export const forceHTMLElementOffsetWidth = (width: number = 100): (() => void) => {
   const currentOffsetDefinition = Object.getOwnPropertyDescriptor(
     window.HTMLElement.prototype,
     'offsetWidth'

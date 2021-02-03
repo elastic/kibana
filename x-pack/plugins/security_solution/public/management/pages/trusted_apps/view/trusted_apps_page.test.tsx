@@ -25,7 +25,7 @@ import {
 } from '../../../../../../fleet/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { isLoadedResourceState } from '../state';
-import { forceHTMLElementOffsetWith } from './components/effected_policy_select/test_utils';
+import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -202,7 +202,7 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should have list of policies populated', async () => {
-      const resetEnv = forceHTMLElementOffsetWith();
+      const resetEnv = forceHTMLElementOffsetWidth();
       const { getByTestId } = await renderAndClickAddButton();
       expect(getByTestId('policy-abc123'));
       resetEnv();

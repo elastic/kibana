@@ -20,9 +20,14 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
+import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
+import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 
 describe('When using the Trusted App Form', () => {
   const dataTestSubjForForm = 'createForm';
+  const generator = new EndpointDocGenerator('effected-policy-select');
+
+  let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
   let mockedContext: AppContextTestRender;
   let formProps: jest.Mocked<CreateTrustedAppFormProps>;
@@ -56,6 +61,11 @@ describe('When using the Trusted App Form', () => {
   };
   const getOsField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
     return renderResult.getByTestId(`${dataTestSub}-osSelectField`) as HTMLButtonElement;
+  };
+  const getGlobalSwitchField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
+    return renderResult.getByTestId(
+      `${dataTestSub}-effectedPolicies-globalSwitch`
+    ) as HTMLButtonElement;
   };
   const getDescriptionField = (dataTestSub: string = dataTestSubjForForm): HTMLTextAreaElement => {
     return renderResult.getByTestId(`${dataTestSub}-descriptionField`) as HTMLTextAreaElement;
@@ -97,6 +107,8 @@ describe('When using the Trusted App Form', () => {
   };
 
   beforeEach(() => {
+    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
+
     mockedContext = createAppRootMockRenderer();
 
     latestUpdatedTrustedApp = defaultNewTrustedApp();
@@ -113,7 +125,10 @@ describe('When using the Trusted App Form', () => {
     };
   });
 
-  afterEach(() => reactTestingLibrary.cleanup());
+  afterEach(() => {
+    resetHTMLElementOffsetWidth();
+    reactTestingLibrary.cleanup();
+  });
 
   describe('and the form is rendered', () => {
     beforeEach(() => render());
@@ -218,6 +233,58 @@ describe('When using the Trusted App Form', () => {
 
       it('should show the AND visual connector when multiple entries are present', () => {
         expect(getConditionBuilderAndConnectorBadge().textContent).toEqual('AND');
+      });
+    });
+  });
+
+  describe('the Policy Selection area', () => {
+    it('should show loader when setting `policies.isLoading` to true', () => {
+      formProps.policies.isLoading = true;
+      render();
+      expect(
+        renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
+          .textContent
+      ).toEqual('Loading options');
+    });
+
+    describe('and policies exist', () => {
+      beforeEach(() => {
+        const policy = generator.generatePolicyPackagePolicy();
+        policy.name = 'test policy A';
+        policy.id = '123';
+
+        formProps.policies.options = [policy];
+      });
+
+      it('should display the policies available, but disabled if ', () => {
+        render();
+        expect(renderResult.getByTestId('policy-123'));
+      });
+
+      it('should have `global` switch on if effective scope is global and policy options disabled', () => {
+        render();
+        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('true');
+        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
+          'true'
+        );
+        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
+          'false'
+        );
+      });
+
+      it('should have specific policies checked if scope is per-policy', () => {
+        (formProps.trustedApp as NewTrustedApp).effectScope = {
+          type: 'policy',
+          policies: ['123'],
+        };
+        render();
+        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('false');
+        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
+          'false'
+        );
+        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
+          'true'
+        );
       });
     });
   });

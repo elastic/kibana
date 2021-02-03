@@ -11,7 +11,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import React from 'react';
-import { forceHTMLElementOffsetWith } from './test_utils';
+import { forceHTMLElementOffsetWidth } from './test_utils';
 import { fireEvent, act } from '@testing-library/react';
 
 describe('when using EffectedPolicySelect component', () => {
@@ -33,7 +33,7 @@ describe('when using EffectedPolicySelect component', () => {
   let resetHTMLElementOffsetWidth: () => void;
 
   beforeAll(() => {
-    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWith();
+    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
   });
 
   afterAll(() => resetHTMLElementOffsetWidth());

@@ -160,10 +160,7 @@ export type CreateTrustedAppFormProps = Pick<
   trustedApp: MaybeImmutable<NewTrustedApp>;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
-  policies: {
-    options: EffectedPolicySelectProps['options'];
-    isLoading?: EffectedPolicySelectProps['isLoading'];
-  };
+  policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
   /** if form should be shown full width of parent container */
   fullWidth?: boolean;
 };
