@@ -110,12 +110,12 @@ Example of `%meta` output:
 
 ##### date
 Outputs the date of the logging event. The date conversion specifier may be followed by a set of braces containing a name of predefined date format and canonical timezone name.
-Timezone name is expected to be one from [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+Timezone name is expected to be one from [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Timezone defaults to the host timezone when not explicitly specified.
 Example of `%date` output:
 
 | Conversion pattern                       | Example                                                          |
 | ---------------------------------------- | ---------------------------------------------------------------- |
-| `%date`                                  | `2012-02-01T14:30:22.011Z` uses `ISO8601` format by default      |
+| `%date`                                  | `2012-02-01T09:30:22.011-05:00` uses `ISO8601` format with timezone by default      |
 | `%date{ISO8601}`                         | `2012-02-01T14:30:22.011Z`                                       |
 | `%date{ISO8601_TZ}`                      | `2012-02-01T09:30:22.011-05:00`   `ISO8601` with timezone        |
 | `%date{ISO8601_TZ}{America/Los_Angeles}` | `2012-02-01T06:30:22.011-08:00`                                  |
@@ -386,22 +386,22 @@ loggerWithNestedContext.debug('Message with `debug` log level.');
 
 And assuming logger for `server` context with `console` appender and `trace` level was used, console output will look like this:
 ```bash
-[2017-07-25T18:54:41.639Z][TRACE][server] Message with `trace` log level.
-[2017-07-25T18:54:41.639Z][DEBUG][server] Message with `debug` log level.
-[2017-07-25T18:54:41.639Z][INFO ][server] Message with `info` log level.
-[2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
-[2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
-[2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
+[2017-07-25T11:54:41.639-07:00][TRACE][server] Message with `trace` log level.
+[2017-07-25T11:54:41.639-07:00][DEBUG][server] Message with `debug` log level.
+[2017-07-25T11:54:41.639-07:00][INFO ][server] Message with `info` log level.
+[2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.
+[2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
+[2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 
-[2017-07-25T18:54:41.639Z][TRACE][server.http] Message with `trace` log level.
-[2017-07-25T18:54:41.639Z][DEBUG][server.http] Message with `debug` log level.
+[2017-07-25T11:54:41.639-07:00][TRACE][server.http] Message with `trace` log level.
+[2017-07-25T11:54:41.639-07:00][DEBUG][server.http] Message with `debug` log level.
 ```
 
 The log will be less verbose with `warn` level for the `server` context:
 ```bash
-[2017-07-25T18:54:41.639Z][WARN ][server] Message with `warn` log level.
-[2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
-[2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
+[2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.
+[2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
+[2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 ```
 
 ### Logging config migration
@@ -464,7 +464,7 @@ logging.root.level: all
 
 #### logging.timezone
 Set to the canonical timezone id to log events using that timezone. New logging config allows
-to [specify timezone](#date) for `layout: pattern`.
+to [specify timezone](#date) for `layout: pattern`. Defaults to host timezone when not specified.
 ```yaml
 logging:
   appenders:
@@ -486,7 +486,7 @@ TBD
 
 | Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
 | --------------- | ------------------------------------------ | ------------------------------------------ |
-| @timestamp      | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
+| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`                    |
 | context         | `parent.child`                             | `['parent', 'child']`                      |
 | level           | `DEBUG`                                    | `['debug']`                                |
 | meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
