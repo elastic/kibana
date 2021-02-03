@@ -51,9 +51,9 @@ upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`
 
 ### 6 Create map to monitor alerts
 - Go to the Maps app and create a new map
-- Using GeoJSON Upload, upload the geojson file located in the folder of the previously 
+- Using GeoJSON Upload, upload the GeoJSON file located in the folder of the previously 
 cloned `mta_tracks` repo: `nyc-neighborhoods.geo.json`. Accept all of the default
-settings.
+settings and add the layer.
 - You may want to click your newly added layer and select "Fit to data" so you can see the
 boundaries you've added.
 _ When finished uploading and adding the layer, save the map using a name of your
@@ -103,8 +103,8 @@ Entity: {{context.entityId}} with document ID: {{context.entityDocumentId}} has 
         - Geo-line track
   - Boundary layer
     - This layer should already be added from when you uploaded the GeoJSON
-      file earlier. Otherwise it can be added by selecting `Documents` > `Index patterns` > `nyc-neighborhoods` 
-      then accept the defaults. 
+      file earlier. If it's not already added, it can be added by selecting `Documents`
+      > `Index patterns` > `nyc-neighborhoods` then accept the defaults and add the layer. 
   - Vehicle tracks
     - Add `Tracks` > `Index patterns` > `mtatracks*`, accept the defaults selected and set `Entity` > `entity_id`. Add the layer and style appropriately.
   - Last known location
@@ -114,9 +114,10 @@ Entity: {{context.entityId}} with document ID: {{context.entityDocumentId}} has 
 - Update time scope of data
   - Changing the refresh rate `Refresh every`: `4 seconds` keeps the layers updated and in particular
   shows the latest values obtained in the `Top hits` layer
-  - The time picker should be set to the default `15 minutes`, this is a good default but can be adusted
-  up or down to see more or less data respectively
+  - The time picker should already be set to the default `15 minutes`, this is a good default but
+  can be adjusted up or down to see more or less data respectively
 - General tips  
     - Style layers with contrasting colors to clearly see each
     - Consider using icons for the `Top hits` vehicle movement layer
     - Consider adding tooltips to layers to better understand the data in your layers.
+    - Save your Map anytime you've made any layer adjustments
