@@ -339,6 +339,12 @@ export class ClusterClientAdapter {
                             },
                           },
                         },
+                        {
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
+                          },
+                        },
                       ],
                     },
                   },
@@ -370,10 +376,9 @@ export class ClusterClientAdapter {
             path: 'kibana.saved_objects',
           },
           aggs: {
-            saved_object_type: {
+            saved_object: {
               filter: {
                 terms: {
-                  // default maximum of 65,536 terms, configurable by index.max_terms_count
                   'kibana.saved_objects.id': ids,
                 },
               },
@@ -403,7 +408,7 @@ export class ClusterClientAdapter {
         index,
         body,
       });
-      return result.body.aggregations.saved_objects.saved_object_type.ids.buckets.map(
+      return result.body.aggregations.saved_objects.saved_object.ids.buckets.map(
         (savedObject: Record<string, unknown>) => ({
           savedObjectId: savedObject.key,
           summary: savedObject.summary,

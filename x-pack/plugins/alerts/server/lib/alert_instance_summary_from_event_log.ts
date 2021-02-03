@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SanitizedAlert, AlertInstanceSummary, AlertInstanceStatus } from '../types';
 
 const MAX_BUCKETS_LIMIT = 65535;
 
 export interface AlertInstanceSummaryFromEventLogParams {
   alert: SanitizedAlert<{ bar: boolean }>;
-  summary: RawEventLogAlertsSummary;
+  instancesLatestStateSummary: RawEventLogAlertsSummary;
+  instancesCreatedSummary: Omit<RawEventLogAlertsSummary, 'last_execution_state'>;
   dateStart: string;
   dateEnd: string;
 }
@@ -19,7 +21,13 @@ export function alertInstanceSummaryFromEventLog(
   params: AlertInstanceSummaryFromEventLogParams
 ): AlertInstanceSummary {
   // initialize the  result
-  const { alert, summary, dateStart, dateEnd } = params;
+  const {
+    alert,
+    instancesLatestStateSummary,
+    instancesCreatedSummary,
+    dateStart,
+    dateEnd,
+  } = params;
   const alertInstanceSummary: AlertInstanceSummary = {
     id: alert.id,
     name: alert.name,
@@ -39,16 +47,27 @@ export function alertInstanceSummaryFromEventLog(
 
   const instances = new Map<string, AlertInstanceStatus>();
 
-  if (summary.instances && summary.instances.buckets) {
-    for (const instance of summary.instances.buckets) {
+  if (instancesLatestStateSummary.instances && instancesLatestStateSummary.instances.buckets) {
+    for (const instance of instancesLatestStateSummary.instances.buckets) {
       const instanceId = instance.key;
       const status = getAlertInstanceStatus(instances, instanceId);
-      status.activeStartDate = instance.instance_created.max_timestampt.value_as_string;
+      if (instancesCreatedSummary.instances) {
+        const instanceCreated = instancesCreatedSummary.instances.buckets.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (newInstance: any) => newInstance.key === instanceId
+        );
+        status.activeStartDate = instanceCreated
+          ? instanceCreated.instance_created.max_timestampt.value_as_string
+          : undefined;
+      }
 
       const actionActivityResult = instance.last_state.action.hits.hits;
       if (actionActivityResult.length > 0) {
         const actionData = actionActivityResult[0]._source;
-        if (actionData.event.action === 'active-instance') {
+        if (
+          actionData.event.action === EVENT_LOG_ACTIONS.activeInstance ||
+          actionData.event.action === EVENT_LOG_ACTIONS.newInstance
+        ) {
           status.status = 'Active';
           status.actionGroupId = actionData.kibana.alerting.action_group_id;
           status.actionSubgroup = actionData.kibana.alerting.action_subgroup;
@@ -57,15 +76,22 @@ export function alertInstanceSummaryFromEventLog(
     }
   }
 
-  const executionSummary = summary.last_execution_state.action.hits.hits[0]._source;
-  alertInstanceSummary.lastRun = executionSummary['@timestamp'];
+  if (
+    instancesLatestStateSummary.last_execution_state &&
+    instancesLatestStateSummary.last_execution_state.action &&
+    instancesLatestStateSummary.last_execution_state.action.hits.hits.length > 0
+  ) {
+    const executionSummary =
+      instancesLatestStateSummary.last_execution_state.action.hits.hits[0]._source;
+    alertInstanceSummary.lastRun = executionSummary['@timestamp'];
 
-  if (executionSummary.error !== undefined) {
-    alertInstanceSummary.status = 'Error';
-    alertInstanceSummary.errorMessages.push({
-      date: executionSummary['@timestamp'],
-      message: executionSummary.error.message,
-    });
+    if (executionSummary.error !== undefined) {
+      alertInstanceSummary.status = 'Error';
+      alertInstanceSummary.errorMessages.push({
+        date: executionSummary['@timestamp'],
+        message: executionSummary.error.message,
+      });
+    }
   }
   // set the muted status of instances
   for (const instanceId of alert.mutedInstanceIds) {
@@ -97,7 +123,7 @@ export interface RawEventLogAlertsSummary {
   last_execution_state: Record<string, any>;
 }
 
-export const getAlertInstancesSummaryEventLogQueryAggregation = (start?: string, end?: string) => ({
+export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
   instances: {
     // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
     terms: {
@@ -106,14 +132,6 @@ export const getAlertInstancesSummaryEventLogQueryAggregation = (start?: string,
       size: MAX_BUCKETS_LIMIT,
     },
     aggs: {
-      instance_created: {
-        filter: {
-          term: { 'event.action': 'new-instance' },
-        },
-        aggs: {
-          max_timestampt: { max: { field: '@timestamp' } },
-        },
-      },
       last_state: {
         filter: {
           bool: {
@@ -122,22 +140,9 @@ export const getAlertInstancesSummaryEventLogQueryAggregation = (start?: string,
                 bool: {
                   should: [
                     { term: { 'event.action': 'active-instance' } },
+                    { term: { 'event.action': 'new-instance' } },
                     { term: { 'event.action': 'recovered-instance' } },
                   ],
-                },
-              },
-              start && {
-                range: {
-                  '@timestamp': {
-                    gte: start,
-                  },
-                },
-              },
-              end && {
-                range: {
-                  '@timestamp': {
-                    lte: end,
-                  },
                 },
               },
             ],
@@ -190,7 +195,28 @@ export const getAlertInstancesSummaryEventLogQueryAggregation = (start?: string,
       },
     },
   },
-});
+};
+
+export const alertInstanceCreatedQueryAggregation = {
+  instances: {
+    // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
+    terms: {
+      field: 'kibana.alerting.instance_id',
+      order: { _key: 'asc' },
+      size: MAX_BUCKETS_LIMIT,
+    },
+    aggs: {
+      instance_created: {
+        filter: {
+          term: { 'event.action': 'new-instance' },
+        },
+        aggs: {
+          max_timestampt: { max: { field: '@timestamp' } },
+        },
+      },
+    },
+  },
+};
 
 // return an instance status object, creating and adding to the map if needed
 function getAlertInstanceStatus(
