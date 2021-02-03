@@ -220,30 +220,26 @@ export const getMlJobMetrics = async (
   if (ml) {
     try {
       const fakeRequest = { headers: {} } as KibanaRequest;
+      const jobsType = 'security';
       const securityJobStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
-        .jobStats('security');
+        .jobStats(jobsType);
 
       const jobDetails = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
-        .jobs('security');
+        .jobs(jobsType);
 
-      /*
       const datafeedStatsCache = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .datafeedStats();
-      */
 
       return securityJobStats.jobs.map((jobStat) => {
         const jobId = jobStat.job_id;
         const jobDetail = jobDetails.jobs.find((job) => job.job_id === jobId);
-        /*
+
         const datafeedStat = datafeedStatsCache.datafeeds.find(
           (datafeed) => datafeed.datafeed_id === `datafeed-${jobId}`
         );
-
-        console.log(datafeedStat);
-        */
 
         return {
           job_id: jobId,
@@ -281,6 +277,19 @@ export const getMlJobMetrics = async (
             minimum_bucket_processing_time_ms:
               jobStat.timing_stats.minimum_bucket_processing_time_ms,
             total_bucket_processing_time_ms: jobStat.timing_stats.total_bucket_processing_time_ms,
+          },
+          datafeed: {
+            datafeed_id: datafeedStat?.datafeed_id,
+            state: datafeedStat?.state,
+            timing_stats: {
+              average_search_time_per_bucket_ms:
+                datafeedStat?.timing_stats.average_search_time_per_bucket_ms,
+              bucket_count: datafeedStat?.timing_stats.bucket_count,
+              exponential_average_search_time_per_hour_ms:
+                datafeedStat?.timing_stats.exponential_average_search_time_per_hour_ms,
+              search_count: datafeedStat?.timing_stats.search_count,
+              total_search_time_ms: datafeedStat?.timing_stats.total_search_time_ms,
+            },
           },
         } as MlJobMetric;
       });

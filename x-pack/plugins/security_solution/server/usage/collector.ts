@@ -66,7 +66,6 @@ export const registerCollector: RegisterCollector = ({
         ml_jobs: {
           type: 'array',
           items: {
-            // @pjhampton / @jeska: these are still undecided - taking id and times for now
             job_id: { type: 'keyword' },
             open_time: { type: 'keyword' },
             create_time: { type: 'keyword' },
@@ -95,6 +94,17 @@ export const registerCollector: RegisterCollector = ({
               maximum_bucket_processing_time_ms: { type: 'long' },
               minimum_bucket_processing_time_ms: { type: 'long' },
               total_bucket_processing_time_ms: { type: 'long' },
+            },
+            datafeed: {
+              datafeed_id: { type: 'keyword' },
+              state: { type: 'keyword' },
+              timing_stats: {
+                average_search_time_per_bucket_ms: { type: 'long' },
+                bucket_count: { type: 'long' },
+                exponential_average_search_time_per_hour_ms: { type: 'long' },
+                search_count: { type: 'long' },
+                total_search_time_ms: { type: 'long' },
+              },
             },
           },
         },
@@ -129,8 +139,6 @@ export const registerCollector: RegisterCollector = ({
         fetchDetectionsMetrics(ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(internalSavedObjectsClient),
       ]);
-
-      // console.log(JSON.stringify(detectionMetrics));
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,

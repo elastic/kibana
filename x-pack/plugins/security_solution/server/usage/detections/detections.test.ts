@@ -12,7 +12,9 @@ import {
   getMockListModulesResponse,
   getMockRulesResponse,
   getMockMlJobDetailsResponse,
-  getMockMlStatsResponse,
+  getMockMlJobStatsResponse,
+  getMockMlDatafeedsResponse,
+  getMockMlDatafeedStatsResponse,
 } from './detections.mocks';
 import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
 
@@ -123,12 +125,19 @@ describe('Detections Usage and Metrics', () => {
       );
     });
 
-    it('returns an ml job telemetry object', async () => {
+    it('returns an ml job telemetry object from anomaly detectors provider', async () => {
       const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
-      const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlStatsResponse());
+      const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlJobStatsResponse());
+      const mockDatafeedResponse = jest.fn().mockResolvedValue(getMockMlDatafeedsResponse());
+      const mockDatafeedStatsResponse = jest
+        .fn()
+        .mockResolvedValue(getMockMlDatafeedStatsResponse());
+
       mlMock.anomalyDetectorsProvider.mockReturnValue(({
         jobs: mockJobsResponse,
         jobStats: mockJobStatsResponse,
+        datafeeds: mockDatafeedResponse,
+        datafeedStat: mockDatafeedStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
       const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
@@ -165,6 +174,17 @@ describe('Detections Usage and Metrics', () => {
                 maximum_bucket_processing_time_ms: 392,
                 minimum_bucket_processing_time_ms: 0,
                 total_bucket_processing_time_ms: 7957.00000000008,
+              },
+              datafeed: {
+                datafeed_id: 'datafeed-high_distinct_count_error_message',
+                state: 'stopped',
+                timing_stats: {
+                  average_search_time_per_bucket_ms: 360.7927310729215,
+                  bucket_count: 8612,
+                  exponential_average_search_time_per_hour_ms: 86145.39799630083,
+                  search_count: 7202,
+                  total_search_time_ms: 3107147,
+                },
               },
             },
           ],

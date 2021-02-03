@@ -3330,6 +3330,35 @@
                         "type": "long"
                       }
                     }
+                  },
+                  "datafeed": {
+                    "properties": {
+                      "datafeed_id": {
+                        "type": "keyword"
+                      },
+                      "state": {
+                        "type": "keyword"
+                      },
+                      "timing_stats": {
+                        "properties": {
+                          "average_search_time_per_bucket_ms": {
+                            "type": "long"
+                          },
+                          "bucket_count": {
+                            "type": "long"
+                          },
+                          "exponential_average_search_time_per_hour_ms": {
+                            "type": "long"
+                          },
+                          "search_count": {
+                            "type": "long"
+                          },
+                          "total_search_time_ms": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
