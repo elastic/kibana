@@ -19,7 +19,11 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
-import { TypedLensByValueInput } from '../../../plugins/lens/public';
+import {
+  TypedLensByValueInput,
+  PersistedIndexPatternLayer,
+  XYState,
+} from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
 // Generate a Lens state based on some app-specific input parameters.
@@ -28,6 +32,48 @@ function getLensAttributes(
   defaultIndexPattern: IndexPattern,
   color: string
 ): TypedLensByValueInput['attributes'] {
+  const dataLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1', 'col2'],
+    columns: {
+      col2: {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Count of records',
+        operationType: 'count',
+        scale: 'ratio',
+        sourceField: 'Records',
+      },
+      col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: defaultIndexPattern.timeFieldName!,
+      },
+    },
+  };
+
+  const xyConfig: XYState = {
+    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    fittingFunction: 'None',
+    gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    layers: [
+      {
+        accessors: ['col2'],
+        layerId: 'layer1',
+        seriesType: 'bar_stacked',
+        xAccessor: 'col1',
+        yConfig: [{ forAccessor: 'col2', color }],
+      },
+    ],
+    legend: { isVisible: true, position: 'right' },
+    preferredSeriesType: 'bar_stacked',
+    tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+    valueLabels: 'hide',
+  };
+
   return {
     visualizationType: 'lnsXY',
     title: 'Prefilled from example app',
@@ -47,51 +93,13 @@ function getLensAttributes(
       datasourceStates: {
         indexpattern: {
           layers: {
-            layer1: {
-              columnOrder: ['col1', 'col2'],
-              columns: {
-                col2: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: 'Count of records',
-                  operationType: 'count',
-                  scale: 'ratio',
-                  sourceField: 'Records',
-                },
-                col1: {
-                  dataType: 'date',
-                  isBucketed: true,
-                  label: '@timestamp',
-                  operationType: 'date_histogram',
-                  params: { interval: 'auto' },
-                  scale: 'interval',
-                  sourceField: defaultIndexPattern.timeFieldName!,
-                },
-              },
-            },
+            layer1: dataLayer,
           },
         },
       },
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: {
-        axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        fittingFunction: 'None',
-        gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        layers: [
-          {
-            accessors: ['col2'],
-            layerId: 'layer1',
-            seriesType: 'bar_stacked',
-            xAccessor: 'col1',
-            yConfig: [{ forAccessor: 'col2', color }],
-          },
-        ],
-        legend: { isVisible: true, position: 'right' },
-        preferredSeriesType: 'bar_stacked',
-        tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        valueLabels: 'hide',
-      },
+      visualization: xyConfig,
     },
   };
 }

@@ -70,6 +70,7 @@ const layerList = [
       {
         leftField: 'iso2',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: '673ff994-fc75-4c67-909b-69fcb0e1060e',
           indexPatternTitle: 'kibana_sample_data_logs',
           term: 'geo.src',

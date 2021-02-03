@@ -23,7 +23,6 @@ export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
-  hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
 }
@@ -72,11 +71,6 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
 
   createField({ fieldName }: { fieldName: string }): IField {
     throw new Error('Cannot create a new field from just a fieldname for an es_agg_source.');
-  }
-
-  hasMatchingMetricField(fieldName: string): boolean {
-    const matchingField = this.getMetricFieldForName(fieldName);
-    return !!matchingField;
   }
 
   getMetricFieldForName(fieldName: string): IESAggField | null {

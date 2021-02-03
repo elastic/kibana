@@ -121,9 +121,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
   constructor(
     private readonly config: LegacyElasticsearchClientConfig,
     private readonly log: Logger,
+    private readonly type: string,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.client = new Client(parseElasticsearchClientConfig(config, log));
+    this.client = new Client(parseElasticsearchClientConfig(config, log, type));
   }
 
   /**
@@ -186,7 +187,7 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     // between all scoped client instances.
     if (this.scopedClient === undefined) {
       this.scopedClient = new Client(
-        parseElasticsearchClientConfig(this.config, this.log, {
+        parseElasticsearchClientConfig(this.config, this.log, this.type, {
           auth: false,
           ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
         })

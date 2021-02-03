@@ -278,7 +278,10 @@ describe('IndexPattern Data Panel', () => {
         {...defaultProps}
         state={state}
         setState={setStateSpy}
-        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
+        dragDropContext={{
+          ...createMockedDragDropContext(),
+          dragging: { id: '1' },
+        }}
       />
     );
 
@@ -297,7 +300,10 @@ describe('IndexPattern Data Panel', () => {
           indexPatterns: {},
         }}
         setState={jest.fn()}
-        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
+        dragDropContext={{
+          ...createMockedDragDropContext(),
+          dragging: { id: '1' },
+        }}
         changeIndexPattern={jest.fn()}
       />
     );
@@ -329,7 +335,10 @@ describe('IndexPattern Data Panel', () => {
         ...defaultProps,
         changeIndexPattern: jest.fn(),
         setState,
-        dragDropContext: { dragging: { id: '1' }, setDragging: () => {} },
+        dragDropContext: {
+          ...createMockedDragDropContext(),
+          dragging: { id: '1' },
+        },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         state: {
           indexPatternRefs: [],

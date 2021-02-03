@@ -107,7 +107,6 @@ export function CustomLinkMenuSection({
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
         <SectionSubtitle>
           {i18n.translate(
             'xpack.apm.transactionActionMenu.customLink.subtitle',

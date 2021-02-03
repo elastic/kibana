@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from '../../common/graphql/types';
+import { InfraSourceConfiguration } from '../../common/http_api/source_api';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -12,13 +12,6 @@ import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-
-// NP_TODO: We shouldn't need this context anymore but I am
-// not sure how the graphql stuff uses it, so we can't remove it yet
-export interface InfraContext {
-  req: any;
-  rawReq?: any;
-}
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
