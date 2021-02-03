@@ -35,12 +35,12 @@ import {
 import type { MlClient } from '../../lib/ml_client';
 
 export class AnalyticsManager {
-  private _client: IScopedClusterClient['asInternalUser'];
+  private _client: IScopedClusterClient;
   private _mlClient: MlClient;
   private _inferenceModels: TrainedModelConfigResponse[];
   private _jobStats: DataFrameAnalyticsStats[];
 
-  constructor(mlClient: MlClient, client: IScopedClusterClient['asInternalUser']) {
+  constructor(mlClient: MlClient, client: IScopedClusterClient) {
     this._client = client;
     this._mlClient = mlClient;
     this._inferenceModels = [];
@@ -112,7 +112,9 @@ export class AnalyticsManager {
   }
 
   private async getAnalyticsStats() {
-    const resp = await this._mlClient.getDataFrameAnalyticsStats({ size: 1000 });
+    const resp = await this._mlClient.getDataFrameAnalyticsStats<{
+      data_frame_analytics: DataFrameAnalyticsStats[];
+    }>({ size: 1000 });
     const stats = resp?.body?.data_frame_analytics;
     return stats;
   }
@@ -142,15 +144,14 @@ export class AnalyticsManager {
   }
 
   private async getIndexData(index: string) {
-    const indexData = await this._client.indices.get({
+    const indexData = await this._client.asInternalUser.indices.get({
       index,
     });
-
     return indexData?.body;
   }
 
   private async getTransformData(transformId: string) {
-    const transform = await this._client.transform.getTransform({
+    const transform = await this._client.asInternalUser.transform.getTransform({
       transform_id: transformId,
     });
     const transformData = transform?.body?.transforms[0];
