@@ -22955,7 +22955,7 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel-dist/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
@@ -23119,7 +23119,7 @@ const createProductionPackageJson = pkgJson => _objectSpread(_objectSpread({}, p
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
-const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel-dist/kibana/');
+const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel/bin/');
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
  * dependencies, these `file:` dependencies will be copied into `node_modules`
@@ -23129,7 +23129,7 @@ const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  *
- * Additionally it also taken care of replacing `link:bazel-dist/bin/` with
+ * Additionally it also taken care of replacing `link:bazel/bin/` with
  * `file:` so we can also support the copy of the Bazel packages dist already into
  * build/packages to be copied into the node_modules
  */
@@ -23146,7 +23146,7 @@ function transformDependencies(dependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel-dist/bin/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
       continue;
     }
 
@@ -59637,7 +59637,7 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel-dist', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -59659,7 +59659,7 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby__WEBPACK_IMPORTED_MODULE_1___default()([`**/*`], {
     onlyFiles: false,
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel-dist', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
     dot: true
   });
 

@@ -60,7 +60,7 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
 
   const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
   await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: join(kibanaRoot, 'bazel-dist', 'bin', 'packages', basename(buildProjectPath)),
+    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
     dot: true,
     onlyFiles: true,
     parents: true,
@@ -86,7 +86,7 @@ async function applyCorrectPermissions(project: Project, kibanaRoot: string, bui
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby([`**/*`], {
     onlyFiles: false,
-    cwd: join(kibanaRoot, 'bazel-dist', 'bin', 'packages', basename(buildProjectPath)),
+    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
     dot: true,
   });
 

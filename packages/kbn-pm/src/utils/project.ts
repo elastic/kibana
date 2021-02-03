@@ -92,7 +92,7 @@ export class Project {
   public ensureValidProjectDependency(project: Project) {
     const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
     const relativePathToProjectIfBazelPkg = normalizePath(
-      Path.relative(this.path, `bazel-dist/bin/packages/${Path.basename(project.path)}`)
+      Path.relative(this.path, `bazel/bin/packages/${Path.basename(project.path)}`)
     );
 
     const versionInPackageJson = this.allDependencies[project.name];
