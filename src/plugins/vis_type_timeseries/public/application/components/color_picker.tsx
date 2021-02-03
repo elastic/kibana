@@ -44,7 +44,10 @@ export function ColorPicker({
   uiState,
   seriesId,
 }: ColorPickerProps) {
-  const [color, setColor] = useState('');
+  const initialColorValue = value?.includes('rgba')
+    ? value.replace(COMMAS_NUMS_ONLY_RE, '')
+    : value;
+  const [color, setColor] = useState(initialColorValue || '');
 
   const handleColorChange = useCallback(
     (text: string, { rgba, hex }) => {
@@ -78,11 +81,6 @@ export function ColorPicker({
         colors.overwrite?.[seriesName]
       ) {
         setColor(colors.overwrite[seriesName]);
-      } else {
-        const initialColorValue = value?.includes('rgba')
-          ? value.replace(COMMAS_NUMS_ONLY_RE, '')
-          : value;
-        setColor(initialColorValue || '');
       }
     };
     updateColor();
@@ -91,7 +89,7 @@ export function ColorPicker({
     return () => {
       uiState?.off('change', updateColor);
     };
-  }, [value, seriesId, seriesName, uiState]);
+  }, [seriesId, seriesName, uiState]);
 
   const handleClear = () => {
     setColor('');
