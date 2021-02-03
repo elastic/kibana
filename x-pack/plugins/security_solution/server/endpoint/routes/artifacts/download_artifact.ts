@@ -27,9 +27,9 @@ import { EndpointAppContext } from '../../types';
 const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 
 /**
- * Registers the exception list route to enable sensors to download an allowlist artifact
+ * Registers the artifact download route to enable sensors to download an allowlist artifact
  */
-export function registerDownloadExceptionListRoute(
+export function registerDownloadArtifactRoute(
   router: IRouter,
   endpointContext: EndpointAppContext,
   cache: LRU<string, Buffer>
@@ -47,7 +47,7 @@ export function registerDownloadExceptionListRoute(
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;
-      const logger = endpointContext.logFactory.get('download_exception_list');
+      const logger = endpointContext.logFactory.get('download_artifact');
 
       // The ApiKey must be associated with an enrolled Fleet agent
       try {
