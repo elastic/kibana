@@ -25,6 +25,8 @@ interface Options {
   serviceName: string;
   setup: Setup & SetupTimeRange;
   transactionType: string;
+  start: number;
+  end: number;
 }
 
 type ESResponse = PromiseReturnType<typeof fetcher>;
@@ -33,7 +35,7 @@ function transform(options: Options, response: ESResponse) {
   if (response.hits.total.value === 0) {
     return [];
   }
-  const { start, end } = options.setup;
+  const { start, end } = options;
   const buckets = response.aggregations?.throughput.buckets ?? [];
   return buckets.map(({ key: x, doc_count: value }) => ({
     x,
@@ -46,8 +48,10 @@ async function fetcher({
   serviceName,
   setup,
   transactionType,
+  start,
+  end,
 }: Options) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

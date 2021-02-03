@@ -15,6 +15,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -25,7 +26,12 @@ export function ServiceOverviewThroughputChart({
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { start, end } = urlParams;
+  const { start, end, comparisonEnabled, comparisonType } = urlParams;
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -41,12 +47,22 @@ export function ServiceOverviewThroughputChart({
               end,
               transactionType,
               uiFilters: JSON.stringify(uiFilters),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters, transactionType]
+    [
+      serviceName,
+      start,
+      end,
+      uiFilters,
+      transactionType,
+      comparisonStart,
+      comparisonEnd,
+    ]
   );
 
   return (
@@ -65,7 +81,7 @@ export function ServiceOverviewThroughputChart({
         fetchStatus={status}
         timeseries={[
           {
-            data: data?.throughput ?? [],
+            data: data?.timeseries ?? [],
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
@@ -73,6 +89,21 @@ export function ServiceOverviewThroughputChart({
               { defaultMessage: 'Throughput' }
             ),
           },
+          ...(comparisonEnabled
+            ? [
+                {
+                  data: data?.comparisonTimeseries ?? [],
+                  type: 'area',
+                  color: 'red',
+                  title: i18n.translate(
+                    'xpack.apm.serviceOverview.comparisonLabel',
+                    {
+                      defaultMessage: 'Comparison',
+                    }
+                  ),
+                },
+              ]
+            : []),
         ]}
         yLabelFormat={asTransactionRate}
       />
