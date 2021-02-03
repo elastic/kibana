@@ -56,7 +56,7 @@ export const ACTIONS_COLUMN = {
         { defaultMessage: 'View query analytics' }
       ),
       type: 'icon',
-      icon: 'popout',
+      icon: 'eye',
       color: 'primary',
       onClick: (item: Query | RecentQuery) => {
         const { navigateToUrl } = KibanaLogic.values;
