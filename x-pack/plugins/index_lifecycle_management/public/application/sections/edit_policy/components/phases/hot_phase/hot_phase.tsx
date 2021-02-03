@@ -16,6 +16,7 @@ import {
   EuiTextColor,
   EuiSwitch,
   EuiIconTip,
+  EuiText,
 } from '@elastic/eui';
 
 import { useFormData, SelectField, NumericField } from '../../../../../../shared_imports';
@@ -95,21 +96,18 @@ export const HotPhase: FunctionComponent = () => {
             <UseField<boolean> path={isUsingDefaultRolloverPath}>
               {(field) => (
                 <>
-                  <EuiSwitch
-                    label={field.label}
-                    checked={field.value}
-                    onChange={(e) => field.setValue(e.target.checked)}
-                    data-test-subj="useDefaultRolloverSwitch"
-                  />
-                  &nbsp;
-                  <EuiIconTip
-                    type="questionInCircle"
-                    content={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                        defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
-                      />
-                    }
+                  <EuiText color="default">
+                    <EuiSwitch
+                      label={field.label}
+                      checked={field.value}
+                      onChange={(e) => field.setValue(e.target.checked)}
+                      data-test-subj="useDefaultRolloverSwitch"
+                    />
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
+                    defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
                   />
                 </>
               )}
