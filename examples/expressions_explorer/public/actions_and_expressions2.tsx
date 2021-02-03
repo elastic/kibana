@@ -26,7 +26,6 @@ import {
 } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { NAVIGATE_TRIGGER_ID } from './actions/navigate_trigger';
 
 interface Props {
   expressions: ExpressionsStart;
@@ -35,7 +34,7 @@ interface Props {
 
 export function ActionsExpressionsExample2({ expressions, actions }: Props) {
   const [expression, updateExpression] = useState(
-    'button name="click me" href="http://www.google.com"'
+    'button name="click me" href="http://www.google.com" color={var color}'
   );
 
   const [variables, updateVariables] = useState({
@@ -51,11 +50,7 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
   };
 
   const handleEvents = (event: any) => {
-    if (event.id !== 'NAVIGATE') return;
-    // enrich event context with some extra data
-    event.baseUrl = 'http://www.google.com';
-
-    actions.executeTriggerActions(NAVIGATE_TRIGGER_ID, event.value);
+    updateVariables({ color: event.value.href === 'http://www.google.com' ? 'red' : 'blue' });
   };
 
   return (
