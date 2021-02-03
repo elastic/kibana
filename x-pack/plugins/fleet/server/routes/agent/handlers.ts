@@ -316,34 +316,24 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    // Reassign by array of IDs
-    if (Array.isArray(request.body.agents)) {
-      await AgentService.reassignAgents(
-        soClient,
-        esClient,
-        { agentIds: request.body.agents },
-        request.body.policy_id
-      );
-    } else {
-      await AgentService.reassignAgents(
-        soClient,
-        esClient,
-        { kuery: request.body.agents },
-        request.body.policy_id
-      );
-    }
+    const results = await AgentService.reassignAgents(
+      soClient,
+      esClient,
+      Array.isArray(request.body.agents)
+        ? { agentIds: request.body.agents }
+        : { kuery: request.body.agents },
+      request.body.policy_id
+    );
 
-    const body: PostBulkAgentReassignResponse = {};
-    // TODO fix
-    // const body: PostBulkAgentReassignResponse = result.saved_objects.reduce((acc, so) => {
-    //   return {
-    //     ...acc,
-    //     [so.id]: {
-    //       success: !so.error,
-    //       error: so.error || undefined,
-    //     },
-    //   };
-    // }, {});
+    const body: PostBulkAgentReassignResponse = results.items.reduce((acc, so) => {
+      return {
+        ...acc,
+        [so.id]: {
+          success: !so.error,
+          error: so.error || undefined,
+        },
+      };
+    }, {});
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

@@ -44,7 +44,7 @@ export async function reassignAgents(
         kuery: string;
       },
   newAgentPolicyId: string
-) {
+): Promise<{ items: Array<{ id: string; sucess: boolean; error?: Error }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);

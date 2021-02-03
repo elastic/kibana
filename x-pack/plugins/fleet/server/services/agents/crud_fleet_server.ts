@@ -208,15 +208,23 @@ export async function bulkUpdateAgents(
       },
     },
     {
-      doc: agentSOAttributesToFleetServerAgentDoc(data),
+      doc: { ...agentSOAttributesToFleetServerAgentDoc(data) },
     },
   ]);
 
-  await esClient.bulk({
+  const res = await esClient.bulk({
     body,
     index: AGENTS_INDEX,
     refresh: 'wait_for',
   });
+
+  return {
+    items: res.body.items.map((item: { update: { _id: string; error?: Error } }) => ({
+      id: item.update._id,
+      success: !item.update.error,
+      error: item.update.error,
+    })),
+  };
 }
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
