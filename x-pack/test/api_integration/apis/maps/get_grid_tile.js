@@ -26,8 +26,7 @@ export default function ({ getService }) {
 &geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=point\
-&geoFieldType=geo_point`
+&requestType=point`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')
@@ -54,8 +53,7 @@ export default function ({ getService }) {
 &geometryFieldName=geo.coordinates\
 &index=logstash-*\
 &requestBody=(_source:(excludes:!()),aggs:(gridSplit:(aggs:(avg_of_bytes:(avg:(field:bytes)),gridCentroid:(geo_centroid:(field:geo.coordinates))),geotile_grid:(bounds:!n,field:geo.coordinates,precision:!n,shard_size:65535,size:65535))),fields:!((field:%27@timestamp%27,format:date_time),(field:%27relatedContent.article:modified_time%27,format:date_time),(field:%27relatedContent.article:published_time%27,format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((match_all:()),(range:(%27@timestamp%27:(format:strict_date_optional_time,gte:%272015-09-20T00:00:00.000Z%27,lte:%272015-09-20T01:00:00.000Z%27)))),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(hour_of_day:(script:(lang:painless,source:%27doc[!%27@timestamp!%27].value.getHour()%27))),size:0,stored_fields:!(%27*%27))\
-&requestType=grid\
-&geoFieldType=geo_point`
+&requestType=grid`
         )
         .set('kbn-xsrf', 'kibana')
         .responseType('blob')

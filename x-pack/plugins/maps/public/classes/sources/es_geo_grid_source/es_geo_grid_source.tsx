@@ -450,8 +450,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 &geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
-&requestType=${this._descriptor.requestType}\
-&geoFieldType=${geoField.type}`;
+&requestType=${this._descriptor.requestType}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

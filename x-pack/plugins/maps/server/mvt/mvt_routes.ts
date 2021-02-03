@@ -85,7 +85,6 @@ export function initMVTRoutes({
           requestBody: schema.string(),
           index: schema.string(),
           requestType: schema.string(),
-          geoFieldType: schema.string(),
           searchSessionId: schema.maybe(schema.string()),
         }),
       },
@@ -108,7 +107,6 @@ export function initMVTRoutes({
         index: query.index as string,
         requestBody: requestBodyDSL as any,
         requestType: query.requestType as RENDER_AS,
-        geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
       });
 
