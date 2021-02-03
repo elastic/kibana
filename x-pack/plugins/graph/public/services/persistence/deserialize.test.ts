@@ -5,7 +5,7 @@
  */
 
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
-import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState } from './deserialize';
+import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -119,9 +119,9 @@ describe('deserialize', () => {
       savedWorkspace,
       {
         getNonScriptedFields: () => [
-          { name: 'field1', type: 'string', aggregatable: true },
-          { name: 'field2', type: 'string', aggregatable: true },
-          { name: 'field3', type: 'string', aggregatable: true },
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
       } as IndexPattern,
       workspace
@@ -234,6 +234,24 @@ describe('deserialize', () => {
       const success = migrateLegacyIndexPatternRef(workspacePayload, []);
       expect(success).toEqual({ success: true });
       expect(workspacePayload).toEqual(savedWorkspace);
+    });
+  });
+
+  describe('mapFields', () => {
+    it('should not include unmapped fields', () => {
+      const indexPattern = {
+        getNonScriptedFields: () => [
+          { name: 'field1', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
+          { name: 'runtimeField', type: 'string', aggregatable: true, isMapped: false },
+          { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
+        ],
+      } as IndexPattern;
+      expect(mapFields(indexPattern).map(({ name }) => name)).toEqual([
+        'field1',
+        'field2',
+        'field3',
+      ]);
     });
   });
 });

@@ -43,6 +43,7 @@ describe('useInstalledSecurityJobs', () => {
       expect(result.current.jobs).toEqual(
         expect.arrayContaining([
           {
+            awaitingNodeAssignment: false,
             datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
             datafeedIndices: ['auditbeat-*'],
             datafeedState: 'stopped',

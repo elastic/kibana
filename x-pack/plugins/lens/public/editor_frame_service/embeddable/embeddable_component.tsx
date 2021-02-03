@@ -14,7 +14,7 @@ import type { IndexPatternPersistedState } from '../../indexpattern_datasource/t
 import type { XYState } from '../../xy_visualization/types';
 import type { PieVisualizationState } from '../../pie_visualization/types';
 import type { DatatableVisualizationState } from '../../datatable_visualization/visualization';
-import type { State as MetricState } from '../../metric_visualization/types';
+import type { MetricState } from '../../metric_visualization/types';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,

@@ -7,11 +7,13 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { UseField, CheckBoxField, NumericField } from '../../../../../../shared_imports';
+import { CheckBoxField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+
+import { UseField } from '../../../form';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
 

@@ -12,12 +12,10 @@ import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers({
-    supertest,
-    es,
-  });
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers(
+    getService
+  );
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
