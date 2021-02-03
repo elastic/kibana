@@ -46,7 +46,7 @@ export class TimelionPlugin
   implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
+  public setup(core: CoreSetup<TimelionPluginStartDeps>): RecursiveReadonly<PluginSetupContract> {
     const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
 
     const configManager = new ConfigManager(this.initializerContext.config);
