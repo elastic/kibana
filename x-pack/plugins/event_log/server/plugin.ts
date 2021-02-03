@@ -32,7 +32,7 @@ import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { findByIdsRoute } from './routes/find_by_ids';
-import { getAlertsInstancesSummaryByIdsRoute } from './routes/get_alerts_instances_summary_by_ids';
+import { getEventsSummaryBySavedObjectIdsRoute } from './routes/get_events_summary_by_saved_object_ids';
 
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
@@ -108,7 +108,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // Register routes
     findRoute(router, this.systemLogger);
     findByIdsRoute(router, this.systemLogger);
-    getAlertsInstancesSummaryByIdsRoute(router, this.systemLogger);
+    getEventsSummaryBySavedObjectIdsRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }

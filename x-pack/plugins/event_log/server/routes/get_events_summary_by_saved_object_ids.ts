@@ -30,25 +30,35 @@ const optionsSchema = schema.object({
   end: optionalDateFieldSchema,
 });
 
-const bodySchema = schema.object({
-  ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
+const paramSchema = schema.object({
+  type: schema.string(),
 });
 
-export const getAlertsInstancesSummaryByIdsRoute = (
+const bodySchema = schema.object({
+  ids: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  aggs: schema.recordOf(schema.string(), schema.any()),
+});
+
+export const getEventsSummaryBySavedObjectIdsRoute = (
   router: EventLogRouter,
   systemLogger: Logger
 ) => {
   router.post(
     {
-      path: `${BASE_EVENT_LOG_API_PATH}/_alerts_instances_summary`,
+      path: `${BASE_EVENT_LOG_API_PATH}/{type}/saved_object_summary`,
       validate: {
+        params: paramSchema,
         query: optionsSchema,
         body: bodySchema,
       },
     },
     router.handleLegacyErrors(async function (
       context: EventLogRequestHandlerContext,
-      req: KibanaRequest<unknown, TypeOf<typeof optionsSchema>, TypeOf<typeof bodySchema>>,
+      req: KibanaRequest<
+        TypeOf<typeof paramSchema>,
+        TypeOf<typeof optionsSchema>,
+        TypeOf<typeof bodySchema>
+      >,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       if (!context.eventLog) {
@@ -56,13 +66,20 @@ export const getAlertsInstancesSummaryByIdsRoute = (
       }
       const eventLogClient = context.eventLog.getEventLogClient();
       const {
-        body: { ids },
+        params: { type },
+        body: { ids, aggs },
         query,
       } = req;
 
       try {
         return res.ok({
-          body: await eventLogClient.getEventsForAlertInstancesSummary(ids, query.start, query.end),
+          body: await eventLogClient.getEventsSummaryBySavedObjectIds(
+            type,
+            ids,
+            aggs,
+            query.start,
+            query.end
+          ),
         });
       } catch (err) {
         const call = `getEventsForAlertInstancesSummary([${ids}], ${JSON.stringify(query)})`;

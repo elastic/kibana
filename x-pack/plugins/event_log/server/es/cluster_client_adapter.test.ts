@@ -17,6 +17,7 @@ import { delay } from '../lib/delay';
 import { times } from 'lodash';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { RequestEvent } from '@elastic/elasticsearch';
+import { IValidatedEvent } from '../types';
 
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
@@ -703,7 +704,115 @@ describe('queryEventsBySavedObject', () => {
 });
 
 describe('queryEventsSummaryBySavedObjectIds', () => {
+  test('should call cluster with proper aggregations and with default namespace', async () => {
+    const start = '2020-07-08T00:52:28.350Z';
+    const end = '2020-07-08T00:00:00.000Z';
+    clusterClient.search.mockResolvedValue(
+      asApiResponse({
+        aggregations: {
+          events: {
+            saved_objects: {
+              saved_object_type: {
+                ids: {
+                  buckets: [
+                    {
+                      key: '1',
+                      summary: {
+                        test_aggs1: {
+                          key: '1212',
+                        },
+                      },
+                    },
+                    {
+                      key: '2',
+                      summary: {
+                        test_aggs1: {
+                          key: '33333',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      })
+    );
+    await clusterClientAdapter.queryEventsSummaryBySavedObjectIds(
+      'index-name',
+      undefined,
+      'saved-object-type',
+      ['saved-object-id'],
+      {},
+      start,
+      end
+    );
 
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "body": Object {
+          "from": 0,
+          "query": Object {
+            "bool": Object {
+              "must": Array [
+                Object {
+                  "nested": Object {
+                    "path": "kibana.saved_objects",
+                    "query": Object {
+                      "bool": Object {
+                        "must": Array [
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.rel": Object {
+                                "value": "primary",
+                              },
+                            },
+                          },
+                          Object {
+                            "term": Object {
+                              "kibana.saved_objects.type": Object {
+                                "value": "saved-object-type",
+                              },
+                            },
+                          },
+                          Object {
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
+                            },
+                          },
+                          Object {
+                            "bool": Object {
+                              "must_not": Object {
+                                "exists": Object {
+                                  "field": "kibana.saved_objects.namespace",
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "size": 10,
+          "sort": Object {
+            "@timestamp": Object {
+              "order": "asc",
+            },
+          },
+        },
+        "index": "index-name",
+        "track_total_hits": true,
+      }
+    `);
+  });
 });
 
 type RetryableFunction = () => boolean;
@@ -736,4 +845,100 @@ async function retryUntil(
   }
 
   return false;
+}
+
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeAction: 'execute-action',
+  newInstance: 'new-instance',
+  recoveredInstance: 'recovered-instance',
+  activeInstance: 'active-instance',
+};
+
+const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
+function dateString(isoBaseDate: string, offsetMillis = 0): string {
+  return new Date(Date.parse(isoBaseDate) + offsetMillis).toISOString();
+}
+
+export class EventsFactory {
+  private events: IValidatedEvent[] = [];
+
+  constructor(private date: string = dateStart) {}
+
+  getEvents(): IValidatedEvent[] {
+    // ES normally returns events sorted newest to oldest, so we need to sort
+    // that way also
+    const events = this.events.slice();
+    events.sort((a, b) => -a!['@timestamp']!.localeCompare(b!['@timestamp']!));
+    return events;
+  }
+
+  getTime(): string {
+    return this.date;
+  }
+
+  advanceTime(millis: number): EventsFactory {
+    this.date = dateString(this.date, millis);
+    return this;
+  }
+
+  addExecute(provider: string, errorMessage?: string): EventsFactory {
+    let event: IValidatedEvent = {
+      '@timestamp': this.date,
+      event: {
+        provider,
+        action: EVENT_LOG_ACTIONS.execute,
+      },
+    };
+
+    if (errorMessage) {
+      event = { ...event, error: { message: errorMessage } };
+    }
+
+    this.events.push(event);
+    return this;
+  }
+
+  addActiveInstance(
+    provider: string,
+    instanceId: string,
+    actionGroupId: string | undefined
+  ): EventsFactory {
+    const kibanaAlerting = actionGroupId
+      ? { instance_id: instanceId, action_group_id: actionGroupId }
+      : { instance_id: instanceId };
+    this.events.push({
+      '@timestamp': this.date,
+      event: {
+        provider,
+        action: EVENT_LOG_ACTIONS.activeInstance,
+      },
+      kibana: { alerting: kibanaAlerting },
+    });
+    return this;
+  }
+
+  addNewInstance(provider: string, instanceId: string): EventsFactory {
+    this.events.push({
+      '@timestamp': this.date,
+      event: {
+        provider,
+        action: 'new-instance',
+      },
+      kibana: { alerting: { instance_id: instanceId } },
+    });
+    return this;
+  }
+
+  addRecoveredInstance(provider: string, instanceId: string): EventsFactory {
+    this.events.push({
+      '@timestamp': this.date,
+      event: {
+        provider,
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
+      },
+      kibana: { alerting: { instance_id: instanceId } },
+    });
+    return this;
+  }
 }

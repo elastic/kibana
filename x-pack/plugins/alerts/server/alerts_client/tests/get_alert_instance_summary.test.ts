@@ -13,11 +13,10 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
-import { QueryEventsBySavedObjectResult } from '../../../../event_log/server';
 import { SavedObject } from 'kibana/server';
-import { EventsFactory } from '../../lib/alert_instance_summary_from_event_log.test';
 import { RawAlert } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { RawEventLogAlertsSummary } from '../../lib/alert_instance_summary_from_event_log';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -51,13 +50,6 @@ beforeEach(() => {
 });
 
 setGlobalDate();
-
-const AlertInstanceSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
-  page: 1,
-  per_page: 10000,
-  total: 0,
-  data: [],
-};
 
 const AlertInstanceSummaryIntervalSeconds = 1;
 
@@ -114,24 +106,14 @@ describe('getAlertInstanceSummary()', () => {
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
 
-    const eventsFactory = new EventsFactory(mockedDateString);
-    const events = eventsFactory
-      .addExecute()
-      .addNewInstance('instance-currently-active')
-      .addNewInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active', 'action group A')
-      .addActiveInstance('instance-previously-active', 'action group B')
-      .advanceTime(10000)
-      .addExecute()
-      .addRecoveredInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active', 'action group A')
-      .getEvents();
-    const eventsResult = {
-      ...AlertInstanceSummaryFindEventsResult,
-      total: events.length,
-      data: events,
-    };
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(eventsResult);
+    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const summaryResult = [
+      {
+        savedObjectId: '',
+        summary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
@@ -188,15 +170,20 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls saved objects and event log client with default params', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const summaryResult = [
+      {
+        savedObjectId: '',
+        summary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     await alertsClient.getAlertInstanceSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
         Array [
@@ -211,22 +198,66 @@ describe('getAlertInstanceSummary()', () => {
         },
       ]
     `);
-    // calculate the expected start/end date for one test
-    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
-    expect(end).toBe(mockedDateString);
-
-    const startMillis = Date.parse(start!);
-    const endMillis = Date.parse(end!);
-    const expectedDuration = 60 * AlertInstanceSummaryIntervalSeconds * 1000;
-    expect(endMillis - startMillis).toBeGreaterThan(expectedDuration - 2);
-    expect(endMillis - startMillis).toBeLessThan(expectedDuration + 2);
   });
 
   test('calls event log client with start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    const summaryResult = [
+      {
+        savedObjectId: 'e60004e0-65e1-11eb-96ec-3b8c9e2069b7',
+        summary: {
+          doc_count: 440,
+          instances: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'host-11',
+                doc_count: 49,
+                last_state: {
+                  doc_count: 49,
+                  action: {
+                    hits: {
+                      total: {
+                        value: 49,
+                        relation: 'eq',
+                      },
+                      max_score: null,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.0.0-000001',
+                          _id: 'hvR9ZncBZvAf3rflOD0w',
+                          _score: null,
+                          _source: {
+                            '@timestamp': '2021-02-03T06:03:38.212Z',
+                            event: {
+                              action: 'active-instance',
+                            },
+                            kibana: {
+                              alerting: {
+                                action_group_id: 'threshold met',
+                              },
+                            },
+                          },
+                          sort: [1612332218212],
+                        },
+                      ],
+                    },
+                  },
+                },
+                instance_created: {
+                  doc_count: 0,
+                  max_timestampt: {
+                    value: null,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
@@ -234,8 +265,8 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
@@ -247,16 +278,21 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls event log client with relative start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const summaryResult = [
+      {
+        savedObjectId: '',
+        summary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     const dateStart = '2m';
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
+    const { start, end } = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][2]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
@@ -268,9 +304,14 @@ describe('getAlertInstanceSummary()', () => {
 
   test('invalid start date throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const summaryResult = [
+      {
+        savedObjectId: '',
+        summary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
     expect(
@@ -282,9 +323,14 @@ describe('getAlertInstanceSummary()', () => {
 
   test('saved object get throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
-    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(
-      AlertInstanceSummaryFindEventsResult
-    );
+    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const summaryResult = [
+      {
+        savedObjectId: '',
+        summary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
 
     expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
       `[Error: OMG!]`
@@ -293,7 +339,7 @@ describe('getAlertInstanceSummary()', () => {
 
   test('findEvents throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 2!'));
 
     // error eaten but logged
     await alertsClient.getAlertInstanceSummary({ id: '1' });

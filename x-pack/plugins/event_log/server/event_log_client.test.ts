@@ -276,7 +276,61 @@ describe('EventLogStart', () => {
   });
 
   describe('getEventsSummaryBySavedObjectIds', () => {
+    test('get summary for all events that referenced to the saved object', async () => {
+      const esContext = contextMock.create();
 
+      const savedObjectGetter = jest.fn();
+
+      const eventLogClient = new EventLogClient({
+        esContext,
+        savedObjectGetter,
+        request: FakeRequest(),
+      });
+
+      savedObjectGetter.mockResolvedValueOnce({
+        id: 'saved-object-id',
+        type: 'saved-object-type',
+        attributes: {},
+        references: [],
+      });
+
+      const result = [
+        {
+          savedObjectId: 'saved-object-id',
+          summary: {
+            sub_objects: {},
+          },
+        },
+      ];
+      esContext.esAdapter.queryEventsSummaryBySavedObjectIds.mockResolvedValue(result);
+
+      expect(
+        await eventLogClient.getEventsSummaryBySavedObjectIds(
+          'saved-object-type',
+          ['saved-object-id'],
+          {
+            sub_objects: {
+              terms: {
+                field: 'sub_object.id',
+              },
+            },
+          }
+        )
+      ).toEqual(result);
+
+      expect(esContext.esAdapter.queryEventsSummaryBySavedObjectIds).toHaveBeenCalledWith(
+        esContext.esNames.indexPattern,
+        undefined,
+        'saved-object-type',
+        ['saved-object-id'],
+        {
+          page: 1,
+          per_page: 10,
+          sort_field: '@timestamp',
+          sort_order: 'asc',
+        }
+      );
+    });
   });
 });
 

@@ -315,87 +315,79 @@ export class ClusterClientAdapter {
     const body = {
       size: 0,
       sort: { ['@timestamp']: { order: 'desc' } },
-      aggs: {
-        events: {
-          filter: {
-            bool: {
-              must: reject(
-                [
-                  start && {
-                    range: {
-                      '@timestamp': {
-                        gte: start,
-                      },
-                    },
-                  },
-                  end && {
-                    range: {
-                      '@timestamp': {
-                        lte: end,
-                      },
-                    },
-                  },
-                  namespaceQuery,
-                ],
-                isUndefined
-              ),
-            },
-          },
-          aggs: {
-            saved_objects: {
-              nested: {
-                path: 'kibana.saved_objects',
-              },
-              aggs: {
-                saved_object_type: {
-                  filter: {
+      query: {
+        bool: {
+          must: reject(
+            [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
                     bool: {
-                      must: reject(
-                        [
-                          {
-                            bool: {
-                              must: [
-                                {
-                                  term: {
-                                    'kibana.saved_objects.rel': {
-                                      value: SAVED_OBJECT_REL_PRIMARY,
-                                    },
-                                  },
-                                },
-                                {
-                                  term: {
-                                    'kibana.saved_objects.type': {
-                                      value: type,
-                                    },
-                                  },
-                                },
-                                {
-                                  terms: {
-                                    // default maximum of 65,536 terms, configurable by index.max_terms_count
-                                    'kibana.saved_objects.id': ids,
-                                  },
-                                },
-                              ],
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: SAVED_OBJECT_REL_PRIMARY,
                             },
                           },
-                        ],
-                        isUndefined
-                      ),
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: type,
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
+                },
+              },
+              start && {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              end && {
+                range: {
+                  '@timestamp': {
+                    lte: end,
+                  },
+                },
+              },
+              namespaceQuery,
+            ],
+            isUndefined
+          ),
+        },
+      },
+      aggs: {
+        saved_objects: {
+          nested: {
+            path: 'kibana.saved_objects',
+          },
+          aggs: {
+            saved_object_type: {
+              filter: {
+                terms: {
+                  // default maximum of 65,536 terms, configurable by index.max_terms_count
+                  'kibana.saved_objects.id': ids,
+                },
+              },
+              aggs: {
+                ids: {
+                  // use 'terms' with size of MAX_BUCKETS_LIMIT instead of 'composite', because of filter
+                  terms: {
+                    field: 'kibana.saved_objects.id',
+                    size: MAX_BUCKETS_LIMIT,
+                  },
                   aggs: {
-                    ids: {
-                      // use 'terms' with size of MAX_BUCKETS_LIMIT instead of 'composite', because of filter
-                      terms: {
-                        field: 'kibana.saved_objects.id',
-                        size: MAX_BUCKETS_LIMIT,
-                      },
-                      aggs: {
-                        summary: {
-                          reverse_nested: {},
-                          aggs,
-                        },
-                      },
+                    summary: {
+                      reverse_nested: {},
+                      aggs,
                     },
                   },
                 },
@@ -411,7 +403,7 @@ export class ClusterClientAdapter {
         index,
         body,
       });
-      return result.body.aggregations.events.saved_objects.saved_object_type.ids.buckets.map(
+      return result.body.aggregations.saved_objects.saved_object_type.ids.buckets.map(
         (savedObject: Record<string, unknown>) => ({
           savedObjectId: savedObject.key,
           summary: savedObject.summary,

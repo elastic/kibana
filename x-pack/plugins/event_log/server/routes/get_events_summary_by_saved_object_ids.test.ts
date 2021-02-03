@@ -8,7 +8,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { getAlertsInstancesSummaryByIdsRoute } from './get_alerts_instances_summary_by_ids';
+import { getEventsSummaryBySavedObjectIdsRoute } from './get_events_summary_by_saved_object_ids';
 
 const eventLogClient = eventLogClientMock.create();
 const systemLogger = loggingSystemMock.createLogger();
@@ -17,45 +17,39 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('get_alerts_instances_summary_by_ids', () => {
+describe('getEventsSummaryBySavedObjectIdsRoute', () => {
   it('get events for alerts by ids and group their as instances summary', async () => {
     const router = httpServiceMock.createRouter();
 
-    getAlertsInstancesSummaryByIdsRoute(router, systemLogger);
+    getEventsSummaryBySavedObjectIdsRoute(router, systemLogger);
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/_alerts_instances_summary"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/saved_object_summary"`);
 
     const result = [
       {
-        alertId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
-        instances: [
-          {
-            instance_id: 'host-15',
-            lastAction: 'recovered-instance',
-            actionGroupId: '',
-            actionSubgroup: '',
-            activeStartDate: '',
-          },
-        ],
+        savedObjectId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
+        summary: {},
       },
     ];
-    eventLogClient.getEventsForAlertInstancesSummary.mockResolvedValueOnce(result);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(result);
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
+        params: { type: 'alert' },
         body: { ids: ['1'] },
+        aggs: {},
       },
       ['ok']
     );
 
     await handler(context, req, res);
 
-    expect(eventLogClient.getEventsForAlertInstancesSummary).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [ids] = eventLogClient.getEventsForAlertInstancesSummary.mock.calls[0];
+    const [ids] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
     expect(ids).toEqual(['1']);
 
     expect(res.ok).toHaveBeenCalledWith({
@@ -66,28 +60,21 @@ describe('get_alerts_instances_summary_by_ids', () => {
   it('supports optional pagination parameters', async () => {
     const router = httpServiceMock.createRouter();
 
-    getAlertsInstancesSummaryByIdsRoute(router, systemLogger);
+    getEventsSummaryBySavedObjectIdsRoute(router, systemLogger);
 
     const [, handler] = router.post.mock.calls[0];
-    eventLogClient.getEventsForAlertInstancesSummary.mockResolvedValueOnce([
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce([
       {
-        alertId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
-        instances: [
-          {
-            instance_id: 'host-15',
-            lastAction: 'recovered-instance',
-            actionGroupId: '',
-            actionSubgroup: '',
-            activeStartDate: '',
-          },
-        ],
+        savedObjectId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
+        summary: {},
       },
     ]);
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        body: { ids: ['1'] },
+        params: { type: 'alert' },
+        body: { ids: ['1'], aggs: {} },
         query: { start: '2323', end: '232333' },
       },
       ['ok']
@@ -95,24 +82,16 @@ describe('get_alerts_instances_summary_by_ids', () => {
 
     await handler(context, req, res);
 
-    expect(eventLogClient.getEventsForAlertInstancesSummary).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [id, options] = eventLogClient.getEventsForAlertInstancesSummary.mock.calls[0];
+    const [id, options] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
     expect(id).toEqual(['1']);
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith([
       {
-        alertId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
-        instances: [
-          {
-            instance_id: 'host-15',
-            lastAction: 'recovered-instance',
-            actionGroupId: '',
-            actionSubgroup: '',
-            activeStartDate: '',
-          },
-        ],
+        savedObjectId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
+        summary: {},
       },
     ]);
   });
@@ -120,14 +99,15 @@ describe('get_alerts_instances_summary_by_ids', () => {
   it('logs a warning when the query throws an error', async () => {
     const router = httpServiceMock.createRouter();
 
-    getAlertsInstancesSummaryByIdsRoute(router, systemLogger);
+    getEventsSummaryBySavedObjectIdsRoute(router, systemLogger);
 
     const [, handler] = router.post.mock.calls[0];
-    eventLogClient.getEventsForAlertInstancesSummary.mockRejectedValueOnce(new Error('oof!'));
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockRejectedValueOnce(new Error('oof!'));
 
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
+        params: { type: 'alert' },
         body: { ids: ['1'] },
         query: { start: '2342343', end: '456456' },
       },
@@ -138,7 +118,7 @@ describe('get_alerts_instances_summary_by_ids', () => {
 
     expect(systemLogger.debug).toHaveBeenCalledTimes(1);
     expect(systemLogger.debug).toHaveBeenCalledWith(
-      'error calling eventLog getEventsForAlertInstancesSummary([1], {"start":"2342343","end":"456456"}): oof!'
+      'error calling eventLog getEventsSummaryBySavedObjectIds([1], {"start":"2342343","end":"456456"}): oof!'
     );
   });
 });
