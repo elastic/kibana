@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { RelevanceTuningLogic } from '../relevance_tuning_logic';
 import { RelevanceTuningItem } from './relevance_tuning_item';
 import { FIELD_FILTER_CUTOFF } from '../constants';
+import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 
 import './relevance_tuning_form.scss';
 
@@ -77,6 +78,7 @@ export const RelevanceTuningForm: React.FC = () => {
         {filteredSchemaFields.map((fieldName) => (
           <EuiPanel key={fieldName} className="relevanceTuningForm__panel">
             <EuiAccordion
+              key={fieldName}
               id={fieldName}
               buttonContentClassName="relevanceTuningForm__item"
               buttonContent={
@@ -88,7 +90,13 @@ export const RelevanceTuningForm: React.FC = () => {
                 />
               }
               paddingSize="s"
-            />
+            >
+              <RelevanceTuningItemContent
+                name={fieldName}
+                type={schema[fieldName]}
+                field={searchSettings.search_fields[fieldName]}
+              />
+            </EuiAccordion>
           </EuiPanel>
         ))}
       </form>
