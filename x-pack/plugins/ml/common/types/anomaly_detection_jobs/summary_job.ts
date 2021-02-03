@@ -32,6 +32,7 @@ export interface MlSummaryJob {
   deleting?: boolean;
   latestTimestampSortValue?: number;
   earliestStartTimestampMs?: number;
+  awaitingNodeAssignment: boolean;
 }
 
 export interface AuditMessage {
