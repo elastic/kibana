@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UpgradeAssistantPageProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -24,34 +23,32 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
       return await retry.try(async () => {
         await common.navigateToApp('settings');
         await testSubjects.click('upgrade_assistant');
-      });
-    }
-
-    async expectUpgradeAssistant() {
-      return await retry.try(async () => {
-        log.debug(`expectUpgradeAssistant()`);
-        expect(await testSubjects.exists('upgradeAssistantRoot')).to.equal(true);
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/upgrade_assistant`);
+        retry.waitFor('url to contain /upgrade_assistant', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('/upgrade_assistant');
+        });
       });
     }
 
     async toggleDeprecationLogging() {
-      return await retry.try(async () => {
-        log.debug('toggleDeprecationLogging()');
-        await testSubjects.click('upgradeAssistantDeprecationToggle');
-      });
+      log.debug('toggleDeprecationLogging()');
+      await testSubjects.click('upgradeAssistantDeprecationToggle');
     }
 
-    async expectDeprecationLoggingLabel(labelText: string) {
-      return await retry.try(async () => {
-        log.debug('expectDeprecationLoggingLabel()');
-        const label = await find.byCssSelector(
-          '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
-        );
-        const value = await label.getVisibleText();
-        expect(value).to.equal(labelText);
-      });
+    async isDeprecationLoggingEnabled() {
+      const isDeprecationEnabled = await testSubjects.getAttribute(
+        'upgradeAssistantDeprecationToggle',
+        'aria-checked'
+      );
+      log.debug(`Deprecation enabled == ${isDeprecationEnabled}`);
+      return isDeprecationEnabled === 'true';
+    }
+
+    async deprecationLoggingEnabledLabel() {
+      const loggingEnabledLabel = await find.byCssSelector(
+        '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
+      );
+      return await loggingEnabledLabel.getVisibleText();
     }
 
     async clickTab(tabId: string) {
@@ -61,22 +58,20 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
       });
     }
 
-    async expectIssueSummary(summary: string) {
-      return await retry.try(async () => {
-        log.debug('expectIssueSummary()');
-        const summaryElText = await testSubjects.getVisibleText('upgradeAssistantIssueSummary');
-        expect(summaryElText).to.eql(summary);
+    async waitForTelemetryHidden() {
+      const self = this;
+      retry.waitFor('Telemetry to disappear.', async () => {
+        return (await self.isTelemetryExists()) === false;
       });
     }
 
-    async expectTelemetryHasFinish() {
-      return await retry.try(async () => {
-        log.debug('expectTelemetryHasFinish');
-        const isTelemetryFinished = !(await testSubjects.exists(
-          'upgradeAssistantTelemetryRunning'
-        ));
-        expect(isTelemetryFinished).to.equal(true);
-      });
+    async issueSummaryText() {
+      log.debug('expectIssueSummary()');
+      return await testSubjects.getVisibleText('upgradeAssistantIssueSummary');
+    }
+
+    async isTelemetryExists() {
+      return await testSubjects.exists('upgradeAssistantTelemetryRunning');
     }
   }
 
