@@ -121,7 +121,7 @@ export class MonitorReportsTask implements ReportingTask {
       maxAttempts: 1,
       // round the timeout value up to the nearest second, since Task Manager
       // doesn't support milliseconds
-      timeout: this.timeout.asSeconds() + 's',
+      timeout: Math.ceil(this.timeout.asSeconds()) + 's',
     };
   }
 
