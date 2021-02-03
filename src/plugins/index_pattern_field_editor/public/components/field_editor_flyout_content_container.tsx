@@ -90,14 +90,11 @@ export const FieldEditorFlyoutContentContainer = ({
     async (updatedField: Field) => {
       const script = updatedField.script?.source ? updatedField.script : undefined;
 
-      // TODO if script is defined OR runtime type is changed
-      if (script) {
+      if (fieldTypeToProcess === 'runtime') {
         indexPattern.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
           script,
         });
-      } else {
-        indexPattern.removeRuntimeField(updatedField.name);
       }
 
       const editedField = indexPattern.getFieldByName(updatedField.name);
@@ -127,7 +124,7 @@ export const FieldEditorFlyoutContentContainer = ({
         notifications.toasts.addError(e, { title });
       }
     },
-    [onSave, indexPattern, indexPatternService, notifications]
+    [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess]
   );
 
   const loadEditor = useCallback(async () => {
