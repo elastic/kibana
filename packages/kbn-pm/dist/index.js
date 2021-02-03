@@ -175,7 +175,7 @@ function help() {
         -i, --include           Include only specified projects. If left unspecified, it defaults to including all projects.
         --oss                   Do not include the x-pack when running command.
         --skip-kibana-plugins   Filter all plugins in ./plugins and ../kibana-extra when running command.
-        --no-cache              Disable the bootstrap cache
+        --no-cache              Disable the kbn packages bootstrap cache
         --no-validate           Disable the bootstrap yarn.lock validation
         --verbose               Set log level to verbose
         --debug                 Set log level to debug
@@ -209,7 +209,7 @@ async function run(argv) {
       cache: true,
       validate: true
     },
-    boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate']
+    boolean: ['cache', 'validate']
   });
   const args = options._;
 
@@ -8898,8 +8898,7 @@ const BootstrapCommand = {
 
     const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
-    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path;
-    const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])]; // Install bazel machinery tools if needed
+    const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path; // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Install monorepo npm dependencies
 
@@ -8912,9 +8911,7 @@ const BootstrapCommand = {
         }
 
         if (project.isSinglePackageJsonProject || isExternalPlugin) {
-          await project.installDependencies({
-            extraArgs
-          });
+          await project.installDependencies();
           continue;
         }
 
@@ -23060,12 +23057,10 @@ class Project {
     return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(dep));
   }
 
-  async installDependencies({
-    extraArgs
-  }) {
+  async installDependencies(options = {}) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[${this.name}] running yarn`);
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
-    await Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, extraArgs);
+    await Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, options === null || options === void 0 ? void 0 : options.extraArgs);
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
   }
 

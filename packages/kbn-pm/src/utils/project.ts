@@ -213,11 +213,11 @@ export class Project {
     return Object.values(this.allDependencies).every((dep) => isLinkDependency(dep));
   }
 
-  public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+  public async installDependencies(options: { extraArgs?: string[] } = {}) {
     log.info(`[${this.name}] running yarn`);
 
     log.write('');
-    await installInDir(this.path, extraArgs);
+    await installInDir(this.path, options?.extraArgs);
     log.write('');
   }
 }
