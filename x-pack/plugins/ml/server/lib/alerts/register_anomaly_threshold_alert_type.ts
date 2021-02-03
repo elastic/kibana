@@ -5,16 +5,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_ALERT_TYPES, ML_ALERT_TYPES_CONFIG } from '../../../common/constants/alerts';
+import {
+  ML_ALERT_TYPES,
+  ML_ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
-import { mlAnomalyThresholdAlertParams } from '../../routes/schemas/alerting_schema';
+import {
+  MlAnomalyThresholdAlertParams,
+  mlAnomalyThresholdAlertParams,
+} from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerts/common';
 
 const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_THRESHOLD];
 
-export interface AnomalyThresholdAlertContext {
+export type AnomalyThresholdAlertContext = {
   name: string;
   jobIds: string[];
   timestampIso8601: string;
@@ -24,13 +36,19 @@ export interface AnomalyThresholdAlertContext {
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
   anomalyExplorerUrl: string;
-}
+} & AlertInstanceContext;
 
 export function registerAnomalyThresholdAlertType({
   alerts,
   mlSharedServices,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerts.registerType<
+    MlAnomalyThresholdAlertParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AnomalyThresholdAlertContext,
+    ThresholdMetActionGroupId
+  >({
     id: ML_ALERT_TYPES.ANOMALY_THRESHOLD,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -44,6 +62,12 @@ export function registerAnomalyThresholdAlertType({
           name: 'timestamp',
           description: i18n.translate('xpack.ml.alertContext.timestampDescription', {
             defaultMessage: 'Timestamp of the anomaly',
+          }),
+        },
+        {
+          name: 'timestampIso8601',
+          description: i18n.translate('xpack.ml.alertContext.timestampIso8601Description', {
+            defaultMessage: 'Time in ISO8601 format',
           }),
         },
         {
@@ -81,6 +105,7 @@ export function registerAnomalyThresholdAlertType({
           description: i18n.translate('xpack.ml.alertContext.anomalyExplorerUrlDescription', {
             defaultMessage: 'URL to open in the Anomaly Explorer',
           }),
+          useWithTripleBracesInTemplates: true,
         },
       ],
     },
@@ -93,7 +118,6 @@ export function registerAnomalyThresholdAlertType({
       if (executionResult) {
         const alertInstanceName = executionResult.name;
         const alertInstance = services.alertInstanceFactory(alertInstanceName);
-        // @ts-ignore
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, executionResult);
       }
     },

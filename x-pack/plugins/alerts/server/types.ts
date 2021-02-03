@@ -103,6 +103,7 @@ export interface AlertExecutorOptions<
 export interface ActionVariable {
   name: string;
   description: string;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 export type ExecutorType<

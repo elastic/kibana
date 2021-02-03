@@ -6,8 +6,7 @@
 
 import { HttpService } from '../http_service';
 import { ML_BASE_PATH } from '../../../../common/constants/app';
-import { MlAnomalyThresholdAlertParams } from '../../../alerting/ml_anomaly_threshold_trigger';
-import { PreviewResponse } from '../../../../common/types/alerts';
+import { MlAnomalyThresholdAlertParams, PreviewResponse } from '../../../../common/types/alerts';
 
 export type AlertingApiService = ReturnType<typeof alertingApiProvider>;
 

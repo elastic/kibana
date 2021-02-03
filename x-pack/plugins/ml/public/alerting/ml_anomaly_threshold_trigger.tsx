@@ -12,19 +12,10 @@ import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
 import { HttpService } from '../application/services/http_service';
 import { SeverityControl } from './severity_control';
 import { ResultTypeSelector } from './result_type_selector';
-import type { AnomalyResultType } from '../../common/types/anomalies';
 import { alertingApiProvider } from '../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
-
-export interface MlAnomalyThresholdAlertParams {
-  jobSelection: {
-    jobIds?: string[];
-    groupIds?: string[];
-  };
-  severity: number;
-  resultType: AnomalyResultType;
-}
+import { MlAnomalyThresholdAlertParams } from '../../common/types/alerts';
 
 interface Props {
   alertParams: MlAnomalyThresholdAlertParams;
@@ -54,8 +45,12 @@ const MlAlertThresholdAlertTrigger: FC<Props> = ({
   );
 
   useEffect(function setDefaults() {
-    onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
-    setAlertProperty('tags', ['ml']);
+    if (alertParams.severity === undefined) {
+      onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
+    }
+    if (alertParams.tags === undefined) {
+      setAlertProperty('tags', ['ml']);
+    }
     return () => {
       // Reset alert properties on unmount
     };

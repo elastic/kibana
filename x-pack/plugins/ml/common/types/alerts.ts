@@ -6,6 +6,7 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import { AlertTypeParams } from '../../../alerts/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
@@ -17,9 +18,10 @@ export interface AlertExecutionResult {
   isInterim: boolean;
   jobIds: string[];
   timestamp: number;
+  timestampEpoch: number;
   timestampIso8601: string;
   score: number;
-  bucketRange?: { start: string; end: string };
+  bucketRange: { start: string; end: string };
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
 }
@@ -60,7 +62,6 @@ export interface BucketAnomalyAlertDoc extends BaseAnomalyAlertDoc {
 
 export interface InfluencerAnomalyAlertDoc extends BaseAnomalyAlertDoc {
   result_type: typeof ANOMALY_RESULT_TYPE.INFLUENCER;
-  // In case job includes influencers configuration
   influencer_field_name: string;
   influencer_field_value: string | number;
   influencer_score: number;
@@ -79,3 +80,12 @@ export function isBucketAnomalyAlertDoc(arg: any): arg is BucketAnomalyAlertDoc 
 export function isInfluencerAnomalyAlertDoc(arg: any): arg is InfluencerAnomalyAlertDoc {
   return arg.hasOwnProperty('result_type') && arg.result_type === ANOMALY_RESULT_TYPE.INFLUENCER;
 }
+
+export type MlAnomalyThresholdAlertParams = {
+  jobSelection: {
+    jobIds?: string[];
+    groupIds?: string[];
+  };
+  severity: number;
+  resultType: AnomalyResultType;
+} & AlertTypeParams;

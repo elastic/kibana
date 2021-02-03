@@ -45,7 +45,8 @@ Top records:
   \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
 \\{\\{/context.topRecords\\}\\}
 
-[Open in Anomaly Explorer](\\{\\{anomalyExplorerUrl\\}\\})
+\\{\\{! Complete the URL with your Kibana hostname \\}\\}
+[Open in Anomaly Explorer](https://KIBANA_HOST\\{\\{\\{context.anomalyExplorerUrl\\}\\}\\})
 `,
       }
     ),

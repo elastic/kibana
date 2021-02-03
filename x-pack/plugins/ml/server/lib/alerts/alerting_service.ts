@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import rison from 'rison-node';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyThresholdAlertParams,
@@ -55,6 +56,43 @@ export function alertingServiceProvider(mlClient: MlClient) {
     };
   };
 
+  const getCommonScriptedFields = () => {
+    return {
+      start: {
+        script: {
+          lang: 'painless',
+          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()-((doc["bucket_span"].value * 1000)
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
+          params: {
+            padding: 10,
+          },
+        },
+      },
+      end: {
+        script: {
+          lang: 'painless',
+          source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()+((doc["bucket_span"].value * 1000)
+ * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
+          params: {
+            padding: 10,
+          },
+        },
+      },
+      timestamp_epoch: {
+        script: {
+          lang: 'painless',
+          source: 'doc["timestamp"].value.getMillis()/1000',
+        },
+      },
+      timestamp_iso8601: {
+        script: {
+          lang: 'painless',
+          source: 'doc["timestamp"].value',
+        },
+      },
+    };
+  };
+
   /**
    * Builds an agg query based on the requested result type.
    * @param resultType
@@ -96,6 +134,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
               },
               size: 3,
               script_fields: {
+                ...getCommonScriptedFields(),
                 score: {
                   script: {
                     lang: 'painless',
@@ -107,12 +146,6 @@ export function alertingServiceProvider(mlClient: MlClient) {
                     lang: 'painless',
                     source:
                       'doc["timestamp"].value + "_" + doc["influencer_field_name"].value + "_" + doc["influencer_field_value"].value',
-                  },
-                },
-                timestamp_iso8601: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value',
                   },
                 },
               },
@@ -154,6 +187,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
               },
               size: 3,
               script_fields: {
+                ...getCommonScriptedFields(),
                 score: {
                   script: {
                     lang: 'painless',
@@ -165,12 +199,6 @@ export function alertingServiceProvider(mlClient: MlClient) {
                     lang: 'painless',
                     source:
                       'doc["timestamp"].value + "_" + doc["function"].value + "_" + doc["field_name"].value',
-                  },
-                },
-                timestamp_iso8601: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value',
                   },
                 },
               },
@@ -201,38 +229,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
               },
               size: 1,
               script_fields: {
-                start: {
-                  script: {
-                    lang: 'painless',
-                    source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()-((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
-                    params: {
-                      padding: 10,
-                    },
-                  },
-                },
-                end: {
-                  script: {
-                    lang: 'painless',
-                    source: `LocalDateTime.ofEpochSecond((doc["timestamp"].value.getMillis()+((doc["bucket_span"].value * 1000)
- * params.padding)) / 1000, 0, ZoneOffset.UTC).toString()+\":00.000Z\"`,
-                    params: {
-                      padding: 10,
-                    },
-                  },
-                },
-                timestamp_epoch: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value.getMillis()/1000',
-                  },
-                },
-                timestamp_iso8601: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value',
-                  },
-                },
+                ...getCommonScriptedFields(),
                 score: {
                   script: {
                     lang: 'painless',
@@ -355,7 +352,6 @@ export function alertingServiceProvider(mlClient: MlClient) {
         .map((v) => {
           const aggTypeResults = v[resultsLabel.aggGroupLabel];
           const requestedAnomalies = aggTypeResults[resultsLabel.topHitsLabel].hits.hits;
-          const bucketHit = v.bucket_results.top_bucket_hits.hits.hits[0];
 
           return {
             count: aggTypeResults.doc_count,
@@ -365,10 +361,12 @@ export function alertingServiceProvider(mlClient: MlClient) {
             isInterim: requestedAnomalies.some((h) => h._source.is_interim),
             timestamp: requestedAnomalies[0]._source.timestamp,
             timestampIso8601: requestedAnomalies[0].fields.timestamp_iso8601[0],
+            timestampEpoch: requestedAnomalies[0].fields.timestamp_epoch[0],
             score: requestedAnomalies[0].fields.score[0],
-            ...(bucketHit
-              ? { bucketRange: { start: bucketHit?.fields.start[0], end: bucketHit.fields.end[0] } }
-              : {}),
+            bucketRange: {
+              start: requestedAnomalies[0].fields.start[0],
+              end: requestedAnomalies[0].fields.end[0],
+            },
             topRecords: v.record_results.top_record_hits.hits.hits.map((h) => ({
               ...h._source,
               score: h.fields.score[0],
@@ -382,6 +380,64 @@ export function alertingServiceProvider(mlClient: MlClient) {
           };
         })
     );
+  };
+
+  /**
+   * TODO Replace with URL generator when https://github.com/elastic/kibana/issues/59453 is resolved
+   * @param r
+   * @param type
+   */
+  const buildExplorerUrl = (r: AlertExecutionResult, type: AnomalyResultType): string => {
+    const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
+
+    const globalState = {
+      ml: {
+        jobIds: r.jobIds,
+      },
+      time: {
+        from: r.bucketRange.start,
+        to: r.bucketRange.end,
+      },
+    };
+    const appState = {
+      explorer: {
+        ...(isInfluencerResult
+          ? {
+              mlExplorerFilter: {
+                filterActive: true,
+                filteredFields: [
+                  r.topInfluencers![0].influencer_field_name,
+                  r.topInfluencers![0].influencer_field_value,
+                ],
+                influencersFilterQuery: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match_phrase: {
+                          [r.topInfluencers![0].influencer_field_name]: r.topInfluencers![0]
+                            .influencer_field_value,
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            }
+          : {}),
+        mlExplorerSwimlane: {
+          selectedLanes: [
+            isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
+          ],
+          selectedTimes: [r.timestampEpoch],
+          selectedType: isInfluencerResult ? 'viewBy' : 'overall',
+          ...(isInfluencerResult
+            ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
+            : {}),
+        },
+      },
+    };
+    return `/app/ml/explorer/?_g=${rison.encode(globalState)}&_a=${rison.encode(appState)}`;
   };
 
   return {
@@ -401,15 +457,13 @@ export function alertingServiceProvider(mlClient: MlClient) {
 
       const result = res[0];
 
+      const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
+
       return result
         ? {
             ...result,
             name: result.key_as_string,
-            // anomalyExplorerUrl: await new MlUrlGenerator({
-            //   appBasePath: '/app/ml',
-            //   useHash: false,
-            // }).createUrl({ page: 'explorer', pageState: {} }),
-            anomalyExplorerUrl: '',
+            anomalyExplorerUrl,
           }
         : undefined;
     },

@@ -18,8 +18,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import type { AlertingApiService } from '../application/services/ml_api_service/alerting';
-import { MlAnomalyThresholdAlertParams } from './ml_anomaly_threshold_trigger';
-import { PreviewResponse } from '../../common/types/alerts';
+import { MlAnomalyThresholdAlertParams, PreviewResponse } from '../../common/types/alerts';
 
 export interface PreviewAlertConditionProps {
   alertingApiService: AlertingApiService;
