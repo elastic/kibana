@@ -264,7 +264,9 @@ describe('#start(installPath)', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [],
+          Array [
+            "action.destructive_requires_name=true",
+          ],
           undefined,
           Object {
             "log": <ToolingLog>,
@@ -340,7 +342,9 @@ describe('#run()', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [],
+          Array [
+            "action.destructive_requires_name=true",
+          ],
           undefined,
           Object {
             "log": <ToolingLog>,

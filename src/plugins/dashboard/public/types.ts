@@ -81,8 +81,7 @@ export type DashboardAppStateDefaults = DashboardAppState & {
 };
 
 /**
- * In URL panels are optional,
- * Panels are not added to the URL when in "view" mode
+ * Panels are not added to the URL
  */
 export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
   panels?: SavedDashboardPanel[];

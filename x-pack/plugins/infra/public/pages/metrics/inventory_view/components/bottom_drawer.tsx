@@ -25,7 +25,8 @@ export const BottomDrawer: React.FC<{
   measureRef: (instance: HTMLElement | null) => void;
   interval: string;
   formatter: InfraFormatter;
-}> = ({ measureRef, interval, formatter, children }) => {
+  width: number;
+}> = ({ measureRef, width, interval, formatter, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const trackDrawerOpen = useUiTracker({ app: 'infra_metrics' });
@@ -35,7 +36,7 @@ export const BottomDrawer: React.FC<{
   }, [isOpen, trackDrawerOpen]);
 
   return (
-    <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen}>
+    <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
         <EuiFlexItem grow={false}>
           <ShowHideButton
@@ -65,15 +66,14 @@ export const BottomDrawer: React.FC<{
   );
 };
 
-const BottomActionContainer = euiStyled.div<{ isOpen: boolean }>`
+const BottomActionContainer = euiStyled.div<{ isOpen: boolean; outerWidth: number }>`
   padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
-  position: absolute;
-  height: ${(props) => (props.isOpen ? '244px' : '48px')};
-  overflow: ${(props) => (props.isOpen ? 'visible' : 'hidden')};
-  left: 0;
+  position: fixed;
   bottom: 0;
   right: 0;
-  transition: height ${TRANSITION_MS}ms;
+  transition: transform ${TRANSITION_MS}ms;
+  transform: translateY(${(props) => (props.isOpen ? 0 : '224px')});
+  width: ${(props) => props.outerWidth}px;
 `;
 
 const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
