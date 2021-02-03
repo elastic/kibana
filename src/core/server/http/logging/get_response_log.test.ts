@@ -169,6 +169,31 @@ describe('getEcsResponseLog', () => {
         }
       `);
     });
+
+    test('does not mutate original headers', () => {
+      const reqHeaders = { authorization: 'a', cookie: 'b', 'user-agent': 'hi' };
+      const resHeaders = { headers: { 'content-length': 123, 'set-cookie': 'c' } };
+      const req = createMockHapiRequest({
+        headers: reqHeaders,
+        response: { headers: resHeaders },
+      });
+      getEcsResponseLog(req, logger);
+      expect(reqHeaders).toMatchInlineSnapshot(`
+        Object {
+          "authorization": "a",
+          "cookie": "b",
+          "user-agent": "hi",
+        }
+      `);
+      expect(resHeaders).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "content-length": 123,
+            "set-cookie": "c",
+          },
+        }
+      `);
+    });
   });
 
   describe('ecs', () => {

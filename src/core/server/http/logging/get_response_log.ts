@@ -20,19 +20,15 @@ const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
 function redactSensitiveHeaders(
-  headers: Record<string, string | string[]>
+  headers?: Record<string, string | string[]>
 ): Record<string, string | string[]> {
-  return (
-    headers &&
-    Object.keys(headers).reduce(
-      (acc, key) => ({
-        // Create a shallow copy to prevent mutating the original headers
-        ...acc,
-        [key]: FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key],
-      }),
-      {} as Record<string, string | string[]>
-    )
-  );
+  const result = {} as Record<string, string | string[]>;
+  if (headers) {
+    for (const key of Object.keys(headers)) {
+      result[key] = FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key];
+    }
+  }
+  return result;
 }
 
 /**

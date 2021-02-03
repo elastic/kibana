@@ -57,10 +57,6 @@ describe('request logging', () => {
                 },
               },
             },
-            root: {
-              appenders: ['test-console', 'default'],
-              level: 'warn',
-            },
             loggers: [
               {
                 context: 'http.server.response',
@@ -106,10 +102,6 @@ describe('request logging', () => {
                 pattern: '%level|%logger|%message|%meta',
               },
             },
-          },
-          root: {
-            appenders: ['test-console', 'default'],
-            level: 'warn',
           },
           loggers: [
             {
