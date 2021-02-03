@@ -23,11 +23,12 @@ import { NavigationPublicPluginStart } from '../services/navigation';
 import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from '../services/data';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
+import { DashboardPanelStorage } from './lib';
 import { UrlForwardingStart } from '../../../url_forwarding/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
-  | { destination: 'dashboard'; id?: string; useReplace?: boolean }
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
   | { destination: 'listing'; filter?: string; useReplace?: boolean };
 
 export interface DashboardEmbedSettings {
@@ -67,12 +68,14 @@ export interface DashboardAppServices {
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
+  allowByValueEmbeddables: boolean;
   urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   indexPatterns: IndexPatternsContract;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
+  dashboardPanelStorage: DashboardPanelStorage;
   dashboardCapabilities: DashboardCapabilities;
   initializerContext: PluginInitializerContext;
   onAppLeave: AppMountParameters['onAppLeave'];
