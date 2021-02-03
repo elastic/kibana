@@ -150,8 +150,8 @@ It also provides a stateful version of it on the start contract.
 Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.md[presentationUtil]
-|Utilities and components used by the presentation-related plugins
+|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
+|The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
@@ -370,6 +370,10 @@ and actions.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
@@ -415,7 +419,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Run all tests from the x-pack root directory
+|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]

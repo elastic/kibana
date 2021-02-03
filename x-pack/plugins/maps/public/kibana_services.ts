@@ -49,6 +49,7 @@ export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
+export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

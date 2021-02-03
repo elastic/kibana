@@ -18,10 +18,11 @@ export interface Suite {
   suites: Suite[];
   tests: Test[];
   title: string;
-  file?: string;
+  file: string;
   parent?: Suite;
   eachTest: (cb: (test: Test) => void) => void;
   root: boolean;
+  suiteTag: string;
 }
 
 export interface Test {

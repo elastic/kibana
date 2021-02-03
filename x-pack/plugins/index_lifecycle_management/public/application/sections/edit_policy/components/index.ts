@@ -5,7 +5,6 @@
  */
 
 export { ActiveBadge } from './active_badge';
-export { ErrableFormRow } from './form_errors';
 export { LearnMoreLink } from './learn_more_link';
 export { OptionalLabel } from './optional_label';
 export { PolicyJsonFlyout } from './policy_json_flyout';
@@ -13,5 +12,6 @@ export { DescribedFormRow, ToggleFieldWithDescribedFormRow } from './described_f
 export { FieldLoadingError } from './field_loading_error';
 export { ActiveHighlight } from './active_highlight';
 export { Timeline } from './timeline';
+export { FormErrorsCallout } from './form_errors_callout';
 
 export * from './phases';

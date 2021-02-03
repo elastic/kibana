@@ -84,7 +84,10 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-describe('QueryStringInput', () => {
+// FAILING: https://github.com/elastic/kibana/issues/85715
+// FAILING: https://github.com/elastic/kibana/issues/89603
+// FAILING: https://github.com/elastic/kibana/issues/89641
+describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -102,7 +105,7 @@ describe('QueryStringInput', () => {
     await waitFor(() => getByText('KQL'));
   });
 
-  it.skip('Should pass the query language to the language switcher', () => {
+  it('Should pass the query language to the language switcher', () => {
     const component = mount(
       wrapQueryStringInputInContext({
         query: luceneQuery,

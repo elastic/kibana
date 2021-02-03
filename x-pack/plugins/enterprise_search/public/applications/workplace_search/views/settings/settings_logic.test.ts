@@ -6,12 +6,9 @@
 
 import { LogicMounter } from '../../../__mocks__/kea.mock';
 
-import {
-  mockFlashMessageHelpers,
-  mockHttpValues,
-  expectedAsyncError,
-  mockKibanaValues,
-} from '../../../__mocks__';
+import { mockFlashMessageHelpers, mockHttpValues, mockKibanaValues } from '../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
 
@@ -89,20 +86,18 @@ describe('SettingsLogic', () => {
     describe('initializeSettings', () => {
       it('calls API and sets values', async () => {
         const setServerPropsSpy = jest.spyOn(SettingsLogic.actions, 'setServerProps');
-        const promise = Promise.resolve(configuredSources);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(configuredSources));
         SettingsLogic.actions.initializeSettings();
 
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings');
-        await promise;
+        await nextTick();
         expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
         SettingsLogic.actions.initializeSettings();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -114,20 +109,18 @@ describe('SettingsLogic', () => {
           SettingsLogic.actions,
           'onInitializeConnectors'
         );
-        const promise = Promise.resolve(serverProps);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(serverProps));
         SettingsLogic.actions.initializeConnectors();
 
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors');
-        await promise;
+        await nextTick();
         expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
         SettingsLogic.actions.initializeConnectors();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -138,25 +131,23 @@ describe('SettingsLogic', () => {
         const NAME = 'updated name';
         SettingsLogic.actions.onOrgNameInputChange(NAME);
         const setUpdatedNameSpy = jest.spyOn(SettingsLogic.actions, 'setUpdatedName');
-        const promise = Promise.resolve({ organizationName: NAME });
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve({ organizationName: NAME }));
 
         SettingsLogic.actions.updateOrgName();
 
         expect(http.put).toHaveBeenCalledWith('/api/workplace_search/org/settings/customize', {
           body: JSON.stringify({ name: NAME }),
         });
-        await promise;
+        await nextTick();
         expect(setSuccessMessage).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
         expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.reject('this is an error'));
         SettingsLogic.actions.updateOrgName();
 
-        await expectedAsyncError(promise);
+        await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
@@ -168,8 +159,7 @@ describe('SettingsLogic', () => {
           SettingsLogic.actions,
           'setUpdatedOauthApplication'
         );
-        const promise = Promise.resolve({ oauthApplication });
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve({ oauthApplication }));
         SettingsLogic.actions.setOauthApplication(oauthApplication);
         SettingsLogic.actions.updateOauthApplication();
 
@@ -183,16 +173,15 @@ describe('SettingsLogic', () => {
             }),
           }
         );
-        await promise;
+        await nextTick();
         expect(setUpdatedOauthApplicationSpy).toHaveBeenCalledWith({ oauthApplication });
         expect(setSuccessMessage).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.reject('this is an error'));
         SettingsLogic.actions.updateOauthApplication();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -203,20 +192,18 @@ describe('SettingsLogic', () => {
       const NAME = 'baz';
 
       it('calls API and sets values', async () => {
-        const promise = Promise.resolve({});
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve({}));
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
 
-        await promise;
+        await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
         expect(setQueuedSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.reject('this is an error'));
         SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });

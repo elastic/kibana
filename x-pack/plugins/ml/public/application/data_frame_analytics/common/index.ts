@@ -41,6 +41,7 @@ export {
 
 export { getIndexData } from './get_index_data';
 export { getIndexFields } from './get_index_fields';
+export { getScatterplotMatrixLegendType } from './get_scatterplot_matrix_legend_type';
 
 export { useResultsViewConfig } from './use_results_view_config';
 export { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';

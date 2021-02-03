@@ -22,6 +22,13 @@ describe('Query decorator', () => {
     expect(decoratedQuery).toEqual({ query_string: { query: '*', analyze_wildcard: true } });
   });
 
+  test('should merge in serialized query string options', () => {
+    const queryStringOptions = '{ "analyze_wildcard": true }';
+    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, queryStringOptions);
+
+    expect(decoratedQuery).toEqual({ query_string: { query: '*', analyze_wildcard: true } });
+  });
+
   test('should add a default of a time_zone parameter if one is provided', () => {
     const decoratedQuery = decorateQuery(
       { query_string: { query: '*' } },

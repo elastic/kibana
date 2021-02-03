@@ -40,7 +40,7 @@ function getDisplayedFieldsLength(
     .reduce((allFieldCount, [, { fields }]) => allFieldCount + fields.length, 0);
 }
 
-export function FieldList({
+export const FieldList = React.memo(function FieldList({
   exists,
   fieldGroups,
   existenceFetchFailed,
@@ -135,13 +135,15 @@ export function FieldList({
           {Object.entries(fieldGroups)
             .filter(([, { showInAccordion }]) => !showInAccordion)
             .flatMap(([, { fields }]) =>
-              fields.map((field) => (
+              fields.map((field, index) => (
                 <FieldItem
                   {...fieldProps}
                   exists={exists(field)}
                   field={field}
                   hideDetails={true}
                   key={field.name}
+                  itemIndex={index}
+                  groupIndex={0}
                   dropOntoWorkspace={dropOntoWorkspace}
                   hasSuggestionForField={hasSuggestionForField}
                 />
@@ -151,7 +153,7 @@ export function FieldList({
         <EuiSpacer size="s" />
         {Object.entries(fieldGroups)
           .filter(([, { showInAccordion }]) => showInAccordion)
-          .map(([key, fieldGroup]) => (
+          .map(([key, fieldGroup], index) => (
             <Fragment key={key}>
               <FieldsAccordion
                 dropOntoWorkspace={dropOntoWorkspace}
@@ -168,6 +170,7 @@ export function FieldList({
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
                 paginatedFields={paginatedFields[key]}
                 fieldProps={fieldProps}
+                groupIndex={index + 1}
                 onToggle={(open) => {
                   setAccordionState((s) => ({
                     ...s,
@@ -198,4 +201,4 @@ export function FieldList({
       </div>
     </div>
   );
-}
+});
