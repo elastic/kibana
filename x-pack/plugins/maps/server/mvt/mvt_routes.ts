@@ -6,14 +6,9 @@
 
 import rison from 'rison-node';
 import { schema } from '@kbn/config-schema';
-import {
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  RequestHandlerContext,
-} from 'src/core/server';
+import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
-import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -29,7 +24,7 @@ export function initMVTRoutes({
   router,
   logger,
 }: {
-  router: IRouter<RequestHandlerContext & { search: DataApiRequestHandlerContext }>;
+  router: IRouter<DataRequestHandlerContext>;
   logger: Logger;
 }) {
   router.get(
@@ -49,7 +44,7 @@ export function initMVTRoutes({
       },
     },
     async (
-      context: RequestHandlerContext & { search: DataApiRequestHandlerContext },
+      context: DataRequestHandlerContext,
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
@@ -91,7 +86,7 @@ export function initMVTRoutes({
       },
     },
     async (
-      context: RequestHandlerContext & { search: DataApiRequestHandlerContext },
+      context: DataRequestHandlerContext,
       request: KibanaRequest<unknown, Record<string, any>, unknown>,
       response: KibanaResponseFactory
     ) => {
