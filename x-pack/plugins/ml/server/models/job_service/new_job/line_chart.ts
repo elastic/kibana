@@ -17,7 +17,7 @@ interface Result {
   value: Value;
 }
 
-interface ProcessedResults {
+export interface ProcessedResults {
   success: boolean;
   results: Record<number, Result[]>;
   totalResults: number;
