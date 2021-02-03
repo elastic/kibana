@@ -91,9 +91,10 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
     '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\]react-monaco-editor)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 

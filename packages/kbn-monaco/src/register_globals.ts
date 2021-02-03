@@ -46,3 +46,7 @@ window.MonacoEnvironment = {
     return new Worker(URL.createObjectURL(blob));
   },
 };
+
+// needed for functionsl tests so that we can get value from 'editor'
+// @ts-ignore
+window.monaco = monaco;
