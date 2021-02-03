@@ -10,8 +10,10 @@ import { SidebarItems } from '../../step_detail/waterfall/types';
 
 export interface IWaterfallContext {
   totalNetworkRequests: number;
+  highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: WaterfallData;
+  showOnlyHighlightedNetworkRequests: boolean;
   sidebarItems?: SidebarItems;
   legendItems?: unknown[];
   renderTooltipItem: (
@@ -24,8 +26,10 @@ export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
   totalNetworkRequests: number;
+  highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
+  showOnlyHighlightedNetworkRequests: IWaterfallContext['showOnlyHighlightedNetworkRequests'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
@@ -34,20 +38,24 @@ interface ProviderProps {
 export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
+  showOnlyHighlightedNetworkRequests,
   sidebarItems,
   legendItems,
   renderTooltipItem,
   totalNetworkRequests,
+  highlightedNetworkRequests,
   fetchedNetworkRequests,
 }) => {
   return (
     <WaterfallContext.Provider
       value={{
         data,
+        showOnlyHighlightedNetworkRequests,
         sidebarItems,
         legendItems,
         renderTooltipItem,
         totalNetworkRequests,
+        highlightedNetworkRequests,
         fetchedNetworkRequests,
       }}
     >

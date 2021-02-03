@@ -326,6 +326,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 137.70799999925657,
           },
         ],
+        "totalHighlightedRequests": 2,
       }
     `);
   });
@@ -452,6 +453,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0.9219999983906746,
           },
         ],
+        "totalHighlightedRequests": 2,
       }
     `);
   });
@@ -477,6 +479,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0,
           },
         ],
+        "totalHighlightedRequests": 1,
       }
     `);
   });
@@ -500,6 +503,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0,
           },
         ],
+        "totalHighlightedRequests": 1,
       }
     `);
   });
@@ -520,6 +524,36 @@ describe('getSeriesAndDomain', () => {
       return false;
     });
     expect(contentDownloadedingConfigItem).toBeDefined();
+  });
+
+  it('counts the total number of highlighted items', () => {
+    // only one CSS file in this array of network Items
+    const actual = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    expect(actual.totalHighlightedRequests).toBe(1);
+  });
+
+  it('adds isHighlighted to waterfall entry when filter matches', () => {
+    // only one CSS file in this array of network Items
+    const { series } = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    series.forEach((item) => {
+      if (item.x === 0) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
+  });
+
+  it('adds isHighlighted to waterfall entry when query matches', () => {
+    // only the second item matches this query
+    const { series } = getSeriesAndDomain(networkItems, false, 'director', []);
+    series.forEach((item) => {
+      if (item.x === 1) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
   });
 });
 

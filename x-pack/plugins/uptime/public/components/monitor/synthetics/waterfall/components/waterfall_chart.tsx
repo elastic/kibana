@@ -52,9 +52,11 @@ export const WaterfallChart = ({
 }: WaterfallChartProps) => {
   const {
     data,
+    showOnlyHighlightedNetworkRequests,
     sidebarItems,
     legendItems,
     totalNetworkRequests,
+    highlightedNetworkRequests,
     fetchedNetworkRequests,
   } = useWaterfallContext();
 
@@ -83,7 +85,9 @@ export const WaterfallChart = ({
               <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false} />
               <NetworkRequestsTotal
                 totalNetworkRequests={totalNetworkRequests}
+                highlightedNetworkRequests={highlightedNetworkRequests}
                 fetchedNetworkRequests={fetchedNetworkRequests}
+                showHighlightedNetworkRequests={showOnlyHighlightedNetworkRequests}
               />
               {renderFilter && (
                 <WaterfallChartFilterContainer>{renderFilter()}</WaterfallChartFilterContainer>

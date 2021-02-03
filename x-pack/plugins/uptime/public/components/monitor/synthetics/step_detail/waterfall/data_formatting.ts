@@ -62,6 +62,7 @@ export const isHighlightedItem = (
   if (!query && activeFilters?.length === 0) {
     return true;
   }
+
   const matchQuery = query ? item.url?.includes(query) : true;
   const matchFilters =
     activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
@@ -96,8 +97,13 @@ export const getSeriesAndDomain = (
     }
   };
 
+  let totalHighlightedRequests = 0;
+
   const series = items.reduce<WaterfallData>((acc, item, index) => {
     const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    if (isHighlighted) {
+      totalHighlightedRequests++;
+    }
 
     if (!item.timings) {
       acc.push({
@@ -186,7 +192,7 @@ export const getSeriesAndDomain = (
     filteredSeries = series.filter((item) => item.config.isHighlighted);
   }
 
-  return { series: filteredSeries, domain };
+  return { series: filteredSeries, domain, totalHighlightedRequests };
 };
 
 export const getSidebarItems = (

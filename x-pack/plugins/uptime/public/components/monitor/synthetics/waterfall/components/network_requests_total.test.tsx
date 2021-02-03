@@ -11,7 +11,11 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 describe('NetworkRequestsTotal', () => {
   it('message in case total is greater than fetched', () => {
     const { getByText, getByLabelText } = render(
-      <NetworkRequestsTotal fetchedNetworkRequests={1000} totalNetworkRequests={1100} />
+      <NetworkRequestsTotal
+        fetchedNetworkRequests={1000}
+        totalNetworkRequests={1100}
+        highlightedNetworkRequests={1000}
+      />
     );
 
     expect(getByText('First 1000/1100 network requests')).toBeInTheDocument();
@@ -20,9 +24,52 @@ describe('NetworkRequestsTotal', () => {
 
   it('message in case total is equal to fetched requests', () => {
     const { getByText } = render(
-      <NetworkRequestsTotal fetchedNetworkRequests={500} totalNetworkRequests={500} />
+      <NetworkRequestsTotal
+        fetchedNetworkRequests={500}
+        totalNetworkRequests={500}
+        highlightedNetworkRequests={1000}
+      />
     );
 
     expect(getByText('500 network requests')).toBeInTheDocument();
+  });
+
+  it('does not show highlighted item message when showHighlightedNetworkEvents is false', () => {
+    const { queryByText } = render(
+      <NetworkRequestsTotal
+        fetchedNetworkRequests={500}
+        totalNetworkRequests={500}
+        highlightedNetworkRequests={0}
+        showHighlightedNetworkRequests={false}
+      />
+    );
+
+    expect(queryByText(/match the filter/)).not.toBeInTheDocument();
+  });
+
+  it('does not show highlighted item message when highlightedNetworkEvents is less than 0', () => {
+    const { queryByText } = render(
+      <NetworkRequestsTotal
+        fetchedNetworkRequests={500}
+        totalNetworkRequests={500}
+        highlightedNetworkRequests={-1}
+        showHighlightedNetworkRequests={false}
+      />
+    );
+
+    expect(queryByText(/match the filter/)).not.toBeInTheDocument();
+  });
+
+  it('show highlighted item message when highlightedNetworkEvents is greater than 0 and showHighlightedNetworkEvents is true', () => {
+    const { getByText } = render(
+      <NetworkRequestsTotal
+        fetchedNetworkRequests={500}
+        totalNetworkRequests={500}
+        highlightedNetworkRequests={20}
+        showHighlightedNetworkRequests={true}
+      />
+    );
+
+    expect(getByText(/\(20 match the filter\)/)).toBeInTheDocument();
   });
 });

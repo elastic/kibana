@@ -12,9 +12,16 @@ import { NetworkRequestsTotalStyle } from './styles';
 interface Props {
   totalNetworkRequests: number;
   fetchedNetworkRequests: number;
+  highlightedNetworkRequests: number;
+  showHighlightedNetworkRequests?: boolean;
 }
 
-export const NetworkRequestsTotal = ({ totalNetworkRequests, fetchedNetworkRequests }: Props) => {
+export const NetworkRequestsTotal = ({
+  totalNetworkRequests,
+  fetchedNetworkRequests,
+  highlightedNetworkRequests,
+  showHighlightedNetworkRequests,
+}: Props) => {
   return (
     <NetworkRequestsTotalStyle size="xs" color="subdued">
       <strong>
@@ -29,7 +36,15 @@ export const NetworkRequestsTotal = ({ totalNetworkRequests, fetchedNetworkReque
                   })
                 : totalNetworkRequests,
           },
-        })}
+        })}{' '}
+        {showHighlightedNetworkRequests &&
+          highlightedNetworkRequests >= 0 &&
+          `(${i18n.translate('xpack.uptime.synthetics.waterfall.requestsHighlightedMessage', {
+            defaultMessage: '{numHighlightedRequests} match the filter',
+            values: {
+              numHighlightedRequests: highlightedNetworkRequests,
+            },
+          })})`}
       </strong>
       {totalNetworkRequests > fetchedNetworkRequests && (
         <EuiIconTip

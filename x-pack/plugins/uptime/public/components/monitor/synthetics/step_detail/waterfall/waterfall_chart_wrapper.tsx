@@ -64,7 +64,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   const [networkData] = useState<NetworkItems>(data);
 
-  const { series, domain } = useMemo(() => {
+  const { series, domain, totalHighlightedRequests } = useMemo(() => {
     return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
@@ -91,7 +91,9 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     <WaterfallProvider
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}
+      highlightedNetworkRequests={totalHighlightedRequests}
       data={series}
+      showOnlyHighlightedNetworkRequests={onlyHighlighted}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       renderTooltipItem={(tooltipProps) => {
