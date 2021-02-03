@@ -15,7 +15,7 @@ import {
   Mappings,
   Settings,
   IngestPipeline,
-} from '../../../../../../../common/types/file_datavisualizer';
+} from '../../../../../../../../file_upload/common';
 
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
