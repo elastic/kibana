@@ -5,18 +5,22 @@
 #
 # The full list of Bazel options: https://docs.bazel.build/versions/master/command-line-reference.html
 
-# Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
-build --disk_cache=bazel-cache/disk-cache
+# Local Cache Settings
+## Avoid cache results from being corrupt when changing source during build
+common --experimental_guard_against_concurrent_changes
 
-# Bazel repo cache settings
-build --repository_cache=bazel-cache/repository-cache
+## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
+build --disk_cache=~/.bazel-cache/disk-cache
+
+## Bazel repo cache settings
+build --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
-# Build results will be placed in a directory called "bazel-dist/bin"
+# Build results will be placed in a directory called "bazel/bin"
 # This will still create a bazel-out symlink in
 # the project directory, which must be excluded from the
 # editor's search path.
-build --symlink_prefix=bazel-dist/
+build --symlink_prefix=bazel/
 # To disable the symlinks altogether (including bazel-out) we can use
 # build --symlink_prefix=/
 # however this makes it harder to find outputs.
@@ -37,9 +41,7 @@ common --color=yes
 build --show_task_finish
 build --noshow_progress
 build --noshow_loading_progress
-
-## enforced default values
-build --show_result=1
+build --show_result=0
 
 # Specifies desired output mode for running tests.
 # Valid values are
@@ -78,7 +80,8 @@ test:debug --test_output=streamed --test_strategy=exclusive --test_timeout=9999 
 # The node process will break before user code starts and wait for the debugger to connect.
 run:debug --define=VERBOSE_LOGS=1 -- --node_options=--inspect-brk
 # The following option will change the build output of certain rules such as terser and may not be desirable in all cases
-build:debug --compilation_mode=dbg
+# It will also output both the repo cache and action cache to a folder inside the repo
+build:debug --compilation_mode=dbg --show_result=1 --disk_cache=bazel-cache/disk-cache --repository_cache=bazel-cache/repository-cache
 
 # Turn off legacy external runfiles
 # This prevents accidentally depending on this feature, which Bazel will remove.
