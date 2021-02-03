@@ -1,10 +1,12 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
-import { Subject } from 'rxjs';
+import { defer, of, Subject } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
+import { LOG_ENTRIES_SEARCH_STRATEGY } from '../../../common/search_strategies/log_entries/log_entries';
 import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
 import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
 
@@ -15,30 +17,61 @@ import { LogStream } from './';
 export const startTimestamp = 1595145600000;
 export const endTimestamp = startTimestamp + 15 * 60 * 1000;
 
+export const dataMock = {
+  search: {
+    search: ({ params }, options) => {
+      return defer(() => {
+        switch (options.strategy) {
+          case LOG_ENTRIES_SEARCH_STRATEGY:
+            if (params.after?.time === params.endTimestamp || params.before?.time === params.startTimestamp) {
+              return of({
+                id: 'EMPTY_FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: ENTRIES_EMPTY,
+              });
+            } else {
+              const entries = generateFakeEntries(
+                200,
+                params.startTimestamp,
+                params.endTimestamp,
+                params.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
+              );
+              return of({
+                id: 'FAKE_RESPONSE',
+                total: 1,
+                loaded: 1,
+                isRunning: false,
+                isPartial: false,
+                rawResponse: {
+                  data: {
+                    entries,
+                    topCursor: entries[0].cursor,
+                    bottomCursor: entries[entries.length - 1].cursor,
+                    hasMoreBefore: false,
+                  },
+                  errors: [],
+                }
+              });
+            }
+          default:
+            return of({
+              id: 'FAKE_RESPONSE',
+              rawResponse: {},
+            });
+        }
+      }).pipe(delay(2000));
+    },
+  },
+};
+
+
 export const fetch = function (url, params) {
   switch (url) {
     case '/api/infra/log_source_configurations/default':
       return DEFAULT_SOURCE_CONFIGURATION;
-    case '/api/log_entries/entries':
-      const body = JSON.parse(params.body);
-      if (body.after?.time === body.endTimestamp || body.before?.time === body.startTimestamp) {
-        return ENTRIES_EMPTY;
-      } else {
-        const entries = generateFakeEntries(
-          200,
-          body.startTimestamp,
-          body.endTimestamp,
-          body.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
-        );
-        return {
-          data: {
-            entries,
-            topCursor: entries[0].cursor,
-            bottomCursor: entries[entries.length - 1].cursor,
-            hasMoreBefore: false,
-          },
-        };
-      }
     default:
       return {};
   }
@@ -67,7 +100,7 @@ export const Template = (args) => <LogStream {...args} />;
     (story) => (
       <I18nProvider>
         <EuiThemeProvider>
-          <KibanaContextProvider services={{ http: { fetch }, uiSettings }}>
+          <KibanaContextProvider services={{ data: dataMock, http: { fetch }, uiSettings }}>
             {story()}
           </KibanaContextProvider>
         </EuiThemeProvider>

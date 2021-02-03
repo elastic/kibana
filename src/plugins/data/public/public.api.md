@@ -2368,30 +2368,12 @@ export class SearchSource {
     // @deprecated
     fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
-    getFields(): {
-        type?: string | undefined;
-        query?: import("../..").Query | undefined;
-        filter?: Filter | Filter[] | (() => Filter | Filter[] | undefined) | undefined;
-        sort?: Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection> | Record<string, import("./types").SortDirectionNumeric | import("./types").SortDirection>[] | undefined;
-        highlight?: any;
-        highlightAll?: boolean | undefined;
-        aggs?: any;
-        from?: number | undefined;
-        size?: number | undefined;
-        source?: string | boolean | string[] | undefined;
-        version?: boolean | undefined;
-        fields?: SearchFieldValue[] | undefined;
-        fieldsFromSource?: string | boolean | string[] | undefined;
-        index?: import("../..").IndexPattern | undefined;
-        searchAfter?: import("./types").EsQuerySearchAfter | undefined;
-        timeout?: string | undefined;
-        terminate_after?: number | undefined;
-    };
+    getFields(recurse?: boolean): SearchSourceFields;
     getId(): string;
     getOwnField<K extends keyof SearchSourceFields>(field: K): SearchSourceFields[K];
     getParent(): SearchSource | undefined;
     getSearchRequestBody(): Promise<any>;
-    getSerializedFields(): SearchSourceFields;
+    getSerializedFields(recurse?: boolean): SearchSourceFields;
     // Warning: (ae-incompatible-release-tags) The symbol "history" is marked as @public, but its signature references "SearchRequest" which is marked as @internal
     //
     // (undocumented)
@@ -2415,6 +2397,7 @@ export class SearchSource {
 export interface SearchSourceFields {
     // (undocumented)
     aggs?: any;
+    // Warning: (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
     fields?: SearchFieldValue[];
     // @deprecated
     fieldsFromSource?: NameList;
@@ -2607,7 +2590,6 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:139:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/search/search_source/search_source.ts:187:7 - (ae-forgotten-export) The symbol "SearchFieldValue" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:55:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:55:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts

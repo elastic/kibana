@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
 import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
