@@ -15,7 +15,6 @@ import {
   SavedObject,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
-  SavedObjectsUpdateResponse,
 } from '../../../../../../src/core/server';
 import { IKibanaSearchRequest, ISearchOptions } from '../../../../../../src/plugins/data/common';
 import { ISearchSessionService } from '../../../../../../src/plugins/data/server';
@@ -84,11 +83,7 @@ export class SearchSessionService
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>,
     retry: number = 1
-  ): Promise<
-    | SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>
-    | SavedObject<SearchSessionSavedObjectAttributes>
-    | undefined
-  > => {
+  ): Promise<SavedObject<SearchSessionSavedObjectAttributes> | undefined> => {
     const retryOnConflict = async (e: any) => {
       this.logger.debug(`Conflict error | ${sessionId}`);
       // Randomize sleep to spread updates out in case of conflicts
@@ -98,7 +93,11 @@ export class SearchSessionService
 
     this.logger.debug(`updateOrCreate | ${sessionId} | ${retry}`);
     try {
-      return await this.update(deps, sessionId, attributes);
+      return (await this.update(
+        deps,
+        sessionId,
+        attributes
+      )) as SavedObject<SearchSessionSavedObjectAttributes>;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         try {
@@ -251,7 +250,7 @@ export class SearchSessionService
       idMapping = { [requestHash]: searchInfo };
     }
 
-    return this.updateOrCreate(deps, sessionId, { idMapping });
+    await this.updateOrCreate(deps, sessionId, { idMapping });
   };
 
   public async getSearchIdMapping(deps: SearchSessionDependencies, sessionId: string) {
