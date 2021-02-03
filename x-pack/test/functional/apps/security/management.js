@@ -13,14 +13,14 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
-  const EDIT_USERS_PATH = `${USERS_PATH}/create`;
+  const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
 
   const ROLES_PATH = 'security/roles';
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
   // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe('Management', function () {
+  describe.only('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -46,13 +46,9 @@ export default function ({ getService, getPageObjects }) {
       describe('navigation', () => {
         it('Can navigate to create user section', async () => {
           await PageObjects.security.clickElasticsearchUsers();
-          await PageObjects.common.sleep(5000);
           await PageObjects.security.clickCreateNewUser();
-          await PageObjects.common.sleep(5000);
           const currentUrl = await browser.getCurrentUrl();
-          await PageObjects.common.sleep(5000);
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
-          await PageObjects.common.sleep(5000);
         });
 
         it('Clicking cancel in create user section brings user back to listing', async () => {
@@ -65,13 +61,21 @@ export default function ({ getService, getPageObjects }) {
         it('Clicking save in create user section brings user back to listing', async () => {
           await PageObjects.security.clickCreateNewUser();
 
-          await testSubjects.setValue('userFormUserNameInput', 'new-user');
-          await testSubjects.setValue('passwordInput', '123456');
-          await testSubjects.setValue('passwordConfirmationInput', '123456');
-          await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
-          await testSubjects.setValue('userFormEmailInput', 'example@example.com');
+          // await testSubjects.setValue('userFormUserNameInput', 'new-user');
+          // await testSubjects.setValue('passwordInput', '123456');
+          // await testSubjects.setValue('passwordConfirmationInput', '123456');
+          // await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
+          // await testSubjects.setValue('userFormEmailInput', 'example@example.com');
 
-          await PageObjects.security.clickSaveEditUser();
+          await PageObjects.security.createUser({
+            username: 'new-user',
+            password: '123456',
+            confirm_password: '123456',
+            email: 'example@example.com',
+            full_name: 'Full User Name',
+          });
+
+          //await PageObjects.security.clickSaveEditUser();
 
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(USERS_PATH);
@@ -83,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_USERS_PATH);
           // allow time for user to load
-          await PageObjects.common.sleep(5000);
+          await PageObjects.common.sleep(500);
           const userName = await testSubjects.getAttribute('userFormUserNameInput', 'value');
           expect(userName).to.equal('new-user');
         });
@@ -152,7 +156,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.security.clickSaveEditUser();
 
           await PageObjects.settings.navigateTo();
-          await testSubjects.click('users');
+          await testSubjects.click('roles');
           await testSubjects.click('tablePaginationPopoverButton');
           await testSubjects.click('tablePagination-100-rows');
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
