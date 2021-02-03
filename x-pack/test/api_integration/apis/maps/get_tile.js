@@ -65,8 +65,8 @@ export default function ({ getService }) {
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(3);
-      const feature = layer.feature(2);
+      expect(layer.length).to.be(2);
+      const feature = layer.feature(1);
       expect(feature.type).to.be(3);
       expect(feature.extent).to.be(4096);
       expect(feature.id).to.be(undefined);
