@@ -146,15 +146,14 @@ export class AnalyticsManager {
   private async getIndexData(index: string) {
     const indexData = await this._client.asInternalUser.indices.get({
       index,
-    }); // SHOULD THIS BE CURRENT USER????!!!!!!!!!!!!!!!!!!!!!
-
+    });
     return indexData?.body;
   }
 
   private async getTransformData(transformId: string) {
     const transform = await this._client.asInternalUser.transform.getTransform({
       transform_id: transformId,
-    }); // SHOULD THIS BE CURRENT USER????!!!!!!!!!!!!!!!!!!!!!
+    });
     const transformData = transform?.body?.transforms[0];
     return transformData;
   }
