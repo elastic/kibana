@@ -19,7 +19,7 @@
 }
 
 .kbnQueryBar__textarea {
-  @include kbnThemeStyle('v7') {
+  @include kbnThemeStyle('vs7') {
     box-shadow: 0 0 0 1px $euiFormBorderColor;
     &:not(:focus):not(:invalid) {
       @include euiYScrollWithShadows;
