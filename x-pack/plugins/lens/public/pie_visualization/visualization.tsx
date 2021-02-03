@@ -11,12 +11,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { LayerState, PieVisualizationState } from './types';
+import { PieLayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { DimensionEditor, PieToolbar } from './toolbar';
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
