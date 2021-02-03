@@ -3,17 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { generatePath } from 'react-router-dom';
 
-import { CREATE_ENGINE_SUCCESS_MESSAGE } from './constants';
 import {
   LogicMounter,
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
 } from '../../../__mocks__';
+
+import { generatePath } from 'react-router-dom';
+
 import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
+
+import { CREATE_ENGINE_SUCCESS_MESSAGE } from './constants';
 import { CreateEngineLogic, DEFAULT_LANGUAGE } from './create_engine_logic';
 
 describe('CreateEngineLogic', () => {
@@ -109,7 +112,7 @@ describe('CreateEngineLogic', () => {
       });
 
       it('calls onCreateEngineSuccess on valid submission', async () => {
-        jest.spyOn(CreateEngineLogic.actions, 'onCreateEngineSuccess'); // .mockImplementation();
+        jest.spyOn(CreateEngineLogic.actions, 'onCreateEngineSuccess');
         const promise = (http.post as jest.Mock).mockReturnValueOnce({});
         await CreateEngineLogic.actions.submitEngine();
         await promise;

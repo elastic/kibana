@@ -55,7 +55,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/collection`,
+      path: '/as/engines/collection',
     })
   );
 

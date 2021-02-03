@@ -16,14 +16,14 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 export const DEFAULT_LANGUAGE = 'Universal';
 
-export interface CreateEngineActions {
+interface CreateEngineActions {
   onCreateEngineSuccess(): void;
   setLanguage(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
   submitEngine(): void;
 }
 
-export interface CreateEngineValues {
+interface CreateEngineValues {
   language: string;
   name: string;
   rawName: string;
