@@ -22,12 +22,13 @@ import {
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public');
-jest.mock('./index_threshold_api', () => {
-  return {
-    getThresholdAlertVisualizationData: () =>
-      Promise.resolve({ results: [{ group: 'a', metrics: [['b', 2]] }] }),
-  };
-});
+jest.mock('./index_threshold_api', () => ({
+  getThresholdAlertVisualizationData: jest.fn(() =>
+    Promise.resolve({ results: [{ group: 'a', metrics: [['b', 2]] }] })
+  ),
+}));
+
+const { getThresholdAlertVisualizationData } = jest.requireMock('./index_threshold_api');
 // jest.mock('../../../../triggers_actions_ui/public', () => {
 //   const original = jest.requireActual('../../../../triggers_actions_ui/public');
 //   return {
@@ -142,10 +143,30 @@ describe('ThresholdVisualization', () => {
     });
 
     expect(wrapper.find('[data-test-subj="firstLoad"]').exists()).toBeFalsy();
+    expect(getThresholdAlertVisualizationData).toHaveBeenCalled();
   });
 
-  // verify getvisualiation data has been called
-  // throw error in get visualizations and verify error thingie shows up
+  test('renders error message when getting visualization fails', async () => {
+    getThresholdAlertVisualizationData.mockImplementation(() => Promise.reject('oh no'));
+    const wrapper = mountWithIntl(
+      <ThresholdVisualization
+        alertParams={getAlertParams()}
+        alertInterval="1m"
+        aggregationTypes={builtInAggregationTypes}
+        comparators={builtInComparators}
+        charts={chartsStartMock}
+        dataFieldsFormats={dataMock.fieldFormats}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
+  });
+
   // test for callout when no data
   // test for chart components when data is available
   // test that getvisualization is repeatedly called

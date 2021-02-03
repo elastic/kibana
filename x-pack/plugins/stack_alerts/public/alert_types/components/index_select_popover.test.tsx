@@ -8,6 +8,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { IndexSelectPopover } from './index_select_popover';
+import { EuiComboBox } from '@elastic/eui';
 
 jest.mock('../../../../triggers_actions_ui/public', () => {
   const original = jest.requireActual('../../../../triggers_actions_ui/public');
@@ -57,6 +58,8 @@ jest.mock('../../../../triggers_actions_ui/public', () => {
 });
 
 describe('IndexSelectPopover', () => {
+  const onIndexChange = jest.fn();
+  const onTimeFieldChange = jest.fn();
   const props = {
     index: [],
     esFields: [],
@@ -65,8 +68,8 @@ describe('IndexSelectPopover', () => {
       index: [],
       timeField: [],
     },
-    onIndexChange: jest.fn(),
-    onTimeFieldChange: jest.fn(),
+    onIndexChange,
+    onTimeFieldChange,
   };
 
   beforeEach(() => {
@@ -116,6 +119,29 @@ describe('IndexSelectPopover', () => {
 
     const updatedIndexSearchValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
     expect(updatedIndexSearchValue.first().props().value).toEqual('indexPattern1');
+
+    const thresholdComboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="thresholdIndexesComboBox"]');
+    const thresholdOptions = thresholdComboBox.prop('options');
+    expect(thresholdOptions.length > 0).toBeTruthy();
+
+    await act(async () => {
+      thresholdComboBox.prop('onChange')!([thresholdOptions[0].options![0]]);
+      await nextTick();
+      wrapper.update();
+    });
+    expect(onIndexChange).toHaveBeenCalledWith(
+      [thresholdOptions[0].options![0]].map((opt) => opt.value)
+    );
+
+    const timeFieldSelect = wrapper.find('select[data-test-subj="thresholdAlertTimeFieldSelect"]');
+    await act(async () => {
+      timeFieldSelect.simulate('change', { target: { value: '@timestamp' } });
+      await nextTick();
+      wrapper.update();
+    });
+    expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
   });
 
   test('renders index and timeField if defined', async () => {

@@ -220,6 +220,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <Fragment>
         <EuiSpacer size="l" />
         <EuiCallOut
+          data-test-subj="errorCallout"
           title={
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
