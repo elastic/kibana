@@ -25,7 +25,6 @@ import {
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
@@ -966,9 +965,13 @@ export class VectorLayer extends AbstractLayer {
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
       const mbLayer: MbLayer = {
         id: tooManyFeaturesLayerId,
-        type: 'fill',
+        type: 'line',
         source: sourceId,
-        paint: {},
+        paint: {
+          'line-color': 'orange',
+          'line-width': 4,
+          'line-dasharray': [2, 1],
+        },
       };
       if (mvtSourceLayer) {
         mbLayer['source-layer'] = mvtSourceLayer;
@@ -979,13 +982,9 @@ export class VectorLayer extends AbstractLayer {
         ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
         true,
       ]);
-      mbMap.setPaintProperty(
-        tooManyFeaturesLayerId,
-        'fill-pattern',
-        KBN_TOO_MANY_FEATURES_IMAGE_ID
-      );
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
+      mbMap.setLayoutProperty(tooManyFeaturesLayerId, 'line-join', 'bevel');
     }
+    mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha() * 0.6);
 
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),

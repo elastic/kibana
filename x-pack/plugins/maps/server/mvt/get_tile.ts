@@ -131,7 +131,6 @@ export async function getTile({
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
 }): Promise<Buffer | null> {
-  let features: Feature[];
   try {
     requestBody.query.bool.filter.push({
       geo_shape: {
@@ -146,22 +145,38 @@ export async function getTile({
       sessionId: searchSessionId,
     };
 
-    const countResponse = await context
+    const documentsResponse = await context
       .search!.search(
         {
           params: {
             index,
-            body: {
-              size: 0,
-              query: requestBody.query,
-            },
+            body: requestBody,
           },
         },
         searchOptions
       )
       .toPromise();
 
-    if (countResponse.rawResponse.hits.total > requestBody.size) {
+    // Todo: pass in epochMillies-fields
+    const featureCollection = hitsToGeoJson(
+      documentsResponse.rawResponse.hits.hits,
+      (hit: Record<string, unknown>) => {
+        return flattenHit(geometryFieldName, hit);
+      },
+      geometryFieldName,
+      geoFieldType,
+      []
+    );
+
+    // Correct system-fields.
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const props = featureCollection.features[i].properties;
+      if (props !== null) {
+        props[FEATURE_ID_PROPERTY_NAME] = featureCollection.features[i].id;
+      }
+    }
+
+    if (documentsResponse.rawResponse.hits.total > requestBody.size) {
       // Generate "too many features"-bounds
       const bboxResponse = await context
         .search!.search(
@@ -185,56 +200,14 @@ export async function getTile({
         )
         .toPromise();
 
-      features = [
-        {
-          type: 'Feature',
-          properties: {
-            [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
-          },
-          geometry: esBboxToGeoJsonPolygon(
-            bboxResponse.rawResponse.aggregations.data_bounds.bounds
-          ),
+      featureCollection.features.push({
+        type: 'Feature',
+        properties: {
+          [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
         },
-      ];
-    } else {
-      const documentsResponse = await context
-        .search!.search(
-          {
-            params: {
-              index,
-              body: requestBody,
-            },
-          },
-          searchOptions
-        )
-        .toPromise();
-
-      // Todo: pass in epochMillies-fields
-      const featureCollection = hitsToGeoJson(
-        documentsResponse.rawResponse.hits.hits,
-        (hit: Record<string, unknown>) => {
-          return flattenHit(geometryFieldName, hit);
-        },
-        geometryFieldName,
-        geoFieldType,
-        []
-      );
-
-      features = featureCollection.features;
-
-      // Correct system-fields.
-      for (let i = 0; i < features.length; i++) {
-        const props = features[i].properties;
-        if (props !== null) {
-          props[FEATURE_ID_PROPERTY_NAME] = features[i].id;
-        }
-      }
+        geometry: esBboxToGeoJsonPolygon(bboxResponse.rawResponse.aggregations.data_bounds.bounds),
+      });
     }
-
-    const featureCollection: FeatureCollection = {
-      features,
-      type: 'FeatureCollection',
-    };
 
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
