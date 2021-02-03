@@ -33,7 +33,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./service_maps/service_maps'));
 
     loadTestFile(require.resolve('./service_overview/dependencies'));
-    loadTestFile(require.resolve('./service_overview/error_groups'));
     loadTestFile(require.resolve('./service_overview/instances'));
 
     loadTestFile(require.resolve('./services/agent_name'));
@@ -44,7 +43,7 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./services/top_services'));
     loadTestFile(require.resolve('./services/transaction_types'));
     loadTestFile(require.resolve('./services/error_groups'));
-    loadTestFile(require.resolve('./services/error_groups_agg_results'));
+    loadTestFile(require.resolve('./services/error_groups_statistics'));
 
     loadTestFile(require.resolve('./settings/anomaly_detection/basic'));
     loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));

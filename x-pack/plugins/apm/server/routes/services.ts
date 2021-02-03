@@ -4,27 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import * as t from 'io-ts';
 import { uniq } from 'lodash';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceAgentName } from '../lib/services/get_service_agent_name';
-import { getServices } from '../lib/services/get_services';
-import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
-import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
-import { createRoute } from './create_route';
-import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
-import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
-import { getThroughput } from '../lib/services/get_throughput';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getServiceAnnotations } from '../lib/services/annotations';
+import { getServices } from '../lib/services/get_services';
+import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { getServiceErrorGroupsMetrics } from '../lib/services/get_service_error_groups_metrics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
-import { getServiceErrorGroupsMetrics } from '../lib/services/get_service_error_groups_metrics';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getThroughput } from '../lib/services/get_throughput';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -285,8 +286,8 @@ export const serviceErrorGroupsRoute = createRoute({
   },
 });
 
-export const serviceErrorGroupsAggResultsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/agg_results',
+export const serviceErrorGroupsStatisticsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -297,7 +298,7 @@ export const serviceErrorGroupsAggResultsRoute = createRoute({
       t.type({
         numBuckets: toNumberRt,
         transactionType: t.string,
-        groupIds: t.string,
+        groupIds: t.string.pipe(jsonRt),
       }),
     ]),
   }),
@@ -314,7 +315,7 @@ export const serviceErrorGroupsAggResultsRoute = createRoute({
       setup,
       numBuckets,
       transactionType,
-      groupIds: JSON.parse(groupIds),
+      groupIds,
     });
   },
 });

@@ -79,11 +79,10 @@ describe('ServiceOverview', () => {
         status: FETCH_STATUS.SUCCESS,
       });
 
+    /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'GET /api/apm/services/{serviceName}/error_groups': {
         error_groups: [],
-        total_error_groups: 0,
       },
       'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
         transactionGroups: [],
@@ -91,9 +90,12 @@ describe('ServiceOverview', () => {
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'GET /api/apm/services/{serviceName}/service_overview_instances': [],
+      'GET /api/apm/services/{serviceName}/error_groups/statistics': {
+        timeseries: [],
+      },
     };
+    /* eslint-enable @typescript-eslint/naming-convention */
 
     jest
       .spyOn(callApmApiModule, 'createCallApmApi')

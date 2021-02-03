@@ -6,7 +6,6 @@
 
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
-import uuid from 'uuid';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeFilter } from '../../../../common/utils/range_filter';
@@ -97,8 +96,6 @@ export async function getServiceErrorGroups({
   );
 
   return {
-    requestId: uuid(),
-    total_error_groups: errorGroups.length,
     is_aggregation_accurate:
       (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
     error_groups: sortedErrorGroups,

@@ -12,6 +12,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty, orderBy } from 'lodash';
 import React, { useState } from 'react';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -54,7 +55,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data = {
-      totalItemCount: 0,
       items: [],
       requestId: '',
     },
@@ -78,16 +78,15 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         },
       }).then((response) => {
         return {
-          requestId: response.requestId,
+          requestId: uuid(),
           items: response.error_groups,
-          totalItemCount: response.total_error_groups,
         };
       });
     },
     [start, end, serviceName, uiFilters, transactionType]
   );
 
-  const { items, totalItemCount, requestId } = data;
+  const { items, requestId } = data;
   const currentPageErrorGroups = orderBy(
     items,
     (group) => {
@@ -100,41 +99,33 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
   const groupIds = JSON.stringify(
-    currentPageErrorGroups.map(({ group_id: groupId }) => groupId)
+    currentPageErrorGroups.map(({ group_id: groupId }) => groupId).sort()
   );
   const {
-    data: groupIdsErrorAggResults,
-    status: groupIdsErrorAggResultsStatus,
+    data: groupIdsErrorStatistics,
+    status: groupIdsErrorStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      async function fetchAggResults() {
-        if (
-          !isEmpty(requestId) &&
-          groupIds &&
-          start &&
-          end &&
-          transactionType
-        ) {
-          const aggResults = await callApmApi({
-            endpoint:
-              'GET /api/apm/services/{serviceName}/error_groups/agg_results',
-            params: {
-              path: { serviceName },
-              query: {
-                start,
-                end,
-                uiFilters: JSON.stringify(uiFilters),
-                numBuckets: 20,
-                transactionType,
-                groupIds,
-              },
+      if (!isEmpty(requestId) && groupIds && start && end && transactionType) {
+        return callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/error_groups/statistics',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              numBuckets: 20,
+              transactionType,
+              groupIds,
             },
-            isCachable: true,
-          });
-          return { [requestId]: aggResults };
-        }
+          },
+          isCachable: true,
+        }).then((response) => {
+          return { [requestId]: response };
+        });
       }
-      return fetchAggResults();
     },
     // only fetches agg results when requestId changes or group ids change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,8 +134,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const columns = getColumns({
     serviceName,
-    groupIdsErrorAggResults: groupIdsErrorAggResults
-      ? groupIdsErrorAggResults[requestId]
+    groupIdsErrorStatistics: groupIdsErrorStatistics
+      ? groupIdsErrorStatistics[requestId]
       : undefined,
   });
 
@@ -183,13 +174,13 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               pagination={{
                 pageIndex,
                 pageSize: PAGE_SIZE,
-                totalItemCount,
+                totalItemCount: items.length,
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                groupIdsErrorAggResultsStatus === FETCH_STATUS.LOADING
+                groupIdsErrorStatisticsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {

@@ -15,14 +15,14 @@ import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups'>;
-type GroupIdsErrorAggResults = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/agg_results'>;
+type GroupIdsErrorStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/statistics'>;
 
 export function getColumns({
   serviceName,
-  groupIdsErrorAggResults,
+  groupIdsErrorStatistics,
 }: {
   serviceName: string;
-  groupIdsErrorAggResults: GroupIdsErrorAggResults;
+  groupIdsErrorStatistics: GroupIdsErrorStatistics;
 }): Array<EuiBasicTableColumn<ErrorGroupItem['error_groups'][0]>> {
   return [
     {
@@ -69,8 +69,8 @@ export function getColumns({
       ),
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries = groupIdsErrorAggResults
-          ? groupIdsErrorAggResults[errorGroupId]?.timeseries
+        const timeseries = groupIdsErrorStatistics
+          ? groupIdsErrorStatistics[errorGroupId]?.timeseries
           : undefined;
         return (
           <SparkPlot
