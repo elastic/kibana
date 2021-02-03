@@ -26,6 +26,7 @@ const mockGetConfig = jest.fn().mockImplementation((key: string) => {
       ['P1DT', 'YYYY-MM-DD'],
       ['P1YT', 'YYYY'],
     ],
+    'query:queryString:options': {},
   };
   return config[key] ?? key;
 });

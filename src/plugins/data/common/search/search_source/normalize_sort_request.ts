@@ -49,6 +49,11 @@ function normalize(
     }
   }
 
+  // FIXME: for unknown reason on the server this setting is serialized
+  // https://github.com/elastic/kibana/issues/89902
+  if (typeof defaultSortOptions === 'string') {
+    defaultSortOptions = JSON.parse(defaultSortOptions);
+  }
   // Don't include unmapped_type for _score field
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { unmapped_type, ...otherSortOptions } = defaultSortOptions;

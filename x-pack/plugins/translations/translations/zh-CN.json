@@ -4718,7 +4718,6 @@
     "visualize.createVisualization.failedToLoadErrorMessage": "无法加载可视化",
     "visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage": "必须提供 indexPattern 或 savedSearchId",
     "visualize.createVisualization.noVisTypeErrorMessage": "必须提供有效的可视化类型",
-    "visualize.discover.visualizeFieldLabel": "可视化字段",
     "visualize.editor.createBreadcrumb": "创建",
     "visualize.editor.defaultEditBreadcrumbText": "编辑",
     "visualize.experimentalVisInfoText": "此可视化为试验性功能，不受正式发行版功能支持 SLA 的约束。如欲提供反馈，请在 {githubLink} 中创建问题。",
