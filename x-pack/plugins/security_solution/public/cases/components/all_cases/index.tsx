@@ -5,7 +5,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBasicTable,
+  EuiBasicTable as _EuiBasicTable,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -81,6 +81,14 @@ const getSortField = (field: string): SortFieldCase => {
   }
   return SortFieldCase.createdAt;
 };
+
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable = styled(EuiBasicTable)`
+  .euiTableRow-isExpandedRow.euiTableRow-isSelectable .euiTableCellContent {
+    padding: 0 0 0 32px;
+  }
+`;
+BasicTable.displayName = 'BasicTable';
 
 interface AllCasesProps {
   onRowClick?: (theCase?: Case) => void;
@@ -483,7 +491,7 @@ export const AllCases = React.memo<AllCasesProps>(
                   )}
                 </UtilityBarSection>
               </UtilityBar>
-              <EuiBasicTable
+              <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
                 isSelectable={userCanCrud && !isModal}

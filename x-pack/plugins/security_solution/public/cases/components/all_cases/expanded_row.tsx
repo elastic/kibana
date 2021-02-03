@@ -5,12 +5,30 @@
  */
 
 import React from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import styled from 'styled-components';
 import { Case } from '../../containers/types';
 import { CasesColumns } from './columns';
 import { basicCase, cases } from '../../containers/mock';
 
 type ExpandedRowMap = Record<string, Element> | {};
+
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable = styled(EuiBasicTable)`
+  thead {
+    display: none;
+  }
+
+  tbody {
+    .euiTableCellContent {
+      padding: 0 8px !important;
+    }
+    .euiTableRowCell {
+      border: 0;
+    }
+  }
+`;
+BasicTable.displayName = 'BasicTable';
 
 export const getExpandedRowMap = ({
   data = cases, // mock
@@ -28,12 +46,12 @@ export const getExpandedRowMap = ({
   }
 
   return [...data].reduce((acc, curr) => {
-    curr.subCases = [basicCase]; // mock data
+    curr.subCases = [basicCase, basicCase]; // MOCK data
     if (curr.subCases != null) {
       return {
         ...acc,
         [curr.id]: (
-          <EuiBasicTable
+          <BasicTable
             columns={columns}
             data-test-subj={`sub-cases-table-${curr.id}`}
             itemId="id"
