@@ -18,7 +18,7 @@ import { ENGINE_PATH } from '../../routes';
 import { formatApiName } from '../../utils/format_api_name';
 
 import { ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
-import { EngineCreationLogic, DEFAULT_LANGUAGE } from './engine_creation_logic';
+import { EngineCreationLogic } from './engine_creation_logic';
 
 describe('EngineCreationLogic', () => {
   const { mount } = new LogicMounter(EngineCreationLogic);
@@ -29,7 +29,7 @@ describe('EngineCreationLogic', () => {
   const DEFAULT_VALUES = {
     name: '',
     rawName: '',
-    language: DEFAULT_LANGUAGE,
+    language: 'Universal',
   };
 
   it('has expected default values', () => {
@@ -50,23 +50,20 @@ describe('EngineCreationLogic', () => {
     });
 
     describe('setRawName', () => {
-      const newName = 'Name__With#$&*%Special--Characters';
-      const sanitizedNewName = formatApiName(newName);
-
       beforeAll(() => {
         mount();
-        EngineCreationLogic.actions.setRawName(newName);
+        EngineCreationLogic.actions.setRawName('Name__With#$&*%Special--Characters');
       });
 
       describe('rawName', () => {
         it('should be set to provided value', () => {
-          expect(EngineCreationLogic.values.rawName).toEqual(newName);
+          expect(EngineCreationLogic.values.rawName).toEqual('Name__With#$&*%Special--Characters');
         });
       });
 
       describe('name', () => {
         it('should be set to a sanitized value', () => {
-          expect(EngineCreationLogic.values.name).toEqual(sanitizedNewName);
+          expect(EngineCreationLogic.values.name).toEqual('name-with-special-characters');
         });
       });
     });
@@ -80,14 +77,11 @@ describe('EngineCreationLogic', () => {
       });
 
       it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(ENGINE_CREATION_SUCCESS_MESSAGE);
+        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
       });
 
       it('should navigate the user to the engine page', () => {
-        const enginePath = generatePath(ENGINE_PATH, {
-          engineName: EngineCreationLogic.values.name,
-        });
-        expect(navigateToUrl).toHaveBeenCalledWith(enginePath);
+        expect(navigateToUrl).toHaveBeenCalledWith('/engines/test');
       });
     });
 
