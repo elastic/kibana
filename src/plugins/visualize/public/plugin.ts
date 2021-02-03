@@ -78,6 +78,7 @@ export class VisualizePlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
 
   private readonly visEditorsRegistry = createVisEditorsRegistry();
 
@@ -114,6 +115,12 @@ export class VisualizePlugin
         },
       ],
       getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (urlToSave: string) => {
+        if (this.isLinkedToOriginatingApp?.()) {
+          return core.http.basePath.prepend('/app/visualize');
+        }
+        return urlToSave;
+      },
     });
     this.stopUrlTracking = () => {
       stopUrlTracker();
@@ -133,6 +140,13 @@ export class VisualizePlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
+
+        // allows the urlTracker to only save URLs that are not linked to an originatingApp
+        this.isLinkedToOriginatingApp = () => {
+          return Boolean(
+            pluginsStart.embeddable.getStateTransfer().getIncomingEditorState()?.originatingApp
+          );
+        };
 
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();
