@@ -57,10 +57,17 @@ export const internalArtifactCreateSchema = t.intersection([
 ]);
 export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreateSchema>;
 
+export const internalManifestEntrySchema = t.exact(
+  t.type({
+    policyId: t.union([identifier, t.undefined]),
+    artifactId: identifier,
+  })
+);
+export type InternalManifestEntrySchema = t.TypeOf<typeof internalManifestEntrySchema>;
+
 export const internalManifestSchema = t.exact(
   t.type({
-    defaultArtifactIds: t.array(identifier),
-    policySpecificArtifactIds: t.record(identifier, t.array(identifier)),
+    artifacts: t.array(internalManifestEntrySchema),
     schemaVersion: manifestSchemaVersion,
     semanticVersion,
   })

@@ -10,8 +10,9 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { reportErrors } from './common';
+import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import { isEmptyManifestDiff } from './manifest';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -112,53 +113,38 @@ export class ManifestTask {
         return;
       }
 
-      // New computed manifest based on current state of exception list
+      // New computed manifest based on current manifest
       const newManifest = await manifestManager.buildNewManifest(oldManifest);
-      const diffs = newManifest.diff(oldManifest);
 
-      // Compress new artifacts
-      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
-      for (const artifactId of adds) {
-        const compressError = await newManifest.compressArtifact(artifactId);
-        if (compressError) {
-          throw compressError;
+      const diff = newManifest.diff(oldManifest);
+
+      if (!isEmptyManifestDiff(diff)) {
+        const persistErrors = await manifestManager.pushArtifacts(
+          diff.additions as InternalArtifactCompleteSchema[]
+        );
+        if (persistErrors.length) {
+          reportErrors(this.logger, persistErrors);
+          throw new Error('Unable to persist new artifacts.');
         }
-      }
 
-      // Persist new artifacts
-      const artifacts = adds
-        .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
-      if (artifacts.length !== adds.length) {
-        throw new Error('Invalid artifact encountered.');
-      }
-      const persistErrors = await manifestManager.pushArtifacts(artifacts);
-      if (persistErrors.length) {
-        reportErrors(this.logger, persistErrors);
-        throw new Error('Unable to persist new artifacts.');
-      }
-
-      // Commit latest manifest state, if different
-      if (diffs.length) {
+        // Commit latest manifest state
         newManifest.bumpSemanticVersion();
-        const error = await manifestManager.commit(newManifest);
-        if (error) {
-          throw error;
+        await manifestManager.commit(newManifest);
+
+        // Try dispatching to ingest-manager package policies
+        const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+        if (dispatchErrors.length) {
+          reportErrors(this.logger, dispatchErrors);
+          throw new Error('Error dispatching manifest.');
         }
-      }
 
-      // Try dispatching to ingest-manager package policies
-      const dispatchErrors = await manifestManager.tryDispatch(newManifest);
-      if (dispatchErrors.length) {
-        reportErrors(this.logger, dispatchErrors);
-        throw new Error('Error dispatching manifest.');
-      }
-
-      // Try to clean up superceded artifacts
-      const deletes = diffs.filter((diff) => diff.type === 'delete').map((diff) => diff.id);
-      const deleteErrors = await manifestManager.deleteArtifacts(deletes);
-      if (deleteErrors.length) {
-        reportErrors(this.logger, deleteErrors);
+        // Try to clean up superceded artifacts
+        const deleteErrors = await manifestManager.deleteArtifacts(
+          diff.removals.map((artifact) => getArtifactId(artifact))
+        );
+        if (deleteErrors.length) {
+          reportErrors(this.logger, deleteErrors);
+        }
       }
     } catch (err) {
       this.logger.error(err);

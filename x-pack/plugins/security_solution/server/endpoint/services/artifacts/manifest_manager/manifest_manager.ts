@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import semver from 'semver';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
+import { isEqual } from 'lodash';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+import {
+  manifestDispatchSchema,
+  ManifestSchema,
+} from '../../../../../common/endpoint/schema/manifest';
 
 import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
   getFullEndpointExceptionList,
+  isCompressed,
   Manifest,
-  ManifestDiff,
+  maybeCompressArtifact,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -38,14 +43,8 @@ export interface ManifestManagerContext {
   cache: LRU<string, Buffer>;
 }
 
-export interface ManifestSnapshotOpts {
-  initialize?: boolean;
-}
-
-export interface ManifestSnapshot {
-  manifest: Manifest;
-  diffs: ManifestDiff[];
-}
+const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
+  isEqual(new Set(Object.keys(manifest1.artifacts)), new Set(Object.keys(manifest2.artifacts)));
 
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
@@ -220,21 +219,17 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
-      for (const id of manifestSo.attributes.defaultArtifactIds) {
-        manifest.addDefaultEntry((await this.artifactClient.getArtifact(id)).attributes);
+      for (const entry of manifestSo.attributes.artifacts) {
+        manifest.addEntry(
+          (await this.artifactClient.getArtifact(entry.artifactId)).attributes,
+          entry.policyId
+        );
       }
-      for (const policyId of Object.keys(manifestSo.attributes.policySpecificArtifactIds)) {
-        for (const id of manifestSo.attributes.policySpecificArtifactIds[policyId]) {
-          manifest.addPolicySpecificEntry(
-            policyId,
-            (await this.artifactClient.getArtifact(id)).attributes
-          );
-        }
-      }
+
       return manifest;
-    } catch (err) {
-      if (err.output.statusCode !== 404) {
-        throw err;
+    } catch (error) {
+      if (!error.output || error.output.statusCode !== 404) {
+        throw error;
       }
       return null;
     }
@@ -246,17 +241,36 @@ export class ManifestManager {
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
+  public async buildNewManifest(
+    baselineManifest: Manifest = Manifest.getDefault(this.schemaVersion)
+  ): Promise<Manifest> {
     // Build new exception list artifacts
     const artifacts = (
       await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
     ).flat();
 
     // Build new manifest
-    const manifest = Manifest.fromArtifacts(
-      artifacts,
-      baselineManifest ?? Manifest.getDefault(this.schemaVersion)
-    );
+    const manifest = new Manifest({
+      schemaVersion: this.schemaVersion,
+      semanticVersion: baselineManifest.getSemanticVersion(),
+      soVersion: baselineManifest.getSavedObjectVersion(),
+    });
+
+    for (const artifact of artifacts) {
+      let artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
+
+      if (!isCompressed(artifactToAdd)) {
+        artifactToAdd = await maybeCompressArtifact(artifactToAdd);
+
+        if (!isCompressed(artifactToAdd)) {
+          throw new Error(`Unable to compress artifact: ${getArtifactId(artifactToAdd)}`);
+        } else if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
+          throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
+        }
+      }
+
+      manifest.addEntry(artifactToAdd);
+    }
 
     return manifest;
   }
@@ -285,7 +299,7 @@ export class ManifestManager {
 
           if (!manifestDispatchSchema.is(serializedManifest)) {
             errors.push(new Error(`Invalid manifest for policy ${packagePolicy.id}`));
-          } else {
+          } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
             newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
 
             try {
@@ -302,9 +316,13 @@ export class ManifestManager {
             } catch (err) {
               errors.push(err);
             }
+          } else {
+            this.logger.debug(
+              `No change in manifest content for package policy: ${id}. Staying on old version`
+            );
           }
         } else {
-          this.logger.debug(`No change in package policy: ${id}`);
+          this.logger.debug(`No change in manifest version for package policy: ${id}`);
         }
       } else {
         errors.push(new Error(`Package Policy ${id} has no config.`));
@@ -320,28 +338,22 @@ export class ManifestManager {
    * @param manifest The Manifest to commit.
    * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
-  public async commit(manifest: Manifest): Promise<Error | null> {
-    try {
-      const manifestClient = this.getManifestClient();
+  public async commit(manifest: Manifest) {
+    const manifestClient = this.getManifestClient();
 
-      // Commit the new manifest
-      const manifestSo = manifest.toSavedObject();
-      const version = manifest.getSavedObjectVersion();
+    // Commit the new manifest
+    const manifestSo = manifest.toSavedObject();
+    const version = manifest.getSavedObjectVersion();
 
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
-    } catch (err) {
-      return err;
+    if (version == null) {
+      await manifestClient.createManifest(manifestSo);
+    } else {
+      await manifestClient.updateManifest(manifestSo, {
+        version,
+      });
     }
 
-    return null;
+    this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
   private async forEachPolicy(callback: (policy: PackagePolicy) => Promise<void>) {

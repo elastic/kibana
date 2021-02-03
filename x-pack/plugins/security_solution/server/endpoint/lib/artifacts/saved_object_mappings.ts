@@ -62,13 +62,18 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
       index: false,
     },
-    defaultArtifactIds: {
-      type: 'keyword',
-      index: false,
-    },
-    policySpecificArtifactIds: {
-      type: 'object',
-      enabled: false,
+    artifacts: {
+      type: 'nested',
+      properties: {
+        policyId: {
+          type: 'keyword',
+          index: false,
+        },
+        artifactId: {
+          type: 'keyword',
+          index: false,
+        },
+      },
     },
   },
 };
