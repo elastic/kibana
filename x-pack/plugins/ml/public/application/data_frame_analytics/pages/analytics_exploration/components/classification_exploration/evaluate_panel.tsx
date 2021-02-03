@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { AucRocChartView } from '../../../../../components/auc_roc_chart/auc_roc_chart';
+import { AucRocChart } from '../../../../../components/auc_roc_chart/auc_roc_chart';
 import { ErrorCallout } from '../error_callout';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
@@ -352,7 +352,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
               </>
             ) : null}
             {/* AUC ROC Chart */}
-            {!isLoadingAucRoc ? (
+            {!isLoadingAucRoc && aucRocData.length > 0 ? (
               <>
                 {Array.isArray(errorAucRoc) && errorAucRoc.map((e) => <ErrorCallout error={e} />)}
                 {errorAucRoc === null && (
@@ -374,7 +374,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <AucRocChartView data={aucRocData} />
+                    <AucRocChart data={aucRocData} />
                   </>
                 )}
               </>

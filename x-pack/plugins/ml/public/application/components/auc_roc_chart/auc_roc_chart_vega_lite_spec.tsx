@@ -8,8 +8,6 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
 export const LEGEND_TYPES = {
@@ -24,39 +22,6 @@ export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
-
-export const getColorSpec = (
-  euiTheme: typeof euiThemeLight,
-  outliers = true,
-  color?: string,
-  legendType?: LegendType
-) => {
-  // For outlier detection result pages coloring is done based on a threshold.
-  // This returns a Vega spec using a conditional to return the color.
-  if (outliers) {
-    return {
-      condition: {
-        value: COLOR_OUTLIER,
-        test: `(datum['${OUTLIER_SCORE_FIELD}'] >= mlOutlierScoreThreshold.cutoff)`,
-      },
-      value: euiTheme.euiColorMediumShade,
-    };
-  }
-
-  // Based on the type of the color field,
-  // this returns either a continuous or categorical color spec.
-  if (color !== undefined && legendType !== undefined) {
-    return {
-      field: color,
-      type: legendType,
-      scale: {
-        range: legendType === LEGEND_TYPES.NOMINAL ? COLOR_RANGE_NOMINAL : COLOR_RANGE_QUANTITATIVE,
-      },
-    };
-  }
-
-  return { value: DEFAULT_COLOR };
-};
 
 export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
   // we append two rows which make up the data for the diagonal baseline
@@ -109,10 +74,11 @@ export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
         title: 'True Positive Rate (TPR) (a.k.a Recall)',
         type: 'quantitative',
       },
+      tooltip: ['class_name', 'fpt', 'tpr'],
     },
     height: 400,
+    width: 400,
     mark: 'line',
     title: 'ROC Curve',
-    width: 400,
   };
 };
