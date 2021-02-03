@@ -26,6 +26,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { SourceLoadingPage } from '../source_loading_page';
 import { Prompt } from '../../utils/navigation_warning_prompt';
+import { MLConfigurationPanel } from './ml_configuration_panel';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -52,7 +53,6 @@ export const SourceConfigurationSettings = ({
     formState,
     formStateChanges,
   } = useSourceConfigurationFormState(source && source.configuration);
-
   const persistUpdates = useCallback(async () => {
     if (sourceExists) {
       await updateSourceConfiguration(formStateChanges);
@@ -122,6 +122,14 @@ export const SourceConfigurationSettings = ({
               podFieldProps={indicesConfigurationProps.podField}
               readOnly={!isWriteable}
               timestampFieldProps={indicesConfigurationProps.timestampField}
+            />
+          </EuiPanel>
+          <EuiSpacer />
+          <EuiPanel paddingSize="l">
+            <MLConfigurationPanel
+              isLoading={isLoading}
+              readOnly={!isWriteable}
+              anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
             />
           </EuiPanel>
           <EuiSpacer />

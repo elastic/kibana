@@ -90,6 +90,7 @@ export const SavedSourceConfigurationRuntimeType = rt.partial({
   metricsExplorerDefaultView: rt.string,
   fields: SavedSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  anomalyThreshold: rt.string,
 });
 
 export interface InfraSavedSourceConfiguration
@@ -107,6 +108,7 @@ export const pickSavedSourceConfiguration = (
     inventoryDefaultView,
     metricsExplorerDefaultView,
     logColumns,
+    anomalyThreshold,
   } = value;
   const { container, host, pod, tiebreaker, timestamp } = fields;
 
@@ -119,6 +121,7 @@ export const pickSavedSourceConfiguration = (
     metricsExplorerDefaultView,
     fields: { container, host, pod, tiebreaker, timestamp },
     logColumns,
+    anomalyThreshold,
   };
 };
 
@@ -140,6 +143,7 @@ export const StaticSourceConfigurationRuntimeType = rt.partial({
   metricsExplorerDefaultView: rt.string,
   fields: StaticSourceConfigurationFieldsRuntimeType,
   logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  anomalyThreshold: rt.string,
 });
 
 export interface InfraStaticSourceConfiguration

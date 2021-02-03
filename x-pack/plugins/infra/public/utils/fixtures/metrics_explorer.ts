@@ -40,6 +40,7 @@ export const source = {
     message: ['message'],
     tiebreaker: '@timestamp',
   },
+  anomalyThreshold: '20',
 };
 
 export const chartOptions: MetricsExplorerChartOptions = {
