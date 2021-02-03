@@ -7,30 +7,31 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { shallowWithIntl as shallow } from '@kbn/test/jest';
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
-import { DiscoverIndexPattern } from './discover_index_pattern';
+import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { configMock } from '../../../__mocks__/config';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 
 const indexPattern = {
-  id: 'the-index-pattern-id',
+  id: 'the-index-pattern-id-first',
   title: 'test1 title',
 } as IndexPattern;
 
 const indexPattern1 = {
-  id: 'the-index-pattern-id',
+  id: 'the-index-pattern-id-first',
   attributes: {
     title: 'test1 title',
   },
 } as SavedObject<any>;
 
 const indexPattern2 = {
-  id: 'the-index-pattern-id-2',
+  id: 'the-index-pattern-id',
   attributes: {
     title: 'test2 title',
   },
@@ -67,11 +68,11 @@ function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel:
 
 describe('DiscoverIndexPattern', () => {
   test('Invalid props dont cause an exception', () => {
-    const props = {
+    const props = ({
       indexPatternList: null,
       selectedIndexPattern: null,
       setIndexPattern: jest.fn(),
-    } as any;
+    } as unknown) as DiscoverIndexPatternProps;
 
     expect(shallow(<DiscoverIndexPattern {...props} />)).toMatchSnapshot(`""`);
   });
@@ -84,10 +85,15 @@ describe('DiscoverIndexPattern', () => {
     ]);
   });
 
-  test('should switch data panel to target index pattern', () => {
+  test('should switch data panel to target index pattern', async () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
-
-    selectIndexPatternPickerOption(instance, 'test2 title');
-    expect(defaultProps.setAppState).toHaveBeenCalledWith('test2');
+    await act(async () => {
+      selectIndexPatternPickerOption(instance, 'test2 title');
+    });
+    expect(defaultProps.setAppState).toHaveBeenCalledWith({
+      index: 'the-index-pattern-id',
+      columns: [],
+      sort: [],
+    });
   });
 });

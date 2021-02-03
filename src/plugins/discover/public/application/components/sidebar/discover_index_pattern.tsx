@@ -82,7 +82,7 @@ export function DiscoverIndexPattern({
           config.get(MODIFY_COLUMNS_ON_SWITCH),
           useNewFieldsApi
         );
-        await setAppState(nextAppState);
+        setAppState(nextAppState);
       }
     },
     [selectedIndexPattern, state, config, indexPatterns, setAppState, useNewFieldsApi]
