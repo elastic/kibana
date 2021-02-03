@@ -27,6 +27,7 @@
     "plugins/maps/**/*",
     "plugins/maps_file_upload/**/*",
     "plugins/maps_legacy_licensing/**/*",
+    "plugins/ml/**/*",
     "plugins/observability/**/*",
     "plugins/reporting/**/*",
     "plugins/searchprofiler/**/*",
@@ -49,6 +50,8 @@
     "plugins/snapshot_restore/**/*",
     "plugins/painless_lab/**/*",
     "plugins/watcher/**/*",
+    "plugins/runtime_fields/**/*",
+    "plugins/index_management/**/*",
     "plugins/grokdebugger/**/*",
     "test/**/*"
   ],
@@ -120,6 +123,7 @@
     { "path": "./plugins/maps_file_upload/tsconfig.json" },
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
+    { "path": "./plugins/ml/tsconfig.json" },
     { "path": "./plugins/observability/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },
     { "path": "./plugins/saved_objects_tagging/tsconfig.json" },
@@ -133,6 +137,8 @@
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "./plugins/runtime_fields/tsconfig.json" },
+    { "path": "./plugins/index_management/tsconfig.json" },
     { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }
