@@ -109,7 +109,11 @@ describe('Detections Usage and Metrics', () => {
       mlMock = mlServicesMock.create();
     });
 
-    it('tallies jobs data given jobs results', async () => {
+    it('returns an empty array if there is no data', async () => {
+      mlMock.anomalyDetectorsProvider.mockReturnValue(({
+        jobs: null,
+        jobStats: null,
+      } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
       const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
@@ -119,16 +123,7 @@ describe('Detections Usage and Metrics', () => {
       );
     });
 
-    it('returns an empty array if there is no data', async () => {
-      const mockJobSummary = jest.fn().mockResolvedValue(getMockJobSummaryResponse());
-      const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
-      mlMock.modulesProvider.mockReturnValue(({
-        listModules: mockListModules,
-      } as unknown) as ReturnType<typeof mlMock.modulesProvider>);
-      mlMock.jobServiceProvider.mockReturnValue({
-        jobsSummary: mockJobSummary,
-      });
-
+    it('returns an ml job telemetry object', async () => {
       const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
       const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlStatsResponse());
       mlMock.anomalyDetectorsProvider.mockReturnValue(({
