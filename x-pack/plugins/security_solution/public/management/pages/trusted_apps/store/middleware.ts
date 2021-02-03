@@ -153,7 +153,17 @@ const submitCreationIfNeeded = async (
 
   // FIXME: Implement PUT API for updating Trusted App - https://github.com/elastic/security-team/issues/682#issuecomment-768581449
   if (editMode) {
-    throw new Error('PUT Trusted APP API missing');
+    // eslint-disable-next-line no-console
+    console.warn('PUT Trusted APP API missing');
+    store.dispatch(
+      createTrustedAppCreationSubmissionResourceStateChanged({
+        type: 'LoadedResourceState',
+        data: entry as TrustedApp,
+      })
+    );
+    store.dispatch({
+      type: 'trustedAppsListDataOutdated',
+    });
   }
 
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
