@@ -132,4 +132,22 @@ describe('of expression', () => {
       )
     ).toBeTruthy();
   });
+
+  it('renders a helptext when passed as a prop', () => {
+    const onChangeSelectedAggField = jest.fn();
+    const wrapper = shallow(
+      <OfExpression
+        aggType="count"
+        errors={{ aggField: [] }}
+        fields={[{ normalizedType: 'number', name: 'test', text: 'test text' }]}
+        aggField="test"
+        onChangeSelectedAggField={onChangeSelectedAggField}
+        helpText="Helptext test message"
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="availablefieldsOptionsFormRow"]').prop('helpText')).toBe(
+      'Helptext test message'
+    );
+  });
 });
