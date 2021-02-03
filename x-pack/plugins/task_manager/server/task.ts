@@ -126,6 +126,16 @@ export const taskDefinitionSchema = schema.object(
         min: 1,
       })
     ),
+    /**
+     * The maximum number tasks of this type that can be run concurrently per Kibana instance.
+     * Setting this value will force Task Manager to poll for this task type seperatly from other task types
+     * which can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
+     */
+    maxConcurrency: schema.maybe(
+      schema.number({
+        min: 0,
+      })
+    ),
   },
   {
     validate({ timeout }) {

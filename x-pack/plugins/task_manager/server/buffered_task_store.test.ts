@@ -16,8 +16,6 @@ describe('Buffered Task Store', () => {
     taskStore.bulkUpdate.mockResolvedValue([]);
     const bufferedStore = new BufferedTaskStore(taskStore, {});
 
-    expect(bufferedStore.maxAttempts).toEqual(10);
-
     bufferedStore.remove('1');
     expect(taskStore.remove).toHaveBeenCalledWith('1');
   });

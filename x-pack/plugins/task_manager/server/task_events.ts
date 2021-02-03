@@ -22,6 +22,12 @@ export enum TaskEventType {
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
 }
 
+export enum TaskClaimErrorType {
+  CLAIMED_BY_ID_OUT_OF_CAPACITY = 'CLAIMED_BY_ID_OUT_OF_CAPACITY',
+  CLAIMED_BY_ID_NOT_RETURNED = 'CLAIMED_BY_ID_NOT_RETURNED',
+  CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS = 'CLAIMED_BY_ID_NOT_IN_CLAIMING_STATUS',
+}
+
 export interface TaskTiming {
   start: number;
   stop: number;
@@ -46,10 +52,14 @@ export interface RanTask {
 export type ErroredTask = RanTask & {
   error: Error;
 };
+export interface ClaimTaskErr {
+  task: Option<ConcreteTaskInstance>;
+  errorType: TaskClaimErrorType;
+}
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
-export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
+export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
@@ -91,7 +101,7 @@ export function asTaskRunEvent(
 
 export function asTaskClaimEvent(
   id: string,
-  event: Result<ConcreteTaskInstance, Option<ConcreteTaskInstance>>,
+  event: Result<ConcreteTaskInstance, ClaimTaskErr>,
   timing?: TaskTiming
 ): TaskClaim {
   return {

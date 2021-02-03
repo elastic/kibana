@@ -6,19 +6,26 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { of, Subject } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
+import { first, catchError } from 'rxjs/operators';
 
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
+import { taskClaimingMock } from './queries/task_claiming.mock';
+import { ClaimOwnershipResult } from './queries/task_claiming';
+import { TaskPoolRunResult } from './task_pool';
+import { Err, isErr, isOk } from './lib/result_type';
+import { FillPoolResult } from './lib/fill_pool';
 
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
 
   const taskManagerLogger = mockLogger();
   const mockTaskStore = taskStoreMock.create({});
+  const mockTaskClaiming = taskClaimingMock.create({});
   const taskManagerOpts = {
     config: {
       enabled: true,
@@ -41,6 +48,7 @@ describe('TaskPollingLifecycle', () => {
       },
     },
     taskStore: mockTaskStore,
+    taskClaiming: mockTaskClaiming,
     logger: taskManagerLogger,
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
@@ -64,12 +72,12 @@ describe('TaskPollingLifecycle', () => {
       });
 
       clock.tick(150);
-      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).not.toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(true);
 
       clock.tick(150);
-      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).toHaveBeenCalled();
     });
   });
 
@@ -84,13 +92,13 @@ describe('TaskPollingLifecycle', () => {
       elasticsearchAndSOAvailability$.next(true);
 
       clock.tick(150);
-      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(false);
 
-      mockTaskStore.claimAvailableTasks.mockClear();
+      mockTaskClaiming.claimAvailableTasks.mockClear();
       clock.tick(150);
-      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).not.toHaveBeenCalled();
     });
 
     test('restarts polling once the ES and SavedObjects services become available again', () => {
@@ -103,26 +111,26 @@ describe('TaskPollingLifecycle', () => {
       elasticsearchAndSOAvailability$.next(true);
 
       clock.tick(150);
-      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(false);
-      mockTaskStore.claimAvailableTasks.mockClear();
+      mockTaskClaiming.claimAvailableTasks.mockClear();
       clock.tick(150);
 
-      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).not.toHaveBeenCalled();
 
       elasticsearchAndSOAvailability$.next(true);
       clock.tick(150);
 
-      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+      expect(mockTaskClaiming.claimAvailableTasks).toHaveBeenCalled();
     });
   });
 
   describe('claimAvailableTasks', () => {
-    test('should claim Available Tasks when there are available workers', () => {
+    test('should claim Available Tasks when there are available workers', async () => {
       const logger = mockLogger();
       const claim = jest.fn(() =>
-        Promise.resolve({
+        of({
           docs: [],
           stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
         })
@@ -130,15 +138,19 @@ describe('TaskPollingLifecycle', () => {
 
       const availableWorkers = 1;
 
-      claimAvailableTasks([], claim, availableWorkers, logger);
+      expect(
+        isOk(
+          await getFirstAsPromise(claimAvailableTasks([], claim, () => availableWorkers, logger))
+        )
+      ).toBeTruthy();
 
       expect(claim).toHaveBeenCalledTimes(1);
     });
 
-    test('should not claim Available Tasks when there are no available workers', () => {
+    test('should not claim Available Tasks when there are no available workers', async () => {
       const logger = mockLogger();
       const claim = jest.fn(() =>
-        Promise.resolve({
+        of({
           docs: [],
           stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
         })
@@ -146,7 +158,12 @@ describe('TaskPollingLifecycle', () => {
 
       const availableWorkers = 0;
 
-      claimAvailableTasks([], claim, availableWorkers, logger);
+      const err = await getFirstAsPromise(
+        claimAvailableTasks([], claim, () => availableWorkers, logger)
+      );
+
+      expect(isErr(err)).toBeTruthy();
+      expect((err as Err<FillPoolResult>).error).toEqual(FillPoolResult.NoAvailableWorkers);
 
       expect(claim).not.toHaveBeenCalled();
     });
@@ -155,16 +172,24 @@ describe('TaskPollingLifecycle', () => {
      * This handles the case in which Elasticsearch has had inline script disabled.
      * This is achieved by setting the `script.allowed_types` flag on Elasticsearch to `none`
      */
-    test('handles failure due to inline scripts being disabled', () => {
+    test('handles failure due to inline scripts being disabled', async () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => {
-        throw Object.assign(new Error(), {
-          response:
-            '{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}],"type":"search_phase_execution_exception","reason":"all shards failed","phase":"query","grouped":true,"failed_shards":[{"shard":0,"index":".kibana_task_manager_1","node":"24A4QbjHSK6prvtopAKLKw","reason":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}],"caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts","caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}},"status":400}',
-        });
-      });
+      const claim = jest.fn(
+        () =>
+          new Observable<ClaimOwnershipResult>((observer) => {
+            observer.error(
+              Object.assign(new Error(), {
+                response:
+                  '{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}],"type":"search_phase_execution_exception","reason":"all shards failed","phase":"query","grouped":true,"failed_shards":[{"shard":0,"index":".kibana_task_manager_1","node":"24A4QbjHSK6prvtopAKLKw","reason":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}],"caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts","caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}},"status":400}',
+              })
+            );
+          })
+      );
 
-      claimAvailableTasks([], claim, 10, logger);
+      const err = await getFirstAsPromise(claimAvailableTasks([], claim, () => 10, logger));
+
+      expect(isErr(err)).toBeTruthy();
+      expect((err as Err<FillPoolResult>).error).toEqual(FillPoolResult.Failed);
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -173,3 +198,9 @@ describe('TaskPollingLifecycle', () => {
     });
   });
 });
+
+function getFirstAsPromise<T>(obs$: Observable<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    obs$.subscribe(resolve, reject);
+  });
+}

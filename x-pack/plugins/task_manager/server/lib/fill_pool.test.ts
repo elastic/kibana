@@ -12,24 +12,28 @@ import { asOk, Result } from './result_type';
 import { ClaimOwnershipResult } from '../task_store';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskManagerRunner } from '../task_running/task_runner';
+import { from, Observable } from 'rxjs';
 
 jest.mock('../task_running/task_runner');
 
 describe('fillPool', () => {
   function mockFetchAvailableTasks(
     tasksToMock: number[][]
-  ): () => Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
-    const tasks: ConcreteTaskInstance[][] = tasksToMock.map((ids) => mockTaskInstances(ids));
-    let index = 0;
-    return async () =>
-      asOk({
-        stats: {
-          tasksUpdated: tasks[index + 1]?.length ?? 0,
-          tasksConflicted: 0,
-          tasksClaimed: 0,
-        },
-        docs: tasks[index++] || [],
-      });
+  ): () => Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+    const claimCycles: ConcreteTaskInstance[][] = tasksToMock.map((ids) => mockTaskInstances(ids));
+    return () =>
+      from(
+        claimCycles.map((tasks) =>
+          asOk({
+            stats: {
+              tasksUpdated: tasks?.length ?? 0,
+              tasksConflicted: 0,
+              tasksClaimed: 0,
+            },
+            docs: tasks,
+          })
+        )
+      );
   }
 
   const mockTaskInstances = (ids: number[]): ConcreteTaskInstance[] =>
@@ -50,7 +54,7 @@ describe('fillPool', () => {
       ownerId: null,
     }));
 
-  test('stops filling when pool runs all claimed tasks, even if there is more capacity', async () => {
+  test('fills task pool with all claimed tasks until fetchAvailableTasks stream closes', async () => {
     const tasks = [
       [1, 2, 3],
       [4, 5],
@@ -61,21 +65,7 @@ describe('fillPool', () => {
 
     await fillPool(fetchAvailableTasks, converter, run);
 
-    expect(_.flattenDeep(run.args)).toEqual(mockTaskInstances([1, 2, 3]));
-  });
-
-  test('stops filling when the pool has no more capacity', async () => {
-    const tasks = [
-      [1, 2, 3],
-      [4, 5],
-    ];
-    const fetchAvailableTasks = mockFetchAvailableTasks(tasks);
-    const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
-    const converter = _.identity;
-
-    await fillPool(fetchAvailableTasks, converter, run);
-
-    expect(_.flattenDeep(run.args)).toEqual(mockTaskInstances([1, 2, 3]));
+    expect(_.flattenDeep(run.args)).toEqual(mockTaskInstances([1, 2, 3, 4, 5]));
   });
 
   test('calls the converter on the records prior to running', async () => {
@@ -90,7 +80,7 @@ describe('fillPool', () => {
 
     await fillPool(fetchAvailableTasks, converter, run);
 
-    expect(_.flattenDeep(run.args)).toEqual(['1', '2', '3']);
+    expect(_.flattenDeep(run.args)).toEqual(['1', '2', '3', '4', '5']);
   });
 
   describe('error handling', () => {
@@ -100,7 +90,10 @@ describe('fillPool', () => {
         (instance.id as unknown) as TaskManagerRunner;
 
       try {
-        const fetchAvailableTasks = async () => Promise.reject('fetch is not working');
+        const fetchAvailableTasks = () =>
+          new Observable<Result<ClaimOwnershipResult, FillPoolResult>>((obs) =>
+            obs.error('fetch is not working')
+          );
 
         await fillPool(fetchAvailableTasks, converter, run);
       } catch (err) {

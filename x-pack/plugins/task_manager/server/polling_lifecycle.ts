@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, Observable, Subscription } from 'rxjs';
+import { Subject, Observable, Subscription, throwError } from 'rxjs';
 
 import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
-import { tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map } from './lib/result_type';
@@ -44,11 +44,13 @@ import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
+import { TaskClaiming } from './queries/task_claiming';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
+  taskClaiming: TaskClaiming;
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
@@ -69,6 +71,7 @@ export class TaskPollingLifecycle {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
+  private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
 
   private logger: Logger;
@@ -96,16 +99,18 @@ export class TaskPollingLifecycle {
     elasticsearchAndSOAvailability$,
     config,
     taskStore,
+    taskClaiming,
     definitions,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
+    this.taskClaiming = taskClaiming;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
-    // pipe store events into the lifecycle event stream
-    this.store.events.subscribe(emitEvent);
+    // pipe taskClaiming events into the lifecycle event stream
+    this.taskClaiming.events.subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -197,6 +202,7 @@ export class TaskPollingLifecycle {
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
+      defaultMaxAttempts: this.taskClaiming.maxAttempts,
     });
   };
 
@@ -210,8 +216,18 @@ export class TaskPollingLifecycle {
       () =>
         claimAvailableTasks(
           tasksToClaim.splice(0, this.pool.availableWorkers),
-          this.store.claimAvailableTasks,
-          this.pool.availableWorkers,
+          this.taskClaiming.claimAvailableTasks,
+          (taskType?: string) =>
+            taskType && this.definitions.get(taskType)?.maxConcurrency
+              ? Math.max(
+                  Math.min(
+                    this.pool.availableWorkers,
+                    this.definitions.get(taskType)!.maxConcurrency! -
+                      this.pool.getOccupiedWorkersByType(taskType)
+                  ),
+                  0
+                )
+              : this.pool.availableWorkers,
           this.logger
         ),
       // wrap each task in a Task Runner
@@ -250,59 +266,65 @@ export class TaskPollingLifecycle {
   }
 }
 
-export async function claimAvailableTasks(
+export function claimAvailableTasks(
   claimTasksById: string[],
-  claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
-  availableWorkers: number,
+  claim: (opts: OwnershipClaimingOpts) => Observable<ClaimOwnershipResult>,
+  getCapacity: (taskType?: string) => number,
   logger: Logger
-): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
-  if (availableWorkers > 0) {
-    performance.mark('claimAvailableTasks_start');
+): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+  return new Observable((observer) => {
+    if (getCapacity() > 0) {
+      performance.mark('claimAvailableTasks_start');
 
-    try {
-      const claimResult = await claim({
-        size: availableWorkers,
+      claim({
+        getCapacity,
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
-      });
-      const {
-        docs,
-        stats: { tasksClaimed },
-      } = claimResult;
+      }).subscribe(
+        (claimResult) => {
+          const {
+            docs,
+            stats: { tasksClaimed },
+          } = claimResult;
 
-      if (tasksClaimed === 0) {
-        performance.mark('claimAvailableTasks.noTasks');
-      }
-      performance.mark('claimAvailableTasks_stop');
-      performance.measure(
-        'claimAvailableTasks',
-        'claimAvailableTasks_start',
-        'claimAvailableTasks_stop'
+          if (tasksClaimed === 0) {
+            performance.mark('claimAvailableTasks.noTasks');
+          }
+          performance.mark('claimAvailableTasks_stop');
+          performance.measure(
+            'claimAvailableTasks',
+            'claimAvailableTasks_start',
+            'claimAvailableTasks_stop'
+          );
+
+          if (docs.length !== tasksClaimed) {
+            logger.warn(
+              `[Task Ownership error]: ${tasksClaimed} tasks were claimed by Kibana, but ${
+                docs.length
+              } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
+            );
+          }
+          observer.next(asOk(claimResult));
+        },
+        (ex) => {
+          if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
+            logger.warn(
+              `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
+            );
+            observer.next(asErr(FillPoolResult.Failed));
+          } else {
+            observer.error(ex);
+          }
+        },
+        () => observer.complete()
       );
-
-      if (docs.length !== tasksClaimed) {
-        logger.warn(
-          `[Task Ownership error]: ${tasksClaimed} tasks were claimed by Kibana, but ${
-            docs.length
-          } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
-        );
-      }
-      return asOk(claimResult);
-    } catch (ex) {
-      if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
-        logger.warn(
-          `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
-        );
-        return asErr(FillPoolResult.Failed);
-      } else {
-        throw ex;
-      }
+    } else {
+      performance.mark('claimAvailableTasks.noAvailableWorkers');
+      logger.debug(
+        `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
+      );
+      observer.next(asErr(FillPoolResult.NoAvailableWorkers));
+      observer.complete();
     }
-  } else {
-    performance.mark('claimAvailableTasks.noAvailableWorkers');
-    logger.debug(
-      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
-    );
-    return asErr(FillPoolResult.NoAvailableWorkers);
-  }
+  });
 }

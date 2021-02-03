@@ -24,6 +24,8 @@ interface Opts {
 }
 
 export enum TaskPoolRunResult {
+  // This mean we have no Run Result becuse no tasks were Ran in this cycle
+  NoTaskWereRan = 'NoTaskWereRan',
   // This means we're running all the tasks we claimed
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
   // This means we're running all the tasks we claimed and we're at capacity
@@ -90,6 +92,16 @@ export class TaskPool {
     // the poller and the pool from hanging due to lack of capacity
     this.cancelExpiredTasks();
     return this.maxWorkers - this.occupiedWorkers;
+  }
+
+  /**
+   * Gets how many workers are currently in use by type.
+   */
+  public getOccupiedWorkersByType(type: string) {
+    return [...this.running].reduce(
+      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      0
+    );
   }
 
   /**

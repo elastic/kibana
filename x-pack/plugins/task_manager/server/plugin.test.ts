@@ -69,6 +69,15 @@ describe('TaskManagerPlugin', () => {
 
       const setupApi = await taskManagerPlugin.setup(coreMock.createSetup());
 
+      // we only start a poller if we have task types that we support and we track
+      // phases (moving from Setup to Start) based on whether the poller is working
+      setupApi.registerTaskDefinitions({
+        setupTimeType: {
+          title: 'setupTimeType',
+          createTaskRunner: () => ({ async run() {} }),
+        },
+      });
+
       await taskManagerPlugin.start(coreMock.createStart());
 
       expect(() =>

@@ -13,6 +13,7 @@ import {
   asTaskRunEvent,
   asTaskClaimEvent,
   asTaskRunRequestEvent,
+  TaskClaimErrorType,
 } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
@@ -23,15 +24,18 @@ import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
 import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
   const mockTaskManager = taskPollingLifecycleMock.create({});
+  const definitions = new TaskTypeDictionary(mockLogger());
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     taskPollingLifecycle: mockTaskManager,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
+    definitions,
   };
 
   beforeEach(() => {
@@ -182,7 +186,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it does not exist`)
@@ -204,7 +213,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it is currently running`)
@@ -226,7 +240,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toEqual(
         new Error(`Failed to run task "${id}" as it is currently running`)
@@ -269,7 +288,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "idle")]`
@@ -291,7 +315,12 @@ describe('TaskScheduling', () => {
 
       const result = taskScheduling.runNow(id);
 
-      events$.next(asTaskClaimEvent(id, asErr(none)));
+      events$.next(
+        asTaskClaimEvent(
+          id,
+          asErr({ task: none, errorType: TaskClaimErrorType.CLAIMED_BY_ID_NOT_RETURNED })
+        )
+      );
 
       await expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" for unknown reason (Current Task Lifecycle is "failed")]`

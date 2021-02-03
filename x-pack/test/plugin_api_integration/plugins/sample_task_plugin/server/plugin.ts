@@ -104,6 +104,20 @@ export class SampleTaskManagerFixturePlugin
         // fail after the first failed run
         maxAttempts: 1,
       },
+      sampleTaskWithSingleConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that can only have one concurrent instance.',
+      },
+      sampleTaskWithLimitedConcurrency: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Max Concurrency of 2',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description: 'A sample task that can only have two concurrent instance.',
+      },
       sampleRecurringTaskTimingOut: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that times out each run.',

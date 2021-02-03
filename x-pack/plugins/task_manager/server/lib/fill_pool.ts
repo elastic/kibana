@@ -5,12 +5,23 @@
  */
 
 import { performance } from 'perf_hooks';
+import { Observable } from 'rxjs';
+import { tap, map, concatMap, last } from 'rxjs/operators';
 import { ConcreteTaskInstance } from '../task';
 import { WithTaskTiming, startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
 import { TaskManagerRunner } from '../task_running';
 import { ClaimOwnershipResult } from '../task_store';
-import { Result, map } from './result_type';
+import {
+  Result,
+  map as mapResult,
+  isOk,
+  mapOk,
+  promiseResult,
+  asErr,
+  asOk,
+  either,
+} from './result_type';
 
 export enum FillPoolResult {
   Failed = 'Failed',
@@ -20,6 +31,17 @@ export enum FillPoolResult {
   RanOutOfCapacity = 'RanOutOfCapacity',
   PoolFilled = 'PoolFilled',
 }
+
+type FillPoolAndRunResult = Result<
+  {
+    result: TaskPoolRunResult;
+    stats?: ClaimOwnershipResult['stats'];
+  },
+  {
+    result: FillPoolResult;
+    stats?: ClaimOwnershipResult['stats'];
+  }
+>;
 
 export type ClaimAndFillPoolResult = Partial<Pick<ClaimOwnershipResult, 'stats'>> & {
   result: FillPoolResult;
@@ -39,52 +61,80 @@ export type TimedFillPoolResult = WithTaskTiming<ClaimAndFillPoolResult>;
  * @param converter - a function that converts task records to the appropriate task runner
  */
 export async function fillPool(
-  fetchAvailableTasks: () => Promise<Result<ClaimOwnershipResult, FillPoolResult>>,
+  fetchAvailableTasks: () => Observable<Result<ClaimOwnershipResult, FillPoolResult>>,
   converter: (taskInstance: ConcreteTaskInstance) => TaskManagerRunner,
   run: (tasks: TaskManagerRunner[]) => Promise<TaskPoolRunResult>
 ): Promise<TimedFillPoolResult> {
   performance.mark('fillPool.start');
-  const stopTaskTimer = startTaskTimer();
-  const augmentTimingTo = (
-    result: FillPoolResult,
-    stats?: ClaimOwnershipResult['stats']
-  ): TimedFillPoolResult => ({
-    result,
-    stats,
-    timing: stopTaskTimer(),
-  });
-  return map<ClaimOwnershipResult, FillPoolResult, Promise<TimedFillPoolResult>>(
-    await fetchAvailableTasks(),
-    async ({ docs, stats }) => {
-      if (!docs.length) {
-        performance.mark('fillPool.bailNoTasks');
-        performance.measure(
-          'fillPool.activityDurationUntilNoTasks',
-          'fillPool.start',
-          'fillPool.bailNoTasks'
-        );
-        return augmentTimingTo(FillPoolResult.NoTasksClaimed, stats);
-      }
-
-      const tasks = docs.map(converter);
-
-      switch (await run(tasks)) {
-        case TaskPoolRunResult.RanOutOfCapacity:
-          performance.mark('fillPool.bailExhaustedCapacity');
-          performance.measure(
-            'fillPool.activityDurationUntilExhaustedCapacity',
-            'fillPool.start',
-            'fillPool.bailExhaustedCapacity'
+  return new Promise((resolve, reject) => {
+    const stopTaskTimer = startTaskTimer();
+    const augmentTimingTo = (
+      result: FillPoolResult,
+      stats?: ClaimOwnershipResult['stats']
+    ): TimedFillPoolResult => ({
+      result,
+      stats,
+      timing: stopTaskTimer(),
+    });
+    fetchAvailableTasks()
+      .pipe(
+        concatMap(async (res) =>
+          mapResult<ClaimOwnershipResult, FillPoolResult, Promise<FillPoolAndRunResult>>(
+            res,
+            async ({ docs, stats }) => {
+              if (!docs.length) {
+                performance.mark('fillPool.bailNoTasks');
+                performance.measure(
+                  'fillPool.activityDurationUntilNoTasks',
+                  'fillPool.start',
+                  'fillPool.bailNoTasks'
+                );
+                return asOk({ result: TaskPoolRunResult.NoTaskWereRan, stats });
+              }
+              return asOk(
+                await run(docs.map(converter)).then((runResult) => ({
+                  result: runResult,
+                  stats,
+                }))
+              );
+            },
+            async (fillPoolResult) => asErr({ result: fillPoolResult })
+          )
+        ),
+        // TODO: once we actually make multiple queries this will haveto change
+        // we need to summarize the stats
+        last()
+      )
+      .subscribe(
+        (claimResults) => {
+          resolve(
+            mapResult(
+              claimResults,
+              ({ result, stats }) => {
+                switch (result) {
+                  case TaskPoolRunResult.RanOutOfCapacity:
+                    performance.mark('fillPool.bailExhaustedCapacity');
+                    performance.measure(
+                      'fillPool.activityDurationUntilExhaustedCapacity',
+                      'fillPool.start',
+                      'fillPool.bailExhaustedCapacity'
+                    );
+                    return augmentTimingTo(FillPoolResult.RanOutOfCapacity, stats);
+                  case TaskPoolRunResult.RunningAtCapacity:
+                    performance.mark('fillPool.cycle');
+                    return augmentTimingTo(FillPoolResult.RunningAtCapacity, stats);
+                  case TaskPoolRunResult.NoTaskWereRan:
+                    return augmentTimingTo(FillPoolResult.NoTasksClaimed, stats);
+                  default:
+                    performance.mark('fillPool.cycle');
+                    return augmentTimingTo(FillPoolResult.PoolFilled, stats);
+                }
+              },
+              ({ result, stats }) => augmentTimingTo(result, stats)
+            )
           );
-          return augmentTimingTo(FillPoolResult.RanOutOfCapacity, stats);
-        case TaskPoolRunResult.RunningAtCapacity:
-          performance.mark('fillPool.cycle');
-          return augmentTimingTo(FillPoolResult.RunningAtCapacity, stats);
-        default:
-          performance.mark('fillPool.cycle');
-          return augmentTimingTo(FillPoolResult.PoolFilled, stats);
-      }
-    },
-    async (result) => augmentTimingTo(result)
-  );
+        },
+        (err) => reject(err)
+      );
+  });
 }

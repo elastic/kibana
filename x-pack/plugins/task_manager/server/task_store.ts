@@ -7,12 +7,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import apm from 'elastic-apm-node';
-import { Subject, Observable } from 'rxjs';
-import { omit, difference, partition, map, defaults } from 'lodash';
-
-import { some, none } from 'fp-ts/lib/Option';
-
+import { Subject } from 'rxjs';
+import { omit, defaults } from 'lodash';
 import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
 import {
   SavedObject,
@@ -31,38 +27,15 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
-  TaskStatus,
 } from './task';
 
-import { TaskClaim, asTaskClaimEvent } from './task_events';
-
-import {
-  asUpdateByQuery,
-  shouldBeOneOf,
-  mustBeAllOf,
-  filterDownBy,
-  asPinnedQuery,
-  matchesClauses,
-  SortOptions,
-} from './queries/query_clauses';
-
-import {
-  updateFieldsAndMarkAsFailed,
-  IdleTaskWithExpiredRunAt,
-  InactiveTasks,
-  RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
-  tasksClaimedByOwner,
-} from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
-
 import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
   taskManagerId: string;
-  maxAttempts: number;
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
@@ -90,7 +63,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 export interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
   claimTasksById?: string[];
-  size: number;
+  getCapacity: (taskType?: string) => number;
 }
 
 export interface FetchResult {
@@ -122,7 +95,6 @@ export interface UpdateByQueryResult {
  * interface into the index.
  */
 export class TaskStore {
-  public readonly maxAttempts: number;
   public readonly index: string;
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
@@ -131,7 +103,6 @@ export class TaskStore {
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: SavedObjectsSerializer;
-  private events$: Subject<TaskClaim>;
 
   /**
    * Constructs a new TaskStore.
@@ -147,20 +118,10 @@ export class TaskStore {
     this.esClient = opts.esClient;
     this.index = opts.index;
     this.taskManagerId = opts.taskManagerId;
-    this.maxAttempts = opts.maxAttempts;
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-    this.events$ = new Subject<TaskClaim>();
   }
-
-  public get events(): Observable<TaskClaim> {
-    return this.events$;
-  }
-
-  private emitEvents = (events: TaskClaim[]) => {
-    events.forEach((event) => this.events$.next(event));
-  };
 
   /**
    * Schedules a task.
@@ -198,144 +159,6 @@ export class TaskStore {
       ...opts,
       sort,
     });
-  }
-
-  /**
-   * Claims available tasks from the index, which are ready to be run.
-   * - runAt is now or past
-   * - is not currently claimed by any instance of Kibana
-   * - has a type that is in our task definitions
-   *
-   * @param {OwnershipClaimingOpts} options
-   * @returns {Promise<ClaimOwnershipResult>}
-   */
-  public claimAvailableTasks = async ({
-    claimOwnershipUntil,
-    claimTasksById = [],
-    size,
-  }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const claimTasksByIdWithRawIds = claimTasksById.map((id) =>
-      this.serializer.generateRawId(undefined, 'task', id)
-    );
-
-    const {
-      updated: tasksUpdated,
-      version_conflicts: tasksConflicted,
-    } = await this.markAvailableTasksAsClaimed(claimOwnershipUntil, claimTasksByIdWithRawIds, size);
-
-    const docs =
-      tasksUpdated > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
-
-    const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
-      claimTasksById.includes(doc.id)
-    );
-
-    const [documentsClaimedById, documentsRequestedButNotClaimed] = partition(
-      documentsReturnedById,
-      // we filter the schduled tasks down by status is 'claiming' in the esearch,
-      // but we do not apply this limitation on tasks claimed by ID so that we can
-      // provide more detailed error messages when we fail to claim them
-      (doc) => doc.status === TaskStatus.Claiming
-    );
-
-    const documentsRequestedButNotReturned = difference(
-      claimTasksById,
-      map(documentsReturnedById, 'id')
-    );
-
-    this.emitEvents([
-      ...documentsClaimedById.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))),
-      ...documentsClaimedBySchedule.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))),
-      ...documentsRequestedButNotClaimed.map((doc) => asTaskClaimEvent(doc.id, asErr(some(doc)))),
-      ...documentsRequestedButNotReturned.map((id) => asTaskClaimEvent(id, asErr(none))),
-    ]);
-
-    return {
-      stats: {
-        tasksUpdated,
-        tasksConflicted,
-        tasksClaimed: documentsClaimedById.length + documentsClaimedBySchedule.length,
-      },
-      docs: docs.filter((doc) => doc.status === TaskStatus.Claiming),
-    };
-  };
-
-  private async markAvailableTasksAsClaimed(
-    claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
-    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
-    size: OwnershipClaimingOpts['size']
-  ): Promise<UpdateByQueryResult> {
-    const registeredTaskTypes = this.definitions.getAllTypes();
-    const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
-      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
-    }, {});
-    const queryForScheduledTasks = mustBeAllOf(
-      // Either a task with idle status and runAt <= now or
-      // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
-    );
-
-    // The documents should be sorted by runAt/retryAt, unless there are pinned
-    // tasks being queried, in which case we want to sort by score first, and then
-    // the runAt/retryAt.  That way we'll get the pinned tasks first.  Note that
-    // the score seems to favor newer documents rather than older documents, so
-    // if there are not pinned tasks being queried, we do NOT want to sort by score
-    // at all, just by runAt/retryAt.
-    const sort: SortOptions = [SortByRunAtAndRetryAt];
-    if (claimTasksById && claimTasksById.length) {
-      sort.unshift('_score');
-    }
-
-    const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const result = await this.updateByQuery(
-      asUpdateByQuery({
-        query: matchesClauses(
-          mustBeAllOf(
-            claimTasksById && claimTasksById.length
-              ? asPinnedQuery(claimTasksById, queryForScheduledTasks)
-              : queryForScheduledTasks
-          ),
-          filterDownBy(InactiveTasks)
-        ),
-        update: updateFieldsAndMarkAsFailed(
-          {
-            ownerId: this.taskManagerId,
-            retryAt: claimOwnershipUntil,
-          },
-          claimTasksById || [],
-          registeredTaskTypes,
-          taskMaxAttempts
-        ),
-        sort,
-      }),
-      {
-        max_docs: size,
-      }
-    );
-
-    if (apmTrans) apmTrans.end();
-    return result;
-  }
-
-  /**
-   * Fetches tasks from the index, which are owned by the current Kibana instance
-   */
-  private async sweepForClaimedTasks(
-    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
-    size: OwnershipClaimingOpts['size']
-  ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = tasksClaimedByOwner(this.taskManagerId);
-    const { docs } = await this.search({
-      query:
-        claimTasksById && claimTasksById.length
-          ? asPinnedQuery(claimTasksById, claimedTasksQuery)
-          : claimedTasksQuery,
-      size,
-      sort: SortByRunAtAndRetryAt,
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 
   /**
@@ -526,7 +349,7 @@ export class TaskStore {
     return body;
   }
 
-  private async updateByQuery(
+  public async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs: max_docs }: UpdateByQueryOpts = {}

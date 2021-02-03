@@ -66,7 +66,6 @@ export interface TaskRunner {
 }
 
 export interface Updatable {
-  readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
 }
@@ -77,6 +76,7 @@ type Opts = {
   instance: ConcreteTaskInstance;
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
+  defaultMaxAttempts: number;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -107,6 +107,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
+  private defaultMaxAttempts: number;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -125,6 +126,7 @@ export class TaskManagerRunner implements TaskRunner {
     store,
     beforeRun,
     beforeMarkRunning,
+    defaultMaxAttempts,
     onTaskEvent = identity,
   }: Opts) {
     this.instance = sanitizeInstance(instance);
@@ -134,6 +136,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
+    this.defaultMaxAttempts = defaultMaxAttempts;
   }
 
   /**
@@ -349,7 +352,7 @@ export class TaskManagerRunner implements TaskRunner {
       return true;
     }
 
-    const maxAttempts = this.definition.maxAttempts || this.bufferedTaskStore.maxAttempts;
+    const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
     return this.instance.attempts < maxAttempts;
   }
 

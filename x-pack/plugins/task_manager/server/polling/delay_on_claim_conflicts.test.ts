@@ -79,6 +79,61 @@ describe('delayOnClaimConflicts', () => {
   );
 
   test(
+    'emits delay only once, no mater how many subscribers there are',
+    fakeSchedulers(async () => {
+      const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
+
+      const delays$ = delayOnClaimConflicts(of(10), of(100), taskLifecycleEvents$, 80, 2);
+
+      const firstSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
+      const secondSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
+
+      taskLifecycleEvents$.next(
+        asTaskPollingCycleEvent(
+          asOk({
+            result: FillPoolResult.PoolFilled,
+            stats: {
+              tasksUpdated: 0,
+              tasksConflicted: 8,
+              tasksClaimed: 0,
+            },
+            docs: [],
+          })
+        )
+      );
+
+      const thirdSubscriber$ = delays$.pipe(take(2), bufferCount(2)).toPromise<number[]>();
+
+      taskLifecycleEvents$.next(
+        asTaskPollingCycleEvent(
+          asOk({
+            result: FillPoolResult.PoolFilled,
+            stats: {
+              tasksUpdated: 0,
+              tasksConflicted: 10,
+              tasksClaimed: 0,
+            },
+            docs: [],
+          })
+        )
+      );
+
+      // should get the initial value of 0 delay
+      const [initialDelay, firstRandom] = await firstSubscriber$;
+      // should get the 0 delay (as a replay), which was the last value plus the first random value
+      const [initialDelayInSecondSub, firstRandomInSecondSub] = await secondSubscriber$;
+      // should get the first random value (as a replay) and the next random value
+      const [firstRandomInThirdSub, secondRandomInThirdSub] = await thirdSubscriber$;
+
+      expect(initialDelay).toEqual(0);
+      expect(initialDelayInSecondSub).toEqual(0);
+      expect(firstRandom).toEqual(firstRandomInSecondSub);
+      expect(firstRandomInSecondSub).toEqual(firstRandomInThirdSub);
+      expect(secondRandomInThirdSub).toBeGreaterThanOrEqual(0);
+    })
+  );
+
+  test(
     'doesnt emit a new delay when conflicts have reduced',
     fakeSchedulers(async () => {
       const pollInterval = 100;

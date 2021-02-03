@@ -6,10 +6,15 @@
 import { TaskDefinition, taskDefinitionSchema } from './task';
 import { Logger } from '../../../../src/core/server';
 
-export type TaskDefinitionRegistry = Record<
-  string,
-  Omit<TaskDefinition, 'type' | 'timeout'> & Pick<Partial<TaskDefinition>, 'timeout'>
->;
+export const InvalidTaskType = '*';
+export type TaskDefinitionRegistry<
+  TaskTypes extends string
+> = TaskTypes extends typeof InvalidTaskType
+  ? never
+  : Record<
+      TaskTypes,
+      Omit<TaskDefinition, 'type' | 'timeout'> & Pick<Partial<TaskDefinition>, 'timeout'>
+    >;
 export class TaskTypeDictionary {
   private definitions = new Map<string, TaskDefinition>();
   private logger: Logger;
@@ -24,6 +29,10 @@ export class TaskTypeDictionary {
 
   public getAllTypes() {
     return [...this.definitions.keys()];
+  }
+
+  public getAllDefinitions() {
+    return [...this.definitions.values()];
   }
 
   public has(type: string) {
@@ -47,7 +56,9 @@ export class TaskTypeDictionary {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
+  public registerTaskDefinitions<TaskTypes extends string>(
+    taskDefinitions: TaskDefinitionRegistry<TaskTypes>
+  ) {
     const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
@@ -69,7 +80,9 @@ export class TaskTypeDictionary {
  *
  * @param taskDefinitions - The Kibana task definitions dictionary
  */
-export function sanitizeTaskDefinitions(taskDefinitions: TaskDefinitionRegistry): TaskDefinition[] {
+export function sanitizeTaskDefinitions(
+  taskDefinitions: TaskDefinitionRegistry<string>
+): TaskDefinition[] {
   return Object.entries(taskDefinitions).map(([type, rawDefinition]) => {
     return taskDefinitionSchema.validate({ type, ...rawDefinition }) as TaskDefinition;
   });
