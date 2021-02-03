@@ -10,10 +10,9 @@ import { Location } from 'history';
 import { useActions } from 'kea';
 import { useLocation } from 'react-router-dom';
 
-import { parseQueryParams } from '../../../../shared/query_params';
 import { Loading } from '../../../../shared/loading';
 
-import { AddSourceLogic, OauthParams } from './add_source/add_source_logic';
+import { AddSourceLogic } from './add_source/add_source_logic';
 
 /**
  * This component merely triggers catchs the redirect from the oauth application and initializes the saving
@@ -22,11 +21,10 @@ import { AddSourceLogic, OauthParams } from './add_source/add_source_logic';
  */
 export const SourceAdded: React.FC = () => {
   const { search } = useLocation() as Location;
-  const params = (parseQueryParams(search) as unknown) as OauthParams;
   const { saveSourceParams } = useActions(AddSourceLogic);
 
   useEffect(() => {
-    saveSourceParams(params);
+    saveSourceParams(search);
   }, []);
 
   return <Loading />;

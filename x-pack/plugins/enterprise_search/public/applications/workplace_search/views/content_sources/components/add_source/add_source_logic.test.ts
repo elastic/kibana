@@ -280,6 +280,9 @@ describe('AddSourceLogic', () => {
         session_state: 'session123',
       };
 
+      const queryString =
+        'code=code123&state=%22%7B%22state%22%3A%20%22foo%22%7D%22&session_state=session123';
+
       const response = { serviceName: 'name', indexPermissions: false, serviceType: 'zendesk' };
 
       beforeEach(() => {
@@ -290,7 +293,7 @@ describe('AddSourceLogic', () => {
         const setAddedSourceSpy = jest.spyOn(SourcesLogic.actions, 'setAddedSource');
         const { serviceName, indexPermissions, serviceType } = response;
         http.get.mockReturnValue(Promise.resolve(response));
-        AddSourceLogic.actions.saveSourceParams(params);
+        AddSourceLogic.actions.saveSourceParams(queryString);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
           query: {
             ...params,
@@ -309,7 +312,7 @@ describe('AddSourceLogic', () => {
       it('handles error', async () => {
         http.get.mockReturnValue(Promise.reject('this is an error'));
 
-        AddSourceLogic.actions.saveSourceParams(params);
+        AddSourceLogic.actions.saveSourceParams(queryString);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');

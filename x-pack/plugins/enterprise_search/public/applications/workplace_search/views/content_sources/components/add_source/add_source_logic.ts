@@ -8,12 +8,15 @@ import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Search } from 'history';
+
 import { i18n } from '@kbn/i18n';
 
 import { HttpFetchQuery } from 'src/core/public';
 
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { parseQueryParams } from '../../../../../shared/query_params';
 
 import {
   flashAPIErrors,
@@ -87,7 +90,7 @@ export interface AddSourceActions {
     isUpdating: boolean,
     successCallback?: () => void
   ): { isUpdating: boolean; successCallback?(): void };
-  saveSourceParams(oauthParams: OauthParams): { oauthParams: OauthParams };
+  saveSourceParams(search: Search): { search: Search };
   getSourceConfigData(serviceType: string): { serviceType: string };
   getSourceConnectData(
     serviceType: string,
@@ -195,7 +198,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       isUpdating,
       successCallback,
     }),
-    saveSourceParams: (oauthParams: OauthParams) => ({ oauthParams }),
+    saveSourceParams: (search: Search) => ({ search }),
     createContentSource: (
       serviceType: string,
       successCallback: () => void,
@@ -470,13 +473,13 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         actions.setButtonNotLoading();
       }
     },
-    saveSourceParams: async ({ oauthParams }) => {
+    saveSourceParams: async ({ search }) => {
       const { http } = HttpLogic.values;
       const { isOrganization } = AppLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
-
-      const query = { ...oauthParams, kibana_host: kibanaHost };
+      const params = (parseQueryParams(search) as unknown) as OauthParams;
+      const query = { ...params, kibana_host: kibanaHost };
       const route = '/api/workplace_search/sources/create';
 
       try {
