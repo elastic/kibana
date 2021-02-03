@@ -36,7 +36,7 @@ const DeleteConfirm = ({
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.message', {
-    defaultMessage: `Deleting the search session \'{name}\' will expire any cached results.`,
+    defaultMessage: `Deleting the search session \'{name}\' deletes all cached results.`,
     values: {
       name,
     },

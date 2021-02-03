@@ -144,7 +144,7 @@ describe('Search Sessions Management API', () => {
       await api.sendCancel('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was canceled and expired.',
+        title: 'The search session was deleted.',
       });
     });
 
