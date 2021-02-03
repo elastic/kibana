@@ -101,8 +101,15 @@ function buildQueryBody(
   const filterStatusAgents = statusAgentIDs
     ? {
         filter: [
-          { terms: { 'elastic.agent.id': statusAgentIDs } }, // OR
-          { terms: { 'HostDetails.elastic.agent.id': statusAgentIDs } },
+          {
+            bool: {
+              // OR's the two together
+              should: [
+                { terms: { 'elastic.agent.id': statusAgentIDs } },
+                { terms: { 'HostDetails.elastic.agent.id': statusAgentIDs } },
+              ],
+            },
+          },
         ],
       }
     : null;
