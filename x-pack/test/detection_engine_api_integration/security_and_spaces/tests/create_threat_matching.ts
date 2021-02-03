@@ -306,7 +306,7 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
-                    field: 'threat.indicator.domain',
+                    field: 'destination.ip',
                     type: 'url',
                   },
                   provider: 'geenensp',
@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
-                    field: 'threat.indicator.domain',
+                    field: 'destination.ip',
                     type: 'url',
                   },
                   provider: 'geenensp',
@@ -386,7 +386,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
-                    field: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'url',
                   },
                   port: 57324,
@@ -399,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
-                    field: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'ip',
                   },
                   provider: 'other_provider',
@@ -467,7 +467,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
-                    field: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'url',
                   },
                   port: 57324,
@@ -480,7 +480,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
-                    field: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'ip',
                   },
                   provider: 'other_provider',
@@ -492,7 +492,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: 57324,
-                    field: 'threat.indicator.port',
+                    field: 'source.port',
                     type: 'url',
                   },
                   port: 57324,
@@ -563,7 +563,7 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
-                    field: 'threat.indicator.domain',
+                    field: 'destination.ip',
                     type: 'url',
                   },
                   provider: 'geenensp',
@@ -583,7 +583,7 @@ export default ({ getService }: FtrProviderContext) => {
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
-                    field: 'threat.indicator.domain',
+                    field: 'destination.ip',
                     type: 'url',
                   },
                   provider: 'geenensp',
@@ -599,7 +599,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: '45.115.45.3',
-                    field: 'threat.indicator.ip',
+                    field: 'source.ip',
                     type: 'url',
                   },
                   port: 57324,
@@ -612,7 +612,7 @@ export default ({ getService }: FtrProviderContext) => {
                   ip: '45.115.45.3',
                   matched: {
                     atomic: 57324,
-                    field: 'threat.indicator.port',
+                    field: 'source.port',
                     type: 'url',
                   },
                   port: 57324,
@@ -623,7 +623,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ]);
         });
-        it('deduplicates a signal if it is found in multiple separate query loops');
       });
     });
   });
