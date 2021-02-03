@@ -36,3 +36,34 @@ You can optionally create a field to edit.
 ### `userPermissions.editIndexPattern(): boolean`
 
 Convenience method that uses the `core.application.capabilities` api to determine whether the user can edit the index pattern. 
+
+### `<DeleteRuntimeFieldProvider />`
+
+This children func React component provides a handler to delete one or multiple runtime fields.
+
+#### Props
+
+* `indexPattern: IndexPattern`: the current index pattern. (**required**)
+
+```js
+
+const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
+
+// Single field
+<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
+  {(deleteField) => (
+    <EuiButton fill color="danger" onClick={() => deleteField('myField')}>
+      Delete
+    </EuiButton>
+  )}
+</DeleteRuntimeFieldProvider>
+
+// Multiple fields
+<DeleteRuntimeFieldProvider indexPattern={indexPattern}>
+  {(deleteFields) => (
+    <EuiButton fill color="danger" onClick={() => deleteFields(['field1', 'field2', 'field3'])}>
+      Delete
+    </EuiButton>
+  )}
+</DeleteRuntimeFieldProvider>
+```
