@@ -284,7 +284,7 @@ export function DiscoverFieldSearch({
                 position="right"
                 content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
                   defaultMessage:
-                    'Unmapped fields will soon be deprecated. We suggest keeping this switch off.',
+                    'Unmapped fields will be deprecated and removed in a future release.',
                 })}
               >
                 <EuiIcon type="alert" />
