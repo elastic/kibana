@@ -22,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89069
-  describe.skip('Search sessions Management UI', () => {
+  describe('Search sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
