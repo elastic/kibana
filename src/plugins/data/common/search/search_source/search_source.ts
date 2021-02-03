@@ -58,9 +58,10 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, keyBy, pick, difference, omit, isFunction } from 'lodash';
+import { uniqueId, keyBy, pick, difference, omit, isFunction, setWith, isEqual } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
+import { isObject } from 'rxjs/internal-compatibility';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
@@ -492,7 +493,7 @@ export class SearchSource {
     let filteredDocvalueFields = docvalueFields;
     if (index) {
       const sourceFilters = index.getSourceFiltering();
-      if (!body.hasOwnProperty('_source') && !fieldListProvided) {
+      if (!body.hasOwnProperty('_source')) {
         body._source = sourceFilters;
       }
       if (body._source && body._source.excludes) {
@@ -544,12 +545,14 @@ export class SearchSource {
         });
       }
 
-      body.stored_fields = remainingFields;
+      body.stored_fields = [...new Set(remainingFields)];
       // only include unique values
       if (fieldsFromSource.length) {
-        /* setWith(body, '_source.includes', fieldsFromSource, (nsValue) =>
-          isObject(nsValue) ? {} : nsValue
-        ); */
+        if (!isEqual(remainingFields, fieldsFromSource)) {
+          setWith(body, '_source.includes', remainingFields, (nsValue) =>
+            isObject(nsValue) ? {} : nsValue
+          );
+        }
         // if items that are in the docvalueFields are provided, we should
         // make sure those are added to the fields API unless they are
         // already set in docvalue_fields

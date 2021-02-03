@@ -7,7 +7,7 @@
  */
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
 
-const TYPE_FIELD = '_type';
+const META_FIELDS = ['_type', '_source'];
 
 export function getFieldListFromIndexPattern(indexPattern: IndexPattern) {
   const { sourceFilters, fields } = indexPattern;
@@ -16,7 +16,7 @@ export function getFieldListFromIndexPattern(indexPattern: IndexPattern) {
   }
   const sourceFiltersValues = sourceFilters.map((sourceFilter) => sourceFilter.value);
   const fieldsToInclude = fields.filter((field) => {
-    return !sourceFiltersValues.includes(field.name) && field.name !== TYPE_FIELD;
+    return !sourceFiltersValues.includes(field.name) && !META_FIELDS.includes(field.name);
   });
   return fieldsToInclude.map((field) => field.name);
 }
