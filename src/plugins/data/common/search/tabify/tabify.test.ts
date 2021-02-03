@@ -27,6 +27,9 @@ describe('tabifyAggResponse Integration', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      getFormatterForField: () => ({
+        toJSON: () => '{}',
+      }),
     } as unknown) as IndexPattern;
 
     return new AggConfigs(indexPattern, aggs, { typesRegistry });
@@ -48,7 +51,7 @@ describe('tabifyAggResponse Integration', () => {
     expect(resp.columns).toHaveLength(1);
 
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
-    expect(resp.columns[0]).toHaveProperty('aggConfig', aggConfigs.aggs[0]);
+    expect(resp.columns[0]).toHaveProperty('name', aggConfigs.aggs[0].makeLabel());
   });
 
   describe('transforms a complex response', () => {
@@ -78,7 +81,7 @@ describe('tabifyAggResponse Integration', () => {
       expect(table.columns).toHaveLength(aggs.length);
 
       aggs.forEach((agg, i) => {
-        expect(table.columns[i]).toHaveProperty('aggConfig', agg);
+        expect(table.columns[i]).toHaveProperty('name', agg.makeLabel());
       });
     }
 
