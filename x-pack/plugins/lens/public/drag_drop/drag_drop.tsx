@@ -275,7 +275,7 @@ const DragInner = memo(function DragInner({
     setDragging(undefined);
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
-    // setA11yMessage(announce.cancelled());
+    setA11yMessage(announce.cancelled());
     if (onDragEnd) {
       onDragEnd();
     }
@@ -338,12 +338,15 @@ const DragInner = memo(function DragInner({
               } else if (
                 keyboardMode &&
                 order &&
-                (keys.ARROW_LEFT === e.key || keys.ARROW_RIGHT === e.key)
+                (keys.ARROW_LEFT === e.key ||
+                  keys.ARROW_RIGHT === e.key ||
+                  'd' === e.key ||
+                  'a' === e.key)
               ) {
                 if (hasReorderingStarted) {
                   setA11yMessage(announce.blockedArrows());
                 } else {
-                  setNextTarget(!!(keys.ARROW_LEFT === e.key));
+                  setNextTarget(!!(keys.ARROW_LEFT === e.key || 'a' === e.key));
                 }
               }
               if (extraKeyboardHandler) {
@@ -540,11 +543,11 @@ const ReorderableDrag = memo(function ReorderableDrag(
         );
         if (index !== -1) activeDropTargetIndex = index;
       }
-      if (keys.ARROW_DOWN === e.key) {
+      if (keys.ARROW_DOWN === e.key || 's' === e.key) {
         if (activeDropTargetIndex < reorderableGroup.length - 1) {
           onReorderableDragOver(reorderableGroup[activeDropTargetIndex + 1]);
         }
-      } else if (keys.ARROW_UP === e.key) {
+      } else if (keys.ARROW_UP === e.key || 'w' === e.key) {
         if (activeDropTargetIndex > 0) {
           onReorderableDragOver(reorderableGroup[activeDropTargetIndex - 1]);
         }

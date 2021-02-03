@@ -164,7 +164,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 
   const setA11yMessage = useMemo(
     () => (message: string) => {
-      console.log(`%c ${message}`, 'background: #251e3e; color: #eee3e7');
+      // console.log(`%c ${message}`, 'background: #251e3e; color: #eee3e7');
       return setA11yMessageState(message);
     },
     [setA11yMessageState]

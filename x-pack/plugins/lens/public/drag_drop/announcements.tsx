@@ -33,18 +33,14 @@ const selectedTargetReplace = (
     },
   });
 
-const droppedReplace = (
-  { label }: HumanData,
-  { label: dropLabel, groupLabel, position }: HumanData
-) =>
+const droppedReplace = ({ label }: HumanData, { label: dropLabel, groupLabel }: HumanData) =>
   i18n.translate('xpack.lens.dragDrop.announce.duplicated.replace', {
     defaultMessage:
-      'You have dropped the item. You have moved {label} to {groupLabel} group to position {position}',
+      'You have dropped the item. You have replaced {dropLabel} with {label} in {groupLabel} group.',
     values: {
       label,
       dropLabel,
       groupLabel,
-      position,
     },
   });
 
