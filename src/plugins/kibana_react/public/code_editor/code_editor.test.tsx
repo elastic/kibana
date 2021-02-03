@@ -50,9 +50,6 @@ test('editor mount setup', () => {
       suggestions: [],
     }),
   };
-  const signatureProvider = {
-    provideSignatureHelp: () => ({ signatures: [], activeParameter: 0, activeSignature: 0 }),
-  };
   const hoverProvider = {
     provideHover: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
       contents: [],
@@ -82,7 +79,6 @@ test('editor mount setup', () => {
       onChange={() => {}}
       editorWillMount={editorWillMount}
       suggestionProvider={suggestionProvider}
-      signatureProvider={signatureProvider}
       hoverProvider={hoverProvider}
     />
   );
