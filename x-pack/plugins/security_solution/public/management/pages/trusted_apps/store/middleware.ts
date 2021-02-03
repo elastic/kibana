@@ -145,9 +145,16 @@ const submitCreationIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const submissionResourceState = getCreationSubmissionResourceState(store.getState());
-  const isValid = isCreationDialogFormValid(store.getState());
-  const entry = getCreationDialogFormEntry(store.getState());
+  const currentState = store.getState();
+  const submissionResourceState = getCreationSubmissionResourceState(currentState);
+  const isValid = isCreationDialogFormValid(currentState);
+  const entry = getCreationDialogFormEntry(currentState);
+  const editMode = isEdit(currentState);
+
+  // FIXME: Implement PUT API for updating Trusted App - https://github.com/elastic/security-team/issues/682#issuecomment-768581449
+  if (editMode) {
+    throw new Error('PUT Trusted APP API missing');
+  }
 
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
     store.dispatch(
@@ -365,7 +372,9 @@ const fetchEditTrustedAppIfNeeded = async (
 
     // eslint-disable-next-line no-console
     console.log('todo: api call');
-    // FIXME: need a GET API
+
+    // FIXME: Implement GET API - https://github.com/elastic/security-team/issues/682#issuecomment-768581449
+    throw new Error('GET trusted app API missing!');
   }
 };
 
