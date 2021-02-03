@@ -13,6 +13,7 @@ import {
   FailureMetadata,
   DockerServersService,
 } from '../src/functional_test_runner/lib';
+import { Test, Suite } from '../src/functional_test_runner/fake_mocha_types';
 
 export { Lifecycle, Config, FailureMetadata };
 
@@ -91,3 +92,5 @@ export interface FtrConfigProviderContext {
   log: ToolingLog;
   readConfigFile(path: string): Promise<Config>;
 }
+
+export { Test, Suite };
