@@ -1378,7 +1378,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Missing expected resource in payload: space:space_2]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1406,7 +1406,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Missing expected resource in payload: space:space_2]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1439,7 +1439,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Unexpected resource in payload: space:space_3]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1462,7 +1462,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Missing expected resource in payload: space:space_2]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
   });

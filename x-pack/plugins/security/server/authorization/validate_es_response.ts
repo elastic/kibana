@@ -42,14 +42,12 @@ function buildValidationSchema(application: string, actions: string[], resources
     {
       unknowns: 'allow',
       validate: (value) => {
-        const actualResources = Object.keys(value);
-        const unexpectedResource = actualResources.find((ar) => !resources.includes(ar));
-        if (unexpectedResource) {
-          throw new Error(`Unexpected resource in payload: ${unexpectedResource}`);
-        }
-        const missingResource = resources.find((r) => !actualResources.includes(r));
-        if (missingResource) {
-          throw new Error(`Missing expected resource in payload: ${missingResource}`);
+        const actualResources = Object.keys(value).sort();
+        if (
+          resources.length !== actualResources.length ||
+          !resources.sort().every((x, i) => x === actualResources[i])
+        ) {
+          throw new Error('Payload did not match expected resources');
         }
 
         Object.values(value).forEach((actionResult) => {
