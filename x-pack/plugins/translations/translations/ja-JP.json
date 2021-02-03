@@ -4718,7 +4718,6 @@
     "visualize.createVisualization.failedToLoadErrorMessage": "ビジュアライゼーションを読み込めませんでした",
     "visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage": "indexPatternまたはsavedSearchIdが必要です",
     "visualize.createVisualization.noVisTypeErrorMessage": "有効なビジュアライゼーションタイプを指定してください",
-    "visualize.discover.visualizeFieldLabel": "Visualizeフィールド",
     "visualize.editor.createBreadcrumb": "作成",
     "visualize.editor.defaultEditBreadcrumbText": "編集",
     "visualize.experimentalVisInfoText": "このビジュアライゼーションはまだ実験段階であり、オフィシャルGA機能のサポートSLAが適用されません。フィードバックがある場合は、{githubLink}で問題を報告してください。",
