@@ -5,27 +5,26 @@
  */
 
 import {
-  getEventScope,
-  ValueClickTriggerEventScope,
+  getEventScopeValues,
   getEventVariableList,
-  getPanelVariables,
-} from '../url_drilldown_scope';
+  ValueClickTriggerEventScope,
+} from './event_variables';
 import {
   RowClickContext,
   ROW_CLICK_TRIGGER,
 } from '../../../../../../../src/plugins/ui_actions/public';
-import { createPoint, rowClickData, TestEmbeddable } from '../test/data';
+import { createPoint, rowClickData } from '../test/data';
 
 describe('VALUE_CLICK_TRIGGER', () => {
   describe('supports `points[]`', () => {
-    test('getEventScope()', () => {
+    test('getEventScopeValues()', () => {
       const mockDataPoints = [
         createPoint({ field: 'field0', value: 'value0' }),
         createPoint({ field: 'field1', value: 'value1' }),
         createPoint({ field: 'field2', value: 'value2' }),
       ];
 
-      const eventScope = getEventScope({
+      const eventScope = getEventScopeValues({
         data: { data: mockDataPoints },
       }) as ValueClickTriggerEventScope;
 
@@ -54,7 +53,7 @@ describe('VALUE_CLICK_TRIGGER', () => {
   describe('handles undefined, null or missing values', () => {
     test('undefined or missing values are removed from the result scope', () => {
       const point = createPoint({ field: undefined } as any);
-      const eventScope = getEventScope({
+      const eventScope = getEventScopeValues({
         data: { data: [point] },
       }) as ValueClickTriggerEventScope;
 
@@ -64,7 +63,7 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
     test('null value stays in the result scope', () => {
       const point = createPoint({ field: 'field', value: null });
-      const eventScope = getEventScope({
+      const eventScope = getEventScopeValues({
         data: { data: [point] },
       }) as ValueClickTriggerEventScope;
 
@@ -78,15 +77,20 @@ describe('ROW_CLICK_TRIGGER', () => {
     const vars = getEventVariableList({
       triggers: [ROW_CLICK_TRIGGER],
     });
-    expect(vars).toEqual(['event.rowIndex', 'event.values', 'event.keys', 'event.columnNames']);
+    expect(vars.map(({ label }) => label)).toEqual([
+      'event.values',
+      'event.keys',
+      'event.columnNames',
+      'event.rowIndex',
+    ]);
   });
 
-  test('getEventScope() returns correct variables for row click trigger', () => {
+  test('getEventScopeValues() returns correct variables for row click trigger', () => {
     const context = ({
       embeddable: {},
       data: rowClickData as any,
     } as unknown) as RowClickContext;
-    const res = getEventScope(context);
+    const res = getEventScopeValues(context);
 
     expect(res).toEqual({
       rowIndex: 1,
@@ -98,195 +102,6 @@ describe('ROW_CLICK_TRIGGER', () => {
         'Count of records',
         'Average of DistanceMiles',
         'Unique count of OriginAirportID',
-      ],
-    });
-  });
-});
-
-describe('getPanelVariables()', () => {
-  test('returns only ID for empty embeddable', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {}
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-    });
-  });
-
-  test('returns title as specified in input', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        title: 'title1',
-      },
-      {}
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      title: 'title1',
-    });
-  });
-
-  test('returns output title if input and output titles are specified', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        title: 'title1',
-      },
-      {
-        title: 'title2',
-      }
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      title: 'title2',
-    });
-  });
-
-  test('returns title from output if title in input is missing', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        title: 'title2',
-      }
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      title: 'title2',
-    });
-  });
-
-  test('returns saved object ID from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        savedObjectId: '5678',
-      },
-      {
-        savedObjectId: '1234',
-      }
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      savedObjectId: '1234',
-    });
-  });
-
-  test('returns saved object ID from input if it is not set on output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        savedObjectId: '5678',
-      },
-      {}
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      savedObjectId: '5678',
-    });
-  });
-
-  test('returns query, timeRange and filters from input', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        query: {
-          language: 'C++',
-          query: 'std::cout << 123;',
-        },
-        timeRange: {
-          from: 'FROM',
-          to: 'TO',
-        },
-        filters: [
-          {
-            meta: {
-              alias: 'asdf',
-              disabled: false,
-              negate: false,
-            },
-          },
-        ],
-      },
-      {}
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      query: {
-        language: 'C++',
-        query: 'std::cout << 123;',
-      },
-      timeRange: {
-        from: 'FROM',
-        to: 'TO',
-      },
-      filters: [
-        {
-          meta: {
-            alias: 'asdf',
-            disabled: false,
-            negate: false,
-          },
-        },
-      ],
-    });
-  });
-
-  test('returns a single index pattern from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
-      }
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-    });
-  });
-
-  test('returns multiple index patterns from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        indexPatterns: [
-          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
-        ],
-      }
-    );
-    const vars = getPanelVariables({ embeddable });
-
-    expect(vars).toEqual({
-      id: 'test',
-      indexPatternIds: [
-        'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-        'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy',
       ],
     });
   });
