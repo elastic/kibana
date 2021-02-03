@@ -22,7 +22,6 @@ function formatCluster(cluster) {
 }
 
 let once = false;
-let inTransit = false;
 
 export function monitoringClustersProvider($injector) {
   return async (clusterUuid, ccs, codePaths) => {
@@ -88,8 +87,8 @@ export function monitoringClustersProvider($injector) {
       }
     }
 
-    if (!once && !inTransit) {
-      inTransit = true;
+    if (!once) {
+      once = true;
       const clusters = await getClusters();
       if (clusters.length) {
         try {
@@ -99,7 +98,6 @@ export function monitoringClustersProvider($injector) {
         } catch (_err) {
           // Intentionally swallow the error as this will retry the next page load
         }
-        inTransit = false;
       }
       return clusters;
     }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Kubernetes {
-  pod?: { uid: string; [key: string]: unknown };
-  [key: string]: unknown;
-}
+import * as detectionsAdminUser from './detections_user.json';
+import * as detectionsAdminRole from './detections_role.json';
+export { detectionsAdminUser, detectionsAdminRole };
