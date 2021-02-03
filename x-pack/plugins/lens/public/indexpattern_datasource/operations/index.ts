@@ -13,6 +13,23 @@ export {
   FieldBasedIndexPatternColumn,
   IncompleteColumn,
   RequiredReference,
+  FiltersIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MinIndexPatternColumn,
+  MaxIndexPatternColumn,
+  AvgIndexPatternColumn,
+  CardinalityIndexPatternColumn,
+  SumIndexPatternColumn,
+  MedianIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  CountIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  CumulativeSumIndexPatternColumn,
+  CounterRateIndexPatternColumn,
+  DerivativeIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
 } from './definitions';
 
 export { createMockedReferenceOperation } from './mocks';

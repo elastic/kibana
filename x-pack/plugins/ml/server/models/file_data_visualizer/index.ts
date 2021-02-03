@@ -5,5 +5,3 @@
  */
 
 export { fileDataVisualizerProvider, InputData } from './file_data_visualizer';
-
-export { importDataProvider } from './import_data';

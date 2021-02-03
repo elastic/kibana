@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
-import { UseField, NumericField } from '../../../../../../shared_imports';
-import { LearnMoreLink, DescribedFormRow } from '../..';
+import { NumericField } from '../../../../../../shared_imports';
+
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { UseField } from '../../../form';
+
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';

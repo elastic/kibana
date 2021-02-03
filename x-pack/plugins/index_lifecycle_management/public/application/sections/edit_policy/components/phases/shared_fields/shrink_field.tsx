@@ -7,9 +7,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
-import { UseField, NumericField } from '../../../../../../shared_imports';
+import { NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { UseField } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 
 import { LearnMoreLink, DescribedFormRow } from '../../';
