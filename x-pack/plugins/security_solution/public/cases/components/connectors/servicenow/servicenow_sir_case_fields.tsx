@@ -184,6 +184,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                 <EuiFlexItem>
                   <EuiCheckbox
                     id="destIpCheckbox"
+                    data-test-subj="destIpCheckbox"
                     label={i18n.DEST_IP}
                     checked={destIp ?? false}
                     compressed
@@ -192,7 +193,8 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCheckbox
-                    id="sourceIpCheckBox"
+                    id="sourceIpCheckbox"
+                    data-test-subj="sourceIpCheckbox"
                     label={i18n.SOURCE_IP}
                     checked={sourceIp ?? false}
                     compressed
@@ -204,6 +206,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                 <EuiFlexItem>
                   <EuiCheckbox
                     id="malwareUrlCheckbox"
+                    data-test-subj="malwareUrlCheckbox"
                     label={i18n.MALWARE_HASH}
                     checked={malwareUrl ?? false}
                     compressed
@@ -213,6 +216,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                 <EuiFlexItem>
                   <EuiCheckbox
                     id="malwareHashCheckbox"
+                    data-test-subj="malwareHashCheckbox"
                     label={i18n.MALWARE_URL}
                     checked={malwareHash ?? false}
                     compressed

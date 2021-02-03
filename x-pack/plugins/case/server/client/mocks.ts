@@ -6,7 +6,8 @@
  */
 
 import { omit } from 'lodash/fp';
-import { KibanaRequest, kibanaResponseFactory } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../src/core/server/http';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {

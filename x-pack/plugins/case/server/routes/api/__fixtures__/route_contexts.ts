@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest, kibanaResponseFactory } from 'src/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../../../src/core/server';
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createCaseClient } from '../../../client';
 import {

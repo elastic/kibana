@@ -41,10 +41,10 @@ describe('ServiceNowSIR Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
-    expect(wrapper.find('[data-test-subj="destIpInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="sourceIpInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="malwareUrlInput"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="malwareHashInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="destIpCheckbox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="sourceIpCheckbox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malwareUrlCheckbox"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="malwareHashCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
@@ -60,16 +60,16 @@ describe('ServiceNowSIR Fields', () => {
     wrapper.update();
 
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Destination IP: 192.68.1.1'
+      'Destination IP: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Source IP: 192.68.1.2'
+      'Source IP: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Malware URL: https://attack.com'
+      'Malware URL: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(3).text()).toEqual(
-      'Malware Hash: 098f6bcd4621d373cade4e832627b4f6'
+      'Malware Hash: Yes'
     );
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(4).text()).toEqual(
       'Priority: 1 - Critical'
@@ -159,17 +159,17 @@ describe('ServiceNowSIR Fields', () => {
 
     expect(onChange).toHaveBeenCalledWith(fields);
 
-    const inputs = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
-    inputs.forEach((subj) =>
+    const checkbox = ['destIp', 'sourceIp', 'malwareHash', 'malwareUrl'];
+    checkbox.forEach((subj) =>
       test(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {
           wrapper
-            .find(`[data-test-subj="${subj}Input"] input`)
+            .find(`[data-test-subj="${subj}Checkbox"] input`)
             .first()
-            .simulate('change', { target: { value: 'new value' } });
+            .simulate('change', { target: { checked: false } });
           expect(onChange).toHaveBeenCalledWith({
             ...fields,
-            [subj]: 'new value',
+            [subj]: false,
           });
         });
       })
