@@ -10,5 +10,12 @@ import React from 'react';
 import { UseField, NumericField } from '../../../shared_imports';
 
 export const PopularityField = () => {
-  return <UseField path="popularity" component={NumericField} />;
+  // TODO how to pass props down to input for functional test
+  return (
+    <UseField
+      path="popularity"
+      component={NumericField}
+      componentProps={{ 'data-test-subj': 'editorFieldCount' }}
+    />
+  );
 };

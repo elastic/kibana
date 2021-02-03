@@ -18,7 +18,7 @@ export const deserializeField = (
 
   return {
     name: field.name,
-    type: field.type,
+    type: field?.esTypes ? field.esTypes[0] : undefined,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,

@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
@@ -27,6 +28,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('increasePopularity');
+      await testSubjects.click('toggleAdvancedSetting');
       await PageObjects.settings.increasePopularity();
     });
 

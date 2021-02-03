@@ -166,7 +166,7 @@ const FieldEditorFlyoutContentComponent = ({
                 <EuiButton
                   color="primary"
                   onClick={onClickSave}
-                  data-test-subj="saveFieldButton"
+                  data-test-subj="fieldSaveButton"
                   fill
                 >
                   {i18nTexts.saveButtonLabel}
