@@ -16,6 +16,9 @@ const LockedPolicyDiv = styled.div`
       width: auto;
     }
   }
+  .euiFlexGroup {
+    padding: 0 ${(props) => props.theme.eui.fractions.thirds.percentage};
+  }
 `;
 
 export const LockedPolicyCard = memo(() => {
