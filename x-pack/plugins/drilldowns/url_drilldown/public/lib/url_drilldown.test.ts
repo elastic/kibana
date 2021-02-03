@@ -5,6 +5,7 @@
  */
 
 import { IExternalUrl } from 'src/core/public';
+import { uiSettingsServiceMock } from 'src/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
@@ -73,6 +74,7 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
   });
   return drilldown;
 };
