@@ -10,12 +10,11 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { SessionsConfigSchema } from '../';
-import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { SearchSessionSavedObjectAttributes } from '../../../../common';
+import { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
-import { UISession } from '../types';
+import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
+import { SessionsConfigSchema } from '..';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -47,7 +46,7 @@ async function getUrlFromState(
 
 // Helper: factory for a function to map server objects to UI objects
 const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
-  savedObject: SavedObject<SearchSessionSavedObjectAttributes>
+  savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
 ): Promise<UISession> => {
   const {
     name,
@@ -109,6 +108,8 @@ export class SearchSessionsMgmtAPI {
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
+        searchFields: ['persisted'],
+        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
@@ -128,7 +129,7 @@ export class SearchSessionsMgmtAPI {
       const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as Array<
-          SavedObject<SearchSessionSavedObjectAttributes>
+          SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
         return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
       }

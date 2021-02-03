@@ -36,6 +36,7 @@ import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -114,6 +115,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   );
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -124,6 +126,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    setJobsAwaitingNodeCount,
     blockRefresh,
     isManagementTable
   );
@@ -261,6 +264,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
       {!isManagementTable && <EuiSpacer size="m" />}
+      <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {!isManagementTable && stats}
         {isManagementTable && managementStats}

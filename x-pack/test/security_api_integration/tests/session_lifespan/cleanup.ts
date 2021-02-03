@@ -15,6 +15,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const randomness = getService('randomness');
   const { username: basicUsername, password: basicPassword } = adminTestUser;
@@ -68,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
-      await es.indices.delete({ index: '.kibana_security_session*' }, { ignore: [404] });
+      await esDeleteAllIndices('.kibana_security_session*');
     });
 
     it('should properly clean up session expired because of lifespan', async function () {
