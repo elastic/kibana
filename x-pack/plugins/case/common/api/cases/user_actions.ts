@@ -21,6 +21,7 @@ const UserActionFieldRt = rt.array(
     rt.literal('title'),
     rt.literal('status'),
     rt.literal('settings'),
+    rt.literal('sub_case'),
   ])
 );
 const UserActionRt = rt.union([

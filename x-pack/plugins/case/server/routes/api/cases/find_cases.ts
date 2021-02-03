@@ -25,7 +25,6 @@ import {
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 import {

@@ -321,13 +321,19 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-const isUserContext = (
+/**
+ * A type narrowing function for user comments. Exporting so integration tests can use it.
+ */
+export const isUserContext = (
   context: CommentRequest | CommentAttributes
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
 
-const isAlertContext = (
+/**
+ * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ */
+export const isAlertContext = (
   context: CommentRequest | CommentAttributes
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;

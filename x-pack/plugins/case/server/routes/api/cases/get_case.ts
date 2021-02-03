@@ -10,6 +10,7 @@ import { CaseResponseRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { flattenCaseSavedObject, wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { countAlertsForID } from '../../../common';
 
 export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
   router.get(
@@ -61,6 +62,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
               savedObject: theCase,
               comments: theComments.saved_objects,
               totalComment: theComments.total,
+              totalAlerts: countAlertsForID({ comments: theComments, id: request.params.case_id }),
             })
           ),
         });

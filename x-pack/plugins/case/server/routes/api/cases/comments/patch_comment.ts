@@ -11,18 +11,13 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
-import {
-  CommentPatchRequestRt,
-  CaseResponseRt,
-  throwErrors,
-  ESCaseAttributes,
-} from '../../../../../common/api';
+import { CommentPatchRequestRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCaseSavedObject, decodeComment } from '../../utils';
+import { escapeHatch, wrapError, decodeComment } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 

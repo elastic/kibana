@@ -119,6 +119,7 @@ export const buildCaseUserActionItem = ({
   fields,
   newValue,
   oldValue,
+  subCaseId,
 }: BuildCaseUserAction): UserActionItem => ({
   attributes: transformNewUserAction({
     actionField: fields as UserActionField,
@@ -134,6 +135,15 @@ export const buildCaseUserActionItem = ({
       name: `associated-${CASE_SAVED_OBJECT}`,
       id: caseId,
     },
+    ...(subCaseId
+      ? [
+          {
+            type: SUB_CASE_SAVED_OBJECT,
+            name: `associated-${SUB_CASE_SAVED_OBJECT}`,
+            id: subCaseId,
+          },
+        ]
+      : []),
   ],
 });
 
@@ -145,6 +155,7 @@ const userActionFieldsAllowed: UserActionField = [
   'title',
   'status',
   'settings',
+  'sub_case',
 ];
 
 export const buildCaseUserActions = ({

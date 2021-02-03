@@ -6,10 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AssociationType, SubCaseResponseRt } from '../../../../../common/api';
+import { SubCaseResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenSubCaseSavedObject, wrapError } from '../../utils';
 import { SUB_CASE_DETAILS_URL } from '../../../../../common/constants';
+import { countAlertsForID } from '../../../../common';
 
 export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -60,6 +61,10 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
               savedObject: subCase,
               comments: theComments.saved_objects,
               totalComment: theComments.total,
+              totalAlerts: countAlertsForID({
+                comments: theComments,
+                id: request.params.sub_case_id,
+              }),
             })
           ),
         });

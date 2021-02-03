@@ -17,7 +17,7 @@ export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
 export const CASE_CONFIGURE_CONNECTOR_DETAILS_URL = `${CASE_CONFIGURE_CONNECTORS_URL}/{connector_id}`;
 export const CASE_CONFIGURE_PUSH_URL = `${CASE_CONFIGURE_CONNECTOR_DETAILS_URL}/push`;
 
-export const SUB_CASES_PATCH_URL = `${CASES_URL}/sub_cases`;
+export const SUB_CASES_PATCH_DEL_URL = `${CASES_URL}/sub_cases`;
 export const SUB_CASES_URL = `${CASE_DETAILS_URL}/sub_cases`;
 export const SUB_CASE_DETAILS_URL = `${CASE_DETAILS_URL}/sub_cases/{sub_case_id}`;
 

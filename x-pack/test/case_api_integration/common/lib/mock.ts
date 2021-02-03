@@ -16,7 +16,17 @@ import {
   CaseStatuses,
   CaseType,
   CaseClientPostRequest,
+  CommentRequestGeneratedAlertType,
+  SubCaseResponse,
+  CommentRequest,
+  AssociationType,
+  CollectionWithSubCaseResponse,
 } from '../../../../plugins/case/common/api';
+import {
+  getAlertIds,
+  isGeneratedAlertContext,
+  isAlertContext,
+} from '../../../../plugins/case/server/routes/api/utils';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
@@ -31,6 +41,14 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+};
+
+/**
+ * The fields for creating a collection style case.
+ */
+export const postCollectionReq: CasePostRequest = {
+  ...postCaseReq,
+  type: CaseType.collection,
 };
 
 /**
@@ -52,6 +70,12 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   type: CommentType.alert,
 };
 
+export const postCommentGenAlertReq: CommentRequestGeneratedAlertType = {
+  alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
+  index: 'test-index',
+  type: CommentType.generatedAlert,
+};
+
 export const postCaseResp = (
   id: string,
   req: CasePostRequest = postCaseReq
@@ -61,13 +85,115 @@ export const postCaseResp = (
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
-  type: CaseType.individual,
+  type: req.type ?? CaseType.individual,
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
   status: CaseStatuses.open,
   updated_by: null,
 });
+
+interface CommentRequestWithID {
+  id: string;
+  comment: CommentRequest;
+}
+
+export const commentsResp = ({
+  comments,
+  associationType,
+}: {
+  comments: CommentRequestWithID[];
+  associationType: AssociationType;
+}): Array<Partial<CommentResponse>> => {
+  return comments.map(({ comment, id }) => {
+    const baseFields = {
+      id,
+      created_by: defaultUser,
+      pushed_at: null,
+      pushed_by: null,
+      updated_by: null,
+    };
+    if (isGeneratedAlertContext(comment)) {
+      return {
+        associationType,
+        alertId: getAlertIds(comment),
+        index: comment.index,
+        type: comment.type,
+        ...baseFields,
+      };
+    } else if (isAlertContext(comment)) {
+      return {
+        associationType,
+        ...comment,
+        ...baseFields,
+      };
+    } else {
+      return {
+        associationType,
+        ...comment,
+        ...baseFields,
+      };
+    }
+  });
+};
+
+export const subCaseResp = ({
+  id,
+  totalAlerts,
+  totalComment,
+  status = CaseStatuses.open,
+}: {
+  id: string;
+  status?: CaseStatuses;
+  totalAlerts: number;
+  totalComment: number;
+}): Partial<SubCaseResponse> => ({
+  status,
+  id,
+  totalAlerts,
+  totalComment,
+  closed_by: null,
+  // TODO: add this
+  // created_by: defaultUser,
+  updated_by: defaultUser,
+});
+
+interface FormattedCollectionResponse {
+  caseInfo: Partial<CaseResponse>;
+  subCase?: Partial<SubCaseResponse>;
+  comments?: Array<Partial<CommentResponse>>;
+}
+
+export const formatCollectionResponse = (
+  caseInfo: CollectionWithSubCaseResponse
+): FormattedCollectionResponse => {
+  return {
+    caseInfo: removeServerGeneratedPropertiesFromCaseCollection(caseInfo),
+    subCase: removeServerGeneratedPropertiesFromSubCase(caseInfo.subCase),
+    comments: removeServerGeneratedPropertiesFromComments(
+      caseInfo.subCase?.comments ?? caseInfo.comments
+    ),
+  };
+};
+
+export const removeServerGeneratedPropertiesFromSubCase = (
+  subCase: Partial<SubCaseResponse> | undefined
+): Partial<SubCaseResponse> | undefined => {
+  if (!subCase) {
+    return;
+  }
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { closed_at, created_at, updated_at, version, comments, ...rest } = subCase;
+  return rest;
+};
+
+export const removeServerGeneratedPropertiesFromCaseCollection = (
+  config: Partial<CollectionWithSubCaseResponse>
+): Partial<CollectionWithSubCaseResponse> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { closed_at, created_at, updated_at, version, subCase, ...rest } = config;
+  return rest;
+};
 
 export const removeServerGeneratedPropertiesFromCase = (
   config: Partial<CaseResponse>
@@ -78,9 +204,9 @@ export const removeServerGeneratedPropertiesFromCase = (
 };
 
 export const removeServerGeneratedPropertiesFromComments = (
-  comments: CommentResponse[]
-): Array<Partial<CommentResponse>> => {
-  return comments.map((comment) => {
+  comments: CommentResponse[] | undefined
+): Array<Partial<CommentResponse>> | undefined => {
+  return comments?.map((comment) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { created_at, updated_at, version, ...rest } = comment;
     return rest;

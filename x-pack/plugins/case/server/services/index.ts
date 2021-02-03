@@ -291,7 +291,7 @@ export class CaseService implements CaseServiceSetup {
   }: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub cases ${ids.join(', ')}`);
-      return await client.bulkGet(ids.map((id) => ({ type: CASE_SAVED_OBJECT, id })));
+      return await client.bulkGet(ids.map((id) => ({ type: SUB_CASE_SAVED_OBJECT, id })));
     } catch (error) {
       this.log.debug(`Error on GET cases ${ids.join(', ')}: ${error}`);
       throw error;

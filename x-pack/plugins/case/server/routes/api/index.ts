@@ -33,6 +33,7 @@ import { RouteDeps } from './types';
 import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
 import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
+import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -47,6 +48,7 @@ export function initCaseApi(deps: RouteDeps) {
   initGetSubCaseApi(deps);
   initPatchSubCasesApi(deps);
   initFindSubCasesApi(deps);
+  initDeleteSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

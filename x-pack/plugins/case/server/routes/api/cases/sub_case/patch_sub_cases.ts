@@ -26,9 +26,8 @@ import {
   ESCaseAttributes,
   SubCaseResponse,
   SubCasesResponseRt,
-  AssociationType,
 } from '../../../../../common/api';
-import { SUB_CASES_PATCH_URL } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
@@ -126,11 +125,13 @@ async function getParentCases({
     caseIds: parentIDInfo.ids,
   });
 
-  const parentCaseErrors = parentCases.saved_objects.find((so) => so.error !== undefined);
+  const parentCaseErrors = parentCases.saved_objects.filter((so) => so.error !== undefined);
 
-  if (parentCaseErrors) {
+  if (parentCaseErrors.length > 0) {
     throw Boom.badRequest(
-      `Unable to find parent cases for sub cases, original error: ${parentCaseErrors.error?.message}`
+      `Unable to find parent cases: ${parentCaseErrors
+        .map((c) => c.id)
+        .join(', ')} for sub cases: ${subCaseIDs.join(', ')}`
     );
   }
 
@@ -322,7 +323,7 @@ async function update({
 export function initPatchSubCasesApi({ router, caseService, userActionService }: RouteDeps) {
   router.patch(
     {
-      path: SUB_CASES_PATCH_URL,
+      path: SUB_CASES_PATCH_DEL_URL,
       validate: {
         body: escapeHatch,
       },

@@ -17,7 +17,7 @@ import { transformESConnectorToCaseConnector } from '../../routes/api/cases/help
 import { flattenCommentSavedObjects, flattenSubCaseSavedObject } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
-import { countAlertsFindResponse } from '../index';
+import { countAlertsForID } from '../index';
 
 interface UserInfo {
   username: string | null | undefined;
@@ -121,7 +121,7 @@ export class CommentableCase {
         subCase: flattenSubCaseSavedObject({
           savedObject: this.subCase,
           comments: subCaseComments.saved_objects,
-          totalAlerts: countAlertsFindResponse(subCaseComments),
+          totalAlerts: countAlertsForID({ comments: subCaseComments, id: this.subCase.id }),
         }),
         ...this.formatCollectionForEncoding(collectionCommentStats.total),
       });
@@ -139,7 +139,7 @@ export class CommentableCase {
 
     return CollectWithSubCaseResponseRt.encode({
       comments: flattenCommentSavedObjects(collectionComments.saved_objects),
-      totalAlerts: countAlertsFindResponse(collectionComments),
+      totalAlerts: countAlertsForID({ comments: collectionComments, id: this.collection.id }),
       ...this.formatCollectionForEncoding(collectionCommentStats.total),
     });
   }

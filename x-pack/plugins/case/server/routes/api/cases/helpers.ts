@@ -33,7 +33,7 @@ import {
 } from '../../../saved_object_types';
 import { flattenSubCaseSavedObject, sortToSnake } from '../utils';
 import { CaseServiceSetup } from '../../../services';
-import { countAlerts } from '../../../common';
+import { groupTotalAlertsByID } from '../../../common';
 
 // TODO: write unit tests for these functions
 export const combineFilters = (filters: string[] | undefined, operator: 'OR' | 'AND'): string => {
@@ -291,22 +291,7 @@ export const getCaseCommentStats = async ({
     return acc;
   }, new Map<string, number>());
 
-  const getFindResultID = (comment: SavedObjectsFindResult<unknown>) => {
-    const refs = comment.references;
-    return refs.length > 0 ? refs.find((ref) => ref.type === refType)?.id : undefined;
-  };
-
-  const groupedAlerts = alerts.saved_objects.reduce((acc, alertsInfo) => {
-    const id = getFindResultID(alertsInfo);
-    if (id) {
-      const totalAlerts = acc.get(id);
-      if (totalAlerts !== undefined) {
-        acc.set(id, totalAlerts + countAlerts(alertsInfo));
-      }
-      acc.set(id, countAlerts(alertsInfo));
-    }
-    return acc;
-  }, new Map<string, number>());
+  const groupedAlerts = groupTotalAlertsByID({ comments: alerts });
   return { commentTotals: groupedComments, alertTotals: groupedAlerts };
 };
 
@@ -359,25 +344,25 @@ export const findSubCases = async ({
   });
 
   const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {
-    const id = getCaseID(subCase);
-    if (id) {
-      const subCaseFromMap = accMap.get(id);
+    const parentCaseID = getCaseID(subCase);
+    if (parentCaseID) {
+      const subCaseFromMap = accMap.get(parentCaseID);
 
       if (subCaseFromMap === undefined) {
         const subCasesForID = [
           flattenSubCaseSavedObject({
             savedObject: subCase,
-            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
-            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+            totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
           }),
         ];
-        accMap.set(id, subCasesForID);
+        accMap.set(parentCaseID, subCasesForID);
       } else {
         subCaseFromMap.push(
           flattenSubCaseSavedObject({
             savedObject: subCase,
-            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
-            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+            totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
           })
         );
       }
