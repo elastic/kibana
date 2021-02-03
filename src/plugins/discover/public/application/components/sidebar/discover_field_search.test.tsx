@@ -136,4 +136,22 @@ describe('DiscoverFieldSearch', () => {
     popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
   });
+
+  test('unmapped fields', () => {
+    const onChangeUnmappedFields = jest.fn();
+    const componentProps = {
+      ...defaultProps,
+      showUnmappedFields: true,
+      useNewFieldsApi: false,
+      onChangeUnmappedFields,
+    };
+    const component = mountComponent(componentProps);
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click');
+    const unmappedFieldsSwitch = findTestSubject(component, 'unmappedFieldsSwitch');
+    act(() => {
+      unmappedFieldsSwitch.simulate('click');
+    });
+    expect(onChangeUnmappedFields).toHaveBeenCalledWith(false);
+  });
 });

@@ -9,7 +9,7 @@ import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
-interface NewJobCapsResponse {
+export interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 

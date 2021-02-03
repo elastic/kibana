@@ -6,57 +6,47 @@
  * Public License, v 1.
  */
 
+import { KibanaServerError } from '../../../../kibana_utils/common';
+
 export interface FailedShard {
   shard: number;
   index: string;
   node: string;
-  reason: {
+  reason: Reason;
+}
+
+export interface Reason {
+  type: string;
+  reason: string;
+  script_stack?: string[];
+  position?: {
+    offset: number;
+    start: number;
+    end: number;
+  };
+  lang?: string;
+  script?: string;
+  caused_by?: {
     type: string;
     reason: string;
-    script_stack: string[];
-    script: string;
-    lang: string;
-    position: {
-      offset: number;
-      start: number;
-      end: number;
-    };
-    caused_by: {
-      type: string;
-      reason: string;
-    };
   };
 }
 
-export interface IEsError {
-  body: {
-    statusCode: number;
-    error: string;
-    message: string;
-    attributes?: {
-      error?: {
-        root_cause?: [
-          {
-            lang: string;
-            script: string;
-          }
-        ];
-        type: string;
-        reason: string;
-        failed_shards: FailedShard[];
-        caused_by: {
-          type: string;
-          reason: string;
-          phase: string;
-          grouped: boolean;
-          failed_shards: FailedShard[];
-          script_stack: string[];
-        };
-      };
-    };
-  };
+export interface IEsErrorAttributes {
+  type: string;
+  reason: string;
+  root_cause?: Reason[];
+  failed_shards?: FailedShard[];
 }
 
+export type IEsError = KibanaServerError<IEsErrorAttributes>;
+
+/**
+ * Checks if a given errors originated from Elasticsearch.
+ * Those params are assigned to the attributes property of an error.
+ *
+ * @param e
+ */
 export function isEsError(e: any): e is IEsError {
-  return !!e.body?.attributes;
+  return !!e.attributes;
 }

@@ -17,12 +17,15 @@ import {
 } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedLayerState } from './types';
+import { PieVisualizationState, SharedPieLayerState } from './types';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { PalettePicker } from '../shared_components';
 
-const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
+const numberOptions: Array<{
+  value: SharedPieLayerState['numberDisplay'];
+  inputDisplay: string;
+}> = [
   {
     value: 'hidden',
     inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
@@ -44,7 +47,7 @@ const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisp
 ];
 
 const categoryOptions: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -68,7 +71,7 @@ const categoryOptions: Array<{
 ];
 
 const categoryOptionsTreemap: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -86,7 +89,7 @@ const categoryOptionsTreemap: Array<{
 ];
 
 const legendOptions: Array<{
-  value: SharedLayerState['legendDisplay'];
+  value: SharedPieLayerState['legendDisplay'];
   label: string;
   id: string;
 }> = [

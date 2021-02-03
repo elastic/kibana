@@ -26,10 +26,6 @@ export const BootstrapCommand: ICommand = {
   async run(projects, projectGraph, { options, kbn, rootPath }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path;
-    const extraArgs = [
-      ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
-      ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
-    ];
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
@@ -44,7 +40,7 @@ export const BootstrapCommand: ICommand = {
         }
 
         if (project.isSinglePackageJsonProject || isExternalPlugin) {
-          await project.installDependencies({ extraArgs });
+          await project.installDependencies();
           continue;
         }
 

@@ -34,6 +34,7 @@ export type MapContext = {
   refreshConfig?: MapRefreshConfig;
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
+  searchSessionId?: string;
 };
 
 export type MapSettings = {

@@ -81,4 +81,21 @@ describe('ExpressionRow', () => {
       wrapper.html().match('<span class="euiExpression__value">0.5</span>') ?? [];
     expect(valueMatch).toBeTruthy();
   });
+
+  it('should render a helpText for the of expression', async () => {
+    const expression = {
+      metric: 'system.load.1',
+      comparator: Comparator.GT,
+      threshold: [0.5],
+      timeSize: 1,
+      timeUnit: 'm',
+      aggType: 'avg',
+    } as MetricExpression;
+
+    const { wrapper } = await setup(expression as MetricExpression);
+
+    const helpText = wrapper.find('[data-test-subj="ofExpression"]').prop('helpText');
+
+    expect(helpText).toMatchSnapshot();
+  });
 });

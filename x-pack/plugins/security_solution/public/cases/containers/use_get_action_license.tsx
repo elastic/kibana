@@ -23,6 +23,8 @@ export const initialData: ActionLicenseState = {
   isError: false,
 };
 
+const MINIMUM_LICENSE_REQUIRED_CONNECTOR = '.jira';
+
 export const useGetActionLicense = (): ActionLicenseState => {
   const [actionLicenseState, setActionLicensesState] = useState<ActionLicenseState>(initialData);
 
@@ -40,7 +42,8 @@ export const useGetActionLicense = (): ActionLicenseState => {
         const response = await getActionLicense(abortCtrl.signal);
         if (!didCancel) {
           setActionLicensesState({
-            actionLicense: response.find((l) => l.id === '.servicenow') ?? null,
+            actionLicense:
+              response.find((l) => l.id === MINIMUM_LICENSE_REQUIRED_CONNECTOR) ?? null,
             isLoading: false,
             isError: false,
           });

@@ -9,13 +9,11 @@
 import { IEsSearchRequest } from 'src/plugins/data/server';
 import { schema } from '@kbn/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
-import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import type { IRouter } from 'src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
-export function registerServerSearchRoute(
-  router: IRouter<RequestHandlerContext & { search: DataApiRequestHandlerContext }>
-) {
+export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
     {
       path: SERVER_SEARCH_ROUTE_PATH,

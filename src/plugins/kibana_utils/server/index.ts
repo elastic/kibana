@@ -18,4 +18,4 @@ export {
   url,
 } from '../common';
 
-export { KbnServerError, reportServerError } from './report_server_error';
+export { KbnServerError, reportServerError, getKbnServerError } from './report_server_error';
