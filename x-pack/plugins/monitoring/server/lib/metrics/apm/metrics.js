@@ -44,9 +44,9 @@ export const metrics = {
     ...ApmMetric.getMetricFields(),
     fieldSource: 'beats_stats.metrics.beat.cgroup',
     usageField: 'cpuacct.total.ns',
-    periodsField: 'cpu.cfs.period.us',
+    periodsField: 'cpu.stats.periods',
     quotaField: 'cpu.cfs.quota.us',
-    field: 'node_stats.process.cpu.percent', // backup field if quota is not configured
+    field: 'beats_stats.metrics.beat.cpu.total.value', // backup field if quota is not configured
     title: i18n.translate('xpack.monitoring.metrics.apmInstance.cpuUtilizationTitle', {
       defaultMessage: 'CPU Utilization',
     }),

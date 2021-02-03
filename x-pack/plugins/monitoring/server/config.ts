@@ -34,6 +34,9 @@ export const configSchema = schema.object({
     }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
+    apm: schema.object({
+      agent_mode: schema.boolean({ defaultValue: false }),
+    }),
     container: schema.object({
       elasticsearch: schema.object({
         enabled: schema.boolean({ defaultValue: false }),

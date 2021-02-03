@@ -17,7 +17,11 @@ import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
-export function handleResponse(response: ElasticsearchResponse, apmUuid: string) {
+export function handleResponse(
+  response: ElasticsearchResponse,
+  apmUuid: string,
+  config: { get: (key: string) => string | undefined }
+) {
   if (!response.hits || response.hits.hits.length === 0) {
     return {};
   }
@@ -58,6 +62,10 @@ export function handleResponse(response: ElasticsearchResponse, apmUuid: string)
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
     bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    config: {
+      container: config.get('monitoring.ui.container.apm.enabled'),
+      agentMode: config.get('monitoring.ui.apm.agent_mode'),
+    },
   };
 }
 
@@ -77,6 +85,8 @@ export async function getApmInfo(
   }
 ) {
   checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');
+
+  const config = req.server.config();
 
   const filters = [
     { term: { 'beats_stats.beat.uuid': apmUuid } },
@@ -137,7 +147,7 @@ export async function getApmInfo(
     }),
   ]);
 
-  const formattedResponse = handleResponse(response, apmUuid);
+  const formattedResponse = handleResponse(response, apmUuid, config);
   return {
     ...formattedResponse,
     timeOfLastEvent,

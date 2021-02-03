@@ -243,6 +243,7 @@ export async function getClustersFromRequest(
   apmsByCluster.forEach((apm) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
     set(clusters[clusterIndex], 'apm', apm.stats);
+    set(clusters[clusterIndex], 'apm.config', apm.config);
   });
 
   // check ccr configuration
