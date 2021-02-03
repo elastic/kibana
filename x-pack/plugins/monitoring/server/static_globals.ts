@@ -17,7 +17,21 @@ interface IAppGlobals {
   monitoringCluster: ILegacyCustomClusterClient;
   config: MonitoringConfig;
   getLogger: GetLogger;
+  getKeyStoreValue: (key: string, storeValueMethod?: () => unknown) => unknown;
 }
+
+interface KeyStoreData {
+  [key: string]: unknown;
+}
+
+const keyStoreData: KeyStoreData = {};
+const getKeyStoreValue = (key: string, storeValueMethod?: () => unknown) => {
+  const value = keyStoreData[key];
+  if ((value === undefined || value == null) && typeof storeValueMethod === 'function') {
+    keyStoreData[key] = storeValueMethod();
+  }
+  return keyStoreData[key];
+};
 
 export class Globals {
   private static _app: IAppGlobals;
@@ -37,6 +51,7 @@ export class Globals {
       monitoringCluster,
       config,
       getLogger,
+      getKeyStoreValue,
     };
   }
 

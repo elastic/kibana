@@ -11,7 +11,12 @@ export const ListWithKuerySchema = schema.object({
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
   showUpgradeable: schema.maybe(schema.boolean()),
-  kuery: schema.maybe(schema.string()),
+  kuery: schema.maybe(
+    schema.oneOf([
+      schema.string(),
+      schema.any(), // KueryNode
+    ])
+  ),
 });
 
 export type ListWithKuery = TypeOf<typeof ListWithKuerySchema>;
