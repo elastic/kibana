@@ -18,6 +18,8 @@ import { timelineActions } from '../../../store/timeline';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { sourcererSelectors } from '../../../../common/store';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -35,6 +37,12 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+
   const handleClick = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
@@ -42,12 +50,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
         timelineId,
         event: {
           eventId,
-          // we don't store yet info about event index name in note
-          indexName: '',
+          indexName: existingIndexNames.join(','),
         },
       })
     );
-  }, [dispatch, eventId, timelineId]);
+  }, [dispatch, eventId, existingIndexNames, timelineId]);
 
   return (
     <EuiButtonIcon

@@ -5,7 +5,6 @@
  */
 
 import { bisector } from 'd3-array';
-
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
 import { LogEntry } from '../../../../common/log_entry';
 
