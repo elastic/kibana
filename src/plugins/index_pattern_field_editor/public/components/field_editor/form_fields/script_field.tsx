@@ -18,6 +18,7 @@ import {
   RuntimeType,
   FieldConfig,
   CodeEditor,
+  ValidationError,
 } from '../../../shared_imports';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
@@ -50,6 +51,8 @@ const typeConfig = schema.type! as FieldConfig<RuntimeType>;
 const defaultType = typeConfig.defaultValue!;
 
 export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
+  let editorValidationTimeout: ReturnType<typeof setTimeout>;
+
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(
     mapReturnTypeToPainlessContext(defaultType)
   );
@@ -61,13 +64,34 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
 
   const [{ type }] = useFormData<FieldFormInternal>({ watch: 'type' });
 
+  const validateScript = (setErrors: (errors: Array<ValidationError<string>>) => void) => {
+    // monaco waits 500ms before validating, so we also add a delay
+    // before checking if there are any syntax errors
+    clearTimeout(editorValidationTimeout);
+    editorValidationTimeout = setTimeout(() => {
+      const hasSyntaxError = PainlessLang.hasSyntaxError();
+      if (hasSyntaxError) {
+        setErrors([
+          {
+            message: i18n.translate(
+              'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
+              {
+                defaultMessage: 'Invalid Painless syntax.',
+              }
+            ),
+          },
+        ]);
+      }
+    }, 600);
+  };
+
   useEffect(() => {
     setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
   }, [type]);
 
   return (
     <UseField<string> path="script.source">
-      {({ value, setValue, label, isValid, getErrorsMessages }) => {
+      {({ value, setValue, label, isValid, getErrorsMessages, setErrors }) => {
         return (
           <EuiFormRow
             label={label}
@@ -105,7 +129,10 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
               width="100%"
               height="300px"
               value={value}
-              onChange={setValue}
+              onChange={(newValue) => {
+                setValue(newValue);
+                validateScript(setErrors);
+              }}
               options={{
                 fontSize: 12,
                 minimap: {

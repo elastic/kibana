@@ -33,8 +33,14 @@ export const getSuggestionProvider = (
   return new PainlessCompletionAdapter(worker, editorStateService);
 };
 
+let diagnosticsAdapter: DiagnosticsAdapter;
+
+export const hasSyntaxError = (): boolean => {
+  return diagnosticsAdapter.hasSyntaxError();
+};
+
 monaco.languages.onLanguage(ID, async () => {
   workerProxyService.setup();
 
-  new DiagnosticsAdapter(worker);
+  diagnosticsAdapter = new DiagnosticsAdapter(worker);
 });
