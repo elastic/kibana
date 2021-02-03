@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
 import { Datafeed } from './datafeed';
 import { DatafeedStats } from './datafeed_stats';
 import { Job } from './job';
@@ -23,16 +22,6 @@ export interface CombinedJob extends Job {
 export interface CombinedJobWithStats extends JobWithStats {
   calendars?: string[];
   datafeed_config: DatafeedWithStats;
-}
-
-export function expandCombinedJobConfig(combinedJob: CombinedJob) {
-  const combinedJobClone = cloneDeep(combinedJob);
-  const job = combinedJobClone;
-  const datafeed = combinedJobClone.datafeed_config;
-  // @ts-expect-error
-  delete job.datafeed_config;
-
-  return { job, datafeed };
 }
 
 export function isCombinedJobWithStats(arg: any): arg is CombinedJobWithStats {

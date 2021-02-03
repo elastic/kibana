@@ -17,18 +17,20 @@ const NodeDetailsDataPointRT = rt.intersection([
   }),
 ]);
 
-const NodeDetailsDataSeries = rt.type({
+const NodeDetailsDataSeriesRT = rt.type({
   id: rt.string,
   label: rt.string,
   data: rt.array(NodeDetailsDataPointRT),
 });
+
+export type NodeDetailsDataSeries = rt.TypeOf<typeof NodeDetailsDataSeriesRT>;
 
 export const NodeDetailsMetricDataRT = rt.intersection([
   rt.partial({
     id: rt.union([InventoryMetricRT, rt.null]),
   }),
   rt.type({
-    series: rt.array(NodeDetailsDataSeries),
+    series: rt.array(NodeDetailsDataSeriesRT),
   }),
 ]);
 

@@ -8,7 +8,7 @@ import { ApplicationStart } from 'kibana/public';
 import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
-import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
@@ -16,11 +16,11 @@ export async function preConfiguredJobRedirect(
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
-  const { job } = mlJobService.tempJobCloningObjects;
-  if (job) {
+  const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
+  if (job && datafeed) {
     try {
       await loadIndexPatterns(indexPatterns);
-      const redirectUrl = getWizardUrlFromCloningJob(job);
+      const redirectUrl = getWizardUrlFromCloningJob(createdBy, job, datafeed);
       await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
@@ -33,8 +33,8 @@ export async function preConfiguredJobRedirect(
   }
 }
 
-function getWizardUrlFromCloningJob(job: CombinedJob) {
-  const created = job?.custom_settings?.created_by;
+function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, datafeed: Datafeed) {
+  const created = createdBy;
   let page = '';
 
   switch (created) {
@@ -55,7 +55,7 @@ function getWizardUrlFromCloningJob(job: CombinedJob) {
       break;
   }
 
-  const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices.join());
+  const indexPatternId = getIndexPatternIdFromName(datafeed.indices.join());
 
   return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
 }
