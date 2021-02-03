@@ -5,10 +5,10 @@
  * compliance with, at your election, the Elastic License or the Server Side
  * Public License, v 1.
  */
-import { Discover } from './discover';
+import { DiscoverMemoized } from './discover';
 
 export function createDiscoverDirective(reactDirective: any) {
-  return reactDirective(Discover, [
+  return reactDirective(DiscoverMemoized, [
     ['fetch', { watchDepth: 'reference' }],
     ['fetchCounter', { watchDepth: 'reference' }],
     ['fetchError', { watchDepth: 'reference' }],
