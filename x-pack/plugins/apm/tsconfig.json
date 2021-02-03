@@ -35,7 +35,7 @@
     //    { "path": "../infra/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
-    //    { "path": "../ml/tsconfig.json" },
+    { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../reporting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
