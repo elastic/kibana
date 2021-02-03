@@ -121,6 +121,8 @@ describe('When on the Trusted Apps Page', () => {
     window.scrollTo = jest.fn();
   });
 
+  afterEach(() => reactTestingLibrary.cleanup());
+
   describe('and there is trusted app entries', () => {
     const renderWithListData = async () => {
       const renderResult = render();
