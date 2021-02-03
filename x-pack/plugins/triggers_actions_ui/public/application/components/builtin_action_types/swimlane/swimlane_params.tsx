@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as i18n2 from './translations';
 import { ActionParamsProps } from '../../../../types';
 import { SwimlaneActionParams } from './types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { useKibana } from '../../../../common/lib/kibana';
+import { getApplication } from './api';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
   actionConnector,
@@ -20,9 +23,106 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   errors,
 }) => {
   const { alertName, severity, caseId, alertSource, caseName, comments } = actionParams;
+  const { config } = actionConnector as PreCo;
+  const { appId } = config;
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
+  const [isLoading, setLoading] = useState(false);
+  const [options, setOptions] = useState([] as Array<{ label: string; value: string }>);
+
+  const abortCtrl = useRef(new AbortController());
+
+  const onSearchChange = useCallback(
+    (searchValue) => {
+      setLoading(true);
+      setOptions([]);
+
+      const didCancel = false;
+
+      const fetchData = async () => {
+        // if (!apiToken || !apiUrl || !appId) {
+        //   setLoading(false);
+        //   return;
+        // }
+
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        try {
+          const res = await getApplication({
+            http,
+            signal: abortCtrl.current.signal,
+            connectorId: actionConnector.id || '',
+            id: appId,
+          });
+          if (!didCancel) {
+            setLoading(false);
+            const application = res.data?.application;
+            if (application?.fields) {
+              const applicationFields = application.fields;
+              const fieldMap = applicationFields.map((f: { id: string; key: string }) => ({
+                value: f.id,
+                label: f.key,
+              }));
+              setOptions(fieldMap);
+            }
+            if (res.status && res.status === 'error') {
+              toasts.addDanger({
+                title: i18n2.SW_GET_APPLICATION_API_ERROR(appId),
+                text: `${res.serviceMessage ?? res.message}`,
+              });
+            }
+          }
+        } catch (error) {
+          if (!didCancel) {
+            setLoading(false);
+            toasts.addDanger({
+              title: i18n2.SW_GET_APPLICATION_API_ERROR(appId),
+              text: error.message,
+            });
+          }
+        }
+      };
+
+      abortCtrl.current.abort();
+      fetchData();
+    },
+    [toasts, actionConnector, appId, http]
+  );
+
+  useEffect(() => {
+    // Simulate initial load.
+    onSearchChange('');
+  }, [onSearchChange]);
 
   return (
     <Fragment>
+      <EuiFormRow
+        id="caseNameKeyName"
+        fullWidth
+        label={i18n2.SW_CASE_NAME_KEY_NAME_TEXT_FIELD_LABEL}
+      >
+        <EuiComboBox
+          fullWidth
+          isLoading={isLoading}
+          isDisabled={isLoading}
+          // name="caseNameKeyName"
+          // value={mappings.caseNameKeyName.fieldKey}
+          options={options}
+          singleSelection={true}
+          // readOnly={readOnly}
+          // required={false}
+          data-test-subj="swimlaneCaseNameKeyNameInput"
+          onSearchChange={onSearchChange}
+          // onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          //   editMappings('caseNameKeyName', e.target.value);
+          // }}
+        />
+      </EuiFormRow>
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
