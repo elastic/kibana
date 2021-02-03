@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-  expectedAsyncError,
-} from '../../../__mocks__';
+import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
 }));
+
+import { nextTick } from '@kbn/test/jest';
 
 import { EngineOverviewLogic } from './';
 
@@ -85,11 +82,10 @@ describe('EngineOverviewLogic', () => {
       it('fetches data and calls onPollingSuccess', async () => {
         mount();
         jest.spyOn(EngineOverviewLogic.actions, 'onPollingSuccess');
-        const promise = Promise.resolve(mockEngineMetrics);
-        http.get.mockReturnValueOnce(promise);
+        http.get.mockReturnValueOnce(Promise.resolve(mockEngineMetrics));
 
         EngineOverviewLogic.actions.pollForOverviewMetrics();
-        await promise;
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/overview');
         expect(EngineOverviewLogic.actions.onPollingSuccess).toHaveBeenCalledWith(
@@ -99,11 +95,10 @@ describe('EngineOverviewLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occurred');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occurred'));
 
         EngineOverviewLogic.actions.pollForOverviewMetrics();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occurred');
       });

@@ -12,7 +12,7 @@ import { ToolTipShortcut } from '../../tool_tip_shortcut';
 import { ComponentStrings } from '../../../../i18n';
 const { WorkpadHeaderRefreshControlSettings: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   doRefresh: MouseEventHandler<HTMLButtonElement>;
   inFlight: boolean;
 }

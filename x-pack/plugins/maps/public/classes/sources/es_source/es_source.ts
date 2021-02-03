@@ -57,6 +57,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -64,6 +65,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object>;
 }
 
@@ -151,17 +153,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async _runEsQuery({
+    registerCancelCallback,
+    requestDescription,
     requestId,
     requestName,
-    requestDescription,
+    searchSessionId,
     searchSource,
-    registerCancelCallback,
   }: {
+    registerCancelCallback: (callback: () => void) => void;
+    requestDescription: string;
     requestId: string;
     requestName: string;
-    requestDescription: string;
+    searchSessionId?: string;
     searchSource: ISearchSource;
-    registerCancelCallback: (callback: () => void) => void;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -172,6 +176,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,
+        searchSessionId,
       });
     }
 
@@ -186,7 +191,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           }
         });
       }
-      resp = await searchSource.fetch({ abortSignal: abortController.signal });
+      resp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+      });
       if (inspectorRequest) {
         const responseStats = search.getResponseInspectorStats(resp, searchSource);
         inspectorRequest.stats(responseStats).ok({ json: resp });
@@ -404,6 +412,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -411,6 +420,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
@@ -456,6 +466,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
         }
       ),
+      searchSessionId,
     });
 
     return resp.aggregations;
