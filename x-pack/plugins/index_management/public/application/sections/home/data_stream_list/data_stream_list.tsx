@@ -52,7 +52,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const {
     core: { getUrlForApp },
-    plugins: { fleet },
+    plugins: { isFleetEnabled },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
@@ -203,7 +203,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {fleet ? (
+            {isFleetEnabled ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."

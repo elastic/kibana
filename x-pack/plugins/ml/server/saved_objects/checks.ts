@@ -33,7 +33,7 @@ interface JobStatus {
   };
 }
 
-interface StatusResponse {
+export interface StatusResponse {
   savedObjects: {
     [type in JobType]: JobSavedObjectStatus[];
   };
