@@ -6,9 +6,12 @@
  * Public License, v 1.
  */
 
+import { FunctionComponent } from 'react';
+
 import { OpenFieldEditorOptions } from './open_editor';
 import { RuntimeType } from './shared_imports';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
+import { DeleteProviderProps } from './components/delete_field_provider';
 
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
@@ -20,6 +23,7 @@ export interface PluginStart {
   userPermissions: {
     editIndexPattern: () => boolean;
   };
+  DeleteRuntimeFieldProvider: FunctionComponent<DeleteProviderProps>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
