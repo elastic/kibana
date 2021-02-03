@@ -72,7 +72,7 @@ export const useSourceViaHttp = ({
   const createDerivedIndexPattern = useCallback(
     (indexType: 'logs' | 'metrics' | 'both' = type) => {
       return {
-        fields: response?.source ? response.status.indexFields : [],
+        fields: response?.source.status ? response.source.status.indexFields : [],
         title: pickIndexPattern(response?.source, indexType),
       };
     },
@@ -80,7 +80,7 @@ export const useSourceViaHttp = ({
   );
 
   const source = useMemo(() => {
-    return response ? { ...response.source, status: response.status } : null;
+    return response ? response.source : null;
   }, [response]);
 
   return {

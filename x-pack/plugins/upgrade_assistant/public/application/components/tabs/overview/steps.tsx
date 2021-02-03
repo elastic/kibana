@@ -19,22 +19,21 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../../../common/version';
 import { UpgradeAssistantTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { useAppContext } from '../../../app_context';
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
-const WAIT_FOR_RELEASE_STEP = {
+const WAIT_FOR_RELEASE_STEP = (majorVersion: number, nextMajorVersion: number) => ({
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
     defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release',
     values: {
-      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
+      nextEsVersion: `${nextMajorVersion}.0`,
     },
   }),
   children: (
-    <Fragment>
+    <>
       <EuiText grow={false}>
         <p>
           <FormattedMessage
@@ -42,15 +41,15 @@ const WAIT_FOR_RELEASE_STEP = {
             defaultMessage="Once the release is out, upgrade to the latest {currentEsMajorVersion} version, and then
               return here to proceed with your {nextEsMajorVersion} upgrade."
             values={{
-              currentEsMajorVersion: `${CURRENT_MAJOR_VERSION}.x`, // use "0.x" notation to imply the last minor
-              nextEsMajorVersion: `${NEXT_MAJOR_VERSION}.0`,
+              currentEsMajorVersion: `${majorVersion}.x`, // use "0.x" notation to imply the last minor
+              nextEsMajorVersion: `${nextMajorVersion}.0`,
             }}
           />
         </p>
       </EuiText>
-    </Fragment>
+    </>
   ),
-};
+});
 
 // Swap in this step for the one above it on the last minor release.
 // @ts-ignore
@@ -100,10 +99,12 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
   }, {} as { [checkupType: string]: number });
 
   // Uncomment when START_UPGRADE_STEP is in use!
-  const { docLinks, http /* , isCloudEnabled */ } = useAppContext();
+  const { kibanaVersionInfo, docLinks, http /* , isCloudEnabled */ } = useAppContext();
 
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+
+  const { currentMajor, nextMajor } = kibanaVersionInfo;
 
   return (
     <EuiSteps
@@ -254,7 +255,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
                           />
                         </EuiLink>
                       ),
-                      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
+                      nextEsVersion: `${nextMajor}.0`,
                     }}
                   />
                 </p>
@@ -278,7 +279,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
         },
 
         // Swap in START_UPGRADE_STEP on the last minor release.
-        WAIT_FOR_RELEASE_STEP,
+        WAIT_FOR_RELEASE_STEP(currentMajor, nextMajor),
         // START_UPGRADE_STEP(isCloudEnabled, esDocBasePath),
       ]}
     />
