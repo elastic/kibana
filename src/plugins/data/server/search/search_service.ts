@@ -328,7 +328,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
     this.cancelSessionSearches(deps, sessionId);
-    const response = await deps.searchSessionsClient.delete(sessionId);
+    return deps.searchSessionsClient.delete(sessionId);
   };
 
   private extendSession = async (
