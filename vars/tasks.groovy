@@ -51,7 +51,7 @@ def functionalOss(Map params = [:]) {
 
     if (config.ciGroups) {
       def ciGroups = 1..12
-      tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it) })
+      tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
     }
 
     if (config.firefox) {
@@ -92,7 +92,7 @@ def functionalXpack(Map params = [:]) {
 
     if (config.ciGroups) {
       def ciGroups = 1..13
-      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
+      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
     }
 
     if (config.firefox) {
