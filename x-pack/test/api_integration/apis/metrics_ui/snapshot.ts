@@ -7,10 +7,6 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import {
-  InfraSnapshotMetricInput,
-  InfraNodeType,
-} from '../../../../plugins/infra/server/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   SnapshotNodeResponse,
@@ -39,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('infra/6.6.0/docker'));
       after(() => esArchiver.unload('infra/6.6.0/docker'));
 
-      it('should basically work', () => {
+      it('should basically work', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -47,8 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'container' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'container',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -86,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
       after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
 
-      it("should use the id for the label when the name doesn't exist", () => {
+      it("should use the id for the label when the name doesn't exist", async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -94,8 +90,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'pod' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'pod',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -118,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
       });
-      it('should have an id and label', () => {
+      it('should have an id and label', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -126,8 +122,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'container' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'container',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -157,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('infra/7.0.0/hosts'));
       after(() => esArchiver.unload('infra/7.0.0/hosts'));
 
-      it('should basically work', () => {
+      it('should basically work', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -165,8 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -193,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should allow for overrides for interval and ignoring lookback', () => {
+      it('should allow for overrides for interval and ignoring lookback', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -203,8 +199,8 @@ export default function ({ getService }: FtrProviderContext) {
             forceInterval: true,
             ignoreLookback: true,
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -229,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should allow for overrides for lookback', () => {
+      it('should allow for overrides for lookback', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -238,8 +234,8 @@ export default function ({ getService }: FtrProviderContext) {
             interval: '1m',
             lookbackSize: 6,
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -277,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: '1',
             },
           ] as SnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          nodeType: 'host',
           groupBy: [],
         });
 
@@ -303,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('should basically work with 1 grouping', () => {
+      it('should basically work with 1 grouping', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -311,8 +307,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [{ field: 'cloud.availability_zone' }],
         });
         return resp.then((data) => {
@@ -330,7 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should basically work with 2 groupings', () => {
+      it('should basically work with 2 groupings', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -338,8 +334,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
         });
 
@@ -359,7 +355,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should show metrics for all nodes when grouping by service type', () => {
+      it('should show metrics for all nodes when grouping by service type', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -367,8 +363,8 @@ export default function ({ getService }: FtrProviderContext) {
             from: min,
             interval: '1m',
           },
-          metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
-          nodeType: 'host' as InfraNodeType,
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
           groupBy: [{ field: 'service.type' }],
         });
         return resp.then((data) => {
