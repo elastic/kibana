@@ -6,7 +6,8 @@
  * Public License, v 1.
  */
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
+import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
@@ -18,25 +19,39 @@ export function createIndexDocRecordsStream(
   useCreate: boolean = false
 ) {
   async function indexDocs(docs: any[]) {
-    const body: any[] = [];
     const operation = useCreate === true ? 'create' : 'index';
-    docs.forEach((doc) => {
-      stats.indexedDoc(doc.index);
-      body.push(
-        {
+    const ops = new WeakMap<any, any>();
+    const errors: string[] = [];
+
+    await client.helpers.bulk({
+      retries: 5,
+      datasource: docs.map((doc) => {
+        const body = doc.source;
+        ops.set(body, {
           [operation]: {
             _index: doc.index,
             _type: doc.type,
             _id: doc.id,
           },
-        },
-        doc.source
-      );
+        });
+        return body;
+      }),
+      onDocument(doc) {
+        return ops.get(doc);
+      },
+      onDrop(dropped) {
+        const dj = JSON.stringify(dropped.document);
+        const ej = JSON.stringify(dropped.error);
+        errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+      },
     });
 
-    const resp = await client.bulk({ requestTimeout: 2 * 60 * 1000, body });
-    if (resp.errors) {
-      throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
+    if (errors.length) {
+      throw new AggregateError(errors);
+    }
+
+    for (const doc of docs) {
+      stats.indexedDoc(doc.index);
     }
   }
 

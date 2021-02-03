@@ -9,7 +9,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -92,7 +92,10 @@ export function createCreateIndexStream({
           return;
         }
 
-        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          err?.meta?.body?.error?.type !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 
