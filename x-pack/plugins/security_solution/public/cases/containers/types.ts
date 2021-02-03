@@ -51,7 +51,8 @@ export interface CaseExternalService {
   externalTitle: string;
   externalUrl: string;
 }
-export interface Case {
+
+interface BasicCase {
   id: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
@@ -71,6 +72,11 @@ export interface Case {
   updatedBy: ElasticUser | null;
   version: string;
   settings: CaseAttributes['settings'];
+}
+
+export type SubCase = BasicCase;
+export interface Case extends BasicCase {
+  subCases?: SubCase[] | null;
 }
 
 export interface QueryParams {

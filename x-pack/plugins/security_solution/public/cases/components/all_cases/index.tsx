@@ -328,10 +328,8 @@ export const AllCases = React.memo<AllCasesProps>(
         getExpandedRowMap({
           columns: memoizedGetCasesColumns,
           data: data.cases,
-          isModal,
-          userCanCrud,
         }),
-      [data.cases, isModal, memoizedGetCasesColumns, userCanCrud]
+      [data.cases, memoizedGetCasesColumns]
     );
 
     const memoizedPagination = useMemo(

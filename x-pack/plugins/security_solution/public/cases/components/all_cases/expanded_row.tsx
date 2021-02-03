@@ -33,19 +33,15 @@ BasicTable.displayName = 'BasicTable';
 export const getExpandedRowMap = ({
   data = cases, // mock
   columns,
-  isModal = false,
-  userCanCrud,
 }: {
   data: Case[] | null;
   columns: CasesColumns[];
-  isModal: boolean;
-  userCanCrud: boolean;
 }): ExpandedRowMap => {
   if (data == null) {
     return {};
   }
 
-  return [...data].reduce((acc, curr) => {
+  return data.reduce((acc, curr) => {
     curr.subCases = [basicCase, basicCase]; // MOCK data
     if (curr.subCases != null) {
       return {
