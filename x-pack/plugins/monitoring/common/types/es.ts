@@ -97,6 +97,29 @@ export interface ElasticsearchNodeStats {
   };
 }
 
+export interface ElasticsearchIndexStats {
+  index?: string;
+  primaries?: {
+    docs?: {
+      count?: number;
+    };
+    store?: {
+      size_in_bytes?: number;
+    };
+    indexing?: {
+      index_total?: number;
+    };
+  };
+  total?: {
+    store?: {
+      size_in_bytes?: number;
+    };
+    search?: {
+      query_total?: number;
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -243,28 +266,7 @@ export interface ElasticsearchLegacySource {
       name?: string;
     };
   };
-  index_stats?: {
-    index?: string;
-    primaries?: {
-      docs?: {
-        count?: number;
-      };
-      store?: {
-        size_in_bytes?: number;
-      };
-      indexing?: {
-        index_total?: number;
-      };
-    };
-    total?: {
-      store?: {
-        size_in_bytes?: number;
-      };
-      search?: {
-        query_total?: number;
-      };
-    };
-  };
+  index_stats?: ElasticsearchIndexStats;
   node_stats?: ElasticsearchNodeStats;
   service?: {
     address?: string;

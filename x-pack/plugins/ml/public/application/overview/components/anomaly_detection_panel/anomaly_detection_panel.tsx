@@ -51,9 +51,10 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const {
     services: { notifications },
   } = useMlKibana();
@@ -84,10 +85,14 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const loadJobs = async () => {
     setIsLoading(true);
 
+    let lazyJobCount = 0;
     try {
       const jobsResult: MlSummaryJobs = await ml.jobs.jobsSummary([]);
       const jobsSummaryList = jobsResult.map((job: MlSummaryJob) => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
+        if (job.awaitingNodeAssignment) {
+          lazyJobCount++;
+        }
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
@@ -100,6 +105,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
       setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
       loadMaxAnomalyScores(jobsGroups);
+      setLazyJobCount(lazyJobCount);
     } catch (e) {
       setErrorMessage(e.message !== undefined ? e.message : JSON.stringify(e));
       setIsLoading(false);
