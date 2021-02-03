@@ -92,7 +92,18 @@ export const registerResolveImportErrorsRoute = (
         });
       }
 
-      const { importer } = context.core.savedObjects;
+      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
+
+      const includedHiddenTypes = req.body.retries
+        .map((retry) => retry.type)
+        .filter(
+          (supportedType) =>
+            typeRegistry.isHidden(supportedType) &&
+            typeRegistry.isImportableAndExportable(supportedType)
+        );
+
+      const client = getClient({ includedHiddenTypes });
+      const importer = getImporter(client);
 
       try {
         const result = await importer.resolveImportErrors({

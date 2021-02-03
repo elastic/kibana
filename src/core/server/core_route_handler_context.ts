@@ -15,6 +15,7 @@ import {
   ISavedObjectTypeRegistry,
   ISavedObjectsExporter,
   ISavedObjectsImporter,
+  SavedObjectsClientProviderOptions,
 } from './saved_objects';
 import {
   InternalElasticsearchServiceStart,
@@ -75,19 +76,23 @@ class CoreSavedObjectsRouteHandlerContext {
     return this.#typeRegistry;
   }
 
-  public get exporter() {
+  public getClient = (options?: SavedObjectsClientProviderOptions) => {
+    return this.savedObjectsStart.getScopedClient(this.request, options);
+  };
+
+  public getExporter = (client: SavedObjectsClientContract) => {
     if (this.#exporter == null) {
-      this.#exporter = this.savedObjectsStart.createExporter(this.client);
+      this.#exporter = this.savedObjectsStart.createExporter(client);
     }
     return this.#exporter;
-  }
+  };
 
-  public get importer() {
+  public getImporter = (client: SavedObjectsClientContract) => {
     if (this.#importer == null) {
-      this.#importer = this.savedObjectsStart.createImporter(this.client);
+      this.#importer = this.savedObjectsStart.createImporter(client);
     }
     return this.#importer;
-  }
+  };
 }
 
 class CoreUiSettingsRouteHandlerContext {

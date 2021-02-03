@@ -31,11 +31,20 @@ export const registerDeleteRoute = (router: IRouter, { coreUsageData }: RouteDep
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
+      const { getClient, typeRegistry } = context.core.savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.delete(type, id, { force });
+      const includedHiddenTypes = [type].filter(
+        (supportedType) =>
+          typeRegistry.isHidden(supportedType) &&
+          typeRegistry.isImportableAndExportable(supportedType)
+      );
+
+      const client = getClient({ includedHiddenTypes });
+
+      const result = await client.delete(type, id, { force });
       return res.ok({ body: result });
     })
   );

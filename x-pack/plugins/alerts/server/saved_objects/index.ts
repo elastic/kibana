@@ -42,6 +42,12 @@ export function setupSavedObjects(
     namespaceType: 'single',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
+    management: {
+      importableAndExportable: true,
+      icon: 'alert',
+      defaultSearchField: 'name',
+      getTitle: ({ attributes }) => attributes.name,
+    },
   });
 
   savedObjects.registerType({

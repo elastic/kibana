@@ -63,6 +63,7 @@ export const registerImportRoute = (
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
+      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
@@ -84,7 +85,15 @@ export const registerImportRoute = (
         });
       }
 
-      const { importer } = context.core.savedObjects;
+      const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
+
+      const includedHiddenTypes = supportedTypes.filter((supportedType) =>
+        typeRegistry.isHidden(supportedType)
+      );
+
+      const client = getClient({ includedHiddenTypes });
+      const importer = getImporter(client);
+
       try {
         const result = await importer.import({
           readStream,
