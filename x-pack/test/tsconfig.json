@@ -73,6 +73,7 @@
     { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "../plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "../plugins/upgrade_assistant/tsconfig.json" },
     { "path": "../plugins/watcher/tsconfig.json" }
   ]
 }
