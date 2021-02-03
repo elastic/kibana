@@ -152,6 +152,7 @@ describe('rules_notification_alert_type', () => {
     const value: Partial<ApiResponse> = {
       statusCode: 200,
       body: {
+        indices: ['index1', 'index2', 'index3', 'index4'],
         fields: {
           '@timestamp': {
             date: {

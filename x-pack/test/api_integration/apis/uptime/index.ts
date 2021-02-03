@@ -7,16 +7,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('uptime', () => {
-    before(
-      async () =>
-        await es.indices.delete({
-          index: 'heartbeat*',
-          ignore: [404],
-        })
-    );
+    before(async () => await esDeleteAllIndices('heartbeat*'));
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./get_all_pings'));

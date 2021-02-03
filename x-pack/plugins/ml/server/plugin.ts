@@ -23,7 +23,6 @@ import { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
-import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -196,7 +195,6 @@ export class MlServerPlugin
     alertingRoutes(routeInit);
 
     initMlServerLog({ log: this.log });
-    initMlTelemetry(coreSetup, plugins.usageCollection);
 
     const sharedServices = createSharedServices(
       this.mlLicense,

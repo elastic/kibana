@@ -19,9 +19,9 @@ import {
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { SourceQuery } from '../../../../../common/graphql/types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { HttpHandler } from 'kibana/public';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 
 const mockedFetch = jest.fn();
 
@@ -37,7 +37,7 @@ const renderUseMetricsExplorerDataHook = () => {
   return renderHook(
     (props: {
       options: MetricsExplorerOptions;
-      source: SourceQuery.Query['source']['configuration'] | undefined;
+      source: InfraSourceConfiguration | undefined;
       derivedIndexPattern: IIndexPattern;
       timeRange: MetricsExplorerTimeOptions;
       afterKey: string | null | Record<string, string | null>;

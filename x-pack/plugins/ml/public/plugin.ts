@@ -21,7 +21,6 @@ import type {
   SharePluginStart,
   UrlGeneratorContract,
 } from 'src/plugins/share/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
@@ -67,7 +66,6 @@ export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -110,7 +108,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
