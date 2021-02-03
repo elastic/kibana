@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { extractNamedQueries } from './utils';
 
+const DEFAULT_INDICATOR_PATH = 'threat.indicator';
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
@@ -40,7 +41,7 @@ export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): Signa
 export const buildMatchedIndicator = ({
   queries,
   threats,
-  indicatorPath = 'threat.indicator',
+  indicatorPath = DEFAULT_INDICATOR_PATH,
 }: {
   queries: ThreatMatchNamedQuery[];
   threats: ThreatListItem[];
