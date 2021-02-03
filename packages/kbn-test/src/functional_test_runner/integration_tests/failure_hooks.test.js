@@ -19,9 +19,11 @@ describe('failure hooks', function () {
   it('runs and prints expected output', () => {
     const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG]);
     const lines = stripAnsi(proc.stdout.toString('utf8')).split(/\r?\n/);
+    const linesCopy = [...lines];
+
     const tests = [
       {
-        flag: '$FAILING_BEFORE_HOOK$',
+        flag: '"before all" hook: $FAILING_BEFORE_HOOK$',
         assert(lines) {
           expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
           expect(lines.shift()).toMatch(
@@ -30,7 +32,7 @@ describe('failure hooks', function () {
         },
       },
       {
-        flag: '$FAILING_TEST$',
+        flag: '└-> $FAILING_TEST$',
         assert(lines) {
           expect(lines.shift()).toMatch(/global before each/);
           expect(lines.shift()).toMatch(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
@@ -38,7 +40,7 @@ describe('failure hooks', function () {
         },
       },
       {
-        flag: '$FAILING_AFTER_HOOK$',
+        flag: '"after all" hook: $FAILING_AFTER_HOOK$',
         assert(lines) {
           expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
           expect(lines.shift()).toMatch(
@@ -48,14 +50,19 @@ describe('failure hooks', function () {
       },
     ];
 
-    while (lines.length && tests.length) {
-      const line = lines.shift();
-      if (line.includes(tests[0].flag)) {
-        const test = tests.shift();
-        test.assert(lines);
+    try {
+      while (lines.length && tests.length) {
+        const line = lines.shift();
+        if (line.includes(tests[0].flag)) {
+          const test = tests.shift();
+          test.assert(lines);
+        }
       }
-    }
 
-    expect(tests).toHaveLength(0);
+      expect(tests).toHaveLength(0);
+    } catch (error) {
+      console.error('full log output', linesCopy.join('\n'));
+      throw error;
+    }
   });
 });
