@@ -47,19 +47,19 @@ const wrapWithSharedState = () => {
       return null;
     }
 
-    private getTitle(title: TitleProp) {
+    public getTitle(title: TitleProp) {
       return typeof title === 'function' ? title(titles[this.state.index - 1]) : title;
     }
 
-    private pushTitle(title: string) {
+    public pushTitle(title: string) {
       titles[this.state.index] = title;
     }
 
-    private removeTitle() {
+    public removeTitle() {
       titles.pop();
     }
 
-    private updateDocumentTitle() {
+    public updateDocumentTitle() {
       const title = (titles[titles.length - 1] || '') + TITLE_SUFFIX;
       if (title !== document.title) {
         document.title = title;

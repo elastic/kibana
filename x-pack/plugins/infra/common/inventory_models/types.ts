@@ -285,7 +285,7 @@ export const ESTopHitsAggRT = rt.type({
   top_hits: rt.object,
 });
 
-interface SnapshotTermsWithAggregation {
+export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
 }
