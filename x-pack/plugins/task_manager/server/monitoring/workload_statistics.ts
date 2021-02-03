@@ -244,10 +244,19 @@ export function padBuckets(
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
 
-    const bucketsToPadBeforeFirstBucket = calculateBucketsBetween(firstBucket, from, pollInterval);
+    // detect when the first bucket is before the `from` so that we can take that into
+    // account by begining the timeline earlier
+    // This can happen when you have overdue tasks and Elasticsearch returns their bucket
+    // as begining before the `from`
+    const firstBucketStartsInThePast = firstBucket - from < 0;
+
+    const bucketsToPadBeforeFirstBucket = firstBucketStartsInThePast
+      ? []
+      : calculateBucketsBetween(firstBucket, from, pollInterval);
+
     const bucketsToPadAfterLast = calculateBucketsBetween(
       lastBucket + pollInterval,
-      to,
+      firstBucketStartsInThePast ? to - pollInterval : to,
       pollInterval
     );
 

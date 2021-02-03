@@ -105,6 +105,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.clickDashboard();
 
+        // The following tests require a fresh dashboard.
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
         const inViewMode = await PageObjects.dashboard.getIsInViewMode();
         if (inViewMode) await PageObjects.dashboard.switchToEditMode();
         await dashboardAddPanel.addSavedSearch(searchName);
@@ -140,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before('and add one panel and save to put dashboard in "view" mode', async () => {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-        await PageObjects.dashboard.saveDashboard(dashboardName);
+        await PageObjects.dashboard.saveDashboard(dashboardName + '2');
       });
 
       before('expand panel to "full screen"', async () => {

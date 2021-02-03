@@ -41,6 +41,7 @@ describe('DashboardState', function () {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       hideWriteControls: false,
+      allowByValueEmbeddables: false,
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),

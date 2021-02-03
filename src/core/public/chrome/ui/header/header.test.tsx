@@ -13,6 +13,7 @@ import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
+import { ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -71,6 +72,9 @@ describe('Header', () => {
     const recentlyAccessed$ = new BehaviorSubject([
       { link: '', label: 'dashboard', id: 'dashboard' },
     ]);
+    const breadcrumbsAppendExtension$ = new BehaviorSubject<
+      undefined | ChromeBreadcrumbsAppendExtension
+    >(undefined);
     const component = mountWithIntl(
       <Header
         {...mockProps()}
@@ -80,6 +84,7 @@ describe('Header', () => {
         recentlyAccessed$={recentlyAccessed$}
         isLocked$={isLocked$}
         customNavLink$={customNavLink$}
+        breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();
@@ -93,5 +98,19 @@ describe('Header', () => {
     component.update();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
+
+    act(() =>
+      breadcrumbsAppendExtension$.next({
+        content: (root: HTMLDivElement) => {
+          root.innerHTML = '<div class="my-extension">__render__</div>';
+          return () => (root.innerHTML = '');
+        },
+      })
+    );
+    component.update();
+    expect(component.find('HeaderExtension').exists()).toBeTruthy();
+    expect(
+      component.find('HeaderExtension').getDOMNode().querySelector('.my-extension')
+    ).toBeTruthy();
   });
 });

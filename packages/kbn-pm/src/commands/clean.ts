@@ -6,19 +6,27 @@
  * Public License, v 1.
  */
 
+import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
+import { runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Remove the node_modules and target directories from all projects.',
+  description: 'Deletes output directories, node_modules and resets internal caches.',
   name: 'clean',
 
   async run(projects) {
+    log.warning(dedent`
+      This command is only necessary for the rare circumstance where you need to recover a consistent
+      state when problems arise. If you need to run this command often, please let us know by
+      filling out this form: https://ela.st/yarn-kbn-clean
+    `);
+
     const toDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {
@@ -43,6 +51,10 @@ export const CleanCommand: ICommand = {
         });
       }
     }
+
+    // Runs Bazel soft clean
+    await runBazel(['clean']);
+    log.success('Soft cleaned bazel');
 
     if (toDelete.length === 0) {
       log.success('Nothing to delete');
