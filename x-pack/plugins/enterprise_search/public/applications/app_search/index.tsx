@@ -78,13 +78,6 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
           <Library />
         </Route>
       )}
-      {canManageEngines && (
-        <Route exact path={CREATE_ENGINES_PATH}>
-          <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-            <CreateEngine />
-          </Layout>
-        </Route>
-      )}
       <Route path={ENGINE_PATH}>
         <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
           <EngineRouter />
@@ -108,6 +101,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
               <Route exact path={CREDENTIALS_PATH}>
                 <Credentials />
               </Route>
+              {canManageEngines && (
+                <Route exact path={CREATE_ENGINES_PATH}>
+                  <CreateEngine />
+                </Route>
+              )}
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
