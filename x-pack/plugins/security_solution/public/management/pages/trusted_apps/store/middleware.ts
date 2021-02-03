@@ -151,7 +151,7 @@ const submitCreationIfNeeded = async (
   const entry = getCreationDialogFormEntry(currentState);
   const editMode = isEdit(currentState);
 
-  // FIXME: Implement PUT API for updating Trusted App - https://github.com/elastic/security-team/issues/682#issuecomment-768581449
+  // FIXME: Implement PUT API for updating Trusted App
   if (editMode) {
     // eslint-disable-next-line no-console
     console.warn('PUT Trusted APP API missing');
@@ -383,7 +383,7 @@ const fetchEditTrustedAppIfNeeded = async (
     // eslint-disable-next-line no-console
     console.log('todo: api call');
 
-    // FIXME: Implement GET API - https://github.com/elastic/security-team/issues/682#issuecomment-768581449
+    // FIXME: Implement GET API
     throw new Error('GET trusted app API missing!');
   }
 };
