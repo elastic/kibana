@@ -18,7 +18,7 @@ import {
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLJobLinkHref } from './ml_job_link';
-import { useGetUrlParams } from '../../../hooks';
+import { useGetUrlParams, useMonitorWithInFlightAlert } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../state/actions';
 import { useAnomalyAlert } from './use_anomaly_alert';
@@ -29,7 +29,6 @@ import {
   isAnomalyAlertDeleting,
 } from '../../../state/alerts/alerts';
 import { UptimeEditAlertFlyoutComponent } from '../../common/alerts/uptime_edit_alert_flyout';
-import { useInFlightAlert } from '../../../hooks/use_in_flight_alert';
 
 interface Props {
   hasMLJob: boolean;
@@ -54,7 +53,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const monitorId = useMonitorId();
-  const isAlertRequestInFlight = useInFlightAlert(monitorId);
+  const isAlertRequestInFlight = useMonitorWithInFlightAlert(monitorId);
 
   const dispatch = useDispatch();
 

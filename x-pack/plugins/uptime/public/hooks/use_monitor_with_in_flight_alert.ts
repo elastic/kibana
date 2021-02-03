@@ -7,7 +7,7 @@
 import { useSelector } from 'react-redux';
 import { pendingSimpleAlertCreationSelector } from '../state/selectors';
 
-export const useInFlightAlert = (monitorId: string): boolean => {
+export const useMonitorWithInFlightAlert = (monitorId: string): boolean => {
   const monitorsWithInFlightRequests = useSelector(pendingSimpleAlertCreationSelector);
 
   return monitorsWithInFlightRequests.some((f) => f.monitorId === monitorId);

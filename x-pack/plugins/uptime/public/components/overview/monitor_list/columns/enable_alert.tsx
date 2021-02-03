@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useInFlightAlert } from '.././../../../hooks/use_in_flight_alert';
+import { useMonitorWithInFlightAlert } from '../../../../hooks';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import {
   alertsSelector,
@@ -40,7 +40,7 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const { data: actionConnectors } = useSelector(connectorsSelector);
 
   const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
-  const isAlertRequestInFlight = useInFlightAlert(monitorId);
+  const isAlertRequestInFlight = useMonitorWithInFlightAlert(monitorId);
 
   const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
@@ -71,7 +71,6 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
         monitorName,
       })
     );
-    // setIsLoading(true);
   };
 
   const disableAlert = () => {
@@ -82,13 +81,8 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
           monitorId,
         })
       );
-      // setIsLoading(true);
     }
   };
-
-  // useEffect(() => {
-  //   setIsLoading(false);
-  // }, [hasAlert, deletedAlertId]);
 
   const hasDefaultConnectors = (settings?.defaultConnectors ?? []).length > 0;
 
