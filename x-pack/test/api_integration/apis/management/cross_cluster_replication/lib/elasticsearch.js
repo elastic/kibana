@@ -10,7 +10,10 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const registerHelpers = (es) => {
+export const registerHelpers = (getService) => {
+  const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString()) => {
@@ -18,17 +21,13 @@ export const registerHelpers = (es) => {
     return es.indices.create({ index }).then(() => index);
   };
 
-  const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter((i) => i !== index);
-    return es.indices.delete({ index });
+  const deleteAllIndices = async () => {
+    await esDeleteAllIndices(indicesCreated);
+    indicesCreated = [];
   };
-
-  const deleteAllIndices = () =>
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
   return {
     createIndex,
-    deleteIndex,
     deleteAllIndices,
   };
 };

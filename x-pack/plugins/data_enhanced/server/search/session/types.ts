@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ConfigSchema } from '../../../config';
+
 export enum SearchStatus {
   IN_PROGRESS = 'in_progress',
   ERROR = 'error',
   COMPLETE = 'complete',
 }
+
+export type SearchSessionsConfig = ConfigSchema['search']['sessions'];

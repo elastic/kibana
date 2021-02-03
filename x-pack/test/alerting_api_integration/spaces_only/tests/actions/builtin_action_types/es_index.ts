@@ -14,9 +14,10 @@ const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 export default function indexTest({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('index action', () => {
-    beforeEach(() => clearTestIndex(es));
+    beforeEach(() => esDeleteAllIndices(ES_TEST_INDEX_NAME));
 
     let createdActionID: string;
     let createdActionIDWithIndex: string;
@@ -135,13 +136,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items.length).to.eql(1);
       expect(items[0]._source).to.eql({ testing: [1, 2, 3] });
     });
-  });
-}
-
-async function clearTestIndex(es: any) {
-  return await es.indices.delete({
-    index: ES_TEST_INDEX_NAME,
-    ignoreUnavailable: true,
   });
 }
 
