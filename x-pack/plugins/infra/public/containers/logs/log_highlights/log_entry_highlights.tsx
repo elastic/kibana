@@ -5,13 +5,12 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-
-import { TimeKey } from '../../../../common/time';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
 import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 import { LogEntry } from '../../../../common/log_entry';
+import { TimeKey } from '../../../../common/time';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
 
 export const useLogEntryHighlights = (
   sourceId: string,
