@@ -10,12 +10,12 @@ import { isRangeFilter } from '../../../es_query/filters';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../field_formats';
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
-import { TabbedTable } from '../../tabify';
 
 import { createFilter } from './create_filter';
+import { Datatable } from '../../../../../expressions/common';
 
 describe('createFilter', () => {
-  let table: TabbedTable;
+  let table: Datatable;
   let aggConfig: IAggConfig;
 
   const typesRegistry = mockAggTypesRegistry();
@@ -62,11 +62,12 @@ describe('createFilter', () => {
 
   beforeEach(() => {
     table = {
+      type: 'datatable',
       columns: [
         {
           id: '1-1',
           name: 'test',
-          aggConfig,
+          meta: { type: 'number' },
         },
       ],
       rows: [

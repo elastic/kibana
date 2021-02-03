@@ -13,6 +13,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
+  TimelineKpiStrategyResponse,
 } from './events';
 import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 
@@ -44,6 +45,8 @@ export type TimelineStrategyResponseType<
   ? TimelineEventsAllStrategyResponse
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsStrategyResponse
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineKpiStrategyResponse
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeStrategyResponse
   : never;
@@ -54,6 +57,8 @@ export type TimelineStrategyRequestType<
   ? TimelineEventsAllRequestOptions
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsRequestOptions
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineRequestBasicOptions
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeRequestOptions
   : never;

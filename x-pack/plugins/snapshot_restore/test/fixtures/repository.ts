@@ -8,7 +8,7 @@ import { getRandomString } from '@kbn/test/jest';
 import { RepositoryType } from '../../common/types';
 const defaultSettings: any = { chunkSize: '10mb', location: '/tmp/es-backups' };
 
-interface Repository {
+export interface Repository {
   name: string;
   type: RepositoryType;
   settings: any;

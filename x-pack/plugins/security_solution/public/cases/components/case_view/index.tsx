@@ -295,7 +295,7 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
-      isValidConnector,
+      isValidConnector: isLoadingConnectors ? true : isValidConnector,
       alerts,
     });
 

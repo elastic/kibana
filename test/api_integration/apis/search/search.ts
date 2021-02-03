@@ -17,7 +17,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('search', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('../../../functional/fixtures/es_archiver/logstash_functional');
     });
 

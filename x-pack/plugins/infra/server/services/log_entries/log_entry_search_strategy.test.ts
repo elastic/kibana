@@ -22,6 +22,7 @@ import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
+import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -121,7 +122,7 @@ describe('LogEntry search strategy', () => {
     expect(response.rawResponse.data).toEqual({
       id: 'HIT_ID',
       index: 'HIT_INDEX',
-      key: {
+      cursor: {
         time: 1605116827143,
         tiebreaker: 1,
       },
@@ -244,6 +245,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+  searchSessionsClient: createSearchSessionsClientMock(),
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,

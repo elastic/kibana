@@ -17,12 +17,5 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
-  "requiredBundles": [
-    "observability",
-    "licenseManagement",
-    "kibanaUtils",
-    "kibanaReact",
-    "apm",
-    "home"
-  ]
+  "requiredBundles": ["observability", "licenseManagement", "kibanaUtils", "kibanaReact", "home"]
 }
