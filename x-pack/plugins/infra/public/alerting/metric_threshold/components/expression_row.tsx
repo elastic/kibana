@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
+  EuiLink,
   EuiHealth,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -233,6 +234,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
+                      defaultMessage="Can't find a metric? {documentationLink}."
+                      values={{
+                        documentationLink: (
+                          <EuiLink
+                            href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
+                            target="BLANK"
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+                              defaultMessage="Learn how to add more data"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
+                  data-test-subj="ofExpression"
                 />
               </StyledExpression>
             )}

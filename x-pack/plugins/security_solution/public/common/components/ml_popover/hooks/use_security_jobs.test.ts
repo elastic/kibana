@@ -65,6 +65,7 @@ describe('useSecurityJobs', () => {
         memory_status: 'hard_limit',
         moduleId: '',
         processed_record_count: 582251,
+        awaitingNodeAssignment: false,
       };
 
       const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));

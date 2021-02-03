@@ -59,6 +59,10 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         $scope.limit += 50;
       };
 
+      $scope.$watch('minimumVisibleRows', (minimumVisibleRows: number) => {
+        $scope.limit = Math.max(minimumVisibleRows || 50, $scope.limit || 50);
+      });
+
       $scope.$watch('hits', (hits: any) => {
         if (!hits) return;
 
