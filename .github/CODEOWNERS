@@ -66,6 +66,7 @@
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
+/x-pack/test/apm_api_integration/ @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
@@ -80,6 +81,7 @@
 /x-pack/plugins/apm/server/lib/rum_client @elastic/uptime
 /x-pack/plugins/apm/server/routes/rum_client.ts @elastic/uptime
 /x-pack/plugins/apm/server/projections/rum_page_load_transactions.ts @elastic/uptime
+/x-pack/test/apm_api_integration/tests/csm/ @elastic/uptime
 
 # Beats
 /x-pack/plugins/beats_management/  @elastic/beats
@@ -99,7 +101,7 @@
 
 # Observability UIs
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/fleet/ @elastic/ingest-management
+/x-pack/plugins/fleet/ @elastic/fleet
 /x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
@@ -147,8 +149,6 @@
 /src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
-/.ci/teamcity/ @elastic/kibana-operations
-/.teamcity/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 

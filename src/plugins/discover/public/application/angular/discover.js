@@ -414,18 +414,9 @@ function discoverController($route, $scope, Promise) {
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
-  function removeSourceFromColumns(columns) {
-    return columns.filter((col) => col !== '_source');
-  }
-
   function getDefaultColumns() {
-    const columns = [...savedSearch.columns];
-
-    if ($scope.useNewFieldsApi) {
-      return removeSourceFromColumns(columns);
-    }
-    if (columns.length > 0) {
-      return columns;
+    if (savedSearch.columns.length > 0) {
+      return [...savedSearch.columns];
     }
     return [...config.get(DEFAULT_COLUMNS_SETTING)];
   }
@@ -748,6 +739,21 @@ function discoverController($route, $scope, Promise) {
     history.push('/');
   };
 
+  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+  let showUnmappedFields = showUnmappedFieldsDefaultValue;
+
+  const onChangeUnmappedFields = (value) => {
+    showUnmappedFields = value;
+    $scope.unmappedFieldsConfig.showUnmappedFields = value;
+    $scope.fetch();
+  };
+
+  $scope.unmappedFieldsConfig = {
+    showUnmappedFieldsDefaultValue,
+    showUnmappedFields,
+    onChangeUnmappedFields,
+  };
+
   $scope.updateDataSource = () => {
     const { indexPattern, searchSource, useNewFieldsApi } = $scope;
     const { columns, sort } = $scope.state;
@@ -757,6 +763,7 @@ function discoverController($route, $scope, Promise) {
       sort,
       columns,
       useNewFieldsApi,
+      showUnmappedFields,
     });
     return Promise.resolve();
   };

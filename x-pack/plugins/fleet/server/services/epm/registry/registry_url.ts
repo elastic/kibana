@@ -11,12 +11,10 @@ import { appContextService, licenseService } from '../../';
 
 const PRODUCTION_REGISTRY_URL_CDN = 'https://epr.elastic.co';
 // const STAGING_REGISTRY_URL_CDN = 'https://epr-staging.elastic.co';
-// const EXPERIMENTAL_REGISTRY_URL_CDN = 'https://epr-experimental.elastic.co/';
 const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 
 // const PRODUCTION_REGISTRY_URL_NO_CDN = 'https://epr.ea-web.elastic.dev';
 // const STAGING_REGISTRY_URL_NO_CDN = 'https://epr-staging.ea-web.elastic.dev';
-// const EXPERIMENTAL_REGISTRY_URL_NO_CDN = 'https://epr-experimental.ea-web.elastic.dev/';
 // const SNAPSHOT_REGISTRY_URL_NO_CDN = 'https://epr-snapshot.ea-web.elastic.dev';
 
 const getDefaultRegistryUrl = (): string => {

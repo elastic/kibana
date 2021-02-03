@@ -5,3 +5,5 @@
  */
 
 export { Form } from './form';
+
+export { EnhancedUseField } from './enhanced_use_field';

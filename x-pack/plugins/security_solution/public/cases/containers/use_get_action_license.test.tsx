@@ -51,7 +51,7 @@ describe('useGetActionLicense', () => {
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
-        actionLicense: actionLicenses[0],
+        actionLicense: actionLicenses[1],
       });
     });
   });

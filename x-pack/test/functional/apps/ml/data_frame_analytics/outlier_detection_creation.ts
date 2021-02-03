@@ -49,6 +49,27 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
+          scatterplotMatrixColorStatsWizard: [
+            // background
+            { key: '#000000', value: 91 },
+            // tick/grid/axis
+            { key: '#6A717D', value: 2 },
+            { key: '#F5F7FA', value: 2 },
+            { key: '#D3DAE6', value: 1 },
+            // scatterplot circles
+            { key: '#54B399', value: 1 },
+            { key: '#54B39A', value: 1 },
+          ],
+          scatterplotMatrixColorStatsResults: [
+            // background
+            { key: '#000000', value: 91 },
+            // tick/grid/axis, grey markers
+            // the red outlier color is not above the 1% threshold.
+            { key: '#6A717D', value: 2 },
+            { key: '#98A2B3', value: 1 },
+            { key: '#F5F7FA', value: 2 },
+            { key: '#D3DAE6', value: 1 },
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
@@ -104,6 +125,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+            testData.expected.scatterplotMatrixColorStatsWizard
+          );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
@@ -221,6 +248,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+            'mlDFExpandableSection-splom',
+            testData.expected.scatterplotMatrixColorStatsResults
+          );
         });
 
         it('displays the analytics job in the map view', async () => {

@@ -25,6 +25,7 @@ import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { ActionsExpressionsExample2 } from './actions_and_expressions2';
 
 interface Props {
   expressions: ExpressionsStart;
@@ -64,6 +65,10 @@ const ExpressionsExplorer = ({ expressions, inspector, actions }: Props) => {
             <EuiSpacer />
 
             <ActionsExpressionsExample expressions={expressions} actions={actions} />
+
+            <EuiSpacer />
+
+            <ActionsExpressionsExample2 expressions={expressions} actions={actions} />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
