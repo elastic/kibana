@@ -15,12 +15,12 @@ import {
   EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
 import { MimeType } from './types';
 import { OPEN_FILTERS_POPOVER } from '../../translations';
-import { METRIC_TYPE, useTrackMetric } from '../../../../../../../observability/public';
+import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
 interface Props {
   query: string;
@@ -69,22 +69,13 @@ export const WaterfallFilter = ({
   const [value, setValue] = useState(query);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const trackMetric = useUiTracker({ app: 'uptime' });
+
   const toggleFilters = (val: string) => {
     setActiveFilters((prevState) =>
       prevState.includes(val) ? prevState.filter((filter) => filter !== val) : [...prevState, val]
     );
   };
-
-  useTrackMetric(
-    { app: 'uptime', metric: 'waterfall_filter_button', metricType: METRIC_TYPE.CLICK },
-    [isPopoverOpen]
-  );
-
-  useTrackMetric(
-    { app: 'uptime', metric: 'waterfall_filter_input', metricType: METRIC_TYPE.CLICK },
-    [query]
-  );
-
   useDebounce(
     () => {
       setQuery(value);
@@ -92,6 +83,33 @@ export const WaterfallFilter = ({
     250,
     [value]
   );
+
+  // indicates use of the query input box
+  useEffect(() => {
+    if (query) {
+      trackMetric({ metric: 'waterfall_filter_input_changed', metricType: METRIC_TYPE.CLICK });
+    }
+  }, [query, trackMetric]);
+
+  // indicates the collapse to show only highlighted checkbox has been clicked
+  useEffect(() => {
+    if (onlyHighlighted) {
+      trackMetric({
+        metric: 'waterfall_filter_collapse_checked',
+        metricType: METRIC_TYPE.CLICK,
+      });
+    }
+  }, [onlyHighlighted, trackMetric]);
+
+  // indicates filters have been applied or changed
+  useEffect(() => {
+    if (activeFilters.length > 0) {
+      trackMetric({
+        metric: `waterfall_filters_applied_changed`,
+        metricType: METRIC_TYPE.CLICK,
+      });
+    }
+  }, [activeFilters, trackMetric]);
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -114,7 +132,7 @@ export const WaterfallFilter = ({
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
               color={activeFilters.length > 0 ? 'primary' : 'text'}
-              aria-pressed={activeFilters.length > 0}
+              isSelected={activeFilters.length > 0}
             />
           }
           isOpen={isPopoverOpen}
