@@ -16,7 +16,6 @@ import { asInteger } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -140,50 +139,53 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       },
     },
     status,
-  } = useFetcher(() => {
-    if (!start || !end || !transactionType) {
-      return;
-    }
+  } = useFetcher(
+    (callApmApi) => {
+      if (!start || !end || !transactionType) {
+        return;
+      }
 
-    return callApmApi({
-      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
-      params: {
-        path: { serviceName },
-        query: {
-          start,
-          end,
-          uiFilters: JSON.stringify(uiFilters),
-          size: PAGE_SIZE,
-          numBuckets: 20,
-          pageIndex: tableOptions.pageIndex,
-          sortField: tableOptions.sort.field,
-          sortDirection: tableOptions.sort.direction,
-          transactionType,
-        },
-      },
-    }).then((response) => {
-      return {
-        items: response.error_groups,
-        totalItemCount: response.total_error_groups,
-        tableOptions: {
-          pageIndex: tableOptions.pageIndex,
-          sort: {
-            field: tableOptions.sort.field,
-            direction: tableOptions.sort.direction,
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters),
+            size: PAGE_SIZE,
+            numBuckets: 20,
+            pageIndex: tableOptions.pageIndex,
+            sortField: tableOptions.sort.field,
+            sortDirection: tableOptions.sort.direction,
+            transactionType,
           },
         },
-      };
-    });
-  }, [
-    start,
-    end,
-    serviceName,
-    uiFilters,
-    tableOptions.pageIndex,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    transactionType,
-  ]);
+      }).then((response) => {
+        return {
+          items: response.error_groups,
+          totalItemCount: response.total_error_groups,
+          tableOptions: {
+            pageIndex: tableOptions.pageIndex,
+            sort: {
+              field: tableOptions.sort.field,
+              direction: tableOptions.sort.direction,
+            },
+          },
+        };
+      });
+    },
+    [
+      start,
+      end,
+      serviceName,
+      uiFilters,
+      tableOptions.pageIndex,
+      tableOptions.sort.field,
+      tableOptions.sort.direction,
+      transactionType,
+    ]
+  );
 
   const {
     items,

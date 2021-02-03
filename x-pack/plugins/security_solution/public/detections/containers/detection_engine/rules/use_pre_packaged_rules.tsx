@@ -262,8 +262,14 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUserCRUD, hasIndexWrite, isAuthenticated, hasEncryptionKey, isSignalIndexExists]);
+  }, [
+    canUserCRUD,
+    hasIndexWrite,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    dispatchToaster,
+  ]);
 
   const prePackagedRuleStatus = useMemo(
     () =>

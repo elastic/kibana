@@ -11,7 +11,8 @@ import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
   ExternalIncidentServiceSecretConfiguration,
-  ExecutorParamsSchema,
+  ExecutorParamsSchemaITSM,
+  ExecutorParamsSchemaSIR,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
@@ -27,18 +28,26 @@ import {
   PushToServiceResponse,
   ExecutorSubActionCommonFieldsParams,
   ServiceNowExecutorResultData,
+  ExecutorSubActionGetChoicesParams,
 } from './types';
 
-export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+export type ActionParamsType =
+  | TypeOf<typeof ExecutorParamsSchemaITSM>
+  | TypeOf<typeof ExecutorParamsSchemaSIR>;
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-export const ActionTypeId = '.servicenow';
+const serviceNowITSMTable = 'incident';
+const serviceNowSIRTable = 'sn_si_incident';
+
+export const ServiceNowITSMActionTypeId = '.servicenow';
+export const ServiceNowSIRActionTypeId = '.servicenow-sir';
+
 // action type definition
-export function getActionType(
+export function getServiceNowITSMActionType(
   params: GetActionTypeParams
 ): ActionType<
   ServiceNowPublicConfigurationType,
@@ -48,9 +57,9 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: ActionTypeId,
+    id: ServiceNowITSMActionTypeId,
     minimumLicenseRequired: 'platinum',
-    name: i18n.NAME,
+    name: i18n.SERVICENOW_ITSM,
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
@@ -58,19 +67,46 @@ export function getActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
-      params: ExecutorParamsSchema,
+      params: ExecutorParamsSchemaITSM,
     },
-    executor: curry(executor)({ logger, configurationUtilities }),
+    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowITSMTable }),
+  };
+}
+
+export function getServiceNowSIRActionType(
+  params: GetActionTypeParams
+): ActionType<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams,
+  PushToServiceResponse | {}
+> {
+  const { logger, configurationUtilities } = params;
+  return {
+    id: ServiceNowSIRActionTypeId,
+    minimumLicenseRequired: 'platinum',
+    name: i18n.SERVICENOW_SIR,
+    validate: {
+      config: schema.object(ExternalIncidentServiceConfiguration, {
+        validate: curry(validate.config)(configurationUtilities),
+      }),
+      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
+        validate: curry(validate.secrets)(configurationUtilities),
+      }),
+      params: ExecutorParamsSchemaSIR,
+    },
+    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowSIRTable }),
   };
 }
 
 // action executor
-const supportedSubActions: string[] = ['getFields', 'pushToService'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident'];
 async function executor(
   {
     logger,
     configurationUtilities,
-  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
+    table,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities; table: string },
   execOptions: ActionTypeExecutorOptions<
     ServiceNowPublicConfigurationType,
     ServiceNowSecretConfigurationType,
@@ -82,6 +118,7 @@ async function executor(
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
+    table,
     {
       config,
       secrets,
@@ -119,6 +156,14 @@ async function executor(
     data = await api.getFields({
       externalService,
       params: getFieldsParams,
+    });
+  }
+
+  if (subAction === 'getChoices') {
+    const getChoicesParams = subActionParams as ExecutorSubActionGetChoicesParams;
+    data = await api.getChoices({
+      externalService,
+      params: getChoicesParams,
     });
   }
 

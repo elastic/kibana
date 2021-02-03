@@ -41,7 +41,7 @@ export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
 
 export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;
 
-export const ENGINE_RELEVANCE_TUNING_PATH = `${ENGINE_PATH}/search-settings`;
+export const ENGINE_RELEVANCE_TUNING_PATH = `${ENGINE_PATH}/relevance_tuning`;
 export const ENGINE_SYNONYMS_PATH = `${ENGINE_PATH}/synonyms`;
 export const ENGINE_CURATIONS_PATH = `${ENGINE_PATH}/curations`;
 // TODO: Curations sub-pages
