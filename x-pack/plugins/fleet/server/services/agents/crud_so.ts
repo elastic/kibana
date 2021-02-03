@@ -215,7 +215,15 @@ export async function bulkUpdateAgents(
     })
   );
 
-  await soClient.bulkUpdate<AgentSOAttributes>(updates);
+  const res = await soClient.bulkUpdate<AgentSOAttributes>(updates);
+
+  return {
+    items: res.saved_objects.map((so) => ({
+      id: so.id,
+      success: !so.error,
+      error: so.error,
+    })),
+  };
 }
 
 export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
