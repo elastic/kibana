@@ -43,6 +43,8 @@
     { "path": "./plugins/translations/tsconfig.json" },
     { "path": "./plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" },
+    { "path": "./plugins/runtime_fields/tsconfig.json" },
+    { "path": "./plugins/index_management/tsconfig.json" },
     { "path": "./plugins/watcher/tsconfig.json" }
   ]
 }
