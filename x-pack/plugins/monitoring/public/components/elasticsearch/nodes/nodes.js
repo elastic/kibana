@@ -136,7 +136,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) => state.nodeId === node.resolver}
+          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver.uuid}
         />
       );
     },

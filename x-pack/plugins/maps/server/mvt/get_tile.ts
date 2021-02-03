@@ -8,8 +8,8 @@
 import geojsonvt from 'geojson-vt';
 // @ts-expect-error
 import vtpbf from 'vt-pbf';
-import { Logger, RequestHandlerContext } from 'src/core/server';
-import type { DataApiRequestHandlerContext } from 'src/plugins/data/server';
+import { Logger } from 'src/core/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
 import { Feature, FeatureCollection, Polygon } from 'geojson';
 import {
   ES_GEO_FIELD_TYPE,
@@ -45,7 +45,7 @@ export async function getGridTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
+  context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS;
@@ -125,7 +125,7 @@ export async function getTile({
   z: number;
   geometryFieldName: string;
   index: string;
-  context: RequestHandlerContext & { search: DataApiRequestHandlerContext };
+  context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
