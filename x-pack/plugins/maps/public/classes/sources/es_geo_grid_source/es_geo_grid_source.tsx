@@ -442,7 +442,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}`
     );
 
-    const geoField = await this._getGeoField();
     const urlTemplate = `${mvtUrlServicePath}\
 ?x={x}\
 &y={y}\

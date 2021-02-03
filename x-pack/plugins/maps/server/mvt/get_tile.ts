@@ -24,7 +24,7 @@ import {
 
 import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
-import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
+import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 
 export async function getGridTile({
