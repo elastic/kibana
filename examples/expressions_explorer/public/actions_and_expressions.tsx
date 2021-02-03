@@ -63,7 +63,7 @@ export function ActionsExpressionsExample({ expressions, actions }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageContent data-test-subj="expressionsActionsTest">
         <EuiPageContentBody>
           <EuiFlexGroup>
             <EuiFlexItem>

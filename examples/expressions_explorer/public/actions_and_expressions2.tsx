@@ -63,7 +63,7 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContent>
-        <EuiPageContentBody>
+        <EuiPageContentBody data-test-subj="expressionsVariablesTest">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
@@ -82,6 +82,7 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
             <EuiFlexItem>
               <EuiPanel paddingSize="none" role="figure">
                 <ReactExpressionRenderer
+                  data-test-subj="expressionsVariablesTestRenderer"
                   expression={expression}
                   debug={true}
                   inspectorAdapters={inspectorAdapters}
