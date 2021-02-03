@@ -191,9 +191,9 @@ describe('RelevanceTuningLogic', () => {
 
   describe('selectors', () => {
     describe('engineHasSchemaFields', () => {
-      it('should false if there is only a single field in a schema', () => {
-        // I believe this is because schemas *always* have an ID, and we don't consider that
-        // a tunable field
+      it('should return false if there is only a single field in a schema', () => {
+        // This is because if a schema only has a single field, it is "id", which we do not
+        // consider a tunable field.
         mount({
           schema: {
             id: 'foo',
