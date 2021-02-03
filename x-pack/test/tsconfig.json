@@ -21,6 +21,7 @@
     { "path": "../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../src/plugins/home/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_overview/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
@@ -40,6 +41,7 @@
 
     { "path": "../plugins/actions/tsconfig.json" },
     { "path": "../plugins/alerts/tsconfig.json" },
+    { "path": "../plugins/code/tsconfig.json" },
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/data_enhanced/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },
