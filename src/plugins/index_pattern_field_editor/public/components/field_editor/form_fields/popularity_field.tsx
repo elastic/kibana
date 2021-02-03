@@ -15,7 +15,7 @@ export const PopularityField = () => {
     <UseField
       path="popularity"
       component={NumericField}
-      componentProps={{ 'data-test-subj': 'editorFieldCount' }}
+      componentProps={{ euiFieldProps: { 'data-test-subj': 'editorFieldCount' } }}
     />
   );
 };
