@@ -82,7 +82,7 @@ export const getEventsSummaryBySavedObjectIdsRoute = (
           ),
         });
       } catch (err) {
-        const call = `getEventsForAlertInstancesSummary([${ids}], ${JSON.stringify(query)})`;
+        const call = `getEventsSummaryBySavedObjectIdsRoute([${ids}], ${JSON.stringify(query)})`;
         systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
         return res.notFound();
       }

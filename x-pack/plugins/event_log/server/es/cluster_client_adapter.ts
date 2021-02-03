@@ -310,6 +310,7 @@ export class ClusterClientAdapter {
       summary: T;
     }>
   > {
+    console.log(JSON.stringify(aggs));
     const namespaceQuery = getNamespaceQuery(namespace);
     const esClient = await this.elasticsearchClientPromise;
     const body = {
@@ -410,6 +411,8 @@ export class ClusterClientAdapter {
         })
       );
     } catch (err) {
+    console.log(err.meta.body.error);
+
       throw new Error(
         `querying for Event Log alerts instances summaries by alert ids "${ids}" failed with: ${err.message}`
       );

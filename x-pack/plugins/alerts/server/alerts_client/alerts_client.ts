@@ -48,7 +48,7 @@ import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authori
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import {
-  alertInstancesSummaryEventLogQueryAggregation,
+  getAlertInstancesSummaryEventLogQueryAggregation,
   alertInstanceSummaryFromEventLog,
 } from '../lib/alert_instance_summary_from_event_log';
 import { AuditLogger, EventOutcome } from '../../../security/server';
@@ -423,9 +423,10 @@ export class AlertsClient {
       }>(
         'alert',
         [id],
-        alertInstancesSummaryEventLogQueryAggregation,
-        parsedDateStart.toISOString(),
-        dateNow.toISOString()
+        getAlertInstancesSummaryEventLogQueryAggregation(
+          parsedDateStart.toISOString(),
+          dateNow.toISOString()
+        )
       );
 
       alertEventsSummary = queryResults[0].summary;

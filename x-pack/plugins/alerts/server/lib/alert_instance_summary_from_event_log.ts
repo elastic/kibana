@@ -39,18 +39,20 @@ export function alertInstanceSummaryFromEventLog(
 
   const instances = new Map<string, AlertInstanceStatus>();
 
-  for (const instance of summary.instances.buckets) {
-    const instanceId = instance.key;
-    const status = getAlertInstanceStatus(instances, instanceId);
-    status.activeStartDate = instance.instance_created.max_timestampt.value_as_string;
+  if (summary.instances && summary.instances.buckets) {
+    for (const instance of summary.instances.buckets) {
+      const instanceId = instance.key;
+      const status = getAlertInstanceStatus(instances, instanceId);
+      status.activeStartDate = instance.instance_created.max_timestampt.value_as_string;
 
-    const actionActivityResult = instance.last_state.action.hits.hits;
-    if (actionActivityResult.length > 0) {
-      const actionData = actionActivityResult[0]._source;
-      if (actionData.event.action === 'active-instance') {
-        status.status = 'Active';
-        status.actionGroupId = actionData.kibana.alerting.action_group_id;
-        status.actionSubgroup = actionData.kibana.alerting.action_subgroup;
+      const actionActivityResult = instance.last_state.action.hits.hits;
+      if (actionActivityResult.length > 0) {
+        const actionData = actionActivityResult[0]._source;
+        if (actionData.event.action === 'active-instance') {
+          status.status = 'Active';
+          status.actionGroupId = actionData.kibana.alerting.action_group_id;
+          status.actionSubgroup = actionData.kibana.alerting.action_subgroup;
+        }
       }
     }
   }
@@ -95,7 +97,7 @@ export interface RawEventLogAlertsSummary {
   last_execution_state: Record<string, any>;
 }
 
-export const alertInstancesSummaryEventLogQueryAggregation = {
+export const getAlertInstancesSummaryEventLogQueryAggregation = (start?: string, end?: string) => ({
   instances: {
     // reason: '[composite] aggregation cannot be used with a parent aggregation of type: [ReverseNestedAggregatorFactory]'
     terms: {
@@ -104,12 +106,40 @@ export const alertInstancesSummaryEventLogQueryAggregation = {
       size: MAX_BUCKETS_LIMIT,
     },
     aggs: {
+      instance_created: {
+        filter: {
+          term: { 'event.action': 'new-instance' },
+        },
+        aggs: {
+          max_timestampt: { max: { field: '@timestamp' } },
+        },
+      },
       last_state: {
         filter: {
           bool: {
-            should: [
-              { term: { 'event.action': 'active-instance' } },
-              { term: { 'event.action': 'recovered-instance' } },
+            must: [
+              {
+                bool: {
+                  should: [
+                    { term: { 'event.action': 'active-instance' } },
+                    { term: { 'event.action': 'recovered-instance' } },
+                  ],
+                },
+              },
+              start && {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              end && {
+                range: {
+                  '@timestamp': {
+                    lte: end,
+                  },
+                },
+              },
             ],
           },
         },
@@ -136,14 +166,6 @@ export const alertInstancesSummaryEventLogQueryAggregation = {
           },
         },
       },
-      instance_created: {
-        filter: {
-          term: { 'event.action': 'new-instance' },
-        },
-        aggs: {
-          max_timestampt: { max: { field: '@timestamp' } },
-        },
-      },
     },
   },
   last_execution_state: {
@@ -168,7 +190,7 @@ export const alertInstancesSummaryEventLogQueryAggregation = {
       },
     },
   },
-};
+});
 
 // return an instance status object, creating and adding to the map if needed
 function getAlertInstanceStatus(

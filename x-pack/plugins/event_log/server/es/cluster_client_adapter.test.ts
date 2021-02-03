@@ -710,29 +710,27 @@ describe('queryEventsSummaryBySavedObjectIds', () => {
     clusterClient.search.mockResolvedValue(
       asApiResponse({
         aggregations: {
-          events: {
-            saved_objects: {
-              saved_object_type: {
-                ids: {
-                  buckets: [
-                    {
-                      key: '1',
-                      summary: {
-                        test_aggs1: {
-                          key: '1212',
-                        },
+          saved_objects: {
+            saved_object_type: {
+              ids: {
+                buckets: [
+                  {
+                    key: '1',
+                    summary: {
+                      test_aggs1: {
+                        key: '1212',
                       },
                     },
-                    {
-                      key: '2',
-                      summary: {
-                        test_aggs1: {
-                          key: '33333',
-                        },
+                  },
+                  {
+                    key: '2',
+                    summary: {
+                      test_aggs1: {
+                        key: '33333',
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
