@@ -7,21 +7,17 @@
  */
 
 import { catchError, first } from 'rxjs/operators';
-import { CoreStart, KibanaRequest } from 'src/core/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  ISearchClient,
   ISearchOptions,
 } from '../../../common/search';
-
-type GetScopedProider = (coreStart: CoreStart) => (request: KibanaRequest) => ISearchClient;
+import { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,
-  coreStartPromise: Promise<[CoreStart, {}, {}]>,
-  getScopedProvider: GetScopedProider
+  getScoped: ISearchStart['asScoped']
 ): void {
   bfetch.addBatchProcessingRoute<
     { request: IKibanaSearchRequest; options?: ISearchOptions },
@@ -33,8 +29,7 @@ export function registerBsearchRoute(
        * @throws `KibanaServerError`
        */
       onBatchItem: async ({ request: requestData, options }) => {
-        const coreStart = await coreStartPromise;
-        const search = getScopedProvider(coreStart[0])(request);
+        const search = getScoped(request);
         return search
           .search(requestData, options)
           .pipe(

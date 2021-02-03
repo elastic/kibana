@@ -5,5 +5,5 @@
  */
 
 export interface Kubernetes {
-  pod: { uid: string; [key: string]: unknown };
+  pod?: { uid: string; [key: string]: unknown };
 }

@@ -5,6 +5,7 @@
  */
 
 import {
+  LargeShardSizeAlert,
   CCRReadExceptionsAlert,
   CpuUsageAlert,
   MissingMonitoringDataAlert,
@@ -34,6 +35,7 @@ import {
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 import { Alert } from '../../../alerts/common';
@@ -52,6 +54,7 @@ const BY_TYPE = {
   [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
   [ALERT_CCR_READ_EXCEPTIONS]: CCRReadExceptionsAlert,
+  [ALERT_LARGE_SHARD_SIZE]: LargeShardSizeAlert,
 };
 
 export class AlertsFactory {
