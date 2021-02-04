@@ -6,6 +6,8 @@
  * Public License, v 1.
  */
 
+const DASHBOARD_STATE_STORAGE_KEY = '_a';
+
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
@@ -17,8 +19,12 @@ export const DashboardConstants = {
   SEARCH_SESSION_ID: 'searchSessionId',
 };
 
-export function createDashboardEditUrl(id: string) {
-  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}`;
+export function createDashboardEditUrl(id?: string, editMode?: boolean) {
+  if (!id) {
+    return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+  }
+  const edit = editMode ? `?${DASHBOARD_STATE_STORAGE_KEY}=(viewMode:edit)` : '';
+  return `${DashboardConstants.VIEW_DASHBOARD_URL}/${id}${edit}`;
 }
 
 export function createDashboardListingFilterUrl(filter: string | undefined) {

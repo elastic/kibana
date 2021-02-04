@@ -91,11 +91,13 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.string()),
           filter: schema.maybe(schema.string()),
+          searchFields: schema.maybe(schema.arrayOf(schema.string())),
+          search: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, res) => {
-      const { page, perPage, sortField, sortOrder, filter } = request.body;
+      const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
       try {
         const response = await context.search!.findSessions({
           page,
@@ -103,6 +105,8 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           sortField,
           sortOrder,
           filter,
+          searchFields,
+          search,
         });
 
         return res.ok({
