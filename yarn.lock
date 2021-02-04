@@ -20293,6 +20293,14 @@ markdown-to-jsx@^6.11.4:
     prop-types "^15.6.2"
     unquote "^1.1.0"
 
+match-sorter@^6.0.2:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/match-sorter/-/match-sorter-6.1.0.tgz#7fec6808d94311a35fef7fd842a11634f2361bd7"
+  integrity sha512-sKPMf4kbF7Dm5Crx0bbfLpokK68PUJ/0STUIOPa1ZmTZEA3lCaPK3gapQR573oLmvdkTfGojzySkIwuq6Z6xRQ==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    remove-accents "0.4.2"
+
 matchdep@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/matchdep/-/matchdep-2.0.0.tgz#c6f34834a0d8dbc3b37c27ee8bbcb27c7775582e"
@@ -24260,6 +24268,14 @@ react-portal@^3.2.0:
   dependencies:
     prop-types "^15.5.8"
 
+react-query@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.7.1.tgz#cbd15d84507431e8c3b248a1069401cb0feda396"
+  integrity sha512-n9Ld5UUzCWqqDDPvdRN45tvTYSBjuWHex2ninxIu+tD20pwfHR8QzPnntYPkc/h/wW4Q48m68FgXVi/co/1CKg==
+  dependencies:
+    "@babel/runtime" "^7.5.5"
+    match-sorter "^6.0.2"
+
 react-redux@^7.1.0, react-redux@^7.1.1, react-redux@^7.2.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-7.2.0.tgz#f970f62192b3981642fec46fd0db18a074fe879d"
@@ -25245,6 +25261,11 @@ remedial@^1.0.7:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/remedial/-/remedial-1.0.8.tgz#a5e4fd52a0e4956adbaf62da63a5a46a78c578a0"
   integrity sha512-/62tYiOe6DzS5BqVsNpH/nkGlX45C/Sp6V+NtiN6JQNS1Viay7cWkazmRkrQrdFj2eshDe96SIQNIoMxqhzBOg==
+
+remove-accents@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/remove-accents/-/remove-accents-0.4.2.tgz#0a43d3aaae1e80db919e07ae254b285d9e1c7bb5"
+  integrity sha1-CkPTqq4egNuRngeuJUsoXZ4ce7U=
 
 remove-bom-buffer@^3.0.0:
   version "3.0.0"

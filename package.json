@@ -283,6 +283,7 @@
     "react-is": "^16.8.0",
     "react-moment-proptypes": "^1.7.0",
     "react-portal": "^3.2.0",
+    "react-query": "^3.7.1",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-router": "^5.2.0",
