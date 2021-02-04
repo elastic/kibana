@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover.scss';
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -32,7 +32,7 @@ import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import { esFilters, IndexPatternField, search } from '../../../../data/public';
-import { DiscoverSidebarResponsive } from './sidebar/discover_sidebar_responsive';
+import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
@@ -41,54 +41,12 @@ import { popularizeField } from '../helpers/popularize_field';
 import { getStateColumnActions } from '../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
+import { DiscoverTopNav } from './discover_topnav';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
-
-const TopNavWrapper = ({
-  topNavMenu,
-  indexPattern,
-  updateQuery,
-  state,
-  opts,
-}: Pick<DiscoverProps, 'topNavMenu' | 'indexPattern' | 'updateQuery' | 'state' | 'opts'>) => {
-  const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
-  const { TopNavMenu } = opts.services.navigation.ui;
-
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appStateContainer, setAppState } = opts.stateContainer;
-    if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
-    } else {
-      // remove savedQueryId from state
-      const newState = {
-        ...appStateContainer.getState(),
-      };
-      delete newState.savedQuery;
-      appStateContainer.set(newState);
-    }
-  };
-  return (
-    <TopNavMenu
-      appName="discover"
-      config={topNavMenu}
-      indexPatterns={[indexPattern]}
-      onQuerySubmit={updateQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
-      query={state.query}
-      setMenuMountPoint={opts.setHeaderActionMenu}
-      savedQueryId={state.savedQuery}
-      screenTitle={opts.savedSearch.title}
-      showDatePicker={showDatePicker}
-      showSaveQuery={!!opts.services.capabilities.discover.saveQuery}
-      showSearchBar={true}
-      useDefaultBehaviors={true}
-    />
-  );
-};
-
-const TopNav = React.memo(TopNavWrapper);
+const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function Discover({
   fetch,
@@ -224,7 +182,7 @@ export function Discover({
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
-        <TopNav
+        <TopNavMemoized
           indexPattern={indexPattern}
           opts={opts}
           state={state}
