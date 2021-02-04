@@ -33,9 +33,13 @@ export const FormatField = ({
     }
   }, [formatError, getFields]);
 
+  useEffect(() => {
+    getFields().format.reset();
+  }, [type, getFields]);
+
   return (
     <UseField<FieldFormatConfig | undefined> path="format">
-      {({ setValue, errors }) => {
+      {({ setValue, errors, value }) => {
         return (
           <>
             {isSubmitted && errors.length > 0 && (
@@ -64,6 +68,7 @@ export const FormatField = ({
               uiSettings={uiSettings}
               onChange={setValue}
               onError={setFormatError}
+              value={value}
               key={typeValue}
             />
           </>
