@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType } from '../../lib/saved_query/saved_object_mappings';
+
+import {
+  createSavedQueryRequestSchema,
+  CreateSavedQueryRequestSchemaDecoded,
+} from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
+import { savedQuerySavedObjectType } from '../../../common/types';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 
 export const createSavedQueryRoute = (router: IRouter) => {
   router.post(
     {
       path: '/api/osquery/saved_query',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: buildRouteValidation<
+          typeof createSavedQueryRequestSchema,
+          CreateSavedQueryRequestSchemaDecoded
+        >(createSavedQueryRequestSchema),
       },
     },
     async (context, request, response) => {

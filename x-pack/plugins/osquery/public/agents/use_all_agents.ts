@@ -62,7 +62,7 @@ export const useAllAgents = ({
       if (!agentsRequest) return Promise.resolve();
 
       const responseData = await data.search
-        .search<AgentsRequestOptions, AgentsStrategyResponse>(agentsRequest!, {
+        .search<AgentsRequestOptions, AgentsStrategyResponse>(agentsRequest, {
           strategy: 'osquerySearchStrategy',
         })
         .toPromise();
@@ -70,7 +70,7 @@ export const useAllAgents = ({
       return {
         ...responseData,
         agents: responseData.edges,
-        inspect: getInspectResponse(responseData, {}),
+        inspect: getInspectResponse(responseData),
       };
     },
     {

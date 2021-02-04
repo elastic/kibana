@@ -99,7 +99,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   });
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId, setCellProps }) => {
+    () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
       const value = data[rowIndex];

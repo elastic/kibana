@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType } from '../../lib/saved_query/saved_object_mappings';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const readSavedQueryRoute = (router: IRouter) => {
   router.get(
@@ -16,11 +16,9 @@ export const readSavedQueryRoute = (router: IRouter) => {
       path: '/api/osquery/saved_query/{id}',
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
-        body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, response) => {
-      //   const esClient = context.core.elasticsearch.client.asInternalUser;
       const savedObjectsClient = context.core.savedObjects.client;
 
       const savedQuery = await savedObjectsClient.get(savedQuerySavedObjectType, request.params.id);

@@ -7,7 +7,7 @@
 
 import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
+// import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({
   docValueFields,

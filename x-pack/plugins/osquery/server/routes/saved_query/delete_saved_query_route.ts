@@ -8,14 +8,13 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType } from '../../lib/saved_query/saved_object_mappings';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const deleteSavedQueryRoute = (router: IRouter) => {
   router.delete(
     {
       path: '/api/osquery/saved_query',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
         body: schema.object({}, { unknowns: 'allow' }),
       },
     },

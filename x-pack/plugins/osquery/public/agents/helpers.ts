@@ -30,7 +30,7 @@ export const generateTablePaginationOptions = (
 
 export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T>,
-  prevResponse: InspectResponse
+  prevResponse?: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
   response:
