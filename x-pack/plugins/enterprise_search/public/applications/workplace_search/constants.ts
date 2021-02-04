@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 export const NAV = {
@@ -281,6 +283,8 @@ export const GITHUB_LINK_TITLE = i18n.translate(
 );
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
+
+export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
 
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',

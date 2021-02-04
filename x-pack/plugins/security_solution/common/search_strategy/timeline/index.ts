@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -13,6 +15,7 @@ import {
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
+  TimelineKpiStrategyResponse,
 } from './events';
 import { DocValueFields, PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 
@@ -44,6 +47,8 @@ export type TimelineStrategyResponseType<
   ? TimelineEventsAllStrategyResponse
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsStrategyResponse
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineKpiStrategyResponse
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeStrategyResponse
   : never;
@@ -54,6 +59,8 @@ export type TimelineStrategyRequestType<
   ? TimelineEventsAllRequestOptions
   : T extends TimelineEventsQueries.details
   ? TimelineEventsDetailsRequestOptions
+  : T extends TimelineEventsQueries.kpi
+  ? TimelineRequestBasicOptions
   : T extends TimelineEventsQueries.lastEventTime
   ? TimelineEventsLastEventTimeRequestOptions
   : never;

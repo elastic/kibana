@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GraphQLSchema } from 'graphql';
-import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
@@ -23,7 +21,6 @@ import {
   CoreSetup,
   IRouter,
   KibanaRequest,
-  KibanaResponseFactory,
   RouteMethod,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
@@ -73,79 +70,6 @@ export class KibanaFramework {
     }
   }
 
-  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
-    // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
-    const body = schema.object({}, { unknowns: 'allow' });
-    type Body = TypeOf<typeof body>;
-
-    const routeOptions = {
-      path: `/api/infra${routePath}`,
-      validate: {
-        body,
-      },
-      options: {
-        tags: ['access:infra'],
-      },
-    };
-    async function handler(
-      context: InfraPluginRequestHandlerContext,
-      request: KibanaRequest<unknown, unknown, Body>,
-      response: KibanaResponseFactory
-    ) {
-      try {
-        const query =
-          request.route.method === 'post'
-            ? (request.body as Record<string, any>)
-            : (request.query as Record<string, any>);
-
-        const gqlResponse = await runHttpQuery([context, request], {
-          method: request.route.method.toUpperCase(),
-          options: (req: InfraPluginRequestHandlerContext, rawReq: KibanaRequest) => ({
-            context: { req, rawReq },
-            schema: gqlSchema,
-          }),
-          query,
-        });
-
-        return response.ok({
-          body: gqlResponse,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      } catch (error) {
-        const errorBody = {
-          message: error.message,
-        };
-
-        if ('HttpQueryError' !== error.name) {
-          return response.internalError({
-            body: errorBody,
-          });
-        }
-
-        if (error.isGraphQLError === true) {
-          return response.customError({
-            statusCode: error.statusCode,
-            body: errorBody,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-        }
-
-        const { headers = [], statusCode = 500 } = error;
-        return response.customError({
-          statusCode,
-          headers,
-          body: errorBody,
-        });
-      }
-    }
-    this.router.post(routeOptions, handler);
-    this.router.get(routeOptions, handler);
-  }
-
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
@@ -187,7 +111,7 @@ export class KibanaFramework {
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
 
-  public async callWithRequest<Hit = {}, Aggregation = undefined>(
+  public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     params: CallWithRequestParams
