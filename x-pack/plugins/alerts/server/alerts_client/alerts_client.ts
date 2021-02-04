@@ -417,11 +417,13 @@ export class AlertsClient {
     let instancesLatestStateSummary: {
       instances: Record<string, unknown>;
       last_execution_state: Record<string, unknown>;
+      errors_state: Record<string, unknown>;
     };
     try {
       const instansStatesQueryResults = await eventLogClient.getEventsSummaryBySavedObjectIds<{
         instances: Record<string, unknown>;
         last_execution_state: Record<string, unknown>;
+        errors_state: Record<string, unknown>;
       }>(
         'alert',
         [id],
@@ -435,7 +437,7 @@ export class AlertsClient {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log latest instances state for alert ${id}: ${err.message}`
       );
-      instancesLatestStateSummary = { instances: {}, last_execution_state: {} };
+      instancesLatestStateSummary = { instances: {}, last_execution_state: {}, errors_state: {} };
     }
 
     let instancesCreatedSummary: {

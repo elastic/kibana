@@ -106,14 +106,29 @@ describe('getAlertInstanceSummary()', () => {
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
 
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
-    const summaryResult = [
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
       {
         savedObjectId: '',
-        summary,
+        summary: instancesLatestStateSummary,
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
@@ -170,14 +185,29 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls saved objects and event log client with default params', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
-    const summaryResult = [
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
       {
         savedObjectId: '',
-        summary,
+        summary: instancesLatestStateSummary,
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     await alertsClient.getAlertInstanceSummary({ id: '1' });
 
@@ -278,14 +308,29 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls event log client with relative start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
-    const summaryResult = [
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
       {
         savedObjectId: '',
-        summary,
+        summary: instancesLatestStateSummary,
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     const dateStart = '2m';
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
@@ -304,14 +349,29 @@ describe('getAlertInstanceSummary()', () => {
 
   test('invalid start date throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
-    const summaryResult = [
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
       {
         savedObjectId: '',
-        summary,
+        summary: instancesLatestStateSummary,
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     const dateStart = 'ain"t no way this will get parsed as a date';
     expect(
@@ -323,14 +383,29 @@ describe('getAlertInstanceSummary()', () => {
 
   test('saved object get throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('OMG!'));
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
-    const summaryResult = [
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
       {
         savedObjectId: '',
-        summary,
+        summary: instancesLatestStateSummary,
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     expect(alertsClient.getAlertInstanceSummary({ id: '1' })).rejects.toMatchInlineSnapshot(
       `[Error: OMG!]`

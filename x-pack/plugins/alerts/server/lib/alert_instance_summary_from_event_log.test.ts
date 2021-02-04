@@ -17,10 +17,18 @@ const dateEnd = dateString(dateStart, ONE_HOUR_IN_MILLIS);
 describe('alertInstanceSummaryFromEventLog', () => {
   test('no events and muted ids', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      errors_state: {},
+      last_execution_state: {},
+    };
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -57,10 +65,18 @@ describe('alertInstanceSummaryFromEventLog', () => {
       throttle: '1h',
       muteAll: true,
     });
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      errors_state: {},
+      last_execution_state: {},
+    };
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart: dateString(dateEnd, ONE_HOUR_IN_MILLIS),
       dateEnd: dateString(dateEnd, ONE_HOUR_IN_MILLIS * 2),
     });
@@ -92,10 +108,18 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const alert = createAlert({
       mutedInstanceIds: ['instance-1', 'instance-2'],
     });
-    const summary: RawEventLogAlertsSummary = { instances: {}, last_execution_state: {} };
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      errors_state: {},
+      last_execution_state: {},
+    };
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -127,16 +151,20 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('active alert but no instances', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
-
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -153,15 +181,37 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('active alert with no instances but has errors', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
-      last_execution_state: {
+      errors_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
+        action: {
+          hits: {
+            hits: [
+              {
+                _source: {
+                  error: {
+                    message: 'oof!',
+                  }
+                }
+              }
+            ]
+          }
+        }
       },
+      last_execution_state: {
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        }
+      }
+    };
+    const instancesCreatedSummary = {
+      instances: {},
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -188,16 +238,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently inactive instance', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -222,16 +277,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('legacy alert with currently inactive instance', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -256,16 +316,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently inactive instance, no new-instance', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -290,16 +355,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently active instance', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -324,16 +394,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently active instance with no action group in event log', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -358,7 +433,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently active instance that switched action groups', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {
         buckets: [
           {
@@ -404,6 +479,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
           },
         ],
       },
+      errors_state: {},
       last_execution_state: {
         doc_count: 48,
         action: {
@@ -429,9 +505,13 @@ describe('alertInstanceSummaryFromEventLog', () => {
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -456,16 +536,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with currently active instance, no new-instance', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -490,16 +575,21 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with active and inactive muted alerts', async () => {
     const alert = createAlert({ mutedInstanceIds: ['instance-1', 'instance-2'] });
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      errors_state: {},
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });
@@ -531,16 +621,33 @@ describe('alertInstanceSummaryFromEventLog', () => {
 
   test('alert with active and inactive alerts over many executes', async () => {
     const alert = createAlert({});
-    const summary: RawEventLogAlertsSummary = {
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
+      "errors_state": {
+        "doc_count": 0,
+        "action": {
+            "hits": {
+                "total": {
+                    "value": 0,
+                    "relation": "eq"
+                },
+                "max_score": null,
+                "hits": []
+            }
+        }
+    },
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
     };
 
+    const instancesCreatedSummary = {
+      instances: {},
+    };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
-      summary,
+      instancesLatestStateSummary,
+      instancesCreatedSummary,
       dateStart,
       dateEnd,
     });

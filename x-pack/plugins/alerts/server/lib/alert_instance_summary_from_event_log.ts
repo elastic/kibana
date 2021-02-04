@@ -12,7 +12,7 @@ const MAX_BUCKETS_LIMIT = 65535;
 export interface AlertInstanceSummaryFromEventLogParams {
   alert: SanitizedAlert<{ bar: boolean }>;
   instancesLatestStateSummary: RawEventLogAlertsSummary;
-  instancesCreatedSummary: Omit<RawEventLogAlertsSummary, 'last_execution_state'>;
+  instancesCreatedSummary: Pick<RawEventLogAlertsSummary, 'instances'>;
   dateStart: string;
   dateEnd: string;
 }
@@ -57,7 +57,7 @@ export function alertInstanceSummaryFromEventLog(
           (newInstance: any) => newInstance.key === instanceId
         );
         status.activeStartDate = instanceCreated
-          ? instanceCreated.instance_created.max_timestampt.value_as_string
+          ? instanceCreated.instance_created.max_timestamp.value_as_string
           : undefined;
       }
 
@@ -76,14 +76,17 @@ export function alertInstanceSummaryFromEventLog(
     }
   }
 
+  if (instancesLatestStateSummary.last_execution_state) {
+    alertInstanceSummary.lastRun =
+      instancesLatestStateSummary.last_execution_state.max_timestamp?.value_as_string;
+  }
+
   if (
-    instancesLatestStateSummary.last_execution_state &&
-    instancesLatestStateSummary.last_execution_state.action &&
-    instancesLatestStateSummary.last_execution_state.action.hits.hits.length > 0
+    instancesLatestStateSummary.errors_state &&
+    instancesLatestStateSummary.errors_state.action &&
+    instancesLatestStateSummary.errors_state.action.hits.hits.length > 0
   ) {
-    const executionSummary =
-      instancesLatestStateSummary.last_execution_state.action.hits.hits[0]._source;
-    alertInstanceSummary.lastRun = executionSummary['@timestamp'];
+    const executionSummary = instancesLatestStateSummary.errors_state.action.hits.hits[0]._source;
 
     if (executionSummary.error !== undefined) {
       alertInstanceSummary.status = 'Error';
@@ -121,6 +124,8 @@ export interface RawEventLogAlertsSummary {
   instances: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   last_execution_state: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errors_state: Record<string, any>;
 }
 
 export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
@@ -135,16 +140,10 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
       last_state: {
         filter: {
           bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    { term: { 'event.action': 'active-instance' } },
-                    { term: { 'event.action': 'new-instance' } },
-                    { term: { 'event.action': 'recovered-instance' } },
-                  ],
-                },
-              },
+            should: [
+              { term: { 'event.action': 'active-instance' } },
+              { term: { 'event.action': 'new-instance' } },
+              { term: { 'event.action': 'recovered-instance' } },
             ],
           },
         },
@@ -173,9 +172,11 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
       },
     },
   },
-  last_execution_state: {
+  errors_state: {
     filter: {
-      term: { 'event.action': 'execute' },
+      bool: {
+        must: [{ term: { 'event.action': 'execute' } }, { exists: { field: 'error.message' } }],
+      },
     },
     aggs: {
       action: {
@@ -190,9 +191,16 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
           _source: {
             includes: ['@timestamp', 'error.message'],
           },
-          size: 1,
         },
       },
+    },
+  },
+  last_execution_state: {
+    filter: {
+      term: { 'event.action': 'execute' },
+    },
+    aggs: {
+      max_timestamp: { max: { field: '@timestamp' } },
     },
   },
 };
@@ -211,7 +219,7 @@ export const alertInstanceCreatedQueryAggregation = {
           term: { 'event.action': 'new-instance' },
         },
         aggs: {
-          max_timestampt: { max: { field: '@timestamp' } },
+          max_timestamp: { max: { field: '@timestamp' } },
         },
       },
     },
