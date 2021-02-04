@@ -306,10 +306,11 @@ the `polling` method could be used enabling that option. *Default: `false`*
 suppress all logging output. *Default: `false`*
 
 | `logging.timezone`
- | Set to the canonical time zone ID
+ | Optional. Set to the canonical time zone ID
 (for example, `America/Los_Angeles`) to log events using that time zone.
 For possible values, refer to
-https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones]. *Default: `UTC`*
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones]. When not set,
+ log dates will be in the {kib} host timezone.
 
 | [[logging-verbose]] `logging.verbose:` {ess-icon}
  | Set to `true` to log all events, including system usage information and all
