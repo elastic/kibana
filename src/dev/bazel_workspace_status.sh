@@ -48,9 +48,10 @@ echo "GIT_TREE_STATUS ${tree_status}"
 # Host
 if [ "$CI" = "true" ]; then
   host=$(hostname | sed 's|\(.*\)-.*|\1|')
+  cores=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}' )
   if [[ $? != 0 ]];
   then
       exit 1
   fi
-  echo "HOST ${host}"
+  echo "HOST ${host}-${cores}"
 fi
