@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
@@ -28,6 +29,7 @@ export interface CommonAlertFilter {
 export interface CommonAlertParamDetail {
   label: string;
   type?: AlertParamType;
+  [name: string]: unknown | undefined;
 }
 
 export interface CommonAlertParamDetails {
@@ -38,6 +40,7 @@ export interface CommonAlertParams {
   duration: string;
   threshold?: number;
   limit?: string;
+  [key: string]: unknown;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
@@ -178,6 +181,18 @@ export interface CCRReadExceptionsStats {
 }
 
 export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
+  instanceId: string;
+  itemLabel: string;
+}
+
+export interface IndexShardSizeStats extends AlertNodeStats {
+  shardIndex: string;
+  shardSize: number;
+}
+
+export interface IndexShardSizeUIMeta extends IndexShardSizeStats {
+  shardIndex: string;
+  shardSize: number;
   instanceId: string;
   itemLabel: string;
 }
