@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -40,7 +41,7 @@ describe('Mapping', () => {
       wrappingComponent: TestProviders,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
-      'Field mappings require an established connection to ServiceNow. Please check your connection credentials.'
+      'Field mappings require an established connection to ServiceNow ITSM. Please check your connection credentials.'
     );
   });
 });

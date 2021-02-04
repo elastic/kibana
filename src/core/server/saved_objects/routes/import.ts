@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Readable } from 'stream';
@@ -13,7 +13,7 @@ import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
-import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
+import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -61,7 +61,7 @@ export const registerImportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import url from 'url';
@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const find = getService('find');
   const retry = getService('retry');
   const deployment = getService('deployment');
-  const esArchiver = getService('esArchiver');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -51,7 +50,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   describe('ui applications', function describeIndexTests() {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
     });
 
