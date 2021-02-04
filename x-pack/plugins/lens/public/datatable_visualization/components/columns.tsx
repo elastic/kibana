@@ -50,8 +50,6 @@ export const createGridColumns = (
     return { rowValue, contentsIsDefined, cellContent };
   };
 
-  const visibleColumnsCount = columnConfig.columns.filter((c) => !c.hidden).length;
-
   return visibleColumns.map((field) => {
     const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
@@ -187,7 +185,7 @@ export const createGridColumns = (
                   defaultMessage: 'Hide',
                 }),
                 'data-test-subj': 'lensDatatableHide',
-                isDisabled: !isHidden && visibleColumnsCount <= 1,
+                isDisabled: !isHidden && visibleColumns.length <= 1,
               },
             ],
       },
