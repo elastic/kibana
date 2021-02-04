@@ -1,4 +1,4 @@
-# Inspired on from https://raw.githubusercontent.com/bazelbuild/rules_nodejs/master/.bazelrc
+# Inspired by https://raw.githubusercontent.com/bazelbuild/rules_nodejs/master/.bazelrc
 # Import shared settings first so we can override below
 import %workspace%/.bazelrc.common
 
