@@ -5104,7 +5104,6 @@
     "xpack.apm.localFilters.titles.serviceName": "サービス名",
     "xpack.apm.localFilters.titles.serviceVersion": "サービスバージョン",
     "xpack.apm.localFilters.titles.transactionResult": "トランザクション結果",
-    "xpack.apm.localFilters.titles.transactionType": "トランザクションタイプ",
     "xpack.apm.localFilters.titles.transactionUrl": "Url",
     "xpack.apm.localFiltersTitle": "フィルター",
     "xpack.apm.metadataTable.section.agentLabel": "エージェント",
