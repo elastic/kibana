@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -23,8 +24,8 @@ test('Loading state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loading'));
-  await userEvent.click(screen.getByText('Cancel session'));
+  await userEvent.click(screen.getByLabelText('Search session loading'));
+  await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -37,7 +38,7 @@ test('Completed state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loaded'));
+  await userEvent.click(screen.getByLabelText('Search session complete'));
   await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
@@ -51,8 +52,8 @@ test('Loading in the background state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loading results in the background'));
-  await userEvent.click(screen.getByText('Cancel session'));
+  await userEvent.click(screen.getByLabelText(/Saved session in progress/));
+  await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -67,38 +68,43 @@ test('BackgroundCompleted state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Results loaded in the background'));
-  expect(screen.getByRole('link', { name: 'View all sessions' }).getAttribute('href')).toBe(
+  await userEvent.click(screen.getByLabelText(/Saved session complete/));
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
     '__link__'
   );
 });
 
 test('Restored state', async () => {
-  const onRefresh = jest.fn();
   render(
     <Container>
-      <SearchSessionIndicator state={SearchSessionState.Restored} onRefresh={onRefresh} />
+      <SearchSessionIndicator
+        state={SearchSessionState.Restored}
+        viewSearchSessionsLink={'__link__'}
+      />
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Results no longer current'));
-  await userEvent.click(screen.getByText('Refresh'));
+  await userEvent.click(screen.getByLabelText(/Saved session restored/));
 
-  expect(onRefresh).toBeCalled();
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+    '__link__'
+  );
 });
 
 test('Canceled state', async () => {
-  const onRefresh = jest.fn();
   render(
     <Container>
-      <SearchSessionIndicator state={SearchSessionState.Canceled} onRefresh={onRefresh} />
+      <SearchSessionIndicator
+        state={SearchSessionState.Canceled}
+        viewSearchSessionsLink={'__link__'}
+      />
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Canceled'));
-  await userEvent.click(screen.getByText('Refresh'));
-
-  expect(onRefresh).toBeCalled();
+  await userEvent.click(screen.getByLabelText(/Search session stopped/));
+  expect(screen.getByRole('link', { name: 'Manage sessions' }).getAttribute('href')).toBe(
+    '__link__'
+  );
 });
 
 test('Disabled state', async () => {
