@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { isObject } from 'lodash';
-import { OperationDefinition, GenericOperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern } from '../../types';
+import { OperationDefinition, GenericOperationDefinition } from '../index';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPattern } from '../../../types';
 
 const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
 

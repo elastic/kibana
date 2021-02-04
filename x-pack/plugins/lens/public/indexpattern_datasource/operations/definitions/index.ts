@@ -35,8 +35,8 @@ import {
   MovingAverageIndexPatternColumn,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
-import { mathOperation, MathIndexPatternColumn } from './math';
-import { formulaOperation, FormulaIndexPatternColumn } from './formula';
+import { mathOperation, MathIndexPatternColumn } from './formula/math';
+import { formulaOperation, FormulaIndexPatternColumn } from './formula/formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
@@ -137,7 +137,7 @@ export {
   derivativeOperation,
   movingAverageOperation,
 } from './calculations';
-export { formulaOperation } from './formula';
+export { formulaOperation } from './formula/formula';
 
 /**
  * Properties passed to the operation-specific part of the popover editor
