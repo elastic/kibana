@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
-import { xpackMocks } from '../../../../mocks';
+import { coreMock } from 'src/core/server/mocks';
+import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { MOCK_VERSION_STRING, getMockVersionInfo } from './__fixtures__/version';
 
 import {
@@ -17,6 +19,18 @@ import {
 import { versionService } from './version';
 
 const { currentMajor, currentVersion } = getMockVersionInfo();
+
+// Re-implement the mock that was imported directly from `x-pack/mocks`
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
 
 describe('getAllNodeVersions', () => {
   it('returns a list of unique node versions', async () => {

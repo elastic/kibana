@@ -300,7 +300,12 @@ def getDocsChangesLink() {
 
   try {
     // httpRequest throws on status codes >400 and failures
-    httpRequest([ method: "GET", url: url ])
+    def resp = httpRequest([ method: "GET", url: url ])
+
+    if (resp.contains("There aren't any differences!")) {
+      return ""
+    }
+
     return "* [Documentation Changes](${url})"
   } catch (ex) {
     print "Failed to reach ${url}"
