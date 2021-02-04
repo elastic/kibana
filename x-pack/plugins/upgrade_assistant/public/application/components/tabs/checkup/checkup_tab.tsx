@@ -102,6 +102,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
               strongCheckupLabel: <strong>{checkupLabel}</strong>,
               nextEsVersion: `${nextMajor}.x`,
             }}
+            data-test-subj="upgradeAssistant{checkupLabel}tabDetail"
           />
         </p>
       </EuiText>
