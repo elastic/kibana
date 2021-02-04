@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Direction } from '@elastic/eui';
@@ -9,7 +10,7 @@ import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
 import type { DatatableProps } from '../expression';
-import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION } from './constants';
+import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
 
 export type LensGridDirection = 'none' | Direction;
 
@@ -23,24 +24,13 @@ export interface LensResizeActionData {
   width: number | undefined;
 }
 
+export interface LensToggleActionData {
+  columnId: string;
+}
+
 export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
 export type LensResizeAction = LensEditEvent<typeof LENS_EDIT_RESIZE_ACTION>;
-
-export interface DatatableColumns {
-  columnIds: string[];
-  sortBy: string;
-  sortDirection: string;
-  columnWidth?: DatatableColumnWidthResult[];
-}
-
-export interface DatatableColumnWidth {
-  columnId: string;
-  width: number;
-}
-
-export type DatatableColumnWidthResult = DatatableColumnWidth & {
-  type: 'lens_datatable_column_width';
-};
+export type LensToggleAction = LensEditEvent<typeof LENS_TOGGLE_ACTION>;
 
 export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
