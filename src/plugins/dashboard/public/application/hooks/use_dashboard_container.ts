@@ -119,6 +119,7 @@ export const useDashboardContainer = (
     return () => {
       canceled = true;
       container?.destroy();
+      setDashboardContainer(null);
     };
   }, [
     dashboardCapabilities,
