@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent } from 'react';
@@ -18,11 +19,17 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ToggleField, UseField, useFormData } from '../../../../../shared_imports';
-import { i18nTexts } from '../../i18n_texts';
 import { FormInternal } from '../../types';
 
-import { MinAgeField } from './shared_fields';
+import { ToggleField, useFormData } from '../../../../../../shared_imports';
+
+import { i18nTexts } from '../../../i18n_texts';
+
+import { UseField } from '../../../form';
+
+import { MinAgeField } from '../shared_fields';
+
+import { PhaseErrorIndicator } from './phase_error_indicator';
 
 import './phase.scss';
 import { PhaseIcon } from '../phase_icon';
@@ -61,6 +68,9 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
         <EuiTitle size={'s'}>
           <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
         </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <PhaseErrorIndicator phase={phase} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

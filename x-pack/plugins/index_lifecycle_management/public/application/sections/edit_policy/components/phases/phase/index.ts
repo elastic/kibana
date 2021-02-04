@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { BreadcrumbService } from './breadcrumbs';
-
-export const createBreadcrumbsMock = () => {
-  const breadcrumbService = new BreadcrumbService();
-  breadcrumbService.setup(jest.fn());
-  return breadcrumbService;
-};
+export { Phase } from './phase';
