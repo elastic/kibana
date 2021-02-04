@@ -47,6 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('should allow existing lens vizs be added to a new dashboard', async () => {
@@ -64,6 +66,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('should allow new lens vizs be added to an existing dashboard', async () => {
@@ -148,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Capabilities', function capabilitiesTests() {
       describe('dashboard no-access privileges', () => {
         before(async () => {
+          await PageObjects.common.navigateToApp('visualize');
           await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all'], true);
         });
 

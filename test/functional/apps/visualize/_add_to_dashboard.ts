@@ -42,6 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardExpect.metricValuesExist(['14,004']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('adding a existing metric to a new dashboard', async function () {
@@ -72,6 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardExpect.metricValuesExist(['14,004']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('adding a new metric to an existing dashboard', async function () {

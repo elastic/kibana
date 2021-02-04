@@ -50,6 +50,8 @@ export default function ({ getPageObjects, getService }) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('should allow existing maps be added to a new dashboard', async () => {
@@ -65,6 +67,8 @@ export default function ({ getPageObjects, getService }) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
+
+      await PageObjects.timeToVisualize.resetNewDashboard();
     });
 
     it('should allow new map be added to an existing dashboard', async () => {
