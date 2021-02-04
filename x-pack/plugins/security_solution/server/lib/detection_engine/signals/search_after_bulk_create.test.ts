@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -309,9 +310,9 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when all search results are in the allowlist and with sortId present', async () => {
     const searchListItems: SearchListItemArraySchema = [
-      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '3.3.3.3' },
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['3.3.3.3'] },
     ];
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
@@ -373,10 +374,10 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when all search results are in the allowlist and no sortId present', async () => {
     const searchListItems: SearchListItemArraySchema = [
-      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
     ];
 
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
