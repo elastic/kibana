@@ -16,7 +16,6 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
-  SavedObjectsOpenPointInTimeOptions,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -478,30 +477,6 @@ export class SavedObjectsClient {
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   }
-
-  /**
-   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
-   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
-   *
-   * @param {string|Array<string>} type
-   * @param {object} [options] - {@link SavedObjectsPointInTimeOptions}
-   * @property {string} [options.keepAlive]
-   * @property {string} [options.preference]
-   * @returns {promise} - { id: string }
-   */
-  public openPointInTimeForType = (
-    type: string | string[],
-    { keepAlive, preference }: SavedObjectsOpenPointInTimeOptions = {}
-  ): ReturnType<SavedObjectsApi['openPointInTimeForType']> => {
-    const types = Array.isArray(type) ? type.join(',') : type;
-    return this.savedObjectsFetch(this.getPath([types, '_pit']), {
-      method: 'POST',
-      body: JSON.stringify({
-        ...(keepAlive ? { keep_alive: keepAlive } : {}),
-        ...(preference ? { preference } : {}),
-      }),
-    });
-  };
 
   private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);

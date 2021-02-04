@@ -42,7 +42,6 @@ export const FIND_STATS_PREFIX = 'apiCalls.savedObjectsFind';
 export const GET_STATS_PREFIX = 'apiCalls.savedObjectsGet';
 export const RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsResolve';
 export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
-export const OPEN_PIT_STATS_PREFIX = 'apiCalls.savedObjectsOpenPit';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
 export const EXPORT_STATS_PREFIX = 'apiCalls.savedObjectsExport';
@@ -57,7 +56,6 @@ const ALL_COUNTER_FIELDS = [
   ...getFieldsForCounter(GET_STATS_PREFIX),
   ...getFieldsForCounter(RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(UPDATE_STATS_PREFIX),
-  ...getFieldsForCounter(OPEN_PIT_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getFieldsForCounter(IMPORT_STATS_PREFIX),
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
@@ -133,10 +131,6 @@ export class CoreUsageStatsClient {
 
   public async incrementSavedObjectsUpdate(options: BaseIncrementOptions) {
     await this.updateUsageStats([], UPDATE_STATS_PREFIX, options);
-  }
-
-  public async incrementSavedObjectsOpenPit(options: BaseIncrementOptions) {
-    await this.updateUsageStats([], OPEN_PIT_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsImport(options: IncrementSavedObjectsImportOptions) {

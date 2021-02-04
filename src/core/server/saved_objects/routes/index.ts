@@ -21,7 +21,6 @@ import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
 import { registerLogLegacyImportRoute } from './log_legacy_import';
-import { registerPointInTimeRoute } from './pit';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
@@ -52,7 +51,6 @@ export function registerRoutes({
   registerBulkCreateRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
   registerLogLegacyImportRoute(router, logger);
-  registerPointInTimeRoute(router, { coreUsageData });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

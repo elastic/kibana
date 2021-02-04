@@ -18,7 +18,6 @@ const createStartContractMock = () => {
       bulkGet: jest.fn(),
       find: jest.fn(),
       get: jest.fn(),
-      openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
       update: jest.fn(),
     },
   };
