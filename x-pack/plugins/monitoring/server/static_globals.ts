@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, ILegacyCustomClusterClient, Logger } from 'kibana/server';
@@ -17,7 +18,21 @@ interface IAppGlobals {
   monitoringCluster: ILegacyCustomClusterClient;
   config: MonitoringConfig;
   getLogger: GetLogger;
+  getKeyStoreValue: (key: string, storeValueMethod?: () => unknown) => unknown;
 }
+
+interface KeyStoreData {
+  [key: string]: unknown;
+}
+
+const keyStoreData: KeyStoreData = {};
+const getKeyStoreValue = (key: string, storeValueMethod?: () => unknown) => {
+  const value = keyStoreData[key];
+  if ((value === undefined || value == null) && typeof storeValueMethod === 'function') {
+    keyStoreData[key] = storeValueMethod();
+  }
+  return keyStoreData[key];
+};
 
 export class Globals {
   private static _app: IAppGlobals;
@@ -37,6 +52,7 @@ export class Globals {
       monitoringCluster,
       config,
       getLogger,
+      getKeyStoreValue,
     };
   }
 
