@@ -121,7 +121,7 @@ export async function getErrorRateTimeSeries({
   topSigTerms: TopSigTerm[];
 }) {
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
+  const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
   if (isEmpty(topSigTerms)) {
     return {};

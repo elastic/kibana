@@ -58,7 +58,11 @@ export function ServiceOverview({
   return (
     <AnnotationsContextProvider>
       <ChartPointerEventContextProvider>
-        <SearchBar prepend={transactionTypeLabel} showTimeComparison />
+        <SearchBar
+          prepend={transactionTypeLabel}
+          showTimeComparison
+          showCorrelations
+        />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
             {isRumAgent && (

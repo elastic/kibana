@@ -17,13 +17,7 @@ import {
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBox,
-  EuiAccordion,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -32,6 +26,8 @@ import { px } from '../../../style/variables';
 import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
+import { CustomFields } from './custom_fields';
+import { useDefaultFieldNames } from './useDefaultFieldNames';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -41,26 +37,31 @@ type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
 
-const initialFieldNames = [
-  'transaction.name',
-  'user.username',
-  'user.id',
-  'host.ip',
-  'user_agent.name',
-  'kubernetes.pod.uuid',
-  'kubernetes.pod.name',
-  'url.domain',
-  'container.id',
-  'service.node.name',
-].map((label) => ({ label }));
+// const initialFieldNames = [
+//   'transaction.name',
+//   'user.username',
+//   'user.id',
+//   'host.ip',
+//   'user_agent.name',
+//   'kubernetes.pod.uuid',
+//   'kubernetes.pod.name',
+//   'url.domain',
+//   'container.id',
+//   'service.node.name',
+// ].map((label) => ({ label }));
 
-export function ErrorCorrelations() {
+interface Props {
+  onClose: () => void;
+}
+
+export function ErrorCorrelations({ onClose }: Props) {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
-  const [fieldNames, setFieldNames] = useState(initialFieldNames);
+  const defaultFieldNames = useDefaultFieldNames();
+  const [fieldNames, setFieldNames] = useState(defaultFieldNames);
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
@@ -78,7 +79,7 @@ export function ErrorCorrelations() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              fieldNames: fieldNames.map((field) => field.label).join(','),
+              fieldNames: fieldNames.join(','),
             },
           },
         });
@@ -99,7 +100,17 @@ export function ErrorCorrelations() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiText size="s">
+            <p>
+              Orbiting this at a distance of roughly ninety-two million miles is
+              an utterly insignificant little blue green planet whose ape-
+              descended life forms are so amazingly primitive that they still
+              think digital watches are a pretty neat idea.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
             <h4>
               {i18n.translate('xpack.apm.correlations.error.chart.title', {
                 defaultMessage: 'Error rate over time',
@@ -123,29 +134,15 @@ export function ErrorCorrelations() {
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
+            onFilter={onClose}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiAccordion
-            id="accordion"
-            buttonContent={i18n.translate(
-              'xpack.apm.correlations.customize.buttonLabel',
-              { defaultMessage: 'Customize fields' }
-            )}
-          >
-            <EuiComboBox
-              fullWidth={true}
-              placeholder={i18n.translate(
-                'xpack.apm.correlations.customize.fieldPlaceholder',
-                { defaultMessage: 'Select or create options' }
-              )}
-              selectedOptions={fieldNames}
-              onChange={setFieldNames}
-              onCreateOption={(term) =>
-                setFieldNames((names) => [...names, { label: term }])
-              }
-            />
-          </EuiAccordion>
+          <CustomFields
+            defaultFieldNames={defaultFieldNames}
+            fieldNames={fieldNames}
+            setFieldNames={setFieldNames}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

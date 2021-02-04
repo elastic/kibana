@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, dropRightWhile } from 'lodash';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
@@ -39,8 +39,8 @@ export async function getLatencyDistribution({
     return {};
   }
 
-  const intervalBuckets = 20;
-  const distributionInterval = roundtoTenth(maxLatency / intervalBuckets);
+  const intervalBuckets = 15;
+  const distributionInterval = Math.floor(maxLatency / intervalBuckets);
 
   const distributionAgg = {
     // filter out outliers not included in the significant term docs
@@ -107,7 +107,14 @@ export async function getLatencyDistribution({
 
   function formatDistribution(distribution: Agg['distribution']) {
     const total = distribution.doc_count;
-    return distribution.dist_filtered_by_latency.buckets.map((bucket) => ({
+
+    // remove trailing buckets that are empty and out of bounds of the desired number of buckets
+    const buckets = dropRightWhile(
+      distribution.dist_filtered_by_latency.buckets,
+      (bucket, index) => bucket.doc_count === 0 && index > intervalBuckets - 1
+    );
+
+    return buckets.map((bucket) => ({
       x: bucket.key,
       y: (bucket.doc_count / total) * 100,
     }));
@@ -128,8 +135,4 @@ export async function getLatencyDistribution({
       };
     }),
   };
-}
-
-function roundtoTenth(v: number) {
-  return Math.pow(10, Math.round(Math.log10(v)));
 }

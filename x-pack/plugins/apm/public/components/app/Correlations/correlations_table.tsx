@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiLink,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiBadge,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { EuiBasicTable } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiCode } from '@elastic/eui';
 import { asInteger, asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -30,6 +33,7 @@ interface Props<T> {
   status: FETCH_STATUS;
   cardinalityColumnName: string;
   setSelectedSignificantTerm: (term: T | null) => void;
+  onFilter: () => void;
 }
 
 export function CorrelationsTable<T extends SignificantTerm>({
@@ -37,6 +41,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
   status,
   cardinalityColumnName,
   setSelectedSignificantTerm,
+  onFilter,
 }: Props<T>) {
   const history = useHistory();
   const columns: Array<EuiBasicTableColumn<T>> = [
@@ -48,7 +53,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
         { defaultMessage: 'Score' }
       ),
       render: (_: any, term: T) => {
-        return <EuiCode>{Math.round(term.score)}</EuiCode>;
+        return <EuiBadge>{Math.round(term.score)}</EuiBadge>;
       },
     },
     {
@@ -96,6 +101,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
                 )}"`,
               },
             });
+            onFilter();
           },
         },
         {
@@ -117,6 +123,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
                 )}"`,
               },
             });
+            onFilter();
           },
         },
       ],
