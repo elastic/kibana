@@ -50,6 +50,8 @@ export const createGridColumns = (
     return { rowValue, contentsIsDefined, cellContent };
   };
 
+  const visibleColumnsCount = columnConfig.columns.filter((c) => !c.hidden).length;
+
   return visibleColumns.map((field) => {
     const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
@@ -135,7 +137,9 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const initialWidth = columnConfig.columns.find(({ columnId }) => columnId === field)?.width;
+    const column = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const initialWidth = column?.width;
+    const isHidden = column?.hidden;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
@@ -178,11 +182,12 @@ export const createGridColumns = (
                 color: 'text',
                 size: 'xs',
                 onClick: () => onColumnHide({ columnId: field }),
-                iconType: 'empty',
+                iconType: 'eyeClosed',
                 label: i18n.translate('xpack.lens.table.hide.hideLabel', {
                   defaultMessage: 'Hide',
                 }),
                 'data-test-subj': 'lensDatatableHide',
+                isDisabled: !isHidden && visibleColumnsCount <= 1,
               },
             ],
       },
