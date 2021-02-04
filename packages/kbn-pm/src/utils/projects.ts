@@ -26,7 +26,8 @@ export interface IProjectsOptions {
 export async function getProjects(
   rootPath: string,
   projectsPathsPatterns: string[],
-  { include = [], exclude = [] }: IProjectsOptions = {}
+  { include = [], exclude = [] }: IProjectsOptions = {},
+  bazelOnly: boolean = false
 ) {
   const projects: ProjectMap = new Map();
 
@@ -39,7 +40,9 @@ export async function getProjects(
       const project = await Project.fromPath(projectDir);
 
       const excludeProject =
-        exclude.includes(project.name) || (include.length > 0 && !include.includes(project.name));
+        exclude.includes(project.name) ||
+        (include.length > 0 && !include.includes(project.name)) ||
+        (bazelOnly && !project.isBazelPackage());
 
       if (excludeProject) {
         continue;
@@ -57,6 +60,30 @@ export async function getProjects(
   }
 
   return projects;
+}
+
+export async function getNonBazelProjectsOnly(projects: ProjectMap) {
+  const bazelProjectsOnly: ProjectMap = new Map();
+
+  for (const project of projects.values()) {
+    if (!project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
+}
+
+export async function getBazelProjectsOnly(projects: ProjectMap) {
+  const bazelProjectsOnly: ProjectMap = new Map();
+
+  for (const project of projects.values()) {
+    if (project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
 }
 
 function packagesFromGlobPattern({ pattern, rootPath }: { pattern: string; rootPath: string }) {
