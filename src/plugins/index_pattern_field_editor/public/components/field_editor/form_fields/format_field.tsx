@@ -10,7 +10,6 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { UseField, useFormData, ES_FIELD_TYPES, useFormContext } from '../../../shared_imports';
 import { FormatSelectEditor, FormatSelectEditorProps } from '../../field_format_editor';
-import { castEsToKbnFieldTypeName } from '../../../../../data/public';
 import { FieldFormInternal } from '../field_editor';
 import { FieldFormatConfig } from '../../../types';
 
@@ -19,11 +18,17 @@ export const FormatField = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
-}: Omit<FormatSelectEditorProps, 'onChange' | 'onError' | 'fieldAttrs'>) => {
-  const [{ name, type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
-  const typeValue = type && type[0] ? type[0].value : undefined;
+}: Omit<FormatSelectEditorProps, 'onChange' | 'onError' | 'esTypes'>) => {
+  const [{ type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
   const { getFields, isSubmitted } = useFormContext();
   const [formatError, setFormatError] = useState<string | undefined>();
+  // convert from combobox type to values
+  const typeValue = type.reduce((collector, item) => {
+    if (item.value !== undefined) {
+      collector.push(item.value as ES_FIELD_TYPES);
+    }
+    return collector;
+  }, [] as ES_FIELD_TYPES[]);
 
   useEffect(() => {
     if (formatError === undefined) {
@@ -55,13 +60,7 @@ export const FormatField = ({
             )}
 
             <FormatSelectEditor
-              fieldAttrs={{
-                name,
-                type: castEsToKbnFieldTypeName(typeValue || 'keyword'),
-                esTypes: typeValue
-                  ? ([typeValue] as ES_FIELD_TYPES[])
-                  : (['keyword'] as ES_FIELD_TYPES[]),
-              }}
+              esTypes={typeValue || (['keyword'] as ES_FIELD_TYPES[])}
               indexPattern={indexPattern}
               fieldFormatEditors={fieldFormatEditors}
               fieldFormats={fieldFormats}
@@ -69,7 +68,7 @@ export const FormatField = ({
               onChange={setValue}
               onError={setFormatError}
               value={value}
-              key={typeValue}
+              key={typeValue.join(', ')}
             />
           </>
         );

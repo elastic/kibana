@@ -20,16 +20,13 @@ import {
   FieldFormat,
 } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
+import { castEsToKbnFieldTypeName } from '../../../../data/public';
 import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
 import { FieldFormatConfig } from '../../types';
 
 export interface FormatSelectEditorProps {
-  fieldAttrs: {
-    name: string;
-    type: KBN_FIELD_TYPES;
-    esTypes: ES_FIELD_TYPES[];
-  };
+  esTypes: ES_FIELD_TYPES[];
   indexPattern: IndexPattern;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
@@ -49,6 +46,7 @@ export interface FormatSelectEditorState {
   fieldFormatId?: string;
   fieldFormatParams?: { [key: string]: unknown };
   format: FieldFormat;
+  kbnType: KBN_FIELD_TYPES;
 }
 
 interface InitialFieldTypeFormat extends FieldTypeFormat {
@@ -83,32 +81,24 @@ export class FormatSelectEditor extends PureComponent<
 > {
   constructor(props: FormatSelectEditorProps) {
     super(props);
-    const {
-      indexPattern,
-      fieldFormats,
-      fieldAttrs: { name, type, esTypes },
-    } = props;
+    const { fieldFormats, esTypes, value } = props;
+    const kbnType = castEsToKbnFieldTypeName(esTypes[0] || 'keyword');
 
     // get current formatter for field, provides default if none exists
-    const format = indexPattern.getFormatterForField({
-      name,
-      type,
-      esTypes,
-    });
-
-    // get saved formatter info
-    const formatConfig = indexPattern.getFormatterForFieldNoDefault(name);
-    formatConfig?.params();
+    const format = value?.id
+      ? fieldFormats.getInstance(value?.id, value?.params)
+      : fieldFormats.getDefaultInstance(kbnType, esTypes);
 
     this.state = {
       fieldTypeFormats: getFieldTypeFormatsList(
-        type,
-        fieldFormats.getDefaultType(type, esTypes) as FieldFormatInstanceType,
+        kbnType,
+        fieldFormats.getDefaultType(kbnType, esTypes) as FieldFormatInstanceType,
         fieldFormats
       ),
       format,
-      fieldFormatId: formatConfig?.type?.id,
-      fieldFormatParams: formatConfig?.params(),
+      fieldFormatId: value?.id,
+      fieldFormatParams: value?.params,
+      kbnType,
     };
   }
   onFormatChange = (formatId: string, params?: any) => {
@@ -145,11 +135,8 @@ export class FormatSelectEditor extends PureComponent<
   };
 
   render() {
-    const {
-      fieldFormatEditors,
-      onError,
-      fieldAttrs: { type },
-    } = this.props;
+    const { fieldFormatEditors, onError } = this.props;
+    const { kbnType } = this.state;
 
     const { fieldTypeFormats, format, fieldFormatId, fieldFormatParams } = this.state;
 
@@ -182,7 +169,7 @@ export class FormatSelectEditor extends PureComponent<
         </EuiFormRow>
         {fieldFormatId ? (
           <FormatEditor
-            fieldType={type}
+            fieldType={kbnType}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
