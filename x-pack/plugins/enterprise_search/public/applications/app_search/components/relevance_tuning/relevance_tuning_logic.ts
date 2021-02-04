@@ -32,19 +32,19 @@ interface RelevanceTuningActions {
 interface RelevanceTuningValues {
   searchSettings: Partial<SearchSettings>;
   schema: Schema;
-  dataLoading: boolean;
-  schemaConflicts: SchemaConflicts;
-  unsavedChanges: boolean;
-  filterInputValue: string;
-  query: string;
-  searchResults: object[] | null;
-  resultsLoading: boolean;
-  showSchemaConflictCallout: boolean;
-  engineHasSchemaFields: boolean;
   schemaFields: string[];
   schemaFieldsWithConflicts: string[];
   filteredSchemaFields: string[];
   filteredSchemaFieldsWithConflicts: string[];
+  schemaConflicts: SchemaConflicts;
+  showSchemaConflictCallout: boolean;
+  engineHasSchemaFields: boolean;
+  filterInputValue: string;
+  query: string;
+  unsavedChanges: boolean;
+  dataLoading: boolean;
+  searchResults: object[] | null;
+  resultsLoading: boolean;
 }
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
@@ -81,23 +81,16 @@ export const RelevanceTuningLogic = kea<
         onInitializeRelevanceTuning: (_, { schema }) => schema,
       },
     ],
-    dataLoading: [
-      true,
-      {
-        onInitializeRelevanceTuning: () => false,
-        resetSearchSettingsState: () => true,
-      },
-    ],
     schemaConflicts: [
       {},
       {
         onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts,
       },
     ],
-    unsavedChanges: [
-      false,
+    showSchemaConflictCallout: [
+      true,
       {
-        setSearchSettings: () => true,
+        dismissSchemaConflictCallout: () => false,
       },
     ],
     filterInputValue: [
@@ -112,11 +105,18 @@ export const RelevanceTuningLogic = kea<
         setSearchQuery: (_, query) => query,
       },
     ],
-    resultsLoading: [
+    unsavedChanges: [
       false,
       {
-        setResultsLoading: (_, resultsLoading) => resultsLoading,
-        setSearchResults: () => false,
+        setSearchSettings: () => true,
+      },
+    ],
+
+    dataLoading: [
+      true,
+      {
+        onInitializeRelevanceTuning: () => false,
+        resetSearchSettingsState: () => true,
       },
     ],
     searchResults: [
@@ -126,18 +126,15 @@ export const RelevanceTuningLogic = kea<
         setSearchResults: (_, searchResults) => searchResults,
       },
     ],
-    showSchemaConflictCallout: [
-      true,
+    resultsLoading: [
+      false,
       {
-        dismissSchemaConflictCallout: () => false,
+        setResultsLoading: (_, resultsLoading) => resultsLoading,
+        setSearchResults: () => false,
       },
     ],
   }),
   selectors: ({ selectors }) => ({
-    engineHasSchemaFields: [
-      () => [selectors.schema],
-      (schema: Schema): boolean => Object.keys(schema).length >= 2,
-    ],
     schemaFields: [() => [selectors.schema], (schema: Schema) => Object.keys(schema)],
     schemaFieldsWithConflicts: [
       () => [selectors.schemaConflicts],
@@ -152,6 +149,10 @@ export const RelevanceTuningLogic = kea<
       () => [selectors.schemaFieldsWithConflicts, selectors.filterInputValue],
       (schemaFieldsWithConflicts: string[], filterInputValue: string): string[] =>
         filterIfTerm(schemaFieldsWithConflicts, filterInputValue),
+    ],
+    engineHasSchemaFields: [
+      () => [selectors.schema],
+      (schema: Schema): boolean => Object.keys(schema).length >= 2,
     ],
   }),
 });
