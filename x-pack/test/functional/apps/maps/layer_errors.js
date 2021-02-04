@@ -10,8 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/69617
-  describe.skip('layer errors', () => {
+  describe('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
@@ -66,14 +65,15 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/36011
-    describe.skip('EMSFileSource with missing EMS id', () => {
+    describe('EMSFileSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}`);
+        expect(errorMsg).to.equal(
+          `Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -90,7 +90,7 @@ export default function ({ getPageObjects }) {
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(
-          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}`
+          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
         );
       });
 
