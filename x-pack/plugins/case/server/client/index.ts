@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CaseClientFactoryArguments, CaseClient } from './types';
+import {
+  CaseClientFactoryArguments,
+  CaseClient,
+  CaseClientFactoryMethods,
+  CaseClientMethods,
+} from './types';
 import { create } from './cases/create';
 import { get } from './cases/get';
 import { update } from './cases/update';
@@ -19,112 +24,22 @@ import { get as getAlerts } from './alerts/get';
 
 export { CaseClient } from './types';
 
-// TODO: Refactor to accommodate the growth of the case client
-export const createCaseClient = ({
-  caseConfigureService,
-  caseService,
-  connectorMappingsService,
-  request,
-  response,
-  savedObjectsClient,
-  userActionService,
-  alertsService,
-  context,
-}: CaseClientFactoryArguments): CaseClient => {
-  return {
-    create: create({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    get: get({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    update: update({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    push: push({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-      context,
-    }),
-    addComment: addComment({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    getAlerts: getAlerts({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    getFields: getFields(),
-    getMappings: getMappings({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    getUserActions: getUserActions({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
-    updateAlertsStatus: updateAlertsStatus({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
-      context,
-      request,
-      response,
-      savedObjectsClient,
-      userActionService,
-    }),
+export const createCaseClient = (args: CaseClientFactoryArguments): CaseClient => {
+  const methods: CaseClientFactoryMethods = {
+    create,
+    get,
+    update,
+    push,
+    addComment,
+    getAlerts,
+    getFields,
+    getMappings,
+    getUserActions,
+    updateAlertsStatus,
   };
+
+  return (Object.keys(methods) as CaseClientMethods[]).reduce((client, method) => {
+    client[method] = methods[method](args);
+    return client;
+  }, {} as CaseClient);
 };
