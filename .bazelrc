@@ -11,7 +11,7 @@ import %workspace%/.bazelrc.common
 
 # BuildBuddy
 ## Metadata settings
-build --workspace_status_command=$(pwd)/src/dev/workspace_status.sh
+build --workspace_status_command=$(pwd)/src/dev/bazel_workspace_status.sh
 # Enable this in case you want to share your build info
 # build --build_metadata=VISIBILITY=PUBLIC
 build --build_metadata=TEST_GROUPS=//packages
