@@ -14,8 +14,7 @@
  *
  * @internal
  */
-
-export interface EcsOpsMetricsEvent {
+export interface EcsEvent {
   /**
    * These typings were written as of ECS 1.7.0.
    * Don't change this value without checking the rest
@@ -30,21 +29,17 @@ export interface EcsOpsMetricsEvent {
   labels?: Record<string, unknown>;
   message?: string;
   tags?: string[];
+
   // other fields
-  process?: EcsProcessField;
+  client?: EcsClientField;
   event?: EcsEventField;
+  http?: EcsHttpField;
+  process?: EcsProcessField;
+  url?: EcsUrlField;
+  user_agent?: EcsUserAgentField;
 }
 
-interface EcsProcessField {
-  uptime?: number;
-}
-
-export interface EcsEventField {
-  kind?: EcsEventKind;
-  category?: EcsEventCategory[];
-  type?: EcsEventType;
-}
-
+/** @internal */
 export enum EcsEventKind {
   ALERT = 'alert',
   EVENT = 'event',
@@ -54,6 +49,7 @@ export enum EcsEventKind {
   SIGNAL = 'signal',
 }
 
+/** @internal */
 export enum EcsEventCategory {
   AUTHENTICATION = 'authentication',
   CONFIGURATION = 'configuration',
@@ -70,6 +66,7 @@ export enum EcsEventCategory {
   WEB = 'web',
 }
 
+/** @internal */
 export enum EcsEventType {
   ACCESS = 'access',
   ADMIN = 'admin',
@@ -87,4 +84,46 @@ export enum EcsEventType {
   PROTOCOL = 'protocol',
   START = 'start',
   USER = 'user',
+}
+
+interface EcsEventField {
+  kind?: EcsEventKind;
+  category?: EcsEventCategory[];
+  type?: EcsEventType;
+}
+
+interface EcsProcessField {
+  uptime?: number;
+}
+
+interface EcsClientField {
+  ip?: string;
+}
+
+interface EcsHttpFieldRequest {
+  body?: { bytes?: number; content?: string };
+  method?: string;
+  mime_type?: string;
+  referrer?: string;
+}
+
+interface EcsHttpFieldResponse {
+  body?: { bytes?: number; content?: string };
+  bytes?: number;
+  status_code?: number;
+}
+
+interface EcsHttpField {
+  version?: string;
+  request?: EcsHttpFieldRequest;
+  response?: EcsHttpFieldResponse;
+}
+
+interface EcsUrlField {
+  path?: string;
+  query?: string;
+}
+
+interface EcsUserAgentField {
+  original?: string;
 }

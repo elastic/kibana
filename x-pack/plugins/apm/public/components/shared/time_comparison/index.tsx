@@ -33,14 +33,21 @@ function formatPreviousPeriodDates({
   momentEnd: moment.Moment;
 }) {
   const isDifferentYears = momentStart.get('year') !== momentEnd.get('year');
-  const dateFormat = isDifferentYears ? 'DD/MM/YY' : 'DD/MM';
+  const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
 }
 
-function getSelectOptions({ start, end }: { start?: string; end?: string }) {
+function getSelectOptions({
+  start,
+  end,
+  rangeTo,
+}: {
+  start?: string;
+  end?: string;
+  rangeTo?: string;
+}) {
   const momentStart = moment(start);
   const momentEnd = moment(end);
-  const dateDiff = getDateDifference(momentStart, momentEnd, 'days');
 
   const yesterdayOption = {
     value: 'yesterday',
@@ -56,22 +63,32 @@ function getSelectOptions({ start, end }: { start?: string; end?: string }) {
     }),
   };
 
+  const dateDiff = getDateDifference({
+    start: momentStart,
+    end: momentEnd,
+    unitOfTime: 'days',
+    precise: true,
+  });
+  const isRangeToNow = rangeTo === 'now';
+
+  if (isRangeToNow) {
+    // Less than or equals to one day
+    if (dateDiff <= 1) {
+      return [yesterdayOption, aWeekAgoOption];
+    }
+
+    // Less than or equals to one week
+    if (dateDiff <= 7) {
+      return [aWeekAgoOption];
+    }
+  }
+
   const prevPeriodOption = {
     value: 'previousPeriod',
     text: formatPreviousPeriodDates({ momentStart, momentEnd }),
   };
 
-  // Less than one day
-  if (dateDiff < 1) {
-    return [yesterdayOption, aWeekAgoOption];
-  }
-
-  // Less than one week
-  if (dateDiff <= 7) {
-    return [aWeekAgoOption];
-  }
-
-  // above one week
+  // above one week or when rangeTo is not "now"
   return [prevPeriodOption];
 }
 
@@ -79,10 +96,10 @@ export function TimeComparison() {
   const history = useHistory();
   const { isMedium, isLarge } = useBreakPoints();
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType },
+    urlParams: { start, end, comparisonEnabled, comparisonType, rangeTo },
   } = useUrlParams();
 
-  const selectOptions = getSelectOptions({ start, end });
+  const selectOptions = getSelectOptions({ start, end, rangeTo });
 
   // Sets default values
   if (comparisonEnabled === undefined || comparisonType === undefined) {
@@ -113,7 +130,7 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={!isMedium && isLarge}
       data-test-subj="comparisonSelect"
-      disabled={selectOptions.length <= 1}
+      disabled={!comparisonEnabled}
       options={selectOptions}
       value={comparisonType}
       prepend={
@@ -123,7 +140,7 @@ export function TimeComparison() {
             label={i18n.translate('xpack.apm.timeComparison.label', {
               defaultMessage: 'Comparison',
             })}
-            checked={comparisonEnabled && selectOptions.length > 0}
+            checked={comparisonEnabled}
             onChange={() => {
               urlHelpers.push(history, {
                 query: {
