@@ -20,6 +20,7 @@ export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana
 export {
   useForm,
   useFormData,
+  useFormContext,
   Form,
   FormSchema,
   UseField,
