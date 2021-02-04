@@ -11,8 +11,6 @@ import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 import { i18n } from '@kbn/i18n';
 
-const fileType = 'json';
-
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
     throw i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
@@ -117,10 +115,10 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
 
 async function writeToIndex(indexingDetails) {
   const query = indexingDetails.id ? { id: indexingDetails.id } : null;
-  const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
+  const { index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
   return await httpService({
-    url: `/api/maps/fileupload/import`,
+    url: `/api/file_upload/import`,
     method: 'POST',
     ...(query ? { query } : {}),
     data: {
@@ -129,8 +127,6 @@ async function writeToIndex(indexingDetails) {
       settings,
       mappings,
       ingestPipeline,
-      fileType,
-      ...(appName ? { app: appName } : {}),
     },
   });
 }
