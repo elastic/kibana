@@ -32,7 +32,7 @@ export interface Field {
 
 export interface RuntimeMapping {
   type: string;
-  script: string;
+  script: any;
 }
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
