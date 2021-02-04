@@ -130,7 +130,7 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={!isMedium && isLarge}
       data-test-subj="comparisonSelect"
-      disabled={selectOptions.length <= 1}
+      disabled={!comparisonEnabled}
       options={selectOptions}
       value={comparisonType}
       prepend={
@@ -140,7 +140,7 @@ export function TimeComparison() {
             label={i18n.translate('xpack.apm.timeComparison.label', {
               defaultMessage: 'Comparison',
             })}
-            checked={comparisonEnabled && selectOptions.length > 0}
+            checked={comparisonEnabled}
             onChange={() => {
               urlHelpers.push(history, {
                 query: {
