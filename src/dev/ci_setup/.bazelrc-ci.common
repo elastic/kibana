@@ -5,7 +5,7 @@
 build --noshow_progress
 
 # Print all the options that apply to the build.
-build --announce_rc
+# build --announce_rc
 
 # More details on failures
 build --verbose_failures=true
