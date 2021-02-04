@@ -35,14 +35,14 @@ export function useSearchSessionTour(
     if (state === SearchSessionState.Loading) {
       if (!safeHas(storage, TOUR_TAKING_TOO_LONG_STEP_KEY)) {
         timeoutHandle = window.setTimeout(() => {
-          searchSessionIndicatorRef.current?.openPopover();
+          safeOpen(searchSessionIndicatorRef);
         }, TOUR_TAKING_TOO_LONG_TIMEOUT);
       }
     }
 
     if (state === SearchSessionState.Restored) {
       if (!safeHas(storage, TOUR_RESTORE_STEP_KEY)) {
-        searchSessionIndicatorRef.current?.openPopover();
+        safeOpen(searchSessionIndicatorRef);
       }
     }
 
@@ -77,5 +77,17 @@ function safeSet(storage: IStorageWrapper, key: string) {
     storage.set(key, true);
   } catch (e) {
     return true;
+  }
+}
+
+function safeOpen(searchSessionIndicatorRef: MutableRefObject<SearchSessionIndicatorRef | null>) {
+  if (searchSessionIndicatorRef.current) {
+    searchSessionIndicatorRef.current.openPopover();
+  } else {
+    // TODO: needed for initial open when component is not rendered yet
+    // fix after: https://github.com/elastic/eui/issues/4460
+    setTimeout(() => {
+      searchSessionIndicatorRef.current?.openPopover();
+    }, 50);
   }
 }
