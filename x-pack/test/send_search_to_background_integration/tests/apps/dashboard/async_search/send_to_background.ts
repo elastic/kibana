@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
+  const queryBar = getService('queryBar');
 
   describe('send to background', () => {
     before(async function () {
@@ -45,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(session1).to.be(fakeSessionId);
 
-      await searchSessions.refresh();
+      await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('completed');
       await testSubjects.missingOrFail('embeddableErrorLabel');
@@ -64,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(url).to.contain('searchSessionId');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
+
       expect(
         await dashboardPanelActions.getSearchSessionIdByTitle('Sum of Bytes by Extension')
       ).to.be(fakeSessionId);

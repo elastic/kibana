@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -225,6 +226,11 @@ export class SearchSessionService
     });
   };
 
+  // TODO: Throw an error if this session doesn't belong to this user
+  public delete = ({ savedObjectsClient }: SearchSessionDependencies, sessionId: string) => {
+    return savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
+  };
+
   /**
    * Tracks the given search request/search ID in the saved session.
    * @internal
@@ -307,6 +313,7 @@ export class SearchSessionService
         update: this.update.bind(this, deps),
         extend: this.extend.bind(this, deps),
         cancel: this.cancel.bind(this, deps),
+        delete: this.delete.bind(this, deps),
       };
     };
   };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +12,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
 const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
+
+export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
+export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
 
 type SessionStateType =
   | 'none'
@@ -60,7 +64,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     public async viewSearchSessions() {
       log.debug('viewSearchSessions');
       await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorviewSearchSessionsLink');
+      await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
     public async save() {
@@ -77,15 +81,20 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverClosed();
     }
 
-    public async refresh() {
-      log.debug('refresh the status');
-      await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorRefreshBtn');
-      await this.ensurePopoverClosed();
-    }
-
     public async openPopover() {
       await this.ensurePopoverOpened();
+    }
+
+    public async openedOrFail() {
+      return testSubjects.existOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
+    }
+
+    public async closedOrFail() {
+      return testSubjects.missingOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
     }
 
     private async ensurePopoverOpened() {
@@ -141,6 +150,20 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
           })
         );
       });
+    }
+
+    public async markTourDone() {
+      await Promise.all([
+        browser.setLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY, 'true'),
+        browser.setLocalStorageItem(TOUR_RESTORE_STEP_KEY, 'true'),
+      ]);
+    }
+
+    public async markTourUndone() {
+      await Promise.all([
+        browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
+        browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
+      ]);
     }
   })();
 }
