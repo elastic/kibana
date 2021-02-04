@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,6 +17,7 @@ import {
   getSavedObjectsClient,
   getCoreOverlays,
   getSavedObjectsTagging,
+  getPresentationUtilContext,
 } from '../../kibana_services';
 import {
   checkForDuplicateTitle,
@@ -185,7 +187,7 @@ export function getTopNavConfig({
             defaultMessage: 'map',
           }),
         };
-
+        const PresentationUtilContext = getPresentationUtilContext();
         const saveModal =
           savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables() ? (
             <SavedObjectSaveModalOrigin
@@ -195,14 +197,10 @@ export function getTopNavConfig({
               options={tagSelector}
             />
           ) : (
-            <SavedObjectSaveModalDashboard
-              {...saveModalProps}
-              savedObjectsClient={getSavedObjectsClient()}
-              tagOptions={tagSelector}
-            />
+            <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
           );
 
-        showSaveModal(saveModal, getCoreI18n().Context);
+        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },
     });
 

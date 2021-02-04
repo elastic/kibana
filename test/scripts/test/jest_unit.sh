@@ -3,4 +3,4 @@
 source src/dev/ci_setup/setup_env.sh
 
 checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=6 --coverage
+  node scripts/jest --config jest.config.oss.js --ci --verbose --maxWorkers=5

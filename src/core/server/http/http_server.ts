@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
+import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -33,6 +33,7 @@ import {
 import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
+import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo } from './types';
 
 /** @internal */
@@ -76,6 +77,7 @@ export class HttpServer {
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
+  private handleServerResponseEvent?: (req: Request) => void;
   private stopped = false;
 
   private readonly log: Logger;
@@ -112,6 +114,7 @@ export class HttpServer {
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
+    this.setupResponseLogging();
     this.setupRequestStateAssignment(config);
 
     return {
@@ -216,6 +219,9 @@ export class HttpServer {
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+      if (this.handleServerResponseEvent) {
+        this.server.events.removeListener('response', this.handleServerResponseEvent);
+      }
       await this.server.stop();
     }
   }
@@ -280,6 +286,24 @@ export class HttpServer {
         return h.continue;
       });
     }
+  }
+
+  private setupResponseLogging() {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`setupResponseLogging called after stop`);
+    }
+
+    const log = this.logger.get('http', 'server', 'response');
+
+    this.handleServerResponseEvent = (request) => {
+      const { message, ...meta } = getEcsResponseLog(request, this.log);
+      log.debug(message!, meta);
+    };
+
+    this.server.events.on('response', this.handleServerResponseEvent);
   }
 
   private setupRequestStateAssignment(config: HttpConfig) {

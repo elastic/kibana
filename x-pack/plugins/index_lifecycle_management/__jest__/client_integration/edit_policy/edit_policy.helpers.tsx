@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -197,7 +198,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
   const setReplicas = (phase: Phases) => async (value: string) => {
-    await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    if (!exists(`${phase}-selectedReplicaCount`)) {
+      await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    }
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
@@ -248,9 +251,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   return {
     ...testBed,
     actions: {
+      saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
+      setPolicyName: createFormSetValueAction('policyNameField'),
       setWaitForSnapshotPolicy,
       savePolicy,
+      hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
+        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
@@ -262,6 +269,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxAge,
         toggleRollover,
         toggleDefaultRollover,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
         ...createForceMergeActions('hot'),
         ...createIndexPriorityActions('hot'),
         ...createShrinkActions('hot'),
@@ -275,6 +283,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
         ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
@@ -289,6 +298,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
