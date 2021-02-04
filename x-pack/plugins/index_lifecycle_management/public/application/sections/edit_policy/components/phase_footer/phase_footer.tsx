@@ -46,7 +46,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
           <EuiLink onClick={() => setValue(true)} data-test-subj={'enableDeletePhaseLink'}>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.enablePhaseButtonLabel"
-              defaultMessage="Enable data deletion"
+              defaultMessage="Set delete age"
             />
           </EuiLink>
         </EuiText>
@@ -65,7 +65,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
         <EuiLink onClick={() => setValue(false)} data-test-subj={'disableDeletePhaseLink'}>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.disablePhaseButtonLabel"
-            defaultMessage="Disable data deletion"
+            defaultMessage="Keep data"
           />
         </EuiLink>
       </EuiText>
