@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
-import { indexPatterns as indexPatternsUtils } from '../../../data/public';
+import {
+  IndexPatternField,
+  indexPatterns as indexPatternsUtils,
+  KBN_FIELD_TYPES,
+} from '../../../data/public';
 
 export interface Location {
   min: number;
@@ -29,6 +33,8 @@ export interface FunctionArg {
     value: string;
   };
 }
+
+const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField);
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
@@ -85,18 +91,15 @@ export function getArgValueSuggestions() {
 
         const valueSplit = partial.split(':');
         return indexPattern.fields
-          .getAll()
-          .filter((field) => {
-            return (
+          .getByType(KBN_FIELD_TYPES.NUMBER)
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               field.aggregatable &&
-              'number' === field.type &&
               containsFieldName(valueSplit[1], field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
-          });
+          )
+          .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
       },
       async split(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -106,17 +109,21 @@ export function getArgValueSuggestions() {
 
         return indexPattern.fields
           .getAll()
-          .filter((field) => {
-            return (
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               field.aggregatable &&
-              ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
+              [
+                KBN_FIELD_TYPES.NUMBER,
+                KBN_FIELD_TYPES.BOOLEAN,
+                KBN_FIELD_TYPES.DATE,
+                KBN_FIELD_TYPES.IP,
+                KBN_FIELD_TYPES.STRING,
+              ].includes(field.type as KBN_FIELD_TYPES) &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: field.name, help: field.type };
-          });
+          )
+          .map((field) => ({ name: field.name, help: field.type }));
       },
       async timefield(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -125,17 +132,14 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .getAll()
-          .filter((field) => {
-            return (
-              'date' === field.type &&
+          .getByType(KBN_FIELD_TYPES.DATE)
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: field.name };
-          });
+          )
+          .map((field) => ({ name: field.name }));
       },
     },
   };
