@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useMemo } from 'react';
+import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
 import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
-import { SourceConfiguration } from '../../utils/source_configuration';
 
-export const useSourceConfigurationFormState = (configuration?: SourceConfiguration) => {
+export const useSourceConfigurationFormState = (configuration?: InfraSourceConfiguration) => {
   const indicesConfigurationFormState = useIndicesConfigurationFormState({
     initialFormState: useMemo(
       () =>
