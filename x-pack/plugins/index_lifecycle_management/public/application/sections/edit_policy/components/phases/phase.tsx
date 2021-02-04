@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiTitle,
-  EuiSpacer,
   EuiText,
-  EuiButtonEmpty,
+  EuiComment,
+  EuiAccordion,
+  EuiSpacer,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -22,12 +22,11 @@ import { ToggleField, UseField, useFormData } from '../../../../../shared_import
 import { i18nTexts } from '../../i18n_texts';
 import { FormInternal } from '../../types';
 
-import { ActiveHighlight } from '../active_highlight';
 import { MinAgeField } from './shared_fields';
 
-import { PhaseFooter } from '../phase_footer';
-
 import './phase.scss';
+import { PhaseIcon } from '../phase_icon';
+import { PhaseFooter } from '../phase_footer';
 
 interface Props {
   phase: 'hot' | 'warm' | 'cold';
@@ -42,90 +41,64 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
   // hot phase is always enabled
   const enabled = get(formData, enabledPath) || phase === 'hot';
 
-  const [isShowingSettings, setShowingSettings] = useState<boolean>(false);
-  return (
-    <EuiFlexGroup>
+  const phaseTitle = (
+    <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
+      {phase !== 'hot' && (
+        <EuiFlexItem grow={false}>
+          <UseField
+            path={enabledPath}
+            component={ToggleField}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': `enablePhaseSwitch-${phase}`,
+                showLabel: false,
+              },
+            }}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <ActiveHighlight phase={phase} enabled={enabled} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasShadow={enabled} className={'ilmPhasePanel'}>
-          <div className={'ilmPhasePanel__inner'}>
-            <EuiFlexGroup wrap>
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize={'s'}>
-                  {phase !== 'hot' && (
-                    <EuiFlexItem grow={false}>
-                      <UseField
-                        path={enabledPath}
-                        component={ToggleField}
-                        componentProps={{
-                          euiFieldProps: {
-                            'data-test-subj': `enablePhaseSwitch-${phase}`,
-                            showLabel: false,
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size={'s'}>
-                      <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              {enabled && (
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    justifyContent="spaceBetween"
-                    alignItems="center"
-                    gutterSize={'xs'}
-                    wrap
-                  >
-                    <EuiFlexItem grow={true}>
-                      {phase !== 'hot' && <MinAgeField phase={phase} />}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        data-test-subj={`${phase}-settingsSwitch`}
-                        onClick={() => {
-                          setShowingSettings(!isShowingSettings);
-                        }}
-                        size="xs"
-                        iconType="controlsVertical"
-                        iconSide="left"
-                        aria-controls={`${phase}-phaseContent`}
-                      >
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
-                          defaultMessage="Settings"
-                        />
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
-              {i18nTexts.editPolicy.descriptions[phase]}
-            </EuiText>
-
-            {enabled && (
-              <div
-                style={isShowingSettings ? {} : { display: 'none' }}
-                id={`${phase}-phaseContent`}
-                aria-live="polite"
-              >
-                <EuiSpacer />
-                {children}
-              </div>
-            )}
-          </div>
-          <PhaseFooter phase={phase} />
-        </EuiPanel>
+        <EuiTitle size={'s'}>
+          <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
+        </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  const minAge = phase !== 'hot' ? <MinAgeField phase={phase} /> : null;
+
+  return (
+    <EuiComment
+      username={phaseTitle}
+      actions={minAge}
+      timelineIcon={<PhaseIcon enabled={enabled} phase={phase} />}
+      className={'ilmPhase'}
+    >
+      <div className="ilmPhase__inner">
+        <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+          {i18nTexts.editPolicy.descriptions[phase]}
+        </EuiText>
+
+        {enabled && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={`${phase}-settingsSwitch`}
+              buttonContent={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
+                  defaultMessage="Advanced settings"
+                />
+              }
+              buttonClassName="ilmSettingsButton"
+            >
+              <EuiSpacer />
+              {children}
+            </EuiAccordion>
+          </>
+        )}
+      </div>
+      <PhaseFooter phase={phase} />
+    </EuiComment>
   );
 };

@@ -1,4 +1,15 @@
-.euiPanel.ilmDeletePhase {
-  // border is only shown in v7 to compensate for panels not having background color
-  border-color: $euiColorDanger;
+.ilmDeletePhase {
+  .euiCommentEvent {
+    &__header {
+      padding: $euiSize;
+      background-color: $euiColorEmptyShade;
+
+    }
+    &__body {
+      padding: $euiSize;
+      background-color: $euiColorLightestShade;
+
+    }
+
+  }
 }

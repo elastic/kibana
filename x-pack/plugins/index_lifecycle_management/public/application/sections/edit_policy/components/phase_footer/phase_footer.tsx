@@ -27,7 +27,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
 
   if (phaseConfiguration === 'disabled' || phaseConfiguration === 'enabled') {
     return (
-      <EuiPanel className={'ilmPhaseFooter'}>
+      <EuiPanel className={'ilmPhaseFooter'} hasShadow={false}>
         <EuiText size={'s'}>&nbsp;</EuiText>
       </EuiPanel>
     );
@@ -35,7 +35,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
 
   if (phaseConfiguration === 'forever') {
     return (
-      <EuiPanel color={'subdued'} className={'ilmPhaseFooter'}>
+      <EuiPanel color={'subdued'} className={'ilmPhaseFooter'} hasShadow={false}>
         <InfinityIcon size={'s'} />{' '}
         <EuiText size={'s'} grow={false} className={'eui-displayInlineBlock'}>
           <FormattedMessage
@@ -54,7 +54,7 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
   }
 
   return (
-    <EuiPanel color={'subdued'} className={'ilmPhaseFooter'}>
+    <EuiPanel color={'subdued'} className={'ilmPhaseFooter'} hasShadow={false}>
       <EuiIcon type={'storage'} size={'s'} />{' '}
       <EuiText size={'s'} grow={false} className={'eui-displayInlineBlock'}>
         <FormattedMessage

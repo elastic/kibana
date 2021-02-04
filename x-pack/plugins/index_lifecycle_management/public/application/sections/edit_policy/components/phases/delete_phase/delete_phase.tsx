@@ -7,13 +7,13 @@
 import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
 import {
-  EuiPanel,
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
   EuiButtonEmpty,
   EuiSpacer,
   EuiText,
+  EuiComment,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +26,7 @@ import { usePhaseTimings } from '../../../form';
 
 import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 import './delete_phase.scss';
+import { PhaseIcon } from '../../phase_icon';
 
 const formFieldPaths = {
   enabled: '_meta.delete.enabled',
@@ -42,44 +43,40 @@ export const DeletePhase: FunctionComponent = () => {
   if (!enabled) {
     return null;
   }
+  const phaseTitle = (
+    <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size={'s'}>
+          <h2>{i18nTexts.editPolicy.titles.delete}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          onClick={() => setDeletePhaseEnabled(false)}
+          data-test-subj={'disableDeletePhaseButton'}
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.removeDeletePhaseButtonLabel"
+            defaultMessage="Remove"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
-    <EuiPanel color={'danger'} className={'ilmDeletePhase'} hasShadow={false}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size={'s'}>
-            <h2>{i18nTexts.editPolicy.titles.delete}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize={'xs'}>
-            <EuiFlexItem>
-              <MinAgeField phase={'delete'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={() => setDeletePhaseEnabled(false)}
-                iconType={'cross'}
-                color={'danger'}
-                size="xs"
-                iconSide="left"
-                data-test-subj={'disableDeletePhaseButton'}
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.removeDeletePhaseButtonLabel"
-                  defaultMessage="Disable"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+    <EuiComment
+      username={phaseTitle}
+      actions={<MinAgeField phase={'delete'} />}
+      className="ilmDeletePhase"
+      timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
+    >
       <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
         {i18nTexts.editPolicy.descriptions.delete}
       </EuiText>
       <EuiSpacer />
       <SnapshotPoliciesField />
-    </EuiPanel>
+    </EuiComment>
   );
 };
