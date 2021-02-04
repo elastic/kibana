@@ -16,7 +16,7 @@ import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupsAggResults } from '../lib/services/get_service_transaction_groups_agg_results';
+import { getServiceTransactionGroupsStatistics } from '../lib/services/get_service_transaction_groups_agg_results';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -139,7 +139,7 @@ export const transactionGroupsStatisticsRoute = createRoute({
       },
     } = context.params;
 
-    return getServiceTransactionGroupsAggResults({
+    return getServiceTransactionGroupsStatistics({
       setup,
       serviceName,
       transactionNames,

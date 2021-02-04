@@ -28,7 +28,7 @@ import {
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export async function getServiceTransactionGroupsAggResults({
+export async function getServiceTransactionGroupsStatistics({
   serviceName,
   transactionNames,
   setup,
