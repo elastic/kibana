@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
@@ -64,15 +66,8 @@ import {
   transactionThroughputChatsRoute,
 } from './transactions';
 import {
-  errorGroupsLocalFiltersRoute,
-  metricsLocalFiltersRoute,
-  servicesLocalFiltersRoute,
-  tracesLocalFiltersRoute,
-  transactionGroupsLocalFiltersRoute,
-  transactionsLocalFiltersRoute,
-  serviceNodesLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
+  uiFiltersEnvironmentsRoute,
 } from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
@@ -174,13 +169,6 @@ const createApmApi = () => {
     .add(transactionThroughputChatsRoute)
 
     // UI filters
-    .add(errorGroupsLocalFiltersRoute)
-    .add(metricsLocalFiltersRoute)
-    .add(servicesLocalFiltersRoute)
-    .add(tracesLocalFiltersRoute)
-    .add(transactionGroupsLocalFiltersRoute)
-    .add(transactionsLocalFiltersRoute)
-    .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
 
     // Service map

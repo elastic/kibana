@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
+  LargeShardSizeAlert,
   CCRReadExceptionsAlert,
   CpuUsageAlert,
   MissingMonitoringDataAlert,
@@ -34,6 +36,7 @@ import {
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_CCR_READ_EXCEPTIONS,
+  ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 import { Alert } from '../../../alerts/common';
@@ -52,6 +55,7 @@ const BY_TYPE = {
   [ALERT_KIBANA_VERSION_MISMATCH]: KibanaVersionMismatchAlert,
   [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: ElasticsearchVersionMismatchAlert,
   [ALERT_CCR_READ_EXCEPTIONS]: CCRReadExceptionsAlert,
+  [ALERT_LARGE_SHARD_SIZE]: LargeShardSizeAlert,
 };
 
 export class AlertsFactory {
