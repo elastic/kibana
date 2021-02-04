@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
@@ -11,6 +12,8 @@ import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../co
 import { AgentStatus } from '../../types';
 
 import { AgentStatusKueryHelper } from '../../../common/services';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { normalizeKuery } from '../saved_object';
 
 export async function getAgentStatusById(
   soClient: SavedObjectsClientContract,
@@ -25,13 +28,24 @@ export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 function joinKuerys(...kuerys: Array<string | undefined>) {
   return kuerys
     .filter((kuery) => kuery !== undefined)
-    .reduce((acc, kuery) => {
-      if (acc === '') {
-        return `(${kuery})`;
+    .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
+        normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
+      );
+
+      if (!acc) {
+        return normalizedKuery;
       }
 
-      return `${acc} and (${kuery})`;
-    }, '');
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, normalizedKuery],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
 export async function getAgentStatusForAgentPolicy(
@@ -56,6 +70,7 @@ export async function getAgentStatusForAgentPolicy(
           ...[
             kuery,
             filterKuery,
+            `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`,
             agentPolicyId ? `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"` : undefined,
           ]
         ),
