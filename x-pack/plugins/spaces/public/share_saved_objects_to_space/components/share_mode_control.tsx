@@ -30,6 +30,7 @@ interface Props {
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
+  enableSpaceAgnosticBehavior: boolean;
 }
 
 function createLabel({
@@ -71,6 +72,7 @@ export const ShareModeControl = (props: Props) => {
     selectedSpaceIds,
     onChange,
     enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
   } = props;
 
   if (spaces.length === 0) {
@@ -173,6 +175,7 @@ export const ShareModeControl = (props: Props) => {
           selectedSpaceIds={selectedSpaceIds}
           onChange={onChange}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+          enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
         />
       </EuiCheckableCard>
       <EuiSpacer size="s" />

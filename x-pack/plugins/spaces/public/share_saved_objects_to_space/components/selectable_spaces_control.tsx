@@ -33,6 +33,7 @@ interface Props {
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
+  enableSpaceAgnosticBehavior: boolean;
 }
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
@@ -65,11 +66,17 @@ const activeSpaceProps = {
 };
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { spaces, selectedSpaceIds, onChange, enableCreateNewSpaceLink } = props;
+  const {
+    spaces,
+    selectedSpaceIds,
+    onChange,
+    enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
+  } = props;
   const { services } = useKibana();
   const { application, docLinks } = services;
 
-  const activeSpaceId = spaces.find((space) => space.isActiveSpace)!.id;
+  const activeSpaceId = spaces.find((space) => space.isActiveSpace)?.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
     .sort((a, b) => (a.isActiveSpace ? -1 : b.isActiveSpace ? 1 : 0))
@@ -137,8 +144,11 @@ export const SelectableSpacesControl = (props: Props) => {
     return null;
   };
 
+  // if space-agnostic behavior is not enabled, the active space is not selected or deselected by the user, so we have to artifically pad the count for this label
+  const selectedCountPad = enableSpaceAgnosticBehavior ? 0 : 1;
   const selectedCount =
-    selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length + 1;
+    selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
+    selectedCountPad;
   const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
   const selectSpacesLabel = i18n.translate(
     'xpack.spaces.management.shareToSpace.shareModeControl.selectSpacesLabel',

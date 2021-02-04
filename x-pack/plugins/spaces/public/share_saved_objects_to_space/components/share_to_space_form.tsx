@@ -21,6 +21,7 @@ interface Props {
   canShareToAllSpaces: boolean;
   makeCopy: () => void;
   enableCreateNewSpaceLink: boolean;
+  enableSpaceAgnosticBehavior: boolean;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
@@ -33,6 +34,7 @@ export const ShareToSpaceForm = (props: Props) => {
     canShareToAllSpaces,
     makeCopy,
     enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
   } = props;
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
@@ -88,6 +90,7 @@ export const ShareToSpaceForm = (props: Props) => {
         selectedSpaceIds={shareOptions.selectedSpaceIds}
         onChange={(selection) => setSelectedSpaceIds(selection)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+        enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
       />
     </div>
   );

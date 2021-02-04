@@ -79,6 +79,13 @@ export interface ShareToSpaceFlyoutProps {
    */
   enableCreateNewSpaceLink?: boolean;
   /**
+   * When enabled, the flyout will allow the user to remove the object from the current space. Otherwise, the current space is noted, and
+   * the user cannot interact with it.
+   *
+   * Default value is false.
+   */
+  enableSpaceAgnosticBehavior?: boolean;
+  /**
    * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
    * this is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or
    * `/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred.

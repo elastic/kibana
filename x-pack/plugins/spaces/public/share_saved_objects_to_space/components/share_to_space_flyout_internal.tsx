@@ -28,6 +28,7 @@ import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from 'src/plugins/spaces_oss/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { GetSpaceResult } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
@@ -122,6 +123,7 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
     }),
     enableCreateCopyCallout = false,
     enableCreateNewSpaceLink = false,
+    enableSpaceAgnosticBehavior = false,
     changeSpacesHandler = createDefaultChangeSpacesHandler(
       savedObjectTarget,
       spacesManager,
@@ -141,7 +143,9 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
     const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
-    const getActiveSpace = spacesManager.getActiveSpace();
+    const getActiveSpace = enableSpaceAgnosticBehavior
+      ? Promise.resolve<Space>({} as Space)
+      : spacesManager.getActiveSpace();
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);
     Promise.all([getSpaces, getActiveSpace, getPermissions])
       .then(([allSpaces, activeSpace, permissions]) => {
@@ -168,15 +172,15 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
           }),
         });
       });
-  }, [savedObjectTarget, spacesManager, toastNotifications]);
+  }, [savedObjectTarget, spacesManager, toastNotifications, enableSpaceAgnosticBehavior]);
 
   const getSelectionChanges = () => {
     const activeSpace = spaces.find((space) => space.isActiveSpace);
-    if (!activeSpace) {
+    if (!activeSpace && !enableSpaceAgnosticBehavior) {
       return { isSelectionChanged: false, spacesToAdd: [], spacesToRemove: [] };
     }
     const initialSelection = savedObjectTarget.namespaces.filter(
-      (spaceId) => spaceId !== activeSpace.id && spaceId !== UNKNOWN_SPACE
+      (spaceId) => spaceId !== activeSpace?.id && spaceId !== UNKNOWN_SPACE
     );
     const { selectedSpaceIds } = shareOptions;
     const filteredSelection = selectedSpaceIds.filter((x) => x !== UNKNOWN_SPACE);
@@ -199,15 +203,16 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
       (spaceId) => !filteredSelection.includes(spaceId)
     );
 
+    const spacesArray = activeSpace ? [activeSpace.id] : []; // if we have an active space, it is automatically selected
     const spacesToAdd = isSharedToAllSpaces
       ? [ALL_SPACES_ID]
       : isUnsharedFromAllSpaces
-      ? [activeSpace.id, ...selectedSpacesToAdd]
+      ? [...spacesArray, ...selectedSpacesToAdd]
       : selectedSpacesToAdd;
     const spacesToRemove = isUnsharedFromAllSpaces
       ? [ALL_SPACES_ID]
       : isSharedToAllSpaces
-      ? [activeSpace.id, ...initialSelection]
+      ? [...spacesArray, ...initialSelection]
       : selectedSpacesToRemove;
     return { isSelectionChanged, spacesToAdd, spacesToRemove };
   };
@@ -238,11 +243,11 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
       return <EuiLoadingSpinner />;
     }
 
-    const activeSpace = spaces.find((x) => x.isActiveSpace)!;
     const showShareWarning =
       enableCreateCopyCallout &&
       spaces.length > 1 &&
-      arraysAreEqual(savedObjectTarget.namespaces, [activeSpace.id]);
+      savedObjectTarget.namespaces.length === 1 &&
+      !arraysAreEqual(savedObjectTarget.namespaces, [ALL_SPACES_ID]);
     // Step 2: Share has not been initiated yet; User must fill out form to continue.
     return (
       <ShareToSpaceForm
@@ -254,6 +259,7 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
         canShareToAllSpaces={canShareToAllSpaces}
         makeCopy={() => setShowMakeCopy(true)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
+        enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
       />
     );
   };
@@ -268,6 +274,11 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
       />
     );
   }
+
+  const isStartShareButtonDisabled =
+    !isSelectionChanged ||
+    shareInProgress ||
+    (enableSpaceAgnosticBehavior && !shareOptions.selectedSpaceIds.length); // the object must exist in at least one space, or all spaces
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
@@ -319,7 +330,7 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
               fill
               onClick={() => startShare()}
               data-test-subj="sts-initiate-button"
-              disabled={!isSelectionChanged || shareInProgress}
+              disabled={isStartShareButtonDisabled}
             >
               <FormattedMessage
                 id="xpack.spaces.management.shareToSpace.shareToSpacesButton"

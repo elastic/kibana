@@ -37,6 +37,7 @@ interface SetupOpts {
   canShareToAllSpaces?: boolean; // default: true
   enableCreateCopyCallout?: boolean;
   enableCreateNewSpaceLink?: boolean;
+  enableSpaceAgnosticBehavior?: boolean;
 }
 
 const setup = async (opts: SetupOpts = {}) => {
@@ -111,6 +112,7 @@ const setup = async (opts: SetupOpts = {}) => {
       onClose={onClose}
       enableCreateCopyCallout={opts.enableCreateCopyCallout}
       enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
+      enableSpaceAgnosticBehavior={opts.enableSpaceAgnosticBehavior}
     />
   );
 
@@ -609,32 +611,66 @@ describe('ShareToSpaceFlyout', () => {
       expect(option.disabled).toEqual(true);
     };
 
-    it('correctly defines space selection options when spaces are not selected', async () => {
-      const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
-      const { wrapper } = await setup({ mockSpaces, namespaces });
+    describe('without enableSpaceAgnosticBehavior', () => {
+      it('correctly defines space selection options when spaces are not selected', async () => {
+        const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
+        const { wrapper } = await setup({ mockSpaces, namespaces });
 
-      const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-      const selectOptions = selectable.prop('options');
-      expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
-      expectActiveSpace(selectOptions[0]);
-      expect(selectOptions[1]['data-space-id']).toEqual('space-1');
-      expectInactiveSpace(selectOptions[1], false);
-      expect(selectOptions[2]['data-space-id']).toEqual('space-2');
-      expectPartiallyAuthorizedSpace(selectOptions[2], false);
+        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+        const selectOptions = selectable.prop('options');
+        expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
+        expectActiveSpace(selectOptions[0]);
+        expect(selectOptions[1]['data-space-id']).toEqual('space-1');
+        expectInactiveSpace(selectOptions[1], false);
+        expect(selectOptions[2]['data-space-id']).toEqual('space-2');
+        expectPartiallyAuthorizedSpace(selectOptions[2], false);
+      });
+
+      it('correctly defines space selection options when spaces are selected', async () => {
+        const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
+        const { wrapper } = await setup({ mockSpaces, namespaces });
+
+        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+        const selectOptions = selectable.prop('options');
+        expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
+        expectActiveSpace(selectOptions[0]);
+        expect(selectOptions[1]['data-space-id']).toEqual('space-1');
+        expectInactiveSpace(selectOptions[1], true);
+        expect(selectOptions[2]['data-space-id']).toEqual('space-2');
+        expectPartiallyAuthorizedSpace(selectOptions[2], true);
+      });
     });
 
-    it('correctly defines space selection options when spaces are selected', async () => {
-      const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
-      const { wrapper } = await setup({ mockSpaces, namespaces });
+    describe('with enableSpaceAgnosticBehavior', () => {
+      const enableSpaceAgnosticBehavior = true;
 
-      const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-      const selectOptions = selectable.prop('options');
-      expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
-      expectActiveSpace(selectOptions[0]);
-      expect(selectOptions[1]['data-space-id']).toEqual('space-1');
-      expectInactiveSpace(selectOptions[1], true);
-      expect(selectOptions[2]['data-space-id']).toEqual('space-2');
-      expectPartiallyAuthorizedSpace(selectOptions[2], true);
+      it('correctly defines space selection options when spaces are not selected', async () => {
+        const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
+        const { wrapper } = await setup({ enableSpaceAgnosticBehavior, mockSpaces, namespaces });
+
+        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+        const selectOptions = selectable.prop('options');
+        expect(selectOptions[0]['data-space-id']).toEqual('space-1');
+        expectInactiveSpace(selectOptions[0], false);
+        expect(selectOptions[1]['data-space-id']).toEqual('space-2');
+        expectPartiallyAuthorizedSpace(selectOptions[1], false);
+        expect(selectOptions[2]['data-space-id']).toEqual('my-active-space');
+        expectInactiveSpace(selectOptions[2], true);
+      });
+
+      it('correctly defines space selection options when spaces are selected', async () => {
+        const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
+        const { wrapper } = await setup({ enableSpaceAgnosticBehavior, mockSpaces, namespaces });
+
+        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+        const selectOptions = selectable.prop('options');
+        expect(selectOptions[0]['data-space-id']).toEqual('space-1');
+        expectInactiveSpace(selectOptions[0], true);
+        expect(selectOptions[1]['data-space-id']).toEqual('space-2');
+        expectPartiallyAuthorizedSpace(selectOptions[1], true);
+        expect(selectOptions[2]['data-space-id']).toEqual('my-active-space');
+        expectInactiveSpace(selectOptions[2], true);
+      });
     });
   });
 });
