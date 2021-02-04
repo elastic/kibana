@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["mocks.ts", "typings/**/*", "plugins/**/*", "tasks/**/*", "plugins/event_log/server/routes/.ts"],
+  "include": ["mocks.ts", "typings/**/*", "plugins/**/*", "tasks/**/*",],
   "exclude": [
     "plugins/actions/**/*",
     "plugins/alerts/**/*",
