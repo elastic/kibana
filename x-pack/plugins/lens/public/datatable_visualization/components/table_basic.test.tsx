@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -64,12 +65,13 @@ function sampleArgs() {
 
   const args: DatatableProps['args'] = {
     title: 'My fanci metric chart',
-    columns: {
-      columnIds: ['a', 'b', 'c'],
-      sortBy: '',
-      sortDirection: 'none',
-      type: 'lens_datatable_columns',
-    },
+    columns: [
+      { columnId: 'a', type: 'lens_datatable_column' },
+      { columnId: 'b', type: 'lens_datatable_column' },
+      { columnId: 'c', type: 'lens_datatable_column' },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
   };
 
   return { data, args };
@@ -251,12 +253,12 @@ describe('DatatableComponent', () => {
 
     const args: DatatableProps['args'] = {
       title: '',
-      columns: {
-        columnIds: ['a', 'b'],
-        sortBy: '',
-        sortDirection: 'none',
-        type: 'lens_datatable_columns',
-      },
+      columns: [
+        { columnId: 'a', type: 'lens_datatable_column' },
+        { columnId: 'b', type: 'lens_datatable_column' },
+      ],
+      sortingColumnId: '',
+      sortingDirection: 'none',
     };
 
     const wrapper = mountWithIntl(
@@ -330,11 +332,8 @@ describe('DatatableComponent', () => {
         data={data}
         args={{
           ...args,
-          columns: {
-            ...args.columns,
-            sortBy: 'b',
-            sortDirection: 'desc',
-          },
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
         }}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -381,11 +380,8 @@ describe('DatatableComponent', () => {
         data={data}
         args={{
           ...args,
-          columns: {
-            ...args.columns,
-            sortBy: 'b',
-            sortDirection: 'desc',
-          },
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
         }}
         formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
         dispatchEvent={onDispatchEvent}
@@ -397,6 +393,32 @@ describe('DatatableComponent', () => {
     expect(wrapper.find(EuiDataGrid).prop('sorting')!.columns).toEqual([
       { id: 'b', direction: 'desc' },
     ]);
+  });
+
+  test('it does not render a hidden column', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
+            { columnId: 'b', type: 'lens_datatable_column' },
+            { columnId: 'c', type: 'lens_datatable_column' },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="display"
+      />
+    );
+
+    expect(wrapper.find(EuiDataGrid).prop('columns')!.length).toEqual(2);
   });
 
   test('it should refresh the table header when the datatable data changes', () => {
