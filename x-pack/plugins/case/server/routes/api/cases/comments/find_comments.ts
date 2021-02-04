@@ -24,9 +24,7 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { getComments } from '../helpers';
-
-const defaultPage = 1;
-const defaultPerPage = 20;
+import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,

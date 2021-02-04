@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should delete a sub case', async () => {
-      const caseInfo = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
       expect(caseInfo.subCase?.id).to.not.eql(undefined);
 
       const { body: subCase } = await supertest
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`should delete a sub case's comments when that case gets deleted`, async () => {
-      const caseInfo = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
       expect(caseInfo.subCase?.id).to.not.eql(undefined);
 
       // there should be two comments on the sub case now

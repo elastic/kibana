@@ -36,6 +36,15 @@ import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
 import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
 
+/**
+ * Default page number when interacting with the saved objects API.
+ */
+export const defaultPage = 1;
+/**
+ * Default number of results when interacting with the saved objects API.
+ */
+export const defaultPerPage = 20;
+
 export function initCaseApi(deps: RouteDeps) {
   // Cases
   initDeleteCasesApi(deps);

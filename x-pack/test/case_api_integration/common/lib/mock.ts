@@ -22,6 +22,7 @@ import {
   CommentRequest,
   AssociationType,
   CollectionWithSubCaseResponse,
+  SubCasesFindResponse,
 } from '../../../../plugins/case/common/api';
 import {
   getAlertIds,
@@ -214,12 +215,21 @@ export const removeServerGeneratedPropertiesFromComments = (
   });
 };
 
-export const findCasesResp: CasesFindResponse = {
+const findCommon = {
   page: 1,
   per_page: 20,
   total: 0,
-  cases: [],
   count_open_cases: 0,
   count_closed_cases: 0,
   count_in_progress_cases: 0,
+};
+
+export const findCasesResp: CasesFindResponse = {
+  ...findCommon,
+  cases: [],
+};
+
+export const findSubCasesResp: SubCasesFindResponse = {
+  ...findCommon,
+  subCases: [],
 };

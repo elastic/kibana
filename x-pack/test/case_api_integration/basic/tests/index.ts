@@ -35,6 +35,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./connectors/case'));
     loadTestFile(require.resolve('./cases/sub_cases/delete_sub_cases'));
     loadTestFile(require.resolve('./cases/sub_cases/get_sub_case'));
+    loadTestFile(require.resolve('./cases/sub_cases/find_sub_cases'));
 
     // Migrations
     loadTestFile(require.resolve('./cases/migrations'));

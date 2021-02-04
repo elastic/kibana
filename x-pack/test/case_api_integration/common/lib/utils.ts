@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { CASES_URL } from '../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -18,8 +18,12 @@ import {
   CasePostRequest,
   CollectionWithSubCaseResponse,
   CommentRequestGeneratedAlertType,
+  SubCasesFindResponse,
+  CaseStatuses,
+  SubCasesResponse,
 } from '../../../../plugins/case/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
+import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
 
 /**
  * Variable to easily access the default comment for the createSubCase function.
@@ -31,22 +35,39 @@ export const defaultCreateSubComment = postCommentGenAlertReq;
  */
 export const defaultCreateSubPost = postCollectionReq;
 
+interface CreateSubCaseResp {
+  newSubCaseInfo: CollectionWithSubCaseResponse;
+  modifiedSubCases?: SubCasesResponse;
+}
+
 /**
  * Creates a sub case using the actions API. If a caseID isn't passed in then it will create
  * the collection as well. To create a sub case a comment must be created so it uses a default
  * generated alert style comment which can be overridden.
  */
-export const createSubCase = async ({
+export const createSubCase = async (args: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  comment?: CommentRequestGeneratedAlertType;
+  caseID?: string;
+  caseInfo?: CasePostRequest;
+}): Promise<CreateSubCaseResp> => {
+  return createSubCaseComment({ ...args, forceNewSubCase: true });
+};
+
+export const createSubCaseComment = async ({
   supertest,
   caseID,
   comment = defaultCreateSubComment,
   caseInfo = defaultCreateSubPost,
+  // if true it will close any open sub cases and force a new sub case to be opened
+  forceNewSubCase = false,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
   comment?: CommentRequestGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
-}): Promise<CollectionWithSubCaseResponse> => {
+  forceNewSubCase?: boolean;
+}): Promise<CreateSubCaseResp> => {
   const { body: createdAction } = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'foo')
@@ -66,6 +87,31 @@ export const createSubCase = async ({
   } else {
     collectionID = caseID;
   }
+
+  let closedSubCases: SubCasesResponse | undefined;
+  if (forceNewSubCase) {
+    const { body: subCasesResp }: { body: SubCasesFindResponse } = await supertest
+      .get(`${getSubCasesUrl(collectionID)}/_find`)
+      .expect(200);
+
+    if (subCasesResp.subCases.length > 0) {
+      // mark the sub case as closed so a new sub case will be created on the next comment
+      closedSubCases = (
+        await supertest
+          .patch(SUB_CASES_PATCH_DEL_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            subCases: subCasesResp.subCases.map((subCase) => ({
+              id: subCase.id,
+              version: subCase.version,
+              status: CaseStatuses.closed,
+            })),
+          })
+          .expect(200)
+      ).body;
+    }
+  }
+
   const caseConnector = await supertest
     .post(`/api/actions/action/${createdAction.id}/_execute`)
     .set('kbn-xsrf', 'foo')
@@ -81,7 +127,7 @@ export const createSubCase = async ({
     .expect(200);
 
   expect(caseConnector.body.status).to.eql('ok');
-  return caseConnector.body.data;
+  return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
 export const getConfiguration = ({

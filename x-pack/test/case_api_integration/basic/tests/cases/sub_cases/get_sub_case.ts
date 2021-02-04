@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a case', async () => {
-      const caseInfo = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
 
       const { body }: { body: SubCaseResponse } = await supertest
         .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the correct number of alerts with multiple types of alerts', async () => {
-      const caseInfo = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
 
       const { body: singleAlert }: { body: CollectionWithSubCaseResponse } = await supertest
         .post(getCaseCommentsUrl(caseInfo.id))
