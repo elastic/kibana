@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -82,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // load URL to restore a saved session
+      // TODO: replace with clicking on "Re-run link"
       const url = await browser.getCurrentUrl();
       const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
       await browser.get(savedSessionURL);
