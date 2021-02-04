@@ -192,14 +192,14 @@ export function* fetchAlertsEffect() {
         simpleAlertEnabled(action.payload.defaultActions)
       );
       yield put(getMonitorAlertsAction.get());
-    } catch (error) {
-      kibanaService.core.notifications.toasts.addError(error, {
+    } catch (err) {
+      kibanaService.core.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.uptime.overview.alerts.enabled.failed', {
           defaultMessage: 'Alert cannot be enabled!',
         }),
       });
       yield put(resolveAsyncLoadingAction({ monitorId, monitorName }));
-      yield put(createAlertAction.fail(error));
+      yield put(createAlertAction.fail(err));
     }
   });
 }

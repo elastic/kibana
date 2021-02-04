@@ -13,6 +13,15 @@ export function handleAsyncAction<ReducerState>(
   asyncAction: AsyncAction<any, any>
 ) {
   return {
+    [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
+      ...state,
+      [storeKey]: {
+        ...(state as any)[storeKey],
+        data: action.payload,
+        loading: false,
+      },
+    }),
+
     [String(asyncAction.get)]: (state: ReducerState, action: any) => {
       return {
         ...state,
@@ -23,15 +32,6 @@ export function handleAsyncAction<ReducerState>(
         },
       };
     },
-
-    [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
-      ...state,
-      [storeKey]: {
-        ...(state as any)[storeKey],
-        data: action.payload,
-        loading: false,
-      },
-    }),
 
     [String(asyncAction.fail)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
