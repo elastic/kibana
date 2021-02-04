@@ -63,7 +63,7 @@ describe('RelevanceTuningLogic', () => {
 
   describe('actions', () => {
     describe('onInitializeRelevanceTuning', () => {
-      it('should set state', () => {
+      it('should set searchSettings, schema, & schemaConflicts from the API response, and set dataLoading to false', () => {
         mount({
           dataLoading: true,
         });
@@ -80,7 +80,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setSearchSettings', () => {
-      it('should set state', () => {
+      it('should set setSearchSettings and set unsavedChanges to true', () => {
         mount({
           unsavedChanges: false,
         });
@@ -95,7 +95,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setFilterValue', () => {
-      it('should set state', () => {
+      it('should set filterInputValue', () => {
         mount();
         RelevanceTuningLogic.actions.setFilterValue('foo');
 
@@ -107,7 +107,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setSearchQuery', () => {
-      it('should set state', () => {
+      it('should set query', () => {
         mount();
         RelevanceTuningLogic.actions.setSearchQuery('foo');
 
@@ -119,7 +119,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setSearchResults', () => {
-      it('should set state', () => {
+      it('should set searchResults and set resultLoading to false', () => {
         mount({
           resultsLoading: true,
         });
@@ -134,7 +134,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setResultsLoading', () => {
-      it('should set state', () => {
+      it('should set resultsLoading', () => {
         mount({
           resultsLoading: false,
         });
@@ -148,7 +148,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('clearSearchResults', () => {
-      it('should set state', () => {
+      it('should set searchResults', () => {
         mount({
           searchResults: [{}],
         });
@@ -162,7 +162,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('resetSearchSettingsState', () => {
-      it('should set state', () => {
+      it('should set dataLoading', () => {
         mount({
           dataLoading: false,
         });
@@ -176,7 +176,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('dismissSchemaConflictCallout', () => {
-      it('should set state', () => {
+      it('should set showSchemaConflictCallout to false', () => {
         mount({
           showSchemaConflictCallout: true,
         });
