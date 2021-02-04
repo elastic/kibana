@@ -11,14 +11,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiIcon, EuiText, EuiLink, EuiPanel } from '@elastic/eui';
 
+import { PhasesExceptDelete } from '../../../../../../common/types';
+
 import { usePhaseTimings } from '../../form';
 
 import { InfinityIcon } from '../infinity_icon';
-
 import './phase_footer.scss';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold';
+  phase: PhasesExceptDelete;
 }
 
 export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {

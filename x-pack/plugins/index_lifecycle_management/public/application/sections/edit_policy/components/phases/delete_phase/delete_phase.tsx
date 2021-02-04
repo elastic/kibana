@@ -19,8 +19,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { UseField } from '../../../form';
-
 import { useFormData } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
@@ -30,6 +28,7 @@ import { usePhaseTimings } from '../../../form';
 import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 import './delete_phase.scss';
 import { PhaseIcon } from '../../phase_icon';
+import { PhaseErrorIndicator } from '../phase/phase_error_indicator';
 
 const formFieldPaths = {
   enabled: '_meta.delete.enabled',
@@ -64,6 +63,10 @@ export const DeletePhase: FunctionComponent = () => {
             defaultMessage="Remove"
           />
         </EuiButtonEmpty>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <PhaseErrorIndicator phase={'delete'} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
