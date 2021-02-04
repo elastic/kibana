@@ -520,7 +520,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={threshold}
       updateComparator={updateComparator}
       updateThreshold={updateThreshold}
-      errors={errors.critical as IErrorObject}
+      errors={(errors.critical as IErrorObject) ?? {}}
       metric={metric}
     />
   );
@@ -531,7 +531,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       threshold={warningThreshold}
       updateComparator={updateWarningComparator}
       updateThreshold={updateWarningThreshold}
-      errors={errors.warning as IErrorObject}
+      errors={(errors.warning as IErrorObject) ?? {}}
       metric={metric}
     />
   );

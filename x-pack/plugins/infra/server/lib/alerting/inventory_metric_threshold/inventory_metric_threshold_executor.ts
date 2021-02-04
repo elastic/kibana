@@ -136,7 +136,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const actionGroupId =
         nextState === AlertStates.OK
           ? RecoveredActionGroup.id
-          : AlertStates.WARNING
+          : nextState === AlertStates.WARNING
           ? WARNING_ACTIONS.id
           : FIRED_ACTIONS.id;
       alertInstance.scheduleActions(
