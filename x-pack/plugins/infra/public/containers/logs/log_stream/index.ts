@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
+import createContainer from 'constate';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
@@ -238,3 +239,5 @@ export function useLogStream({
     isReloading,
   };
 }
+
+export const [LogStreamProvider, useLogStreamContext] = createContainer(useLogStream);
