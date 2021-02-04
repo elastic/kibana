@@ -40,6 +40,7 @@ export const servicesRoute = createRoute({
     );
 
     const services = await getServices({
+      environment,
       setup,
       searchAggregatedTransactions,
       logger: context.logger,

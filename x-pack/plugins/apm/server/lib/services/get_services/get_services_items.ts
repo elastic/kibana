@@ -16,16 +16,19 @@ export type ServicesItemsSetup = Setup & SetupTimeRange;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
+  environment,
   setup,
   searchAggregatedTransactions,
   logger,
 }: {
+  environment?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }) {
   const params = {
     projection: getServicesProjection({
+      environment,
       setup,
       searchAggregatedTransactions,
     }),
@@ -35,7 +38,7 @@ export async function getServicesItems({
 
   const [transactionStats, healthStatuses] = await Promise.all([
     getServiceTransactionStats(params),
-    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
+    getHealthStatuses(params, environment).catch((err) => {
       logger.error(err);
       return [];
     }),

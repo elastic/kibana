@@ -23,8 +23,10 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getServiceInstanceSystemMetricStats({
+  environment,
   setup,
   serviceName,
   size,
@@ -95,6 +97,7 @@ export async function getServiceInstanceSystemMetricStats({
           filter: [
             { range: rangeFilter(start, end) },
             { term: { [SERVICE_NAME]: serviceName } },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
           should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],

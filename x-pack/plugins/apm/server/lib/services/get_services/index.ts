@@ -13,16 +13,19 @@ import { getServicesItems } from './get_services_items';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 export async function getServices({
+  environment,
   setup,
   searchAggregatedTransactions,
   logger,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }) {
   const [items, hasLegacyData] = await Promise.all([
     getServicesItems({
+      environment,
       setup,
       searchAggregatedTransactions,
       logger,
