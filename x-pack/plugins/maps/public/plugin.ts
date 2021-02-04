@@ -54,7 +54,7 @@ import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { StartContract as FileUploadStartContract } from '../../maps_file_upload/public';
+import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
@@ -78,7 +78,7 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  mapsFileUpload: FileUploadStartContract;
+  fileUpload: FileUploadStartContract;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicPluginStart;
