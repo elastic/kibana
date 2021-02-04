@@ -1,0 +1,38 @@
+on:
+  pull_request:
+    branches:
+      - backport-testing
+    # types: [closed]
+
+jobs:
+  backport:
+    name: Backport
+    # if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: 'master'
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - run: npm install -g backport
+
+      - name: Labels
+        run: |
+          echo "$PR_LABELS"
+        env:
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
+
+      - name: backport
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          backport --username "${{ github.actor }}" --accessToken "${{ secrets.GITHUB_TOKEN }}" --ci --pr "$PR_NUMBER" --labels backport --verbose
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
