@@ -65,13 +65,13 @@ export default function ({ getPageObjects }) {
     });
 
     describe('EMSFileSource with missing EMS id', () => {
-      const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
+      const MISSING_EMS_ID = 'idThatDoesNotExistForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(
-          `Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your systemadministrator.`
+          `Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
         );
       });
 
@@ -83,13 +83,13 @@ export default function ({ getPageObjects }) {
     });
 
     describe('EMSTMSSource with missing EMS id', () => {
-      const MISSING_EMS_ID = 'idThatDoesNotExitForEMSTile';
+      const MISSING_EMS_ID = 'idThatDoesNotExistForEMSTile';
       const LAYER_NAME = 'EMS_tiles';
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(
-          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your systemadministrator.`
+          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}. Kibana is unable to access Elastic Maps Service. Contact your system administrator.`
         );
       });
 
@@ -101,7 +101,7 @@ export default function ({ getPageObjects }) {
     });
 
     describe('KibanaRegionmapSource with missing region map configuration', () => {
-      const MISSING_REGION_NAME = 'nameThatDoesNotExitForKibanaRegionmapSource';
+      const MISSING_REGION_NAME = 'nameThatDoesNotExistForKibanaRegionmapSource';
       const LAYER_NAME = 'Custom_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
