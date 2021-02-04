@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('resolve_import_errors', () => {
