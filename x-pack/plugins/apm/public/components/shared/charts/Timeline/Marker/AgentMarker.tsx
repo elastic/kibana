@@ -12,7 +12,7 @@ import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { px, units } from '../../../../../style/variables';
 import { Legend } from '../../Legend';
-import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
