@@ -562,6 +562,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async toggleColumnVisibility(dimension: string) {
+      await this.openDimensionEditor(dimension);
+      const id = 'lns-table-column-hidden';
+      const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await this.closeDimensionEditor();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
       await el.focus();

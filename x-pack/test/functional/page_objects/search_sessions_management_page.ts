@@ -49,11 +49,11 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
                 '[data-test-subj="sessionManagementPopoverAction-reload"]'
               );
             },
-            cancel: async () => {
-              log.debug('management ui: cancel the session');
+            delete: async () => {
+              log.debug('management ui: delete the session');
               await actionsCell.click();
               await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-cancel"]'
+                '[data-test-subj="sessionManagementPopoverAction-delete"]'
               );
               await PageObjects.common.clickConfirmOnModal();
             },

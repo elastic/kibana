@@ -9,48 +9,56 @@ import type { EuiDataGridSorting } from '@elastic/eui';
 import type { Datatable } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../../types';
 import type {
-  DatatableColumns,
   LensGridDirection,
   LensResizeAction,
   LensSortAction,
+  LensToggleAction,
 } from './types';
+import { ColumnConfig } from './table_basic';
 
 import { desanitizeFilterContext } from '../../utils';
 
 export const createGridResizeHandler = (
-  columnConfig: DatatableColumns & {
-    type: 'lens_datatable_columns';
-  },
-  setColumnConfig: React.Dispatch<
-    React.SetStateAction<
-      DatatableColumns & {
-        type: 'lens_datatable_columns';
-      }
-    >
-  >,
+  columnConfig: ColumnConfig,
+  setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
   onEditAction: (data: LensResizeAction['data']) => void
 ) => (eventData: { columnId: string; width: number | undefined }) => {
   // directly set the local state of the component to make sure the visualization re-renders immediately,
   // re-layouting and taking up all of the available space.
   setColumnConfig({
     ...columnConfig,
-    columnWidth: [
-      ...(columnConfig.columnWidth || []).filter(({ columnId }) => columnId !== eventData.columnId),
-      ...(eventData.width !== undefined
-        ? [
-            {
-              columnId: eventData.columnId,
-              width: eventData.width,
-              type: 'lens_datatable_column_width' as const,
-            },
-          ]
-        : []),
-    ],
+    columns: columnConfig.columns.map((column) => {
+      if (column.columnId === eventData.columnId) {
+        return { ...column, width: eventData.width };
+      }
+      return column;
+    }),
   });
   return onEditAction({
     action: 'resize',
     columnId: eventData.columnId,
     width: eventData.width,
+  });
+};
+
+export const createGridHideHandler = (
+  columnConfig: ColumnConfig,
+  setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
+  onEditAction: (data: LensToggleAction['data']) => void
+) => (eventData: { columnId: string }) => {
+  // directly set the local state of the component to make sure the visualization re-renders immediately
+  setColumnConfig({
+    ...columnConfig,
+    columns: columnConfig.columns.map((column) => {
+      if (column.columnId === eventData.columnId) {
+        return { ...column, hidden: true };
+      }
+      return column;
+    }),
+  });
+  return onEditAction({
+    action: 'toggle',
+    columnId: eventData.columnId,
   });
 };
 
@@ -85,7 +93,7 @@ export const createGridFilterHandler = (
 };
 
 export const createGridSortingConfig = (
-  sortBy: string,
+  sortBy: string | undefined,
   sortDirection: LensGridDirection,
   onEditAction: (data: LensSortAction['data']) => void
 ): EuiDataGridSorting => ({
