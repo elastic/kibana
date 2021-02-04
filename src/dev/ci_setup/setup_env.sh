@@ -175,4 +175,21 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
 
+###
+### copy .bazelrc-ci into $HOME/.bazelrc
+###
+cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
+
+###
+### append auth token to buildbuddy into "$HOME/.bazelrc";
+###
+echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
+
+###
+### make sure bazelisk is installed on CI
+###
+bazeliskVersion=$(head -n 1 "$KIBANA_DIR/.bazeliskversion")
+yarn global add "@bazel/bazelisk@${bazeliskVersion}"
+
 export CI_ENV_SETUP=true
