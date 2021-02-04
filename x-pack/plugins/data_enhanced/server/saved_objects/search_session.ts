@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'kibana/server';
-
-export const SEARCH_SESSION_TYPE = 'search-session';
+import { SEARCH_SESSION_TYPE } from '../../common';
 
 export const searchSessionMapping: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
@@ -14,6 +14,9 @@ export const searchSessionMapping: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
+      persisted: {
+        type: 'boolean',
+      },
       sessionId: {
         type: 'keyword',
       },
@@ -24,6 +27,9 @@ export const searchSessionMapping: SavedObjectsType = {
         type: 'date',
       },
       expires: {
+        type: 'date',
+      },
+      touched: {
         type: 'date',
       },
       status: {

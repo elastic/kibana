@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { combineLatest, Observable, timer } from 'rxjs';
@@ -244,10 +245,19 @@ export function padBuckets(
     const firstBucket = histogram.buckets[0].key;
     const lastBucket = histogram.buckets[histogram.buckets.length - 1].key;
 
-    const bucketsToPadBeforeFirstBucket = calculateBucketsBetween(firstBucket, from, pollInterval);
+    // detect when the first bucket is before the `from` so that we can take that into
+    // account by begining the timeline earlier
+    // This can happen when you have overdue tasks and Elasticsearch returns their bucket
+    // as begining before the `from`
+    const firstBucketStartsInThePast = firstBucket - from < 0;
+
+    const bucketsToPadBeforeFirstBucket = firstBucketStartsInThePast
+      ? []
+      : calculateBucketsBetween(firstBucket, from, pollInterval);
+
     const bucketsToPadAfterLast = calculateBucketsBetween(
       lastBucket + pollInterval,
-      to,
+      firstBucketStartsInThePast ? to - pollInterval : to,
       pollInterval
     );
 
