@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -99,9 +99,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
     }
 
-    async removePanel() {
+    async removePanel(parent?: WebElementWrapper) {
       log.debug('removePanel');
-      await this.openContextMenu();
+      await this.openContextMenu(parent);
       const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
       if (!isActionVisible) await this.clickContextMenuMoreItem();
       const isPanelActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
@@ -111,10 +111,8 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async removePanelByTitle(title: string) {
       const header = await this.getPanelHeading(title);
-      await this.openContextMenu(header);
-      const isActionVisible = await testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
-      if (!isActionVisible) await this.clickContextMenuMoreItem();
-      await testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+      log.debug('found header? ', Boolean(header));
+      await this.removePanel(header);
     }
 
     async customizePanel(parent?: WebElementWrapper) {
