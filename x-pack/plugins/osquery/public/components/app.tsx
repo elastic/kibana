@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 
 import { PLUGIN_NAME } from '../../common';
-import { LiveQuery } from '../live_query';
 import { Queries } from '../queries';
 
 export const OsqueryAppComponent = () => {

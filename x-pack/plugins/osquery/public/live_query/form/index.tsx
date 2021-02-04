@@ -32,6 +32,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ onSubmit }) => {
   return (
     <Form form={form}>
       <UseField path="agents" component={AgentsTableField} />
+      <EuiSpacer />
       <EuiButton onClick={submit}>{'Send query'}</EuiButton>
     </Form>
   );
