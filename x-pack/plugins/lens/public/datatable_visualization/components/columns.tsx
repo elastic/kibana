@@ -136,7 +136,8 @@ export const createGridColumns = (
       : undefined;
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
-    const initialWidth = columnConfig.columns.find(({ columnId }) => columnId === field)?.width;
+    const initialWidth = columnArgs?.width;
+    const isHidden = columnArgs?.hidden;
     const originalColumnId = columnArgs?.originalColumnId;
     const originalName = columnArgs?.originalName;
 
@@ -182,7 +183,7 @@ export const createGridColumns = (
                 color: 'text',
                 size: 'xs',
                 onClick: () => onColumnHide({ columnId: originalColumnId || field }),
-                iconType: 'empty',
+                iconType: 'eyeClosed',
                 label: i18n.translate('xpack.lens.table.hide.hideLabel', {
                   defaultMessage: 'Hide {name}',
                   values: {
@@ -190,6 +191,7 @@ export const createGridColumns = (
                   },
                 }),
                 'data-test-subj': 'lensDatatableHide',
+                isDisabled: !isHidden && visibleColumns.length <= 1,
               },
             ],
       },
