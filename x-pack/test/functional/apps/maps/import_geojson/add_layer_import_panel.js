@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
   const DEFAULT_LOAD_FILE_NAME = 'point.json';
+  const security = getService('security');
 
   describe('GeoJSON import layer panel', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_maps_all', 'geoall_data_writer']);
       await PageObjects.maps.openNewMap();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     beforeEach(async () => {
