@@ -617,5 +617,11 @@ describe('DragDrop', () => {
       expect(onDrop).not.toHaveBeenCalled();
       expect(setA11yMessage).toBeCalledWith('Movement cancelled');
     });
+    test.skip('proper keyboard Instruction is displayed for non-reorderable and reorderable group', () => {});
+    // TODO: tests :
+    //  * Test the accessibility messages, depending on the dropType
+    //  * nextValidDropTarget test
+    //  * Add the accessibility messages
+    //  * Add the accessibility messages
   });
 });

@@ -88,11 +88,6 @@ interface BaseProps {
    * cannot be dropped onto this component.
    */
   dropType?: DropType;
-
-  /**
-   * temporary flag to exclude the draggable elements that don't have keyboard nav yet. To be removed along with the feature development
-   */
-  noKeyboardSupportYet?: boolean;
   /**
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
@@ -117,7 +112,6 @@ interface DragInnerProps extends BaseProps {
   ) => void;
   onDragEnd?: () => void;
   extraKeyboardHandler?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
-  hasReorderingStarted?: boolean;
   ariaDescribedBy?: string;
 }
 
@@ -215,8 +209,6 @@ const DragInner = memo(function DragInner({
   onDragStart,
   onDragEnd,
   extraKeyboardHandler,
-  noKeyboardSupportYet,
-  hasReorderingStarted,
   ariaDescribedBy,
   setA11yMessage,
 }: DragInnerProps) {
@@ -279,62 +271,51 @@ const DragInner = memo(function DragInner({
     );
 
     setActiveDropTarget(nextTarget);
-    if (nextTarget) {
-      setA11yMessage(
-        announce.selectedTarget(value.humanData, nextTarget?.humanData, nextTarget?.dropType)
-      );
-    } else {
-      setA11yMessage(announce.noTarget());
-    }
+    setA11yMessage(
+      nextTarget
+        ? announce.selectedTarget(value.humanData, nextTarget?.humanData, nextTarget?.dropType)
+        : announce.noTarget()
+    );
   };
   return (
     <div className={className}>
-      {!noKeyboardSupportYet && (
-        <EuiScreenReaderOnly showOnFocus>
-          <button
-            aria-label={value.humanData.label}
-            aria-describedby={ariaDescribedBy || `lnsDragDrop-keyboardInstructions`}
-            className="lnsDragDrop__keyboardHandler"
-            data-test-subj="lnsDragDrop-keyboardHandler"
-            onBlur={() => {
+      <EuiScreenReaderOnly showOnFocus>
+        <button
+          aria-label={value.humanData.label}
+          aria-describedby={ariaDescribedBy || `lnsDragDrop-keyboardInstructions`}
+          className="lnsDragDrop__keyboardHandler"
+          data-test-subj="lnsDragDrop-keyboardHandler"
+          onBlur={() => {
+            if (isDragging) {
+              dragEnd();
+            }
+          }}
+          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
+            const { key } = e;
+            if (key === keys.ENTER || key === keys.SPACE) {
+              if (activeDropTarget) {
+                dropToActiveDropTarget();
+              }
+              if (isDragging) {
+                dragEnd();
+              } else {
+                dragStart(e);
+                setKeyboardMode(true);
+              }
+            } else if (key === keys.ESCAPE) {
               if (isDragging) {
                 dragEnd();
               }
-            }}
-            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-              if (e.key === keys.ENTER || e.key === keys.SPACE) {
-                if (activeDropTarget) {
-                  dropToActiveDropTarget();
-                }
-                if (isDragging) {
-                  dragEnd();
-                } else {
-                  dragStart(e);
-                  setKeyboardMode(true);
-                }
-              } else if (e.key === keys.ESCAPE) {
-                dragEnd();
-              } else if (
-                keyboardMode &&
-                order &&
-                (keys.ARROW_LEFT === e.key ||
-                  keys.ARROW_RIGHT === e.key ||
-                  'd' === e.key ||
-                  'a' === e.key)
-              ) {
-                if (hasReorderingStarted) {
-                  setA11yMessage(announce.blockedArrows());
-                } else {
-                  setNextTarget(!!(keys.ARROW_LEFT === e.key || 'a' === e.key));
-                }
-              }
-              if (extraKeyboardHandler) {
-                extraKeyboardHandler(e);
-              }
-            }}
-          />
-        </EuiScreenReaderOnly>
-      )}
+            }
+            if (extraKeyboardHandler) {
+              extraKeyboardHandler(e);
+            }
+            if (keyboardMode && (keys.ARROW_LEFT === key || keys.ARROW_RIGHT === key)) {
+              setNextTarget(!!(keys.ARROW_LEFT === key));
+            }
+          }}
+        />
+      </EuiScreenReaderOnly>
 
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
@@ -375,7 +356,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
   } = props;
 
   useShallowCompareEffect(() => {
-    if (order && dropType && value && onDrop) {
+    if (dropType && value && onDrop) {
       registerDropTarget(order, { ...value, onDrop, dropType });
       return () => {
         registerDropTarget(order, undefined);
@@ -519,7 +500,10 @@ const ReorderableDrag = memo(function ReorderableDrag(
         );
         if (index !== -1) activeDropTargetIndex = index;
       }
-      if (keys.ARROW_DOWN === e.key || 's' === e.key) {
+      if (e.key === keys.ARROW_LEFT || e.key === keys.ARROW_RIGHT) {
+        resetReorderState();
+        setActiveDropTarget(undefined);
+      } else if (keys.ARROW_DOWN === e.key) {
         if (activeDropTargetIndex < reorderableGroup.length - 1) {
           const nextTarget = nextValidDropTarget(
             activeDropTarget,
@@ -528,7 +512,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
           );
           onReorderableDragOver(nextTarget);
         }
-      } else if (keys.ARROW_UP === e.key || 'w' === e.key) {
+      } else if (keys.ARROW_UP === e.key) {
         if (activeDropTargetIndex > 0) {
           const nextTarget = nextValidDropTarget(
             activeDropTarget,
@@ -601,7 +585,6 @@ const ReorderableDrag = memo(function ReorderableDrag(
         {...props}
         ariaDescribedBy="lnsDragDrop-keyboardInstructionsWithReorder"
         extraKeyboardHandler={extraKeyboardHandler}
-        hasReorderingStarted={!!reorderedItems.length}
         onDragStart={onReorderableDragStart}
         onDragEnd={onReorderableDragEnd}
       />

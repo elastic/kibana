@@ -149,13 +149,9 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     [setDraggingState]
   );
 
-  const setA11yMessage = useMemo(
-    () => (message: string) => {
-      // console.log(`%c ${message}`, 'background: #251e3e; color: #eee3e7');
-      return setA11yMessageState(message);
-    },
-    [setA11yMessageState]
-  );
+  const setA11yMessage = useMemo(() => (message: string) => setA11yMessageState(message), [
+    setA11yMessageState,
+  ]);
 
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DropIdentifier) =>
@@ -217,8 +213,8 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 
 export function nextValidDropTarget(
   activeDropTarget: DropTargets | undefined,
-  draggingData: [string],
-  filterElements?: (el?: DragDropIdentifier) => boolean,
+  draggingOrder: [string],
+  filterElements: (el: DragDropIdentifier) => boolean = () => true,
   reverse = false
 ) {
   if (!activeDropTarget) {
@@ -226,10 +222,10 @@ export function nextValidDropTarget(
   }
 
   const filteredTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder)].filter(
-    ([, dropTarget]) => !!dropTarget && !!(filterElements ? filterElements(dropTarget) : true)
+    ([, dropTarget]) => dropTarget && filterElements(dropTarget)
   );
 
-  const nextDropTargets = [...filteredTargets, draggingData].sort(([orderA], [orderB]) => {
+  const nextDropTargets = [...filteredTargets, draggingOrder].sort(([orderA], [orderB]) => {
     const parsedOrderA = orderA.split(',').map((v) => Number(v));
     const parsedOrderB = orderB.split(',').map((v) => Number(v));
 
@@ -237,15 +233,20 @@ export function nextValidDropTarget(
     return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
   });
 
-  const currentActiveDropIndex = nextDropTargets.findIndex(([targetOrder, dropTarget]) => {
-    return activeDropTarget.activeDropTarget
-      ? dropTarget?.id === activeDropTarget.activeDropTarget.id
-      : targetOrder === draggingData[0];
-  });
+  let currentActiveDropIndex = nextDropTargets.findIndex(
+    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.activeDropTarget?.id
+  );
+
+  if (currentActiveDropIndex === -1) {
+    currentActiveDropIndex = nextDropTargets.findIndex(
+      ([targetOrder]) => targetOrder === draggingOrder[0]
+    );
+  }
 
   const previousElement =
     (nextDropTargets.length + currentActiveDropIndex - 1) % nextDropTargets.length;
   const nextElement = (currentActiveDropIndex + 1) % nextDropTargets.length;
+
   return nextDropTargets[reverse ? previousElement : nextElement][1];
 }
 

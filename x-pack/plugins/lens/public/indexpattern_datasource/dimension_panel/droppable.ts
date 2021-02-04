@@ -192,8 +192,6 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
   });
 
   trackUiEvent('drop_onto_dimension');
-  const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
-  trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
   setState(
     mergeLayer({
       state,

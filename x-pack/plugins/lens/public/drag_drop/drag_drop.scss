@@ -28,6 +28,7 @@
 
 // Drop area when there's an item being dragged
 .lnsDragDrop-isDropTarget {
+  @include lnsDroppable;
   @include lnsDroppableActive;
 }
 
@@ -54,10 +55,10 @@
 }
 
 .lnsDragDrop-notCompatible {
-  background-color: transparentize($euiColorWarning, .9);
+  background-color: #FEFBDC;
   &.lnsDragDrop-isActiveDropTarget {
-    background-color: transparentize($euiColorWarning, .75);
-    border: $euiBorderWidthThin dashed $euiColorWarning;
+    border: $euiBorderWidthThin dashed #D8C262;
+    background-color: #F3E9BE;
   }
 }
 
@@ -82,7 +83,7 @@
   transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   position: relative;
-  z-index: 1;
+  z-index: $euiZLevel1;
 }
 
 // Draggable item when it is moving
