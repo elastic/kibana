@@ -13,7 +13,7 @@ and Oracle Enterprise.
 NOTE: RPM install is not supported on distributions with old versions of RPM,
 such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
 
-It contains both free and subscription features.
+This package contains both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the

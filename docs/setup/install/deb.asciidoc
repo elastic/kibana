@@ -8,7 +8,7 @@ The Debian package for Kibana can be <<install-deb,downloaded from our website>>
 or from our <<deb-repo,APT repository>>. It can be used to install
 Kibana on any Debian-based system such as Debian and Ubuntu.
 
-It contains both free and subscription features.
+This package contains both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the

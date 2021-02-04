@@ -7,7 +7,7 @@
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
-It contains both free and subscription features.
+This package contains both free and subscription features.
 <<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
