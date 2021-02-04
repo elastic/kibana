@@ -188,9 +188,8 @@ export const update = async ({
       const caseComments = (await caseService.getAllCaseComments({
         client: savedObjectsClient,
         id: theCase.id,
+        includeSubCaseComments: true,
         options: {
-          // TODO: is this a bug? I think this will return no fields for attributes, I have no idea why when
-          // we attempt to access the attributes that it doesn't crash??
           fields: [],
           filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
           page: 1,

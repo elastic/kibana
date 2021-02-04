@@ -757,6 +757,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect({ ...data, comments }).to.eql({
             ...postCaseResp(caseRes.body.id),
             comments,
+            totalAlerts: 1,
             totalComment: 1,
             updated_by: {
               email: null,

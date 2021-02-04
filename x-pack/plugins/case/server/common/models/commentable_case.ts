@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from 'src/core/server';
 import {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from 'src/core/server';
+import {
+  AssociationType,
   CaseSettings,
   CaseStatuses,
-  CollectionWithSubCaseAttributes,
+  CollectionWithSubCaseResponse,
   CollectWithSubCaseResponseRt,
+  CommentAttributes,
+  CommentPatchRequest,
+  CommentRequest,
   ESCaseAttributes,
   SubCaseAttributes,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from '../../routes/api/cases/helpers';
-import { flattenCommentSavedObjects, flattenSubCaseSavedObject } from '../../routes/api/utils';
+import {
+  flattenCommentSavedObjects,
+  flattenSubCaseSavedObject,
+  transformNewComment,
+} from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
-import { countAlertsForID } from '../index';
-
-interface UserInfo {
-  username: string | null | undefined;
-  full_name: string | null | undefined;
-  email: string | null | undefined;
-}
+import { countAlertsForID, UserInfo } from '../index';
 
 interface CommentableCaseParams {
   collection: SavedObject<ESCaseAttributes>;
@@ -65,18 +72,7 @@ export class CommentableCase {
     return this.collection.attributes.settings;
   }
 
-  public get attributes(): CollectionWithSubCaseAttributes {
-    return {
-      subCase: this.subCase?.attributes,
-      case: {
-        ...this.collection.attributes,
-        connector: transformESConnectorToCaseConnector(this.collection.attributes.connector),
-      },
-    };
-  }
-
-  // TODO: refactor this, we shouldn't really need to know the saved object type?
-  public buildRefsToCase(): SavedObjectReference[] {
+  private buildRefsToCase(): SavedObjectReference[] {
     const subCaseSOType = SUB_CASE_SAVED_OBJECT;
     const caseSOType = CASE_SAVED_OBJECT;
     return [
@@ -91,6 +87,50 @@ export class CommentableCase {
     ];
   }
 
+  public async updateComment({
+    updateRequest,
+    updatedAt,
+    user,
+  }: {
+    updateRequest: CommentPatchRequest;
+    updatedAt: string;
+    user: UserInfo;
+  }): Promise<SavedObjectsUpdateResponse<CommentAttributes>> {
+    const { id, version, ...queryRestAttributes } = updateRequest;
+
+    return this.service.patchComment({
+      client: this.soClient,
+      commentId: id,
+      updatedAttributes: {
+        ...queryRestAttributes,
+        updated_at: updatedAt,
+        updated_by: user,
+      },
+      version,
+    });
+  }
+
+  public async createComment({
+    createdDate,
+    user,
+    commentReq,
+  }: {
+    createdDate: string;
+    user: UserInfo;
+    commentReq: CommentRequest;
+  }): Promise<SavedObject<CommentAttributes>> {
+    return this.service.postNewComment({
+      client: this.soClient,
+      attributes: transformNewComment({
+        associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
+        createdDate,
+        ...commentReq,
+        ...user,
+      }),
+      references: this.buildRefsToCase(),
+    });
+  }
+
   private formatCollectionForEncoding(totalComment: number) {
     return {
       id: this.collection.id,
@@ -101,7 +141,7 @@ export class CommentableCase {
     };
   }
 
-  public async encode() {
+  public async encode(): Promise<CollectionWithSubCaseResponse> {
     const collectionCommentStats = await this.service.getAllCaseComments({
       client: this.soClient,
       id: this.collection.id,
@@ -146,8 +186,10 @@ export class CommentableCase {
   }
 
   public async update({ date, user }: { date: string; user: UserInfo }): Promise<CommentableCase> {
+    let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
+
     if (this.subCase) {
-      const updated = await this.service.patchSubCase({
+      const updatedSubCase = await this.service.patchSubCase({
         client: this.soClient,
         subCaseId: this.subCase.id,
         updatedAttributes: {
@@ -159,22 +201,17 @@ export class CommentableCase {
         version: this.subCase.version,
       });
 
-      return new CommentableCase({
-        soClient: this.soClient,
-        service: this.service,
-        collection: this.collection,
-        subCase: {
-          ...this.subCase,
-          attributes: {
-            ...this.subCase.attributes,
-            ...updated.attributes,
-          },
-          version: updated.version ?? this.subCase.version,
+      updatedSubCaseAttributes = {
+        ...this.subCase,
+        attributes: {
+          ...this.subCase.attributes,
+          ...updatedSubCase.attributes,
         },
-      });
+        version: updatedSubCase.version ?? this.subCase.version,
+      };
     }
 
-    const updated = await this.service.patchCase({
+    const updatedCase = await this.service.patchCase({
       client: this.soClient,
       caseId: this.collection.id,
       updatedAttributes: {
@@ -184,16 +221,17 @@ export class CommentableCase {
       version: this.collection.version,
     });
 
+    // this will contain the updated sub case information if the sub case was defined initially
     return new CommentableCase({
       collection: {
         ...this.collection,
         attributes: {
           ...this.collection.attributes,
-          ...updated.attributes,
+          ...updatedCase.attributes,
         },
-        version: updated.version ?? this.collection.version,
+        version: updatedCase.version ?? this.collection.version,
       },
-      subCase: this.subCase,
+      subCase: updatedSubCaseAttributes,
       soClient: this.soClient,
       service: this.service,
     });

@@ -11,19 +11,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import {
-  decodeComment,
-  getAlertIds,
-  isGeneratedAlertContext,
-  transformNewComment,
-} from '../../routes/api/utils';
+import { decodeComment, getAlertIds, isGeneratedAlertContext } from '../../routes/api/utils';
 
 import {
   throwErrors,
   CommentRequestRt,
   CommentType,
   CaseStatuses,
-  AssociationType,
   CaseType,
   SubCaseAttributes,
   CommentRequest,
@@ -33,9 +27,8 @@ import {
 } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CommentableCase } from '../../common';
+import { CommentableCase, UserInfo } from '../../common';
 import { CaseClientImpl } from '..';
 
 async function getSubCase({
@@ -83,12 +76,15 @@ const addGeneratedAlerts = async ({
   decodeComment(comment);
   const createdDate = new Date().toISOString();
 
-  const myCase = await caseService.getCase({
+  const caseInfo = await caseService.getCase({
     client: savedObjectsClient,
     id: caseId,
   });
 
-  if (query.type === CommentType.generatedAlert && myCase.attributes.type !== CaseType.collection) {
+  if (
+    query.type === CommentType.generatedAlert &&
+    caseInfo.attributes.type !== CaseType.collection
+  ) {
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
   }
 
@@ -99,68 +95,33 @@ const addGeneratedAlerts = async ({
     createdAt: createdDate,
   });
 
-  const userDetails = {
-    username: myCase.attributes.created_by?.username,
-    full_name: myCase.attributes.created_by?.full_name,
-    email: myCase.attributes.created_by?.email,
+  const commentableCase = new CommentableCase({
+    collection: caseInfo,
+    subCase,
+    soClient: savedObjectsClient,
+    service: caseService,
+  });
+
+  const userDetails: UserInfo = {
+    username: caseInfo.attributes.created_by?.username,
+    full_name: caseInfo.attributes.created_by?.full_name,
+    email: caseInfo.attributes.created_by?.email,
   };
 
-  const [newComment, updatedCase, updatedSubCase] = await Promise.all([
-    // TODO: probably move this to the service layer
-    caseService.postNewComment({
-      client: savedObjectsClient,
-      attributes: transformNewComment({
-        associationType: AssociationType.subCase,
-        createdDate,
-        ...query,
-        ...userDetails,
-      }),
-      references: [
-        {
-          type: CASE_SAVED_OBJECT,
-          name: `associated-${CASE_SAVED_OBJECT}`,
-          id: myCase.id,
-        },
-        {
-          type: SUB_CASE_SAVED_OBJECT,
-          name: `associated-${SUB_CASE_SAVED_OBJECT}`,
-          id: subCase.id,
-        },
-      ],
-    }),
-    caseService.patchCase({
-      client: savedObjectsClient,
-      caseId,
-      updatedAttributes: {
-        updated_at: createdDate,
-        updated_by: {
-          ...userDetails,
-        },
-      },
-      version: myCase.version,
-    }),
-    caseService.patchSubCase({
-      client: savedObjectsClient,
-      subCaseId: subCase.id,
-      updatedAttributes: {
-        updated_at: createdDate,
-        updated_by: {
-          ...userDetails,
-        },
-      },
-      version: subCase.version,
-    }),
+  const [newComment, updatedCase] = await Promise.all([
+    commentableCase.createComment({ createdDate, user: userDetails, commentReq: query }),
+    commentableCase.update({ date: createdDate, user: userDetails }),
   ]);
 
   if (
     (newComment.attributes.type === CommentType.alert ||
       newComment.attributes.type === CommentType.generatedAlert) &&
-    myCase.attributes.settings.syncAlerts
+    caseInfo.attributes.settings.syncAlerts
   ) {
     const ids = getAlertIds(query);
     await caseClient.updateAlertsStatus({
       ids,
-      status: myCase.attributes.status,
+      status: caseInfo.attributes.status,
       indices: new Set([newComment.attributes.index]),
     });
   }
@@ -180,27 +141,7 @@ const addGeneratedAlerts = async ({
     ],
   });
 
-  return new CommentableCase({
-    collection: {
-      ...myCase,
-      ...updatedCase,
-      attributes: {
-        ...myCase.attributes,
-        ...updatedCase.attributes,
-      },
-      version: updatedCase.version ?? myCase.version,
-      references: myCase.references,
-    },
-    subCase: {
-      ...subCase,
-      ...updatedSubCase,
-      attributes: { ...subCase.attributes, ...updatedSubCase.attributes },
-      version: updatedSubCase.version ?? subCase.version,
-      references: subCase.references,
-    },
-    service: caseService,
-    soClient: savedObjectsClient,
-  }).encode();
+  return updatedCase.encode();
 };
 
 async function getCombinedCase(
@@ -290,21 +231,14 @@ export const addComment = async ({
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
+  const userInfo: UserInfo = {
+    username,
+    full_name,
+    email,
+  };
 
   const [newComment, updatedCase] = await Promise.all([
-    caseService.postNewComment({
-      client: savedObjectsClient,
-      attributes: transformNewComment({
-        // TODO: this needs to be sub if it is a sub case
-        associationType: AssociationType.case,
-        createdDate,
-        ...query,
-        username,
-        full_name,
-        email,
-      }),
-      references: combinedCase.buildRefsToCase(),
-    }),
+    combinedCase.createComment({ createdDate, user: userInfo, commentReq: query }),
     // This will return a full new CombinedCase object that has the updated and base fields
     // merged together so let's use the return value from now on
     combinedCase.update({
@@ -314,9 +248,7 @@ export const addComment = async ({
   ]);
 
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-    const ids = Array.isArray(newComment.attributes.alertId)
-      ? newComment.attributes.alertId
-      : [newComment.attributes.alertId];
+    const ids = getAlertIds(query);
     await caseClient.updateAlertsStatus({
       ids,
       status: updatedCase.status,

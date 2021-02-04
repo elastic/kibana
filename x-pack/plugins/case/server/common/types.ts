@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './models';
-export * from './utils';
-export * from './types';
+export interface UserInfo {
+  username: string | null | undefined;
+  full_name: string | null | undefined;
+  email: string | null | undefined;
+}

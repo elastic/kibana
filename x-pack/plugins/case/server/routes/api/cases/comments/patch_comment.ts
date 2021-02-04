@@ -13,7 +13,7 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { CommentableCase } from '../../../../common';
+import { CommentableCase, UserInfo } from '../../../../common';
 import { CommentPatchRequestRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
@@ -120,17 +120,18 @@ export function initPatchCommentApi({
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
+        const userInfo: UserInfo = {
+          username,
+          full_name,
+          email,
+        };
+
         const updatedDate = new Date().toISOString();
         const [updatedComment, updatedCase] = await Promise.all([
-          caseService.patchComment({
-            client,
-            commentId: queryCommentId,
-            updatedAttributes: {
-              ...queryRestAttributes,
-              updated_at: updatedDate,
-              updated_by: { email, full_name, username },
-            },
-            version: queryCommentVersion,
+          commentableCase.updateComment({
+            updateRequest: query,
+            updatedAt: updatedDate,
+            user: userInfo,
           }),
           commentableCase.update({
             date: updatedDate,
