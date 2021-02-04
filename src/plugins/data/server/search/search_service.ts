@@ -316,7 +316,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         strategy: strategyName,
         isStored: true,
       };
-      this.cancel(deps, searchId, searchOptions);
+      try {
+        await this.cancel(deps, searchId, searchOptions);
+      } catch (e) {
+        // Ignore errors for individual search cancellations
+      }
     }
   };
 
@@ -327,7 +331,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   };
 
   private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
-    this.cancelSessionSearches(deps, sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
     return deps.searchSessionsClient.delete(sessionId);
   };
 
