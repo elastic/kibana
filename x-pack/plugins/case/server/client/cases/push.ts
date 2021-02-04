@@ -36,8 +36,15 @@ export const push = ({
   connectorId,
 }: CaseClientPush): Promise<CaseResponse> => {
   /* Start of push to external service */
-  const connector = await actionsClient.get({ id: connectorId });
   const theCase = await caseClient.get({ id: caseId, includeComments: true });
+
+  if (theCase.status === CaseStatuses.closed) {
+    throw Boom.conflict(
+      `This case ${theCase.title} is closed. You can not pushed if the case is closed.`
+    );
+  }
+
+  const connector = await actionsClient.get({ id: connectorId });
   const userActions = await caseClient.getUserActions({ caseId });
   const alerts = await caseClient.getAlerts({
     ids: theCase.comments?.filter(isCommentAlertType).map((comment) => comment.alertId) ?? [],
@@ -96,12 +103,6 @@ export const push = ({
     }),
     actionsClient.getAll(),
   ]);
-
-  if (myCase.attributes.status === CaseStatuses.closed) {
-    throw Boom.conflict(
-      `This case ${myCase.attributes.title} is closed. You can not pushed if the case is closed.`
-    );
-  }
 
   const comments = await caseService.getAllCaseComments({
     client: savedObjectsClient,

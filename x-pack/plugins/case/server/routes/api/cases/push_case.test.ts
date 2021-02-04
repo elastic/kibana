@@ -18,12 +18,15 @@ import {
   mockUserActions,
 } from '../__fixtures__';
 import { initPushCaseApi } from './push_case';
-import { CASE_PUSH_URL } from '../../../../common/constants';
 import { CasesRequestHandlerContext } from '../../../types';
+import { getCasePushUrl } from '../../../../common/api/helpers';
 
 describe('Push case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   const mockDate = '2019-11-25T21:54:48.952Z';
+  const caseId = 'mock-id-3';
+  const connectorId = '123';
+  const path = getCasePushUrl(caseId, connectorId);
 
   beforeAll(async () => {
     routeHandler = await createRoute(initPushCaseApi, 'post');
@@ -35,11 +38,11 @@ describe('Push case', () => {
 
   it(`Pushes a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: CASE_PUSH_URL,
+      path,
       method: 'post',
       params: {
-        case_id: 'mock-id-3',
-        connector_id: '123',
+        case_id: caseId,
+        connector_id: connectorId,
       },
       body: {},
     });
@@ -56,7 +59,7 @@ describe('Push case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.external_service).toEqual({
-      connector_id: '123',
+      connector_id: connectorId,
       connector_name: 'ServiceNow',
       external_id: '10663',
       external_title: 'RJ2-200',
@@ -72,11 +75,11 @@ describe('Push case', () => {
 
   it(`Pushes a case and closes when closure_type: 'close-by-pushing'`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: CASE_PUSH_URL,
+      path,
       method: 'post',
       params: {
-        case_id: 'mock-id-3',
-        connector_id: '123',
+        case_id: caseId,
+        connector_id: connectorId,
       },
       body: {},
     });
@@ -105,11 +108,11 @@ describe('Push case', () => {
 
   it('Unhappy path - context case missing', async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: CASE_PUSH_URL,
+      path,
       method: 'post',
       params: {
-        case_id: 'mock-id-3',
-        connector_id: '123',
+        case_id: caseId,
+        connector_id: connectorId,
       },
       body: {},
     });
@@ -135,11 +138,11 @@ describe('Push case', () => {
 
   it('Unhappy path - context actions missing', async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: CASE_PUSH_URL,
+      path,
       method: 'post',
       params: {
-        case_id: 'mock-id-3',
-        connector_id: '123',
+        case_id: caseId,
+        connector_id: connectorId,
       },
       body: {},
     });
