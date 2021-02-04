@@ -62,7 +62,7 @@ export class IndexPatternsFetcher {
     const patternListActive = await this.validatePatternListActive(patternList);
     const fieldCapsResponse = await getFieldCapabilities(
       this.elasticsearchClient,
-      patternListActive,
+      patternListActive.length > 0 ? patternListActive : patternList,
       metaFields,
       {
         allow_no_indices: fieldCapsOptions
@@ -70,6 +70,7 @@ export class IndexPatternsFetcher {
           : this.allowNoIndices,
       }
     );
+
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
       const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
@@ -124,8 +125,8 @@ export class IndexPatternsFetcher {
   /**
    *  Get a list of field objects for a time pattern
    *
-   *  @param patternList
-   *  @return {Promise<Array<string>>}
+   *  @param patternList string[]
+   *  @return {Promise<string[]>}
    */
   async validatePatternListActive(patternList: string[]) {
     const result = await Promise.all(
