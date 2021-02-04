@@ -41,7 +41,6 @@ describe('getEventsSummaryBySavedObjectIdsRoute', () => {
       {
         params: { type: 'alert' },
         body: { ids: ['1'], aggs: {} },
-        query: {},
       },
       ['ok']
     );

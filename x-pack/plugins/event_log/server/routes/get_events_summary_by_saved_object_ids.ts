@@ -57,7 +57,7 @@ export const getEventsSummaryBySavedObjectIdsRoute = (
       context: EventLogRequestHandlerContext,
       req: KibanaRequest<
         TypeOf<typeof paramSchema>,
-        TypeOf<typeof optionsSchema>,
+        TypeOf<typeof optionsSchema> | undefined,
         TypeOf<typeof bodySchema>
       >,
       res: KibanaResponseFactory
@@ -78,8 +78,8 @@ export const getEventsSummaryBySavedObjectIdsRoute = (
             type,
             ids,
             aggs,
-            query.start,
-            query.end
+            query?.start,
+            query?.end
           ),
         });
       } catch (err) {
