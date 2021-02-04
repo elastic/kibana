@@ -68,11 +68,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(Object.keys(response.body).length).to.be(transactionNames.length);
         expectSnapshot(Object.keys(response.body)).toMatchInline(`
-        Array [
-          "DispatcherServlet#doGet",
-          "APIRestController#customers",
-        ]
-      `);
+                  Array [
+                    "DispatcherServlet#doGet",
+                    "APIRestController#customers",
+                  ]
+              `);
 
         expect(Object.values(response.body).map((group: any) => group.impact).length).to.be(2);
         expectSnapshot(Object.values(response.body).map((group: any) => group.impact))
@@ -90,25 +90,215 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         }
 
         expect(item.latency.length).to.be.greaterThan(0);
-        expectSnapshot(removeEmptyCoordinates(item.latency)[0]).toMatchInline(`
-        Object {
-          "x": 1607435880000,
-          "y": 69429,
-        }
+        expectSnapshot(removeEmptyCoordinates(item.latency)).toMatchInline(`
+          Array [
+            Object {
+              "x": 1607435880000,
+              "y": 69429,
+            },
+            Object {
+              "x": 1607435940000,
+              "y": 8071285,
+            },
+            Object {
+              "x": 1607436000000,
+              "y": 31949,
+            },
+            Object {
+              "x": 1607436120000,
+              "y": 47755,
+            },
+            Object {
+              "x": 1607436240000,
+              "y": 35403,
+            },
+            Object {
+              "x": 1607436480000,
+              "y": 48137,
+            },
+            Object {
+              "x": 1607436600000,
+              "y": 35457,
+            },
+            Object {
+              "x": 1607436960000,
+              "y": 30501,
+            },
+            Object {
+              "x": 1607437200000,
+              "y": 46937.5,
+            },
+          ]
         `);
         expect(item.throughput.length).to.be.greaterThan(0);
-        expectSnapshot(removeEmptyCoordinates(item.throughput)[0]).toMatchInline(`
-        Object {
-          "x": 1607435820000,
-          "y": 0,
-        }
+        expectSnapshot(removeEmptyCoordinates(item.throughput)).toMatchInline(`
+          Array [
+            Object {
+              "x": 1607435820000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607435880000,
+              "y": 0.01,
+            },
+            Object {
+              "x": 1607435940000,
+              "y": 0.02,
+            },
+            Object {
+              "x": 1607436000000,
+              "y": 0.01,
+            },
+            Object {
+              "x": 1607436060000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436120000,
+              "y": 0.01,
+            },
+            Object {
+              "x": 1607436180000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436240000,
+              "y": 0.04,
+            },
+            Object {
+              "x": 1607436300000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436360000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436420000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436480000,
+              "y": 0.02,
+            },
+            Object {
+              "x": 1607436540000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436600000,
+              "y": 0.01,
+            },
+            Object {
+              "x": 1607436660000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436720000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436780000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436840000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436900000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436960000,
+              "y": 0.02,
+            },
+            Object {
+              "x": 1607437020000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437080000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437140000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437200000,
+              "y": 0.02,
+            },
+            Object {
+              "x": 1607437260000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437320000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437380000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437440000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437500000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437560000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437620000,
+              "y": 0,
+            },
+          ]
         `);
         expect(item.errorRate.length).to.be.greaterThan(0);
-        expectSnapshot(removeEmptyCoordinates(item.errorRate).pop()).toMatchInline(`
-          Object {
-            "x": 1607437200000,
-            "y": 0.5,
-          }
+        expectSnapshot(removeEmptyCoordinates(item.errorRate)).toMatchInline(`
+          Array [
+            Object {
+              "x": 1607435880000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607435940000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436000000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436120000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436240000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436480000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436600000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607436960000,
+              "y": 0,
+            },
+            Object {
+              "x": 1607437200000,
+              "y": 0.5,
+            },
+          ]
         `);
       });
       it('returns empty when transaction name is not found', async () => {
