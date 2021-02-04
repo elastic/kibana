@@ -17405,7 +17405,6 @@
     "xpack.securitySolution.case.components.connectors.case.optionAddToExistingCase": "添加到现有案例",
     "xpack.securitySolution.case.components.connectors.case.selectMessageText": "创建或更新案例。",
     "xpack.securitySolution.case.configure.errorGetFields": "从服务中获取字段时出错",
-    "xpack.securitySolution.case.configure.errorPushingToService": "推送到服务时出错",
     "xpack.securitySolution.case.configure.successSaveToast": "已保存外部连接设置",
     "xpack.securitySolution.case.configureCases.addNewConnector": "添加新连接器",
     "xpack.securitySolution.case.configureCases.blankMappings": "至少一个字段需映射到 { connectorName }",

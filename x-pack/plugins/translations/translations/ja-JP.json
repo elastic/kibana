@@ -17361,7 +17361,6 @@
     "xpack.securitySolution.case.components.connectors.case.optionAddToExistingCase": "既存のケースに追加",
     "xpack.securitySolution.case.components.connectors.case.selectMessageText": "ケースを作成または更新します。",
     "xpack.securitySolution.case.configure.errorGetFields": "サービスからのフィールドの取得中にエラーが発生しました",
-    "xpack.securitySolution.case.configure.errorPushingToService": "サービスへのプッシュエラー",
     "xpack.securitySolution.case.configure.successSaveToast": "保存された外部接続設定",
     "xpack.securitySolution.case.configureCases.addNewConnector": "新しいコネクターを追加",
     "xpack.securitySolution.case.configureCases.blankMappings": "1 つ以上のフィールドを { connectorName } にマッピングする必要があります",
