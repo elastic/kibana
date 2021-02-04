@@ -97,8 +97,8 @@ describe('KibanaMigrator', () => {
 
       const migrator = new KibanaMigrator(options);
 
-      expect(() => migrator.runMigrations()).rejects.toThrow(
-        /Migrations are not ready. Make sure prepareMigrations is called first./i
+      await expect(() => migrator.runMigrations()).toThrowErrorMatchingInlineSnapshot(
+        `"Migrations are not ready. Make sure prepareMigrations is called first."`
       );
     });
 
