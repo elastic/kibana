@@ -15,14 +15,14 @@ export const AnomalySummary = ({ anomaly }: { anomaly: MetricsHostsAnomaly }) =>
   const { actual, typical } = anomaly;
 
   const moreThanExpectedAnomalyMessage = i18n.translate(
-    'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
+    'xpack.infra.ml.anomalyFlyout.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
       defaultMessage: 'more',
     }
   );
 
   const fewerThanExpectedAnomalyMessage = i18n.translate(
-    'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
+    'xpack.infra.ml.anomalyFlyout.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
       defaultMessage: 'fewer',
     }

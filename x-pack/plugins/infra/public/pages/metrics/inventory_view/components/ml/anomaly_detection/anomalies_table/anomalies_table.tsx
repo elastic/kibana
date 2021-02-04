@@ -163,7 +163,7 @@ export const AnomaliesTable = () => {
   return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={1}>
           <EuiSuperDatePicker
             start={start}
             end={end}
@@ -173,9 +173,10 @@ export const AnomaliesTable = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={true}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={1}>
           <EuiFieldSearch
+            fullWidth
             placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.searchPlaceholder', {
               defaultMessage: 'Search for anomalies',
             })}
