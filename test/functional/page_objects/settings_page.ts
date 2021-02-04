@@ -28,6 +28,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async clickLinkText(text: string) {
       await find.clickByDisplayedLinkText(text);
     }
+
+    async clickByButtonText(text: string) {
+      await find.clickByButtonText(text);
+    }
+
     async clickKibanaSettings() {
       await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();

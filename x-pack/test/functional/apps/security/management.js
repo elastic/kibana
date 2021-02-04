@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }) {
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.skip('Management', function () {
+  describe('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -150,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.settings.navigateTo();
           await testSubjects.click('users');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          await PageObjects.settings.clickByButtonText('kibana_dashboard_only_user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
