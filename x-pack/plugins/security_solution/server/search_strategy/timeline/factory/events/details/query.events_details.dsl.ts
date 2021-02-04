@@ -15,6 +15,7 @@ export const buildTimelineDetailsQuery = (
   allowNoIndices: true,
   index: indexName,
   ignoreUnavailable: true,
+  includeUnmapped: true,
   body: {
     docvalue_fields: docValueFields,
     query: {
