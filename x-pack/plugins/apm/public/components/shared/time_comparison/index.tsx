@@ -23,8 +23,6 @@ const PrependContainer = styled.div`
   padding: 0 ${px(unit)};
 `;
 
-const weekDurationInHours = 24 * 7;
-
 function formatPreviousPeriodDates({
   momentStart,
   momentEnd,
@@ -63,17 +61,22 @@ function getSelectOptions({
     }),
   };
 
-  const dateDiffInHours = getDateDifference(momentStart, momentEnd, 'hours');
+  const dateDiff = getDateDifference({
+    start: momentStart,
+    end: momentEnd,
+    unitOfTime: 'days',
+    precise: true,
+  });
   const isRangeToNow = rangeTo === 'now';
 
   if (isRangeToNow) {
     // Less than or equals to one day
-    if (dateDiffInHours <= 24) {
+    if (dateDiff <= 1) {
       return [yesterdayOption, aWeekAgoOption];
     }
 
     // Less than or equals to one week
-    if (dateDiffInHours <= weekDurationInHours) {
+    if (dateDiff <= 7) {
       return [aWeekAgoOption];
     }
   }

@@ -168,37 +168,52 @@ describe('date time formatters', () => {
     it('milliseconds', () => {
       const start = moment('2019-10-29 08:00:00.001');
       const end = moment('2019-10-29 08:00:00.005');
-      expect(getDateDifference(start, end, 'milliseconds')).toEqual(4);
+      expect(
+        getDateDifference({ start, end, unitOfTime: 'milliseconds' })
+      ).toEqual(4);
     });
     it('seconds', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:00:10');
-      expect(getDateDifference(start, end, 'seconds')).toEqual(10);
+      expect(getDateDifference({ start, end, unitOfTime: 'seconds' })).toEqual(
+        10
+      );
     });
     it('minutes', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:15:00');
-      expect(getDateDifference(start, end, 'minutes')).toEqual(15);
+      expect(getDateDifference({ start, end, unitOfTime: 'minutes' })).toEqual(
+        15
+      );
     });
     it('hours', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 10:00:00');
-      expect(getDateDifference(start, end, 'hours')).toEqual(2);
+      expect(getDateDifference({ start, end, unitOfTime: 'hours' })).toEqual(2);
     });
     it('days', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-30 10:00:00');
-      expect(getDateDifference(start, end, 'days')).toEqual(1);
+      expect(getDateDifference({ start, end, unitOfTime: 'days' })).toEqual(1);
     });
     it('months', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-12-29 08:00:00');
-      expect(getDateDifference(start, end, 'months')).toEqual(2);
+      expect(getDateDifference({ start, end, unitOfTime: 'months' })).toEqual(
+        2
+      );
     });
     it('years', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2020-10-29 08:00:00');
-      expect(getDateDifference(start, end, 'years')).toEqual(1);
+      expect(getDateDifference({ start, end, unitOfTime: 'years' })).toEqual(1);
+    });
+    it('precise days', () => {
+      const start = moment('2019-10-29 08:00:00');
+      const end = moment('2019-10-30 10:00:00');
+      expect(
+        getDateDifference({ start, end, unitOfTime: 'days', precise: true })
+      ).toEqual(1.0833333333333333);
     });
   });
 });
