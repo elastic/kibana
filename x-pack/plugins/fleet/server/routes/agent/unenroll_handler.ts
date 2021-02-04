@@ -24,7 +24,7 @@ export const postAgentUnenrollHandler: RequestHandler<
     if (request.body?.force === true) {
       await AgentService.forceUnenrollAgent(soClient, esClient, request.params.agentId);
     } else {
-      await AgentService.unenrollAgent(soClient, request.params.agentId);
+      await AgentService.unenrollAgent(soClient, esClient, request.params.agentId);
     }
 
     const body: PostAgentUnenrollResponse = {};
