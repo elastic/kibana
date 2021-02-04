@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -58,23 +59,27 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     }
 
     public async viewSearchSessions() {
+      log.debug('viewSearchSessions');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorviewSearchSessionsLink');
     }
 
     public async save() {
+      log.debug('save the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorSaveBtn');
       await this.ensurePopoverClosed();
     }
 
     public async cancel() {
+      log.debug('cancel the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorCancelBtn');
       await this.ensurePopoverClosed();
     }
 
     public async refresh() {
+      log.debug('refresh the status');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorRefreshBtn');
       await this.ensurePopoverClosed();
@@ -85,8 +90,12 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensurePopoverOpened() {
+      log.debug('ensurePopoverOpened');
       const isAlreadyOpen = await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
-      if (isAlreadyOpen) return;
+      if (isAlreadyOpen) {
+        log.debug('Popover is already open');
+        return;
+      }
       return retry.waitFor(`searchSessions popover opened`, async () => {
         await testSubjects.click(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
         return await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
@@ -94,6 +103,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensurePopoverClosed() {
+      log.debug('ensurePopoverClosed');
       const isAlreadyClosed = !(await testSubjects.exists(
         SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
       ));
@@ -110,7 +120,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
      * Alternatively, a test can navigate to `Management > Search Sessions` and use the UI to delete any created tests.
      */
     public async deleteAllSearchSessions() {
-      log.debug('Deleting created searcg sessions');
+      log.debug('Deleting created search sessions');
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(10000, async () => {
         const { body } = await supertest
