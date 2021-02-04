@@ -21,8 +21,10 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getServiceInstanceTransactionStats({
+  environment,
   setup,
   transactionType,
   serviceName,
@@ -73,6 +75,7 @@ export async function getServiceInstanceTransactionStats({
             { range: rangeFilter(start, end) },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },
