@@ -75,7 +75,7 @@ const getTransformedHits = (
     }
 
     const source = {
-      '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+      '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
       threshold_result: {
         count: totalResults,
         value: ruleId,
@@ -104,10 +104,10 @@ const getTransformedHits = (
         }
 
         const source = {
-          '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+          '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
           threshold_result: {
             count: docCount,
-            value: get(threshold.field, hit._source),
+            value: key,
           },
         };
 
