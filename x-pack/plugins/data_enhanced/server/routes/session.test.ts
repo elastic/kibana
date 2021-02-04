@@ -16,6 +16,13 @@ import type {
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
 
+enum PostHandlerIndex {
+  SAVE,
+  FIND,
+  CANCEL,
+  EXTEND,
+}
+
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
   let mockContext: jest.Mocked<DataRequestHandlerContext>;
@@ -37,7 +44,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, saveHandler]] = mockRouter.post.mock.calls;
+    const [, saveHandler] = mockRouter.post.mock.calls[PostHandlerIndex.SAVE];
 
     saveHandler(mockContext, mockRequest, mockResponse);
 
@@ -71,7 +78,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, [, findHandler]] = mockRouter.post.mock.calls;
+    const [, findHandler] = mockRouter.post.mock.calls[PostHandlerIndex.FIND];
 
     findHandler(mockContext, mockRequest, mockResponse);
 
@@ -89,7 +96,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, updateHandler]] = mockRouter.put.mock.calls;
+    const [, updateHandler] = mockRouter.put.mock.calls[0];
 
     updateHandler(mockContext, mockRequest, mockResponse);
 
@@ -104,7 +111,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, cancelHandler]] = mockRouter.cancel.mock.calls;
+    const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
 
     cancelHandler(mockContext, mockRequest, mockResponse);
 
@@ -119,9 +126,9 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, deleteHandler]] = mockRouter.delete.mock.calls;
+    const [, deleteHandler] = mockRouter.delete.mock.calls[0];
 
-    deleteHandler(mockContext, mockRequest, mockResponse);
+    await deleteHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
   });
@@ -136,7 +143,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, , [, extendHandler]] = mockRouter.post.mock.calls;
+    const [, extendHandler] = mockRouter.post.mock.calls[PostHandlerIndex.EXTEND];
 
     extendHandler(mockContext, mockRequest, mockResponse);
 
