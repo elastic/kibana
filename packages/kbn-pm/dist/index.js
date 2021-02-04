@@ -95,7 +95,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "run", function() { return _cli__WEBPACK_IMPORTED_MODULE_0__["run"]; });
 
 /* harmony import */ var _production__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(519);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildProductionProjects"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildBazelProductionProjects"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(248);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getProjects", function() { return _utils_projects__WEBPACK_IMPORTED_MODULE_2__["getProjects"]; });
@@ -8897,12 +8899,13 @@ const BootstrapCommand = {
   }) {
     var _projects$get;
 
-    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
+    const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
+    const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path; // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Install monorepo npm dependencies
 
-    for (const batch of batchedProjects) {
+    for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
         const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${path__WEBPACK_IMPORTED_MODULE_0__["sep"]}plugins`);
 
@@ -8929,10 +8932,18 @@ const BootstrapCommand = {
     // copy those scripts into the top level node_modules folder
 
 
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph);
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph); // Bootstrap process for Bazel packages
+    //
+    // NOTE: Bazel projects will be introduced incrementally
+    // And should begin from the ones with none dependencies forward.
+    // That way non bazel projects could depend on bazel projects but not the other way around
+    // That is only intended during the migration process while non Bazel projects are not removed at all.
+
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build']); // Bootstrap process for non Bazel packages
+
     /**
      * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
-     * in the list of projects. We do this because some projects need to be
+     * in the list of non Bazel projects. We do this because some projects need to be
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
@@ -8941,8 +8952,8 @@ const BootstrapCommand = {
     const caches = new Map();
     let cachedProjectCount = 0;
 
-    for (const project of projects.values()) {
-      if (project.hasScript('kbn:bootstrap')) {
+    for (const project of nonBazelProjectsOnly.values()) {
+      if (project.hasScript('kbn:bootstrap') && !project.isBazelPackage()) {
         const file = new _utils_bootstrap_cache_file__WEBPACK_IMPORTED_MODULE_6__["BootstrapCacheFile"](kbn, project, checksums);
         const valid = options.cache && file.isValid();
 
@@ -8962,7 +8973,7 @@ const BootstrapCommand = {
       _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
-    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async project => {
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedNonBazelProjects, async project => {
       const cache = caches.get(project);
 
       if (cache && !cache.valid) {
@@ -22646,6 +22657,8 @@ async function parallelize(items, fn, concurrency = 4) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getProjects", function() { return getProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getNonBazelProjectsOnly", function() { return getNonBazelProjectsOnly; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBazelProjectsOnly", function() { return getBazelProjectsOnly; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProjectGraph", function() { return buildProjectGraph; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "topologicallyBatchProjects", function() { return topologicallyBatchProjects; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "includeTransitiveProjects", function() { return includeTransitiveProjects; });
@@ -22675,7 +22688,7 @@ const glob = Object(util__WEBPACK_IMPORTED_MODULE_2__["promisify"])(glob__WEBPAC
 async function getProjects(rootPath, projectsPathsPatterns, {
   include = [],
   exclude = []
-} = {}) {
+} = {}, bazelOnly = false) {
   const projects = new Map();
 
   for (const pattern of projectsPathsPatterns) {
@@ -22688,7 +22701,7 @@ async function getProjects(rootPath, projectsPathsPatterns, {
       const projectConfigPath = normalize(filePath);
       const projectDir = path__WEBPACK_IMPORTED_MODULE_1___default.a.dirname(projectConfigPath);
       const project = await _project__WEBPACK_IMPORTED_MODULE_4__["Project"].fromPath(projectDir);
-      const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
+      const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name) || bazelOnly && !project.isBazelPackage();
 
       if (excludeProject) {
         continue;
@@ -22706,6 +22719,28 @@ async function getProjects(rootPath, projectsPathsPatterns, {
   }
 
   return projects;
+}
+async function getNonBazelProjectsOnly(projects) {
+  const bazelProjectsOnly = new Map();
+
+  for (const project of projects.values()) {
+    if (!project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
+}
+async function getBazelProjectsOnly(projects) {
+  const bazelProjectsOnly = new Map();
+
+  for (const project of projects.values()) {
+    if (project.isBazelPackage()) {
+      bazelProjectsOnly.set(project.name, project);
+    }
+  }
+
+  return bazelProjectsOnly;
 }
 
 function packagesFromGlobPattern({
@@ -22837,14 +22872,16 @@ class CliError extends Error {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return Project; });
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(112);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(249);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(246);
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(251);
-/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(318);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(134);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(112);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(249);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(246);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(251);
+/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(318);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -22864,9 +22901,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 class Project {
   static async fromPath(path) {
-    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["readPackageJson"])(path);
+    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path);
     return new Project(pkgJson, path);
   }
   /** parsed package.json */
@@ -22893,19 +22931,22 @@ class Project {
 
     _defineProperty(this, "scripts", void 0);
 
+    _defineProperty(this, "bazelPackage", void 0);
+
     _defineProperty(this, "isSinglePackageJsonProject", false);
 
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
-    this.packageJsonLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'package.json');
-    this.nodeModulesLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'node_modules');
-    this.targetLocation = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, 'target');
+    this.packageJsonLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'package.json');
+    this.nodeModulesLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'node_modules');
+    this.targetLocation = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'target');
     this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
     this.allDependencies = _objectSpread(_objectSpread({}, this.devDependencies), this.productionDependencies);
     this.isSinglePackageJsonProject = this.json.name === 'kibana';
     this.scripts = this.json.scripts || {};
+    this.bazelPackage = !this.isSinglePackageJsonProject && fs__WEBPACK_IMPORTED_MODULE_0___default.a.existsSync(path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, 'BUILD.bazel'));
   }
 
   get name() {
@@ -22913,27 +22954,29 @@ class Project {
   }
 
   ensureValidProjectDependency(project) {
-    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_0___default.a.relative(this.path, project.path));
+    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`; // TODO: after introduce bazel to build packages do not allow child projects
-    // to hold dependencies
+    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
+    //  do not allow child projects to hold dependencies
 
-    if (versionInPackageJson === expectedVersionInPackageJson) {
+    if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
       return;
     }
 
     const updateMsg = 'Update its package.json to the expected value below.';
     const meta = {
       actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
       package: `${this.name} (${this.packageJsonLocation})`
     };
 
-    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(versionInPackageJson)) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
+    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson)) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
   }
 
   getBuildConfig() {
@@ -22947,11 +22990,15 @@ class Project {
 
 
   getIntermediateBuildDirectory() {
-    return path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   getCleanConfig() {
     return this.json.kibana && this.json.kibana.clean || {};
+  }
+
+  isBazelPackage() {
+    return this.bazelPackage;
   }
 
   isFlaggedAsDevOnly() {
@@ -22971,7 +23018,7 @@ class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, raw)
+        [this.name]: path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, raw)
       };
     }
 
@@ -22979,25 +23026,25 @@ class Project {
       const binsConfig = {};
 
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(this.path, raw[binName]);
+        binsConfig[binName] = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(this.path, raw[binName]);
       }
 
       return binsConfig;
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_2__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
-      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_1__["inspect"])(raw),
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
+      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_2__["inspect"])(raw),
       package: `${this.name} (${this.packageJsonLocation})`
     });
   }
 
   async runScript(scriptName, args = []) {
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`Running script [${scriptName}] in [${this.name}]:`);
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["runScriptInPackage"])(scriptName, args, this);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`Running script [${scriptName}] in [${this.name}]:`);
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackage"])(scriptName, args, this);
   }
 
   runScriptStreaming(scriptName, options = {}) {
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["runScriptInPackageStreaming"])({
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackageStreaming"])({
       script: scriptName,
       args: options.args || [],
       pkg: this,
@@ -23010,14 +23057,14 @@ class Project {
   }
 
   isEveryDependencyLocal() {
-    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_4__["isLinkDependency"])(dep));
+    return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(dep));
   }
 
   async installDependencies(options = {}) {
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].info(`[${this.name}] running yarn`);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].write('');
-    await Object(_scripts__WEBPACK_IMPORTED_MODULE_5__["installInDir"])(this.path, options === null || options === void 0 ? void 0 : options.extraArgs);
-    _log__WEBPACK_IMPORTED_MODULE_3__["log"].write('');
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[${this.name}] running yarn`);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
+    await Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, options === null || options === void 0 ? void 0 : options.extraArgs);
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write('');
   }
 
 } // We normalize all path separators to `/` in generated files
@@ -23036,6 +23083,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "writePackageJson", function() { return writePackageJson; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createProductionPackageJson", function() { return createProductionPackageJson; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isLinkDependency", function() { return isLinkDependency; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBazelPackageDependency", function() { return isBazelPackageDependency; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "transformDependencies", function() { return transformDependencies; });
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(252);
 /* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(read_pkg__WEBPACK_IMPORTED_MODULE_0__);
@@ -23069,6 +23117,7 @@ const createProductionPackageJson = pkgJson => _objectSpread(_objectSpread({}, p
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
+const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel/bin/');
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
  * dependencies, these `file:` dependencies will be copied into `node_modules`
@@ -23077,6 +23126,10 @@ const isLinkDependency = depVersion => depVersion.startsWith('link:');
  * This will allow us to copy packages into the build and run `yarn`, which
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
+ *
+ * Additionally it also taken care of replacing `link:bazel/bin/` with
+ * `file:` so we can also support the copy of the Bazel packages dist already into
+ * build/packages to be copied into the node_modules
  */
 
 function transformDependencies(dependencies = {}) {
@@ -23085,11 +23138,17 @@ function transformDependencies(dependencies = {}) {
   for (const name of Object.keys(dependencies)) {
     const depVersion = dependencies[name];
 
-    if (isLinkDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:', 'file:');
-    } else {
+    if (!isLinkDependency(depVersion)) {
       newDeps[name] = depVersion;
+      continue;
     }
+
+    if (isBazelPackageDependency(depVersion)) {
+      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
+      continue;
+    }
+
+    newDeps[name] = depVersion.replace('link:', 'file:');
   }
 
   return newDeps;
@@ -59682,8 +59741,11 @@ function getProjectPaths({
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(520);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
+/* harmony import */ var _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(520);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return _build_bazel_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildBazelProductionProjects"]; });
+
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(745);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_1__["buildNonBazelProductionProjects"]; });
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -59694,20 +59756,21 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
+
 /***/ }),
 /* 520 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return buildProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildBazelProductionProjects", function() { return buildBazelProductionProjects; });
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(521);
 /* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
-/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var globby__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(737);
+/* harmony import */ var globby__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(globby__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(518);
+/* harmony import */ var _build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(745);
 /* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
 /* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
@@ -59727,95 +59790,40 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function buildProductionProjects({
+async function buildBazelProductionProjects({
   kibanaRoot,
   buildRoot,
   onlyOSS
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
-  const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
-  const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getBazelProjectsOnly"])(await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["getProductionProjects"])(kibanaRoot, onlyOSS));
   const projectNames = [...projects.values()].map(project => project.name);
-  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing production build for [${projectNames.join(', ')}]`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
-  for (const batch of batchedProjects) {
-    for (const project of batch) {
-      await deleteTarget(project);
-      await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
-    }
+  for (const project of projects.values()) {
+    await Object(_build_non_bazel_production_projects__WEBPACK_IMPORTED_MODULE_3__["buildProject"])(project);
+    await copyToBuild(project, kibanaRoot, buildRoot);
+    await applyCorrectPermissions(project, kibanaRoot, buildRoot);
   }
 }
 /**
- * Returns the subset of projects that should be built into the production
- * bundle. As we copy these into Kibana's `node_modules` during the build step,
- * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies. If onlyOSS
- * is supplied, we omit projects with build.oss in their package.json set to false.
- */
-
-async function getProductionProjects(rootPath, onlyOSS) {
-  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])({
-    rootPath
-  });
-  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
-  const projectsSubset = [projects.get('kibana')];
-
-  if (projects.has('x-pack')) {
-    projectsSubset.push(projects.get('x-pack'));
-  }
-
-  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
-    onlyProductionDependencies: true
-  }); // We remove Kibana, as we're already building Kibana
-
-  productionProjects.delete('kibana');
-
-  if (onlyOSS) {
-    productionProjects.forEach(project => {
-      if (project.getBuildConfig().oss === false) {
-        productionProjects.delete(project.json.name);
-      }
-    });
-  }
-
-  return productionProjects;
-}
-
-async function deleteTarget(project) {
-  const targetDir = project.targetLocation;
-
-  if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(targetDir)) {
-    await del__WEBPACK_IMPORTED_MODULE_1___default()(targetDir, {
-      force: true
-    });
-  }
-}
-
-async function buildProject(project) {
-  if (project.hasScript('build')) {
-    await project.runScript('build');
-  }
-}
-/**
- * Copy all the project's files from its "intermediate build directory" and
- * into the build. The intermediate directory can either be the root of the
- * project or some other location defined in the project's `package.json`.
+ * Copy all the project's files from its Bazel dist directory into the
+ * project build folder.
  *
  * When copying all the files into the build, we exclude `node_modules` because
  * we want the Kibana build to be responsible for actually installing all
  * dependencies. The primary reason for allowing the Kibana build process to
  * manage dependencies is that it will "dedupe" them, so we don't include
- * unnecessary copies of dependencies.
+ * unnecessary copies of dependencies. We also exclude every related Bazel build
+ * files in order to get the most cleaner package module we can in the final distributable.
  */
-
 
 async function copyToBuild(project, kibanaRoot, buildRoot) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
-  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
-    cwd: project.getIntermediateBuildDirectory(),
+  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -59830,6 +59838,28 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
   const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["createProductionPackageJson"])(packageJson);
   await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, preparedPackageJson);
+}
+
+async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
+  const allPluginPaths = await globby__WEBPACK_IMPORTED_MODULE_1___default()([`**/*`], {
+    onlyFiles: false,
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath)),
+    dot: true
+  });
+
+  for (const pluginPath of allPluginPaths) {
+    const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, pluginPath);
+
+    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(resolvedPluginPath)) {
+      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["chmod"])(resolvedPluginPath, 0o644);
+    }
+
+    if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(resolvedPluginPath)) {
+      await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["chmod"])(resolvedPluginPath, 0o755);
+    }
+  }
 }
 
 /***/ }),
@@ -87340,6 +87370,1042 @@ class CpyError extends NestedError {
 
 module.exports = CpyError;
 
+
+/***/ }),
+/* 737 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const arrayUnion = __webpack_require__(526);
+const glob = __webpack_require__(147);
+const fastGlob = __webpack_require__(528);
+const dirGlob = __webpack_require__(738);
+const gitignore = __webpack_require__(742);
+
+const DEFAULT_FILTER = () => false;
+
+const isNegative = pattern => pattern[0] === '!';
+
+const assertPatternsInput = patterns => {
+	if (!patterns.every(x => typeof x === 'string')) {
+		throw new TypeError('Patterns must be a string or an array of strings');
+	}
+};
+
+const generateGlobTasks = (patterns, taskOpts) => {
+	patterns = [].concat(patterns);
+	assertPatternsInput(patterns);
+
+	const globTasks = [];
+
+	taskOpts = Object.assign({
+		ignore: [],
+		expandDirectories: true
+	}, taskOpts);
+
+	patterns.forEach((pattern, i) => {
+		if (isNegative(pattern)) {
+			return;
+		}
+
+		const ignore = patterns
+			.slice(i)
+			.filter(isNegative)
+			.map(pattern => pattern.slice(1));
+
+		const opts = Object.assign({}, taskOpts, {
+			ignore: taskOpts.ignore.concat(ignore)
+		});
+
+		globTasks.push({pattern, opts});
+	});
+
+	return globTasks;
+};
+
+const globDirs = (task, fn) => {
+	let opts = {cwd: task.opts.cwd};
+
+	if (Array.isArray(task.opts.expandDirectories)) {
+		opts = Object.assign(opts, {files: task.opts.expandDirectories});
+	} else if (typeof task.opts.expandDirectories === 'object') {
+		opts = Object.assign(opts, task.opts.expandDirectories);
+	}
+
+	return fn(task.pattern, opts);
+};
+
+const getPattern = (task, fn) => task.opts.expandDirectories ? globDirs(task, fn) : [task.pattern];
+
+module.exports = (patterns, opts) => {
+	let globTasks;
+
+	try {
+		globTasks = generateGlobTasks(patterns, opts);
+	} catch (err) {
+		return Promise.reject(err);
+	}
+
+	const getTasks = Promise.all(globTasks.map(task => Promise.resolve(getPattern(task, dirGlob))
+		.then(globs => Promise.all(globs.map(glob => ({
+			pattern: glob,
+			opts: task.opts
+		}))))
+	))
+		.then(tasks => arrayUnion.apply(null, tasks));
+
+	const getFilter = () => {
+		return Promise.resolve(
+			opts && opts.gitignore ?
+				gitignore({cwd: opts.cwd, ignore: opts.ignore}) :
+				DEFAULT_FILTER
+		);
+	};
+
+	return getFilter()
+		.then(filter => {
+			return getTasks
+				.then(tasks => Promise.all(tasks.map(task => fastGlob(task.pattern, task.opts))))
+				.then(paths => arrayUnion.apply(null, paths))
+				.then(paths => paths.filter(p => !filter(p)));
+		});
+};
+
+module.exports.sync = (patterns, opts) => {
+	const globTasks = generateGlobTasks(patterns, opts);
+
+	const getFilter = () => {
+		return opts && opts.gitignore ?
+			gitignore.sync({cwd: opts.cwd, ignore: opts.ignore}) :
+			DEFAULT_FILTER;
+	};
+
+	const tasks = globTasks.reduce((tasks, task) => {
+		const newTask = getPattern(task, dirGlob.sync).map(glob => ({
+			pattern: glob,
+			opts: task.opts
+		}));
+		return tasks.concat(newTask);
+	}, []);
+
+	const filter = getFilter();
+
+	return tasks.reduce(
+		(matches, task) => arrayUnion(matches, fastGlob.sync(task.pattern, task.opts)),
+		[]
+	).filter(p => !filter(p));
+};
+
+module.exports.generateGlobTasks = generateGlobTasks;
+
+module.exports.hasMagic = (patterns, opts) => []
+	.concat(patterns)
+	.some(pattern => glob.hasMagic(pattern, opts));
+
+module.exports.gitignore = gitignore;
+
+
+/***/ }),
+/* 738 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(4);
+const arrify = __webpack_require__(739);
+const pathType = __webpack_require__(740);
+
+const getExtensions = extensions => extensions.length > 1 ? `{${extensions.join(',')}}` : extensions[0];
+const getPath = filepath => filepath[0] === '!' ? filepath.slice(1) : filepath;
+
+const addExtensions = (file, extensions) => {
+	if (path.extname(file)) {
+		return `**/${file}`;
+	}
+
+	return `**/${file}.${getExtensions(extensions)}`;
+};
+
+const getGlob = (dir, opts) => {
+	opts = Object.assign({}, opts);
+
+	if (opts.files && !Array.isArray(opts.files)) {
+		throw new TypeError(`\`options.files\` must be an \`Array\`, not \`${typeof opts.files}\``);
+	}
+
+	if (opts.extensions && !Array.isArray(opts.extensions)) {
+		throw new TypeError(`\`options.extensions\` must be an \`Array\`, not \`${typeof opts.extensions}\``);
+	}
+
+	if (opts.files && opts.extensions) {
+		return opts.files.map(x => path.join(dir, addExtensions(x, opts.extensions)));
+	} else if (opts.files) {
+		return opts.files.map(x => path.join(dir, `**/${x}`));
+	} else if (opts.extensions) {
+		return [path.join(dir, `**/*.${getExtensions(opts.extensions)}`)];
+	}
+
+	return [path.join(dir, '**')];
+};
+
+module.exports = (input, opts) => {
+	return Promise.all(arrify(input).map(x => pathType.dir(getPath(x))
+		.then(isDir => isDir ? getGlob(x, opts) : x)))
+		.then(globs => [].concat.apply([], globs));
+};
+
+module.exports.sync = (input, opts) => {
+	const globs = arrify(input).map(x => pathType.dirSync(getPath(x)) ? getGlob(x, opts) : x);
+	return [].concat.apply([], globs);
+};
+
+
+/***/ }),
+/* 739 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+module.exports = function (val) {
+	if (val === null || val === undefined) {
+		return [];
+	}
+
+	return Array.isArray(val) ? val : [val];
+};
+
+
+/***/ }),
+/* 740 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(134);
+const pify = __webpack_require__(741);
+
+function type(fn, fn2, fp) {
+	if (typeof fp !== 'string') {
+		return Promise.reject(new TypeError(`Expected a string, got ${typeof fp}`));
+	}
+
+	return pify(fs[fn])(fp)
+		.then(stats => stats[fn2]())
+		.catch(err => {
+			if (err.code === 'ENOENT') {
+				return false;
+			}
+
+			throw err;
+		});
+}
+
+function typeSync(fn, fn2, fp) {
+	if (typeof fp !== 'string') {
+		throw new TypeError(`Expected a string, got ${typeof fp}`);
+	}
+
+	try {
+		return fs[fn](fp)[fn2]();
+	} catch (err) {
+		if (err.code === 'ENOENT') {
+			return false;
+		}
+
+		throw err;
+	}
+}
+
+exports.file = type.bind(null, 'stat', 'isFile');
+exports.dir = type.bind(null, 'stat', 'isDirectory');
+exports.symlink = type.bind(null, 'lstat', 'isSymbolicLink');
+exports.fileSync = typeSync.bind(null, 'statSync', 'isFile');
+exports.dirSync = typeSync.bind(null, 'statSync', 'isDirectory');
+exports.symlinkSync = typeSync.bind(null, 'lstatSync', 'isSymbolicLink');
+
+
+/***/ }),
+/* 741 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const processFn = (fn, opts) => function () {
+	const P = opts.promiseModule;
+	const args = new Array(arguments.length);
+
+	for (let i = 0; i < arguments.length; i++) {
+		args[i] = arguments[i];
+	}
+
+	return new P((resolve, reject) => {
+		if (opts.errorFirst) {
+			args.push(function (err, result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 1; i < arguments.length; i++) {
+						results[i - 1] = arguments[i];
+					}
+
+					if (err) {
+						results.unshift(err);
+						reject(results);
+					} else {
+						resolve(results);
+					}
+				} else if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		} else {
+			args.push(function (result) {
+				if (opts.multiArgs) {
+					const results = new Array(arguments.length - 1);
+
+					for (let i = 0; i < arguments.length; i++) {
+						results[i] = arguments[i];
+					}
+
+					resolve(results);
+				} else {
+					resolve(result);
+				}
+			});
+		}
+
+		fn.apply(this, args);
+	});
+};
+
+module.exports = (obj, opts) => {
+	opts = Object.assign({
+		exclude: [/.+(Sync|Stream)$/],
+		errorFirst: true,
+		promiseModule: Promise
+	}, opts);
+
+	const filter = key => {
+		const match = pattern => typeof pattern === 'string' ? key === pattern : pattern.test(key);
+		return opts.include ? opts.include.some(match) : !opts.exclude.some(match);
+	};
+
+	let ret;
+	if (typeof obj === 'function') {
+		ret = function () {
+			if (opts.excludeMain) {
+				return obj.apply(this, arguments);
+			}
+
+			return processFn(obj, opts).apply(this, arguments);
+		};
+	} else {
+		ret = Object.create(Object.getPrototypeOf(obj));
+	}
+
+	for (const key in obj) { // eslint-disable-line guard-for-in
+		const x = obj[key];
+		ret[key] = typeof x === 'function' && filter(key) ? processFn(x, opts) : x;
+	}
+
+	return ret;
+};
+
+
+/***/ }),
+/* 742 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(134);
+const path = __webpack_require__(4);
+const fastGlob = __webpack_require__(528);
+const gitIgnore = __webpack_require__(743);
+const pify = __webpack_require__(741);
+const slash = __webpack_require__(744);
+
+const DEFAULT_IGNORE = [
+	'**/node_modules/**',
+	'**/bower_components/**',
+	'**/flow-typed/**',
+	'**/coverage/**',
+	'**/.git'
+];
+
+const readFileP = pify(fs.readFile);
+
+const mapGitIgnorePatternTo = base => ignore => {
+	if (ignore.startsWith('!')) {
+		return '!' + path.posix.join(base, ignore.substr(1));
+	}
+
+	return path.posix.join(base, ignore);
+};
+
+const parseGitIgnore = (content, opts) => {
+	const base = slash(path.relative(opts.cwd, path.dirname(opts.fileName)));
+
+	return content
+		.split(/\r?\n/)
+		.filter(Boolean)
+		.filter(l => l.charAt(0) !== '#')
+		.map(mapGitIgnorePatternTo(base));
+};
+
+const reduceIgnore = files => {
+	return files.reduce((ignores, file) => {
+		ignores.add(parseGitIgnore(file.content, {
+			cwd: file.cwd,
+			fileName: file.filePath
+		}));
+		return ignores;
+	}, gitIgnore());
+};
+
+const getIsIgnoredPredecate = (ignores, cwd) => {
+	return p => ignores.ignores(slash(path.relative(cwd, p)));
+};
+
+const getFile = (file, cwd) => {
+	const filePath = path.join(cwd, file);
+	return readFileP(filePath, 'utf8')
+		.then(content => ({
+			content,
+			cwd,
+			filePath
+		}));
+};
+
+const getFileSync = (file, cwd) => {
+	const filePath = path.join(cwd, file);
+	const content = fs.readFileSync(filePath, 'utf8');
+
+	return {
+		content,
+		cwd,
+		filePath
+	};
+};
+
+const normalizeOpts = opts => {
+	opts = opts || {};
+	const ignore = opts.ignore || [];
+	const cwd = opts.cwd || process.cwd();
+	return {ignore, cwd};
+};
+
+module.exports = o => {
+	const opts = normalizeOpts(o);
+
+	return fastGlob('**/.gitignore', {ignore: DEFAULT_IGNORE.concat(opts.ignore), cwd: opts.cwd})
+		.then(paths => Promise.all(paths.map(file => getFile(file, opts.cwd))))
+		.then(files => reduceIgnore(files))
+		.then(ignores => getIsIgnoredPredecate(ignores, opts.cwd));
+};
+
+module.exports.sync = o => {
+	const opts = normalizeOpts(o);
+
+	const paths = fastGlob.sync('**/.gitignore', {ignore: DEFAULT_IGNORE.concat(opts.ignore), cwd: opts.cwd});
+	const files = paths.map(file => getFileSync(file, opts.cwd));
+	const ignores = reduceIgnore(files);
+	return getIsIgnoredPredecate(ignores, opts.cwd);
+};
+
+
+/***/ }),
+/* 743 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+module.exports = function () {
+  return new IgnoreBase();
+};
+
+// A simple implementation of make-array
+function make_array(subject) {
+  return Array.isArray(subject) ? subject : [subject];
+}
+
+var REGEX_BLANK_LINE = /^\s+$/;
+var REGEX_LEADING_EXCAPED_EXCLAMATION = /^\\\!/;
+var REGEX_LEADING_EXCAPED_HASH = /^\\#/;
+var SLASH = '/';
+var KEY_IGNORE = typeof Symbol !== 'undefined' ? Symbol.for('node-ignore')
+/* istanbul ignore next */
+: 'node-ignore';
+
+var IgnoreBase = function () {
+  function IgnoreBase() {
+    _classCallCheck(this, IgnoreBase);
+
+    this._rules = [];
+    this[KEY_IGNORE] = true;
+    this._initCache();
+  }
+
+  _createClass(IgnoreBase, [{
+    key: '_initCache',
+    value: function _initCache() {
+      this._cache = {};
+    }
+
+    // @param {Array.<string>|string|Ignore} pattern
+
+  }, {
+    key: 'add',
+    value: function add(pattern) {
+      this._added = false;
+
+      if (typeof pattern === 'string') {
+        pattern = pattern.split(/\r?\n/g);
+      }
+
+      make_array(pattern).forEach(this._addPattern, this);
+
+      // Some rules have just added to the ignore,
+      // making the behavior changed.
+      if (this._added) {
+        this._initCache();
+      }
+
+      return this;
+    }
+
+    // legacy
+
+  }, {
+    key: 'addPattern',
+    value: function addPattern(pattern) {
+      return this.add(pattern);
+    }
+  }, {
+    key: '_addPattern',
+    value: function _addPattern(pattern) {
+      // #32
+      if (pattern && pattern[KEY_IGNORE]) {
+        this._rules = this._rules.concat(pattern._rules);
+        this._added = true;
+        return;
+      }
+
+      if (this._checkPattern(pattern)) {
+        var rule = this._createRule(pattern);
+        this._added = true;
+        this._rules.push(rule);
+      }
+    }
+  }, {
+    key: '_checkPattern',
+    value: function _checkPattern(pattern) {
+      // > A blank line matches no files, so it can serve as a separator for readability.
+      return pattern && typeof pattern === 'string' && !REGEX_BLANK_LINE.test(pattern)
+
+      // > A line starting with # serves as a comment.
+      && pattern.indexOf('#') !== 0;
+    }
+  }, {
+    key: 'filter',
+    value: function filter(paths) {
+      var _this = this;
+
+      return make_array(paths).filter(function (path) {
+        return _this._filter(path);
+      });
+    }
+  }, {
+    key: 'createFilter',
+    value: function createFilter() {
+      var _this2 = this;
+
+      return function (path) {
+        return _this2._filter(path);
+      };
+    }
+  }, {
+    key: 'ignores',
+    value: function ignores(path) {
+      return !this._filter(path);
+    }
+  }, {
+    key: '_createRule',
+    value: function _createRule(pattern) {
+      var origin = pattern;
+      var negative = false;
+
+      // > An optional prefix "!" which negates the pattern;
+      if (pattern.indexOf('!') === 0) {
+        negative = true;
+        pattern = pattern.substr(1);
+      }
+
+      pattern = pattern
+      // > Put a backslash ("\") in front of the first "!" for patterns that begin with a literal "!", for example, `"\!important!.txt"`.
+      .replace(REGEX_LEADING_EXCAPED_EXCLAMATION, '!')
+      // > Put a backslash ("\") in front of the first hash for patterns that begin with a hash.
+      .replace(REGEX_LEADING_EXCAPED_HASH, '#');
+
+      var regex = make_regex(pattern, negative);
+
+      return {
+        origin: origin,
+        pattern: pattern,
+        negative: negative,
+        regex: regex
+      };
+    }
+
+    // @returns `Boolean` true if the `path` is NOT ignored
+
+  }, {
+    key: '_filter',
+    value: function _filter(path, slices) {
+      if (!path) {
+        return false;
+      }
+
+      if (path in this._cache) {
+        return this._cache[path];
+      }
+
+      if (!slices) {
+        // path/to/a.js
+        // ['path', 'to', 'a.js']
+        slices = path.split(SLASH);
+      }
+
+      slices.pop();
+
+      return this._cache[path] = slices.length
+      // > It is not possible to re-include a file if a parent directory of that file is excluded.
+      // If the path contains a parent directory, check the parent first
+      ? this._filter(slices.join(SLASH) + SLASH, slices) && this._test(path)
+
+      // Or only test the path
+      : this._test(path);
+    }
+
+    // @returns {Boolean} true if a file is NOT ignored
+
+  }, {
+    key: '_test',
+    value: function _test(path) {
+      // Explicitly define variable type by setting matched to `0`
+      var matched = 0;
+
+      this._rules.forEach(function (rule) {
+        // if matched = true, then we only test negative rules
+        // if matched = false, then we test non-negative rules
+        if (!(matched ^ rule.negative)) {
+          matched = rule.negative ^ rule.regex.test(path);
+        }
+      });
+
+      return !matched;
+    }
+  }]);
+
+  return IgnoreBase;
+}();
+
+// > If the pattern ends with a slash,
+// > it is removed for the purpose of the following description,
+// > but it would only find a match with a directory.
+// > In other words, foo/ will match a directory foo and paths underneath it,
+// > but will not match a regular file or a symbolic link foo
+// >  (this is consistent with the way how pathspec works in general in Git).
+// '`foo/`' will not match regular file '`foo`' or symbolic link '`foo`'
+// -> ignore-rules will not deal with it, because it costs extra `fs.stat` call
+//      you could use option `mark: true` with `glob`
+
+// '`foo/`' should not continue with the '`..`'
+
+
+var DEFAULT_REPLACER_PREFIX = [
+
+// > Trailing spaces are ignored unless they are quoted with backslash ("\")
+[
+// (a\ ) -> (a )
+// (a  ) -> (a)
+// (a \ ) -> (a  )
+/\\?\s+$/, function (match) {
+  return match.indexOf('\\') === 0 ? ' ' : '';
+}],
+
+// replace (\ ) with ' '
+[/\\\s/g, function () {
+  return ' ';
+}],
+
+// Escape metacharacters
+// which is written down by users but means special for regular expressions.
+
+// > There are 12 characters with special meanings:
+// > - the backslash \,
+// > - the caret ^,
+// > - the dollar sign $,
+// > - the period or dot .,
+// > - the vertical bar or pipe symbol |,
+// > - the question mark ?,
+// > - the asterisk or star *,
+// > - the plus sign +,
+// > - the opening parenthesis (,
+// > - the closing parenthesis ),
+// > - and the opening square bracket [,
+// > - the opening curly brace {,
+// > These special characters are often called "metacharacters".
+[/[\\\^$.|?*+()\[{]/g, function (match) {
+  return '\\' + match;
+}],
+
+// leading slash
+[
+
+// > A leading slash matches the beginning of the pathname.
+// > For example, "/*.c" matches "cat-file.c" but not "mozilla-sha1/sha1.c".
+// A leading slash matches the beginning of the pathname
+/^\//, function () {
+  return '^';
+}],
+
+// replace special metacharacter slash after the leading slash
+[/\//g, function () {
+  return '\\/';
+}], [
+// > A leading "**" followed by a slash means match in all directories.
+// > For example, "**/foo" matches file or directory "foo" anywhere,
+// > the same as pattern "foo".
+// > "**/foo/bar" matches file or directory "bar" anywhere that is directly under directory "foo".
+// Notice that the '*'s have been replaced as '\\*'
+/^\^*\\\*\\\*\\\//,
+
+// '**/foo' <-> 'foo'
+function () {
+  return '^(?:.*\\/)?';
+}]];
+
+var DEFAULT_REPLACER_SUFFIX = [
+// starting
+[
+// there will be no leading '/' (which has been replaced by section "leading slash")
+// If starts with '**', adding a '^' to the regular expression also works
+/^(?=[^\^])/, function () {
+  return !/\/(?!$)/.test(this)
+  // > If the pattern does not contain a slash /, Git treats it as a shell glob pattern
+  // Actually, if there is only a trailing slash, git also treats it as a shell glob pattern
+  ? '(?:^|\\/)'
+
+  // > Otherwise, Git treats the pattern as a shell glob suitable for consumption by fnmatch(3)
+  : '^';
+}],
+
+// two globstars
+[
+// Use lookahead assertions so that we could match more than one `'/**'`
+/\\\/\\\*\\\*(?=\\\/|$)/g,
+
+// Zero, one or several directories
+// should not use '*', or it will be replaced by the next replacer
+
+// Check if it is not the last `'/**'`
+function (match, index, str) {
+  return index + 6 < str.length
+
+  // case: /**/
+  // > A slash followed by two consecutive asterisks then a slash matches zero or more directories.
+  // > For example, "a/**/b" matches "a/b", "a/x/b", "a/x/y/b" and so on.
+  // '/**/'
+  ? '(?:\\/[^\\/]+)*'
+
+  // case: /**
+  // > A trailing `"/**"` matches everything inside.
+
+  // #21: everything inside but it should not include the current folder
+  : '\\/.+';
+}],
+
+// intermediate wildcards
+[
+// Never replace escaped '*'
+// ignore rule '\*' will match the path '*'
+
+// 'abc.*/' -> go
+// 'abc.*'  -> skip this rule
+/(^|[^\\]+)\\\*(?=.+)/g,
+
+// '*.js' matches '.js'
+// '*.js' doesn't match 'abc'
+function (match, p1) {
+  return p1 + '[^\\/]*';
+}],
+
+// trailing wildcard
+[/(\^|\\\/)?\\\*$/, function (match, p1) {
+  return (p1
+  // '\^':
+  // '/*' does not match ''
+  // '/*' does not match everything
+
+  // '\\\/':
+  // 'abc/*' does not match 'abc/'
+  ? p1 + '[^/]+'
+
+  // 'a*' matches 'a'
+  // 'a*' matches 'aa'
+  : '[^/]*') + '(?=$|\\/$)';
+}], [
+// unescape
+/\\\\\\/g, function () {
+  return '\\';
+}]];
+
+var POSITIVE_REPLACERS = [].concat(DEFAULT_REPLACER_PREFIX, [
+
+// 'f'
+// matches
+// - /f(end)
+// - /f/
+// - (start)f(end)
+// - (start)f/
+// doesn't match
+// - oof
+// - foo
+// pseudo:
+// -> (^|/)f(/|$)
+
+// ending
+[
+// 'js' will not match 'js.'
+// 'ab' will not match 'abc'
+/(?:[^*\/])$/,
+
+// 'js*' will not match 'a.js'
+// 'js/' will not match 'a.js'
+// 'js' will match 'a.js' and 'a.js/'
+function (match) {
+  return match + '(?=$|\\/)';
+}]], DEFAULT_REPLACER_SUFFIX);
+
+var NEGATIVE_REPLACERS = [].concat(DEFAULT_REPLACER_PREFIX, [
+
+// #24, #38
+// The MISSING rule of [gitignore docs](https://git-scm.com/docs/gitignore)
+// A negative pattern without a trailing wildcard should not
+// re-include the things inside that directory.
+
+// eg:
+// ['node_modules/*', '!node_modules']
+// should ignore `node_modules/a.js`
+[/(?:[^*])$/, function (match) {
+  return match + '(?=$|\\/$)';
+}]], DEFAULT_REPLACER_SUFFIX);
+
+// A simple cache, because an ignore rule only has only one certain meaning
+var cache = {};
+
+// @param {pattern}
+function make_regex(pattern, negative) {
+  var r = cache[pattern];
+  if (r) {
+    return r;
+  }
+
+  var replacers = negative ? NEGATIVE_REPLACERS : POSITIVE_REPLACERS;
+
+  var source = replacers.reduce(function (prev, current) {
+    return prev.replace(current[0], current[1].bind(pattern));
+  }, pattern);
+
+  return cache[pattern] = new RegExp(source, 'i');
+}
+
+// Windows
+// --------------------------------------------------------------
+/* istanbul ignore if  */
+if (
+// Detect `process` so that it can run in browsers.
+typeof process !== 'undefined' && (process.env && process.env.IGNORE_TEST_WIN32 || process.platform === 'win32')) {
+
+  var filter = IgnoreBase.prototype._filter;
+  var make_posix = function make_posix(str) {
+    return (/^\\\\\?\\/.test(str) || /[^\x00-\x80]+/.test(str) ? str : str.replace(/\\/g, '/')
+    );
+  };
+
+  IgnoreBase.prototype._filter = function (path, slices) {
+    path = make_posix(path);
+    return filter.call(this, path, slices);
+  };
+}
+
+
+/***/ }),
+/* 744 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+module.exports = function (str) {
+	var isExtendedLengthPath = /^\\\\\?\\/.test(str);
+	var hasNonAscii = /[^\x00-\x80]+/.test(str);
+
+	if (isExtendedLengthPath || hasNonAscii) {
+		return str;
+	}
+
+	return str.replace(/\\/g, '/');
+};
+
+
+/***/ }),
+/* 745 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildNonBazelProductionProjects", function() { return buildNonBazelProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getProductionProjects", function() { return getProductionProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProject", function() { return buildProject; });
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(521);
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(518);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(246);
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(251);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(248);
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+
+
+
+
+
+
+
+async function buildNonBazelProductionProjects({
+  kibanaRoot,
+  buildRoot,
+  onlyOSS
+}) {
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getNonBazelProjectsOnly"])(await getProductionProjects(kibanaRoot, onlyOSS));
+  const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
+  const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
+  const projectNames = [...projects.values()].map(project => project.name);
+  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].info(`Preparing non Bazel production build for [${projectNames.join(', ')}]`);
+
+  for (const batch of batchedProjects) {
+    for (const project of batch) {
+      await deleteTarget(project);
+      await buildProject(project);
+      await copyToBuild(project, kibanaRoot, buildRoot);
+    }
+  }
+}
+/**
+ * Returns the subset of projects that should be built into the production
+ * bundle. As we copy these into Kibana's `node_modules` during the build step,
+ * and let Kibana's build process be responsible for installing dependencies,
+ * we only include Kibana's transitive _production_ dependencies. If onlyOSS
+ * is supplied, we omit projects with build.oss in their package.json set to false.
+ */
+
+async function getProductionProjects(rootPath, onlyOSS) {
+  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])({
+    rootPath
+  });
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
+  const projectsSubset = [projects.get('kibana')];
+
+  if (projects.has('x-pack')) {
+    projectsSubset.push(projects.get('x-pack'));
+  }
+
+  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
+    onlyProductionDependencies: true
+  }); // We remove Kibana, as we're already building Kibana
+
+  productionProjects.delete('kibana');
+
+  if (onlyOSS) {
+    productionProjects.forEach(project => {
+      if (project.getBuildConfig().oss === false) {
+        productionProjects.delete(project.json.name);
+      }
+    });
+  }
+
+  return productionProjects;
+}
+
+async function deleteTarget(project) {
+  const targetDir = project.targetLocation;
+
+  if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(targetDir)) {
+    await del__WEBPACK_IMPORTED_MODULE_1___default()(targetDir, {
+      force: true
+    });
+  }
+}
+
+async function buildProject(project) {
+  if (project.hasScript('build')) {
+    await project.runScript('build');
+  }
+}
+/**
+ * Copy all the project's files from its "intermediate build directory" and
+ * into the build. The intermediate directory can either be the root of the
+ * project or some other location defined in the project's `package.json`.
+ *
+ * When copying all the files into the build, we exclude `node_modules` because
+ * we want the Kibana build to be responsible for actually installing all
+ * dependencies. The primary reason for allowing the Kibana build process to
+ * manage dependencies is that it will "dedupe" them, so we don't include
+ * unnecessary copies of dependencies.
+ */
+
+async function copyToBuild(project, kibanaRoot, buildRoot) {
+  // We want the package to have the same relative location within the build
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getIntermediateBuildDirectory(),
+    dot: true,
+    onlyFiles: true,
+    parents: true
+  }); // If a project is using an intermediate build directory, we special-case our
+  // handling of `package.json`, as the project build process might have copied
+  // (a potentially modified) `package.json` into the intermediate build
+  // directory already. If so, we want to use that `package.json` as the basis
+  // for creating the production-ready `package.json`. If it's not present in
+  // the intermediate build, we fall back to using the project's already defined
+  // `package.json`.
+
+  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
+  const preparedPackageJson = Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["createProductionPackageJson"])(packageJson);
+  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, preparedPackageJson);
+}
 
 /***/ })
 /******/ ]);

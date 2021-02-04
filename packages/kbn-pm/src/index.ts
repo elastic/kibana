@@ -7,7 +7,7 @@
  */
 
 export { run } from './cli';
-export { buildProductionProjects } from './production';
+export { buildBazelProductionProjects, buildNonBazelProductionProjects } from './production';
 export { getProjects } from './utils/projects';
 export { Project } from './utils/project';
 export { transformDependencies } from './utils/package_json';

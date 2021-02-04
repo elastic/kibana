@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { buildProductionProjects } from './build_production_projects';
+export { buildBazelProductionProjects } from './build_bazel_production_projects';
+export { buildNonBazelProductionProjects } from './build_non_bazel_production_projects';
