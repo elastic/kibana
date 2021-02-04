@@ -444,7 +444,6 @@ Platform::
 Querying & Filtering::
 * KQL autocomplete suggestions for field values will now have backslashes properly escaped {kibana-pull}85457[#85457]
 Security::
-* Audit Logging: use the original url {kibana-pull}81282[#81282]
 * Prevent Kerberos and PKI providers from initiating a new session for unauthenticated XHR/API requests {kibana-pull}82817[#82817]
 * Fixes incomplete client cert chain when using PKI authentication with the login selector {kibana-pull}88229[#88229]
 Uptime::
