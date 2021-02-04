@@ -46,9 +46,11 @@ fi
 echo "GIT_TREE_STATUS ${tree_status}"
 
 # Host
-host=$(hostname | sed 's|\(.*\)-.*|\1|')
-if [[ $? != 0 ]];
-then
-    exit 1
+if [ "$CI" = "true" ]; then
+  host=$(hostname | sed 's|\(.*\)-.*|\1|')
+  if [[ $? != 0 ]];
+  then
+      exit 1
+  fi
+  echo "HOST ${host}"
 fi
-echo "HOST ${host}"
