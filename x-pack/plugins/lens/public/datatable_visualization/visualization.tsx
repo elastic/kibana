@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -220,7 +221,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({ columnId: accessor })),
+            .map((accessor) => ({
+              columnId: accessor,
+              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+            })),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,
