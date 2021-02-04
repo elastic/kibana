@@ -53,7 +53,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       });
 
       it('should reorder the elements for the table', async () => {
-        await PageObjects.lens.reorderDimensions('lnsDatatable_column', 2, 0);
+        await PageObjects.lens.reorderDimensions('lnsDatatable_column', 3, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_column')).to.eql([
           'Top values of @message.raw',
@@ -82,6 +82,55 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql(['Top values of @message.raw']);
+      });
+
+      it('should move the column to non-compatible dimension group', async () => {
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql(['Top values of @message.raw']);
+
+        await PageObjects.lens.dragDimensionToDimension(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger'
+        );
+
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql([]);
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql([]);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Unique count of @message.raw',
+        ]);
+      });
+      it('should duplicate the column when dragging to empty dimension in the same group', async () => {
+        await PageObjects.lens.dragDimensionToDimension(
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_yDimensionPanel > lns-empty-dimension'
+        );
+        await PageObjects.lens.dragDimensionToDimension(
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_yDimensionPanel > lns-empty-dimension'
+        );
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Unique count of @message.raw',
+          'Unique count of @message.raw [1]',
+          'Unique count of @message.raw [2]',
+        ]);
+      });
+      it('should duplicate the column when dragging to empty dimension in the same group', async () => {
+        await PageObjects.lens.dragDimensionToDimension(
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_xDimensionPanel > lns-empty-dimension'
+        );
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Unique count of @message.raw',
+          'Unique count of @message.raw [1]',
+        ]);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
+          'Top values of @message.raw',
+        ]);
       });
     });
 
@@ -114,21 +163,19 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'utc_time',
         ]);
       });
-      // TODO: mouse tests
-      // * duplicating in group
-      // * replacing in non-compatible
-      // * adding in non-compatible
-
-      // TODO: keyboard tests
-      // * moving field to workspace
-      // * moving field to add
-      // * moving field to replace
-      // * duplicating in group
-      // * reordering with keyboard (check if we don't have it)
-      // * moving to compatible
-      // * moving to incompatible
-      // * replacing incompatible
-      // * replacing compatible
     });
   });
 }
+
+// focus element .focus()
+
+// TODO: keyboard tests
+// * moving field to workspace
+// * moving field to add
+// * moving field to replace
+// * duplicating in group
+// * reordering with keyboard (check if we don't have it)
+// * moving to compatible
+// * moving to incompatible
+// * replacing incompatible
+// * replacing compatible

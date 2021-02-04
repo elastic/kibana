@@ -194,16 +194,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Reorder elements within the group
      *
-     * @param startIndex - the index of dragging element
-     * @param endIndex - the index of drop
+     * @param startIndex - the index of dragging element starting from 1
+     * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${
-        startIndex + 1
-      }) .lnsDragDrop`;
-      const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
-        endIndex + 1
-      }) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
