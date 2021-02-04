@@ -231,72 +231,67 @@ export const getMlJobMetrics = async (
         .jobs(jobsType);
 
       const jobDetailsCache = new Map();
-      jobDetails.jobs.forEach((detail) =>
-        jobDetailsCache.set(detail.job_id, detail)
-      );
+      jobDetails.jobs.forEach((detail) => jobDetailsCache.set(detail.job_id, detail));
 
       const datafeedStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .datafeedStats();
 
       const datafeedStatsCache = new Map();
-      datafeedStats.datafeeds.forEach((datafeedStat) => 
+      datafeedStats.datafeeds.forEach((datafeedStat) =>
         datafeedStatsCache.set(`${datafeedStat.datafeed_id}`, datafeedStat)
       );
 
-      return securityJobStats.jobs.map((jobStat) => {
-        const jobId = jobStat.job_id;
-        const jobDetail = jobDetailsCache.get(jobStat.job_id);
-        const datafeedStat = datafeedStatsCache.get(`datafeed-${jobId}`);
+      return securityJobStats.jobs.map((stat) => {
+        const jobId = stat.job_id;
+        const jobDetail = jobDetailsCache.get(stat.job_id);
+        const datafeed = datafeedStatsCache.get(`datafeed-${jobId}`);
 
         return {
           job_id: jobId,
-          open_time: jobStat.open_time,
+          open_time: stat.open_time,
           create_time: jobDetail?.create_time,
           finished_time: jobDetail?.finished_time,
-          state: jobStat.state,
+          state: stat.state,
           data_counts: {
-            bucket_count: jobStat.data_counts.bucket_count,
-            empty_bucket_count: jobStat.data_counts.empty_bucket_count,
-            input_bytes: jobStat.data_counts.input_bytes,
-            input_record_count: jobStat.data_counts.input_record_count,
-            last_data_time: jobStat.data_counts.last_data_time,
-            processed_record_count: jobStat.data_counts.processed_record_count,
+            bucket_count: stat.data_counts.bucket_count,
+            empty_bucket_count: stat.data_counts.empty_bucket_count,
+            input_bytes: stat.data_counts.input_bytes,
+            input_record_count: stat.data_counts.input_record_count,
+            last_data_time: stat.data_counts.last_data_time,
+            processed_record_count: stat.data_counts.processed_record_count,
           },
           model_size_stats: {
             bucket_allocation_failures_count:
-              jobStat.model_size_stats.bucket_allocation_failures_count,
-            memory_status: jobStat.model_size_stats.memory_status,
-            model_bytes: jobStat.model_size_stats.model_bytes,
-            model_bytes_exceeded: jobStat.model_size_stats.model_bytes_exceeded,
-            model_bytes_memory_limit: jobStat.model_size_stats.model_bytes_memory_limit,
-            peak_model_bytes: jobStat.model_size_stats.peak_model_bytes,
+              stat.model_size_stats.bucket_allocation_failures_count,
+            memory_status: stat.model_size_stats.memory_status,
+            model_bytes: stat.model_size_stats.model_bytes,
+            model_bytes_exceeded: stat.model_size_stats.model_bytes_exceeded,
+            model_bytes_memory_limit: stat.model_size_stats.model_bytes_memory_limit,
+            peak_model_bytes: stat.model_size_stats.peak_model_bytes,
           },
           timing_stats: {
-            average_bucket_processing_time_ms:
-              jobStat.timing_stats.average_bucket_processing_time_ms,
-            bucket_count: jobStat.timing_stats.bucket_count,
+            average_bucket_processing_time_ms: stat.timing_stats.average_bucket_processing_time_ms,
+            bucket_count: stat.timing_stats.bucket_count,
             exponential_average_bucket_processing_time_ms:
-              jobStat.timing_stats.exponential_average_bucket_processing_time_ms,
+              stat.timing_stats.exponential_average_bucket_processing_time_ms,
             exponential_average_bucket_processing_time_per_hour_ms:
-              jobStat.timing_stats.exponential_average_bucket_processing_time_per_hour_ms,
-            maximum_bucket_processing_time_ms:
-              jobStat.timing_stats.maximum_bucket_processing_time_ms,
-            minimum_bucket_processing_time_ms:
-              jobStat.timing_stats.minimum_bucket_processing_time_ms,
-            total_bucket_processing_time_ms: jobStat.timing_stats.total_bucket_processing_time_ms,
+              stat.timing_stats.exponential_average_bucket_processing_time_per_hour_ms,
+            maximum_bucket_processing_time_ms: stat.timing_stats.maximum_bucket_processing_time_ms,
+            minimum_bucket_processing_time_ms: stat.timing_stats.minimum_bucket_processing_time_ms,
+            total_bucket_processing_time_ms: stat.timing_stats.total_bucket_processing_time_ms,
           },
           datafeed: {
-            datafeed_id: datafeedStat?.datafeed_id,
-            state: datafeedStat?.state,
+            datafeed_id: datafeed?.datafeed_id,
+            state: datafeed?.state,
             timing_stats: {
               average_search_time_per_bucket_ms:
-                datafeedStat?.timing_stats.average_search_time_per_bucket_ms,
-              bucket_count: datafeedStat?.timing_stats.bucket_count,
+                datafeed?.timing_stats.average_search_time_per_bucket_ms,
+              bucket_count: datafeed?.timing_stats.bucket_count,
               exponential_average_search_time_per_hour_ms:
-                datafeedStat?.timing_stats.exponential_average_search_time_per_hour_ms,
-              search_count: datafeedStat?.timing_stats.search_count,
-              total_search_time_ms: datafeedStat?.timing_stats.total_search_time_ms,
+                datafeed?.timing_stats.exponential_average_search_time_per_hour_ms,
+              search_count: datafeed?.timing_stats.search_count,
+              total_search_time_ms: datafeed?.timing_stats.total_search_time_ms,
             },
           },
         } as MlJobMetric;
