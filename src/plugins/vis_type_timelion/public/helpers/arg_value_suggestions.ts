@@ -7,9 +7,13 @@
  */
 
 import { get } from 'lodash';
-import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
+import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
-import { indexPatterns as indexPatternsUtils, IndexPatternAttributes } from '../../../data/public';
+import {
+  IndexPatternField,
+  indexPatterns as indexPatternsUtils,
+  KBN_FIELD_TYPES,
+} from '../../../data/public';
 
 export interface Location {
   min: number;
@@ -30,9 +34,10 @@ export interface FunctionArg {
   };
 }
 
+const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField);
+
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
-  const savedObjectsClient = getSavedObjectsClient();
 
   async function getIndexPattern(functionArgs: FunctionArg[]) {
     const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
@@ -42,22 +47,9 @@ export function getArgValueSuggestions() {
     }
     const indexPatternTitle = get(indexPatternArg, 'value.text');
 
-    const { savedObjects } = await savedObjectsClient.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['title'],
-      search: `"${indexPatternTitle}"`,
-      searchFields: ['title'],
-      perPage: 10,
-    });
-    const indexPatternSavedObject = savedObjects.find(
-      ({ attributes }) => attributes.title === indexPatternTitle
+    return (await indexPatterns.find(indexPatternTitle)).find(
+      (index) => index.title === indexPatternTitle
     );
-    if (!indexPatternSavedObject) {
-      // index argument does not match an index pattern
-      return;
-    }
-
-    return await indexPatterns.get(indexPatternSavedObject.id);
   }
 
   function containsFieldName(partial: string, field: { name: string }) {
@@ -73,18 +65,11 @@ export function getArgValueSuggestions() {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
-        const resp = await savedObjectsClient.find<IndexPatternAttributes>({
-          type: 'index-pattern',
-          fields: ['title', 'type'],
-          search: `${search}`,
-          searchFields: ['title'],
-          perPage: 25,
-        });
-        return resp.savedObjects
-          .filter((savedObject) => !savedObject.get('type'))
-          .map((savedObject) => {
-            return { name: savedObject.attributes.title };
-          });
+        const size = 25;
+
+        return (await indexPatterns.find(search, size)).map(({ title }) => ({
+          name: title,
+        }));
       },
       async metric(partial: string, functionArgs: FunctionArg[]) {
         if (!partial || !partial.includes(':')) {
@@ -106,18 +91,15 @@ export function getArgValueSuggestions() {
 
         const valueSplit = partial.split(':');
         return indexPattern.fields
-          .getAll()
-          .filter((field) => {
-            return (
+          .getByType(KBN_FIELD_TYPES.NUMBER)
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               field.aggregatable &&
-              'number' === field.type &&
               containsFieldName(valueSplit[1], field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
-          });
+          )
+          .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
       },
       async split(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -127,17 +109,21 @@ export function getArgValueSuggestions() {
 
         return indexPattern.fields
           .getAll()
-          .filter((field) => {
-            return (
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               field.aggregatable &&
-              ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
+              [
+                KBN_FIELD_TYPES.NUMBER,
+                KBN_FIELD_TYPES.BOOLEAN,
+                KBN_FIELD_TYPES.DATE,
+                KBN_FIELD_TYPES.IP,
+                KBN_FIELD_TYPES.STRING,
+              ].includes(field.type as KBN_FIELD_TYPES) &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: field.name, help: field.type };
-          });
+          )
+          .map((field) => ({ name: field.name, help: field.type }));
       },
       async timefield(partial: string, functionArgs: FunctionArg[]) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -146,17 +132,14 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .getAll()
-          .filter((field) => {
-            return (
-              'date' === field.type &&
+          .getByType(KBN_FIELD_TYPES.DATE)
+          .filter(
+            (field) =>
+              !isRuntimeField(field) &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
-            );
-          })
-          .map((field) => {
-            return { name: field.name };
-          });
+          )
+          .map((field) => ({ name: field.name }));
       },
     },
   };

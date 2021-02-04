@@ -23,6 +23,7 @@ import {
   IndexPriorityField,
   ReplicasField,
 } from '../shared_fields';
+
 import { Phase } from '../phase';
 
 const i18nTexts = {

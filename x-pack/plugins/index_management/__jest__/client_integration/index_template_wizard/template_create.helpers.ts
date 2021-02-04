@@ -23,4 +23,4 @@ const initTestBed = registerTestBed<TestSubjects>(
   testBedConfig
 );
 
-export const setup = formSetup.bind(null, initTestBed);
+export const setup: any = formSetup.bind(null, initTestBed);

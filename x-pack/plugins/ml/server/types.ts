@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { HomeServerPluginSetup } from 'src/plugins/home/server';
 import type { IRouter } from 'kibana/server';
 import type { CloudSetup } from '../../cloud/server';
@@ -43,7 +42,6 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
-  usageCollection: UsageCollectionSetup;
 }
 
 export interface PluginsStart {

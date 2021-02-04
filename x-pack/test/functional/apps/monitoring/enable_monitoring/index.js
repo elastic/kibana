@@ -13,8 +13,11 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Monitoring is turned off', function () {
+    // You no longer enable monitoring through Kibana on cloud https://github.com/elastic/kibana/pull/88375
+    this.tags(['skipCloud']);
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
@@ -37,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esSupertest.delete('/.monitoring-*').expect(200);
+      await esDeleteAllIndices('/.monitoring-*');
     });
 
     it('Monitoring enabled', async function () {
