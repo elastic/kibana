@@ -23,10 +23,12 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.loadIfNeeded('pre_calculated_histogram');
     });
     after(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.unload('visualize/default');
+      await esArchiver.unload('pre_calculated_histogram');
     });
 
     describe('field distribution', () => {
@@ -341,6 +343,34 @@ export default ({ getService }: FtrProviderContext) => {
               {
                 count: 10,
                 key: '57.79.108.136',
+              },
+            ],
+          },
+        });
+      });
+
+      it('should return an auto histogram for precalculated histograms', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/test-histogram/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            field: {
+              name: 'histogram-content',
+              type: 'histogram',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          histogram: {
+            buckets: [
+              {
+                count: 100,
+                key: 0,
               },
             ],
           },

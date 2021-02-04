@@ -22,6 +22,7 @@ import { getInvalidFieldMessage } from './operations/definitions/helpers';
  * produce 'number')
  */
 export function normalizeOperationDataType(type: DataType) {
+  if (type === 'histogram') return 'number';
   return type === 'document' ? 'number' : type;
 }
 

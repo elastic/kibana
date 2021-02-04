@@ -32,6 +32,14 @@ const typeToFn: Record<string, string> = {
   median: 'aggMedian',
 };
 
+const typeToSupportedDatatype: Record<string, string[]> = {
+  min: ['number'],
+  max: ['number'],
+  avg: ['number', 'histogram'],
+  sum: ['number', 'histogram'],
+  median: ['number', 'histogram'],
+};
+
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
@@ -61,7 +69,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        fieldType === 'number' &&
+        typeToSupportedDatatype[type].includes(fieldType) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
@@ -77,7 +85,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
       return Boolean(
         newField &&
-          newField.type === 'number' &&
+          typeToSupportedDatatype[type].includes(newField.type) &&
           newField.aggregatable &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );

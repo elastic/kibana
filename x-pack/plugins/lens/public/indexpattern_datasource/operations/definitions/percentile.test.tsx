@@ -68,6 +68,52 @@ describe('percentile', () => {
     };
   });
 
+  describe('getPossibleOperationForField', () => {
+    it('should accept number', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'bytes',
+          displayName: 'bytes',
+          type: 'number',
+          esTypes: ['long'],
+          aggregatable: true,
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+    });
+
+    it('should accept histogram', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'response_time',
+          displayName: 'response_time',
+          type: 'histogram',
+          esTypes: ['histogram'],
+          aggregatable: true,
+        })
+      ).toEqual({
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      });
+    });
+
+    it('should reject keywords', () => {
+      expect(
+        percentileOperation.getPossibleOperationForField({
+          name: 'origin',
+          displayName: 'origin',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+        })
+      ).toBeUndefined();
+    });
+  });
+
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
       const percentileColumn = layer.columns.col2 as PercentileIndexPatternColumn;
@@ -131,6 +177,34 @@ describe('percentile', () => {
       expect(percentileColumn.dataType).toEqual('number');
       expect(percentileColumn.params.percentile).toEqual(95);
       expect(percentileColumn.label).toEqual('95th percentile of test');
+    });
+  });
+
+  describe('isTransferable', () => {
+    it('should transfer from number to histogram', () => {
+      const indexPattern = createMockedIndexPattern();
+      indexPattern.getFieldByName = jest.fn().mockReturnValue({
+        name: 'response_time',
+        displayName: 'response_time',
+        type: 'histogram',
+        esTypes: ['histogram'],
+        aggregatable: true,
+      });
+      expect(
+        percentileOperation.isTransferable(
+          {
+            label: '',
+            sourceField: 'response_time',
+            isBucketed: false,
+            dataType: 'number',
+            operationType: 'percentile',
+            params: {
+              percentile: 95,
+            },
+          },
+          indexPattern
+        )
+      ).toBeTruthy();
     });
   });
 
