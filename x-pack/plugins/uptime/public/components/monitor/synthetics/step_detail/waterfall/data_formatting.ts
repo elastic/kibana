@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -197,7 +198,7 @@ const buildTimingPalette = (): TimingColourPalette => {
   const palette = Object.values(Timings).reduce<Partial<TimingColourPalette>>((acc, value) => {
     switch (value) {
       case Timings.Blocked:
-        acc[value] = SAFE_PALETTE[6];
+        acc[value] = SAFE_PALETTE[16];
         break;
       case Timings.Dns:
         acc[value] = SAFE_PALETTE[0];

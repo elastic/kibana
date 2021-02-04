@@ -1,0 +1,11 @@
+# Inspired on https://github.com/angular/angular/blob/master/.circleci/bazel.common.rc
+# Settings in this file should be OS agnostic
+
+# Don't be spammy in the logs
+build --noshow_progress
+
+# Print all the options that apply to the build.
+build --announce_rc
+
+# More details on failures
+build --verbose_failures=true

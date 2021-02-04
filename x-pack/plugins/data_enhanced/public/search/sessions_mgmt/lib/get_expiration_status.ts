@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { SessionsMgmtConfigSchema } from '../';
+import { SessionsConfigSchema } from '../';
 
-export const getExpirationStatus = (config: SessionsMgmtConfigSchema, expires: string | null) => {
+export const getExpirationStatus = (config: SessionsConfigSchema, expires: string | null) => {
   const tNow = moment.utc().valueOf();
   const tFuture = moment.utc(expires).valueOf();
 
@@ -16,7 +17,7 @@ export const getExpirationStatus = (config: SessionsMgmtConfigSchema, expires: s
   // and the session was early expired when the browser refreshed the listing
   const durationToExpire = moment.duration(tFuture - tNow);
   const expiresInDays = Math.floor(durationToExpire.asDays());
-  const sufficientDays = Math.ceil(moment.duration(config.expiresSoonWarning).asDays());
+  const sufficientDays = Math.ceil(moment.duration(config.management.expiresSoonWarning).asDays());
 
   let toolTipContent = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresSoonInDays', {
     defaultMessage: 'Expires in {numDays} days',

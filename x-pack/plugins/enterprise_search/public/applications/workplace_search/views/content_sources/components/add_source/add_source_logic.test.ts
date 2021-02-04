@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
+  mockKibanaValues,
 } from '../../../../../__mocks__';
 
 import { AppLogic } from '../../../../app_logic';
@@ -16,7 +17,12 @@ jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
+import { SourcesLogic } from '../../sources_logic';
+
+import { nextTick } from '@kbn/test/jest';
+
 import { CustomSource } from '../../../../types';
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
@@ -31,6 +37,7 @@ import {
 describe('AddSourceLogic', () => {
   const { mount } = new LogicMounter(AddSourceLogic);
   const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
 
   const defaultValues = {
@@ -267,27 +274,74 @@ describe('AddSourceLogic', () => {
       });
     });
 
+    describe('saveSourceParams', () => {
+      const params = {
+        code: 'code123',
+        state: '"{"state": "foo"}"',
+        session_state: 'session123',
+      };
+
+      const queryString =
+        'code=code123&state=%22%7B%22state%22%3A%20%22foo%22%7D%22&session_state=session123';
+
+      const response = { serviceName: 'name', indexPermissions: false, serviceType: 'zendesk' };
+
+      beforeEach(() => {
+        SourcesLogic.mount();
+      });
+
+      it('sends params to server and calls correct methods', async () => {
+        const setAddedSourceSpy = jest.spyOn(SourcesLogic.actions, 'setAddedSource');
+        const { serviceName, indexPermissions, serviceType } = response;
+        http.get.mockReturnValue(Promise.resolve(response));
+        AddSourceLogic.actions.saveSourceParams(queryString);
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+          query: {
+            ...params,
+            kibana_host: '',
+          },
+        });
+
+        await nextTick();
+
+        expect(setAddedSourceSpy).toHaveBeenCalledWith(serviceName, indexPermissions, serviceType);
+        expect(navigateToUrl).toHaveBeenCalledWith(
+          getSourcesPath(SOURCES_PATH, AppLogic.values.isOrganization)
+        );
+      });
+
+      it('handles error', async () => {
+        http.get.mockReturnValue(Promise.reject('this is an error'));
+
+        AddSourceLogic.actions.saveSourceParams(queryString);
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        expect(navigateToUrl).toHaveBeenCalledWith(
+          getSourcesPath(SOURCES_PATH, AppLogic.values.isOrganization)
+        );
+      });
+    });
+
     describe('organization context', () => {
       describe('getSourceConfigData', () => {
         it('calls API and sets values', async () => {
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
-          const promise = Promise.resolve(sourceConfigData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConfigData));
 
           AddSourceLogic.actions.getSourceConfigData('github');
           expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/settings/connectors/github'
           );
-          await promise;
+          await nextTick();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceConfigData('github');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -302,36 +356,49 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setSourceConnectData'
           );
-          const promise = Promise.resolve(sourceConnectData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConnectData));
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
 
+          const query = {
+            index_permissions: false,
+            kibana_host: '',
+          };
+
           expect(clearFlashMessages).toHaveBeenCalled();
           expect(AddSourceLogic.values.buttonLoading).toEqual(true);
-          expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/github/prepare');
-          await promise;
+          expect(http.get).toHaveBeenCalledWith(
+            '/api/workplace_search/org/sources/github/prepare',
+            { query }
+          );
+          await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
           expect(successCallback).toHaveBeenCalledWith(sourceConnectData.oauthUrl);
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });
 
-        it('appends query params', () => {
+        it('passes query params', () => {
           AddSourceLogic.actions.setSourceSubdomainValue('subdomain');
           AddSourceLogic.actions.setSourceIndexPermissionsValue(true);
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
 
+          const query = {
+            index_permissions: true,
+            kibana_host: '',
+            subdomain: 'subdomain',
+          };
+
           expect(http.get).toHaveBeenCalledWith(
-            '/api/workplace_search/org/sources/github/prepare?subdomain=subdomain&index_permissions=true'
+            '/api/workplace_search/org/sources/github/prepare',
+            { query }
           );
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -343,24 +410,22 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setSourceConnectData'
           );
-          const promise = Promise.resolve(sourceConnectData);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(sourceConnectData));
 
           AddSourceLogic.actions.getSourceReConnectData('github');
 
           expect(http.get).toHaveBeenCalledWith(
             '/api/workplace_search/org/sources/github/reauth_prepare'
           );
-          await promise;
+          await nextTick();
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getSourceReConnectData('github');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -372,22 +437,20 @@ describe('AddSourceLogic', () => {
             AddSourceLogic.actions,
             'setPreContentSourceConfigData'
           );
-          const promise = Promise.resolve(config);
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.resolve(config));
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
 
           expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
-          await promise;
+          await nextTick();
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.get.mockReturnValue(promise);
+          http.get.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.getPreContentSourceConfigData('123');
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -414,8 +477,7 @@ describe('AddSourceLogic', () => {
           const successCallback = jest.fn();
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setSourceConfigDataSpy = jest.spyOn(AddSourceLogic.actions, 'setSourceConfigData');
-          const promise = Promise.resolve({ sourceConfigData });
-          http.put.mockReturnValue(promise);
+          http.put.mockReturnValue(Promise.resolve({ sourceConfigData }));
 
           AddSourceLogic.actions.saveSourceConfig(true, successCallback);
 
@@ -425,10 +487,10 @@ describe('AddSourceLogic', () => {
             http.put
           ).toHaveBeenCalledWith(
             `/api/workplace_search/org/settings/connectors/${sourceConfigData.serviceType}`,
-            { body: JSON.stringify({ params }) }
+            { body: JSON.stringify(params) }
           );
 
-          await promise;
+          await nextTick();
           expect(successCallback).toHaveBeenCalled();
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
@@ -448,16 +510,15 @@ describe('AddSourceLogic', () => {
           };
 
           expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/settings/connectors', {
-            body: JSON.stringify({ params: createParams }),
+            body: JSON.stringify(createParams),
           });
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.put.mockReturnValue(promise);
+          http.put.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.saveSourceConfig(true);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
@@ -495,8 +556,7 @@ describe('AddSourceLogic', () => {
         it('calls API and sets values', async () => {
           const setButtonNotLoadingSpy = jest.spyOn(AddSourceLogic.actions, 'setButtonNotLoading');
           const setCustomSourceDataSpy = jest.spyOn(AddSourceLogic.actions, 'setCustomSourceData');
-          const promise = Promise.resolve({ sourceConfigData });
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.resolve({ sourceConfigData }));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
 
@@ -505,18 +565,17 @@ describe('AddSourceLogic', () => {
           expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/create_source', {
             body: JSON.stringify({ ...params }),
           });
-          await promise;
+          await nextTick();
           expect(setCustomSourceDataSpy).toHaveBeenCalledWith({ sourceConfigData });
           expect(successCallback).toHaveBeenCalled();
           expect(setButtonNotLoadingSpy).toHaveBeenCalled();
         });
 
         it('handles error', async () => {
-          const promise = Promise.reject('this is an error');
-          http.post.mockReturnValue(promise);
+          http.post.mockReturnValue(Promise.reject('this is an error'));
 
           AddSourceLogic.actions.createContentSource(serviceType, successCallback, errorCallback);
-          await expectedAsyncError(promise);
+          await nextTick();
 
           expect(errorCallback).toHaveBeenCalled();
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -530,11 +589,15 @@ describe('AddSourceLogic', () => {
       });
 
       it('getSourceConnectData', () => {
+        const query = {
+          kibana_host: '',
+        };
+
         AddSourceLogic.actions.getSourceConnectData('github', jest.fn());
 
-        expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/github/prepare'
-        );
+        expect(
+          http.get
+        ).toHaveBeenCalledWith('/api/workplace_search/account/sources/github/prepare', { query });
       });
 
       it('getSourceReConnectData', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
@@ -14,13 +15,15 @@ import {
   CaseConfigureService,
   ConnectorMappingsService,
 } from '../../../services';
-import { getActions } from '../__mocks__/request_responses';
+import { getActions, getActionTypes } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
+
   const log = loggingSystemMock.create().get('case');
   const esClientMock = elasticsearchServiceMock.createClusterClient();
 

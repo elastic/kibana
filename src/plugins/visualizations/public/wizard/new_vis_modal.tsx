@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -21,7 +21,7 @@ import {
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
-import type { TypesStart, VisType, VisTypeAlias } from '../vis_types';
+import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
@@ -46,7 +46,7 @@ interface TypeSelectionProps {
 interface TypeSelectionState {
   showSearchVisModal: boolean;
   showGroups: boolean;
-  visType?: VisType;
+  visType?: BaseVisType;
 }
 
 // TODO: redirect logic is specific to visualise & dashboard
@@ -129,7 +129,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.props.onClose();
   };
 
-  private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
+  private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
     if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
@@ -144,7 +144,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.redirectToVis(this.state.visType!, searchType, searchId);
   };
 
-  private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
+  private redirectToVis(
+    visType: BaseVisType | VisTypeAlias,
+    searchType?: string,
+    searchId?: string
+  ) {
     if (this.trackUiMetric) {
       this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
     }

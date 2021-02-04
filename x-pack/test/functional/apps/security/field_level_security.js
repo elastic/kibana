@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -71,14 +72,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer1 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer1',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer one',
+        confirm_password: 'changeme',
+        full_name: 'customer one',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_viewssnrole'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -87,14 +86,12 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user customer2 ', async function () {
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'customer2',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'customer two',
+        confirm_password: 'changeme',
+        full_name: 'customer two',
         email: 'flstest@elastic.com',
-        save: true,
         roles: ['kibana_admin', 'a_view_no_ssn_role'],
       });
       const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

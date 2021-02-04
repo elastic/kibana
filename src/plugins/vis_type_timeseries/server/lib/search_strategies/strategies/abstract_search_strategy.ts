@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
+
+import { indexPatterns } from '../../../../../data/server';
 
 import type { Framework } from '../../../plugin';
 import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
 import type { VisPayload } from '../../../../common/types';
 import type { IndexPatternsService } from '../../../../../data/common';
-import { indexPatterns } from '../../../../../data/server';
-import { SanitizedFieldType } from '../../../../common/types';
+import type { SanitizedFieldType } from '../../../../common/types';
 import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
 /**

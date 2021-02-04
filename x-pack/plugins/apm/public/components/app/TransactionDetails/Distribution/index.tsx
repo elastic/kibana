@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -23,10 +24,10 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';

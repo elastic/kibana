@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,12 +11,11 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { SessionsMgmtConfigSchema } from '../';
-import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { SearchSessionSavedObjectAttributes } from '../../../../common';
+import { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
-import { UISession } from '../types';
+import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
+import { SessionsConfigSchema } from '..';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -47,10 +47,9 @@ async function getUrlFromState(
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (
-  urls: UrlGeneratorsStart,
-  { expiresSoonWarning }: SessionsMgmtConfigSchema
-) => async (savedObject: SavedObject<SearchSessionSavedObjectAttributes>): Promise<UISession> => {
+const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
+  savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
+): Promise<UISession> => {
   const {
     name,
     appId,
@@ -92,7 +91,7 @@ interface SearcgSessuibManagementDeps {
 export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
-    private config: SessionsMgmtConfigSchema,
+    private config: SessionsConfigSchema,
     private deps: SearcgSessuibManagementDeps
   ) {}
 
@@ -101,14 +100,18 @@ export class SearchSessionsMgmtAPI {
       saved_objects: object[];
     }
 
-    const refreshTimeout = moment.duration(this.config.refreshTimeout);
+    const mgmtConfig = this.config.management;
+
+    const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
 
     const fetch$ = from(
       this.sessionsClient.find({
         page: 1,
-        perPage: this.config.maxSessions,
+        perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
+        searchFields: ['persisted'],
+        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
@@ -128,7 +131,7 @@ export class SearchSessionsMgmtAPI {
       const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as Array<
-          SavedObject<SearchSessionSavedObjectAttributes>
+          SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
         return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
       }
@@ -147,6 +150,10 @@ export class SearchSessionsMgmtAPI {
 
   public reloadSearchSession(reloadUrl: string) {
     this.deps.application.navigateToUrl(reloadUrl);
+  }
+
+  public getExtendByDuration() {
+    return this.config.defaultExpiration;
   }
 
   // Cancel and expire

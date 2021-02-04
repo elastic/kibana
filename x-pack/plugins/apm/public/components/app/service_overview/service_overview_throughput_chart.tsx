@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
@@ -13,7 +14,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function ServiceOverviewThroughputChart({
@@ -27,24 +27,27 @@ export function ServiceOverviewThroughputChart({
   const { transactionType } = useApmServiceContext();
   const { start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (serviceName && transactionType && start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-        params: {
-          path: {
-            serviceName,
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && transactionType && start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            transactionType,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters, transactionType]);
+        });
+      }
+    },
+    [serviceName, start, end, uiFilters, transactionType]
+  );
 
   return (
     <EuiPanel>

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { History } from 'history';
@@ -34,6 +34,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
@@ -93,6 +94,7 @@ export interface VisualizeServices extends CoreStart {
   dashboard: DashboardStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface SavedVisInstance {

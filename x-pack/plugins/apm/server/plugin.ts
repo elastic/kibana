@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -173,7 +174,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
           context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
         ]);
 
-        const esClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         return createApmEventClient({
           debug: debug ?? false,
@@ -195,13 +196,13 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     // create agent configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });
     // create custom action index without blocking start lifecycle
     createApmCustomLinkIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });

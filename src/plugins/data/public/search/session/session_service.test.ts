@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SessionService, ISessionService } from './session_service';
@@ -113,7 +113,7 @@ describe('Session service', () => {
       sessionId,
     });
 
-    sessionService.setSearchSessionInfoProvider({
+    sessionService.enableStorage({
       getName: async () => 'Name',
       getUrlGeneratorData: async () => ({
         urlGeneratorId: 'id',
@@ -155,5 +155,63 @@ describe('Session service', () => {
     expect(sessionService.isCurrentSession()).toBeFalsy();
     expect(sessionService.isCurrentSession('some-other')).toBeFalsy();
     expect(sessionService.isCurrentSession(sessionId)).toBeTruthy();
+  });
+
+  test('enableStorage() enables storage capabilities', async () => {
+    sessionService.start();
+    await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"No info provider for current session"`
+    );
+
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    expect(sessionService.isSessionStorageReady()).toBe(true);
+
+    await expect(() => sessionService.save()).resolves;
+
+    sessionService.clear();
+    expect(sessionService.isSessionStorageReady()).toBe(false);
+  });
+
+  test('can provide config for search session indicator', () => {
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
+    sessionService.enableStorage(
+      {
+        getName: async () => 'Name',
+        getUrlGeneratorData: async () => ({
+          urlGeneratorId: 'id',
+          initialState: {},
+          restoreState: {},
+        }),
+      },
+      {
+        isDisabled: () => ({ disabled: true, reasonText: 'text' }),
+      }
+    );
+
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(true);
+
+    sessionService.clear();
+    expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
+  });
+
+  test('save() throws in case getUrlGeneratorData returns throws', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => {
+        throw new Error('Haha');
+      },
+    });
+    sessionService.start();
+    await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
   });
 });

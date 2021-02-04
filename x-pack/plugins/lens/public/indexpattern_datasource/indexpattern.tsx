@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -18,6 +19,7 @@ import {
   Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
+  InitializationOptions,
 } from '../types';
 import {
   loadInitialState,
@@ -50,11 +52,11 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { Dragging } from '../drag_drop/providers';
+import { DragDropIdentifier } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
-export type DraggedField = Dragging & {
+export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;
   indexPatternId: string;
 };
@@ -104,7 +106,8 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext
+      initialContext?: VisualizeFieldContext,
+      options?: InitializationOptions
     ) {
       return loadInitialState({
         persistedState,
@@ -114,6 +117,7 @@ export function getIndexPatternDatasource({
         storage,
         indexPatternsService,
         initialContext,
+        options,
       });
     },
 
@@ -164,7 +168,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    toExpression,
+    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
       domElement: Element,
@@ -367,11 +371,14 @@ export function getIndexPatternDatasource({
         return;
       }
 
+      // Forward the indexpattern as well, as it is required by some operationType checks
       const layerErrors = Object.values(state.layers).map((layer) =>
-        (getErrorMessages(layer) ?? []).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: message,
-        }))
+        (getErrorMessages(layer, state.indexPatterns[layer.indexPatternId]) ?? []).map(
+          (message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: message,
+          })
+        )
       );
 
       // Single layer case, no need to explain more

@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
 import { WmsOptions } from '../../../maps_legacy/public';
@@ -28,7 +28,7 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 
 export type RegionMapOptionsProps = {
   getServiceSettings: () => Promise<IServiceSettings>;
-} & VisOptionsProps<RegionMapVisParams>;
+} & VisEditorOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
   const { getServiceSettings, stateParams, vis, setValue } = props;

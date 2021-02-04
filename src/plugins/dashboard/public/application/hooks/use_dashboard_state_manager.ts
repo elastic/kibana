@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import { useKibana } from '../../services/kibana_react';
 import {
   connectToQueryState,
   esFilters,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../services/data';
@@ -51,8 +52,10 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     initializerContext,
-    dashboardCapabilities,
     savedObjectsTagging,
+    dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -85,12 +88,14 @@ export const useDashboardStateManager = (
 
     const stateManager = new DashboardStateManager({
       hasTaggingCapabilities,
+      dashboardPanelStorage,
       hideWriteControls,
       history,
       kbnUrlStateStorage,
       kibanaVersion,
       savedDashboard,
       usageCollection,
+      allowByValueEmbeddables,
     });
 
     // sync initial app filters from state to filterManager
@@ -159,14 +164,27 @@ export const useDashboardStateManager = (
       stateManager.isNew()
     );
 
-    searchSession.setSearchSessionInfoProvider(
+    searchSession.enableStorage(
       createSessionRestorationDataProvider({
         data: dataPlugin,
         getDashboardTitle: () => dashboardTitle,
         getDashboardId: () => savedDashboard?.id || '',
         getAppState: () => stateManager.getAppState(),
-      })
+      }),
+      {
+        isDisabled: () =>
+          dashboardCapabilities.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
     );
+
+    if (stateManager.getIsEditMode()) {
+      stateManager.restorePanels();
+    }
 
     setDashboardStateManager(stateManager);
     setViewMode(stateManager.getViewMode());
@@ -181,6 +199,8 @@ export const useDashboardStateManager = (
     dataPlugin,
     filterManager,
     hasTaggingCapabilities,
+    initializerContext.config,
+    dashboardPanelStorage,
     hideWriteControls,
     history,
     kibanaVersion,
@@ -192,6 +212,8 @@ export const useDashboardStateManager = (
     toasts,
     uiSettings,
     usageCollection,
+    allowByValueEmbeddables,
+    dashboardCapabilities.storeSearchSession,
   ]);
 
   return { dashboardStateManager, viewMode, setViewMode };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './app.scss';
@@ -370,6 +371,11 @@ export function App({
     state.persistedDoc?.state,
   ]);
 
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
+
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
@@ -385,8 +391,11 @@ export function App({
     }
 
     let references = lastKnownDoc.references;
-    if (savedObjectsTagging && saveProps.newTags) {
-      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    if (savedObjectsTagging) {
+      references = savedObjectsTagging.ui.updateTagsReferences(
+        references,
+        saveProps.newTags || tagsIds
+      );
     }
 
     const docToSave = {
@@ -586,11 +595,6 @@ export function App({
     },
   });
 
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
-
   return (
     <>
       <div className="lnsApp">
@@ -707,7 +711,6 @@ export function App({
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
-        savedObjectsClient={savedObjectsClient}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
         onSave={runSave}

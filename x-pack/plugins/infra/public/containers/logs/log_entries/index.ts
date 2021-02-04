@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import createContainer from 'constate';
@@ -10,10 +12,10 @@ import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import {
   LogEntriesResponse,
-  LogEntry,
   LogEntriesRequest,
   LogEntriesBaseRequest,
 } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { fetchLogEntries } from './api/fetch_log_entries';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 

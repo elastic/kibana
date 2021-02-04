@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import {
-  VisOptionsProps,
   BasicOptions,
   SelectOption,
   SwitchOption,
@@ -21,7 +21,7 @@ import { WmsOptions } from '../../../maps_legacy/public';
 import { TileMapVisParams } from '../types';
 import { MapTypes } from '../utils/map_types';
 
-export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
+export type TileMapOptionsProps = VisEditorOptionsProps<TileMapVisParams>;
 
 function TileMapOptions(props: TileMapOptionsProps) {
   const { stateParams, setValue, vis } = props;

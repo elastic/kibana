@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -48,10 +49,11 @@ export const renderLegendItem: RenderItem<LegendItem> = (item) => {
 };
 
 interface Props {
+  total: number;
   data: NetworkItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
@@ -66,6 +68,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
 
   return (
     <WaterfallProvider
+      totalNetworkRequests={total}
+      fetchedNetworkRequests={networkData.length}
       data={series}
       sidebarItems={sidebarItems}
       legendItems={legendItems}

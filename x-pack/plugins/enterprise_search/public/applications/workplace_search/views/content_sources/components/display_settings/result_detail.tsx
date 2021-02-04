@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -25,6 +26,9 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+
+import { ADD_FIELD_LABEL, EDIT_FIELD_LABEL, REMOVE_FIELD_LABEL } from '../../../../constants';
+import { VISIBLE_FIELDS_TITLE, EMPTY_FIELDS_DESCRIPTION, PREVIEW_TITLE } from './constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
@@ -55,7 +59,7 @@ export const ResultDetail: React.FC = () => {
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem>
                     <EuiTitle size="s">
-                      <h3>Visible Fields</h3>
+                      <h3>{VISIBLE_FIELDS_TITLE}</h3>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -65,7 +69,7 @@ export const ResultDetail: React.FC = () => {
                       disabled={availableFieldOptions.length < 1}
                       data-test-subj="AddFieldButton"
                     >
-                      Add Field
+                      {ADD_FIELD_LABEL}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -106,13 +110,13 @@ export const ResultDetail: React.FC = () => {
                                     <div>
                                       <EuiButtonIcon
                                         data-test-subj="EditFieldButton"
-                                        aria-label="Edit Field"
+                                        aria-label={EDIT_FIELD_LABEL}
                                         iconType="pencil"
                                         onClick={() => openEditDetailField(index)}
                                       />
                                       <EuiButtonIcon
                                         data-test-subj="RemoveFieldButton"
-                                        aria-label="Remove Field"
+                                        aria-label={REMOVE_FIELD_LABEL}
                                         iconType="cross"
                                         onClick={() => removeDetailField(index)}
                                       />
@@ -127,9 +131,7 @@ export const ResultDetail: React.FC = () => {
                     </EuiDroppable>
                   </EuiDragDropContext>
                 ) : (
-                  <p data-test-subj="EmptyFieldsDescription">
-                    Add fields and move them into the order you want them to appear.
-                  </p>
+                  <p data-test-subj="EmptyFieldsDescription">{EMPTY_FIELDS_DESCRIPTION}</p>
                 )}
               </>
             </EuiFormRow>
@@ -138,7 +140,7 @@ export const ResultDetail: React.FC = () => {
         <EuiFlexItem>
           <EuiPanel>
             <EuiTitle size="s">
-              <h3>Preview</h3>
+              <h3>{PREVIEW_TITLE}</h3>
             </EuiTitle>
             <EuiSpacer />
             <ExampleResultDetailCard />
