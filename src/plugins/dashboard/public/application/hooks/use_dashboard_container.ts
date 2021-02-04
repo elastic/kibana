@@ -15,6 +15,7 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
 } from '../../services/embeddable';
@@ -70,6 +71,8 @@ export const useDashboardContainer = (
 
     const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
 
+    let canceled = false;
+    let container: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
       const newContainer = await dashboardFactory.create(
         getDashboardContainerInput({
@@ -81,6 +84,13 @@ export const useDashboardContainer = (
           searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
         })
       );
+
+      if (canceled) {
+        newContainer?.destroy();
+        return;
+      }
+
+      container = newContainer;
 
       if (!newContainer || isErrorEmbeddable(newContainer)) {
         return;
@@ -106,7 +116,10 @@ export const useDashboardContainer = (
       }
       setDashboardContainer(newContainer);
     })();
-    return () => setDashboardContainer(null);
+    return () => {
+      canceled = true;
+      container?.destroy();
+    };
   }, [
     dashboardCapabilities,
     dashboardStateManager,
