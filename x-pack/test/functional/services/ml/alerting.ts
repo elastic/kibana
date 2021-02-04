@@ -65,6 +65,16 @@ export function MachineLearningAlertingProvider(
       await testSubjects.setValue('mlAnomalyAlertPreviewInterval', '6m');
     },
 
+    async assertPreviewButtonState(expectedEnabled: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlAnomalyAlertPreviewButton');
+      expect(isEnabled).to.eql(
+        expectedEnabled,
+        `Expected data frame analytics "create" button to be '${
+          expectedEnabled ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     async clickPreviewButton() {
       await testSubjects.click('mlAnomalyAlertPreviewButton');
       await this.assertPreviewCalloutVisible();
