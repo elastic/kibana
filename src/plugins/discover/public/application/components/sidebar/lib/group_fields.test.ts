@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { groupFields } from './group_fields';
@@ -178,6 +178,7 @@ describe('group_fields', function () {
       fieldFilterState,
       true
     );
+
     expect(actual.popular).toEqual([category]);
     expect(actual.selected).toEqual([currency]);
     expect(actual.unpopular).toEqual([]);
@@ -213,5 +214,31 @@ describe('group_fields', function () {
       'customer_birth_date',
       'unknown',
     ]);
+  });
+
+  it('excludes unmapped fields if showUnmappedFields set to false', function () {
+    const fieldFilterState = getDefaultFieldFilter();
+    const fieldsWithUnmappedField = [...fields];
+    fieldsWithUnmappedField.push({
+      name: 'unknown_field',
+      type: 'unknown',
+      esTypes: ['unknown'],
+      count: 1,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+
+    const actual = groupFields(
+      fieldsWithUnmappedField as IndexPatternField[],
+      ['customer_birth_date', 'currency', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      true,
+      false
+    );
+    expect(actual.unpopular).toEqual([]);
   });
 });
