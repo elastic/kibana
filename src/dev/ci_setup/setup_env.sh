@@ -181,9 +181,19 @@ fi
 cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 
 ###
+### append auth token to buildbuddy into "$HOME/.bazelrc";
+###
+echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
+echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
+
+export PATH="$PATH:$HOME/.yarn/bin"
+ls $(yarn global dir)
+ls $(yarn global bin)
+ls "$HOME/.yarn/bin"
+###
 ### make sure bazelisk is installed on CI
 ###
 bazeliskVersion=$(head -n 1 "$KIBANA_DIR/.bazeliskversion")
-npm install -g "@bazel/bazelisk@${bazeliskVersion}"
+yarn global add "@bazel/bazelisk@${bazeliskVersion}"
 
 export CI_ENV_SETUP=true
