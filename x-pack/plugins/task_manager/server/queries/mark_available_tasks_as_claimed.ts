@@ -12,6 +12,7 @@ import {
   mustBeAllOf,
   MustCondition,
   BoolClauseWithAnyCondition,
+  ShouldCondition,
 } from './query_clauses';
 
 export const TaskWithSchedule: ExistsFilter = {
@@ -33,6 +34,14 @@ export function taskWithLessThanMaxAttempts(
           },
         },
       ],
+    },
+  };
+}
+
+export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
+  return {
+    bool: {
+      should: [...taskTypes].map((type) => ({ term: { 'task.taskType': type } })),
     },
   };
 }

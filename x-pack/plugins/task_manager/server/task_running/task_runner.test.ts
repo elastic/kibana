@@ -16,6 +16,7 @@ import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
+import { taskStoreMock } from '../task_store.mock';
 
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 
@@ -65,8 +66,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
     expect(instance.id).toEqual(id);
     expect(instance.runAt.getTime()).toEqual(minutesFromNow(initialAttempts * 5).getTime());
@@ -95,8 +96,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
     expect(instance.runAt.getTime()).toBeGreaterThan(minutesFromNow(9).getTime());
     expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
@@ -173,8 +174,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWithMatch(store.update, { runAt });
+    expect(store.update).toHaveBeenCalledTimes(1);
+    expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
   });
 
   test('reschedules tasks that return a schedule', async () => {
@@ -201,8 +202,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWithMatch(store.update, { runAt });
+    expect(store.update).toHaveBeenCalledTimes(1);
+    expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
   });
 
   test(`doesn't reschedule recurring tasks that throw an unrecoverable error`, async () => {
@@ -226,7 +227,7 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
     expect(instance.status).toBe('failed');
 
     expect(onTaskEvent).toHaveBeenCalledWith(
@@ -264,8 +265,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    sinon.assert.calledWithMatch(store.update, { runAt });
+    expect(store.update).toHaveBeenCalledTimes(1);
+    expect(store.update).toHaveBeenCalledWith(expect.objectContaining({ runAt }));
   });
 
   test('removes non-recurring tasks after they complete', async () => {
@@ -289,8 +290,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.remove);
-    sinon.assert.calledWith(store.remove, id);
+    expect(store.remove).toHaveBeenCalledTimes(1);
+    expect(store.remove).toHaveBeenCalledWith(id);
   });
 
   test('cancel cancels the task runner, if it is cancellable', async () => {
@@ -364,13 +365,13 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
     expect(instance.attempts).toEqual(initialAttempts + 1);
     expect(instance.status).toBe('running');
-    expect(instance.startedAt.getTime()).toEqual(Date.now());
-    expect(instance.retryAt.getTime()).toEqual(
+    expect(instance.startedAt!.getTime()).toEqual(Date.now());
+    expect(instance.retryAt!.getTime()).toEqual(
       minutesFromNow((initialAttempts + 1) * 5).getTime() + timeoutMinutes * 60 * 1000
     );
   });
@@ -399,11 +400,11 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
-    expect(instance.retryAt.getTime()).toEqual(
-      instance.startedAt.getTime() + intervalMinutes * 60 * 1000
+    expect(instance.retryAt!.getTime()).toEqual(
+      instance.startedAt!.getTime() + intervalMinutes * 60 * 1000
     );
   });
 
@@ -431,10 +432,10 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
-    expect(instance.retryAt.getTime()).toEqual(instance.startedAt.getTime() + 5 * 60 * 1000);
+    expect(instance.retryAt!.getTime()).toEqual(instance.startedAt!.getTime() + 5 * 60 * 1000);
   });
 
   test('calculates retryAt by timeout if it exceeds the schedule when running a recurring task', async () => {
@@ -463,11 +464,11 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
 
-    expect(instance.retryAt.getTime()).toEqual(
-      instance.startedAt.getTime() + timeoutMinutes * 60 * 1000
+    expect(instance.retryAt!.getTime()).toEqual(
+      instance.startedAt!.getTime() + timeoutMinutes * 60 * 1000
     );
   });
 
@@ -497,9 +498,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
   });
@@ -529,9 +530,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     const expectedRunAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
     expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
@@ -562,9 +563,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts, error);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     expect(instance.status).toBe('failed');
   });
@@ -596,9 +597,9 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.notCalled(getRetryStub);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     const nextIntervalDelay = 60000; // 1m
     const expectedRunAt = new Date(Date.now() + nextIntervalDelay);
@@ -631,11 +632,11 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
-    expect(instance.retryAt.getTime()).toEqual(
+    expect(instance.retryAt!.getTime()).toEqual(
       new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
     );
   });
@@ -664,9 +665,9 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon
-      .stub()
-      .throws(SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')));
+    store.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error'))
+    );
 
     expect(await runner.markTaskAsRunning()).toEqual(false);
   });
@@ -695,9 +696,9 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon
-      .stub()
-      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id'));
+    store.update.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+    );
 
     return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
       `[Error: Saved object [type/id] not found]`
@@ -728,15 +729,20 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon.stub();
-    store.update.onFirstCall().throws(SavedObjectsErrorHelpers.createBadRequestError('type'));
-    store.update.onSecondCall().resolves();
+    store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError('type'));
+    store.update.mockResolvedValueOnce(
+      mockInstance({
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      })
+    );
 
     await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
       `[Error: type: Bad Request]`
     );
 
-    sinon.assert.calledWith(store.update, {
+    expect(store.update).toHaveBeenCalledWith({
       ...mockInstance({
         id,
         attempts: initialAttempts + 1,
@@ -773,13 +779,18 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon.stub();
-    store.update.onFirstCall().throws(SavedObjectsErrorHelpers.createConflictError('type', 'id'));
-    store.update.onSecondCall().resolves();
+    store.update.mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError('type', 'id'));
+    store.update.mockResolvedValueOnce(
+      mockInstance({
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      })
+    );
 
     await expect(runner.markTaskAsRunning()).resolves.toMatchInlineSnapshot(`false`);
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
   });
 
   test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails due to Saved Object not being found`, async () => {
@@ -806,17 +817,22 @@ describe('TaskManagerRunner', () => {
       },
     });
 
-    store.update = sinon.stub();
-    store.update
-      .onFirstCall()
-      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id'));
-    store.update.onSecondCall().resolves();
+    store.update.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+    );
+    store.update.mockResolvedValueOnce(
+      mockInstance({
+        id,
+        attempts: initialAttempts,
+        schedule: undefined,
+      })
+    );
 
     await expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(
       `[Error: Saved object [type/id] not found]`
     );
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
   });
 
   test('uses getRetry (returning true) to set retryAt when defined', async () => {
@@ -844,13 +860,13 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
     const timeoutDelay = timeoutMinutes * 60 * 1000;
-    expect(instance.retryAt.getTime()).toEqual(
+    expect(instance.retryAt!.getTime()).toEqual(
       new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
     );
   });
@@ -880,11 +896,11 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
-    expect(instance.retryAt).toBeNull();
+    expect(instance.retryAt!).toBeNull();
     expect(instance.status).toBe('running');
   });
 
@@ -914,12 +930,12 @@ describe('TaskManagerRunner', () => {
 
     await runner.markTaskAsRunning();
 
-    sinon.assert.calledOnce(store.update);
+    expect(store.update).toHaveBeenCalledTimes(1);
     sinon.assert.notCalled(getRetryStub);
-    const instance = store.update.args[0][0];
+    const instance = store.update.mock.calls[0][0];
 
     const timeoutDelay = timeoutMinutes * 60 * 1000;
-    expect(instance.retryAt.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
+    expect(instance.retryAt!.getTime()).toEqual(new Date(Date.now() + timeoutDelay).getTime());
   });
 
   test('Fails non-recurring task when maxAttempts reached', async () => {
@@ -946,11 +962,11 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('failed');
-    expect(instance.retryAt).toBeNull();
+    expect(instance.retryAt!).toBeNull();
     expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
   });
 
@@ -980,8 +996,8 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    sinon.assert.calledOnce(store.update);
-    const instance = store.update.args[0][0];
+    expect(store.update).toHaveBeenCalledTimes(1);
+    const instance = store.update.mock.calls[0][0];
     expect(instance.attempts).toEqual(3);
     expect(instance.status).toEqual('idle');
     expect(instance.runAt.getTime()).toEqual(
@@ -1009,7 +1025,7 @@ describe('TaskManagerRunner', () => {
         },
       });
 
-      store.update.returns(instance);
+      store.update.mockResolvedValueOnce(instance);
 
       await runner.markTaskAsRunning();
 
@@ -1037,7 +1053,7 @@ describe('TaskManagerRunner', () => {
         },
       });
 
-      store.update.throws(new Error('cant mark as running'));
+      store.update.mockRejectedValueOnce(new Error('cant mark as running'));
 
       try {
         await runner.markTaskAsRunning();
@@ -1191,7 +1207,7 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      const instance = store.update.args[0][0];
+      const instance = store.update.mock.calls[0][0];
       expect(instance.status).toBe('failed');
 
       expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1253,13 +1269,9 @@ describe('TaskManagerRunner', () => {
 
     const instance = mockInstance(opts.instance);
 
-    const store = {
-      update: sinon.stub(),
-      remove: sinon.stub(),
-      maxAttempts: 5,
-    };
+    const store = taskStoreMock.create();
 
-    store.update.returns(instance);
+    store.update.mockResolvedValue(instance);
 
     const definitions = new TaskTypeDictionary(logger);
     definitions.registerTaskDefinitions({
@@ -1273,6 +1285,7 @@ describe('TaskManagerRunner', () => {
     }
 
     const runner = new TaskManagerRunner({
+      defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),
       logger,

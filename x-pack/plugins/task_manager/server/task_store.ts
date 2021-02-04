@@ -60,22 +60,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
   max_docs?: number;
 }
 
-export interface OwnershipClaimingOpts {
-  claimOwnershipUntil: Date;
-  claimTasksById?: string[];
-  getCapacity: (taskType?: string) => number;
-}
-
 export interface FetchResult {
-  docs: ConcreteTaskInstance[];
-}
-
-export interface ClaimOwnershipResult {
-  stats: {
-    tasksUpdated: number;
-    tasksConflicted: number;
-    tasksClaimed: number;
-  };
   docs: ConcreteTaskInstance[];
 }
 
@@ -109,7 +94,6 @@ export class TaskStore {
    * @param {StoreOpts} opts
    * @prop {esClient} esClient - An elasticsearch client
    * @prop {string} index - The name of the task manager index
-   * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {TaskDefinition} definition - The definition of the task being run
    * @prop {serializer} - The saved object serializer
    * @prop {savedObjectsRepository} - An instance to the saved objects repository
@@ -121,6 +105,17 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+  }
+
+  /**
+   * Convert ConcreteTaskInstance Ids to match their SavedObject format as serialized
+   * in Elasticsearch
+   * @param tasks - The task being scheduled.
+   */
+  public convertToSavedObjectIds(
+    taskIds: Array<ConcreteTaskInstance['id']>
+  ): Array<ConcreteTaskInstance['id']> {
+    return taskIds.map((id) => this.serializer.generateRawId(undefined, 'task', id));
   }
 
   /**

@@ -500,7 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it.skip('should only run as many instances of a task as its maxConcurrency will allow', async () => {
+    it('should only run as many instances of a task as its maxConcurrency will allow', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
       const firstWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
@@ -583,7 +583,7 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
-    it.skip('should reset runAt on a task when RunNow is called at a time that would exceed its maxConcurrency', async () => {
+    it('should return a task run error result when RunNow is called at a time that would cause the task to exceed its maxConcurrency', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
       const firstWithSingleConcurrency = await scheduleTask({
         taskType: 'sampleTaskWithSingleConcurrency',
@@ -628,17 +628,8 @@ export default function ({ getService }: FtrProviderContext) {
         error: `Error: Failed to run task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
       });
 
-      await retry.try(async () => {
-        const task = await currentTask(firstWithSingleConcurrency.id);
-        expect(Date.parse(task.runAt)).to.eql(new Date(0));
-      });
       // release the second task
       await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
-
-      // ensure first task gets picked up next
-      await retry.try(async () => {
-        expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(2);
-      });
     });
 
     it('should return a task run error result when running a task now fails', async () => {

@@ -9,10 +9,10 @@ import sinon from 'sinon';
 import { fillPool, FillPoolResult } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
 import { asOk, Result } from './result_type';
-import { ClaimOwnershipResult } from '../task_store';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskManagerRunner } from '../task_running/task_runner';
 import { from, Observable } from 'rxjs';
+import { ClaimOwnershipResult } from '../queries/task_claiming';
 
 jest.mock('../task_running/task_runner');
 
@@ -29,6 +29,7 @@ describe('fillPool', () => {
               tasksUpdated: tasks?.length ?? 0,
               tasksConflicted: 0,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: tasks,
           })

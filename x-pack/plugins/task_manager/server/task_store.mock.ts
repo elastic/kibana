@@ -7,13 +7,13 @@
 import { TaskStore } from './task_store';
 
 interface TaskStoreOptions {
-  maxAttempts?: number;
   index?: string;
   taskManagerId?: string;
 }
 export const taskStoreMock = {
-  create({ maxAttempts = 0, index = '', taskManagerId = '' }: TaskStoreOptions) {
+  create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
     const mocked = ({
+      convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
       schedule: jest.fn(),
@@ -22,7 +22,6 @@ export const taskStoreMock = {
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),
-      maxAttempts,
       index,
       taskManagerId,
     } as unknown) as jest.Mocked<TaskStore>;

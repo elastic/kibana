@@ -6,22 +6,14 @@
 
 import { performance } from 'perf_hooks';
 import { Observable } from 'rxjs';
-import { tap, map, concatMap, last } from 'rxjs/operators';
+import { concatMap, last } from 'rxjs/operators';
+import uuid from 'uuid';
+import { ClaimOwnershipResult } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { WithTaskTiming, startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
 import { TaskManagerRunner } from '../task_running';
-import { ClaimOwnershipResult } from '../task_store';
-import {
-  Result,
-  map as mapResult,
-  isOk,
-  mapOk,
-  promiseResult,
-  asErr,
-  asOk,
-  either,
-} from './result_type';
+import { Result, map as mapResult, asErr, asOk } from './result_type';
 
 export enum FillPoolResult {
   Failed = 'Failed',

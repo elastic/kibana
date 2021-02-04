@@ -22,6 +22,7 @@ export const taskClaimingMock = {
   }: TaskClaimingOptions) {
     const mocked = ({
       claimAvailableTasks: jest.fn(),
+      claimAvailableTasksIfCapacityIsAvailable: jest.fn(),
       maxAttempts,
       taskManagerId,
       events,

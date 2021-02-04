@@ -25,7 +25,6 @@ import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
 import { healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { TaskClaiming } from './queries/task_claiming';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
   TaskTypeDictionary,
@@ -102,11 +101,9 @@ export class TaskManagerPlugin
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: <TaskTypes extends string>(
-        taskDefinition: TaskDefinitionRegistry<TaskTypes>
-      ) => {
+      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.assertStillInSetup('register task definitions');
-        this.definitions.registerTaskDefinitions<TaskTypes>(taskDefinition);
+        this.definitions.registerTaskDefinitions(taskDefinition);
       },
     };
   }
@@ -124,13 +121,6 @@ export class TaskManagerPlugin
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
 
-    const taskClaiming = new TaskClaiming({
-      taskStore,
-      serializer,
-      maxAttempts: this.config!.max_attempts,
-      definitions: this.definitions,
-    });
-
     const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
@@ -143,7 +133,6 @@ export class TaskManagerPlugin
       definitions: this.definitions,
       logger: this.logger,
       taskStore,
-      taskClaiming,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,

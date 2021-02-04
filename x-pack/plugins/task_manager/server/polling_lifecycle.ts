@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, Observable, Subscription, throwError } from 'rxjs';
-
-import { performance } from 'perf_hooks';
-
+import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
-import { catchError, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
 import { Result, asErr, mapErr, asOk, map } from './lib/result_type';
@@ -39,18 +36,17 @@ import {
 } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
-import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_store';
+import { TaskStore } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
-import { TaskClaiming } from './queries/task_claiming';
+import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
-  taskClaiming: TaskClaiming;
   config: TaskManagerConfig;
   middleware: Middleware;
   elasticsearchAndSOAvailability$: Observable<boolean>;
@@ -99,18 +95,14 @@ export class TaskPollingLifecycle {
     elasticsearchAndSOAvailability$,
     config,
     taskStore,
-    taskClaiming,
     definitions,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
     this.store = taskStore;
-    this.taskClaiming = taskClaiming;
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
-    // pipe taskClaiming events into the lifecycle event stream
-    this.taskClaiming.events.subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -122,6 +114,26 @@ export class TaskPollingLifecycle {
       maxWorkers$: maxWorkersConfiguration$,
     });
     this.pool.load.subscribe(emitEvent);
+
+    this.taskClaiming = new TaskClaiming({
+      taskStore,
+      maxAttempts: config.max_attempts,
+      definitions,
+      logger: this.logger,
+      getCapacity: (taskType?: string) =>
+        taskType && this.definitions.get(taskType)?.maxConcurrency
+          ? Math.max(
+              Math.min(
+                this.pool.availableWorkers,
+                this.definitions.get(taskType)!.maxConcurrency! -
+                  this.pool.getOccupiedWorkersByType(taskType)
+              ),
+              0
+            )
+          : this.pool.availableWorkers,
+    });
+    // pipe taskClaiming events into the lifecycle event stream
+    this.taskClaiming.events.subscribe(emitEvent);
 
     const {
       max_poll_inactivity_cycles: maxPollInactivityCycles,
@@ -216,18 +228,7 @@ export class TaskPollingLifecycle {
       () =>
         claimAvailableTasks(
           tasksToClaim.splice(0, this.pool.availableWorkers),
-          this.taskClaiming.claimAvailableTasks,
-          (taskType?: string) =>
-            taskType && this.definitions.get(taskType)?.maxConcurrency
-              ? Math.max(
-                  Math.min(
-                    this.pool.availableWorkers,
-                    this.definitions.get(taskType)!.maxConcurrency! -
-                      this.pool.getOccupiedWorkersByType(taskType)
-                  ),
-                  0
-                )
-              : this.pool.availableWorkers,
+          this.taskClaiming,
           this.logger
         ),
       // wrap each task in a Task Runner
@@ -268,63 +269,38 @@ export class TaskPollingLifecycle {
 
 export function claimAvailableTasks(
   claimTasksById: string[],
-  claim: (opts: OwnershipClaimingOpts) => Observable<ClaimOwnershipResult>,
-  getCapacity: (taskType?: string) => number,
+  taskClaiming: TaskClaiming,
   logger: Logger
 ): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
   return new Observable((observer) => {
-    if (getCapacity() > 0) {
-      performance.mark('claimAvailableTasks_start');
-
-      claim({
-        getCapacity,
+    taskClaiming
+      .claimAvailableTasksIfCapacityIsAvailable({
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
-      }).subscribe(
+      })
+      .subscribe(
         (claimResult) => {
-          const {
-            docs,
-            stats: { tasksClaimed },
-          } = claimResult;
-
-          if (tasksClaimed === 0) {
-            performance.mark('claimAvailableTasks.noTasks');
-          }
-          performance.mark('claimAvailableTasks_stop');
-          performance.measure(
-            'claimAvailableTasks',
-            'claimAvailableTasks_start',
-            'claimAvailableTasks_stop'
-          );
-
-          if (docs.length !== tasksClaimed) {
-            logger.warn(
-              `[Task Ownership error]: ${tasksClaimed} tasks were claimed by Kibana, but ${
-                docs.length
-              } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
-            );
-          }
-          observer.next(asOk(claimResult));
+          observer.next(claimResult);
         },
         (ex) => {
+          // if the `taskClaiming` stream errors out we want to catch it and see if
+          // we can identify the reason
+          // if we can - we emit an FillPoolResult error rather than erroring out the wrapping Observable
+          // returned by `claimAvailableTasks`
           if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
             logger.warn(
               `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
             );
             observer.next(asErr(FillPoolResult.Failed));
+            observer.complete();
           } else {
+            // as we could't identify the reason - we'll error out the wrapping Observable too
             observer.error(ex);
           }
         },
-        () => observer.complete()
+        () => {
+          observer.complete();
+        }
       );
-    } else {
-      performance.mark('claimAvailableTasks.noAvailableWorkers');
-      logger.debug(
-        `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
-      );
-      observer.next(asErr(FillPoolResult.NoAvailableWorkers));
-      observer.complete();
-    }
   });
 }
