@@ -18,12 +18,12 @@ fi
 # Configuring Metricbeat monitoring for the load testing
 # Getting the URL
 TOP="$(curl -L http://snapshots.elastic.co/latest/master.json)"
-BUILD=$(echo $TOP | sed 's/.*"version" : "\(.*\)", "build_id.*/\1/')
-echo $BUILD
+MB_BUILD=$(echo $TOP | sed 's/.*"version" : "\(.*\)", "build_id.*/\1/')
+echo $MB_BUILD
 MB_BUILD_ID=$(echo $TOP | sed 's/.*"build_id" : "\(.*\)", "manifest_url.*/\1/')
 echo $MB_BUILD_ID
 
-URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${BUILD}-amd64.deb
+URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${MB_BUILD}-amd64.deb
 
 # Downloading the Metricbeat package
 while [ 1 ]; do
