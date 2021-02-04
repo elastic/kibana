@@ -41,7 +41,7 @@ import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface Props {
-  expression: MetricExpression;
+  expression: Required<MetricExpression>;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
   filterQuery?: string;
