@@ -123,7 +123,7 @@ export class IndexPatternsFetcher {
   }
 
   /**
-   *  Get a list of field objects for a time pattern
+   *  Returns an index pattern list of only those index pattern strings in the given list that return indices
    *
    *  @param patternList string[]
    *  @return {Promise<string[]>}
