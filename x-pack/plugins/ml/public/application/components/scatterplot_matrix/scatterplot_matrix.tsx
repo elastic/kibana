@@ -26,11 +26,10 @@ import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
 import { useCurrentEuiTheme } from '../color_range_legend';
-import { VegaChart, VegaChartLoading } from '../vega_chart';
+import { LegendType, VegaChart, VegaChartLoading } from '../vega_chart';
 
 import {
   getScatterplotMatrixVegaLiteSpec,
-  LegendType,
   OUTLIER_SCORE_FIELD,
 } from './scatterplot_matrix_vega_lite_spec';
 

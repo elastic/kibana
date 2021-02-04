@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { LegendType, LEGEND_TYPES } from './common';
-export { VegaChart } from './vega_chart';
-export { VegaChartLoading } from './vega_chart_loading';
+export const LEGEND_TYPES = {
+  NOMINAL: 'nominal',
+  QUANTITATIVE: 'quantitative',
+} as const;
+export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];

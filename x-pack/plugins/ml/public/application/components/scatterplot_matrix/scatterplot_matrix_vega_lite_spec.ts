@@ -15,11 +15,7 @@ import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@e
 
 import { i18n } from '@kbn/i18n';
 
-export const LEGEND_TYPES = {
-  NOMINAL: 'nominal',
-  QUANTITATIVE: 'quantitative',
-} as const;
-export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
+import { LegendType, LEGEND_TYPES } from '../vega_chart';
 
 export const OUTLIER_SCORE_FIELD = 'outlier_score';
 

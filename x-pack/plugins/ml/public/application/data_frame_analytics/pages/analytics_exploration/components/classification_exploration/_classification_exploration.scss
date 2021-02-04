@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.mlDataFrameAnalyticsClassification__confusionMatrix {
+.mlDataFrameAnalyticsClassification__evaluateSectionContent {
   padding: 0 5%;
 }
 
@@ -14,7 +14,7 @@
   The following two classes are a workaround to avoid having EuiDataGrid in a flex layout
   and just uses a legacy approach for a two column layout so we don't break IE11.
 */
-.mlDataFrameAnalyticsClassification__confusionMatrix:after {
+.mlDataFrameAnalyticsClassification__evaluateSectionContent:after {
   content: '';
   display: table;
   clear: both;
@@ -22,7 +22,8 @@
 
 .mlDataFrameAnalyticsClassification__actualLabel {
   float: left;
-  width: 8%;
+  /* Fixed width so we can align it with the padding of the AUC ROC chart. */
+  width: 80px;
   padding-top: $euiSize * 4;
 }
 
@@ -32,7 +33,7 @@
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
   float: left;
   min-width: 480px;
-  width: 92%;
+  width: calc(100% - 80px);
 
   .euiDataGridRowCell--boolean {
     text-transform: none;

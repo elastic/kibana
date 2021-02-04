@@ -9,7 +9,7 @@ import { ANALYSIS_CONFIG_TYPE } from './analytics';
 
 import { AnalyticsJobType } from '../pages/analytics_management/hooks/use_create_analytics_form/state';
 
-import { LEGEND_TYPES } from '../../components/scatterplot_matrix/scatterplot_matrix_vega_lite_spec';
+import { LEGEND_TYPES } from '../../components/vega_chart';
 
 export const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType | 'unknown') => {
   switch (jobType) {

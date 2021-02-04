@@ -290,7 +290,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                     </EuiFlexGroup>
                     {/* BEGIN TABLE ELEMENTS */}
                     <EuiSpacer size="m" />
-                    <div className="mlDataFrameAnalyticsClassification__confusionMatrix">
+                    <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
                       <div className="mlDataFrameAnalyticsClassification__actualLabel">
                         <EuiText size="xs" color="subdued">
                           <FormattedMessage
@@ -361,24 +361,32 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 <EuiSpacer size="m" />
                 <EuiFlexGroup gutterSize="none">
                   <EuiTitle size="xxs">
-                    <span>AUC ROC</span>
+                    <span>
+                      <FormattedMessage
+                        id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle"
+                        defaultMessage="Receiver operating characteristic (ROC) curve"
+                      />
+                    </span>
                   </EuiTitle>
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
                       anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
                       content={i18n.translate(
-                        'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip',
                         {
-                          defaultMessage: 'AUC ROC Help Text',
+                          defaultMessage:
+                            'The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds.',
                         }
                       )}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 {!isLoadingAucRoc && aucRocData.length > 0 && (
-                  <VegaChart
-                    vegaSpec={getAucRocChartVegaLiteSpec(classificationClasses, aucRocData)}
-                  />
+                  <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
+                    <VegaChart
+                      vegaSpec={getAucRocChartVegaLiteSpec(classificationClasses, aucRocData)}
+                    />
+                  </div>
                 )}
                 {isLoadingAucRoc && <VegaChartLoading />}
               </>

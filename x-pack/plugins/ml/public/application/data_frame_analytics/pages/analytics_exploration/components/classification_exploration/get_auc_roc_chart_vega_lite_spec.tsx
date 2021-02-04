@@ -11,15 +11,15 @@ import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
 import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { LEGEND_TYPES } from '../../../../../components/vega_chart';
+
 import { AucRocCurveItem } from '../../../../common/analytics';
 
-export const LEGEND_TYPES = {
-  NOMINAL: 'nominal',
-  QUANTITATIVE: 'quantitative',
-} as const;
-export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
-
+const GRAY = euiPaletteGray(1)[0];
 const BASELINE = 'baseline';
+const SIZE = 300;
 
 // returns a custom color range that includes gray for the baseline
 function getColorRangeNominal(classificationClasses: string[]) {
@@ -31,7 +31,7 @@ function getColorRangeNominal(classificationClasses: string[]) {
     classificationClasses.length
   );
 
-  colorRangeNominal.splice(baselineIndex, 0, euiPaletteGray(1)[0]);
+  colorRangeNominal.splice(baselineIndex, 0, GRAY);
 
   return colorRangeNominal;
 }
@@ -52,13 +52,15 @@ export const getAucRocChartVegaLiteSpec = (
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
+    // Left padding of 45px to align the left axis of the chart with the confusion matrix above.
+    padding: { left: 45, top: 0, right: 0, bottom: 0 },
     config: {
       legend: {
         orient: 'right',
       },
       view: {
-        continuousHeight: 300,
-        continuousWidth: 400,
+        continuousHeight: SIZE,
+        continuousWidth: SIZE,
       },
     },
     data: {
@@ -88,13 +90,29 @@ export const getAucRocChartVegaLiteSpec = (
       x: {
         field: 'fpr',
         sort: null,
-        title: 'False Positive Rate (FPR)',
+        title: i18n.translate('xpack.ml.dataframe.analytics.rocChartSpec.xAxisTitle', {
+          defaultMessage: 'False Positive Rate (FPR)',
+        }),
         type: 'quantitative',
+        axis: {
+          tickColor: GRAY,
+          labelColor: GRAY,
+          domainColor: GRAY,
+          titleColor: GRAY,
+        },
       },
       y: {
         field: 'tpr',
-        title: 'True Positive Rate (TPR) (a.k.a Recall)',
+        title: i18n.translate('xpack.ml.dataframe.analytics.rocChartSpec.yAxisTitle', {
+          defaultMessage: 'True Positive Rate (TPR) (a.k.a Recall)',
+        }),
         type: 'quantitative',
+        axis: {
+          tickColor: GRAY,
+          labelColor: GRAY,
+          domainColor: GRAY,
+          titleColor: GRAY,
+        },
       },
       tooltip: [
         { type: LEGEND_TYPES.NOMINAL, field: 'class_name' },
@@ -102,9 +120,8 @@ export const getAucRocChartVegaLiteSpec = (
         { type: LEGEND_TYPES.QUANTITATIVE, field: 'tpr' },
       ],
     },
-    height: 400,
-    width: 400,
+    height: SIZE,
+    width: SIZE,
     mark: 'line',
-    title: 'ROC Curve',
   };
 };
