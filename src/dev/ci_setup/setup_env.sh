@@ -180,7 +180,6 @@ fi
 ###
 cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 
-
 ###
 ### make sure bazelisk is installed on CI
 ###
