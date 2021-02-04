@@ -228,4 +228,46 @@ To add a custom label to a field, go to *Stack Management > Index Pattern*. Deta
 image::user/images/highlights-custom-field-labels.png[Drilldown table row trigger]
 
 
+[float]
+[[ml-jobs-space]]
+=== {ml-cap} jobs are now space-aware
+
+{anomaly-detect-cap} and {dfanalytics} jobs are space-aware starting in 7.11. 
+{kibana-ref}/xpack-spaces.html[Spaces] enable you to organize your {ml} jobs 
+and other {kib} saved objects into meaningful categories. Once a {ml} job is 
+limited to a {kib} space, users only see the job if they are assigned to the 
+same space. Extra checks for spaces have been added when deleting jobs, and a 
+warning is shown if any jobs are missing their saved objects.
+
+
+[float]
+[[index-data-visualizer-design]]
+=== Index data visualizer has new design
+
+The {ml} data visualizer provides a view into your indices to give a better 
+understanding of the fields in the data set prior to creating {anomaly-detect} 
+or {dfanalytics-jobs}. The data visualizer went through a major redesign and the 
+previous card based display is switched to a table. It has the benefit of a more 
+compact layout, a new document count chart, and expanded rows for viewing 
+details on individual fields.
+
+[role="screenshot"]
+image::user/images/highlights-index-data-vis-design.png[Index data visualizer table]
+
+
+[float]
+[[single-metric-viewer-nav]]
+=== Enhanced navigation for the Single Metric Viewer
+
+The new navigation enables you to explore the results of the {anomaly-jobs} 
+easier and provides more control for selecting the partitioning field in the 
+Single Metric Viewer. An indication of the maximum anomaly score for each value 
+is now displayed, and you have the possibility to sort matches by score or name 
+and to limit the selection to values which are anomalous over the selected time 
+range.
+
+[role="screenshot"]
+image::user/images/highlights-smv-nav.png[Single Metric Viewer enhanced navigation]
+
+
 // end::notable-highlights[]
