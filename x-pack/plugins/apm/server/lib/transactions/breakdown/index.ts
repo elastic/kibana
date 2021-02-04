@@ -22,13 +22,16 @@ import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getTransactionBreakdown({
+  environment,
   setup,
   serviceName,
   transactionName,
   transactionType,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
@@ -81,6 +84,7 @@ export async function getTransactionBreakdown({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { range: rangeFilter(start, end) },
+    ...getEnvironmentFilter(environment),
     ...esFilter,
   ];
 

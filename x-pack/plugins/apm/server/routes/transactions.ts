@@ -207,25 +207,25 @@ export const transactionThroughputChatsRoute = createRoute({
       t.partial({ transactionName: t.string }),
       uiFiltersRt,
       rangeRt,
+      environmentRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType, transactionName } = context.params.query;
-
-    if (!setup.uiFilters.environment) {
-      throw Boom.badRequest(
-        `environment is a required property of the ?uiFilters JSON for transaction_groups/charts.`
-      );
-    }
+    const {
+      environment,
+      transactionType,
+      transactionName,
+    } = context.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     return await getThroughputCharts({
+      environment,
       serviceName,
       transactionType,
       transactionName,
@@ -291,6 +291,7 @@ export const transactionChartsBreakdownRoute = createRoute({
     query: t.intersection([
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -299,9 +300,14 @@ export const transactionChartsBreakdownRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionName, transactionType } = context.params.query;
+    const {
+      environment,
+      transactionName,
+      transactionType,
+    } = context.params.query;
 
     return getTransactionBreakdown({
+      environment,
       serviceName,
       transactionName,
       transactionType,
@@ -318,6 +324,7 @@ export const transactionChartsErrorRateRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
+      environmentRt,
       uiFiltersRt,
       rangeRt,
       t.type({ transactionType: t.string }),
@@ -329,13 +336,14 @@ export const transactionChartsErrorRateRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { transactionType, transactionName } = params.query;
+    const { environment, transactionType, transactionName } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
     return getErrorRate({
+      environment,
       serviceName,
       transactionType,
       transactionName,

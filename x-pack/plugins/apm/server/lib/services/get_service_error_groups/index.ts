@@ -21,12 +21,14 @@ import {
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export type ServiceErrorGroupItem = ValuesType<
   PromiseReturnType<typeof getServiceErrorGroups>
 >;
 
 export async function getServiceErrorGroups({
+  environment,
   serviceName,
   setup,
   size,
@@ -36,6 +38,7 @@ export async function getServiceErrorGroups({
   sortField,
   transactionType,
 }: {
+  environment?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   size: number;
@@ -61,6 +64,7 @@ export async function getServiceErrorGroups({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

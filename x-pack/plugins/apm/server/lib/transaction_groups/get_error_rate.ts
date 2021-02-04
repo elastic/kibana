@@ -26,14 +26,17 @@ import {
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../helpers/transaction_error_rate';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 
 export async function getErrorRate({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
@@ -64,6 +67,7 @@ export async function getErrorRate({
     ),
     ...transactionNamefilter,
     ...transactionTypefilter,
+    ...getEnvironmentFilter(environment),
     ...esFilter,
   ];
 

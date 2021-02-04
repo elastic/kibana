@@ -13,7 +13,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 export function useTransactionBreakdown() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, transactionName } = urlParams;
+  const { environment, start, end, transactionName } = urlParams;
   const { transactionType } = useApmServiceContext();
 
   const { data = { timeseries: undefined }, error, status } = useFetcher(
@@ -25,6 +25,7 @@ export function useTransactionBreakdown() {
           params: {
             path: { serviceName },
             query: {
+              environment,
               start,
               end,
               transactionName,
@@ -35,7 +36,15 @@ export function useTransactionBreakdown() {
         });
       }
     },
-    [serviceName, start, end, transactionType, transactionName, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      uiFilters,
+    ]
   );
 
   return {

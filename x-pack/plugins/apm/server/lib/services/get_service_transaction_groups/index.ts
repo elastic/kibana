@@ -15,6 +15,7 @@ import {
 import { mergeTransactionGroupData } from './merge_transaction_group_data';
 
 export async function getServiceTransactionGroups({
+  environment,
   serviceName,
   setup,
   size,
@@ -26,6 +27,7 @@ export async function getServiceTransactionGroups({
   transactionType,
   latencyAggregationType,
 }: {
+  environment?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   size: number;
@@ -45,6 +47,7 @@ export async function getServiceTransactionGroups({
     isAggregationAccurate,
   } = await getTransactionGroupsForPage({
     apmEventClient,
+    environment,
     start,
     end,
     serviceName,
@@ -62,6 +65,7 @@ export async function getServiceTransactionGroups({
 
   const timeseriesData = await getTimeseriesDataForTransactionGroups({
     apmEventClient,
+    environment,
     start,
     end,
     esFilter,

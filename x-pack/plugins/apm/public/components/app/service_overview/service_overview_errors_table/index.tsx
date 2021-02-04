@@ -52,7 +52,7 @@ const DEFAULT_SORT = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end },
+    urlParams: { environment, start, end },
     uiFilters,
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
@@ -152,6 +152,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         params: {
           path: { serviceName },
           query: {
+            environment,
             start,
             end,
             uiFilters: JSON.stringify(uiFilters),
@@ -178,6 +179,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       });
     },
     [
+      environment,
       start,
       end,
       serviceName,

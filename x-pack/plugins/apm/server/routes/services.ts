@@ -262,6 +262,7 @@ export const serviceErrorGroupsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
+      environmentRt,
       rangeRt,
       uiFiltersRt,
       t.type({
@@ -285,6 +286,7 @@ export const serviceErrorGroupsRoute = createRoute({
     const {
       path: { serviceName },
       query: {
+        environment,
         numBuckets,
         pageIndex,
         size,
@@ -294,6 +296,7 @@ export const serviceErrorGroupsRoute = createRoute({
       },
     } = context.params;
     return getServiceErrorGroups({
+      environment,
       serviceName,
       setup,
       size,

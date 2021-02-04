@@ -20,6 +20,7 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { getThroughputBuckets } from './transform';
 
 export type ThroughputChartsResponse = PromiseReturnType<
@@ -27,6 +28,7 @@ export type ThroughputChartsResponse = PromiseReturnType<
 >;
 
 async function searchThroughput({
+  environment,
   serviceName,
   transactionType,
   transactionName,
@@ -34,6 +36,7 @@ async function searchThroughput({
   searchAggregatedTransactions,
   intervalString,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -50,6 +53,7 @@ async function searchThroughput({
       searchAggregatedTransactions
     ),
     { term: { [TRANSACTION_TYPE]: transactionType } },
+    ...getEnvironmentFilter(environment),
     ...setup.esFilter,
   ];
 
@@ -90,12 +94,14 @@ async function searchThroughput({
 }
 
 export async function getThroughputCharts({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -105,6 +111,7 @@ export async function getThroughputCharts({
   const { bucketSize, intervalString } = getBucketSize(setup);
 
   const response = await searchThroughput({
+    environment,
     serviceName,
     transactionType,
     transactionName,
