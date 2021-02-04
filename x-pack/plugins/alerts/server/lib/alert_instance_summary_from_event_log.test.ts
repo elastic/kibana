@@ -193,18 +193,18 @@ describe('alertInstanceSummaryFromEventLog', () => {
                 _source: {
                   error: {
                     message: 'oof!',
-                  }
-                }
-              }
-            ]
-          }
-        }
+                  },
+                },
+              },
+            ],
+          },
+        },
       },
       last_execution_state: {
         max_timestamp: {
           value_as_string: '2020-06-18T00:00:10.000Z',
-        }
-      }
+        },
+      },
     };
     const instancesCreatedSummary = {
       instances: {},
@@ -624,19 +624,19 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
-      "errors_state": {
-        "doc_count": 0,
-        "action": {
-            "hits": {
-                "total": {
-                    "value": 0,
-                    "relation": "eq"
-                },
-                "max_score": null,
-                "hits": []
-            }
-        }
-    },
+      errors_state: {
+        doc_count: 0,
+        action: {
+          hits: {
+            total: {
+              value: 0,
+              relation: 'eq',
+            },
+            max_score: null,
+            hits: [],
+          },
+        },
+      },
       last_execution_state: {
         '@timestamp': '2020-06-18T00:00:10.000Z',
       },
