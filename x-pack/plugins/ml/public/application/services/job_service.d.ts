@@ -9,7 +9,6 @@ import { SearchResponse } from 'elasticsearch';
 import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
 import { CombinedJob, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
-import { CREATED_BY_LABEL } from '../../../common/constants/new_job';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -20,7 +19,7 @@ declare interface JobService {
   jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
-    createdBy?: CREATED_BY_LABEL | null;
+    createdBy?: string;
     datafeed?: Datafeed;
     job: any;
     skipTimeRangeStep: boolean;
