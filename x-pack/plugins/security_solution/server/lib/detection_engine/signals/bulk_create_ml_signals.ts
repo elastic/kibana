@@ -42,8 +42,9 @@ interface BulkCreateMlSignalsParams {
   buildRuleMessage: BuildRuleMessage;
 }
 
-interface EcsAnomaly extends Anomaly {
+export interface EcsAnomaly extends Anomaly {
   '@timestamp': string;
+  __anomaly_score: number;
 }
 
 export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
@@ -68,8 +69,10 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   );
   const setTimestamp = (_anomaly: Anomaly) =>
     set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
+  const setAnomalyScore = (_anomaly: Anomaly) =>
+    set(_anomaly, '__anomaly_score', _anomaly.record_score);
 
-  return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
+  return flow(omitDottedFields, setNestedFields, setTimestamp, setAnomalyScore)(anomaly);
 };
 
 const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<EcsAnomaly> => {

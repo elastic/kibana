@@ -8,7 +8,7 @@
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 
-export const SIGNALS_TEMPLATE_VERSION = 14;
+export const SIGNALS_TEMPLATE_VERSION = 24;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {

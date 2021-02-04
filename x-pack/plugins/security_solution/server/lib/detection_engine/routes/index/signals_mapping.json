@@ -10,6 +10,9 @@
               }
             }
           },
+          "anomaly_score": {
+            "type": "float"
+          },
           "parent": {
             "properties": {
               "rule": {

@@ -13,6 +13,7 @@ import {
   sampleDocWithAncestors,
   sampleRuleSO,
   sampleWrappedSignalHit,
+  sampleDocWithOverrides,
 } from './__mocks__/es_results';
 import {
   buildBulkBody,
@@ -24,6 +25,7 @@ import {
 import { SignalHit, SignalSourceHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { buildEcsAnomaly } from './bulk_create_ml_signals.mock';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -238,6 +240,38 @@ describe('buildBulkBody', () => {
       },
     };
     expect(fakeSignalSourceHit).toEqual(expected);
+  });
+
+  it('builds a document with an anomaly score from an anomaly result', () => {
+    const anomaly = buildEcsAnomaly();
+    const anomalyScore = anomaly.__anomaly_score;
+    const sampleParams = sampleRuleAlertParams();
+    const doc = sampleDocWithOverrides(anomaly);
+
+    const builtSignal = buildBulkBody({
+      doc,
+      ruleParams: sampleParams,
+      id: sampleRuleGuid,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+
+    expect(builtSignal.__anomaly_score).toBeUndefined();
+    expect(builtSignal).toEqual(
+      expect.objectContaining({
+        signal: expect.objectContaining({
+          anomaly_score: anomalyScore,
+        }),
+      })
+    );
   });
 
   test('bulk body builds original_event if it exists on the event to begin with', () => {

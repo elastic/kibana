@@ -73,7 +73,10 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
+  // these fields are set on results at query time in order to be promoted to mapped fields in the above code.
   delete doc._source.threshold_result;
+  delete doc._source.__anomaly_score;
+
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,

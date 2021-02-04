@@ -222,6 +222,28 @@ export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   sort: [],
 });
 
+export const sampleDocWithOverrides = (
+  overrides: Partial<SignalSourceHit['_source']> = {}
+): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: sampleIdGuid,
+  _source: {
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    ...overrides,
+  },
+  sort: [],
+});
+
+export const sampleCustomSearchResults = (hits: SignalSourceHit[]): SignalSearchResponse => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: { total: { value: hits.length, relation: 'eq' }, max_score: 0, hits },
+});
+
 export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   took: 10,
   timed_out: false,

@@ -16,11 +16,14 @@ import {
   sampleBulkCreateDuplicateResult,
   sampleBulkCreateErrorResult,
   sampleDocWithAncestors,
+  sampleCustomSearchResults,
+  sampleDocWithOverrides,
 } from './__mocks__/es_results';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
+import { buildEcsAnomaly } from './bulk_create_ml_signals.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -205,6 +208,52 @@ describe('singleBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(createdItemsCount).toEqual(0);
+  });
+
+  test('creates ML signals in the correct form', async () => {
+    const anomaly = buildEcsAnomaly();
+    const sampleParams = sampleRuleAlertParams();
+    mockService.callCluster.mockResolvedValueOnce({
+      took: 100,
+      errors: false,
+      items: [
+        {
+          fakeItemValue: 'fakeItemKey',
+        },
+      ],
+    });
+    await singleBulkCreate({
+      filteredEvents: sampleCustomSearchResults([sampleDocWithOverrides(anomaly)]),
+      ruleParams: sampleParams,
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      actions: [],
+      name: 'rule-name',
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(mockService.callCluster).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.arrayContaining([
+          expect.objectContaining({
+            signal: expect.objectContaining({
+              anomaly_score: anomaly.__anomaly_score,
+            }),
+          }),
+        ]),
+      })
+    );
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {

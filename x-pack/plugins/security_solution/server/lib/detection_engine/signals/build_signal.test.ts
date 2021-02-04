@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sampleDocNoSortId } from './__mocks__/es_results';
+import { sampleDocNoSortId, sampleDocWithOverrides } from './__mocks__/es_results';
 import {
   buildSignal,
   buildParent,
@@ -20,6 +20,7 @@ import {
 } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { buildEcsAnomaly } from './bulk_create_ml_signals.mock';
 
 describe('buildSignal', () => {
   beforeEach(() => {
@@ -187,6 +188,23 @@ describe('buildSignal', () => {
       depth: 1,
     };
     expect(signal).toEqual(expected);
+  });
+
+  it('builds a signal with anomaly_score if it is present on the incoming document', () => {
+    const anomaly = buildEcsAnomaly();
+    const anomalyScore = anomaly.__anomaly_score;
+    const doc = sampleDocWithOverrides(anomaly);
+    const rule = getRulesSchemaMock();
+    const signal = {
+      ...buildSignal([doc], rule),
+      ...additionalSignalFields(doc),
+    };
+
+    expect(signal).toEqual(
+      expect.objectContaining({
+        anomaly_score: anomalyScore,
+      })
+    );
   });
 
   test('it builds a ancestor correctly if the parent does not exist', () => {

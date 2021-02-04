@@ -105,6 +105,7 @@ export const additionalSignalFields = (doc: BaseSignalHit) => {
     original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
     original_event: doc._source.event ?? undefined,
     threshold_result: doc._source.threshold_result,
+    anomaly_score: doc._source.__anomaly_score ?? undefined,
     original_signal:
       doc._source.signal != null && !isEventTypeSignal(doc) ? doc._source.signal : undefined,
   };
