@@ -26,10 +26,12 @@ import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/e
 import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
+  LENS_TOGGLE_ACTION,
 } from './datatable_visualization/components/constants';
 import type {
   LensSortActionData,
   LensResizeActionData,
+  LensToggleActionData,
 } from './datatable_visualization/components/types';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -368,7 +370,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
   palette?: string[];
 }
@@ -649,6 +651,7 @@ export interface LensBrushEvent {
 interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
+  [LENS_TOGGLE_ACTION]: LensToggleActionData;
 }
 type LensEditSupportedActions = keyof LensEditContextMapping;
 
