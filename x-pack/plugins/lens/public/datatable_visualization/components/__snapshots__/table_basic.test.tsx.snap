@@ -101,7 +101,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
@@ -137,7 +138,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
@@ -173,7 +175,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
@@ -325,7 +328,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
@@ -361,7 +365,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
@@ -397,7 +402,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 Object {
                   "color": "text",
                   "data-test-subj": "lensDatatableHide",
-                  "iconType": "empty",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
                   "label": "Hide",
                   "onClick": [Function],
                   "size": "xs",
