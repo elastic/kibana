@@ -347,6 +347,8 @@ logging.root.level: off
 ```
 ### Dedicated loggers
 
+**Metrics Logs**
+
 The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
 The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
 
@@ -364,6 +366,28 @@ ops.interval: 5000
 ```
 
 The minimum interval is 100ms and defaults to 5000ms.
+
+**Request and Response Logs**
+
+The `http.server.response` logger is configured with `debug` level and will automatically output
+data about http requests and responses occurring on the Kibana server.
+The message contains some high-level information, and the corresponding log meta contains the following:
+
+| Meta property | Description | Format
+| :------------------------- | :-------------------------- | :-------------------------- |
+| client.ip | IP address of the requesting client | ip |
+| http.request.method | http verb for the request (uppercase) | string |
+| http.request.mime_type | (optional) mime as specified in the headers | string |
+| http.request.referrer | (optional) referrer | string |
+| http.request.headers | request headers | object |
+| http.response.body.bytes | (optional) Calculated response payload size in bytes | number |
+| http.response.status_code | status code returned | number |
+| http.response.headers | response headers | object |
+| http.response.responseTime | (optional) Calculated response time in ms | number |
+| url.path | request path | string |
+| url.query | (optional) request query string | string |
+| user_agent.original | raw user-agent string provided in request headers | string |
+
 ## Usage
 
 Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with 
@@ -478,6 +502,26 @@ logging:
 
 #### logging.events
 Define a custom logger for a specific context.
+
+**`logging.events.ops`** outputs sample system and process information at a regular interval.
+With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+```yaml
+  loggers:
+    - context: metrics.ops
+      appenders: [console]
+      level: debug
+```
+
+**`logging.events.request` and `logging.events.response`** provide logs for each request handled
+by the http service. With the new logging config, these are provided by a dedicated [context](#logger-hierarchy),
+and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+```yaml
+  loggers:
+    - context: http.server.response
+      appenders: [console]
+      level: debug
+```
 
 #### logging.filter
 TBD

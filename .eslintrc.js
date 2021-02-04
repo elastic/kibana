@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const APACHE_2_0_LICENSE_HEADER = `
@@ -27,7 +27,7 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
-const DUAL_LICENSE_HEADER = `
+const OLD_DUAL_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -37,11 +37,30 @@ const DUAL_LICENSE_HEADER = `
  */
 `;
 
-const ELASTIC_LICENSE_HEADER = `
+const DUAL_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+`;
+
+const OLD_ELASTIC_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
+ */
+`;
+
+const ELASTIC_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 `;
 
@@ -136,6 +155,8 @@ module.exports = {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -166,6 +187,8 @@ module.exports = {
             licenses: [
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -201,8 +224,10 @@ module.exports = {
           'error',
           {
             licenses: [
-              DUAL_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -228,9 +253,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -251,9 +278,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -274,9 +303,11 @@ module.exports = {
           'error',
           {
             licenses: [
+              APACHE_2_0_LICENSE_HEADER,
               DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
-              APACHE_2_0_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
             ],
