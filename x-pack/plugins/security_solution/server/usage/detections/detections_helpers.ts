@@ -229,20 +229,24 @@ export const getMlJobMetrics = async (
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .jobs(jobsType);
 
-      const datafeedStatsCache = await ml
+      const jobDetailsCache = new Map();
+      jobDetails.jobs.forEach((detail) =>
+        jobDetailsCache.set(detail.job_id, detail)
+      );
+
+      const datafeedStats = await ml
         .anomalyDetectorsProvider(fakeRequest, savedObjectClient)
         .datafeedStats();
 
+      const datafeedStatsCache = new Map();
+      datafeedStats.datafeeds.forEach((datafeedStat) => 
+        datafeedStatsCache.set(`${datafeedStat.datafeed_id}`, datafeedStat)
+      );
+
       return securityJobStats.jobs.map((jobStat) => {
         const jobId = jobStat.job_id;
-
-        // TODO: o(n) -> o(1)
-        const jobDetail = jobDetails.jobs.find((job) => job.job_id === jobId);
-
-        // TODO: o(n) -> o(1)
-        const datafeedStat = datafeedStatsCache.datafeeds.find(
-          (datafeed) => datafeed.datafeed_id === `datafeed-${jobId}`
-        );
+        const jobDetail = jobDetailsCache.get(jobStat.job_id);
+        const datafeedStat = datafeedStatsCache.get(`datafeed-${jobId}`);
 
         return {
           job_id: jobId,
