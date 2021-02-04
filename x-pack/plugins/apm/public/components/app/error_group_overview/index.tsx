@@ -7,29 +7,26 @@
 
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { Projection } from '../../../../common/projections';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
-import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
 interface ErrorGroupOverviewProps {
   serviceName: string;
 }
 
-function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
+export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end, sortField, sortDirection } = urlParams;
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
@@ -68,18 +65,6 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
-  const localUIFiltersConfig = useMemo(() => {
-    const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
-      params: {
-        serviceName,
-      },
-      projection: Projection.errorGroups,
-    };
-
-    return config;
-  }, [serviceName]);
-
   if (!errorDistributionData || !errorGroupListData) {
     return null;
   }
@@ -88,41 +73,34 @@ function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
     <>
       <SearchBar />
       <EuiPage>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <LocalUIFilters {...localUIFiltersConfig} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <EuiPanel>
-              <ErrorDistribution
-                distribution={errorDistributionData}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                  {
-                    defaultMessage: 'Error occurrences',
-                  }
-                )}
-              />
-            </EuiPanel>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiPanel>
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                {
+                  defaultMessage: 'Error occurrences',
+                }
+              )}
+            />
+          </EuiPanel>
 
+          <EuiSpacer size="s" />
+
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>Errors</h3>
+            </EuiTitle>
             <EuiSpacer size="s" />
 
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <h3>Errors</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-
-              <ErrorGroupList
-                items={errorGroupListData}
-                serviceName={serviceName}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+            <ErrorGroupList
+              items={errorGroupListData}
+              serviceName={serviceName}
+            />
+          </EuiPanel>
         </EuiFlexGroup>
       </EuiPage>
     </>
   );
 }
-
-export { ErrorGroupOverview };
