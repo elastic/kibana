@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
@@ -32,6 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
+        `--migrations.enableV2=false`,
         `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
         `--logging.json=false`,
         `--server.maxPayloadBytes=1679958`,

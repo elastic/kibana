@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
@@ -19,7 +21,7 @@ import {
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
   ResilientPushToServiceApiParams,
-  ServiceNowPushToServiceApiParams,
+  ServiceNowITSMPushToServiceApiParams,
   SimpleComment,
   Transformer,
   TransformerArgs,
@@ -105,7 +107,11 @@ export const serviceFormatter = (
         thirdPartyName: 'Resilient',
       };
     case ConnectorTypes.servicenow:
-      const { severity, urgency, impact } = params as ServiceNowPushToServiceApiParams['incident'];
+      const {
+        severity,
+        urgency,
+        impact,
+      } = params as ServiceNowITSMPushToServiceApiParams['incident'];
       return {
         incident: { severity, urgency, impact },
         thirdPartyName: 'ServiceNow',

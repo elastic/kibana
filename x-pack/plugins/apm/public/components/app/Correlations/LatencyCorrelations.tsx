@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -26,10 +27,7 @@ import {
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SignificantTermsTable } from './SignificantTermsTable';
 import { ChartContainer } from '../../shared/charts/chart_container';
 
@@ -65,34 +63,37 @@ export function LatencyCorrelations() {
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/correlations/slow_transactions',
-        params: {
-          query: {
-            serviceName,
-            transactionName,
-            transactionType,
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-            durationPercentile,
-            fieldNames: fieldNames.map((field) => field.label).join(','),
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/correlations/slow_transactions',
+          params: {
+            query: {
+              serviceName,
+              transactionName,
+              transactionType,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              durationPercentile,
+              fieldNames: fieldNames.map((field) => field.label).join(','),
+            },
           },
-        },
-      });
-    }
-  }, [
-    serviceName,
-    start,
-    end,
-    transactionName,
-    transactionType,
-    uiFilters,
-    durationPercentile,
-    fieldNames,
-  ]);
+        });
+      }
+    },
+    [
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+      durationPercentile,
+      fieldNames,
+    ]
+  );
 
   return (
     <>

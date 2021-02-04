@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -63,12 +63,6 @@ export function decorateEsError(error: EsErrors) {
   }
 
   if (responseErrors.isNotFound(error.statusCode)) {
-    const match = error?.meta?.body?.error?.reason?.match(
-      /no such index \[(.+)\] and \[require_alias\] request flag is \[true\] and \[.+\] is not an alias/
-    );
-    if (match?.length > 0) {
-      return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
-    }
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }
 
