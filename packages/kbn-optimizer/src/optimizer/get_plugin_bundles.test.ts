@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
@@ -77,8 +77,8 @@ it('returns a bundle for core and each plugin', () => {
         "type": "plugin",
       },
       Object {
-        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
-     * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
+        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements. 
+     * Licensed under the Elastic License 2.0; you may not use this file except in compliance with the Elastic License 2.0. */
     ",
         "contextDir": <repoRoot>/x-pack/plugins/box,
         "id": "box",
