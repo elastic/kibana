@@ -79,16 +79,19 @@ export interface AlertContextMeta {
 }
 
 type Criteria = InventoryMetricConditions[];
-type Props = AlertTypeParamsExpressionProps<
-  {
-    criteria: Criteria;
-    nodeType: InventoryItemType;
-    filterQuery?: string;
-    filterQueryText?: string;
-    sourceId: string;
-    alertOnNoData?: boolean;
-  },
-  AlertContextMeta
+type Props = Omit<
+  AlertTypeParamsExpressionProps<
+    {
+      criteria: Criteria;
+      nodeType: InventoryItemType;
+      filterQuery?: string;
+      filterQueryText?: string;
+      sourceId: string;
+      alertOnNoData?: boolean;
+    },
+    AlertContextMeta
+  >,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 
 export const defaultExpression = {

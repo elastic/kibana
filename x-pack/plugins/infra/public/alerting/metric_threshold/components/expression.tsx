@@ -29,8 +29,11 @@ import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import {
+  IErrorObject,
+  AlertTypeParamsExpressionProps,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../triggers_actions_ui/public/types';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -45,15 +48,10 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-interface Props {
-  errors: IErrorObject[];
-  alertParams: AlertParams;
-  alertInterval: string;
-  alertThrottle: string;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  metadata: AlertContextMeta;
-}
+type Props = Omit<
+  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+>;
 
 const defaultExpression = {
   aggType: Aggregators.AVERAGE,
@@ -65,7 +63,15 @@ const defaultExpression = {
 export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    errors,
+    alertInterval,
+    alertThrottle,
+    metadata,
+    alertNotifyWhen,
+  } = props;
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -75,7 +81,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit>('m');
+  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
@@ -173,7 +179,7 @@ export const Expressions: React.FC<Props> = (props) => {
           timeUnit: tu,
         })) || [];
       setTimeUnit(tu as Unit);
-      setAlertParams('criteria', criteria);
+      setAlertParams('criteria', criteria as AlertParams['criteria']);
     },
     [alertParams.criteria, setAlertParams]
   );
@@ -190,7 +196,7 @@ export const Expressions: React.FC<Props> = (props) => {
           timeSize,
           timeUnit,
           aggType: metric.aggregation,
-        }))
+        })) as AlertParams['criteria']
       );
     } else {
       setAlertParams('criteria', [defaultExpression]);
@@ -279,7 +285,7 @@ export const Expressions: React.FC<Props> = (props) => {
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
               setAlertParams={updateParams}
-              errors={errors[idx] || emptyError}
+              errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
               <ExpressionChart
@@ -395,6 +401,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertThrottle={alertThrottle}
+        alertNotifyWhen={alertNotifyWhen}
         alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
         showNoDataResults={alertParams.alertOnNoData}

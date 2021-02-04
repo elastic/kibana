@@ -16,8 +16,10 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
-  metric?: string;
+export type MetricExpression = Omit<MetricExpressionParams, 'metric' | 'timeSize' | 'timeUnit'> & {
+  metric?: MetricExpressionParams['metric'];
+  timeSize?: MetricExpressionParams['timeSize'];
+  timeUnit?: MetricExpressionParams['timeUnit'];
 };
 
 export enum AGGREGATION_TYPES {
@@ -51,9 +53,9 @@ export interface ExpressionChartData {
   series: ExpressionChartSeries;
 }
 
-export interface AlertParams {
+export interface AlertParams extends Record<string, unknown> {
   criteria: MetricExpression[];
-  groupBy?: string[];
+  groupBy?: string | string[];
   filterQuery?: string;
   sourceId: string;
   filterQueryText?: string;
