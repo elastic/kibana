@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -45,6 +45,11 @@ export class DocLinksService {
         },
         auditbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
+        },
+        enterpriseSearch: {
+          base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
+          appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
+          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -221,6 +226,7 @@ export class DocLinksService {
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
+          indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
@@ -259,6 +265,11 @@ export interface DocLinksStart {
     };
     readonly metricbeat: {
       readonly base: string;
+    };
+    readonly enterpriseSearch: {
+      readonly base: string;
+      readonly appSearchBase: string;
+      readonly workplaceSearchBase: string;
     };
     readonly heartbeat: {
       readonly base: string;
@@ -347,6 +358,7 @@ export interface DocLinksStart {
       createPipeline: string;
       createTransformRequest: string;
       executeWatchActionModes: string;
+      indexExists: string;
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;

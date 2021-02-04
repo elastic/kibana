@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -30,6 +31,8 @@ import {
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { ITermJoinSource } from '../term_join_source/term_join_source';
+import { IField } from '../../fields/field';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -47,7 +50,7 @@ export function extractPropertiesMap(rawEsData: any, countPropertyName: string):
   return propertiesMap;
 }
 
-export class ESTermSource extends AbstractESAggSource {
+export class ESTermSource extends AbstractESAggSource implements ITermJoinSource {
   static type = SOURCE_TYPES.ES_TERM_SOURCE;
 
   static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
@@ -79,7 +82,7 @@ export class ESTermSource extends AbstractESAggSource {
     });
   }
 
-  hasCompleteConfig() {
+  hasCompleteConfig(): boolean {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
@@ -147,6 +150,7 @@ export class ESTermSource extends AbstractESAggSource {
           rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
         },
       }),
+      searchSessionId: searchFilters.searchSessionId,
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
@@ -172,5 +176,9 @@ export class ESTermSource extends AbstractESAggSource {
           size: this._descriptor.size,
         }
       : null;
+  }
+
+  getRightFields(): IField[] {
+    return this.getMetricFields();
   }
 }

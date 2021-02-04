@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
@@ -12,7 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
-import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';

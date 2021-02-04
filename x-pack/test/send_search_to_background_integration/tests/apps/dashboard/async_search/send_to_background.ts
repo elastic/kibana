@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -30,9 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.deleteAllSearchSessions();
     });
 
-    it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
+    it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes. Back button restores a session.', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      const url = await browser.getCurrentUrl();
+      let url = await browser.getCurrentUrl();
       const fakeSessionId = '__fake__';
       const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
       await browser.get(savedSessionURL);
@@ -53,6 +54,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sum of Bytes by Extension'
       );
       expect(session2).not.to.be(fakeSessionId);
+
+      // back button should restore the session:
+      url = await browser.getCurrentUrl();
+      expect(url).not.to.contain('searchSessionId');
+
+      await browser.goBack();
+
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain('searchSessionId');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.expectState('restored');
+      expect(
+        await dashboardPanelActions.getSearchSessionIdByTitle('Sum of Bytes by Extension')
+      ).to.be(fakeSessionId);
     });
 
     it('Saves and restores a session', async () => {
@@ -66,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // load URL to restore a saved session
+      // TODO: replace with clicking on "Re-run link"
       const url = await browser.getCurrentUrl();
       const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
       await browser.get(savedSessionURL);
@@ -82,6 +98,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
+
+      // navigating to a listing page clears the session
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await searchSessions.missingOrFail();
     });
   });
 }

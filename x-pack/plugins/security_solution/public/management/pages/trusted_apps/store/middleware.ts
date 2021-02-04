@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -53,6 +54,7 @@ import {
   getListTotalItemsCount,
   trustedAppsListPageActive,
   entriesExistState,
+  policiesState,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -267,6 +269,53 @@ const checkTrustedAppsExistIfNeeded = async (
   }
 };
 
+export const retrieveListOfPoliciesIfNeeded = async (
+  { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = getState();
+  const currentPoliciesState = policiesState(currentState);
+  const isLoading = isLoadingResourceState(currentPoliciesState);
+  const isPageActive = trustedAppsListPageActive(currentState);
+  const isCreateFlow = isCreationDialogLocation(currentState);
+
+  if (isPageActive && isCreateFlow && !isLoading) {
+    dispatch({
+      type: 'trustedAppsPoliciesStateChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        previousState: currentPoliciesState,
+      } as TrustedAppsListPageState['policies'],
+    });
+
+    try {
+      const policyList = await trustedAppsService.getPolicyList({
+        query: {
+          page: 1,
+          perPage: 1000,
+        },
+      });
+
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: policyList,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: 'trustedAppsPoliciesStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: error.body,
+          lastLoadedState: getLastLoadedResourceState(policiesState(getState())),
+        },
+      });
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -281,6 +330,7 @@ export const createTrustedAppsPageMiddleware = (
 
     if (action.type === 'userChangedUrl') {
       updateCreationDialogIfNeeded(store);
+      retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'trustedAppCreationDialogConfirmed') {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -16,11 +17,6 @@ export function registerLensUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
   const lensUsageCollector = usageCollection.makeUsageCollector<LensUsage>({
     type: 'lens',
     async fetch() {
@@ -55,7 +51,10 @@ export function registerLensUsageCollector(
         };
       }
     },
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     schema: lensUsageSchema,
   });
 

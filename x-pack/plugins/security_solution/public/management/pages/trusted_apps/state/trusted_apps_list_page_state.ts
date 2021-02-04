@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export interface Pagination {
   pageIndex: number;
@@ -53,6 +55,8 @@ export interface TrustedAppsListPageState {
     confirmed: boolean;
     submissionResourceState: AsyncResourceState<TrustedApp>;
   };
+  /** A list of all available polices for use in associating TA to policies */
+  policies: AsyncResourceState<GetPolicyListResponse>;
   location: TrustedAppsListPageLocation;
   active: boolean;
 }

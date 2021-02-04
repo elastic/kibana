@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { delay } from 'bluebird';
@@ -289,13 +289,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           }
 
           const origin = document.querySelector(arguments[0]);
-          const target = document.querySelector(arguments[1]);
 
           const dragStartEvent = createEvent('dragstart');
           dispatchEvent(origin, dragStartEvent);
 
           setTimeout(() => {
             const dropEvent = createEvent('drop');
+            const target = document.querySelector(arguments[1]);
             dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
             const dragEndEvent = createEvent('dragend');
             dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);

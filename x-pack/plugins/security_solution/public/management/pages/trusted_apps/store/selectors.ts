@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -23,6 +24,7 @@ import {
   TrustedAppsListPageLocation,
   TrustedAppsListPageState,
 } from '../state';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState>): boolean => {
   const freshDataTimestamp = state.listView.freshDataTimestamp;
@@ -184,3 +186,17 @@ export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boole
 export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
   state
 ) => state.active;
+
+export const policiesState = (
+  state: Immutable<TrustedAppsListPageState>
+): Immutable<TrustedAppsListPageState['policies']> => state.policies;
+
+export const loadingPolicies: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(policiesState, (policies) => isLoadingResourceState(policies));
+
+export const listOfPolicies: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
+  return isLoadedResourceState(policies) ? policies.data.items : [];
+});

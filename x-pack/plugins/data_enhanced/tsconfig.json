@@ -14,7 +14,8 @@
     "config.ts",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
-    "public/autocomplete/providers/kql_query_suggestion/__fixtures__/*.json"
+    "public/autocomplete/providers/kql_query_suggestion/__fixtures__/*.json",
+    "common/search/test_data/*.json"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

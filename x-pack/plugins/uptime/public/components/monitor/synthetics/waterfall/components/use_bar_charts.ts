@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
@@ -17,17 +18,16 @@ export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
 
   useEffect(() => {
     if (data.length > 0) {
-      let chartIndex = 1;
+      let chartIndex = 0;
 
-      const firstCanvasItems = data.filter((item) => item.x <= CANVAS_MAX_ITEMS);
-
-      const chartsN: Array<IWaterfallContext['data']> = [firstCanvasItems];
+      const chartsN: Array<IWaterfallContext['data']> = [];
 
       data.forEach((item) => {
         // Subtract 1 to account for x value starting from 0
         if (item.x === CANVAS_MAX_ITEMS * chartIndex && !chartsN[item.x / CANVAS_MAX_ITEMS]) {
-          chartsN.push([]);
+          chartsN.push([item]);
           chartIndex++;
+          return;
         }
         chartsN[chartIndex - 1].push(item);
       });

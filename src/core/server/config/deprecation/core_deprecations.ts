@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { has, get } from 'lodash';
@@ -103,6 +103,17 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath,
   return settings;
 };
 
+const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.ops')) {
+    log(
+      '"logging.events.ops" has been deprecated and will be removed ' +
+        'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
+        '"metrics.ops" context in your logging configuration.'
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -137,4 +148,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
   mapManifestServiceUrlDeprecation,
+  opsLoggingEventDeprecation,
 ];

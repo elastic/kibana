@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IconType } from '@elastic/eui/src/components/icon/icon';
@@ -16,16 +17,20 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState, Dragging } from './drag_drop';
+import { DragContextState, DragDropIdentifier } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
+import {
+  LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+} from './datatable_visualization/components/constants';
 import type {
   LensSortActionData,
-  LENS_EDIT_SORT_ACTION,
-} from './datatable_visualization/expression';
+  LensResizeActionData,
+} from './datatable_visualization/components/types';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -222,8 +227,8 @@ export interface DatasourceDataPanelProps<T = unknown> {
   query: Query;
   dateRange: DateRange;
   filters: Filter[];
-  dropOntoWorkspace: (field: Dragging) => void;
-  hasSuggestionForField: (field: Dragging) => boolean;
+  dropOntoWorkspace: (field: DragDropIdentifier) => void;
+  hasSuggestionForField: (field: DragDropIdentifier) => boolean;
 }
 
 interface SharedDimensionProps {
@@ -297,6 +302,8 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
+  groupId: string;
+  isNew?: boolean;
 };
 
 export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
@@ -641,6 +648,7 @@ export interface LensBrushEvent {
 // Use same technique as TriggerContext
 interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+  [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
 }
 type LensEditSupportedActions = keyof LensEditContextMapping;
 

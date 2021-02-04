@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -12,7 +13,7 @@ import {
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  LegacyClusterClient,
+  IClusterClient,
   SharedGlobalConfig,
   IContextProvider,
 } from 'src/core/server';
@@ -33,7 +34,7 @@ import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { findByIdsRoute } from './routes/find_by_ids';
 
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 const PROVIDER = 'eventLog';
 
@@ -77,9 +78,9 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
-      clusterClientPromise: core
+      elasticsearchClientPromise: core
         .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       kibanaVersion: this.kibanaVersion,
     });
 

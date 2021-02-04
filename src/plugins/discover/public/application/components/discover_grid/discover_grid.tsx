@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -50,12 +50,6 @@ export interface DiscoverGridProps {
    * Determines which columns are displayed
    */
   columns: string[];
-  /**
-   * Determines whether the given columns are the default ones, so parts of the document
-   * are displayed (_source) with limited actions (cannor move, remove columns)
-   * Implemented for matching with legacy behavior
-   */
-  defaultColumns: boolean;
   /**
    * The used index pattern
    */
@@ -126,7 +120,6 @@ export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
 export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
-  defaultColumns,
   indexPattern,
   onAddColumn,
   onFilter,
@@ -144,6 +137,7 @@ export const DiscoverGrid = ({
   sort,
 }: DiscoverGridProps) => {
   const [expanded, setExpanded] = useState<ElasticSearchHit | undefined>(undefined);
+  const defaultColumns = columns.includes('_source');
 
   /**
    * Pagination

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from 'redux';
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { AsyncResourceState, TrustedAppsListData } from '../state';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
 
@@ -58,6 +60,10 @@ export type TrustedAppsExistResponse = Action<'trustedAppsExistStateChanged'> & 
   payload: AsyncResourceState<boolean>;
 };
 
+export type TrustedAppsPoliciesStateChanged = Action<'trustedAppsPoliciesStateChanged'> & {
+  payload: AsyncResourceState<GetPolicyListResponse>;
+};
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
   | TrustedAppsListResourceStateChanged
@@ -70,4 +76,5 @@ export type TrustedAppsPageAction =
   | TrustedAppCreationDialogFormStateUpdated
   | TrustedAppCreationDialogConfirmed
   | TrustedAppsExistResponse
+  | TrustedAppsPoliciesStateChanged
   | TrustedAppCreationDialogClosed;

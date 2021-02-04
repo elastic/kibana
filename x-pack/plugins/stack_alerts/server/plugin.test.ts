@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
@@ -58,12 +59,31 @@ describe('AlertingBuiltins Plugin', () => {
         Object {
           "actionGroups": Array [
             Object {
-              "id": "tracking threshold met",
-              "name": "Tracking threshold met",
+              "id": "Tracked entity contained",
+              "name": "Tracking containment met",
             },
           ],
-          "id": ".geo-threshold",
-          "name": "Tracking threshold",
+          "id": ".geo-containment",
+          "name": "Tracking containment",
+        }
+      `);
+
+      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
+      const testedEsQueryArgs = {
+        id: esQueryArgs.id,
+        name: esQueryArgs.name,
+        actionGroups: esQueryArgs.actionGroups,
+      };
+      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "query matched",
+              "name": "Query matched",
+            },
+          ],
+          "id": ".es-query",
+          "name": "ES query",
         }
       `);
 

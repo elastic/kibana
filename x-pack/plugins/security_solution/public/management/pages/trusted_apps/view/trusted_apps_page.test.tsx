@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsPage } from './trusted_apps_page';
@@ -19,6 +21,13 @@ import {
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions } from 'kibana/public';
 import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
+import {
+  GetPackagePoliciesResponse,
+  PACKAGE_POLICY_API_ROUTES,
+} from '../../../../../../fleet/common';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { isLoadedResourceState } from '../state';
+import { forceHTMLElementOffsetWith } from './components/effected_policy_select/test_utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -27,6 +36,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+
+  const generator = new EndpointDocGenerator('policy-list');
 
   let mockedContext: AppContextTestRender;
   let history: AppContextTestRender['history'];
@@ -70,6 +81,21 @@ describe('When on the Trusted Apps Page', () => {
           per_page: httpOptions?.query?.per_page ?? 20,
         };
       }
+
+      if (path === PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) {
+        const policy = generator.generatePolicyPackagePolicy();
+        policy.name = 'test policy A';
+        policy.id = 'abc123';
+
+        const response: GetPackagePoliciesResponse = {
+          items: [policy],
+          page: 1,
+          perPage: 1000,
+          total: 1,
+        };
+        return response;
+      }
+
       if (currentGetHandler) {
         return currentGetHandler(...args);
       }
@@ -128,10 +154,21 @@ describe('When on the Trusted Apps Page', () => {
       await act(async () => {
         await waitForAction('trustedAppsListResourceStateChanged');
       });
-      const addButton = renderResult.getByTestId('trustedAppsListAddButton');
-      reactTestingLibrary.act(() => {
+
+      act(() => {
+        const addButton = renderResult.getByTestId('trustedAppsListAddButton');
         fireEvent.click(addButton, { button: 1 });
       });
+
+      // Wait for the policies to be loaded
+      await act(async () => {
+        await waitForAction('trustedAppsPoliciesStateChanged', {
+          validate: (action) => {
+            return isLoadedResourceState(action.payload);
+          },
+        });
+      });
+
       return renderResult;
     };
 
@@ -162,6 +199,13 @@ describe('When on the Trusted Apps Page', () => {
     it('should display create form', async () => {
       const { queryByTestId } = await renderAndClickAddButton();
       expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
+    });
+
+    it('should have list of policies populated', async () => {
+      const resetEnv = forceHTMLElementOffsetWith();
+      const { getByTestId } = await renderAndClickAddButton();
+      expect(getByTestId('policy-abc123'));
+      resetEnv();
     });
 
     it('should initially have the flyout Add button disabled', async () => {
