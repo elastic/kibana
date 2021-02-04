@@ -286,12 +286,14 @@ describe('When on the Trusted Apps Page', () => {
           fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-nameTextField'), {
             target: { value: 'trusted app A' },
           });
-
+        });
+        reactTestingLibrary.act(() => {
           fireEvent.change(
             getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
             { target: { value: 'SOME$HASH#HERE' } }
           );
-
+        });
+        reactTestingLibrary.act(() => {
           fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-descriptionField'), {
             target: { value: 'let this be' },
           });
