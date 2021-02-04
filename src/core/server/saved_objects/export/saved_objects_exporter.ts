@@ -8,7 +8,9 @@
 
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObject, SavedObjectsClientContract } from '../types';
+import { Logger } from '../../logging';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsFindOptions } from '../types';
+import { SavedObjectsFindResult, SavedObjectsFindResponse } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
@@ -35,16 +37,20 @@ export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #exportTransforms: Record<string, SavedObjectsExportTransform>;
   readonly #exportSizeLimit: number;
+  readonly #log: Logger;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     exportSizeLimit,
+    logger,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     exportSizeLimit: number;
+    logger: Logger;
   }) {
+    this.#log = logger;
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
     this.#exportTransforms = typeRegistry.getAllTypes().reduce((transforms, type) => {
@@ -66,6 +72,7 @@ export class SavedObjectsExporter {
    * @throws SavedObjectsExportError
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
+    this.#log.debug(`Initiating export for types: [${options.types.join(',')}]`);
     const objects = await this.fetchByTypes(options);
     return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
@@ -83,6 +90,7 @@ export class SavedObjectsExporter {
    * @throws SavedObjectsExportError
    */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
+    this.#log.debug(`Initiating export of [${options.objects.length}] objects.`);
     if (options.objects.length > this.#exportSizeLimit) {
       throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
@@ -106,6 +114,7 @@ export class SavedObjectsExporter {
       namespace,
     }: SavedObjectExportBaseOptions
   ) {
+    this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
     let exportedObjects: Array<SavedObject<unknown>>;
     let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
@@ -117,6 +126,7 @@ export class SavedObjectsExporter {
     });
 
     if (includeReferencesDeep) {
+      this.#log.debug(`Fetching saved objects references.`);
       const fetchResult = await fetchNestedDependencies(
         savedObjects,
         this.#savedObjectsClient,
@@ -138,6 +148,7 @@ export class SavedObjectsExporter {
       missingRefCount: missingReferences.length,
       missingReferences,
     };
+    this.#log.debug(`Exporting [${redactedObjects.length}] saved objects.`);
     return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
   }
 
@@ -150,27 +161,88 @@ export class SavedObjectsExporter {
     return bulkGetResult.saved_objects;
   }
 
+  /**
+   * Generator which wraps calls to `SavedObjects.find` and iterates over
+   * multiple pages of results using `_pit` and `search_after`. This will
+   * continue paging until a set of results is received that's smaller than
+   * the designated `perPage`.
+   */
+  private async *findWithPointInTime(findOptions: SavedObjectsFindOptions) {
+    const getLastHitSortValue = (res: SavedObjectsFindResponse) =>
+      res.saved_objects.length && res.saved_objects[res.saved_objects.length - 1].sort;
+
+    const findWithPit = async ({ id, searchAfter }: { id: string; searchAfter?: unknown[] }) => {
+      return await this.#savedObjectsClient.find({
+        sortField: 'updated_at', // sort field is required to use search_after
+        sortOrder: 'desc',
+        pit: {
+          id,
+          keepAlive: '1m', // bump keep_alive by 1m on every new request
+        },
+        ...(searchAfter ? { searchAfter } : {}),
+        ...findOptions,
+      });
+    };
+
+    // Open PIT and request our first page of hits
+    let { id: pitId } = await this.#savedObjectsClient.openPointInTimeForType(findOptions.type);
+    let results = await findWithPit({ id: pitId });
+
+    let lastHitCount = results.saved_objects.length;
+    let lastHitSortValue = getLastHitSortValue(results);
+    pitId = results.pit_id!;
+
+    this.#log.debug(`Collected [${lastHitCount}] saved objects for export.`);
+
+    yield results;
+
+    // We've reached the end when there are fewer hits than our perPage size
+    while (lastHitSortValue && lastHitCount === findOptions.perPage) {
+      results = await findWithPit({
+        id: pitId,
+        searchAfter: lastHitSortValue,
+      });
+
+      lastHitCount = results.saved_objects.length;
+      lastHitSortValue = getLastHitSortValue(results);
+      pitId = results.pit_id!;
+
+      this.#log.debug(`Collected [${lastHitCount}] more saved objects for export.`);
+
+      yield results;
+    }
+  }
+
   private async fetchByTypes({
     types,
     namespace,
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
-    const findResponse = await this.#savedObjectsClient.find({
+    const options: SavedObjectsFindOptions = {
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
       perPage: this.#exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
-    });
-    if (findResponse.total > this.#exportSizeLimit) {
-      throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
+    };
+    const finder = this.findWithPointInTime(options);
+
+    let hits: SavedObjectsFindResult[] = [];
+    for await (const result of finder) {
+      hits = hits.concat(result.saved_objects);
+      if (hits.length > this.#exportSizeLimit) {
+        throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
+      }
     }
+
+    // TODO: Need to close our PIT after we have collected all hits
+    // await this.#savedObjectsClient.closePointInTime(id);
 
     // sorts server-side by _id, since it's only available in fielddata
     return (
-      findResponse.saved_objects
+      hits
         // exclude the find-specific `score` property from the exported objects
         .map(({ score, ...obj }) => obj)
         .sort(byIdAscComparator)

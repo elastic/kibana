@@ -800,8 +800,9 @@ export class SavedObjectsRepository {
             index: this.getIndicesForTypes(allowedTypes),
             preference,
           }),
+      // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
+      ...(searchAfter ? {} : { from: perPage * (page - 1) }),
       size: perPage,
-      from: perPage * (page - 1),
       _source: includedFields(type, fields),
       rest_total_hits_as_int: true,
       body: {
