@@ -22,6 +22,7 @@ import {
 import { CoreStart } from 'src/core/public';
 import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
+import { FieldFormatConfig } from '../../types';
 
 export interface FormatSelectEditorProps {
   fieldAttrs: {
@@ -33,8 +34,9 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: { id: string; params?: { [key: string]: any } } | undefined) => void;
+  onChange: (change?: FieldFormatConfig) => void;
   onError: (error?: string) => void;
+  value?: FieldFormatConfig;
 }
 
 interface FieldTypeFormat {

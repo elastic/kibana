@@ -13,6 +13,7 @@ import { castEsToKbnFieldTypeName } from '../../../../../data/public';
 
 import { ES_FIELD_TYPES } from '../../../shared_imports';
 import { FieldFormInternal } from '../field_editor';
+import { FieldFormatConfig } from '../../../types';
 
 export const FormatField = ({
   indexPattern,
@@ -24,8 +25,8 @@ export const FormatField = ({
   const typeValue = type && type[0] ? type[0].value : undefined;
 
   return (
-    <UseField path="format">
-      {({ setValue, setErrors }) => {
+    <UseField<FieldFormatConfig | undefined> path="format">
+      {({ setValue, setErrors, value }) => {
         return (
           <FormatSelectEditor
             fieldAttrs={{
@@ -41,6 +42,7 @@ export const FormatField = ({
             uiSettings={uiSettings}
             onChange={setValue}
             onError={() => {}}
+            value={value}
             key={typeValue}
           />
         );

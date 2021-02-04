@@ -7,7 +7,7 @@
  */
 
 import { FunctionComponent } from 'react';
-import { DataPublicPluginStart, RuntimeField, FieldFormat } from './shared_imports';
+import { DataPublicPluginStart, RuntimeField } from './shared_imports';
 
 import { OpenFieldEditorOptions } from './open_editor';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
@@ -41,5 +41,10 @@ export interface Field {
   script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;
-  format?: ReturnType<FieldFormat['toJSON']>;
+  format?: FieldFormatConfig;
+}
+
+export interface FieldFormatConfig {
+  id: string;
+  params?: { [key: string]: any };
 }
