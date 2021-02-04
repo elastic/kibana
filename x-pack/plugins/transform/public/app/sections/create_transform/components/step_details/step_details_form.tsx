@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,7 +36,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { isHttpFetchError } from '../../../../common/request';
+import { getCombinedRuntimeMappings, isHttpFetchError } from '../../../../common/request';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useApi } from '../../../../hooks/use_api';
@@ -187,7 +187,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
         const previewRequest = getPreviewTransformRequestBody(
           searchItems.indexPattern.title,
           pivotQuery,
-          partialPreviewRequest
+          partialPreviewRequest,
+          stepDefineState.runtimeMappings
         );
 
         const transformPreview = await api.getTransformsPreview(previewRequest);

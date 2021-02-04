@@ -35,7 +35,8 @@ export const latestConfigMapper = {
  */
 function getOptions(
   indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
-  aggConfigs: AggConfigs
+  aggConfigs: AggConfigs,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ) {
   const aggConfig = aggConfigs.aggs[0];
   const param = aggConfig.type.params.find((p) => p.type === 'field');
@@ -45,6 +46,10 @@ function getOptions(
 
   const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
+  const runtimeFieldsOptions = runtimeMappings
+    ? Object.keys(runtimeMappings).map((k) => ({ label: k, value: k }))
+    : [];
+
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredIndexPatternFields
     .filter((v) => !ignoreFieldNames.has(v.name))
     .map((v) => ({
@@ -52,7 +57,16 @@ function getOptions(
       value: v.name,
     }));
 
-  const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
+  const runtimeFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = runtimeMappings
+    ? Object.entries(runtimeMappings)
+        .filter(([fieldName, fieldMapping]) => fieldMapping.type === 'date')
+        .map(([fieldName, fieldMapping]) => ({
+          label: fieldName,
+          value: fieldName,
+        }))
+    : [];
+
+  const indexPatternFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
     // The backend API for `latest` allows all field types for sort but the UI will be limited to `date`.
     .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable && v.type === 'date')
     .map((v) => ({
@@ -60,7 +74,15 @@ function getOptions(
       value: v.name,
     }));
 
-  return { uniqueKeyOptions, sortFieldOptions };
+  const sortByLabel = (a: EuiComboBoxOptionOption<string>, b: EuiComboBoxOptionOption<string>) =>
+    a.label.localeCompare(b.label);
+
+  return {
+    uniqueKeyOptions: [...uniqueKeyOptions, ...runtimeFieldsOptions].sort(sortByLabel),
+    sortFieldOptions: [...indexPatternFieldsSortOptions, ...runtimeFieldsSortOptions].sort(
+      sortByLabel
+    ),
+  };
 }
 
 /**
@@ -86,7 +108,8 @@ export function validateLatestConfig(config?: LatestFunctionConfig) {
 
 export function useLatestFunctionConfig(
   defaults: StepDefineExposedState['latestConfig'],
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
+  runtimeMappings: StepDefineExposedState['runtimeMappings']
 ): {
   config: LatestFunctionConfigUI;
   uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>>;
@@ -104,8 +127,8 @@ export function useLatestFunctionConfig(
 
   const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => {
     const aggConfigs = data.search.aggs.createAggConfigs(indexPattern, [{ type: 'terms' }]);
-    return getOptions(indexPattern, aggConfigs);
-  }, [indexPattern, data.search.aggs]);
+    return getOptions(indexPattern, aggConfigs, runtimeMappings);
+  }, [indexPattern, data.search.aggs, runtimeMappings]);
 
   const updateLatestFunctionConfig = useCallback(
     (update) =>

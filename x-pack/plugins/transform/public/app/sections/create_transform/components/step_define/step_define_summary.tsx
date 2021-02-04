@@ -56,15 +56,16 @@ export const StepDefineSummary: FC<Props> = ({
 
   const pivotQuery = getPivotQuery(searchQuery);
 
-  const previewRequest = getPreviewTransformRequestBody(
-    searchItems.indexPattern.title,
-    pivotQuery,
-    partialPreviewRequest
-  );
-
   const combinedRuntimeMappings = useMemo(
     () => getCombinedRuntimeMappings(searchItems.indexPattern, runtimeMappings),
     [searchItems.indexPattern, runtimeMappings]
+  );
+
+  const previewRequest = getPreviewTransformRequestBody(
+    searchItems.indexPattern.title,
+    pivotQuery,
+    partialPreviewRequest,
+    combinedRuntimeMappings
   );
 
   const pivotPreviewProps = usePivotData(

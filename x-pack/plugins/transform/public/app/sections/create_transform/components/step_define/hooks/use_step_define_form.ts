@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { getPreviewTransformRequestBody } from '../../../../../common';
 
@@ -19,6 +19,7 @@ import { usePivotConfig } from './use_pivot_config';
 import { useSearchBar } from './use_search_bar';
 import { useLatestFunctionConfig } from './use_latest_function_config';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
+import { getCombinedRuntimeMappings } from '../../../../../common/request';
 
 export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
@@ -30,13 +31,23 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
 
   const searchBar = useSearchBar(defaults, indexPattern);
   const pivotConfig = usePivotConfig(defaults, indexPattern);
-  const latestFunctionConfig = useLatestFunctionConfig(defaults.latestConfig, indexPattern);
+
+  const combinedRuntimeMappings = useMemo(
+    () => getCombinedRuntimeMappings(searchItems.indexPattern, overrides?.runtimeMappings),
+    [searchItems.indexPattern, overrides?.runtimeMappings]
+  );
+
+  const latestFunctionConfig = useLatestFunctionConfig(
+    defaults.latestConfig,
+    indexPattern,
+    combinedRuntimeMappings
+  );
 
   const previewRequest = getPreviewTransformRequestBody(
     indexPattern.title,
     searchBar.state.pivotQuery,
-    pivotConfig.state.requestPayload
-    // overrides?.runtimeMappings
+    pivotConfig.state.requestPayload,
+    combinedRuntimeMappings
   );
 
   // pivot config hook
@@ -50,8 +61,8 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
       const previewRequestUpdate = getPreviewTransformRequestBody(
         indexPattern.title,
         searchBar.state.pivotQuery,
-        pivotConfig.state.requestPayload
-        // overrides?.runtimeMappings
+        pivotConfig.state.requestPayload,
+        combinedRuntimeMappings
       );
 
       const stringifiedSourceConfigUpdate = JSON.stringify(

@@ -117,7 +117,8 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(Object.keys(combinedRuntimeMappings).length > 0
+        ...(typeof combinedRuntimeMappings === 'object' &&
+        Object.keys(combinedRuntimeMappings).length > 0
           ? { runtime_mappings: combinedRuntimeMappings }
           : {}),
       },

@@ -30,6 +30,10 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
+export interface RuntimeMapping {
+  type: string;
+  script: string;
+}
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
@@ -47,8 +51,7 @@ export interface StepDefineExposedState {
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
-  // @TODO: fix any
-  runtimeMappings?: any;
+  runtimeMappings?: { [key: string]: RuntimeMapping };
 }
 
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
