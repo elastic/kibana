@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { UseField, useFormData, FieldHook } from '../../../shared_imports';
@@ -30,12 +30,6 @@ const ConnectorFields = ({ connectors, isEdit, field }: ConnectorsFieldProps) =>
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
   const connector = getConnectorById(connectorId, connectors) ?? null;
-
-  useEffect(() => {
-    if (connectorId) {
-      setValue(null);
-    }
-  }, [setValue, connectorId]);
 
   return (
     <ConnectorFieldsForm

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -40,6 +40,7 @@ const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowSIRFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
+  const init = useRef(true);
   const {
     category = null,
     destIp = true,
@@ -169,11 +170,29 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
     ]
   );
 
-  // We need to set them up at initialization
+  // When connector change set fields to null
   useEffect(() => {
-    onChange({ category, destIp, malwareHash, malwareUrl, priority, sourceIp, subcategory });
+    if (!init.current) {
+      onChange({
+        category: null,
+        destIp: true,
+        malwareHash: true,
+        malwareUrl: true,
+        priority: null,
+        sourceIp: null,
+        subcategory: null,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connector]);
+
+  // Set field at initialization
+  useEffect(() => {
+    if (init.current) {
+      init.current = false;
+      onChange({ category, destIp, malwareHash, malwareUrl, priority, sourceIp, subcategory });
+    }
+  }, [category, destIp, malwareHash, malwareUrl, onChange, priority, sourceIp, subcategory]);
 
   return isEdit ? (
     <div data-test-subj={'connector-fields-sn'}>

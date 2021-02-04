@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { map } from 'lodash/fp';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
@@ -24,6 +24,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
   isEdit = true,
   onChange,
 }) => {
+  const init = useRef(true);
   const { issueType = null, priority = null, parent = null } = fields ?? {};
   const { http, notifications } = useKibana().services;
 
@@ -137,6 +138,22 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
     },
     [currentIssueType, fields, onChange, parent, priority]
   );
+
+  // When connector change set fields to null
+  useEffect(() => {
+    if (!init.current) {
+      onChange({ issueType: null, priority: null, parent: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connector]);
+
+  // Set field at initialization
+  useEffect(() => {
+    if (init.current) {
+      init.current = false;
+      onChange({ issueType, priority, parent });
+    }
+  }, [issueType, onChange, parent, priority]);
 
   return isEdit ? (
     <div data-test-subj={'connector-fields-jira'}>

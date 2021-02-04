@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -29,6 +29,7 @@ const defaultOptions: Options = {
 const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowITSMFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
+  const init = useRef(true);
   const { severity = null, urgency = null, impact = null } = fields ?? {};
   const { http, notifications } = useKibana().services;
   const [options, setOptions] = useState<Options>(defaultOptions);
@@ -85,12 +86,6 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     onSuccess: onChoicesSuccess,
   });
 
-  // We need to set them up at initialization
-  useEffect(() => {
-    onChange({ impact, severity, urgency });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const onChangeCb = useCallback(
     (
       key: keyof ServiceNowITSMFieldsType,
@@ -100,6 +95,22 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
     },
     [fields, onChange]
   );
+
+  // When connector change set fields to null
+  useEffect(() => {
+    if (!init.current) {
+      onChange({ urgency: null, severity: null, impact: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connector]);
+
+  // Set field at initialization
+  useEffect(() => {
+    if (init.current) {
+      init.current = false;
+      onChange({ urgency, severity, impact });
+    }
+  }, [impact, onChange, severity, urgency]);
 
   return isEdit ? (
     <div data-test-subj={'connector-fields-sn'}>

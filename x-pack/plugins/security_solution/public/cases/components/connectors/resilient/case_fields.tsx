@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -27,6 +27,7 @@ import { ConnectorCard } from '../card';
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ResilientFieldsType>
 > = ({ isEdit = true, fields, connector, onChange }) => {
+  const init = useRef(true);
   const { incidentTypes = null, severityCode = null } = fields ?? {};
 
   const { http, notifications } = useKibana().services;
@@ -135,11 +136,21 @@ const ResilientFieldsComponent: React.FunctionComponent<
     }
   }, [incidentTypes, onFieldChange]);
 
-  // We need to set them up at initialization
+  // When connector change set fields to null
   useEffect(() => {
-    onChange({ incidentTypes, severityCode });
+    if (!init.current) {
+      onChange({ incidentTypes: null, severityCode: null });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connector]);
+
+  // Set field at initialization
+  useEffect(() => {
+    if (init.current) {
+      init.current = false;
+      onChange({ incidentTypes, severityCode });
+    }
+  }, [incidentTypes, onChange, severityCode]);
 
   return isEdit ? (
     <span data-test-subj={'connector-fields-resilient'}>
