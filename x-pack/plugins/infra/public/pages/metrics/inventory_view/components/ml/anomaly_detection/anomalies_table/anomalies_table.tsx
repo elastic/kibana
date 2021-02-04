@@ -272,6 +272,7 @@ const stringToNumericTimeRange = (timeRange: {
 });
 
 const columns: Array<{
+  field: string;
   name: string;
   sortable: boolean;
   render: Function;
