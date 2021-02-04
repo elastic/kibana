@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, Fragment } from 'react';
@@ -9,7 +10,9 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { useFormData, UseField, ToggleField } from '../../../../../../shared_imports';
+import { useFormData, ToggleField } from '../../../../../../shared_imports';
+
+import { UseField } from '../../../form';
 
 import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
 

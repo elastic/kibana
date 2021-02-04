@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
@@ -21,7 +23,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     async getList() {
-      const table = await find.byCssSelector('table');
+      const table = await testSubjects.find('searchSessionsMgmtTable');
       const allRows = await table.findAllByTestSubject('searchSessionsRow');
 
       return Promise.all(
@@ -37,15 +39,18 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
             app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
             view: async () => {
+              log.debug('management ui: view the session');
               await viewCell.click();
             },
             reload: async () => {
+              log.debug('management ui: reload the status');
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-reload"]'
               );
             },
             cancel: async () => {
+              log.debug('management ui: cancel the session');
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-cancel"]'
