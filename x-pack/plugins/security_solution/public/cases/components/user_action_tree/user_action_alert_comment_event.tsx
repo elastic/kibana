@@ -14,12 +14,15 @@ import { SecurityPageName } from '../../../app/types';
 
 import { Alert } from '../case_view';
 import * as i18n from './translations';
+import { CommentType } from '../../../../../case/common/api';
 
 interface Props {
   alert: Alert | undefined;
+  alertsCount?: number;
+  commentType?: CommentType;
 }
 
-const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
+const AlertCommentEventComponent: React.FC<Props> = ({ alert, alertsCount, commentType }) => {
   const ruleName = alert?.rule?.name ?? null;
   const ruleId = alert?.rule?.id ?? null;
   const { navigateToApp } = useKibana().services.application;
@@ -35,12 +38,28 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
   );
 
   return ruleId != null && ruleName != null ? (
-    <>
-      {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-      <EuiLink onClick={onLinkClick} data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}>
-        {ruleName}
-      </EuiLink>
-    </>
+    commentType !== CommentType.generatedAlert ? (
+      <>
+        {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
+        <EuiLink
+          onClick={onLinkClick}
+          data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}
+        >
+          {ruleName}
+        </EuiLink>
+      </>
+    ) : (
+      <>
+        <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount)}</b>{' '}
+        {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
+        <EuiLink
+          onClick={onLinkClick}
+          data-test-subj={`alert-rule-link-${alert?._id ?? 'deleted'}`}
+        >
+          {ruleName}
+        </EuiLink>
+      </>
+    )
   ) : (
     <>{i18n.ALERT_RULE_DELETED_COMMENT_LABEL}</>
   );

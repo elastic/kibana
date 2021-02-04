@@ -41,6 +41,19 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
+export const GENERATED_ALERT_COMMENT_LABEL_TITLE = i18n.translate(
+  'xpack.securitySolution.case.caseView.generatedAlertCommentLabelTitle',
+  {
+    defaultMessage: 'were added from',
+  }
+);
+
+export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.case.caseView.generatedAlertCountCommentLabelTitle', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
   'xpack.securitySolution.case.caseView.alertRuleDeletedLabelTitle',
   {
@@ -57,6 +70,13 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate(
 
 export const ALERT_NOT_FOUND_TOOLTIP = i18n.translate(
   'xpack.securitySolution.case.caseView.showAlertDeletedTooltip',
+  {
+    defaultMessage: 'Alert not found',
+  }
+);
+
+export const SEND_ALERT_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.case.caseView.sendAlertToTimelineTooltip',
   {
     defaultMessage: 'Alert not found',
   }
