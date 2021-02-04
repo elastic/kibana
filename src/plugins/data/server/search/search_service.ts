@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, switchMap } from 'rxjs/operators';
+import { first, switchMap, tap } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -65,7 +65,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
-import { tapFirst } from '../../common';
 import { registerBsearchRoute } from './routes/bsearch';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
@@ -274,8 +273,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
       return from(getSearchRequest()).pipe(
         switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
-        tapFirst((response) => {
-          if (request.id || !options.sessionId || !response.id || options.isRestore) return;
+        tap((response) => {
+          if (!options.sessionId || !response.id || options.isRestore) return;
           deps.searchSessionsClient.trackId(request, response.id, options);
         })
       );
