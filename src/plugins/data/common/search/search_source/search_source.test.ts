@@ -836,5 +836,27 @@ describe('SearchSource', () => {
       expect(references[1].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).filter[0].meta.indexRefName).toEqual(references[1].name);
     });
+
+    test('mvt geoshape layer test', async () => {
+      // @ts-expect-error TS won't like using this field name, but technically it's possible.
+      searchSource.setField('docvalue_fields', ['prop1']);
+      searchSource.setField('source', ['geometry']);
+      searchSource.setField('fieldsFromSource', ['geometry', 'prop1']);
+      searchSource.setField('index', ({
+        ...indexPattern,
+        getSourceFiltering: () => ({ excludes: [] }),
+        getComputedFields: () => ({
+          storedFields: ['*'],
+          scriptFields: {},
+          docvalueFields: [],
+        }),
+      } as unknown) as IndexPattern);
+      const request = await searchSource.getSearchRequestBody();
+      expect(request.stored_fields).toEqual(['geometry', 'prop1']);
+      expect(request.docvalue_fields).toEqual(['prop1']);
+      expect(request._source).toEqual({
+        includes: ['geometry', 'prop1'],
+      });
+    });
   });
 });

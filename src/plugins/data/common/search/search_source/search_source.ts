@@ -580,7 +580,8 @@ export class SearchSource {
         ...Object.keys(body.script_fields),
         ...Object.keys(body.runtime_mappings),
       ]).filter((remainingField) => {
-        if (!body._source || !body._source.excludes) return remainingField;
+        if (!remainingField) return false;
+        if (!body._source || !body._source.excludes) return true;
         return !body._source.excludes.includes(remainingField);
       });
 
