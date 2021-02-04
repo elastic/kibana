@@ -92,3 +92,11 @@ export const PostTrustedAppCreateRequestSchema = {
     ),
   ]),
 };
+
+export const PutTrustedAppUpdateRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+  // body is the same as Create
+  body: PostTrustedAppCreateRequestSchema.body,
+};

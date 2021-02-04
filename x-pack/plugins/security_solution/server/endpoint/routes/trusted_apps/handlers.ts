@@ -14,6 +14,8 @@ import {
   DeleteTrustedAppsRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
+  PutTrustedAppsRequestParams,
+  PutTrustedAppUpdateRequest,
 } from '../../../../common/endpoint/types';
 
 import { EndpointAppContext } from '../../types';
@@ -107,14 +109,32 @@ export const getTrustedAppsCreateRouteHandler = (
   };
 };
 
-export const getTrustedAppsSummaryRouteHandler = (
+export const getTrustedAppsUpdateRouteHandler = (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<
+  PutTrustedAppsRequestParams,
   unknown,
-  unknown,
-  PostTrustedAppCreateRequest,
+  PutTrustedAppUpdateRequest,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      throw new Error('not implemented');
+      // return res.ok({
+      //   body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
+      // });
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
+
+export const getTrustedAppsSummaryRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
