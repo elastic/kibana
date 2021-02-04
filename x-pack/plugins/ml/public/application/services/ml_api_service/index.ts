@@ -15,12 +15,17 @@ import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
-import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
+import {
+  MlServerDefaults,
+  MlServerLimits,
+  MlNodeCount,
+} from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import {
   Job,
+  JobStats,
   Datafeed,
   CombinedJob,
   Detector,
@@ -116,14 +121,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: Job[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}`,
       });
     },
 
     getJobStats(obj: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: JobStats[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}/_stats`,
       });
     },
@@ -614,7 +619,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     mlNodeCount() {
-      return httpService.http<{ count: number }>({
+      return httpService.http<MlNodeCount>({
         path: `${basePath()}/ml_node_count`,
         method: 'GET',
       });
