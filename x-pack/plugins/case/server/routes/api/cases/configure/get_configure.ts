@@ -35,7 +35,7 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
           const caseClient = context.case.getCaseClient();
           const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
-            throw Boom.notFound('Action client have not been found');
+            throw Boom.notFound('Action client not found');
           }
           try {
             mappings = await caseClient.getMappings({

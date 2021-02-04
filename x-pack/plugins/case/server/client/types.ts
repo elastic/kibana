@@ -68,6 +68,13 @@ export interface CaseClientGetUserActions {
   caseId: string;
 }
 
+export interface MappingsClient {
+  actionsClient: ActionsClient;
+  caseClient: CaseClient;
+  connectorId: string;
+  connectorType: string;
+}
+
 export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
@@ -98,9 +105,12 @@ export interface CaseClient {
   updateAlertsStatus: (args: CaseClientUpdateAlertsStatus) => Promise<void>;
 }
 
-export interface MappingsClient {
-  actionsClient: ActionsClient;
-  caseClient: CaseClient;
-  connectorId: string;
-  connectorType: string;
-}
+export type CaseClientFactoryMethod = (
+  factoryArgs: CaseClientFactoryArguments
+) => (methodArgs: any) => Promise<any>;
+
+export type CaseClientMethods = keyof CaseClient;
+
+export type CaseClientFactoryMethods = {
+  [K in CaseClientMethods]: CaseClientFactoryMethod;
+};

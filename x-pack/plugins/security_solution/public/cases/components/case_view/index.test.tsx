@@ -107,7 +107,7 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
 
   const data = caseProps.caseData;
   const defaultGetCase = {
@@ -144,7 +144,10 @@ describe('CaseView ', () => {
 
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      pushCaseToExternalService,
+    }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useQueryAlertsMock.mockImplementation(() => ({
       loading: false,
@@ -378,7 +381,7 @@ describe('CaseView ', () => {
 
       wrapper.update();
 
-      expect(postPushToService).toHaveBeenCalled();
+      expect(pushCaseToExternalService).toHaveBeenCalled();
     });
   });
 

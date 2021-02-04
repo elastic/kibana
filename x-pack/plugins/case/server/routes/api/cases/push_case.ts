@@ -27,14 +27,14 @@ export function initPushCaseApi({ router }: RouteDeps) {
     },
     async (context, request, response) => {
       if (!context.case) {
-        throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
       }
 
       const caseClient = context.case.getCaseClient();
       const actionsClient = context.actions?.getActionsClient();
 
       if (actionsClient == null) {
-        throw Boom.notFound('Action client have not been found');
+        return response.badRequest({ body: 'Action client not found' });
       }
 
       const params = pipe(

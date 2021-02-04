@@ -69,8 +69,8 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const userActionService = {
-    postUserActions: jest.fn(),
     getUserActions: jest.fn(),
+    postUserActions: jest.fn(),
   };
 
   const alertsService = {

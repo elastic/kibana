@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { comment as commentObj, mappings, defaultPipes, basicParams, updateUser } from './mock';
 import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';
+import { comment as commentObj, mappings, defaultPipes, basicParams, userActions } from './mock';
 
 import {
   createIncident,
@@ -187,6 +187,7 @@ describe('api/cases/configure/utils', () => {
       });
     });
   });
+
   describe('transformComments', () => {
     test('transform creation comments', () => {
       const comments = [commentObj];
@@ -203,14 +204,19 @@ describe('api/cases/configure/utils', () => {
       const comments = [
         {
           ...commentObj,
-          ...updateUser,
+          updated_at: '2020-03-13T08:34:53.450Z',
+          updated_by: {
+            full_name: 'Another User',
+            username: 'another',
+            email: 'elastic@elastic.co',
+          },
         },
       ];
       const res = transformComments(comments, ['informationUpdated']);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (updated at ${updateUser.updatedAt} by ${updateUser.updatedBy.full_name})`,
+          comment: `${formatComment.comment} (updated at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})`,
         },
       ]);
     });
@@ -242,15 +248,15 @@ describe('api/cases/configure/utils', () => {
       const comments = [
         {
           ...commentObj,
-          updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { full_name: 'Elastic2', username: 'elastic' },
+          updated_at: '2020-04-13T08:34:53.450Z',
+          updated_by: { full_name: 'Elastic2', username: 'elastic', email: 'elastic@elastic.co' },
         },
       ];
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.full_name})`,
+          comment: `${formatComment.comment} (added at ${comments[0].updated_at} by ${comments[0].updated_by.full_name})`,
         },
       ]);
     });
@@ -259,19 +265,20 @@ describe('api/cases/configure/utils', () => {
       const comments = [
         {
           ...commentObj,
-          updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { full_name: '', username: 'elastic2' },
+          updated_at: '2020-04-13T08:34:53.450Z',
+          updated_by: { full_name: '', username: 'elastic2', email: 'elastic@elastic.co' },
         },
       ];
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
           ...formatComment,
-          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.username})`,
+          comment: `${formatComment.comment} (added at ${comments[0].updated_at} by ${comments[0].updated_by.username})`,
         },
       ]);
     });
   });
+
   describe('transformers', () => {
     const { informationCreated, informationUpdated, informationAdded, append } = transformers;
     describe('informationCreated', () => {
@@ -396,77 +403,60 @@ describe('api/cases/configure/utils', () => {
       });
     });
   });
+
   describe('createIncident', () => {
     let actionsMock = actionsClientMock.create();
-    const theCase = flattenCaseSavedObject({
-      savedObject: mockCases[0],
-    });
+    const theCase = {
+      ...flattenCaseSavedObject({
+        savedObject: mockCases[0],
+      }),
+      comments: [commentObj],
+      totalComments: 1,
+    };
+
+    const connector = {
+      id: '456',
+      actionTypeId: '.jira',
+      name: 'Connector without isCaseOwned',
+      config: {
+        apiUrl: 'https://elastic.jira.com',
+      },
+      isPreconfigured: false,
+    };
 
     it('maps an external incident', async () => {
       const res = await createIncident({
         actionsClient: actionsMock,
         theCase,
         userActions: [],
-        connector: {
-          id: '456',
-          actionTypeId: '.jira',
-          name: 'Connector without isCaseOwned',
-          config: {
-            apiUrl: 'https://elastic.jira.com',
-          },
-          isPreconfigured: false,
-        },
-        mappings: [],
+        connector,
+        mappings,
         alerts: [],
       });
 
       expect(res).toEqual({
         incident: {
-          description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          priority: null,
+          labels: ['defacement'],
+          issueType: null,
+          parent: null,
+          short_description:
+            'Super Bad Security Issue (created at 2019-11-25T21:54:48.952Z by elastic)',
+          description:
+            'This is a brand new case of a bad meanie defacing data (created at 2019-11-25T21:54:48.952Z by elastic)',
           externalId: null,
-          impact: '3',
-          severity: '1',
-          short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-          urgency: '2',
         },
-        comments: [
-          {
-            comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          },
-        ],
-      });
-    });
-
-    it('throws error if invalid service', async () => {
-      await createIncident({
-        actionsClient: actionsMock,
-        theCase,
-        userActions: [],
-        connector: {
-          id: '456',
-          actionTypeId: '.jira',
-          name: 'Connector without isCaseOwned',
-          config: {
-            apiUrl: 'https://elastic.jira.com',
-          },
-          isPreconfigured: false,
-        },
-        mappings: [],
-        alerts: [],
-      }).catch((e) => {
-        expect(e).not.toBeNull();
-        expect(e).toEqual(new Error(`Invalid service`));
+        comments: [],
       });
     });
 
     it('updates an existing incident', async () => {
       const existingIncidentData = {
-        description: 'fun description',
-        impact: '3',
-        severity: '3',
+        priority: null,
+        issueType: null,
+        parent: null,
         short_description: 'fun title',
-        urgency: '3',
+        description: 'fun description',
       };
 
       const execute = jest.fn().mockReturnValue(existingIncidentData);
@@ -475,64 +465,47 @@ describe('api/cases/configure/utils', () => {
       const res = await createIncident({
         actionsClient: actionsMock,
         theCase,
-        userActions: [],
-        connector: {
-          id: '456',
-          actionTypeId: '.jira',
-          name: 'Connector without isCaseOwned',
-          config: {
-            apiUrl: 'https://elastic.jira.com',
-          },
-          isPreconfigured: false,
-        },
-        mappings: [],
+        userActions,
+        connector,
+        mappings,
         alerts: [],
       });
 
       expect(res).toEqual({
         incident: {
-          description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-          externalId: '123',
-          impact: '3',
-          severity: '1',
-          short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-          urgency: '2',
+          priority: null,
+          labels: ['defacement'],
+          issueType: null,
+          parent: null,
+          description:
+            'fun description \r\nThis is a brand new case of a bad meanie defacing data (updated at 2019-11-25T21:54:48.952Z by elastic)',
+          externalId: 'external-id',
+          short_description:
+            'Super Bad Security Issue (updated at 2019-11-25T21:54:48.952Z by elastic)',
         },
-        comments: [
-          {
-            comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-            commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          },
-        ],
+        comments: [],
       });
     });
 
     it('throws error when existing incident throws', async () => {
+      expect.assertions(2);
       const execute = jest.fn().mockImplementation(() => {
         throw new Error('exception');
       });
 
       actionsMock = { ...actionsMock, execute };
-      await createIncident({
+      createIncident({
         actionsClient: actionsMock,
         theCase,
-        userActions: [],
-        connector: {
-          id: '456',
-          actionTypeId: '.jira',
-          name: 'Connector without isCaseOwned',
-          config: {
-            apiUrl: 'https://elastic.jira.com',
-          },
-          isPreconfigured: false,
-        },
-        mappings: [],
+        userActions,
+        connector,
+        mappings,
         alerts: [],
       }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e).toEqual(
           new Error(
-            `Retrieving Incident by id 123 from ServiceNow failed with exception: Error: exception`
+            `Retrieving Incident by id external-id from .jira failed with exception: Error: exception`
           )
         );
       });

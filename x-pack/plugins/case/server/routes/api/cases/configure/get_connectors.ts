@@ -39,7 +39,7 @@ export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
         const actionsClient = context.actions?.getActionsClient();
 
         if (actionsClient == null) {
-          throw Boom.notFound('Action client have not been found');
+          throw Boom.notFound('Action client not found');
         }
 
         const actionTypes = (await actionsClient.listTypes()).reduce(

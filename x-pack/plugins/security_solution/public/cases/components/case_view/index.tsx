@@ -297,7 +297,6 @@ export const CaseComponent = React.memo<CaseProps>(
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector: isLoadingConnectors ? true : isValidConnector,
-      alerts,
     });
 
     const onSubmitConnector = useCallback(

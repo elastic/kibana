@@ -39,10 +39,10 @@ jest.mock('../../containers/configure/api');
 describe('usePushToService', () => {
   const caseId = '12345';
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
     isLoading: false,
-    postPushToService,
+    pushCaseToExternalService,
   };
 
   const mockConnector = connectorsMock[0];
@@ -71,19 +71,6 @@ describe('usePushToService', () => {
     updateCase,
     userCanCrud: true,
     isValidConnector: true,
-    alerts: {
-      'alert-id-1': {
-        _id: 'alert-id-1',
-        _index: 'alert-index-1',
-        '@timestamp': '2020-11-20T15:35:28.373Z',
-        rule: {
-          id: 'rule-id-1',
-          name: 'Awesome rule',
-          from: 'now-360s',
-          to: 'now',
-        },
-      },
-    },
   };
 
   beforeEach(() => {
@@ -105,28 +92,13 @@ describe('usePushToService', () => {
       );
       await waitForNextUpdate();
       result.current.pushButton.props.children.props.onClick();
-      expect(postPushToService).toBeCalledWith({
+      expect(pushCaseToExternalService).toBeCalledWith({
         caseId,
-        caseServices,
         connector: {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
           type: ConnectorTypes.serviceNowITSM,
-        },
-        updateCase,
-        alerts: {
-          'alert-id-1': {
-            _id: 'alert-id-1',
-            _index: 'alert-index-1',
-            '@timestamp': '2020-11-20T15:35:28.373Z',
-            rule: {
-              id: 'rule-id-1',
-              name: 'Awesome rule',
-              from: 'now-360s',
-              to: 'now',
-            },
-          },
         },
       });
       expect(result.current.pushCallouts).toBeNull();

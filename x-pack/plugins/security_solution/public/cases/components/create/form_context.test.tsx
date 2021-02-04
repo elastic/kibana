@@ -35,7 +35,6 @@ import { FormContext } from './form_context';
 import { CreateCaseForm } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { noop } from 'lodash/fp';
 
 const sampleId = 'case-id';
 
@@ -60,7 +59,7 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const postCase = jest.fn();
-const postPushToService = jest.fn();
+const pushCaseToExternalService = jest.fn();
 
 const defaultPostCase = {
   isLoading: false,
@@ -69,11 +68,9 @@ const defaultPostCase = {
 };
 
 const defaultPostPushToService = {
-  serviceData: null,
-  pushedCaseData: null,
   isLoading: false,
   isError: false,
-  postPushToService,
+  pushCaseToExternalService,
 };
 
 const fillForm = (wrapper: ReactWrapper) => {
@@ -261,7 +258,7 @@ describe('Create case', () => {
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       await waitFor(() => {
         expect(postCase).toBeCalledWith(sampleData);
-        expect(postPushToService).not.toHaveBeenCalled();
+        expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
     });
   });
@@ -318,7 +315,7 @@ describe('Create case', () => {
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
         });
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
             id: 'jira-1',
@@ -326,7 +323,6 @@ describe('Create case', () => {
             type: '.jira',
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
-          updateCase: noop,
         });
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
@@ -386,7 +382,7 @@ describe('Create case', () => {
           },
         });
 
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
             id: 'resilient-2',
@@ -394,7 +390,6 @@ describe('Create case', () => {
             type: '.resilient',
             fields: { incidentTypes: ['19'], severityCode: '4' },
           },
-          updateCase: noop,
         });
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
@@ -447,7 +442,7 @@ describe('Create case', () => {
           },
         });
 
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
           connector: {
             id: 'servicenow-1',
@@ -455,7 +450,6 @@ describe('Create case', () => {
             type: '.servicenow',
             fields: { impact: '2', severity: '2', urgency: '2' },
           },
-          updateCase: noop,
         });
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({

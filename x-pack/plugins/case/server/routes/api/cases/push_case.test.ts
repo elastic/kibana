@@ -13,21 +13,18 @@ import {
   createRoute,
   createRouteContext,
   mockCases,
+  mockCaseConfigure,
+  mockCaseMappings,
+  mockUserActions,
 } from '../__fixtures__';
 import { initPushCaseApi } from './push_case';
-import { CASE_DETAILS_URL } from '../../../../common/constants';
-import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
+import { CASE_PUSH_URL } from '../../../../common/constants';
+import { CasesRequestHandlerContext } from '../../../types';
 
 describe('Push case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   const mockDate = '2019-11-25T21:54:48.952Z';
-  const caseExternalServiceRequestBody = {
-    connector_id: 'connector_id',
-    connector_name: 'connector_name',
-    external_id: 'external_id',
-    external_title: 'external_title',
-    external_url: 'external_url',
-  };
+
   beforeAll(async () => {
     routeHandler = await createRoute(initPushCaseApi, 'post');
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
@@ -35,41 +32,60 @@ describe('Push case', () => {
       toISOString: jest.fn().mockReturnValue(mockDate),
     }));
   });
+
   it(`Pushes a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: `${CASE_DETAILS_URL}/_push`,
+      path: CASE_PUSH_URL,
       method: 'post',
       params: {
         case_id: 'mock-id-3',
+        connector_id: '123',
       },
-      body: caseExternalServiceRequestBody,
+      body: {},
     });
 
     const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
+        caseMappingsSavedObject: mockCaseMappings,
+        caseConfigureSavedObject: mockCaseConfigure,
+        caseUserActionsSavedObject: mockUserActions,
       })
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.external_service.pushed_at).toEqual(mockDate);
-    expect(response.payload.external_service.connector_id).toEqual('connector_id');
-    expect(response.payload.closed_at).toEqual(null);
+    expect(response.payload.external_service).toEqual({
+      connector_id: '123',
+      connector_name: 'ServiceNow',
+      external_id: '10663',
+      external_title: 'RJ2-200',
+      external_url: 'https://siem-kibana.atlassian.net/browse/RJ2-200',
+      pushed_at: mockDate,
+      pushed_by: {
+        email: 'd00d@awesome.com',
+        full_name: 'Awesome D00d',
+        username: 'awesome',
+      },
+    });
   });
+
   it(`Pushes a case and closes when closure_type: 'close-by-pushing'`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: `${CASE_DETAILS_URL}/_push`,
+      path: CASE_PUSH_URL,
       method: 'post',
       params: {
         case_id: 'mock-id-3',
+        connector_id: '123',
       },
-      body: caseExternalServiceRequestBody,
+      body: {},
     });
 
     const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
+        caseMappingsSavedObject: mockCaseMappings,
+        caseUserActionsSavedObject: mockUserActions,
         caseConfigureSavedObject: [
           {
             ...mockCaseConfigure[0],
@@ -84,28 +100,66 @@ describe('Push case', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.external_service.pushed_at).toEqual(mockDate);
-    expect(response.payload.external_service.connector_id).toEqual('connector_id');
     expect(response.payload.closed_at).toEqual(mockDate);
   });
 
-  it(`Returns an error if pushCaseUserAction throws`, async () => {
+  it('Unhappy path - context case missing', async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: `${CASE_DETAILS_URL}/_push`,
+      path: CASE_PUSH_URL,
       method: 'post',
-      body: {
-        notagoodbody: 'Throw an error',
+      params: {
+        case_id: 'mock-id-3',
+        connector_id: '123',
       },
+      body: {},
     });
 
     const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
+        caseMappingsSavedObject: mockCaseMappings,
+        caseConfigureSavedObject: mockCaseConfigure,
+        caseUserActionsSavedObject: mockUserActions,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(400);
-    expect(response.payload.isBoom).toEqual(true);
+    const betterContext = ({
+      ...theContext,
+      case: null,
+    } as unknown) as CasesRequestHandlerContext;
+
+    const res = await routeHandler(betterContext, request, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload).toEqual('RouteHandlerContext is not registered for cases');
+  });
+
+  it('Unhappy path - context actions missing', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_PUSH_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-3',
+        connector_id: '123',
+      },
+      body: {},
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseMappingsSavedObject: mockCaseMappings,
+        caseConfigureSavedObject: mockCaseConfigure,
+        caseUserActionsSavedObject: mockUserActions,
+      })
+    );
+
+    const betterContext = ({
+      ...theContext,
+      actions: null,
+    } as unknown) as CasesRequestHandlerContext;
+
+    const res = await routeHandler(betterContext, request, kibanaResponseFactory);
+    expect(res.status).toEqual(400);
+    expect(res.payload).toEqual('Action client not found');
   });
 });

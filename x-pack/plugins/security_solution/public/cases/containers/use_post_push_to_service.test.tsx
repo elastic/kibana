@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostPushToService, UsePostPushToService } from './use_post_push_to_service';
-import { basicPush, pushedCase } from './mock';
+import { pushedCase } from './mock';
 import * as api from './api';
 import { CaseConnector, ConnectorTypes } from '../../../../case/common/api';
 
@@ -90,7 +90,6 @@ describe('usePostPushToService', () => {
       );
       await waitForNextUpdate();
       result.current.pushCaseToExternalService({ caseId, connector });
-      await waitForNextUpdate();
 
       expect(result.current).toEqual({
         isLoading: false,

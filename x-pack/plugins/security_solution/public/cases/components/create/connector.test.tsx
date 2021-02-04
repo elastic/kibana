@@ -68,7 +68,7 @@ const useGetSeverityResponse = {
   ],
 };
 
-describe('Connector', () => {
+describe.skip('Connector', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {

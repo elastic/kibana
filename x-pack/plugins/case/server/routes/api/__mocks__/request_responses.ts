@@ -117,6 +117,18 @@ export const getActionTypes = (): ActionTypeConnector[] => [
   },
 ];
 
+export const getActionExecuteResults = (actionId = '123') => ({
+  status: 'ok' as const,
+  data: {
+    title: 'RJ2-200',
+    id: '10663',
+    pushedDate: '2020-12-17T00:32:40.738Z',
+    url: 'https://siem-kibana.atlassian.net/browse/RJ2-200',
+    comments: [],
+  },
+  actionId,
+});
+
 export const newConfiguration: CasesConfigureRequest = {
   connector: {
     id: '456',
