@@ -95,6 +95,5 @@ test('editor mount setup', () => {
   // Verify our language features have been registered
   expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 });
