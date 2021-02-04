@@ -87,3 +87,23 @@ export const choices = [
     ])
     .flat(),
 ];
+
+export const severity = [
+  {
+    id: 4,
+    name: 'Low',
+  },
+  {
+    id: 5,
+    name: 'Medium',
+  },
+  {
+    id: 6,
+    name: 'High',
+  },
+];
+
+export const incidentTypes = [
+  { id: 17, name: 'Communication error (fax; email)' },
+  { id: 1001, name: 'Custom type' },
+];

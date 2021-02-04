@@ -5,28 +5,9 @@
  * 2.0.
  */
 
+import { incidentTypes, severity } from '../../mock';
 import { Props } from '../api';
 import { ResilientIncidentTypes, ResilientSeverity } from '../types';
-
-const severity = [
-  {
-    id: 4,
-    name: 'Low',
-  },
-  {
-    id: 5,
-    name: 'Medium',
-  },
-  {
-    id: 6,
-    name: 'High',
-  },
-];
-
-const incidentTypes = [
-  { id: 17, name: 'Communication error (fax; email)' },
-  { id: 1001, name: 'Custom type' },
-];
 
 export const getIncidentTypes = async (props: Props): Promise<{ data: ResilientIncidentTypes }> =>
   Promise.resolve({ data: incidentTypes });

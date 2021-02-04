@@ -102,7 +102,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
   );
 
   return isEdit ? (
-    <span data-test-subj={'connector-fields-sn'}>
+    <div data-test-subj={'connector-fields-sn'}>
       <EuiFormRow fullWidth label={i18n.URGENCY}>
         <EuiSelect
           fullWidth
@@ -146,7 +146,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </span>
+    </div>
   ) : (
     <ConnectorCard
       connectorType={ConnectorTypes.serviceNowITSM}
