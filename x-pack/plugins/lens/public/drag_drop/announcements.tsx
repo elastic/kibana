@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -105,11 +106,6 @@ export const announcements: CustomAnnouncementsType = {
 };
 
 const defaultAnnouncements = {
-  blockedArrows: () =>
-    i18n.translate('xpack.lens.dragDrop.announce.blockedArrows', {
-      defaultMessage:
-        'You have started reordering and you cannot choose any external target now. Press escape to cancel and try again.',
-    }),
   lifted: ({ label }: HumanData) =>
     i18n.translate('xpack.lens.dragDrop.announce.lifted', {
       defaultMessage: `You have lifted an item {label}`,
