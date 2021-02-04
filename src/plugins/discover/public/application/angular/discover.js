@@ -504,13 +504,6 @@ function discoverController($route, $scope, Promise) {
         )
       );
 
-      subscriptions.add(
-        data.search.session.onRefresh$.subscribe(() => {
-          searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-          refetch$.next();
-        })
-      );
-
       $scope.changeInterval = (interval) => {
         if (interval) {
           setAppState({ interval });
