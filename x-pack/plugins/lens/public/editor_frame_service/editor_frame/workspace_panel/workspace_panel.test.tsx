@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -784,7 +785,15 @@ describe('workspace_panel', () => {
 
     function initComponent(draggingContext = draggedField) {
       instance = mount(
-        <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
+        <ChildDragDropProvider
+          dragging={draggingContext}
+          setDragging={() => {}}
+          setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          setA11yMessage={() => {}}
+        >
           <WorkspacePanel
             activeDatasourceId={'mock'}
             datasourceStates={{
@@ -822,7 +831,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
