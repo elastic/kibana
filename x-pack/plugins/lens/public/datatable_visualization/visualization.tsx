@@ -176,7 +176,10 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({ columnId: accessor })),
+            .map((accessor) => ({
+              columnId: accessor,
+              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+            })),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,
