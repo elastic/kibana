@@ -296,7 +296,6 @@ Security::
 * Allow the default space to be accessed via `/s/default` {kibana-pull}77109[#77109]
 * Omit runtime fields from FLS suggestions {kibana-pull}78330[#78330]
 * Adds the ability to log in to Kibana anonymously without using any 3rd-party reverse proxy workarounds {kibana-pull}79985[#79985]
-* Filter out read access to config and telemetry obj {kibana-pull}82314[#82314]
 * Adds the ability to specify session timeout settings for every provider separately {kibana-pull}82583[#82583]
 * Adds cloud links to user menu {kibana-pull}82803[#82803]
 * Users are now redirected back to the original URL after they log in again {kibana-pull}84229[#84229]
