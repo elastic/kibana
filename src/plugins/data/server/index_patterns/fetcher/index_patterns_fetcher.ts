@@ -16,6 +16,9 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
+import { convertEsError } from './lib/errors';
+import { callFieldCapsApi, callIndexAliasApi } from './lib/es_api';
+import { timePatternToWildcard } from './lib/time_pattern_to_wildcard';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -131,17 +134,14 @@ export class IndexPatternsFetcher {
   async validatePatternListActive(patternList: string[]) {
     const result = await Promise.all(
       patternList.map((pattern) =>
-        this.elasticsearchClient.transport.request({
-          method: 'GET',
-          path: `/_resolve/index/${encodeURIComponent(pattern)}`,
+        this.elasticsearchClient.count({
+          index: pattern,
         })
       )
     );
     return result.reduce(
-      (acc: string[], { body: indexLookup }, patternListIndex) =>
-        indexLookup.indices && indexLookup.indices.length > 0
-          ? [...acc, patternList[patternListIndex]]
-          : acc,
+      (acc: string[], { body: { count } }, patternListIndex) =>
+        count > 0 ? [...acc, patternList[patternListIndex]] : acc,
       []
     );
   }
