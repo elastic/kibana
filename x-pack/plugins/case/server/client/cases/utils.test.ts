@@ -10,10 +10,18 @@ import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';
-import { comment as commentObj, mappings, defaultPipes, basicParams, userActions } from './mock';
+import {
+  comment as commentObj,
+  mappings,
+  defaultPipes,
+  basicParams,
+  userActions,
+  commentAlert,
+} from './mock';
 
 import {
   createIncident,
+  getLatestPushInfo,
   prepareFieldsForTransformation,
   transformComments,
   transformers,
@@ -27,7 +35,7 @@ const formatComment = {
 
 const params = { ...basicParams };
 
-describe('api/cases/configure/utils', () => {
+describe('utils', () => {
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
       const res = prepareFieldsForTransformation({
@@ -424,7 +432,7 @@ describe('api/cases/configure/utils', () => {
       isPreconfigured: false,
     };
 
-    it('maps an external incident', async () => {
+    it('creates an external incident', async () => {
       const res = await createIncident({
         actionsClient: actionsMock,
         theCase,
@@ -448,6 +456,96 @@ describe('api/cases/configure/utils', () => {
         },
         comments: [],
       });
+    });
+
+    it('it creates comments correctly', async () => {
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentObj, id: 'comment-user-1' }],
+        },
+        userActions,
+        connector,
+        mappings,
+        alerts: [],
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment:
+            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-user-1',
+        },
+      ]);
+    });
+
+    it('it does NOT creates comments when mapping is nothing', async () => {
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentObj, id: 'comment-user-1' }],
+        },
+        userActions,
+        connector,
+        mappings: [
+          mappings[0],
+          mappings[1],
+          {
+            source: 'comments',
+            target: 'comments',
+            action_type: 'nothing',
+          },
+        ],
+        alerts: [],
+      });
+
+      expect(res.comments).toEqual([]);
+    });
+
+    it('it creates comments of type alert correctly', async () => {
+      const res = await createIncident({
+        actionsClient: actionsMock,
+        theCase: {
+          ...theCase,
+          comments: [
+            { ...commentObj, id: 'comment-user-1' },
+            { ...commentAlert, id: 'comment-alert-1' },
+            { ...commentAlert, id: 'comment-alert-2' },
+          ],
+        },
+        // Remove second push
+        userActions: userActions.filter((item, index) => index !== 4),
+        connector,
+        mappings: [
+          ...mappings,
+          {
+            source: 'comments',
+            target: 'comments',
+            action_type: 'nothing',
+          },
+        ],
+        alerts: [],
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment:
+            'Wow, good luck catching that bad meanie! (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-user-1',
+        },
+        {
+          comment:
+            'Alert with id alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-alert-1',
+        },
+        {
+          comment:
+            'Alert with id alert-id-1 added to case (added at 2019-11-25T21:55:00.177Z by elastic)',
+          commentId: 'comment-alert-2',
+        },
+      ]);
     });
 
     it('updates an existing incident', async () => {
@@ -508,6 +606,95 @@ describe('api/cases/configure/utils', () => {
             `Retrieving Incident by id external-id from .jira failed with exception: Error: exception`
           )
         );
+      });
+    });
+
+    it('throws error if connector is not supported', async () => {
+      expect.assertions(2);
+      createIncident({
+        actionsClient: actionsMock,
+        theCase,
+        userActions,
+        connector: { ...connector, actionTypeId: 'not-supported' },
+        mappings,
+        alerts: [],
+      }).catch((e) => {
+        expect(e).not.toBeNull();
+        expect(e).toEqual(new Error('Invalid external service'));
+      });
+    });
+
+    describe('getLatestPushInfo', () => {
+      it('it returns the latest push information correctly', async () => {
+        const res = getLatestPushInfo('456', userActions);
+        expect(res).toEqual({
+          index: 4,
+          pushedInfo: {
+            connector_id: '456',
+            connector_name: 'ServiceNow SN',
+            external_id: 'external-id',
+            external_title: 'SIR0010037',
+            external_url:
+              'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+            pushed_at: '2021-02-03T17:45:29.400Z',
+            pushed_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic',
+              username: 'elastic',
+            },
+          },
+        });
+      });
+
+      it('it returns null when there are not actions', async () => {
+        const res = getLatestPushInfo('456', []);
+        expect(res).toBe(null);
+      });
+
+      it('it returns null when there are no push user action', async () => {
+        const res = getLatestPushInfo('456', [userActions[0]]);
+        expect(res).toBe(null);
+      });
+
+      it('it returns the correct push information when with multiple push on different connectors', async () => {
+        const res = getLatestPushInfo('456', [
+          ...userActions.slice(0, 3),
+          {
+            action_field: ['pushed'],
+            action: 'push-to-service',
+            action_at: '2021-02-03T17:45:29.400Z',
+            action_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic',
+              username: 'elastic',
+            },
+            new_value:
+              // The connector id is  123
+              '{"pushed_at":"2021-02-03T17:45:29.400Z","pushed_by":{"username":"elastic","full_name":"Elastic","email":"elastic@elastic.co"},"connector_id":"123","connector_name":"ServiceNow SN","external_id":"external-id","external_title":"SIR0010037","external_url":"https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id"}',
+            old_value: null,
+            action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
+            case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
+            comment_id: null,
+          },
+        ]);
+
+        expect(res).toEqual({
+          index: 1,
+          pushedInfo: {
+            connector_id: '456',
+            connector_name: 'ServiceNow SN',
+            external_id: 'external-id',
+            external_title: 'SIR0010037',
+            external_url:
+              'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+            pushed_at: '2021-02-03T17:41:26.108Z',
+            pushed_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic',
+              username: 'elastic',
+            },
+          },
+        });
       });
     });
   });

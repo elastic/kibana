@@ -101,15 +101,15 @@ export const createIncident = async ({
     updated_by: updatedBy,
   } = theCase;
 
+  if (!isConnectorSupported(connector.actionTypeId)) {
+    throw new Error('Invalid external service');
+  }
+
   const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
-
-  if (!isConnectorSupported(connector.actionTypeId)) {
-    throw new Error(`Invalid external service`);
-  }
 
   const externalServiceFields = await externalServiceFormatters[connector.actionTypeId].format(
     theCase,

@@ -10,7 +10,6 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
 } from '../../../../../../../src/core/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createCaseClient } from '../../../client';
 import {
   AlertService,
@@ -19,22 +18,12 @@ import {
   ConnectorMappingsService,
   CaseUserActionService,
 } from '../../../services';
-import {
-  getActions,
-  getActionTypes,
-  getActionExecuteResults,
-} from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
+import { createActionsClient } from './mock_actions_client';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
-  const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
-  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
-  actionsMock.get.mockImplementation(() => Promise.resolve(getActions()[1]));
-  actionsMock.execute.mockImplementation(({ actionId }) =>
-    Promise.resolve(getActionExecuteResults(actionId))
-  );
+  const actionsMock = createActionsClient();
 
   const log = loggingSystemMock.create().get('case');
   const esClientMock = elasticsearchServiceMock.createClusterClient();
@@ -82,5 +71,5 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     context,
   });
 
-  return context;
+  return { context, services: { userActionService } };
 };

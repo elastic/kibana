@@ -47,6 +47,28 @@ export const comment: CommentResponse = {
   version: 'WzEsMV0=',
 };
 
+export const commentAlert: CommentResponse = {
+  id: 'mock-comment-1',
+  alertId: 'alert-id-1',
+  index: 'alert-index-1',
+  type: CommentType.alert as const,
+  created_at: '2019-11-25T21:55:00.177Z',
+  created_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: '2019-11-25T21:55:00.177Z',
+  updated_by: {
+    full_name: 'elastic',
+    email: 'testemail@elastic.co',
+    username: 'elastic',
+  },
+  version: 'WzEsMV0=',
+};
+
 export const defaultPipes = ['informationCreated'];
 export const basicParams: BasicParams = {
   description: 'a description',
@@ -118,7 +140,7 @@ export const userActions: CaseUserActionsResponse = [
     old_value: null,
     action_id: '7373eb60-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
-    comment_id: '7243a8c0-6647-11eb-a291-51bf6b175a53',
+    comment_id: 'comment-alert-1',
   },
   {
     action_field: ['comment'],
@@ -133,7 +155,7 @@ export const userActions: CaseUserActionsResponse = [
     old_value: null,
     action_id: '7abc6410-6647-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
-    comment_id: '796c3d60-6647-11eb-a291-51bf6b175a53',
+    comment_id: 'comment-alert-2',
   },
   {
     action_field: ['pushed'],
@@ -164,6 +186,6 @@ export const userActions: CaseUserActionsResponse = [
     old_value: null,
     action_id: '0818e5e0-6648-11eb-a291-51bf6b175a53',
     case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
-    comment_id: '0701a980-6648-11eb-a291-51bf6b175a53',
+    comment_id: 'comment-user-1',
   },
 ];

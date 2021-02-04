@@ -47,15 +47,21 @@ const serviceNowSIRTable = 'sn_si_incident';
 export const ServiceNowITSMActionTypeId = '.servicenow';
 export const ServiceNowSIRActionTypeId = '.servicenow-sir';
 
-// action type definition
-export function getServiceNowITSMActionType(
-  params: GetActionTypeParams
-): ActionType<
+export type ServiceNowActionType = ActionType<
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   ExecutorParams,
   PushToServiceResponse | {}
-> {
+>;
+
+export type ServiceNowActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams
+>;
+
+// action type definition
+export function getServiceNowITSMActionType(params: GetActionTypeParams): ServiceNowActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowITSMActionTypeId,
@@ -74,14 +80,7 @@ export function getServiceNowITSMActionType(
   };
 }
 
-export function getServiceNowSIRActionType(
-  params: GetActionTypeParams
-): ActionType<
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  ExecutorParams,
-  PushToServiceResponse | {}
-> {
+export function getServiceNowSIRActionType(params: GetActionTypeParams): ServiceNowActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: ServiceNowSIRActionTypeId,
@@ -119,11 +118,7 @@ async function executor(
     table: string;
     commentFieldKey?: string;
   },
-  execOptions: ActionTypeExecutorOptions<
-    ServiceNowPublicConfigurationType,
-    ServiceNowSecretConfigurationType,
-    ExecutorParams
-  >
+  execOptions: ServiceNowActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;

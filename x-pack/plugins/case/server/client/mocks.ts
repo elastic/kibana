@@ -9,7 +9,6 @@ import { omit } from 'lodash/fp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest, kibanaResponseFactory } from '../../../../../src/core/server/http';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { actionsClientMock } from '../../../actions/server/mocks';
 import {
   AlertServiceContract,
   CaseConfigureService,
@@ -18,9 +17,8 @@ import {
   ConnectorMappingsService,
 } from '../services';
 import { CaseClient } from './types';
-import { authenticationMock } from '../routes/api/__fixtures__';
+import { authenticationMock, createActionsClient } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
-import { getActions } from '../routes/api/__mocks__/request_responses';
 import type { CasesRequestHandlerContext } from '../types';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
@@ -52,8 +50,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     alertsService: jest.Mocked<AlertServiceContract>;
   };
 }> => {
-  const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  const actionsMock = createActionsClient();
   const log = loggingSystemMock.create().get('case');
   const request = {} as KibanaRequest;
   const response = kibanaResponseFactory;

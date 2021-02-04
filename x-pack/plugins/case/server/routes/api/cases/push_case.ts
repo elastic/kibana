@@ -37,12 +37,12 @@ export function initPushCaseApi({ router }: RouteDeps) {
         return response.badRequest({ body: 'Action client not found' });
       }
 
-      const params = pipe(
-        CasePushRequestParamsRt.decode(request.params),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
       try {
+        const params = pipe(
+          CasePushRequestParamsRt.decode(request.params),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
         return response.ok({
           body: await caseClient.push({
             caseClient,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { flattenCaseSavedObject } from '../../routes/api/utils';
@@ -57,7 +56,7 @@ export const push = ({
     connectorType: connector.actionTypeId,
   });
 
-  const res = await createIncident({
+  const externalServiceIncident = await createIncident({
     actionsClient,
     theCase,
     userActions,
@@ -70,12 +69,14 @@ export const push = ({
     actionId: connector.id,
     params: {
       subAction: 'pushToService',
-      subActionParams: res,
+      subActionParams: externalServiceIncident,
     },
   });
 
   if (pushRes.status === 'error') {
-    throw new Error(pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service');
+    throw Boom.failedDependency(
+      pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service'
+    );
   }
 
   /* End of push to external service */
@@ -86,22 +87,12 @@ export const push = ({
 
   const pushedDate = new Date().toISOString();
 
-  const [myCase, myCaseConfigure, totalCommentsFindByCases, connectors] = await Promise.all([
+  const [myCase, myCaseConfigure] = await Promise.all([
     caseService.getCase({
       client: savedObjectsClient,
       caseId,
     }),
     caseConfigureService.find({ client: savedObjectsClient }),
-    caseService.getAllCaseComments({
-      client: savedObjectsClient,
-      caseId,
-      options: {
-        fields: [],
-        page: 1,
-        perPage: 1,
-      },
-    }),
-    actionsClient.getAll(),
   ]);
 
   const comments = await caseService.getAllCaseComments({
@@ -110,7 +101,7 @@ export const push = ({
     options: {
       fields: [],
       page: 1,
-      perPage: totalCommentsFindByCases.total,
+      perPage: theCase.totalComment,
     },
   });
 
@@ -125,16 +116,6 @@ export const push = ({
     external_title: externalServiceResponse.title,
     external_url: externalServiceResponse.url,
   };
-
-  const updateConnector = myCase.attributes.connector;
-
-  if (
-    isEmpty(updateConnector) ||
-    (updateConnector != null && updateConnector.id === 'none') ||
-    !connectors.some((c) => c.id === updateConnector.id)
-  ) {
-    throw Boom.notFound('Connector not found or set to none');
-  }
 
   const [updatedCase, updatedComments] = await Promise.all([
     caseService.patchCase({

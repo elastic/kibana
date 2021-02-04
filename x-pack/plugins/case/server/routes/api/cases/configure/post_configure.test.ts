@@ -40,7 +40,7 @@ describe('POST configuration', () => {
       body: newConfiguration,
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -73,7 +73,7 @@ describe('POST configuration', () => {
       body: newConfiguration,
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: [],
@@ -113,7 +113,7 @@ describe('POST configuration', () => {
       body: newConfiguration,
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -154,7 +154,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -180,7 +180,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -206,7 +206,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -232,7 +232,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -258,7 +258,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -282,7 +282,7 @@ describe('POST configuration', () => {
       caseMappingsSavedObject: mockCaseMappings,
     });
 
-    const context = await createRouteContext(savedObjectRepository);
+    const { context } = await createRouteContext(savedObjectRepository);
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
 
@@ -302,7 +302,7 @@ describe('POST configuration', () => {
       caseMappingsSavedObject: mockCaseMappings,
     });
 
-    const context = await createRouteContext(savedObjectRepository);
+    const { context } = await createRouteContext(savedObjectRepository);
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
 
@@ -325,7 +325,7 @@ describe('POST configuration', () => {
       caseMappingsSavedObject: mockCaseMappings,
     });
 
-    const context = await createRouteContext(savedObjectRepository);
+    const { context } = await createRouteContext(savedObjectRepository);
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
 
@@ -341,7 +341,7 @@ describe('POST configuration', () => {
       body: newConfiguration,
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], id: 'throw-error-find' }],
       })
@@ -359,7 +359,7 @@ describe('POST configuration', () => {
       body: newConfiguration,
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], id: 'throw-error-delete' }],
       })
@@ -384,7 +384,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -411,7 +411,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -437,7 +437,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -459,7 +459,7 @@ describe('POST configuration', () => {
       },
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,

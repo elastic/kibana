@@ -163,6 +163,53 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
 
+    it('should pushes a case and closes when closure_type: close-by-pushing', async () => {
+      const { body: connector } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
+        .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          }),
+          closure_type: 'close-by-pushing',
+        })
+        .expect(200);
+
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...postCaseReq,
+          connector: getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+            fields: { urgency: '2', impact: '2', severity: '2' },
+          }).connector,
+        })
+        .expect(200);
+
+      const { body } = await supertest
+        .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
+        .set('kbn-xsrf', 'true')
+        .send({})
+        .expect(200);
+
+      expect(body.status).to.eql('closed');
+    });
+
     it('unhappy path - 404s when case does not exist', async () => {
       await supertest
         .post(`${CASES_URL}/fake-id/connector/fake-connector/_push`)

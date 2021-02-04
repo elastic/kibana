@@ -72,6 +72,16 @@ export const getActions = (): FindActionResult[] => [
     isPreconfigured: false,
     referencedByCount: 0,
   },
+  {
+    id: 'for-mock-case-id-3',
+    actionTypeId: '.jira',
+    name: 'For mock case id 3',
+    config: {
+      apiUrl: 'https://elastic.jira.com',
+    },
+    isPreconfigured: false,
+    referencedByCount: 0,
+  },
 ];
 
 export const getActionTypes = (): ActionTypeConnector[] => [
