@@ -46,4 +46,4 @@ snapshots.js
 /packages/kbn-monaco/src/painless/antlr
 
 # Bazel
-/bazel-*
+/bazel

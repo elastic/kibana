@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -17,7 +18,7 @@ import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
-import { getServiceErrorGroupsMetrics } from '../lib/services/get_service_error_groups_metrics';
+import { getServiceErrorGroupsStatistics } from '../lib/services/get_service_error_groups_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
@@ -310,7 +311,7 @@ export const serviceErrorGroupsStatisticsRoute = createRoute({
       path: { serviceName },
       query: { numBuckets, transactionType, groupIds },
     } = context.params;
-    return getServiceErrorGroupsMetrics({
+    return getServiceErrorGroupsStatistics({
       serviceName,
       setup,
       numBuckets,
