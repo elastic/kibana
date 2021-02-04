@@ -576,17 +576,13 @@ export class SearchSource {
 
       // request the remaining fields from stored_fields just in case, since the
       // fields API does not handle stored fields
-      let remainingFields = difference(uniqFieldNames, [
+      const remainingFields = difference(uniqFieldNames, [
         ...Object.keys(body.script_fields),
         ...Object.keys(body.runtime_mappings),
-      ]).filter(Boolean);
-
-      if (body._source && body._source.excludes) {
-        // TODO: optimize complexity
-        remainingFields = remainingFields.filter((remainingField) => {
-          return !body._source.excludes.includes(remainingField);
-        });
-      }
+      ]).filter((remainingField) => {
+        if (!body._source || !body._source.excludes) return remainingField;
+        return !body._source.excludes.includes(remainingField);
+      });
 
       body.stored_fields = [...new Set(remainingFields)];
       // only include unique values
