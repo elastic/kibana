@@ -37,6 +37,7 @@ describe('Test Discover Context State', () => {
         ],
         "filters": Array [],
         "predecessorCount": 4,
+        "routing": undefined,
         "sort": Array [
           "time",
           "desc",
@@ -108,6 +109,7 @@ describe('Test Discover Context State', () => {
   });
 
   test('getState -> filters', async () => {
+    history.push('/#?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))');
     const filterManager = new FilterManager(setupMock.uiSettings);
     const filterGlobal = {
       query: { match: { extension: { query: 'jpg', type: 'phrase' } } },
@@ -176,7 +178,7 @@ describe('Test Discover Context State', () => {
     `);
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match:(extension:(query:jpg,type:phrase))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match:(extension:(query:png,type:phrase))))),predecessorCount:4,sort:!(time,desc),successorCount:4)"`
+      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match:(extension:(query:jpg,type:phrase))))),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match:(extension:(query:png,type:phrase))))),predecessorCount:4,sort:!(time,desc),successorCount:4)"`
     );
   });
 });

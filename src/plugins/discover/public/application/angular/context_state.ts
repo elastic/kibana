@@ -16,7 +16,7 @@ import {
   BaseStateContainer,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+import { esFilters, FilterManager, Filter, Query, TimeRange } from '../../../../data/public';
 
 export interface AppState {
   /**
@@ -47,6 +47,7 @@ interface GlobalState {
    * Array of filters
    */
   filters: Filter[];
+  time: TimeRange;
 }
 
 interface GetStateParams {
@@ -193,7 +194,7 @@ export function getState({
         getFilters(globalStateContainer.getState())
       );
       if (globalFilterChanged) {
-        globalStateContainer.set({ filters: globalFilters });
+        globalStateContainer.set({ ...globalStateContainer.getState(), filters: globalFilters });
       }
       // app state filters
       const appFilters = filterManager.getAppFilters();
@@ -265,6 +266,7 @@ function createInitialAppState(
     predecessorCount: parseInt(defaultSize, 10),
     sort: [timeFieldName, 'desc'],
     successorCount: parseInt(defaultSize, 10),
+    routing: undefined,
   };
   if (typeof urlState !== 'object') {
     return defaultState;
