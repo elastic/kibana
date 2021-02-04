@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -11,6 +12,7 @@ import { AlertParamDuration } from '../../flyout_expressions/alert_param_duratio
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
 import { AlertParamNumber } from '../../flyout_expressions/alert_param_number';
+import { AlertParamTextField } from '../../flyout_expressions/alert_param_textfield';
 
 export interface Props {
   alertParams: { [property: string]: any };
@@ -23,7 +25,7 @@ export interface Props {
 export const Expression: React.FC<Props> = (props) => {
   const { alertParams, paramDetails, setAlertParams, errors } = props;
 
-  const alertParamsUi = Object.keys(alertParams).map((alertParamName) => {
+  const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];
     const value = alertParams[alertParamName];
 
@@ -53,6 +55,17 @@ export const Expression: React.FC<Props> = (props) => {
       case AlertParamType.Number:
         return (
           <AlertParamNumber
+            key={alertParamName}
+            name={alertParamName}
+            details={details}
+            value={value}
+            errors={errors[alertParamName]}
+            setAlertParams={setAlertParams}
+          />
+        );
+      case AlertParamType.TextField:
+        return (
+          <AlertParamTextField
             key={alertParamName}
             name={alertParamName}
             label={details?.label}

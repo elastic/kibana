@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy } from 'lodash';
@@ -20,12 +21,12 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { calculateThroughput } from '../helpers/calculate_throughput';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
