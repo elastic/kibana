@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('resolve_import_errors', () => {
     // mock success results including metadata
@@ -38,10 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({
-            index: '.kibana*',
-            ignore: [404],
-          })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
