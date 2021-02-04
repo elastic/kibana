@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { InnerJoin } from './inner_join';
+import { SOURCE_TYPES } from '../../../common/constants';
 
 jest.mock('../../kibana_services', () => {});
 jest.mock('../layers/vector_layer/vector_layer', () => {});
 
 const rightSource = {
+  type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
   indexPatternTitle: 'kibana_sample_data_logs',

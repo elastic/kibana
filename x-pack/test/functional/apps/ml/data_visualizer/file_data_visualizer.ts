@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -109,6 +110,47 @@ export default function ({ getService }: FtrProviderContext) {
         populatedFieldsCount: 12,
         totalFieldsCount: 12,
         fieldTypeFiltersResultCount: 4,
+        fieldNameFiltersResultCount: 1,
+      },
+    },
+    {
+      suiteSuffix: 'with a file containing geo field',
+      filePath: path.join(__dirname, 'files_to_import', 'geo_file.csv'),
+      indexName: 'user-import_2',
+      createIndexPattern: false,
+      fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+      fieldNameFilters: ['Coordinates'],
+      expected: {
+        results: {
+          title: 'geo_file.csv',
+          numberOfFields: 3,
+        },
+        metricFields: [],
+        nonMetricFields: [
+          {
+            fieldName: 'Context',
+            type: ML_JOB_FIELD_TYPES.UNKNOWN,
+            docCountFormatted: '0 (0%)',
+            exampleCount: 0,
+          },
+          {
+            fieldName: 'Coordinates',
+            type: ML_JOB_FIELD_TYPES.GEO_POINT,
+            docCountFormatted: '13 (100%)',
+            exampleCount: 7,
+          },
+          {
+            fieldName: 'Location',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            docCountFormatted: '13 (100%)',
+            exampleCount: 7,
+          },
+        ],
+        visibleMetricFieldsCount: 0,
+        totalMetricFieldsCount: 0,
+        populatedFieldsCount: 3,
+        totalFieldsCount: 3,
+        fieldTypeFiltersResultCount: 1,
         fieldNameFiltersResultCount: 1,
       },
     },

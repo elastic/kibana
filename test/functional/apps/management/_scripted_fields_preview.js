@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  describe('scripted fields preview', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/89475
+  describe.skip('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.createIndexPattern();

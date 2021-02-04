@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -89,6 +90,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const createFormCheckboxAction = (dataTestSubject: string) => async (checked: boolean) => {
+    await act(async () => {
+      form.selectCheckBox(dataTestSubject, checked);
+    });
+    component.update();
+  };
+
   function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
     return async (value: V) => {
       await act(async () => {
@@ -146,16 +154,20 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       forceMergeFieldExists: () => exists(toggleSelector),
       toggleForceMerge: createFormToggleAction(toggleSelector),
       setForcemergeSegmentsCount: createFormSetValueAction(`${phase}-selectedForceMergeSegments`),
-      setBestCompression: createFormToggleAction(`${phase}-bestCompression`),
+      setBestCompression: createFormCheckboxAction(`${phase}-bestCompression`),
     };
   };
 
-  const setIndexPriority = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-phaseIndexPriority`);
+  const createIndexPriorityActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-indexPrioritySwitch`;
+    return {
+      indexPriorityExists: () => exists(toggleSelector),
+      toggleIndexPriority: createFormToggleAction(toggleSelector),
+      setIndexPriority: createFormSetValueAction(`${phase}-indexPriority`),
+    };
+  };
 
   const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
-
-  const warmPhaseOnRollover = createFormToggleAction(`warm-warmPhaseOnRollover`);
 
   const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
 
@@ -186,16 +198,20 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     createFormSetValueAction(`${phase}-selectedNodeAttrs`);
 
   const setReplicas = (phase: Phases) => async (value: string) => {
-    await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    if (!exists(`${phase}-selectedReplicaCount`)) {
+      await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
+    }
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
-  const setShrink = (phase: Phases) => async (value: string) => {
-    await createFormToggleAction(`${phase}-shrinkSwitch`)(true);
-    await createFormSetValueAction(`${phase}-selectedPrimaryShardCount`)(value);
+  const createShrinkActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-shrinkSwitch`;
+    return {
+      shrinkExists: () => exists(toggleSelector),
+      toggleShrink: createFormToggleAction(toggleSelector),
+      setShrink: createFormSetValueAction(`${phase}-primaryShardCount`),
+    };
   };
-
-  const shrinkExists = (phase: Phases) => () => exists(`${phase}-shrinkSwitch`);
 
   const setFreeze = createFormToggleAction('freezeSwitch');
   const freezeExists = () => exists('freezeSwitch');
@@ -235,9 +251,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   return {
     ...testBed,
     actions: {
+      saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
+      setPolicyName: createFormSetValueAction('policyNameField'),
       setWaitForSnapshotPolicy,
       savePolicy,
+      hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
+        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
@@ -249,26 +269,25 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxAge,
         toggleRollover,
         toggleDefaultRollover,
+        hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
         ...createForceMergeActions('hot'),
-        setIndexPriority: setIndexPriority('hot'),
-        setShrink: setShrink('hot'),
-        shrinkExists: shrinkExists('hot'),
+        ...createIndexPriorityActions('hot'),
+        ...createShrinkActions('hot'),
         setReadonly: setReadonly('hot'),
         ...createSearchableSnapshotActions('hot'),
       },
       warm: {
         enable: enable('warm'),
-        warmPhaseOnRollover,
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
-        setShrink: setShrink('warm'),
-        shrinkExists: shrinkExists('warm'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
+        ...createShrinkActions('warm'),
         ...createForceMergeActions('warm'),
         setReadonly: setReadonly('warm'),
-        setIndexPriority: setIndexPriority('warm'),
+        ...createIndexPriorityActions('warm'),
       },
       cold: {
         enable: enable('cold'),
@@ -279,7 +298,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setReplicas: setReplicas('cold'),
         setFreeze,
         freezeExists,
-        setIndexPriority: setIndexPriority('cold'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
+        ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {

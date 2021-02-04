@@ -843,7 +843,7 @@ export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transpo
 };
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -859,7 +859,6 @@ export class ElasticsearchConfig {
     readonly healthCheckDelay: Duration;
     readonly hosts: string[];
     readonly ignoreVersionMismatch: boolean;
-    readonly logQueries: boolean;
     readonly password?: string;
     readonly pingTimeout: Duration;
     readonly requestHeadersWhitelist: string[];
@@ -1531,7 +1530,7 @@ export interface LegacyCallAPIOptions {
 
 // @public @deprecated
 export class LegacyClusterClient implements ILegacyClusterClient {
-    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+    constructor(config: LegacyElasticsearchClientConfig, log: Logger, type: string, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
     // @deprecated
     callAsInternalUser: LegacyAPICaller;
@@ -1553,7 +1552,7 @@ export interface LegacyConfig {
 }
 
 // @public @deprecated (undocumented)
-export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
+export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
@@ -1841,13 +1840,13 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 
 // @public
 export interface PluginInitializerContext<ConfigSchema = unknown> {
-    // (undocumented)
     config: {
         legacy: {
             globalConfig$: Observable<SharedGlobalConfig>;
+            get: () => SharedGlobalConfig;
         };
         create: <T = ConfigSchema>() => Observable<T>;
-        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
+        get: <T = ConfigSchema>() => T;
     };
     // (undocumented)
     env: {
@@ -1855,7 +1854,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
         packageInfo: Readonly<PackageInfo>;
         instanceUuid: string;
     };
-    // (undocumented)
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     logger: LoggerFactory;
     // (undocumented)
     opaqueId: PluginOpaqueId;
@@ -3139,5 +3138,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:371:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

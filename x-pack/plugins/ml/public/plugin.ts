@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,11 +22,10 @@ import type {
   SharePluginStart,
   UrlGeneratorContract,
 } from 'src/plugins/share/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
-import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
@@ -45,6 +45,7 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
+import type { MapsStartApi } from '../../maps/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -52,12 +53,13 @@ export interface MlStartDependencies {
   kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
+  embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -99,10 +101,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
-            embeddable: pluginsSetup.embeddable,
+            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
             kibanaVersion,
           },

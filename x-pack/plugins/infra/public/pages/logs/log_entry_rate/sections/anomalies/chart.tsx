@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { RectAnnotationDatum, AnnotationId } from '@elastic/charts';
 import {
@@ -23,7 +25,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import {
   MLSeverityScoreCategories,
   ML_SEVERITY_COLORS,

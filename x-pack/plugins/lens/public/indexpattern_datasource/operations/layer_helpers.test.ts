@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { OperationMetadata } from '../../types';
@@ -2181,7 +2182,7 @@ describe('state_helpers', () => {
       expect(errors).toHaveLength(1);
     });
 
-    it('should consider incompleteColumns before layer columns', () => {
+    it('should ignore incompleteColumns when checking for errors', () => {
       const savedRef = jest.fn().mockReturnValue(['error 1']);
       const incompleteRef = jest.fn();
       operationDefinitionMap.testReference.getErrorMessage = savedRef;
@@ -2206,9 +2207,9 @@ describe('state_helpers', () => {
         },
         indexPattern
       );
-      expect(savedRef).not.toHaveBeenCalled();
-      expect(incompleteRef).toHaveBeenCalled();
-      expect(errors).toBeUndefined();
+      expect(savedRef).toHaveBeenCalled();
+      expect(incompleteRef).not.toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
 
       delete operationDefinitionMap.testIncompleteReference;
     });

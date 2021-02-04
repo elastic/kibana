@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,6 +10,8 @@ import React from 'react';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 import classNames from 'classnames';
 import { useValues } from 'kea';
+
+import { DESCRIPTION_LABEL } from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
@@ -65,7 +68,7 @@ export const ExampleSearchResultGroup: React.FC = () => {
                       className="example-result-content-placeholder"
                       data-test-subj="DefaultDescriptionLabel"
                     >
-                      Description
+                      {DESCRIPTION_LABEL}
                     </span>
                   )}
                 </div>

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState, useCallback } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -111,19 +112,6 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
   showAllFields: false,
   showEmptyFields: false,
 });
-
-function getItemIdToExpandedRowMap(
-  itemIds: string[],
-  items: FieldVisConfig[]
-): ItemIdToExpandedRowMap {
-  return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
-    const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
-    if (item !== undefined) {
-      m[fieldName] = <IndexBasedDataVisualizerExpandedRow item={item} />;
-    }
-    return m;
-  }, {} as ItemIdToExpandedRowMap);
-}
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
@@ -678,6 +666,26 @@ export const Page: FC = () => {
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
   }, [overallStats, showEmptyFields]);
+
+  const getItemIdToExpandedRowMap = useCallback(
+    function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
+      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+        const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+        if (item !== undefined) {
+          m[fieldName] = (
+            <IndexBasedDataVisualizerExpandedRow
+              item={item}
+              indexPattern={currentIndexPattern}
+              combinedQuery={{ searchQueryLanguage, searchString }}
+            />
+          );
+        }
+        return m;
+      }, {} as ItemIdToExpandedRowMap);
+    },
+    [currentIndexPattern, searchQuery]
+  );
+
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useBarCharts } from './use_bar_charts';
@@ -59,10 +60,13 @@ describe('useBarChartsHooks', () => {
     const firstChartItems = result.current[0];
     const lastChartItems = result.current[4];
 
-    // first chart items last item should be x 199, since we only display 150 items
+    // first chart items last item should be x 149, since we only display 150 items
     expect(firstChartItems[firstChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS - 1);
 
-    // since here are 5 charts, last chart first item should be x 800
+    // first chart will only contain x values from 0 - 149;
+    expect(firstChartItems.find((item) => item.x > 149)).toBe(undefined);
+
+    // since here are 5 charts, last chart first item should be x 600
     expect(lastChartItems[0].x).toBe(CANVAS_MAX_ITEMS * 4);
     expect(lastChartItems[lastChartItems.length - 1].x).toBe(CANVAS_MAX_ITEMS * 5 - 1);
   });

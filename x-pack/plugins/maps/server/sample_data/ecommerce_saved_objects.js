@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -70,6 +71,7 @@ const layerList = [
       {
         leftField: 'iso2',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: '741db9c6-8ebb-4ea9-9885-b6b4ac019d14',
           indexPatternTitle: 'kibana_sample_data_ecommerce',
           term: 'geoip.country_iso_code',
@@ -134,6 +136,7 @@ const layerList = [
       {
         leftField: 'name',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: '30a0ec24-49b6-476a-b4ed-6c1636333695',
           indexPatternTitle: 'kibana_sample_data_ecommerce',
           term: 'geoip.region_name',
@@ -198,6 +201,7 @@ const layerList = [
       {
         leftField: 'label_en',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: 'e325c9da-73fa-4b3b-8b59-364b99370826',
           indexPatternTitle: 'kibana_sample_data_ecommerce',
           term: 'geoip.region_name',
@@ -262,6 +266,7 @@ const layerList = [
       {
         leftField: 'label_en',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: '612d805d-8533-43a9-ac0e-cbf51fe63dcd',
           indexPatternTitle: 'kibana_sample_data_ecommerce',
           term: 'geoip.region_name',

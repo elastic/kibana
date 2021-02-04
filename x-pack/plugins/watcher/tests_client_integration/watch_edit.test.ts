@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
+import { getRandomString } from '@kbn/test/jest';
+
+import { getWatch } from '../__fixtures__';
+import { defaultWatch } from '../public/application/models/watch';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/jest_constants';
-import defaultWatchJson from '../public/application/models/watch/default_watch.json';
-import { getWatch } from '../__fixtures__';
-import { getRandomString } from '@kbn/test/jest';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
@@ -69,7 +71,7 @@ describe('<WatchEdit />', () => {
         expect(exists('jsonWatchForm')).toBe(true);
         expect(find('nameInput').props().value).toBe(watch.name);
         expect(find('idInput').props().value).toBe(watch.id);
-        expect(JSON.parse(codeEditor.props().value as string)).toEqual(defaultWatchJson);
+        expect(JSON.parse(codeEditor.props().value as string)).toEqual(defaultWatch);
 
         // ID should not be editable
         expect(find('idInput').props().readOnly).toEqual(true);
@@ -112,7 +114,7 @@ describe('<WatchEdit />', () => {
                 },
               },
             ],
-            watch: defaultWatchJson,
+            watch: defaultWatch,
           })
         );
       });

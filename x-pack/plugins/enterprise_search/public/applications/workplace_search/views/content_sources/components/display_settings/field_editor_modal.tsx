@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent, useState } from 'react';
@@ -22,6 +23,8 @@ import {
   EuiOverlayMask,
   EuiSelect,
 } from '@elastic/eui';
+
+import { CANCEL_BUTTON, FIELD_LABEL, UPDATE_LABEL, ADD_LABEL } from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
@@ -53,14 +56,16 @@ export const FieldEditorModal: React.FC = () => {
     }
   };
 
-  const ACTION_LABEL = isEditing ? 'Update' : 'Add';
+  const ACTION_LABEL = isEditing ? UPDATE_LABEL : ADD_LABEL;
 
   return (
     <EuiOverlayMask>
       <form onSubmit={handleSubmit}>
         <EuiModal onClose={toggleFieldEditorModal} maxWidth={475}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{ACTION_LABEL} Field</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              {ACTION_LABEL} {FIELD_LABEL}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <EuiForm>
@@ -89,9 +94,9 @@ export const FieldEditorModal: React.FC = () => {
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={toggleFieldEditorModal}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={toggleFieldEditorModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
             <EuiButton data-test-subj="FieldSubmitButton" color="primary" fill={true} type="submit">
-              {ACTION_LABEL} Field
+              {ACTION_LABEL} {FIELD_LABEL}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
