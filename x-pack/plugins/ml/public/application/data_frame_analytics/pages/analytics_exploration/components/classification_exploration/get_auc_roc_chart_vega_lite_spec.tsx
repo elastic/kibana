@@ -11,7 +11,7 @@ import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
 import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
 
-import { AucRocCurveItem } from '../../data_frame_analytics/common/analytics';
+import { AucRocCurveItem } from '../../../../common/analytics';
 
 export const LEGEND_TYPES = {
   NOMINAL: 'nominal',

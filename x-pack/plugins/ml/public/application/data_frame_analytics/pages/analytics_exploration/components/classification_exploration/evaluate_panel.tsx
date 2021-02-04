@@ -21,13 +21,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { AucRocChart } from '../../../../../components/auc_roc_chart/auc_roc_chart';
+import { VegaChart, VegaChartLoading } from '../../../../../components/vega_chart';
 import { ErrorCallout } from '../error_callout';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
+
+import { getAucRocChartVegaLiteSpec } from './get_auc_roc_chart_vega_lite_spec';
 
 import {
   getColumnData,
@@ -353,33 +355,34 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
               </>
             ) : null}
             {/* AUC ROC Chart */}
-            {!isLoadingAucRoc && aucRocData.length > 0 ? (
+            {Array.isArray(errorAucRoc) && errorAucRoc.map((e) => <ErrorCallout error={e} />)}
+            {errorAucRoc === null && (
               <>
-                {Array.isArray(errorAucRoc) && errorAucRoc.map((e) => <ErrorCallout error={e} />)}
-                {errorAucRoc === null && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiFlexGroup gutterSize="none">
-                      <EuiTitle size="xxs">
-                        <span>AUC ROC</span>
-                      </EuiTitle>
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                          content={i18n.translate(
-                            'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
-                            {
-                              defaultMessage: 'AUC ROC Help Text',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <AucRocChart classificationClasses={classificationClasses} data={aucRocData} />
-                  </>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup gutterSize="none">
+                  <EuiTitle size="xxs">
+                    <span>AUC ROC</span>
+                  </EuiTitle>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                      content={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.aucRocCurveTooltip',
+                        {
+                          defaultMessage: 'AUC ROC Help Text',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {!isLoadingAucRoc && aucRocData.length > 0 && (
+                  <VegaChart
+                    vegaSpec={getAucRocChartVegaLiteSpec(classificationClasses, aucRocData)}
+                  />
                 )}
+                {isLoadingAucRoc && <VegaChartLoading />}
               </>
-            ) : null}
+            )}
           </>
         }
       />
