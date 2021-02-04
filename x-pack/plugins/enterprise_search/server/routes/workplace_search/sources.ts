@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -25,14 +26,14 @@ const pageSchema = schema.object({
   total_results: schema.number(),
 });
 
-const oAuthConfigSchema = schema.object({
+const oauthConfigSchema = schema.object({
   base_url: schema.maybe(schema.string()),
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
   service_type: schema.string(),
-  private_key: schema.string(),
-  public_key: schema.string(),
-  consumer_key: schema.string(),
+  private_key: schema.maybe(schema.string()),
+  public_key: schema.maybe(schema.string()),
+  consumer_key: schema.maybe(schema.string()),
 });
 
 const displayFieldSchema = schema.object({
@@ -50,6 +51,7 @@ const displaySettingsSchema = schema.object({
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
 });
 
+// Account routes
 export function registerAccountSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -252,6 +254,10 @@ export function registerAccountPrepareSourcesRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          subdomain: schema.maybe(schema.string()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -390,6 +396,7 @@ export function registerAccountSourceReindexJobStatusRoute({
   );
 }
 
+// Org routes
 export function registerOrgSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -592,6 +599,11 @@ export function registerOrgPrepareSourcesRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          index_permissions: schema.boolean(),
+          subdomain: schema.maybe(schema.string()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -743,6 +755,30 @@ export function registerOrgSourceOauthConfigurationsRoute({
       path: '/ws/org/settings/connectors',
     })
   );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oauthConfigSchema,
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oauthConfigSchema,
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
 }
 
 export function registerOrgSourceOauthConfigurationRoute({
@@ -770,7 +806,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -785,7 +821,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -804,6 +840,30 @@ export function registerOrgSourceOauthConfigurationRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/settings/connectors/:serviceType',
+    })
+  );
+}
+
+// Same route is used for org and account. `state` passes the context.
+export function registerOauthConnectorParamsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/sources/create',
+      validate: {
+        query: schema.object({
+          kibana_host: schema.string(),
+          code: schema.string(),
+          session_state: schema.string(),
+          state: schema.string(),
+          oauth_verifier: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/create',
     })
   );
 }
@@ -841,4 +901,5 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
+  registerOauthConnectorParamsRoute(dependencies);
 };
