@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock } from 'src/core/server/mocks';
@@ -18,7 +19,7 @@ beforeEach(() => {
 });
 
 describe('getEventsSummaryBySavedObjectIdsRoute', () => {
-  it('get events for alerts by ids and group their as instances summary', async () => {
+  it('get events for alerts by ids and group theim as instances summary', async () => {
     const router = httpServiceMock.createRouter();
 
     getEventsSummaryBySavedObjectIdsRoute(router, systemLogger);
@@ -39,8 +40,8 @@ describe('getEventsSummaryBySavedObjectIdsRoute', () => {
       eventLogClient,
       {
         params: { type: 'alert' },
-        body: { ids: ['1'] },
-        aggs: {},
+        body: { ids: ['1'], aggs: {} },
+        query: {},
       },
       ['ok']
     );
@@ -49,8 +50,10 @@ describe('getEventsSummaryBySavedObjectIdsRoute', () => {
 
     expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [ids] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
+    const [type, ids, aggs] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
     expect(ids).toEqual(['1']);
+    expect(type).toEqual('alert');
+    expect(aggs).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,
@@ -84,16 +87,14 @@ describe('getEventsSummaryBySavedObjectIdsRoute', () => {
 
     expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [id, options] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
-    expect(id).toEqual(['1']);
-    expect(options).toMatchObject({});
+    const [type, ids, aggs] = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0];
+    expect(ids).toEqual(['1']);
+    expect(type).toEqual('alert');
+    expect(aggs).toMatchObject({});
 
-    expect(res.ok).toHaveBeenCalledWith([
-      {
-        savedObjectId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d',
-        summary: {},
-      },
-    ]);
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [{ savedObjectId: '25fff0f0-61b4-11eb-9d71-c3f7d68f132d', summary: {} }],
+    });
   });
 
   it('logs a warning when the query throws an error', async () => {
@@ -118,7 +119,7 @@ describe('getEventsSummaryBySavedObjectIdsRoute', () => {
 
     expect(systemLogger.debug).toHaveBeenCalledTimes(1);
     expect(systemLogger.debug).toHaveBeenCalledWith(
-      'error calling eventLog getEventsSummaryBySavedObjectIds([1], {"start":"2342343","end":"456456"}): oof!'
+      'error calling eventLog getEventsSummaryBySavedObjectIdsRoute([1], {"start":"2342343","end":"456456"}): oof!'
     );
   });
 });

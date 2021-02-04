@@ -712,22 +712,33 @@ describe('queryEventsSummaryBySavedObjectIds', () => {
       asApiResponse({
         aggregations: {
           saved_objects: {
-            saved_object_type: {
+            doc_count: 42,
+            saved_object: {
+              doc_count: 42,
               ids: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
                 buckets: [
                   {
-                    key: '1',
+                    key: 'saved-object-id',
+                    doc_count: 42,
                     summary: {
-                      test_aggs1: {
-                        key: '1212',
-                      },
-                    },
-                  },
-                  {
-                    key: '2',
-                    summary: {
-                      test_aggs1: {
-                        key: '33333',
+                      doc_count: 42,
+                      instances: {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 0,
+                        buckets: [
+                          {
+                            key: '*',
+                            doc_count: 21,
+                            instance_created: {
+                              doc_count: 0,
+                              max_timestamp: {
+                                value: null,
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   },
@@ -743,74 +754,164 @@ describe('queryEventsSummaryBySavedObjectIds', () => {
       undefined,
       'saved-object-type',
       ['saved-object-id'],
-      {},
+      {
+        instances: {
+          terms: {
+            field: 'saved-object-type.instance_id',
+            order: {
+              _key: 'asc',
+            },
+            size: 65535,
+          },
+          aggs: {
+            instance_created: {
+              filter: {
+                term: {
+                  'event.action': 'new-instance',
+                },
+              },
+              aggs: {
+                max_timestamp: {
+                  max: {
+                    field: '@timestamp',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       start,
       end
     );
 
     const [query] = clusterClient.search.mock.calls[0];
-    expect(query).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "must": Array [
-                Object {
-                  "nested": Object {
-                    "path": "kibana.saved_objects",
-                    "query": Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.rel": Object {
-                                "value": "primary",
-                              },
-                            },
-                          },
-                          Object {
-                            "term": Object {
-                              "kibana.saved_objects.type": Object {
-                                "value": "saved-object-type",
-                              },
-                            },
-                          },
-                          Object {
-                            "terms": Object {
-                              "kibana.saved_objects.id": Array [
-                                "saved-object-id",
-                              ],
-                            },
-                          },
-                          Object {
-                            "bool": Object {
-                              "must_not": Object {
-                                "exists": Object {
-                                  "field": "kibana.saved_objects.namespace",
+    expect(query).toMatchObject({
+      body: {
+        aggs: {
+          saved_objects: {
+            aggs: {
+              saved_object: {
+                aggs: {
+                  ids: {
+                    aggs: {
+                      summary: {
+                        aggs: {
+                          instances: {
+                            aggs: {
+                              instance_created: {
+                                aggs: {
+                                  max_timestamp: {
+                                    max: {
+                                      field: '@timestamp',
+                                    },
+                                  },
+                                },
+                                filter: {
+                                  term: {
+                                    'event.action': 'new-instance',
+                                  },
                                 },
                               },
                             },
+                            terms: {
+                              field: 'saved-object-type.instance_id',
+                              order: {
+                                _key: 'asc',
+                              },
+                              size: 65535,
+                            },
                           },
-                        ],
+                        },
+                        reverse_nested: {},
                       },
+                    },
+                    terms: {
+                      field: 'kibana.saved_objects.id',
+                      size: 65535,
                     },
                   },
                 },
-              ],
+                filter: {
+                  terms: {
+                    'kibana.saved_objects.id': ['saved-object-id'],
+                  },
+                },
+              },
             },
-          },
-          "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+            nested: {
+              path: 'kibana.saved_objects',
             },
           },
         },
-        "index": "index-name",
-        "track_total_hits": true,
-      }
-    `);
+        query: {
+          bool: {
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          terms: {
+                            'kibana.saved_objects.id': ['saved-object-id'],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2020-07-08T00:52:28.350Z',
+                  },
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    lte: '2020-07-08T00:00:00.000Z',
+                  },
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: 'kibana.saved_objects.namespace',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        sort: {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      },
+      index: 'index-name',
+    });
   });
 });
 

@@ -315,7 +315,9 @@ describe('EventLogStart', () => {
                 field: 'sub_object.id',
               },
             },
-          }
+          },
+          '2020-03-30T14:55:47.054Z',
+          '2020-03-30T15:55:47.054Z'
         )
       ).toEqual(result);
 
@@ -325,11 +327,14 @@ describe('EventLogStart', () => {
         'saved-object-type',
         ['saved-object-id'],
         {
-          page: 1,
-          per_page: 10,
-          sort_field: '@timestamp',
-          sort_order: 'asc',
-        }
+          sub_objects: {
+            terms: {
+              field: 'sub_object.id',
+            },
+          },
+        },
+        '2020-03-30T14:55:47.054Z',
+        '2020-03-30T15:55:47.054Z'
       );
     });
   });
