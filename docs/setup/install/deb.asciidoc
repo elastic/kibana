@@ -8,12 +8,8 @@ The Debian package for Kibana can be <<install-deb,downloaded from our website>>
 or from our <<deb-repo,APT repository>>. It can be used to install
 Kibana on any Debian-based system such as Debian and Ubuntu.
 
-This package is free to use under the Elastic license. It contains open source
-and free commercial features and access to paid commercial features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the
-paid commercial features. See the
-https://www.elastic.co/subscriptions[Subscriptions] page for information about
-Elastic license levels.
+It contains both free and subscription features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page. Other versions can
