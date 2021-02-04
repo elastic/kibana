@@ -31,6 +31,7 @@ interface LogStreamState {
   bottomCursor: LogEntryCursor | null;
   hasMoreBefore: boolean;
   hasMoreAfter: boolean;
+  lastLoadedTime?: Date;
 }
 
 const INITIAL_STATE: LogStreamState = {
@@ -111,6 +112,7 @@ export function useLogStream({
           hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
           bottomCursor: combined.bottomCursor,
           topCursor: combined.topCursor,
+          lastLoadedTime: new Date(),
         }));
       }
     },
@@ -131,6 +133,7 @@ export function useLogStream({
           hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
           topCursor: data.topCursor ?? prevState.topCursor,
           bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
+          lastLoadedTime: new Date(),
         }));
       }
     },
@@ -165,6 +168,7 @@ export function useLogStream({
           hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
           topCursor: prevState.topCursor ?? data.topCursor,
           bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+          lastLoadedTime: new Date(),
         }));
       }
     },
