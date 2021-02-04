@@ -55,6 +55,7 @@
     { "path": "../plugins/ml/tsconfig.json" },
     { "path": "../plugins/task_manager/tsconfig.json" },
     { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
+    { "path": "../plugins/transform/tsconfig.json" },
     { "path": "../plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../plugins/spaces/tsconfig.json" },
