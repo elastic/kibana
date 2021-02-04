@@ -435,79 +435,87 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('alert with currently active instance that switched action groups', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      errors_state: {
+        doc_count: 0,
+        action: {
+          hits: {
+            total: {
+              value: 0,
+              relation: 'eq',
+            },
+            max_score: null,
+            hits: [],
+          },
+        },
+      },
       instances: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
         buckets: [
           {
-            key: 'host-11',
-            doc_count: 49,
+            key: 'instance-1',
+            doc_count: 22,
             last_state: {
-              doc_count: 49,
+              doc_count: 21,
               action: {
                 hits: {
                   total: {
-                    value: 49,
+                    value: 21,
                     relation: 'eq',
                   },
                   max_score: null,
                   hits: [
                     {
                       _index: '.kibana-event-log-8.0.0-000001',
-                      _id: 'hvR9ZncBZvAf3rflOD0w',
+                      _id: 'e233a3cB0UnnGUWTSSgP',
                       _score: null,
                       _source: {
-                        '@timestamp': '2021-02-03T06:03:38.212Z',
+                        '@timestamp': '2021-02-04T07:35:04.144Z',
                         event: {
                           action: 'active-instance',
                         },
                         kibana: {
                           alerting: {
-                            action_group_id: 'threshold met',
+                            action_group_id: 'action group B',
                           },
                         },
                       },
-                      sort: [1612332218212],
+                      sort: [1612424104144],
                     },
                   ],
                 },
               },
             },
-            instance_created: {
-              doc_count: 0,
-              max_timestampt: {
-                value: null,
-              },
-            },
           },
         ],
       },
-      errors_state: {},
       last_execution_state: {
-        doc_count: 48,
-        action: {
-          hits: {
-            total: {
-              value: 48,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [
-              {
-                _index: '.kibana-event-log-8.0.0-000001',
-                _id: 'jvR9ZncBZvAf3rflOD0w',
-                _score: null,
-                _source: {
-                  '@timestamp': '2021-02-03T06:03:38.194Z',
-                },
-                sort: [1612332218194],
-              },
-            ],
-          },
+        doc_count: 20,
+        max_timestamp: {
+          value: 1612424103095,
+          value_as_string: '2021-02-04T07:35:03.095Z',
         },
       },
     };
 
     const instancesCreatedSummary = {
-      instances: {},
+      instances: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [
+          {
+            key: 'instance-1',
+            doc_count: 20,
+            instance_created: {
+              doc_count: 1,
+              max_timestamp: {
+                value: 1612422867554,
+                value_as_string: '2021-02-04T07:14:27.554Z',
+              },
+            },
+          },
+        ],
+      },
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,

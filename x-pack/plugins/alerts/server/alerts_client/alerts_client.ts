@@ -421,7 +421,7 @@ export class AlertsClient {
       errors_state: Record<string, unknown>;
     };
     try {
-      const instansStatesQueryResults = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+      const instancesStatesQueryResult = await eventLogClient.getEventsSummaryBySavedObjectIds<{
         instances: Record<string, unknown>;
         last_execution_state: Record<string, unknown>;
         errors_state: Record<string, unknown>;
@@ -433,7 +433,7 @@ export class AlertsClient {
         dateNow.toISOString()
       );
 
-      instancesLatestStateSummary = instansStatesQueryResults[0].summary;
+      instancesLatestStateSummary = instancesStatesQueryResult[0].summary;
     } catch (err) {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log latest instances state for alert ${id}: ${err.message}`
@@ -445,12 +445,12 @@ export class AlertsClient {
       instances: Record<string, unknown>;
     };
     try {
-      const instansStatesQueryResults = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+      const instancesCreatedQueryResult = await eventLogClient.getEventsSummaryBySavedObjectIds<{
         instances: Record<string, unknown>;
         last_execution_state: Record<string, unknown>;
       }>('alert', [id], alertInstanceCreatedQueryAggregation);
 
-      instancesCreatedSummary = instansStatesQueryResults[0].summary;
+      instancesCreatedSummary = instancesCreatedQueryResult[0].summary;
     } catch (err) {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log instances created for alert ${id}: ${err.message}`

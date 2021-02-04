@@ -234,34 +234,47 @@ describe('getAlertInstanceSummary()', () => {
 
   test('calls event log client with start date', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    const summaryResult = [
+    const instancesLatestStateSummary = [
       {
-        savedObjectId: 'e60004e0-65e1-11eb-96ec-3b8c9e2069b7',
+        savedObjectId: '9c24dfd0-66b8-11eb-9759-27c1213b5f31',
         summary: {
-          doc_count: 440,
+          doc_count: 30,
+          errors_state: {
+            doc_count: 0,
+            action: {
+              hits: {
+                total: {
+                  value: 0,
+                  relation: 'eq',
+                },
+                max_score: null,
+                hits: [],
+              },
+            },
+          },
           instances: {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
               {
-                key: 'host-11',
-                doc_count: 49,
+                key: 'all documents',
+                doc_count: 16,
                 last_state: {
-                  doc_count: 49,
+                  doc_count: 15,
                   action: {
                     hits: {
                       total: {
-                        value: 49,
+                        value: 15,
                         relation: 'eq',
                       },
                       max_score: null,
                       hits: [
                         {
                           _index: '.kibana-event-log-8.0.0-000001',
-                          _id: 'hvR9ZncBZvAf3rflOD0w',
+                          _id: 'YG3xa3cB0UnnGUWTfScr',
                           _score: null,
                           _source: {
-                            '@timestamp': '2021-02-03T06:03:38.212Z',
+                            '@timestamp': '2021-02-04T07:28:43.463Z',
                             event: {
                               action: 'active-instance',
                             },
@@ -271,25 +284,28 @@ describe('getAlertInstanceSummary()', () => {
                               },
                             },
                           },
-                          sort: [1612332218212],
+                          sort: [1612423723463],
                         },
                       ],
                     },
                   },
                 },
-                instance_created: {
-                  doc_count: 0,
-                  max_timestampt: {
-                    value: null,
-                  },
-                },
               },
             ],
+          },
+          last_execution_state: {
+            doc_count: 14,
+            max_timestamp: {
+              value: 1612423722992,
+              value_as_string: '2021-02-04T07:28:42.992Z',
+            },
           },
         },
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(
+      instancesLatestStateSummary
+    );
 
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
