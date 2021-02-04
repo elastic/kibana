@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -558,6 +559,14 @@ const EXPECTED_DATA = [
   },
 ];
 
+const EXPECTED_KPI_COUNTS = {
+  destinationIpCount: 154,
+  hostCount: 1,
+  processCount: 0,
+  sourceIpCount: 121,
+  userCount: 0,
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -586,6 +595,25 @@ export default function ({ getService }: FtrProviderContext) {
           return rest;
         })
       ).to.eql(sortBy(EXPECTED_DATA, 'name'));
+    });
+
+    it('Make sure that we get kpi data', async () => {
+      const {
+        body: { destinationIpCount, hostCount, processCount, sourceIpCount, userCount },
+      } = await supertest
+        .post('/internal/search/securitySolutionTimelineSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: TimelineEventsQueries.kpi,
+          docValueFields: [],
+          indexName: INDEX_NAME,
+          inspect: false,
+          eventId: ID,
+        })
+        .expect(200);
+      expect({ destinationIpCount, hostCount, processCount, sourceIpCount, userCount }).to.eql(
+        EXPECTED_KPI_COUNTS
+      );
     });
   });
 }

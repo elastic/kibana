@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import get from 'lodash/fp/get';
@@ -54,7 +55,8 @@ export const filterThreatMapping = ({
   threatMapping
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-        return get(entry.value, threatListItem._source) == null;
+        const itemValue = get(entry.value, threatListItem.fields);
+        return itemValue == null || itemValue.length !== 1;
       });
       if (atLeastOneItemMissingInThreatList) {
         return { ...threatMap, entries: [] };
@@ -69,15 +71,15 @@ export const createInnerAndClauses = ({
   threatListItem,
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
-    const value = get(threatMappingEntry.value, threatListItem._source);
-    if (value != null) {
+    const value = get(threatMappingEntry.value, threatListItem.fields);
+    if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
         bool: {
           should: [
             {
               match: {
-                [threatMappingEntry.field]: value,
+                [threatMappingEntry.field]: value[0],
               },
             },
           ],
