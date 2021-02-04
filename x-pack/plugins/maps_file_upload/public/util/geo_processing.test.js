@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { geoJsonToEs } from './geo_processing';
-import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
+import { ES_GEO_FIELD_TYPE, geoJsonToEs } from './geo_processing';
 
 describe('geo_processing', () => {
   describe('getGeoJsonToEs', () => {

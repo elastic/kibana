@@ -6,7 +6,11 @@
  */
 
 import _ from 'lodash';
-import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
+
+export const ES_GEO_FIELD_TYPE = {
+  GEO_POINT: 'geo_point',
+  GEO_SHAPE: 'geo_shape',
+};
 
 export function getGeoIndexTypesForFeatures(featureTypes) {
   const hasNoFeatureType = !featureTypes || !featureTypes.length;
