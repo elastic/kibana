@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { first } from 'lodash';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
-import { withTheme, EuiTheme } from '../../../../../../../observability/public';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { useSourceContext } from '../../../../../containers/source';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
@@ -69,7 +69,6 @@ const TopNav = ({
     },
     [visInstance.embeddableHandler]
   );
-  const savedObjectsClient = services.savedObjects.client;
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -85,7 +84,6 @@ const TopNav = ({
           stateContainer,
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
-          savedObjectsClient,
           embeddableId,
         },
         services
@@ -104,7 +102,6 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    savedObjectsClient,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -147,6 +144,10 @@ const TopNav = ({
       }
       return actions.default();
     });
+    return () => {
+      // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
+      onAppLeave((actions) => actions.default());
+    };
   }, [
     onAppLeave,
     originatingApp,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -68,7 +69,7 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-export { MapEmbeddableInput };
+export { MapEmbeddableInput, MapEmbeddableOutput };
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
@@ -82,6 +83,7 @@ export class MapEmbeddable
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -99,9 +101,7 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
   }
 
   private async _initializeSaveMap() {
@@ -135,6 +135,7 @@ export class MapEmbeddable
       timeRange: this.input.timeRange,
       filters: this.input.filters,
       forceRefresh: false,
+      searchSessionId: this.input.searchSessionId,
     });
     if (this.input.refreshConfig) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
@@ -201,25 +202,24 @@ export class MapEmbeddable
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
-  onContainerStateChanged(containerState: MapEmbeddableInput) {
+  onUpdate() {
     if (
-      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-      !_.isEqual(containerState.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.query, this._prevQuery) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters) ||
+      this.input.searchSessionId !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
-        query: containerState.query,
-        timeRange: containerState.timeRange,
-        filters: containerState.filters,
+        query: this.input.query,
+        timeRange: this.input.timeRange,
+        filters: this.input.filters,
         forceRefresh: false,
+        searchSessionId: this.input.searchSessionId,
       });
     }
 
-    if (
-      containerState.refreshConfig &&
-      !_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)
-    ) {
-      this._dispatchSetRefreshConfig(containerState.refreshConfig);
+    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
   }
 
@@ -228,21 +228,25 @@ export class MapEmbeddable
     timeRange,
     filters = [],
     forceRefresh,
+    searchSessionId,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters?: Filter[];
     forceRefresh: boolean;
+    searchSessionId?: string;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
+    this._prevSearchSessionId = searchSessionId;
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         forceRefresh,
+        searchSessionId,
       })
     );
   }
@@ -380,10 +384,11 @@ export class MapEmbeddable
 
   reload() {
     this._dispatchSetQuery({
-      query: this._prevQuery,
-      timeRange: this._prevTimeRange,
-      filters: this._prevFilters ?? [],
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
       forceRefresh: true,
+      searchSessionId: this.input.searchSessionId,
     });
   }
 

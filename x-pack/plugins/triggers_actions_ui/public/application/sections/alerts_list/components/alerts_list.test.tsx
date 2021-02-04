@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
@@ -26,7 +28,13 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
-  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+  alertingFrameworkHealth: jest.fn(() => ({
+    isSufficientlySecure: true,
+    hasPermanentEncryptionKey: true,
+  })),
+}));
+jest.mock('../../../../common/lib/health_api', () => ({
+  triggersActionsUiHealth: jest.fn(() => ({ isAlertsAvailable: true })),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -270,6 +278,13 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('[data-test-subj="alertStatus-ok"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="alertStatus-pending"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="alertStatus-unknown"]').length).toBe(0);
+    expect(wrapper.find('[data-test-subj="refreshAlertsButton"]').exists()).toBeTruthy();
+  });
+
+  it('loads alerts when refresh button is clicked', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="refreshAlertsButton"]').first().simulate('click');
+    expect(loadAlerts).toHaveBeenCalled();
   });
 });
 

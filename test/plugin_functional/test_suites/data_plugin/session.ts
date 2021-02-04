@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -42,10 +42,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();
 
-        // Discover calls destroy on index pattern change, which explicitly closes a session
-        expect(sessionIds.length).to.be(2);
-        expect(sessionIds[0].length).to.be(0);
-        expect(sessionIds[1].length).not.to.be(0);
+        expect(sessionIds.length).to.be(1);
       });
 
       it('Starts on a refresh', async () => {

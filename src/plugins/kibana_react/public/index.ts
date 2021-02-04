@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export * from './code_editor';
@@ -15,6 +15,7 @@ export * from './ui_settings';
 export * from './field_icon';
 export * from './field_button';
 export * from './table_list_view';
+export * from './toolbar_button';
 export * from './split_panel';
 export * from './react_router_navigate';
 export { ValidatedDualRange, Value } from './validated_range';

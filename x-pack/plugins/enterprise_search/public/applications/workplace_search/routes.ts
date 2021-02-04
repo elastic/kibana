@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { generatePath } from 'react-router-dom';
 
-import { CURRENT_MAJOR_VERSION } from '../../../common/version';
-import { ENT_SEARCH_DOCS_PREFIX } from '../shared/constants';
+import { docLinks } from '../shared/doc_links';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
@@ -16,7 +16,7 @@ export const NOT_FOUND_PATH = '/404';
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
-export const DOCS_PREFIX = `https://www.elastic.co/guide/en/workplace-search/${CURRENT_MAJOR_VERSION}`;
+export const DOCS_PREFIX = docLinks.workplaceSearchBase;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
 export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
@@ -42,7 +42,7 @@ export const ZENDESK_DOCS_URL = `${DOCS_PREFIX}/workplace-search-zendesk-connect
 export const CUSTOM_SOURCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-api-sources.html`;
 export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sources-api.html`;
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
-export const ENT_SEARCH_LICENSE_MANAGEMENT = `${ENT_SEARCH_DOCS_PREFIX}/license-management.html`;
+export const ENT_SEARCH_LICENSE_MANAGEMENT = `${docLinks.enterpriseSearchBase}/license-management.html`;
 
 export const PERSONAL_PATH = '/p';
 

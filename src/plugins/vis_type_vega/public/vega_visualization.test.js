@@ -1,22 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import 'jest-canvas-mock';
 
 import $ from 'jquery';
 
-import 'leaflet/dist/leaflet.js';
-import 'leaflet-vega';
 import { createVegaVisualization } from './vega_visualization';
 
 import vegaliteGraph from './test_utils/vegalite_graph.json';
 import vegaGraph from './test_utils/vega_graph.json';
-import vegaMapGraph from './test_utils/vega_map_test.json';
 
 import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
@@ -139,33 +136,6 @@ describe('VegaVisualizations', () => {
           mockGetServiceSettings
         );
         await vegaParser.parseAsync();
-
-        await vegaVis.render(vegaParser);
-        expect(domNode.innerHTML).toMatchSnapshot();
-      } finally {
-        vegaVis.destroy();
-      }
-    });
-
-    test('should show vega blank rectangle on top of a map (vegamap)', async () => {
-      let vegaVis;
-      try {
-        vegaVis = new VegaVisualization(domNode, jest.fn());
-        const vegaParser = new VegaParser(
-          JSON.stringify(vegaMapGraph),
-          new SearchAPI({
-            search: dataPluginStart.search,
-            uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
-          }),
-          0,
-          0,
-          mockGetServiceSettings
-        );
-        await vegaParser.parseAsync();
-
-        mockedWidthValue = 256;
-        mockedHeightValue = 256;
 
         await vegaVis.render(vegaParser);
         expect(domNode.innerHTML).toMatchSnapshot();

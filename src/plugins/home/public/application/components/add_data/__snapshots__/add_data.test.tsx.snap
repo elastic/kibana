@@ -32,6 +32,7 @@ exports[`AddData render 1`] = `
       <div>
         <EuiButtonEmpty
           className="homDataAdd__actionButton"
+          data-test-subj="addSampleData"
           flush="left"
           href="#/tutorial_directory/sampleData"
           iconType="visTable"

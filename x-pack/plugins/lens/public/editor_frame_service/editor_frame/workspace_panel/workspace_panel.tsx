@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
@@ -39,7 +40,7 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext, Dragging } from '../../../drag_drop';
+import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
@@ -75,7 +76,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
-  getSuggestionForField: (field: Dragging) => Suggestion | undefined;
+  getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
 }
 
 interface WorkspaceState {
@@ -83,8 +84,10 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
+const workspaceDropValue = { id: 'lnsWorkspace' };
+
 // Exported for testing purposes only.
-export function WorkspacePanel({
+export const WorkspacePanel = React.memo(function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -102,7 +105,8 @@ export function WorkspacePanel({
 }: WorkspacePanelProps) {
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = getSuggestionForField(dragDropContext.dragging);
+  const suggestionForDraggedField =
+    dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -296,10 +300,11 @@ export function WorkspacePanel({
     >
       <DragDrop
         className="lnsWorkspacePanel__dragDrop"
-        data-test-subj="lnsWorkspace"
+        dataTestSubj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
+        value={workspaceDropValue}
       >
         <div>
           {renderVisualization()}
@@ -308,7 +313,7 @@ export function WorkspacePanel({
       </DragDrop>
     </WorkspacePanelWrapper>
   );
-}
+});
 
 export const InnerVisualizationWrapper = ({
   expression,

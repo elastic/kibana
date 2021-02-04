@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const samplePieVis = {
@@ -106,10 +106,7 @@ export const samplePieVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'vislib_slices',
     hierarchicalData: true,
-    useCustomNoDataScreen: false,
   },
   title: '[Flights] Airline Carrier',
   description: '',
@@ -126,7 +123,6 @@ export const samplePieVis = {
       truncate: 100,
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',
@@ -1622,10 +1618,7 @@ export const sampleAreaVis = {
       },
     },
     hidden: false,
-    requestHandler: 'courier',
-    responseHandler: 'none',
     hierarchicalData: false,
-    useCustomNoDataScreen: false,
   },
   title: '[eCommerce] Sales by Category',
   description: '',
@@ -1762,7 +1755,6 @@ export const sampleAreaVis = {
       ],
     },
   },
-  sessionState: {},
   data: {
     searchSource: {
       id: 'data_source1',

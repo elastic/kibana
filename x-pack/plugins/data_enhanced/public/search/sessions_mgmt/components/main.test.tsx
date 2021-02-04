@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
@@ -12,7 +13,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsMgmtConfigSchema } from '..';
+import { SessionsConfigSchema } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper, mockUrls } from '../__mocks__';
@@ -20,7 +21,7 @@ import { SearchSessionsMgmtMain } from './main';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
-let mockConfig: SessionsMgmtConfigSchema;
+let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
 
@@ -29,11 +30,14 @@ describe('Background Search Session Management Main', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     mockConfig = {
-      expiresSoonWarning: moment.duration(1, 'days'),
-      maxSessions: 2000,
-      refreshInterval: moment.duration(1, 'seconds'),
-      refreshTimeout: moment.duration(10, 'minutes'),
-    };
+      defaultExpiration: moment.duration('7d'),
+      management: {
+        expiresSoonWarning: moment.duration(1, 'days'),
+        maxSessions: 2000,
+        refreshInterval: moment.duration(1, 'seconds'),
+        refreshTimeout: moment.duration(10, 'minutes'),
+      },
+    } as any;
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 

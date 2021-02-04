@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
@@ -11,8 +12,9 @@ import { stringify } from 'query-string';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { encode, RisonValue } from 'rison-node';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled, useTrackPageview } from '../../../../../observability/public';
-import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useTrackPageview } from '../../../../../observability/public';
+import { TimeRange } from '../../../../common/time/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
