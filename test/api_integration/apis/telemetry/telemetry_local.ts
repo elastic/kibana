@@ -8,9 +8,14 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { basicUiCounters } from './__fixtures__/ui_counters';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SavedObject } from '../../../../src/core/server';
+import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
+import { convertSchemaToConfigSchema } from './schema_to_config_schema';
+
 /*
  * Create a single-level array with strings for all the paths to values in the
  * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
@@ -33,6 +38,13 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const ossTelemetrySchema = ossRootTelemetrySchema;
+  set(
+    ossTelemetrySchema,
+    'properties.stack_stats.properties.kibana.properties.plugins',
+    ossPluginsTelemetrySchema
+  );
+  const ossTelemetryValidationSchema = convertSchemaToConfigSchema(ossTelemetrySchema);
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
     before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
@@ -55,6 +67,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.length).to.be(1);
       const stats = body[0];
+
+      // Run @kbn/config-schema validation to the entire payload
+      try {
+        ossTelemetryValidationSchema.validate(stats);
+      } catch (err) {
+        // "[path.to.key]: definition for this key is missing "
+        err.message += ` in document\n${JSON.stringify(stats, null, 2)}`;
+        throw err;
+      }
+
+      // Additional ad-hoc validations we may want to run
       expect(stats.collection).to.be('local');
       expect(stats.collectionSource).to.be('local');
       expect(stats.license).to.be(undefined); // OSS cannot get the license

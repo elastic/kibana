@@ -63,60 +63,116 @@
           }
         },
         "kibana": {
-          "timelion_sheet": {
-            "properties": {
-              "total": {
-                "type": "long"
+          "properties": {
+            "timelion_sheet": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "visualization": {
-            "properties": {
-              "total": {
-                "type": "long"
+            },
+            "visualization": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "search": {
-            "properties": {
-              "total": {
-                "type": "long"
+            },
+            "search": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "index_pattern": {
-            "properties": {
-              "total": {
-                "type": "long"
+            },
+            "index_pattern": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "dashboard": {
-            "properties": {
-              "total": {
-                "type": "long"
+            },
+            "dashboard": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "graph_workspace": {
-            "properties": {
-              "total": {
-                "type": "long"
+            },
+            "graph_workspace": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "count": {
-            "type": "short"
-          },
-          "indices": {
-            "type": "short"
-          },
-          "os": {
-            "platforms": {
+            },
+            "count": {
+              "type": "short"
+            },
+            "indices": {
+              "type": "short"
+            },
+            "os": {
+              "properties": {
+                "platforms": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "platform": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "platformReleases": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "platformRelease": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "distros": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "distro": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "distroReleases": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "distroRelease": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
               "type": "array",
               "items": {
                 "properties": {
-                  "platform": {
+                  "version": {
                     "type": "keyword"
                   },
                   "count": {
@@ -125,58 +181,14 @@
                 }
               }
             },
-            "platformReleases": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "platformRelease": {
-                    "type": "keyword"
-                  },
-                  "count": {
-                    "type": "short"
-                  }
-                }
-              }
-            },
-            "distros": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "distro": {
-                    "type": "keyword"
-                  },
-                  "count": {
-                    "type": "short"
-                  }
-                }
-              }
-            },
-            "distroReleases": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "distroRelease": {
-                    "type": "keyword"
-                  },
-                  "count": {
-                    "type": "short"
-                  }
+            "plugins": {
+              "properties": {
+                "THIS_WILL_BE_REPLACED_BY_THE_PLUGINS_JSON": {
+                  "type": "text"
                 }
               }
             }
-          },
-          "versions": {
-            "type": "array",
-            "items": {
-              "version": {
-                "type": "keyword"
-              },
-              "count": {
-                "type": "short"
-              }
-            }
-          },
-          "plugins": {}
+          }
         }
       }
     },
@@ -186,7 +198,7 @@
           "type": "keyword"
         },
         "timestamp": {
-          "type": "date"
+          "type": "long"
         },
         "status": {
           "type": "keyword"
@@ -508,6 +520,25 @@
                   "type": "long"
                 }
               }
+            },
+            "versions": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "index_count": {
+                    "type": "long"
+                  },
+                  "primary_shard_count": {
+                    "type": "long"
+                  },
+                  "total_primary_bytes": {
+                    "type": "long"
+                  }
+                }
+              }
             }
           }
         },
@@ -594,7 +625,20 @@
                   "type": "array",
                   "items": {
                     "properties": {
-                      "name": {
+                      "pretty_name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "architectures": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "arch": {
                         "type": "keyword"
                       },
                       "count": {
@@ -764,14 +808,16 @@
             "packaging_types": {
               "type": "array",
               "items": {
-                "flavor": {
-                  "type": "keyword"
-                },
-                "type": {
-                  "type": "keyword"
-                },
-                "count": {
-                  "type": "short"
+                "properties": {
+                  "flavor": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
                 }
               }
             },
@@ -793,7 +839,7 @@
                 "number_of_pipelines": {
                   "type": "long"
                 },
-                "procesor_stats": {
+                "processor_stats": {
                   "properties": {
                     "pipeline": {
                       "properties": {
@@ -912,227 +958,229 @@
               }
             },
             "usage": {
-              "nodes": {
-                "type": "array",
-                "items": {
-                  "properties": {
-                    "timestamp": {
-                      "type": "long"
-                    },
-                    "since": {
-                      "type": "long"
-                    },
-                    "node_id": {
-                      "type": "keyword"
-                    },
-                    "aggregations": {
-                      "properties": {
-                        "date_histogram": {
-                          "properties": {
-                            "date": {
-                              "type": "long"
+              "properties": {
+                "nodes": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "timestamp": {
+                        "type": "long"
+                      },
+                      "since": {
+                        "type": "long"
+                      },
+                      "node_id": {
+                        "type": "keyword"
+                      },
+                      "aggregations": {
+                        "properties": {
+                          "date_histogram": {
+                            "properties": {
+                              "date": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "terms": {
-                          "properties": {
-                            "bytes": {
-                              "type": "long"
+                          },
+                          "terms": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "scripted_metric": {
-                          "properties": {
-                            "other": {
-                              "type": "long"
+                          },
+                          "scripted_metric": {
+                            "properties": {
+                              "other": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "sum": {
-                          "properties": {
-                            "numeric": {
-                              "type": "long"
+                          },
+                          "sum": {
+                            "properties": {
+                              "numeric": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "filters": {
-                          "properties": {
-                            "other": {
-                              "type": "long"
+                          },
+                          "filters": {
+                            "properties": {
+                              "other": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "nested": {
-                          "properties": {
-                            "other": {
-                              "type": "long"
+                          },
+                          "nested": {
+                            "properties": {
+                              "other": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "cardinality": {
-                          "properties": {
-                            "bytes": {
-                              "type": "long"
+                          },
+                          "cardinality": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
                             }
-                          }
-                        },
-                        "DYNAMIC_KEY": {
-                          "properties": {
-                            "DYNAMIC_KEY": {
-                              "type": "long"
+                          },
+                          "DYNAMIC_KEY": {
+                            "properties": {
+                              "DYNAMIC_KEY": {
+                                "type": "long"
+                              }
                             }
                           }
                         }
-                      }
-                    },
-                    "rest_actions": {
-                      "properties": {
-                        "ilm_get_action": {
-                          "type": "long"
-                        },
-                        "nodes_usage_action": {
-                          "type": "long"
-                        },
-                        "document_update_action": {
-                          "type": "long"
-                        },
-                        "cat_action": {
-                          "type": "long"
-                        },
-                        "get_index_template_action": {
-                          "type": "long"
-                        },
-                        "remote_cluster_info_action": {
-                          "type": "long"
-                        },
-                        "nodes_info_action": {
-                          "type": "long"
-                        },
-                        "get_mapping_action": {
-                          "type": "long"
-                        },
-                        "get_indices_action": {
-                          "type": "long"
-                        },
-                        "ml_get_jobs_action": {
-                          "type": "long"
-                        },
-                        "nodes_stats_action": {
-                          "type": "long"
-                        },
-                        "delete_index_action": {
-                          "type": "long"
-                        },
-                        "update_by_query_action": {
-                          "type": "long"
-                        },
-                        "monitoring_bulk": {
-                          "type": "long"
-                        },
-                        "xpack_info_action": {
-                          "type": "long"
-                        },
-                        "async_search_submit_action": {
-                          "type": "long"
-                        },
-                        "field_capabilities_action": {
-                          "type": "long"
-                        },
-                        "async_search_get_action": {
-                          "type": "long"
-                        },
-                        "document_get_action": {
-                          "type": "long"
-                        },
-                        "delete_by_query_action": {
-                          "type": "long"
-                        },
-                        "get_license": {
-                          "type": "long"
-                        },
-                        "document_delete_action": {
-                          "type": "long"
-                        },
-                        "count_action": {
-                          "type": "long"
-                        },
-                        "main_action": {
-                          "type": "long"
-                        },
-                        "cat_templates_action": {
-                          "type": "long"
-                        },
-                        "ilm_explain_action": {
-                          "type": "long"
-                        },
-                        "ml_get_job_stats_action": {
-                          "type": "long"
-                        },
-                        "cluster_get_settings_action": {
-                          "type": "long"
-                        },
-                        "put_mapping_action": {
-                          "type": "long"
-                        },
-                        "async_search_delete_action": {
-                          "type": "long"
-                        },
-                        "xpack_usage_action": {
-                          "type": "long"
-                        },
-                        "document_index_action": {
-                          "type": "long"
-                        },
-                        "cat_indices_action": {
-                          "type": "long"
-                        },
-                        "document_create_action_auto_id": {
-                          "type": "long"
-                        },
-                        "indices_stats_action": {
-                          "type": "long"
-                        },
-                        "document_create_action": {
-                          "type": "long"
-                        },
-                        "cluster_state_action": {
-                          "type": "long"
-                        },
-                        "cluster_stats_action": {
-                          "type": "long"
-                        },
-                        "put_index_template_action": {
-                          "type": "long"
-                        },
-                        "resolve_index_action": {
-                          "type": "long"
-                        },
-                        "ccr_follower_info": {
-                          "type": "long"
-                        },
-                        "search_action": {
-                          "type": "long"
-                        },
-                        "recovery_action": {
-                          "type": "long"
-                        },
-                        "get_aliases_action": {
-                          "type": "long"
-                        },
-                        "document_mget_action": {
-                          "type": "long"
-                        },
-                        "get_rollup_index_caps": {
-                          "type": "long"
-                        },
-                        "bulk_action": {
-                          "type": "long"
-                        },
-                        "search_scroll_action": {
-                          "type": "long"
-                        },
-                        "DYNAMIC_KEY": {
-                          "type": "long"
+                      },
+                      "rest_actions": {
+                        "properties": {
+                          "ilm_get_action": {
+                            "type": "long"
+                          },
+                          "nodes_usage_action": {
+                            "type": "long"
+                          },
+                          "document_update_action": {
+                            "type": "long"
+                          },
+                          "cat_action": {
+                            "type": "long"
+                          },
+                          "get_index_template_action": {
+                            "type": "long"
+                          },
+                          "remote_cluster_info_action": {
+                            "type": "long"
+                          },
+                          "nodes_info_action": {
+                            "type": "long"
+                          },
+                          "get_mapping_action": {
+                            "type": "long"
+                          },
+                          "get_indices_action": {
+                            "type": "long"
+                          },
+                          "ml_get_jobs_action": {
+                            "type": "long"
+                          },
+                          "nodes_stats_action": {
+                            "type": "long"
+                          },
+                          "delete_index_action": {
+                            "type": "long"
+                          },
+                          "update_by_query_action": {
+                            "type": "long"
+                          },
+                          "monitoring_bulk": {
+                            "type": "long"
+                          },
+                          "xpack_info_action": {
+                            "type": "long"
+                          },
+                          "async_search_submit_action": {
+                            "type": "long"
+                          },
+                          "field_capabilities_action": {
+                            "type": "long"
+                          },
+                          "async_search_get_action": {
+                            "type": "long"
+                          },
+                          "document_get_action": {
+                            "type": "long"
+                          },
+                          "delete_by_query_action": {
+                            "type": "long"
+                          },
+                          "get_license": {
+                            "type": "long"
+                          },
+                          "document_delete_action": {
+                            "type": "long"
+                          },
+                          "count_action": {
+                            "type": "long"
+                          },
+                          "main_action": {
+                            "type": "long"
+                          },
+                          "cat_templates_action": {
+                            "type": "long"
+                          },
+                          "ilm_explain_action": {
+                            "type": "long"
+                          },
+                          "ml_get_job_stats_action": {
+                            "type": "long"
+                          },
+                          "cluster_get_settings_action": {
+                            "type": "long"
+                          },
+                          "put_mapping_action": {
+                            "type": "long"
+                          },
+                          "async_search_delete_action": {
+                            "type": "long"
+                          },
+                          "xpack_usage_action": {
+                            "type": "long"
+                          },
+                          "document_index_action": {
+                            "type": "long"
+                          },
+                          "cat_indices_action": {
+                            "type": "long"
+                          },
+                          "document_create_action_auto_id": {
+                            "type": "long"
+                          },
+                          "indices_stats_action": {
+                            "type": "long"
+                          },
+                          "document_create_action": {
+                            "type": "long"
+                          },
+                          "cluster_state_action": {
+                            "type": "long"
+                          },
+                          "cluster_stats_action": {
+                            "type": "long"
+                          },
+                          "put_index_template_action": {
+                            "type": "long"
+                          },
+                          "resolve_index_action": {
+                            "type": "long"
+                          },
+                          "ccr_follower_info": {
+                            "type": "long"
+                          },
+                          "search_action": {
+                            "type": "long"
+                          },
+                          "recovery_action": {
+                            "type": "long"
+                          },
+                          "get_aliases_action": {
+                            "type": "long"
+                          },
+                          "document_mget_action": {
+                            "type": "long"
+                          },
+                          "get_rollup_index_caps": {
+                            "type": "long"
+                          },
+                          "bulk_action": {
+                            "type": "long"
+                          },
+                          "search_scroll_action": {
+                            "type": "long"
+                          },
+                          "DYNAMIC_KEY": {
+                            "type": "long"
+                          }
                         }
                       }
                     }
