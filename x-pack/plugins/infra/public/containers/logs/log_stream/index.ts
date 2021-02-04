@@ -139,7 +139,7 @@ export function useLogStream({
   const fetchPreviousEntries = useCallback(() => {
     if (state.topCursor === null) {
       throw new Error(
-        'useLogState: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
       );
     }
 
@@ -173,7 +173,7 @@ export function useLogStream({
   const fetchNextEntries = useCallback(() => {
     if (state.bottomCursor === null) {
       throw new Error(
-        'useLogState: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
       );
     }
 
