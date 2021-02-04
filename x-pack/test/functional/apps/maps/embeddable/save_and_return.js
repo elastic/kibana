@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -81,6 +82,19 @@ export default function ({ getPageObjects, getService }) {
           await PageObjects.dashboard.waitForRenderComplete();
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(2);
+        });
+
+        it('should lose its connection to the dashboard when creating new map', async () => {
+          await PageObjects.maps.gotoMapListingPage();
+          await PageObjects.maps.openNewMap();
+          await PageObjects.maps.expectMissingSaveAndReturnButton();
+
+          // return to origin should not be present in save modal
+          await testSubjects.click('mapSaveButton');
+          const redirectToOriginCheckboxExists = await testSubjects.exists(
+            'returnToOriginModeSwitch'
+          );
+          expect(redirectToOriginCheckboxExists).to.be(false);
         });
       });
 
