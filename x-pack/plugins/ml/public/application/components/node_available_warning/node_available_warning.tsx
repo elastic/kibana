@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC } from 'react';
@@ -41,7 +42,7 @@ export const NodeAvailableWarning: FC = () => {
             defaultMessage="You will not be able to create or run jobs."
           />
         </div>
-        {isCloud && id !== null && (
+        {isCloud() && id !== null && (
           <div>
             <FormattedMessage
               id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
