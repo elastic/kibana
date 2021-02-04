@@ -49,6 +49,7 @@ export default function chainRunner(tlConfig) {
           }
           case 'reference': {
             let reference;
+            console.log(sheet);
             if (item.series) {
               reference = sheet[item.plot - 1][item.series - 1];
             } else {

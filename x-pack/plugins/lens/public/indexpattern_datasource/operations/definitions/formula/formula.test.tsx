@@ -8,12 +8,12 @@
 // import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 // import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 // import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { createMockedIndexPattern } from '../../mocks';
+import { createMockedIndexPattern } from '../../../mocks';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
-import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from './index';
-import type { IndexPattern, IndexPatternLayer } from '../../types';
+import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
+import type { IndexPattern, IndexPatternLayer } from '../../../types';
 
-jest.mock('../layer_helpers', () => {
+jest.mock('../../layer_helpers', () => {
   return {
     getColumnOrder: ({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
       Object.keys(columns),

@@ -11,6 +11,9 @@
   top: 0;
   bottom: 0;
   animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+  clip-path: none;
+  // z-index: $euiZLevel1;
+
 }
 
 .lnsDimensionContainer__footer {

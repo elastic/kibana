@@ -5,24 +5,38 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { groupBy, isObject } from 'lodash';
-import { parse, TinymathFunction, TinymathVariable } from '@kbn/tinymath';
-import type { TinymathNamedArgument, TinymathAST } from '@kbn/tinymath';
-import { EuiButton, EuiTextArea } from '@elastic/eui';
-import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from './index';
-import { ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern, IndexPatternLayer } from '../../types';
-import { getColumnOrder } from '../layer_helpers';
+import {
+  parse,
+  TinymathFunction,
+  TinymathVariable,
+  TinymathNamedArgument,
+  TinymathAST,
+} from '@kbn/tinymath';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import { monaco } from '@kbn/monaco';
+import { CodeEditor, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  OperationDefinition,
+  GenericOperationDefinition,
+  IndexPatternColumn,
+  ParamEditorProps,
+} from '../index';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPattern, IndexPatternLayer } from '../../../types';
+import { getColumnOrder } from '../../layer_helpers';
 import {
   mathOperation,
   hasMathNode,
   findVariables,
   isMathNode,
   hasInvalidOperations,
-} from './math';
-import { documentField } from '../../document_field';
+} from '../math';
+import { documentField } from '../../../document_field';
+import { suggest, getSuggestion, LensMathSuggestion } from './math_completion';
+import { LANGUAGE_ID } from './math_tokenization';
 
 type GroupedNodes = {
   [Key in TinymathNamedArgument['type']]: TinymathNamedArgument[];
@@ -199,23 +213,118 @@ export const formulaOperation: OperationDefinition<
     return !hasMathNode(ast);
   },
 
-  paramEditor: function ParamEditor({
-    layer,
-    updateLayer,
-    columnId,
-    currentColumn,
-    indexPattern,
-    operationDefinitionMap,
-  }) {
-    const [text, setText] = useState(currentColumn.params.formula);
-    return (
-      <>
-        <EuiTextArea
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
+  paramEditor: FormulaEditor,
+};
+
+function FormulaEditor({
+  layer,
+  updateLayer,
+  currentColumn,
+  columnId,
+  http,
+  indexPattern,
+  operationDefinitionMap,
+}: ParamEditorProps<FormulaIndexPatternColumn>) {
+  const [text, setText] = useState(currentColumn.params.formula);
+  const functionList = useRef([]);
+  const kibana = useKibana();
+  const argValueSuggestions = useMemo(() => [], []);
+
+  const provideCompletionItems = useCallback(
+    async (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      context: monaco.languages.CompletionContext
+    ) => {
+      const innerText = model.getValue();
+      const textRange = model.getFullModelRange();
+      let wordRange: monaco.Range;
+      let aSuggestions;
+
+      const lengthAfterPosition = model.getValueLengthInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endLineNumber: textRange.endLineNumber,
+        endColumn: textRange.endColumn,
+      });
+
+      if (context.triggerCharacter === '(') {
+        const wordUntil = model.getWordAtPosition(position.delta(0, -3));
+        if (wordUntil) {
+          wordRange = new monaco.Range(
+            position.lineNumber,
+            position.column,
+            position.lineNumber,
+            position.column
+          );
+
+          // Retrieve suggestions for subexpressions
+          // TODO: make this work for expressions nested more than one level deep
+          aSuggestions = await suggest(
+            innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
+            innerText.length - lengthAfterPosition,
+            context,
+            undefined
+          );
+        }
+      } else {
+        const wordUntil = model.getWordUntilPosition(position);
+        wordRange = new monaco.Range(
+          position.lineNumber,
+          wordUntil.startColumn,
+          position.lineNumber,
+          wordUntil.endColumn
+        );
+        aSuggestions = await suggest(
+          innerText,
+          innerText.length - lengthAfterPosition,
+          context,
+          wordUntil
+        );
+      }
+
+      return {
+        suggestions: aSuggestions
+          ? aSuggestions.list.map((s: IMathFunction | MathFunctionArgs) =>
+              getSuggestion(s, aSuggestions.type, wordRange)
+            )
+          : [],
+      };
+    },
+    [argValueSuggestions]
+  );
+
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={true}>
+        <CodeEditor
+          height={200}
+          // width={200}
+          width="100%"
+          languageId={LANGUAGE_ID}
+          value={text || ''}
+          onChange={setText}
+          suggestionProvider={{
+            triggerCharacters: ['.', ',', '(', '='],
+            provideCompletionItems,
+          }}
+          // hoverProvider={{ provideHover }}
+          options={{
+            automaticLayout: false,
+            fontSize: 14,
+            folding: false,
+            lineNumbers: 'off',
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
           }}
         />
+      </EuiFlexItem>
+      <EuiFlexItem>
         <EuiButton
           onClick={() => {
             updateLayer(
@@ -232,10 +341,10 @@ export const formulaOperation: OperationDefinition<
         >
           Submit
         </EuiButton>
-      </>
-    );
-  },
-};
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 function parseAndExtract(
   text: string,
