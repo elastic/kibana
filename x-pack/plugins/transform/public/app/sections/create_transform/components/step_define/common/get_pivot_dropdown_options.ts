@@ -7,6 +7,7 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  ES_FIELD_TYPES,
   IndexPattern,
   KBN_FIELD_TYPES,
 } from '../../../../../../../../../../src/plugins/data/public';
@@ -28,7 +29,32 @@ import { Field } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
-export function getPivotDropdownOptions(indexPattern: IndexPattern) {
+export function getKibanaFieldTypeFromEsType(type: string): KBN_FIELD_TYPES {
+  switch (type) {
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.SHORT:
+    case ES_FIELD_TYPES.UNSIGNED_LONG:
+      return KBN_FIELD_TYPES.NUMBER;
+
+    case ES_FIELD_TYPES.DATE:
+    case ES_FIELD_TYPES.DATE_NANOS:
+      return KBN_FIELD_TYPES.DATE;
+
+    case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.STRING:
+      return KBN_FIELD_TYPES.STRING;
+
+    default:
+      return type as KBN_FIELD_TYPES;
+  }
+}
+
+export function getPivotDropdownOptions(indexPattern: IndexPattern, runtimeMappings: any) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionOption[] = [];
   const groupByOptionsData: PivotGroupByConfigWithUiSupportDict = {};
@@ -38,11 +64,21 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
-  const fields = indexPattern.fields
+  const indexPatternFields = indexPattern.fields
     .filter((field) => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
-  fields.forEach((field) => {
+  // Support for runtime_mappings that are defined by queries
+  let runtimeFields: Field[] = [];
+  if (runtimeMappings !== undefined) {
+    runtimeFields = Object.keys(runtimeMappings).map((fieldName) => {
+      const field = runtimeMappings[fieldName];
+      return { name: fieldName, type: getKibanaFieldTypeFromEsType(field.type) };
+    });
+  }
+
+  const combinedFields = [...indexPatternFields, ...runtimeFields];
+  combinedFields.forEach((field) => {
     // Group by
     const availableGroupByAggs: [] = getNestedProperty(pivotGroupByFieldSupport, field.type);
 

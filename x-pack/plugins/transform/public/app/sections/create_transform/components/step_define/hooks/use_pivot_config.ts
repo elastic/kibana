@@ -115,8 +115,8 @@ export const usePivotConfig = (
   const toastNotifications = useToastNotifications();
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData } = useMemo(
-    () => getPivotDropdownOptions(indexPattern),
-    [indexPattern]
+    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
+    [defaults.runtimeMappings, indexPattern]
   );
 
   // The list of selected aggregations
