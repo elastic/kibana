@@ -58,7 +58,8 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, keyBy, pick, difference, omit, isFunction, setWith, isEqual } from 'lodash';
+import { setWith } from '@elastic/safer-lodash-set';
+import { uniqueId, keyBy, pick, difference, omit, isFunction, isEqual } from 'lodash';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
@@ -538,7 +539,7 @@ export class SearchSource {
       if (!body.hasOwnProperty('_source')) {
         body._source = sourceFilters;
       }
-      if (body._source && body._source.excludes) {
+      if (body._source) {
         const filter = fieldWildcardFilter(
           body._source.excludes,
           getConfig(UI_SETTINGS.META_FIELDS)
