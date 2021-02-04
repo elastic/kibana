@@ -700,16 +700,25 @@
               "type": "date",
               "index": false
             },
-            "ids": {
-              "type": "keyword",
-              "index": false
-            },
             "schemaVersion": {
               "type": "keyword"
             },
             "semanticVersion": {
               "type": "keyword",
               "index": false
+            },
+            "artifacts": {
+              "type": "nested",
+              "properties": {
+                "policyId": {
+                  "type": "keyword",
+                  "index": false
+                },
+                "artifactId": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
             }
           }
         },

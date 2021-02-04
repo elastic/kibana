@@ -656,9 +656,25 @@
               "index": false,
               "type": "date"
             },
-            "ids": {
+            "schemaVersion": {
+              "type": "keyword"
+            },
+            "semanticVersion": {
               "index": false,
               "type": "keyword"
+            },
+            "artifacts": {
+              "type": "nested",
+              "properties": {
+                "policyId": {
+                  "type": "keyword",
+                  "index": false
+                },
+                "artifactId": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
             }
           }
         },
