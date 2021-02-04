@@ -54,9 +54,9 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: vega.View) {
 
 export class VegaMapView extends VegaBaseView {
   private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
-  private mapStyle = this.getMapStyle();
+  private emsTileLayer = this.getEmsTileLayer();
 
-  private getMapStyle() {
+  private getEmsTileLayer() {
     const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
 
     if (mapStyle) {
@@ -87,14 +87,14 @@ export class VegaMapView extends VegaBaseView {
       maxZoom: defaultMapConfig.maxZoom,
     };
 
-    if (this.mapStyle && this.mapStyle !== userConfiguredLayerId) {
-      const tmsService = await this.mapServiceSettings.getTmsService(this.mapStyle);
+    if (this.emsTileLayer && this.emsTileLayer !== userConfiguredLayerId) {
+      const tmsService = await this.mapServiceSettings.getTmsService(this.emsTileLayer);
 
       if (!tmsService) {
         this.onWarn(
           i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
             defaultMessage: '{mapStyleParam} was not found',
-            values: { mapStyleParam: `"mapStyle":${this.mapStyle}` },
+            values: { mapStyleParam: `"emsTileServiceId":${this.emsTileLayer}` },
           })
         );
         return;
@@ -142,7 +142,7 @@ export class VegaMapView extends VegaBaseView {
   }
 
   private initLayers(mapBoxInstance: Map, vegaView: vega.View) {
-    const shouldShowUserConfiguredLayer = this.mapStyle === userConfiguredLayerId;
+    const shouldShowUserConfiguredLayer = this.emsTileLayer === userConfiguredLayerId;
 
     if (shouldShowUserConfiguredLayer) {
       const { url, options } = this.mapServiceSettings.config.tilemap;
