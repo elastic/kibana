@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,8 +11,9 @@ import { Redirect } from 'react-router-dom';
 import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
-export class LoadListAndRender extends React.Component {
+export class LoadListAndRender extends React.Component<{ stateTransfer: EmbeddableStateTransfer }> {
   _isMounted: boolean = false;
   state = {
     mapsLoaded: false,
@@ -20,6 +22,7 @@ export class LoadListAndRender extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
+    this.props.stateTransfer.clearEditorState();
     this._loadMapsList();
   }
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
@@ -855,10 +857,9 @@ export const calculateThresholdSignalUuid = (
   // used to generate constant Threshold Signals ID when run with the same params
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
-  let baseString = `${ruleId}${startedAt}${thresholdField}`;
-  if (key != null) {
-    baseString = `${baseString}${key}`;
-  }
+  const startedAtString = startedAt.toISOString();
+  const keyString = key ?? '';
+  const baseString = `${ruleId}${startedAtString}${thresholdField}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
 };
