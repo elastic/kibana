@@ -50,6 +50,9 @@ export interface DiscoverGridProps {
    * Determines which columns are displayed
    */
   columns: string[];
+  /**
+   * If set, the given document is displayed in a flyout
+   */
   expandedDoc?: ElasticSearchHit;
   /**
    * The used index pattern
@@ -88,6 +91,9 @@ export interface DiscoverGridProps {
    * The max size of the documents returned by Elasticsearch
    */
   sampleSize: number;
+  /**
+   * Function to set the expanded document, which is displayed in a flyout
+   */
   setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)

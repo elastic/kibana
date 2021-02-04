@@ -93,20 +93,24 @@ export function Discover({
 
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const services = getServices();
-  const topNavMenu = getTopNavLinks({
-    getFieldCounts: opts.getFieldCounts,
-    indexPattern,
-    inspectorAdapters: opts.inspectorAdapters,
-    navigateTo: opts.navigateTo,
-    savedSearch: opts.savedSearch,
-    services,
-    state: opts.stateContainer,
-    onOpenInspector: () => {
-      // prevent overlapping
-      setExpandedDoc(undefined);
-    },
-  });
+  const services = useMemo(() => getServices(), []);
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        getFieldCounts: opts.getFieldCounts,
+        indexPattern,
+        inspectorAdapters: opts.inspectorAdapters,
+        navigateTo: opts.navigateTo,
+        savedSearch: opts.savedSearch,
+        services,
+        state: opts.stateContainer,
+        onOpenInspector: () => {
+          // prevent overlapping
+          setExpandedDoc(undefined);
+        },
+      }),
+    [indexPattern, opts, services]
+  );
   const { TopNavMenu } = services.navigation.ui;
   const { trackUiMetric } = services;
   const { savedSearch, indexPatternList, config } = opts;
