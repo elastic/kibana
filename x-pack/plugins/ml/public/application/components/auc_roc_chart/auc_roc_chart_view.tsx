@@ -14,17 +14,18 @@ import { Handler } from 'vega-tooltip';
 
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { getAucRocChartVegaLiteSpec } from './auc_roc_chart_vega_lite_spec';
+import { getAucRocChartVegaLiteSpec, AucRocDataRow } from './auc_roc_chart_vega_lite_spec';
 
 export interface AucRocChartViewProps {
-  data: any[];
+  classificationClasses: string[];
+  data: AucRocDataRow[];
 }
 
-export const AucRocChartView: FC<AucRocChartViewProps> = ({ data }) => {
+export const AucRocChartView: FC<AucRocChartViewProps> = ({ classificationClasses, data }) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
   useEffect(() => {
-    const vegaSpec = getAucRocChartVegaLiteSpec(data);
+    const vegaSpec = getAucRocChartVegaLiteSpec(classificationClasses, data);
 
     const vgSpec = compile(vegaSpec).spec;
 

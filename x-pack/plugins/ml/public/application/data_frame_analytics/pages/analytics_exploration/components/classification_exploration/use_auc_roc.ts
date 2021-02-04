@@ -34,6 +34,8 @@ export const useAucRoc = (
   searchQuery: ResultsSearchQuery,
   visibleColumns: string[]
 ) => {
+  const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
+
   const [aucRocData, setAucRocData] = useState<AucRocDataRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<null | string[]>(null);
@@ -45,7 +47,6 @@ export const useAucRoc = (
       const dependentVariable = getDependentVar(jobConfig.analysis);
       const resultsField = jobConfig.dest.results_field;
 
-      const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
       const newAucRocData: AucRocDataRow[] = [];
 
       let requiresKeyword = false;
@@ -98,5 +99,5 @@ export const useAucRoc = (
     loadAucRocData();
   }, [JSON.stringify([jobConfig, searchQuery, visibleColumns])]);
 
-  return { aucRocData, error, isLoading };
+  return { aucRocData, classificationClasses, error, isLoading };
 };

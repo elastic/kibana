@@ -149,11 +149,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     }
   }, [confusionMatrixData]);
 
-  const { aucRocData, error: errorAucRoc, isLoading: isLoadingAucRoc } = useAucRoc(
-    jobConfig,
-    searchQuery,
-    visibleColumns
-  );
+  const {
+    aucRocData,
+    classificationClasses,
+    error: errorAucRoc,
+    isLoading: isLoadingAucRoc,
+  } = useAucRoc(jobConfig, searchQuery, visibleColumns);
 
   const renderCellValue = ({
     rowIndex,
@@ -374,7 +375,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <AucRocChart data={aucRocData} />
+                    <AucRocChart classificationClasses={classificationClasses} data={aucRocData} />
                   </>
                 )}
               </>

@@ -8,7 +8,9 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
 
-import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
+import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
+
+import { AucRocCurveItem } from '../../data_frame_analytics/common/analytics';
 
 export const LEGEND_TYPES = {
   NOMINAL: 'nominal',
@@ -16,17 +18,36 @@ export const LEGEND_TYPES = {
 } as const;
 export type LegendType = typeof LEGEND_TYPES[keyof typeof LEGEND_TYPES];
 
-export const OUTLIER_SCORE_FIELD = 'outlier_score';
+const BASELINE = 'baseline';
 
-export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
-export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
-export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
-export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+// returns a custom color range that includes gray for the baseline
+function getColorRangeNominal(classificationClasses: string[]) {
+  const legendItems = [...classificationClasses, BASELINE].sort();
+  const baselineIndex = legendItems.indexOf(BASELINE);
 
-export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
+  const colorRangeNominal = euiPaletteColorBlind({ rotations: 2 }).slice(
+    0,
+    classificationClasses.length
+  );
+
+  colorRangeNominal.splice(baselineIndex, 0, euiPaletteGray(1)[0]);
+
+  return colorRangeNominal;
+}
+
+export interface AucRocDataRow extends AucRocCurveItem {
+  class_name: string;
+}
+
+export const getAucRocChartVegaLiteSpec = (
+  classificationClasses: string[],
+  data: AucRocDataRow[]
+): TopLevelSpec => {
   // we append two rows which make up the data for the diagonal baseline
-  data.push({ tpr: 0, fpr: 0, threshold: 1, class_name: 'baseline' });
-  data.push({ tpr: 1, fpr: 1, threshold: 1, class_name: 'baseline' });
+  data.push({ tpr: 0, fpr: 0, threshold: 1, class_name: BASELINE });
+  data.push({ tpr: 1, fpr: 1, threshold: 1, class_name: BASELINE });
+
+  const colorRangeNominal = getColorRangeNominal(classificationClasses);
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.8.1.json',
@@ -48,9 +69,9 @@ export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
     encoding: {
       color: {
         field: 'class_name',
-        type: 'nominal',
+        type: LEGEND_TYPES.NOMINAL,
         scale: {
-          range: COLOR_RANGE_NOMINAL,
+          range: colorRangeNominal,
         },
       },
       size: {
@@ -58,7 +79,7 @@ export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
       },
       strokeDash: {
         condition: {
-          test: "(datum.class_name === 'baseline')",
+          test: `(datum.class_name === '${BASELINE}')`,
           value: [5, 5],
         },
         value: [0],
@@ -74,7 +95,11 @@ export const getAucRocChartVegaLiteSpec = (data: any[]): TopLevelSpec => {
         title: 'True Positive Rate (TPR) (a.k.a Recall)',
         type: 'quantitative',
       },
-      tooltip: ['class_name', 'fpt', 'tpr'],
+      tooltip: [
+        { type: LEGEND_TYPES.NOMINAL, field: 'class_name' },
+        { type: LEGEND_TYPES.QUANTITATIVE, field: 'fpr' },
+        { type: LEGEND_TYPES.QUANTITATIVE, field: 'tpr' },
+      ],
     },
     height: 400,
     width: 400,
