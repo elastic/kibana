@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import { SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { ACTION } from './components/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
+
+/**
+ * Some properties are optional for a non-persisted Search Session.
+ * This interface makes them mandatory, because management only shows persisted search sessions.
+ */
+export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObjectAttributes &
+  Required<
+    Pick<
+      SearchSessionSavedObjectAttributes,
+      'name' | 'appId' | 'urlGeneratorId' | 'initialState' | 'restoreState'
+    >
+  >;
 
 export interface UISession {
   id: string;

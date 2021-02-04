@@ -8,4 +8,3 @@
 
 /** @internal */
 export { shortenDottedString } from './shorten_dotted_string';
-export { tapFirst } from './tap_first';

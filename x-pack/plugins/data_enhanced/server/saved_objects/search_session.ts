@@ -6,8 +6,7 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-
-export const SEARCH_SESSION_TYPE = 'search-session';
+import { SEARCH_SESSION_TYPE } from '../../common';
 
 export const searchSessionMapping: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
@@ -15,6 +14,9 @@ export const searchSessionMapping: SavedObjectsType = {
   hidden: true,
   mappings: {
     properties: {
+      persisted: {
+        type: 'boolean',
+      },
       sessionId: {
         type: 'keyword',
       },
@@ -25,6 +27,9 @@ export const searchSessionMapping: SavedObjectsType = {
         type: 'date',
       },
       expires: {
+        type: 'date',
+      },
+      touched: {
         type: 'date',
       },
       status: {

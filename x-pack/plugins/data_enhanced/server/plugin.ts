@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { Observable } from 'rxjs';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import {
   PluginSetup as DataPluginSetup,
@@ -23,6 +24,7 @@ import {
 } from './search';
 import { getUiSettings } from './ui_settings';
 import type { DataEnhancedRequestHandlerContext } from './type';
+import { ConfigSchema } from '../config';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -38,9 +40,11 @@ export class EnhancedDataServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
+  private config$: Observable<ConfigSchema>;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data_enhanced');
+    this.config$ = this.initializerContext.config.create();
   }
 
   public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
@@ -52,6 +56,7 @@ export class EnhancedDataServerPlugin
     deps.data.search.registerSearchStrategy(
       ENHANCED_ES_SEARCH_STRATEGY,
       enhancedEsSearchStrategyProvider(
+        this.config$,
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage

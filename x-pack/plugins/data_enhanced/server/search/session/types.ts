@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { ConfigSchema } from '../../../config';
+
 export enum SearchStatus {
   IN_PROGRESS = 'in_progress',
   ERROR = 'error',
   COMPLETE = 'complete',
 }
+
+export type SearchSessionsConfig = ConfigSchema['search']['sessions'];

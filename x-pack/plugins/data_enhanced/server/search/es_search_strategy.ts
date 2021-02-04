@@ -35,10 +35,12 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { AsyncSearchResponse } from './types';
+import { ConfigSchema } from '../../config';
 import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
+  config$: Observable<ConfigSchema>,
+  legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy<IEsSearchRequest> => {
@@ -58,9 +60,13 @@ export const enhancedEsSearchStrategyProvider = (
     const client = esClient.asCurrentUser.asyncSearch;
 
     const search = async () => {
+      const config = await config$.pipe(first()).toPromise();
       const params = id
-        ? getDefaultAsyncGetParams()
-        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
+        ? getDefaultAsyncGetParams(options)
+        : {
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
+            ...request.params,
+          };
       const promise = id
         ? client.get<AsyncSearchResponse>({ ...params, id })
         : client.submit<AsyncSearchResponse>(params);
@@ -89,12 +95,12 @@ export const enhancedEsSearchStrategyProvider = (
     options: ISearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
-    const config = await config$.pipe(first()).toPromise();
+    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
     const querystring = {
-      ...getShardTimeout(config),
+      ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
       ...(await getDefaultSearchParams(uiSettingsClient)),
       ...params,
