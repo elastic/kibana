@@ -190,6 +190,6 @@ echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" 
 ### make sure bazelisk is installed on CI
 ###
 bazeliskVersion=$(head -n 1 "$KIBANA_DIR/.bazeliskversion")
-yarn global add "@bazel/bazelisk@${bazeliskVersion}"
+npm install -g "@bazel/bazelisk@${bazeliskVersion}"
 
 export CI_ENV_SETUP=true
