@@ -135,6 +135,7 @@ export const createGridColumns = (
         ]
       : undefined;
 
+    const hasTransposedColumns = columnConfig.columns.some(({ isTransposed }) => isTransposed);
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
     const initialWidth = columnArgs?.width;
     const isHidden = columnArgs?.hidden;
@@ -184,12 +185,16 @@ export const createGridColumns = (
                 size: 'xs',
                 onClick: () => onColumnHide({ columnId: originalColumnId || field }),
                 iconType: 'eyeClosed',
-                label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-                  defaultMessage: 'Hide {name}',
-                  values: {
-                    name: originalName || name,
-                  },
-                }),
+                label: hasTransposedColumns
+                  ? i18n.translate('xpack.lens.table.hide.hideLabel', {
+                      defaultMessage: 'Hide {name}',
+                      values: {
+                        name: originalName || name,
+                      },
+                    })
+                  : i18n.translate('xpack.lens.table.hide.hideLabelSimple', {
+                      defaultMessage: 'Hide',
+                    }),
                 'data-test-subj': 'lensDatatableHide',
                 isDisabled: !isHidden && visibleColumns.length <= 1,
               },
