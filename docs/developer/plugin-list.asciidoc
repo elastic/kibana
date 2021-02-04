@@ -424,7 +424,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Run all tests from the x-pack root directory
+|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
