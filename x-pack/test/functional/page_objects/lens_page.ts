@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -561,13 +562,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
-    async toggleColumnVisibility(label: string) {
-      const id = `lnsColumns-toggle-${label.replace(/ /g, '-')}`;
-      await testSubjects.click('lnsColumnsButton');
-      await testSubjects.existOrFail(id);
+    async toggleColumnVisibility(dimension: string) {
+      await this.openDimensionEditor(dimension);
+      const id = 'lns-table-column-hidden';
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
-      await testSubjects.click('lnsColumnsButton');
+      await this.closeDimensionEditor();
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
