@@ -211,7 +211,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
         filter: {
           range: {
             anomaly_score: {
-              gte: resultType === ANOMALY_RESULT_TYPE.BUCKET ? severity : defaultSeverityThreshold,
+              gt: resultType === ANOMALY_RESULT_TYPE.BUCKET ? severity : defaultSeverityThreshold,
             },
           },
         },
