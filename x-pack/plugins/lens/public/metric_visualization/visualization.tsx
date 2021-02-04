@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,10 +10,10 @@ import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
-import { State } from './types';
+import { MetricState } from './types';
 
 const toExpression = (
-  state: State,
+  state: MetricState,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   attributes?: { mode?: 'reduced' | 'full'; title?: string; description?: string }
 ): Ast | null => {
@@ -41,7 +42,7 @@ const toExpression = (
   };
 };
 
-export const metricVisualization: Visualization<State> = {
+export const metricVisualization: Visualization<MetricState> = {
   id: 'lnsMetric',
 
   visualizationTypes: [

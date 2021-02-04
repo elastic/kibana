@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSortForSearchSource } from '../angular/doc_table';
@@ -24,12 +24,14 @@ export function updateSearchSource(
     sort,
     columns,
     useNewFieldsApi,
+    showUnmappedFields,
   }: {
     indexPattern: IndexPattern;
     services: DiscoverServices;
     sort: SortOrder[];
     columns: string[];
     useNewFieldsApi: boolean;
+    showUnmappedFields?: boolean;
   }
 ) {
   const { uiSettings, data } = services;
@@ -47,7 +49,7 @@ export function updateSearchSource(
     .setField('filter', data.query.filterManager.getFilters());
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    const fields = getFieldListFromIndexPattern(indexPattern);
+    const fields = getFieldListFromIndexPattern(indexPattern, showUnmappedFields);
     searchSource.setField('fields', fields);
   } else {
     searchSource.removeField('fields');
