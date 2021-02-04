@@ -108,29 +108,107 @@ describe('getAlertInstanceSummary()', () => {
     });
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(alertSO);
 
-    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
-      last_execution_state: {},
-      errors_state: {},
-    };
-    const summaryResult1 = [
+    const instancesLatestStateSummary = [
       {
-        savedObjectId: '',
-        summary: instancesLatestStateSummary,
+        savedObjectId: 'ca200500-66b2-11eb-aa35-e3f876ca1006',
+        summary: {
+          doc_count: 8066,
+          errors_state: {
+            doc_count: 0,
+            action: {
+              hits: {
+                total: {
+                  value: 0,
+                  relation: 'eq',
+                },
+                max_score: null,
+                hits: [],
+              },
+            },
+          },
+          instances: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '*',
+                doc_count: 40,
+                last_state: {
+                  doc_count: 40,
+                  action: {
+                    hits: {
+                      total: {
+                        value: 4033,
+                        relation: 'eq',
+                      },
+                      max_score: null,
+                      hits: [
+                        {
+                          _index: '.kibana-event-log-8.0.0-000001',
+                          _id: 'IW1Ob3cB0UnnGUWTi4rB',
+                          _score: null,
+                          _source: {
+                            '@timestamp': '2021-02-04T23:09:14.190Z',
+                            event: {
+                              action: 'active-instance',
+                            },
+                            kibana: {
+                              alerting: {
+                                action_group_id: 'threshold met',
+                              },
+                            },
+                          },
+                          sort: [1612480154190],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          last_execution_state: {
+            doc_count: 4033,
+            max_timestamp: {
+              value: 1612480154169,
+              value_as_string: '2021-02-04T23:09:14.169Z',
+            },
+          },
+        },
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(
+      instancesLatestStateSummary
+    );
 
-    const instancesCreatedSummary = {
-      instances: {},
-    };
-    const summaryResult2 = [
+    const instanceCreatedDate = '2021-02-03T23:09:14.169Z';
+
+    const instancesCreatedSummary = [
       {
-        savedObjectId: '',
-        summary: instancesCreatedSummary,
+        savedObjectId: 'ca200500-66b2-11eb-aa35-e3f876ca1006',
+        summary: {
+          doc_count: 79,
+          instances: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '*',
+                doc_count: 39,
+                instance_created: {
+                  doc_count: 0,
+                  max_timestamp: {
+                    value_as_string: instanceCreatedDate,
+                  },
+                },
+              },
+            ],
+          },
+        },
       },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
+
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(instancesCreatedSummary);
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
@@ -143,10 +221,10 @@ describe('getAlertInstanceSummary()', () => {
         "errorMessages": Array [],
         "id": "1",
         "instances": Object {
-          "instance-currently-active": Object {
-            "actionGroupId": "action group A",
+          "*": Object {
+            "actionGroupId": "threshold met",
             "actionSubgroup": undefined,
-            "activeStartDate": "2019-02-12T21:01:22.479Z",
+            "activeStartDate": "${instanceCreatedDate}",
             "muted": false,
             "status": "Active",
           },
@@ -157,15 +235,8 @@ describe('getAlertInstanceSummary()', () => {
             "muted": true,
             "status": "OK",
           },
-          "instance-previously-active": Object {
-            "actionGroupId": undefined,
-            "actionSubgroup": undefined,
-            "activeStartDate": undefined,
-            "muted": false,
-            "status": "OK",
-          },
         },
-        "lastRun": "2019-02-12T21:01:32.479Z",
+        "lastRun": "2021-02-04T23:09:14.169Z",
         "muteAll": false,
         "name": "alert-name",
         "status": "Active",
@@ -214,98 +285,146 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1' });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "alert",
-        Array [
-          "1",
-        ],
-        Object {
-          "end": "2019-02-12T21:01:22.479Z",
-          "page": 1,
-          "per_page": 10000,
-          "sort_order": "desc",
-          "start": "2019-02-12T21:00:22.479Z",
-        },
-      ]
-    `);
-  });
-
-  test('calls event log client with start date', async () => {
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
-    const instancesLatestStateSummary = [
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(2);
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0]).toMatchObject([
+      'alert',
+      ['1'],
       {
-        savedObjectId: '9c24dfd0-66b8-11eb-9759-27c1213b5f31',
-        summary: {
-          doc_count: 30,
-          errors_state: {
-            doc_count: 0,
+        errors_state: {
+          aggs: {
             action: {
-              hits: {
-                total: {
-                  value: 0,
-                  relation: 'eq',
+              top_hits: {
+                _source: {
+                  includes: ['@timestamp', 'error.message'],
                 },
-                max_score: null,
-                hits: [],
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                ],
               },
             },
           },
-          instances: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'all documents',
-                doc_count: 16,
-                last_state: {
-                  doc_count: 15,
-                  action: {
-                    hits: {
-                      total: {
-                        value: 15,
-                        relation: 'eq',
-                      },
-                      max_score: null,
-                      hits: [
-                        {
-                          _index: '.kibana-event-log-8.0.0-000001',
-                          _id: 'YG3xa3cB0UnnGUWTfScr',
-                          _score: null,
-                          _source: {
-                            '@timestamp': '2021-02-04T07:28:43.463Z',
-                            event: {
-                              action: 'active-instance',
-                            },
-                            kibana: {
-                              alerting: {
-                                action_group_id: 'threshold met',
-                              },
-                            },
-                          },
-                          sort: [1612423723463],
-                        },
+          filter: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'event.action': 'execute',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'error.message',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        instances: {
+          aggs: {
+            last_state: {
+              aggs: {
+                action: {
+                  top_hits: {
+                    _source: {
+                      includes: [
+                        '@timestamp',
+                        'event.action',
+                        'kibana.alerting.action_group_id',
+                        'kibana.alerting.action_subgroup',
                       ],
                     },
+                    size: 1,
+                    sort: [
+                      {
+                        '@timestamp': {
+                          order: 'desc',
+                        },
+                      },
+                    ],
                   },
                 },
               },
-            ],
+              filter: {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'event.action': 'active-instance',
+                      },
+                    },
+                    {
+                      term: {
+                        'event.action': 'new-instance',
+                      },
+                    },
+                    {
+                      term: {
+                        'event.action': 'recovered-instance',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
           },
-          last_execution_state: {
-            doc_count: 14,
+          terms: {
+            field: 'kibana.alerting.instance_id',
+            order: {
+              _key: 'asc',
+            },
+            size: 65535,
+          },
+        },
+        last_execution_state: {
+          aggs: {
             max_timestamp: {
-              value: 1612423722992,
-              value_as_string: '2021-02-04T07:28:42.992Z',
+              max: {
+                field: '@timestamp',
+              },
+            },
+          },
+          filter: {
+            term: {
+              'event.action': 'execute',
             },
           },
         },
       },
+      '2019-02-12T21:00:22.479Z',
+      '2019-02-12T21:01:22.479Z',
+    ]);
+  });
+
+  test('calls event log client with start date', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getAlertInstanceSummarySavedObject());
+    const instancesLatestStateSummary: RawEventLogAlertsSummary = {
+      instances: {},
+      last_execution_state: {},
+      errors_state: {},
+    };
+    const summaryResult1 = [
+      {
+        savedObjectId: '',
+        summary: instancesLatestStateSummary,
+      },
     ];
-    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(
-      instancesLatestStateSummary
-    );
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult1);
+
+    const instancesCreatedSummary = {
+      instances: {},
+    };
+    const summaryResult2 = [
+      {
+        savedObjectId: '',
+        summary: instancesCreatedSummary,
+      },
+    ];
+    eventLogClient.getEventsSummaryBySavedObjectIds.mockResolvedValueOnce(summaryResult2);
 
     const dateStart = new Date(
       Date.now() - 60 * AlertInstanceSummaryIntervalSeconds * 1000
@@ -313,8 +432,9 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][2]!;
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(2);
+    const start = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][3]!;
+    const end = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][4]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
@@ -354,8 +474,9 @@ describe('getAlertInstanceSummary()', () => {
     await alertsClient.getAlertInstanceSummary({ id: '1', dateStart });
 
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-    const { start, end } = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][2]!;
+    expect(eventLogClient.getEventsSummaryBySavedObjectIds).toHaveBeenCalledTimes(2);
+    const start = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][3]!;
+    const end = eventLogClient.getEventsSummaryBySavedObjectIds.mock.calls[0][4]!;
 
     expect({ start, end }).toMatchInlineSnapshot(`
       Object {
