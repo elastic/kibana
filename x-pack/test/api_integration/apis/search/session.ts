@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -29,11 +31,11 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
       });
 
-      it('should fail to delete an unknown session', async () => {
+      it('should fail to cancel an unknown session', async () => {
         await supertest.delete(`/internal/session/123`).set('kbn-xsrf', 'foo').expect(404);
       });
 
-      it('should create and delete a session', async () => {
+      it('should create and cancel a session', async () => {
         const sessionId = `my-session-${Math.random()}`;
         await supertest
           .post(`/internal/session`)
@@ -49,7 +51,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertest.delete(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
 
-        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(404);
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { status } = resp.body.attributes;
+        expect(status).to.equal(SearchSessionStatus.CANCELLED);
       });
 
       it('should sync search ids into session', async () => {
@@ -123,6 +131,39 @@ export default function ({ getService }: FtrProviderContext) {
         expect(idMappings).to.contain(id1);
         expect(idMappings).to.contain(id2);
       });
+
+      it('should create and extend a session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/internal/session/${sessionId}/_extend`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            expires: '2021-02-26T21:02:43.742Z',
+          })
+          .expect(200);
+      });
+    });
+
+    it('should fail to extend a nonexistent session', async () => {
+      await supertest
+        .post(`/internal/session/123/_extend`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          expires: '2021-02-26T21:02:43.742Z',
+        })
+        .expect(404);
     });
   });
 }

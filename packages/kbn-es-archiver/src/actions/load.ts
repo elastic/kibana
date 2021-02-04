@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -98,9 +98,11 @@ export async function loadAction({
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
     await migrateKibanaIndex({ client, kbnClient });
+    log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
       await createDefaultSpace({ client, index: '.kibana' });
+      log.debug('[%s] Ensured that default space exists in .kibana', name);
     }
   }
 
