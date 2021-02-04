@@ -15,6 +15,36 @@ if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
   ./test/scripts/jenkins_xpack_build_plugins.sh
 fi
 
+# Configuring Metricbeat monitoring for the load testing
+# Getting the URL
+TOP="$(curl -L http://snapshots.elastic.co/latest/master.json)"
+BUILD=$(echo $TOP | sed 's/.*"version" : "\(.*\)", "build_id.*/\1/')
+echo $BUILD
+MB_BUILD_ID=$(echo $TOP | sed 's/.*"build_id" : "\(.*\)", "manifest_url.*/\1/')
+echo $MB_BUILD_ID
+
+URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${BUILD}-amd64.deb
+
+# Downloading the Metricbeat package
+while [ 1 ]; do
+    wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
+    if [ $? = 0 ]; then break; fi; # check return value, break if successful (0)
+       sleep 1s;
+    done;
+
+
+# Install Metricbeat
+dpkg -i ./metricbeat-${BUILD}-amd64.deb || exit 1
+
+# Configure Metricbeat
+pushd ../kibana-load-testing
+cp cfg/metricbeat/elasticsearch-xpack.yml /etc/metricbeat/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/kibana-xpack.yml /etc/metricbeat/modules.d/elasticsearch-xpack.yml
+echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
+cp cfg/metricbeat/metricbeat.yml /etc/metricbeat/metricbeat.yml
+mv /etc/metricbeat/modules.d/system.yml /etc/metricbeat/modules.d/system.yml.disabled
+popd
+
 # doesn't persist, also set in kibanaPipeline.groovy
 export KBN_NP_PLUGINS_BUILT=true
 
@@ -32,8 +62,14 @@ cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
 echo " -> test setup"
 source test/scripts/jenkins_test_setup_xpack.sh
 
+# Restart Metricbeat service
+service metricbeat restart
+
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
 node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts
+  
+# Stopping the Metricbeat service
+service metricbeat stop
