@@ -58,7 +58,7 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 }
 
 export function getCombinedRuntimeMappings(
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ) {
   let combinedRuntimeMappings = {};

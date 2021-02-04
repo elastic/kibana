@@ -49,24 +49,27 @@ export const useIndexData = (
   ]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
-    let runtimeMappingColumns: Array<{ id: string; schema: string | undefined }> = [];
+    let result: Array<{ id: string; schema: string | undefined }> = [];
 
+    // Get the the runtime fields that are defined from API field and index patterns
     if (combinedRuntimeMappings !== undefined) {
-      runtimeMappingColumns = Object.keys(combinedRuntimeMappings).map((fieldName) => {
+      result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
     }
-    return [
-      ...indexPatternFields.map((id) => {
-        const field = indexPattern.fields.getByName(id);
+
+    // Combine the runtime field that are defined from API field
+    indexPatternFields.forEach((id) => {
+      const field = indexPattern.fields.getByName(id);
+      if (!field?.runtimeField) {
         const schema = getDataGridSchemaFromKibanaFieldType(field);
-        return { id, schema };
-      }),
-      ...runtimeMappingColumns,
-    ];
-    return columns;
+        result.push({ id, schema });
+      }
+    });
+
+    return result.sort((a, b) => a.id.localeCompare(b.id));
   }, [
     indexPatternFields,
     indexPattern.fields,

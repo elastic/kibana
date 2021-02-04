@@ -25,7 +25,7 @@ import {
 
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
-import { Field } from './types';
+import type { Field, StepDefineExposedState } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
@@ -54,7 +54,10 @@ export function getKibanaFieldTypeFromEsType(type: string): KBN_FIELD_TYPES {
   }
 }
 
-export function getPivotDropdownOptions(indexPattern: IndexPattern, runtimeMappings: any) {
+export function getPivotDropdownOptions(
+  indexPattern: IndexPattern,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+) {
   // The available group by options
   const groupByOptions: EuiComboBoxOptionOption[] = [];
   const groupByOptionsData: PivotGroupByConfigWithUiSupportDict = {};
@@ -70,7 +73,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern, runtimeMappi
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];
-  if (runtimeMappings !== undefined) {
+  if (typeof runtimeMappings === 'object') {
     runtimeFields = Object.keys(runtimeMappings).map((fieldName) => {
       const field = runtimeMappings[fieldName];
       return { name: fieldName, type: getKibanaFieldTypeFromEsType(field.type) };

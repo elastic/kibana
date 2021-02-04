@@ -32,6 +32,7 @@ export const latestConfigMapper = {
  * Provides available options for unique_key and sort fields
  * @param indexPattern
  * @param aggConfigs
+ * @param runtimeMappings
  */
 function getOptions(
   indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
@@ -41,7 +42,10 @@ function getOptions(
   const aggConfig = aggConfigs.aggs[0];
   const param = aggConfig.type.params.find((p) => p.type === 'field');
   const filteredIndexPatternFields = param
-    ? ((param as unknown) as FieldParamType).getAvailableFields(aggConfig)
+    ? ((param as unknown) as FieldParamType)
+        .getAvailableFields(aggConfig)
+        // runtimeMappings may also include runtime fields defined by the index pattern
+        .filter((ip) => ip.runtimeField === undefined)
     : [];
 
   const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);

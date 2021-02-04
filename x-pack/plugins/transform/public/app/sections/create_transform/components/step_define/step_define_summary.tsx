@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useMemo } from 'react';
+import React, { Fragment, FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +29,6 @@ import { GroupByListSummary } from '../group_by_list';
 import { StepDefineExposedState } from './common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { isLatestPartialRequest } from './common/types';
-import { getCombinedRuntimeMappings } from '../../../../common/request';
 
 interface Props {
   formState: StepDefineExposedState;
@@ -56,16 +55,11 @@ export const StepDefineSummary: FC<Props> = ({
 
   const pivotQuery = getPivotQuery(searchQuery);
 
-  const combinedRuntimeMappings = useMemo(
-    () => getCombinedRuntimeMappings(searchItems.indexPattern, runtimeMappings),
-    [searchItems.indexPattern, runtimeMappings]
-  );
-
   const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
     partialPreviewRequest,
-    combinedRuntimeMappings
+    runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
@@ -73,7 +67,7 @@ export const StepDefineSummary: FC<Props> = ({
     pivotQuery,
     validationStatus,
     partialPreviewRequest,
-    combinedRuntimeMappings
+    runtimeMappings
   );
 
   const isModifiedQuery =
