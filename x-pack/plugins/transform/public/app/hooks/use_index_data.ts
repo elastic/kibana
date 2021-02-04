@@ -21,12 +21,11 @@ import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
   query: PivotQuery,
-  overrides?: StepDefineExposedState
+  combinedRuntimeMappings?: any
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -36,7 +35,6 @@ export const useIndexData = (
       getDataGridSchemaFromKibanaFieldType,
       getDataGridSchemaFromESFieldType,
       getFieldsFromKibanaIndexPattern,
-      getRuntimeFieldsMapping,
       showDataGridColumnChartErrorMessageToast,
       useDataGrid,
       useRenderCellValue,
@@ -53,9 +51,9 @@ export const useIndexData = (
   const columns: EuiDataGridColumn[] = useMemo(() => {
     let runtimeMappingColumns: Array<{ id: string; schema: string | undefined }> = [];
 
-    if (overrides?.runtimeMappings !== undefined) {
-      runtimeMappingColumns = Object.keys(overrides.runtimeMappings).map((fieldName) => {
-        const field = overrides.runtimeMappings[fieldName];
+    if (combinedRuntimeMappings !== undefined) {
+      runtimeMappingColumns = Object.keys(combinedRuntimeMappings).map((fieldName) => {
+        const field = combinedRuntimeMappings[fieldName];
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
@@ -72,7 +70,7 @@ export const useIndexData = (
   }, [
     indexPatternFields,
     indexPattern.fields,
-    overrides,
+    combinedRuntimeMappings,
     getDataGridSchemaFromESFieldType,
     getDataGridSchemaFromKibanaFieldType,
   ]);
@@ -119,7 +117,9 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern, overrides?.runtimeMappings),
+        ...(Object.keys(combinedRuntimeMappings).length > 0
+          ? { runtime_mappings: combinedRuntimeMappings }
+          : {}),
       },
     };
     const resp = await api.esSearch(esSearchRequest);
@@ -164,7 +164,7 @@ export const useIndexData = (
   }, [
     indexPattern.title,
     indexPatternFields,
-    overrides?.runtimeMappings,
+    combinedRuntimeMappings,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns]),
   ]);

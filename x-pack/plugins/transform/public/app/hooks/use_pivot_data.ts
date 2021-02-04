@@ -72,7 +72,8 @@ export const usePivotData = (
   query: PivotQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
-  indexPattern?: SearchItems['indexPattern']
+  // @TODO: fix any
+  combinedRuntimeMappings?: any
 ): UseIndexDataReturnType => {
   const [
     previewMappingsProperties,
@@ -136,14 +137,12 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     let previewRequest = getPreviewTransformRequestBody(indexPatternTitle, query, requestPayload);
-    if (indexPattern !== undefined) {
-      const runtimeMappings = indexPattern.getComputedFields().runtimeFields;
-      if (typeof runtimeMappings === 'object' && Object.keys(runtimeMappings).length > 0) {
-        previewRequest = {
-          ...previewRequest,
-          source: { ...previewRequest.source, runtime_mappings: runtimeMappings },
-        };
-      }
+
+    if (combinedRuntimeMappings) {
+      previewRequest = {
+        ...previewRequest,
+        source: { ...previewRequest.source, runtime_mappings: combinedRuntimeMappings },
+      };
     }
     const resp = await api.getTransformsPreview(previewRequest);
 
@@ -184,7 +183,7 @@ export const usePivotData = (
   }, [
     indexPatternTitle,
     JSON.stringify([requestPayload, query]),
-    indexPattern,
+    combinedRuntimeMappings,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -57,6 +57,7 @@ import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { LatestFunctionForm } from './latest_function_form';
+import { getCombinedRuntimeMappings } from '../../../../common/request';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -84,9 +85,13 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     isAdvancedSourceEditorApplyButtonEnabled,
   } = stepDefineForm.advancedSourceEditor.state;
   const pivotQuery = stepDefineForm.searchBar.state.pivotQuery;
+  const runtimeMappings = useMemo(
+    () => getCombinedRuntimeMappings(indexPattern, overrides?.runtimeMappings),
+    [indexPattern, overrides?.runtimeMappings]
+  );
 
   const indexPreviewProps = {
-    ...useIndexData(indexPattern, stepDefineForm.searchBar.state.pivotQuery, overrides),
+    ...useIndexData(indexPattern, stepDefineForm.searchBar.state.pivotQuery, runtimeMappings),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -120,7 +125,13 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
 
   const pivotPreviewProps = {
-    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload, indexPattern),
+    ...usePivotData(
+      indexPattern.title,
+      pivotQuery,
+      validationStatus,
+      requestPayload,
+      runtimeMappings
+    ),
     dataTestSubj: 'transformPivotPreview',
     title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
       defaultMessage: 'Transform preview',

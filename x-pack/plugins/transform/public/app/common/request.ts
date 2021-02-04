@@ -57,6 +57,32 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
+export function getCombinedRuntimeMappings(
+  indexPattern: IndexPattern,
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
+) {
+  let combinedRuntimeMappings = {};
+
+  // Use runtime field mappings defined inline from API
+  if (typeof runtimeMappings === 'object') {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  // And runtime field mappings defined by index pattern
+  if (indexPattern !== undefined) {
+    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+  }
+
+  if (
+    typeof combinedRuntimeMappings === 'object' &&
+    Object.keys(combinedRuntimeMappings).length > 0
+  ) {
+    return combinedRuntimeMappings;
+  }
+  return undefined;
+}
+
 export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
@@ -69,7 +95,7 @@ export function getPreviewTransformRequestBody(
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
-      ...(runtimeMappings && !isMatchAllQuery(query) ? { query } : {}),
+      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
   };
@@ -97,7 +123,8 @@ export const getCreateTransformRequestBody = (
   ...getPreviewTransformRequestBody(
     indexPatternTitle,
     getPivotQuery(pivotState.searchQuery),
-    pivotState.previewRequest
+    pivotState.previewRequest,
+    pivotState.runtimeMappings
   ),
   // conditionally add optional description
   ...(transformDetailsState.transformDescription !== ''

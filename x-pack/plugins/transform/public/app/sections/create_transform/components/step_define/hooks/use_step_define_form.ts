@@ -36,6 +36,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     indexPattern.title,
     searchBar.state.pivotQuery,
     pivotConfig.state.requestPayload
+    // overrides?.runtimeMappings
   );
 
   // pivot config hook
@@ -50,6 +51,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
         indexPattern.title,
         searchBar.state.pivotQuery,
         pivotConfig.state.requestPayload
+        // overrides?.runtimeMappings
       );
 
       const stringifiedSourceConfigUpdate = JSON.stringify(
@@ -84,7 +86,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
         transformFunction === TRANSFORM_FUNCTION.PIVOT
           ? pivotConfig.state.requestPayload
           : latestFunctionConfig.requestPayload,
-      runtimeMappings: transformFunction === overrides?.runtimeMappings,
+      runtimeMappings: defaults?.runtimeMappings,
     });
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
