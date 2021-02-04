@@ -12,7 +12,7 @@ import { UnregisterCallback } from 'history';
 import { parse } from 'query-string';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import {
   IUiSettingsClient,

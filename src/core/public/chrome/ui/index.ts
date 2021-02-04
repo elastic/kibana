@@ -17,4 +17,3 @@ export {
   ChromeHelpExtensionMenuGitHubLink,
   NavType,
 } from './header';
-export { Footer } from './footer';

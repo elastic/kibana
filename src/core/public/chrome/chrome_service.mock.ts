@@ -14,7 +14,6 @@ import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChro
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getHeaderComponent: jest.fn(),
-    getFooterComponent: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -62,7 +61,7 @@ const createStartContractMock = () => {
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
-    setFooterBanner: jest.fn(),
+    setHeaderBanner: jest.fn(),
     getBodyClasses$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
@@ -75,6 +74,7 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
+  startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   return startContract;
 };
 

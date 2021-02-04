@@ -1,10 +1,11 @@
-@import '../../../../src/core/public/variables';
+@import '../../../../src/core/public/mixins';
 
 // sass-lint:disable no-ids
 #maps-plugin {
+  @include kibanaFullBodyHeight();
+
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$kbnHeaderOffset});
   width: 100%;
   overflow: hidden;
 }

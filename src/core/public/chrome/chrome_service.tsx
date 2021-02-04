@@ -23,7 +23,7 @@ import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { Header, Footer } from './ui';
+import { Header } from './ui';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 import {
   ChromeBadge,
@@ -115,18 +115,13 @@ export class ChromeService {
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
 
-    const footerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
     const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
-    const bodyClasses$ = combineLatest([footerBanner$, headerBanner$]).pipe(
-      map(([footerBanner, headerBanner]) => {
-        const bodyClasses: string[] = [];
-        if (footerBanner) {
-          bodyClasses.push('kbnBody--hasFooterBanner');
-        }
-        if (headerBanner) {
-          bodyClasses.push('kbnBody--hasHeaderBanner');
-        }
-        return bodyClasses;
+    const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
+      map(([headerBanner, isVisible]) => {
+        return [
+          headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
+          isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+        ];
       })
     );
 
@@ -201,6 +196,7 @@ export class ChromeService {
           loadingCount$={http.getLoadingCount$()}
           application={application}
           appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
+          headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
@@ -222,8 +218,6 @@ export class ChromeService {
           isLocked$={getIsNavDrawerLocked$}
         />
       ),
-
-      getFooterComponent: () => <Footer footerBanner$={footerBanner$} />,
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
 
@@ -296,8 +290,8 @@ export class ChromeService {
         customNavLink$.next(customNavLink);
       },
 
-      setFooterBanner: (footerBanner?: ChromeUserBanner) => {
-        footerBanner$.next(footerBanner);
+      setHeaderBanner: (headerBanner?: ChromeUserBanner) => {
+        headerBanner$.next(headerBanner);
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),

@@ -1,4 +1,4 @@
-@include euiHeaderAffordForFixed($kbnHeaderOffset);
+@import '../mixins';
 
 /**
  * stretch the root element of the Kibana application to set the base-size that
@@ -15,11 +15,8 @@
   display: flex;
   flex-flow: column nowrap;
   margin: 0 auto;
-  min-height: calc(100vh - #{$kbnHeaderOffset});
 
-  &.hidden-chrome {
-    min-height: 100vh;
-  }
+  @include kibanaFullBodyMinHeight();
 }
 
 .app-wrapper-panel {
@@ -34,23 +31,10 @@
   }
 }
 
-////////
+.coreSystemRootDomElement {
+  @include euiHeaderAffordForFixed($kbnHeaderOffset);
 
-@mixin euiFooterAffordForBanner($footerHeight: $kbnFooterBannerHeight) {
-  #kibana-body {
-    padding-bottom: $footerHeight;
-  }
-
-  // When the EuiHeader is fixed, we need to account for it in the position of the flyout
-  .euiFlyout,
-  .euiCollapsibleNav {
-    bottom: $footerHeight;
-    // height: calc(100% - #{$footerHeight});
-  }
-}
-
-body {
-  &.kbnBody--hasFooterBanner {
-    @include euiFooterAffordForBanner($kbnFooterBannerHeight);
+  &.kbnBody--hasHeaderBanner {
+    @include euiHeaderAffordForFixed($kbnHeaderOffsetWithBanner);
   }
 }
