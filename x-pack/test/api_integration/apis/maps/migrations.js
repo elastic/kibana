@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -41,7 +42,7 @@ export default function ({ getService }) {
           type: 'index-pattern',
         },
       ]);
-      expect(resp.body.migrationVersion).to.eql({ map: '7.10.0' });
+      expect(resp.body.migrationVersion).to.eql({ map: '7.12.0' });
       expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
     });
   });

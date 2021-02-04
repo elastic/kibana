@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
@@ -83,11 +84,11 @@ describe('#create', () => {
     expect(mockBaseClient.create).toHaveBeenCalledWith('unknown-type', attributes, options);
   });
 
-  it('fails if type is registered and ID is specified', async () => {
+  it('fails if type is registered and non-UUID ID is specified', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     await expect(wrapper.create('known-type', attributes, { id: 'some-id' })).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
+      'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
     );
 
     expect(mockBaseClient.create).not.toHaveBeenCalled();
@@ -310,7 +311,7 @@ describe('#bulkCreate', () => {
     );
   });
 
-  it('fails if ID is specified for registered type', async () => {
+  it('fails if non-UUID ID is specified for registered type', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     const bulkCreateParams = [
@@ -319,7 +320,7 @@ describe('#bulkCreate', () => {
     ];
 
     await expect(wrapper.bulkCreate(bulkCreateParams)).rejects.toThrowError(
-      'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
+      'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
     );
 
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();

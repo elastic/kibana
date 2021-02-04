@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,7 +17,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize', 'dashboard']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -202,7 +203,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }) .lnsDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
         endIndex + 1
-      }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
+      }) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -561,6 +562,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return buttonEl.click();
     },
 
+    async toggleColumnVisibility(dimension: string) {
+      await this.openDimensionEditor(dimension);
+      const id = 'lns-table-column-hidden';
+      const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await this.closeDimensionEditor();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
       await el.focus();
@@ -585,6 +595,50 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('colorPickerAnchor', color);
+    },
+
+    /**
+     * Creates and saves a lens visualization from a dashboard
+     *
+     * @param title - title for the new lens. If left undefined, the panel will be created by value
+     * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     */
+    async createAndAddLensFromDashboard({
+      title,
+      redirectToOrigin,
+    }: {
+      title?: string;
+      redirectToOrigin?: boolean;
+    }) {
+      log.debug(`createAndAddLens${title}`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.switchToEditMode();
+      }
+      await PageObjects.visualize.clickLensWidget();
+      await this.goToTimeRange();
+      await this.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+      if (title) {
+        await this.save(title, false, redirectToOrigin);
+      } else {
+        await this.saveAndReturn();
+      }
     },
   });
 }

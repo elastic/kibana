@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import t, { Encode, Encoder } from 'io-ts';
@@ -131,15 +132,20 @@ type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   ? { params?: T['params'] }
   : { params: T['params'] };
 
-export type Client<TRouteState> = <
-  TEndpoint extends keyof TRouteState & string
->(
-  options: Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+export type Client<
+  TRouteState,
+  TOptions extends { abortable: boolean } = { abortable: true }
+> = <TEndpoint extends keyof TRouteState & string>(
+  options: Omit<
+    FetchOptions,
+    'query' | 'body' | 'pathname' | 'method' | 'signal'
+  > & {
     forceCache?: boolean;
     endpoint: TEndpoint;
   } & (TRouteState[TEndpoint] extends { params: t.Any }
       ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
-      : {})
+      : {}) &
+    (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
 ) => Promise<
   TRouteState[TEndpoint] extends { ret: any }
     ? TRouteState[TEndpoint]['ret']
