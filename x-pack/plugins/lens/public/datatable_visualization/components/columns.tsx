@@ -135,7 +135,9 @@ export const createGridColumns = (
         ]
       : undefined;
 
-    const initialWidth = columnConfig.columns.find(({ columnId }) => columnId === field)?.width;
+    const column = columnConfig.columns.find(({ columnId }) => columnId === field);
+    const initialWidth = column?.width;
+    const isHidden = column?.hidden;
 
     const columnDefinition: EuiDataGridColumn = {
       id: field,
@@ -178,11 +180,12 @@ export const createGridColumns = (
                 color: 'text',
                 size: 'xs',
                 onClick: () => onColumnHide({ columnId: field }),
-                iconType: 'empty',
+                iconType: 'eyeClosed',
                 label: i18n.translate('xpack.lens.table.hide.hideLabel', {
                   defaultMessage: 'Hide',
                 }),
                 'data-test-subj': 'lensDatatableHide',
+                isDisabled: !isHidden && visibleColumns.length <= 1,
               },
             ],
       },
