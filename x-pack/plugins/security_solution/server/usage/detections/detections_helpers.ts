@@ -235,8 +235,11 @@ export const getMlJobMetrics = async (
 
       return securityJobStats.jobs.map((jobStat) => {
         const jobId = jobStat.job_id;
+
+        // TODO: o(n) -> o(1)
         const jobDetail = jobDetails.jobs.find((job) => job.job_id === jobId);
 
+        // TODO: o(n) -> o(1)
         const datafeedStat = datafeedStatsCache.datafeeds.find(
           (datafeed) => datafeed.datafeed_id === `datafeed-${jobId}`
         );

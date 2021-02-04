@@ -283,28 +283,20 @@ export const getMockMlJobStatsResponse = () => ({
   ],
 });
 
-export const getMockMlDatafeedsResponse = () => ({
-  datafeed_id: 'datafeed-high_distinct_count_error_message',
-  job_id: 'high_distinct_count_error_message',
-  query_delay: '80308ms',
-  chunking_config: {},
-  indices_options: {},
-  query: {},
-  indices: ['filebeat-*'],
-  scroll_size: 1000,
-  delayed_data_check_config: {},
-  max_empty_searches: 10,
-});
-
 export const getMockMlDatafeedStatsResponse = () => ({
-  datafeed_id: 'datafeed-high_distinct_count_error_message',
-  state: 'stopped',
-  timing_stats: {
-    job_id: 'high_distinct_count_error_message',
-    search_count: 7202,
-    bucket_count: 8612,
-    total_search_time_ms: 3107147,
-    average_search_time_per_bucket_ms: 360.7927310729215,
-    exponential_average_search_time_per_hour_ms: 86145.39799630083,
-  },
+  count: 1,
+  datafeeds: [
+    {
+      datafeed_id: 'datafeed-high_distinct_count_error_message',
+      state: 'stopped',
+      timing_stats: {
+        job_id: 'high_distinct_count_error_message',
+        search_count: 7202,
+        bucket_count: 8612,
+        total_search_time_ms: 3107147,
+        average_search_time_per_bucket_ms: 360.7927310729215,
+        exponential_average_search_time_per_hour_ms: 86145.39799630083,
+      },
+    },
+  ],
 });

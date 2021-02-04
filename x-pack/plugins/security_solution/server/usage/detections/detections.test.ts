@@ -13,7 +13,6 @@ import {
   getMockRulesResponse,
   getMockMlJobDetailsResponse,
   getMockMlJobStatsResponse,
-  getMockMlDatafeedsResponse,
   getMockMlDatafeedStatsResponse,
 } from './detections.mocks';
 import { fetchDetectionsUsage, fetchDetectionsMetrics } from './index';
@@ -128,7 +127,6 @@ describe('Detections Usage and Metrics', () => {
     it('returns an ml job telemetry object from anomaly detectors provider', async () => {
       const mockJobsResponse = jest.fn().mockResolvedValue(getMockMlJobDetailsResponse());
       const mockJobStatsResponse = jest.fn().mockResolvedValue(getMockMlJobStatsResponse());
-      const mockDatafeedResponse = jest.fn().mockResolvedValue(getMockMlDatafeedsResponse());
       const mockDatafeedStatsResponse = jest
         .fn()
         .mockResolvedValue(getMockMlDatafeedStatsResponse());
@@ -136,8 +134,7 @@ describe('Detections Usage and Metrics', () => {
       mlMock.anomalyDetectorsProvider.mockReturnValue(({
         jobs: mockJobsResponse,
         jobStats: mockJobStatsResponse,
-        datafeeds: mockDatafeedResponse,
-        datafeedStat: mockDatafeedStatsResponse,
+        datafeedStats: mockDatafeedStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
       const result = await fetchDetectionsMetrics(mlMock, savedObjectsClientMock);
