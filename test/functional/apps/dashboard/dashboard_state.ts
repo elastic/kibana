@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'tileMap',
     'visChart',
+    'share',
     'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
@@ -127,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Saved search with column changes will not update when the saved object changes', async () => {
-      await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.switchToEditMode();
+      await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
@@ -191,6 +192,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
+    const getUrlFromShare = async () => {
+      await PageObjects.share.clickShareTopNavButton();
+      const sharedUrl = await PageObjects.share.getSharedUrl();
+      await PageObjects.share.clickShareTopNavButton();
+      return sharedUrl;
+    };
+
     describe('Directly modifying url updates dashboard state', () => {
       it('for query parameter', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -209,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-        const currentUrl = await browser.getCurrentUrl();
+        const currentUrl = await getUrlFromShare();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = currentUrl.replace(
           `w:${DEFAULT_PANEL_WIDTH}`,
@@ -235,7 +243,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when removing a panel', async function () {
-        const currentUrl = await browser.getCurrentUrl();
+        await PageObjects.dashboard.waitForRenderComplete();
+        const currentUrl = await getUrlFromShare();
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
         await browser.get(newUrl.toString(), false);
 
@@ -253,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `[data-title="${PIE_CHART_VIS_NAME}"]`
           );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
-          const currentUrl = await browser.getCurrentUrl();
+          const currentUrl = await getUrlFromShare();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
@@ -279,13 +288,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('resets a pie slice color to the original when removed', async function () {
-          const currentUrl = await browser.getCurrentUrl();
-          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          const currentUrl = await getUrlFromShare();
+          const newUrl = currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+            const pieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
             // The default green color that was stored with the visualization before any dashboard overrides.
             expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
           });

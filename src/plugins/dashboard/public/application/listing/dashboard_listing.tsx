@@ -17,6 +17,8 @@ import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 
 export interface DashboardListingProps {
@@ -41,6 +43,7 @@ export const DashboardListing = ({
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
+      dashboardPanelStorage,
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
@@ -91,12 +94,24 @@ export const DashboardListing = ({
     [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
+  const createItem = useCallback(() => {
+    if (!dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+      redirectTo({ destination: 'dashboard' });
+    } else {
+      confirmCreateWithUnsaved(
+        core.overlays,
+        () => {
+          dashboardPanelStorage.clearPanels();
+          redirectTo({ destination: 'dashboard' });
+        },
+        () => redirectTo({ destination: 'dashboard' })
+      );
+    }
+  }, [dashboardPanelStorage, redirectTo, core.overlays]);
+
   const noItemsFragment = useMemo(
-    () =>
-      getNoItemsMessage(hideWriteControls, core.application, () =>
-        redirectTo({ destination: 'dashboard' })
-      ),
-    [redirectTo, core.application, hideWriteControls]
+    () => getNoItemsMessage(hideWriteControls, core.application, createItem),
+    [createItem, core.application, hideWriteControls]
   );
 
   const fetchItems = useCallback(
@@ -125,7 +140,8 @@ export const DashboardListing = ({
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id }),
+    ({ id }: { id: string | undefined }) =>
+      redirectTo({ destination: 'dashboard', id, editMode: true }),
     [redirectTo]
   );
 
@@ -143,7 +159,7 @@ export const DashboardListing = ({
   } = dashboardListingTable;
   return (
     <TableListView
-      createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
+      createItem={hideWriteControls ? undefined : createItem}
       deleteItems={hideWriteControls ? undefined : deleteItems}
       initialPageSize={savedObjects.settings.getPerPage()}
       editItem={hideWriteControls ? undefined : editItem}
@@ -162,7 +178,9 @@ export const DashboardListing = ({
         listingLimit,
         tableColumns,
       }}
-    />
+    >
+      <DashboardUnsavedListing redirectTo={redirectTo} />
+    </TableListView>
   );
 };
 

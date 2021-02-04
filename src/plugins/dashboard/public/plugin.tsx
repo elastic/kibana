@@ -282,11 +282,11 @@ export class DashboardPlugin
           core,
           appUnMounted,
           usageCollection,
-          onAppLeave: params.onAppLeave,
-          initializerContext: this.initializerContext,
           restorePreviousUrl,
           element: params.element,
+          onAppLeave: params.onAppLeave,
           scopedHistory: this.currentHistory!,
+          initializerContext: this.initializerContext,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
       },

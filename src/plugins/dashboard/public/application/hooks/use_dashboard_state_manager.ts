@@ -52,8 +52,10 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     initializerContext,
-    dashboardCapabilities,
     savedObjectsTagging,
+    dashboardCapabilities,
+    dashboardPanelStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -86,12 +88,14 @@ export const useDashboardStateManager = (
 
     const stateManager = new DashboardStateManager({
       hasTaggingCapabilities,
+      dashboardPanelStorage,
       hideWriteControls,
       history,
       kbnUrlStateStorage,
       kibanaVersion,
       savedDashboard,
       usageCollection,
+      allowByValueEmbeddables,
     });
 
     // sync initial app filters from state to filterManager
@@ -178,6 +182,10 @@ export const useDashboardStateManager = (
       }
     );
 
+    if (stateManager.getIsEditMode()) {
+      stateManager.restorePanels();
+    }
+
     setDashboardStateManager(stateManager);
     setViewMode(stateManager.getViewMode());
 
@@ -191,6 +199,8 @@ export const useDashboardStateManager = (
     dataPlugin,
     filterManager,
     hasTaggingCapabilities,
+    initializerContext.config,
+    dashboardPanelStorage,
     hideWriteControls,
     history,
     kibanaVersion,
@@ -202,6 +212,7 @@ export const useDashboardStateManager = (
     toasts,
     uiSettings,
     usageCollection,
+    allowByValueEmbeddables,
     dashboardCapabilities.storeSearchSession,
   ]);
 

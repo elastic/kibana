@@ -13,3 +13,4 @@ export { getDashboardIdFromUrl } from './url';
 export { createSessionRestorationDataProvider } from './session_restoration';
 export { addHelpMenuToAppChrome } from './help_menu_util';
 export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
+export { DashboardPanelStorage } from './dashboard_panel_storage';

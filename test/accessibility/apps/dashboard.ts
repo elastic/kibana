@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Exit out of edit mode', async () => {
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await PageObjects.dashboard.clickDiscardChanges();
       await a11y.testAppSnapshot();
     });
 

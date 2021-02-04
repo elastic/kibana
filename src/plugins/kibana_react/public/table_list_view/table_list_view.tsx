@@ -518,6 +518,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
+        {this.props.children}
 
         {this.renderListingLimitWarning()}
         {this.renderFetchError()}

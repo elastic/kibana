@@ -7,6 +7,7 @@
  */
 
 export {
+  Storage,
   unhashUrl,
   syncState,
   ISyncStateRef,
