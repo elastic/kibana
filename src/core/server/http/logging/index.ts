@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { applyFiltersToKeys } from './apply_filters_to_keys';
-export { getResponsePayloadBytes } from './get_payload_size';
+export { getEcsResponseLog } from './get_response_log';
