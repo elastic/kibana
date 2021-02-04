@@ -8,6 +8,8 @@
 
 import { join } from 'path';
 // @ts-ignore
+import { REPO_ROOT } from '@kbn/utils';
+// @ts-ignore
 import shell from 'shelljs';
 
 export const finalDirAndFile = (destDir: string) => (filePath = 'exported.ndjson') => {
@@ -21,3 +23,5 @@ export const mkDir = (x: string) => shell.mkdir('-p', x);
 export const ndjsonToObj = (x: string) => x.split('\n').map(JSON.parse);
 
 export const mark = '[SavedObjsSvc]';
+
+export const id = (x: any) => x;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fetchSavedObjects } from './fetch_saved_objects';
-import { importSavedObjects } from './import_saved_objects';
+import { fetchSavedObjects, fetchList } from './fetch_saved_objects';
+import { importSavedObjects, importList } from './import_saved_objects';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export const SavedObjectsProvider = ({ getService }: FtrProviderContext) => {
@@ -17,5 +17,7 @@ export const SavedObjectsProvider = ({ getService }: FtrProviderContext) => {
   return {
     fetch: fetchSavedObjects(dataDir),
     import: importSavedObjects(dataDir),
+    fetchList: fetchList(dataDir),
+    importList: importList(dataDir),
   };
 };

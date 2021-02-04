@@ -15,6 +15,7 @@ import { SuperTest } from 'supertest';
 import { mkDir, finalDirAndFile, ndjsonToObj, mark } from './utils';
 // @ts-ignore
 import * as Either from '../../../../src/dev/code_coverage/ingest_coverage/either';
+import { recurseList } from './recurse_list';
 
 const encoding = 'utf8';
 
@@ -60,12 +61,12 @@ const flush = (dest: string) => (savedObj: any, i: number) => {
 
 export const flushSavedObjects = (dest: string) => (log: ToolingLog) => (payloadEither: any) =>
   payloadEither.fold(
-    () => log.debug(`${mark} Empty resp.text for:\n\t ${dest}`),
+    () => log.error(`${mark} Empty resp.text for:\n\t ${dest}`),
     (payload: any) => {
       log.verbose(`${mark} payload: \n\t${JSON.stringify(payload, null, 2)}`);
       const flushToDestination = flush(dest);
       [...payload].forEach(flushToDestination);
-      log.debug(`${mark} Exported saved objects to destination: \n\t${dest}`);
+      log.info(`${mark} Exported saved objects to destination: \n\t${dest}`);
     }
   );
 
@@ -73,13 +74,14 @@ export const fetchSavedObjects = (dataDir: string) => (appName: string) => (
   log: ToolingLog
 ) => async (supertest: SuperTest<any>) => {
   const joined = join(dataDir, appName);
-export const fetchSavedObjects = (dest = CACHE_PATH) => (appName: string) => (
-  log: ToolingLog
-) => async (supertest: SuperTest<any>) => {
-  const joined = join(dest, appName);
   const [destDir, destFilePath] = finalDirAndFile(joined)();
 
   mkDir(destDir);
   const exportUsingDefaults = exportSavedObjects();
   await flushSavedObjects(destFilePath)(log)(await exportUsingDefaults(log, supertest));
 };
+
+export const fetchList = (dataDir: string) => (log: ToolingLog) => (
+  supertest: SuperTest<any>
+) => async (names: string[]) =>
+  await recurseList(fetchSavedObjects)(dataDir)(log)(supertest)(names);

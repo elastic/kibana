@@ -12,6 +12,7 @@ import { SuperTest } from 'supertest';
 import { ToolingLog } from '@kbn/dev-utils';
 import { join } from 'path';
 import { finalDirAndFile, mark } from './utils';
+import { recurseList } from './recurse_list';
 
 export const importData = (srcFilePath: string) => async (
   log: ToolingLog,
@@ -23,9 +24,9 @@ export const importData = (srcFilePath: string) => async (
     .set('kbn-xsrf', 'anything')
     .attach('file', readFileSync(srcFilePath), srcFilePath)
     .expect(200)
-    .then(() => log.debug(`${mark} import successful of ${srcFilePath}`))
+    .then(() => log.info(`${mark} import successful of ${srcFilePath}`))
     .catch((err: any) =>
-      log.debug(`${mark} caught error - import response: \n\t${JSON.stringify(err, null, 2)}`)
+      log.error(`${mark} caught error - import response: \n\t${JSON.stringify(err, null, 2)}`)
     );
 
 export const importSavedObjects = (dataDir: string) => (appName: string) => (
@@ -34,6 +35,11 @@ export const importSavedObjects = (dataDir: string) => (appName: string) => (
   const from = join(dataDir, appName);
   const [, inputFilePath] = finalDirAndFile(from)();
 
-  log.debug(`${mark} Importing saved objects from path: \n\t${inputFilePath}`);
+  log.info(`${mark} Importing saved objects from path: \n\t${inputFilePath}`);
   importData(inputFilePath)(log, supertest);
 };
+
+export const importList = (dataDir: string) => (log: ToolingLog) => (
+  supertest: SuperTest<any>
+) => async (names: string[]) =>
+  await recurseList(importSavedObjects)(dataDir)(log)(supertest)(names);
