@@ -311,6 +311,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           </Chart>
         ) : (
           <EuiCallOut
+            data-test-subj="noDataCallout"
             size="s"
             title={
               <FormattedMessage

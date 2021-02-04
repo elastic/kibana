@@ -20,62 +20,22 @@ import {
   getTimeUnitLabel,
   TIME_UNITS,
 } from '../../../../triggers_actions_ui/public';
+import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../../../../src/plugins/kibana_react/public');
 jest.mock('./index_threshold_api', () => ({
   getThresholdAlertVisualizationData: jest.fn(() =>
-    Promise.resolve({ results: [{ group: 'a', metrics: [['b', 2]] }] })
+    Promise.resolve({
+      results: [
+        { group: 'a', metrics: [['b', 2]] },
+        { group: 'a', metrics: [['b', 10]] },
+      ],
+    })
   ),
 }));
 
 const { getThresholdAlertVisualizationData } = jest.requireMock('./index_threshold_api');
-// jest.mock('../../../../triggers_actions_ui/public', () => {
-//   const original = jest.requireActual('../../../../triggers_actions_ui/public');
-//   return {
-//     ...original,
-//     getIndexPatterns: () => {
-//       return ['index1', 'index2'];
-//     },
-//     getTimeFieldOptions: () => {
-//       return [
-//         {
-//           text: '@timestamp',
-//           value: '@timestamp',
-//         },
-//       ];
-//     },
-//     getFields: () => {
-//       return Promise.resolve([
-//         {
-//           name: '@timestamp',
-//           type: 'date',
-//         },
-//         {
-//           name: 'field',
-//           type: 'text',
-//         },
-//       ]);
-//     },
-//     getIndexOptions: () => {
-//       return Promise.resolve([
-//         {
-//           label: 'indexOption',
-//           options: [
-//             {
-//               label: 'index1',
-//               value: 'index1',
-//             },
-//             {
-//               label: 'index2',
-//               value: 'index2',
-//             },
-//           ],
-//         },
-//       ]);
-//     },
-//   };
-// });
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
@@ -109,7 +69,7 @@ describe('ThresholdVisualization', () => {
   async function setup(alertParams: IndexThresholdAlertParams) {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        alertParams={getAlertParams()}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -124,6 +84,38 @@ describe('ThresholdVisualization', () => {
     });
     return wrapper;
   }
+
+  test('periodically requests visualization data', async () => {
+    const refreshRate = 10;
+    jest.useFakeTimers();
+
+    const wrapper = mountWithIntl(
+      <ThresholdVisualization
+        alertParams={getAlertParams()}
+        alertInterval="1m"
+        aggregationTypes={builtInAggregationTypes}
+        comparators={builtInComparators}
+        charts={chartsStartMock}
+        dataFieldsFormats={dataMock.fieldFormats}
+        refreshRateInMilliseconds={refreshRate}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(getThresholdAlertVisualizationData).toHaveBeenCalledTimes(1);
+
+    for (let i = 1; i <= 5; i++) {
+      await act(async () => {
+        jest.advanceTimersByTime(refreshRate);
+        await nextTick();
+        wrapper.update();
+      });
+      expect(getThresholdAlertVisualizationData).toHaveBeenCalledTimes(i + 1);
+    }
+  });
 
   test('renders loading message on initial load', async () => {
     const wrapper = mountWithIntl(
@@ -147,28 +139,55 @@ describe('ThresholdVisualization', () => {
     expect(getThresholdAlertVisualizationData).toHaveBeenCalled();
   });
 
-  test('renders error message when getting visualization fails', async () => {
-    getThresholdAlertVisualizationData.mockImplementation(() => Promise.reject('oh no'));
-    const wrapper = mountWithIntl(
-      <ThresholdVisualization
-        alertParams={getAlertParams()}
-        alertInterval="1m"
-        aggregationTypes={builtInAggregationTypes}
-        comparators={builtInComparators}
-        charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
-      />
-    );
+  test('renders chart when visualization results are available', async () => {
+    const wrapper = await setup();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeFalsy();
+    expect(wrapper.find(Chart)).toHaveLength(1);
+    expect(wrapper.find(LineSeries)).toHaveLength(1);
+    expect(wrapper.find(LineAnnotation)).toHaveLength(1);
   });
 
-  // test for callout when no data
-  // test for chart components when data is available
-  // test that getvisualization is repeatedly called
+  test('renders multiple line series chart when visualization results contain multiple groups', async () => {
+    getThresholdAlertVisualizationData.mockImplementation(() =>
+      Promise.resolve({
+        results: [
+          { group: 'a', metrics: [['b', 2]] },
+          { group: 'a', metrics: [['b', 10]] },
+          { group: 'c', metrics: [['d', 1]] },
+        ],
+      })
+    );
+
+    const wrapper = await setup();
+
+    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeFalsy();
+    expect(wrapper.find(Chart)).toHaveLength(1);
+    expect(wrapper.find(LineSeries)).toHaveLength(2);
+    expect(wrapper.find(LineAnnotation)).toHaveLength(1);
+  });
+
+  test('renders error message when getting visualization fails', async () => {
+    const errorMessage = 'oh no';
+    getThresholdAlertVisualizationData.mockImplementation(() => Promise.reject(errorMessage));
+    const wrapper = await setup();
+
+    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
+      `Cannot load alert visualization${errorMessage}`
+    );
+  });
+
+  test('renders no data message when visualization results are empty', async () => {
+    getThresholdAlertVisualizationData.mockImplementation(() => Promise.resolve({ results: [] }));
+    const wrapper = await setup();
+
+    expect(wrapper.find('[data-test-subj="alertVisualizationChart"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="noDataCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="noDataCallout"]').first().text()).toBe(
+      `No data matches this queryCheck that your time range and filters are correct.`
+    );
+  });
 });
