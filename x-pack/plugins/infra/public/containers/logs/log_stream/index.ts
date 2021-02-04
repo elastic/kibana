@@ -34,6 +34,8 @@ interface LogStreamState {
   lastLoadedTime?: Date;
 }
 
+type FetchPageCallback = (params?: { force?: boolean; extendTo?: number }) => void;
+
 const INITIAL_STATE: LogStreamState = {
   entries: [],
   topCursor: null,
@@ -139,19 +141,25 @@ export function useLogStream({
     },
   });
 
-  const fetchPreviousEntries = useCallback(() => {
-    if (state.topCursor === null) {
-      throw new Error(
-        'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-      );
-    }
+  const fetchPreviousEntries = useCallback<FetchPageCallback>(
+    (params) => {
+      if (state.topCursor === null) {
+        throw new Error(
+          'useLogStream: Cannot fetch previous entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        );
+      }
 
-    if (!state.hasMoreBefore) {
-      return;
-    }
+      if (!state.hasMoreBefore && !params?.force) {
+        return;
+      }
 
-    fetchLogEntriesBefore(state.topCursor, LOG_ENTRIES_CHUNK_SIZE);
-  }, [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]);
+      fetchLogEntriesBefore(state.topCursor, {
+        size: LOG_ENTRIES_CHUNK_SIZE,
+        extendTo: params?.extendTo,
+      });
+    },
+    [fetchLogEntriesBefore, state.topCursor, state.hasMoreBefore]
+  );
 
   const {
     fetchLogEntriesAfter,
@@ -174,19 +182,25 @@ export function useLogStream({
     },
   });
 
-  const fetchNextEntries = useCallback(() => {
-    if (state.bottomCursor === null) {
-      throw new Error(
-        'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
-      );
-    }
+  const fetchNextEntries = useCallback<FetchPageCallback>(
+    (params) => {
+      if (state.bottomCursor === null) {
+        throw new Error(
+          'useLogStream: Cannot fetch next entries. No cursor is set.\nEnsure you have called `fetchEntries` at least once.'
+        );
+      }
 
-    if (!state.hasMoreAfter) {
-      return;
-    }
+      if (!state.hasMoreAfter && !params?.force) {
+        return;
+      }
 
-    fetchLogEntriesAfter(state.bottomCursor, LOG_ENTRIES_CHUNK_SIZE);
-  }, [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]);
+      fetchLogEntriesAfter(state.bottomCursor, {
+        size: LOG_ENTRIES_CHUNK_SIZE,
+        extendTo: params?.extendTo,
+      });
+    },
+    [fetchLogEntriesAfter, state.bottomCursor, state.hasMoreAfter]
+  );
 
   const fetchEntries = useCallback(() => {
     setState(INITIAL_STATE);
@@ -194,7 +208,7 @@ export function useLogStream({
     if (center) {
       fetchLogEntriesAround(center, LOG_ENTRIES_CHUNK_SIZE);
     } else {
-      fetchLogEntriesBefore('last', LOG_ENTRIES_CHUNK_SIZE);
+      fetchLogEntriesBefore('last', { size: LOG_ENTRIES_CHUNK_SIZE });
     }
   }, [center, fetchLogEntriesAround, fetchLogEntriesBefore, setState]);
 
