@@ -26,10 +26,11 @@ export interface BoostObject {
 
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
-  search_fields: {
-    [key: string]: {
+  search_fields: Record<
+    string,
+    {
       weight: number;
-    };
-  };
+    }
+  >;
   result_fields?: object;
 }

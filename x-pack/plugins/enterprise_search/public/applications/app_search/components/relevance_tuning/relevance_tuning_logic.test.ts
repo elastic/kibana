@@ -305,7 +305,11 @@ describe('RelevanceTuningLogic', () => {
                 },
               ],
             },
-            search_fields: {},
+            search_fields: {
+              foo: {
+                weight: 1,
+              },
+            },
           },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
@@ -324,7 +328,8 @@ describe('RelevanceTuningLogic', () => {
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings_search',
           {
-            body: '{"boosts":{"foo":[{"type":"value","factor":5}]}}',
+            body:
+              '{"boosts":{"foo":[{"type":"value","factor":5}]},"search_fields":{"foo":{"weight":1}}}',
             query: {
               query: 'foo',
             },
@@ -336,6 +341,10 @@ describe('RelevanceTuningLogic', () => {
       it("won't send boosts or search_fields on the API call if there are none", async () => {
         mount({
           query: 'foo',
+          searchSettings: {
+            searchField: {},
+            boosts: {},
+          },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
         http.post.mockReturnValueOnce(
@@ -948,7 +957,7 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
-      it('will add two empty boost valus if none exist yet', () => {
+      it('will add two empty boost values if none exist yet', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -964,6 +973,27 @@ describe('RelevanceTuningLogic', () => {
             factor: 1,
             type: 'functional',
             value: ['', ''],
+          })
+        );
+      });
+
+      it('will still work if the boost index is out of range', () => {
+        mount({
+          searchSettings: searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            value: ['a', ''],
+          }),
+        });
+        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
+
+        RelevanceTuningLogic.actions.addBoostValue('foo', 10);
+
+        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
+          searchSettingsWithBoost({
+            factor: 1,
+            type: 'functional',
+            value: ['a', ''],
           })
         );
       });
