@@ -76,6 +76,7 @@ async function getCompatibleAnomaliesJobIds(
 export async function getMetricsHostsAnomalies(
   context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
+  anomalyThreshold: string,
   startTime: number,
   endTime: number,
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
@@ -108,6 +109,7 @@ export async function getMetricsHostsAnomalies(
       timing: { spans: fetchLogEntryAnomaliesSpans },
     } = await fetchMetricsHostsAnomalies(
       context.infra.mlSystem,
+      anomalyThreshold,
       jobIds,
       startTime,
       endTime,
@@ -162,6 +164,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricsHostsAnomalies(
   mlSystem: MlSystem,
+  anomalyThreshold: string,
   jobIds: string[],
   startTime: number,
   endTime: number,
@@ -178,7 +181,14 @@ async function fetchMetricsHostsAnomalies(
 
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination),
+      createMetricsHostsAnomaliesQuery(
+        jobIds,
+        anomalyThreshold,
+        startTime,
+        endTime,
+        sort,
+        expandedPagination
+      ),
       jobIds
     )
   );

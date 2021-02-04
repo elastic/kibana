@@ -138,6 +138,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime,
   startTime,
   sourceId,
+  anomalyThreshold,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetMetricsHostsAnomaliesDatasetsError,
@@ -146,6 +147,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
+  anomalyThreshold: string;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
@@ -182,6 +184,7 @@ export const useMetricsHostsAnomaliesResults = ({
         return await callGetMetricHostsAnomaliesAPI(
           {
             sourceId,
+            anomalyThreshold,
             startTime: queryStartTime,
             endTime: queryEndTime,
             metric,
@@ -215,6 +218,7 @@ export const useMetricsHostsAnomaliesResults = ({
     },
     [
       sourceId,
+      anomalyThreshold,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -296,6 +300,7 @@ export const useMetricsHostsAnomaliesResults = ({
 
 interface RequestArgs {
   sourceId: string;
+  anomalyThreshold: string;
   startTime: number;
   endTime: number;
   metric: Metric;
@@ -307,13 +312,14 @@ export const callGetMetricHostsAnomaliesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { sourceId, startTime, endTime, metric, sort, pagination } = requestArgs;
+  const { sourceId, anomalyThreshold, startTime, endTime, metric, sort, pagination } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getMetricsHostsAnomaliesRequestPayloadRT.encode({
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: {
             startTime,
             endTime,

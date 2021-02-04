@@ -27,6 +27,7 @@ const sortToMlFieldMap = {
 
 export const createMetricsK8sAnomaliesQuery = (
   jobIds: string[],
+  anomalyThreshold: string,
   startTime: number,
   endTime: number,
   sort: Sort,
@@ -37,7 +38,7 @@ export const createMetricsK8sAnomaliesQuery = (
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(50),
+    ...createAnomalyScoreFilter(+anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
