@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo, useEffect } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { LogEntry } from '../../../../common/log_entry';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -14,7 +15,6 @@ import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
-import { LogEntriesState } from '../../../containers/logs/log_entries';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
@@ -29,6 +29,11 @@ import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { LogsToolbar } from './page_toolbar';
 import { PageViewLogInContext } from './page_view_log_in_context';
+import { useLogStreamContext } from '../../../containers/logs/log_stream';
+import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
+
+// FIXME Duplicated from <LogStream />. See where to put this
+const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { sourceConfiguration, sourceId } = useLogSourceContext();
@@ -42,16 +47,69 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     logEntryId: flyoutLogEntryId,
   } = useLogEntryFlyoutContext();
 
-  const [logEntriesState, logEntriesCallbacks] = useContext(LogEntriesState.Context);
+  const {
+    startTimestamp,
+    endTimestamp,
+    isStreaming,
+    targetPosition,
+    visibleMidpointTime,
+    visibleTimeInterval,
+    reportVisiblePositions,
+    jumpToTargetPosition,
+    startLiveStreaming,
+    stopLiveStreaming,
+    startDateExpression,
+    endDateExpression,
+    updateDateRange,
+  } = useContext(LogPositionState.Context);
+  const { applyLogFilterQuery } = useContext(LogFilterState.Context);
+
   const {
     isReloading,
     entries,
-    hasMoreAfterEnd,
-    hasMoreBeforeStart,
+    topCursor,
+    bottomCursor,
+    hasMoreAfter: hasMoreAfterEnd,
+    hasMoreBefore: hasMoreBeforeStart,
     isLoadingMore,
     lastLoadedTime,
-  } = logEntriesState;
-  const { checkForNewEntries } = logEntriesCallbacks;
+    fetchEntries,
+    fetchPreviousEntries,
+    fetchNextEntries,
+  } = useLogStreamContext();
+
+  const prevStartTimestamp = usePrevious(startTimestamp);
+  const prevEndTimestamp = usePrevious(endTimestamp);
+
+  // Refetch entries if...
+  useEffect(() => {
+    const isFirstLoad = !prevStartTimestamp || !prevEndTimestamp;
+
+    const newDateRangeDoesNotOverlap =
+      (prevStartTimestamp != null &&
+        startTimestamp != null &&
+        prevStartTimestamp < startTimestamp) ||
+      (prevEndTimestamp != null && endTimestamp != null && prevEndTimestamp > endTimestamp);
+
+    const isCenterPointOutsideLoadedRange =
+      targetPosition != null &&
+      ((topCursor != null && targetPosition.time < topCursor.time) ||
+        (bottomCursor != null && targetPosition.time > bottomCursor.time));
+
+    if (isFirstLoad || newDateRangeDoesNotOverlap || isCenterPointOutsideLoadedRange) {
+      fetchEntries();
+    }
+  }, [
+    fetchEntries,
+    prevStartTimestamp,
+    prevEndTimestamp,
+    startTimestamp,
+    endTimestamp,
+    targetPosition,
+    topCursor,
+    bottomCursor,
+  ]);
+
   const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
     LogHighlightsState.Context
   );
@@ -67,22 +125,50 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     [entries, isReloading, logEntryHighlightsById]
   );
 
-  const { applyLogFilterQuery } = useContext(LogFilterState.Context);
-  const {
-    isStreaming,
-    targetPosition,
-    visibleMidpointTime,
-    visibleTimeInterval,
-    reportVisiblePositions,
-    jumpToTargetPosition,
-    startLiveStreaming,
-    stopLiveStreaming,
-    startDateExpression,
-    endDateExpression,
-    updateDateRange,
-  } = useContext(LogPositionState.Context);
-
   const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
+
+  const handleDateRangeExtension = useCallback(
+    (newDateRange) => {
+      updateDateRange(newDateRange);
+
+      if (
+        'startDateExpression' in newDateRange &&
+        isValidDatemath(newDateRange.startDateExpression)
+      ) {
+        fetchPreviousEntries({
+          force: true,
+          extendTo: datemathToEpochMillis(newDateRange.startDateExpression)!,
+        });
+      }
+      if ('endDateExpression' in newDateRange && isValidDatemath(newDateRange.endDateExpression)) {
+        fetchNextEntries({
+          force: true,
+          extendTo: datemathToEpochMillis(newDateRange.endDateExpression)!,
+        });
+      }
+    },
+    [updateDateRange, fetchPreviousEntries, fetchNextEntries]
+  );
+
+  const handlePagination = useCallback(
+    (params) => {
+      reportVisiblePositions(params);
+      if (!params.fromScroll) {
+        return;
+      }
+
+      if (isLoadingMore) {
+        return;
+      }
+
+      if (params.pagesBeforeStart < PAGE_THRESHOLD) {
+        fetchPreviousEntries();
+      } else if (params.pagesAfterEnd < PAGE_THRESHOLD) {
+        fetchNextEntries();
+      }
+    },
+    [reportVisiblePositions, isLoadingMore, fetchPreviousEntries, fetchNextEntries]
+  );
 
   const setFilter = useCallback(
     (filter, flyoutItemId, timeKey) => {
@@ -123,8 +209,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           items={items}
           jumpToTarget={jumpToTargetPosition}
           lastLoadedTime={lastLoadedTime}
-          reloadItems={checkForNewEntries}
-          reportVisibleInterval={reportVisiblePositions}
+          reloadItems={fetchEntries}
+          reportVisibleInterval={handlePagination}
           scale={textScale}
           target={targetPosition}
           wrap={textWrap}
@@ -134,7 +220,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           currentHighlightKey={currentHighlightKey}
           startDateExpression={startDateExpression}
           endDateExpression={endDateExpression}
-          updateDateRange={updateDateRange}
+          updateDateRange={handleDateRangeExtension}
           startLiveStreaming={startLiveStreaming}
         />
 
