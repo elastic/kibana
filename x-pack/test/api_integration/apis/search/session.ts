@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -44,8 +45,27 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
       });
 
-      it('should fail to cancel an unknown session', async () => {
+      it('should fail to delete an unknown session', async () => {
         await supertest.delete(`/internal/session/123`).set('kbn-xsrf', 'foo').expect(404);
+      });
+
+      it('should create and delete a session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertest.delete(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
+
+        await supertest.get(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(404);
       });
 
       it('should create and cancel a session', async () => {
@@ -62,7 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        await supertest.delete(`/internal/session/${sessionId}`).set('kbn-xsrf', 'foo').expect(200);
+        await supertest
+          .post(`/internal/session/${sessionId}/cancel`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)

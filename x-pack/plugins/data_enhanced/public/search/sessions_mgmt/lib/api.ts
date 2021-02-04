@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,10 +21,9 @@ type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
 function getActions(status: SearchSessionStatus) {
   const actions: ACTION[] = [];
-  actions.push(ACTION.RELOAD);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
-    actions.push(ACTION.CANCEL);
+    actions.push(ACTION.DELETE);
   }
   return actions;
 }
@@ -161,8 +161,8 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.canceled', {
-          defaultMessage: 'The search session was canceled and expired.',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deleted', {
+          defaultMessage: 'The search session was deleted.',
         }),
       });
     } catch (err) {
@@ -170,8 +170,8 @@ export class SearchSessionsMgmtAPI {
       console.error(err);
 
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
-          defaultMessage: 'Failed to cancel the search session!',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
+          defaultMessage: 'Failed to delete the search session!',
         }),
       });
     }
