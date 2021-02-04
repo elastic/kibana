@@ -15,7 +15,6 @@ export const buildTimelineDetailsQuery = (
   allowNoIndices: true,
   index: indexName,
   ignoreUnavailable: true,
-  includeUnmapped: true,
   body: {
     docvalue_fields: docValueFields,
     query: {
@@ -23,8 +22,6 @@ export const buildTimelineDetailsQuery = (
         _id: [id],
       },
     },
-    fields: ['*'],
-    _source: ['signal.*'],
   },
   size: 1,
 });
