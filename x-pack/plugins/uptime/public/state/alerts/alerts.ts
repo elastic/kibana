@@ -59,11 +59,8 @@ interface AsyncLoadingPayload {
   monitorName?: string;
 }
 
-const ASYNC_REQUEST_PENDING = 'ASYNC_REQUEST_PENDING';
-const ASYNC_REQUEST_RESOLVED = 'ASYNC_REQUEST_RESOLVED';
-
-const createAsyncLoadingAction = createAction<AsyncLoadingPayload>(ASYNC_REQUEST_PENDING);
-const resolveAsyncLoadingAction = createAction<AsyncLoadingPayload>(ASYNC_REQUEST_RESOLVED);
+const createAsyncLoadingAction = createAction<AsyncLoadingPayload>('ASYNC_REQUEST_PENDING');
+const resolveAsyncLoadingAction = createAction<AsyncLoadingPayload>('ASYNC_REQUEST_RESOLVED');
 
 export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
@@ -93,24 +90,16 @@ export const alertsReducer = handleActions<AlertState>(
     ...handleAsyncAction<AlertState>('anomalyAlert', getAnomalyAlertAction),
     ...handleAsyncAction<AlertState>('alertDeletion', deleteAlertAction),
     ...handleAsyncAction<AlertState>('anomalyAlertDeletion', deleteAnomalyAlertAction),
-    [String(createAsyncLoadingAction)]: (state: any, action: any) => {
-      const { pendingAlertRequests } = state;
-      const nextPendingAR = [...pendingAlertRequests, action.payload];
-      return {
-        ...state,
-        pendingAlertRequests: nextPendingAR,
-      };
-    },
-    [String(resolveAsyncLoadingAction)]: (state: any, action: any) => {
-      const { pendingAlertRequests } = state;
-      const nextPendingAlertRequests = pendingAlertRequests.filter(
-        (req: AsyncLoadingPayload) => req.monitorId !== action.payload.monitorId
-      );
-      return {
-        ...state,
-        pendingAlertRequests: nextPendingAlertRequests,
-      };
-    },
+    [String(createAsyncLoadingAction)]: (state: any, action: any) => ({
+      ...state,
+      pendingAlertRequests: [...state.pendingAlertRequests, action.payload],
+    }),
+    [String(resolveAsyncLoadingAction)]: (state: any, action: any) => ({
+      ...state,
+      pendingAlertRequests: state.pendingAlertRequests.filter(
+        (req: any) => req.monitorId !== action.payload.monitorId
+      ),
+    }),
   },
   initialState
 );

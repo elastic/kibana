@@ -29,8 +29,6 @@ interface Props {
 }
 
 export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
-  // const [isLoading, setIsLoading] = useState(false);
-
   const { settings } = useSelector(selectDynamicSettings);
 
   const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
