@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { WaterfallChart } from './waterfall_chart';
-import {
-  renderLegendItem,
-  renderSidebarItem,
-} from '../../step_detail/waterfall/waterfall_chart_wrapper';
+import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wrapper';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
@@ -28,7 +25,7 @@ describe('waterfall', () => {
             barStyleAccessor={(datum) => {
               return datum.datum.config.colour;
             }}
-            renderSidebarItem={renderSidebarItem}
+            renderSidebarItem={undefined}
             renderLegendItem={renderLegendItem}
             fullHeight={true}
           />

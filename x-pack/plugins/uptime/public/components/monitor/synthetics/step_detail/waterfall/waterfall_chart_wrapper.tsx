@@ -4,49 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiHealth } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
-import {
-  WaterfallProvider,
-  WaterfallChart,
-  MiddleTruncatedText,
-  RenderItem,
-} from '../../waterfall';
+import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
-import { SideBarItemHighlighter } from '../../waterfall/components/styles';
-
-export const renderSidebarItem: RenderItem<SidebarItem> = (item) => {
-  const { status, offsetIndex } = item;
-
-  const isErrorStatusCode = (statusCode: number) => {
-    const is400 = statusCode >= 400 && statusCode <= 499;
-    const is500 = statusCode >= 500 && statusCode <= 599;
-    const isSpecific300 = statusCode === 301 || statusCode === 307 || statusCode === 308;
-    return is400 || is500 || isSpecific300;
-  };
-
-  return (
-    <SideBarItemHighlighter
-      isHighlighted={item.isHighlighted}
-      data-test-subj={item.isHighlighted ? 'sideBarHighlightedItem' : 'sideBarDimmedItem'}
-    >
-      {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${offsetIndex}. ${item.url}`} />
-      ) : (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <MiddleTruncatedText text={`${offsetIndex}. ${item.url}`} />
-          </EuiFlexItem>
-          <EuiFlexItem component="span" grow={false}>
-            <EuiBadge color="danger">{status}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </SideBarItemHighlighter>
-  );
-};
+import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
@@ -64,6 +28,8 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   const [networkData] = useState<NetworkItems>(data);
 
+  const hasFilters = activeFilters.length > 0;
+
   const { series, domain, totalHighlightedRequests } = useMemo(() => {
     return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
@@ -74,7 +40,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   const legendItems = getLegendItems();
 
-  const renderFilter = () => {
+  const renderFilter = useCallback(() => {
     return (
       <WaterfallFilter
         query={query}
@@ -85,7 +51,19 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         setOnlyHighlighted={setOnlyHighlighted}
       />
     );
-  };
+  }, [activeFilters, setActiveFilters, onlyHighlighted, setOnlyHighlighted, query, setQuery]);
+
+  const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
+    (item) => {
+      return (
+        <WaterfallSidebarItem
+          item={item}
+          renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
+        />
+      );
+    },
+    [hasFilters, onlyHighlighted]
+  );
 
   return (
     <WaterfallProvider

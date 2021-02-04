@@ -12,3 +12,24 @@ export const FILTER_REQUESTS_LABEL = i18n.translate(
     defaultMessage: 'Filter network requests',
   }
 );
+
+export const FILTER_SCREENREADER_LABEL = i18n.translate(
+  'xpack.uptime.synthetics.waterfall.filterGroup.filterScreenreaderLabel',
+  {
+    defaultMessage: 'Filter by',
+  }
+);
+
+export const FILTER_REMOVE_SCREENREADER_LABEL = i18n.translate(
+  'xpack.uptime.synthetics.waterfall.filterGroup.removeFilterScreenReaderLabel',
+  {
+    defaultMessage: 'Remove filter by',
+  }
+);
+
+export const SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL = i18n.translate(
+  'xpack.uptime.synthetics.waterfall.sidebar.filterMatchesScreenReaderLabel',
+  {
+    defaultMessage: 'Resource matches filter',
+  }
+);

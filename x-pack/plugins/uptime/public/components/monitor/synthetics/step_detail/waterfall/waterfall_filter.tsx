@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
+import {
+  FILTER_REQUESTS_LABEL,
+  FILTER_SCREENREADER_LABEL,
+  FILTER_REMOVE_SCREENREADER_LABEL,
+} from '../../waterfall/components/translations';
 import { MimeType } from './types';
 import { OPEN_FILTERS_POPOVER } from '../../translations';
 import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
@@ -146,6 +150,11 @@ export const WaterfallFilter = ({
                 onClick={() => toggleFilters(mimeType)}
                 key={label}
                 withNext={true}
+                aria-label={`${
+                  activeFilters.includes(mimeType)
+                    ? FILTER_REMOVE_SCREENREADER_LABEL
+                    : FILTER_SCREENREADER_LABEL
+                } ${label}`}
               >
                 {label}
               </EuiFilterButton>

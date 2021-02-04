@@ -24,15 +24,21 @@ describe('getChunks', () => {
 });
 
 describe('Component', () => {
-  it('renders truncated text', () => {
-    const { getByText } = render(<MiddleTruncatedText text={longString} />);
+  it('renders truncated text and aria label', () => {
+    const { getByText, getByLabelText } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} />
+    );
 
     expect(getByText(first)).toBeInTheDocument();
     expect(getByText(last)).toBeInTheDocument();
+
+    expect(getByLabelText(longString)).toBeInTheDocument();
   });
 
   it('renders screen reader only text', () => {
-    const { getByTestId } = render(<MiddleTruncatedText text={longString} />);
+    const { getByTestId } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} />
+    );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
 
