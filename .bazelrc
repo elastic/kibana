@@ -8,3 +8,10 @@ import %workspace%/.bazelrc.common
 # build --incompatible_remote_results_ignore_disk=true
 # build --remote_accept_cached=true
 # build --remote_upload_local_results=false
+
+# BuildBuddy
+## Metadata settings
+# Enable this in case you want to share your build info
+# build --build_metadata=VISIBILITY=PUBLIC
+build --build_metadata=TEST_GROUPS=//packages
+
