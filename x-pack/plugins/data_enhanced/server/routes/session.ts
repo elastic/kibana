@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -122,6 +123,29 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
   router.delete(
     {
       path: '/internal/session/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
+        await context.search!.deleteSession(id);
+
+        return res.ok();
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/cancel',
       validate: {
         params: schema.object({
           id: schema.string(),
