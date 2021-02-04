@@ -34,6 +34,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 
 type Func = () => Promise<void>;
 
@@ -157,6 +158,7 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
+      <NeedAdminForUpdateRulesCallOut />
       <ReadOnlyRulesCallOut />
       <ValueListsModal
         showModal={showValueListsModal}

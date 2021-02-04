@@ -52,6 +52,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -192,6 +193,7 @@ const DetectionEnginePageComponent = () => {
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       <ReadOnlyAlertsCallOut />
+      <NeedAdminForUpdateRulesCallOut />
       {indicesExist ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />

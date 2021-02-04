@@ -7,3 +7,4 @@
 export * from './callout_switcher';
 export * from './callout_types';
 export * from './callout';
+export * from './callout_persistent_switcher';

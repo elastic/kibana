@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type CallOutType = 'primary' | 'success' | 'warning' | 'danger';
+import { EuiCallOutProps } from '@elastic/eui';
+
+export type CallOutType = NonNullable<EuiCallOutProps['color']>;
 
 export interface CallOutMessage {
   type: CallOutType;

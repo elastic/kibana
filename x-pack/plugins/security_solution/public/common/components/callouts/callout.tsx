@@ -8,7 +8,6 @@ import React, { FC, memo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { CallOutType, CallOutMessage } from './callout_types';
-import { CallOutDescription } from './callout_description';
 import { CallOutDismissButton } from './callout_dismiss_button';
 
 export interface CallOutProps {
@@ -16,6 +15,7 @@ export interface CallOutProps {
   iconType?: string;
   dismissButtonText?: string;
   onDismiss?: (message: CallOutMessage) => void;
+  showDismissButton?: boolean;
 }
 
 const CallOutComponent: FC<CallOutProps> = ({
@@ -23,8 +23,9 @@ const CallOutComponent: FC<CallOutProps> = ({
   iconType,
   dismissButtonText,
   onDismiss,
+  showDismissButton = true,
 }) => {
-  const { type, id, title } = message;
+  const { type, id, title, description } = message;
   const finalIconType = iconType ?? getDefaultIconType(type);
 
   return (
@@ -35,8 +36,10 @@ const CallOutComponent: FC<CallOutProps> = ({
       data-test-subj={`callout-${id}`}
       data-test-messages={`[${id}]`}
     >
-      <CallOutDescription messages={message} />
-      <CallOutDismissButton message={message} text={dismissButtonText} onClick={onDismiss} />
+      {description}
+      {showDismissButton && (
+        <CallOutDismissButton message={message} text={dismissButtonText} onClick={onDismiss} />
+      )}
     </EuiCallOut>
   );
 };
@@ -51,8 +54,6 @@ const getDefaultIconType = (type: CallOutType): string => {
       return 'help';
     case 'danger':
       return 'alert';
-    default:
-      return '';
   }
 };
 

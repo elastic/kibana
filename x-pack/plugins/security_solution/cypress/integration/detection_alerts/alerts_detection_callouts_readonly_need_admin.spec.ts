@@ -34,7 +34,7 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-describe('Detections > Callouts indicating read-only access to resources', () => {
+describe('Detections > Need Admin Callouts indicating an admin is needed to migrate the alert data set', () => {
   const ALERTS_CALLOUT = 'read-only-access-to-alerts';
   const RULES_CALLOUT = 'read-only-access-to-rules';
   const NEED_ADMIN_FOR_UPDATE_CALLOUT = 'need-admin-for-update-rules';
@@ -50,22 +50,32 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
     login(ROLES.reader);
   });
 
+  beforeEach(() => {
+    // Index mapping is forced to return true as being outdated so that we get the
+    // need admin callouts being shown.
+    cy.intercept('GET', '/api/detection_engine/index', {
+      index_mapping_outdated: true,
+      name: '.siem-signals-default',
+    });
+  });
+
   context('On Detections home page', () => {
     beforeEach(() => {
       loadPageAsReadOnlyUser(DETECTIONS_URL);
     });
 
-    it('We show one primary callout', () => {
+    it('We show the alerts and admin primary callout', () => {
       waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
     });
 
     context('When a user clicks Dismiss on the callout', () => {
-      it('We hide it and persist the dismissal', () => {
+      it('We hide it and persist the dismissal but still show the admin callout', () => {
         waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
         dismissCallOut(ALERTS_CALLOUT);
         reloadPage();
         getCallOut(ALERTS_CALLOUT).should('not.exist');
+        waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       });
     });
   });
@@ -75,9 +85,9 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
       loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
     });
 
-    it('We show one primary callout', () => {
+    it('We show two primary callouts of the alert and the admin', () => {
       waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
     });
 
     context('When a user clicks Dismiss on the callout', () => {
@@ -86,6 +96,7 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
         dismissCallOut(RULES_CALLOUT);
         reloadPage();
         getCallOut(RULES_CALLOUT).should('not.exist');
+        waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       });
     });
   });
@@ -102,31 +113,30 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
       deleteCustomRule();
     });
 
-    it('We show two primary callouts', () => {
+    it('We show three primary callouts', () => {
       waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
       waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
     });
 
     context('When a user clicks Dismiss on the callouts', () => {
       it('We hide them and persist the dismissal', () => {
         waitForCallOutToBeShown(ALERTS_CALLOUT, 'primary');
         waitForCallOutToBeShown(RULES_CALLOUT, 'primary');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+        waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
 
         dismissCallOut(ALERTS_CALLOUT);
         reloadPage();
 
         getCallOut(ALERTS_CALLOUT).should('not.exist');
         getCallOut(RULES_CALLOUT).should('be.visible');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
 
         dismissCallOut(RULES_CALLOUT);
         reloadPage();
 
         getCallOut(ALERTS_CALLOUT).should('not.exist');
         getCallOut(RULES_CALLOUT).should('not.exist');
-        getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
+        waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       });
     });
   });
