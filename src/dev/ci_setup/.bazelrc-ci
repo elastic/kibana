@@ -13,5 +13,4 @@ build --remote_cache=grpcs://cloud.buildbuddy.io
 build --remote_timeout=3600
 
 ## Metadata settings
-build --workspace_status_command=$(pwd)/src/dev/workspace_status.sh
 build --build_metadata=ROLE=CI
