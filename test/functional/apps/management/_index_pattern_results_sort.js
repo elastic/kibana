@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       {
         heading: 'Type',
         first: '',
-        last: 'string',
+        last: 'text',
         selector: async function () {
           const tableRow = await PageObjects.settings.getTableRow(0, 1);
           return await tableRow.getVisibleText();

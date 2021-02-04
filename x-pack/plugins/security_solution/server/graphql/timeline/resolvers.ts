@@ -7,6 +7,7 @@
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { Timeline } from '../../lib/timeline/saved_object';
+import { TimelineType } from '../../../common/types/timeline';
 
 export type QueryTimelineResolver = AppResolverOf<QueryResolvers.GetOneTimelineResolver>;
 
@@ -63,7 +64,13 @@ export const createTimelineResolvers = (
       return true;
     },
     async persistFavorite(root, args, { req }) {
-      return libs.timeline.persistFavorite(req, args.timelineId || null);
+      return libs.timeline.persistFavorite(
+        req,
+        args.timelineId || null,
+        args.templateTimelineId || null,
+        args.templateTimelineVersion || null,
+        args.timelineType || TimelineType.default
+      );
     },
     async persistTimeline(root, args, { req }) {
       return libs.timeline.persistTimeline(

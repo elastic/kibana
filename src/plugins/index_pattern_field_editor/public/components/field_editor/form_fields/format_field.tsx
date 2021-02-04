@@ -53,9 +53,9 @@ export const FormatField = ({
               fieldAttrs={{
                 name,
                 type: castEsToKbnFieldTypeName(typeValue || 'keyword'),
-                esTypes:
-                  // (isArray(field?.type) ? field?.type : ([field?.type] as ES_FIELD_TYPES[])) ||
-                  typeValue ? ([typeValue] as ES_FIELD_TYPES[]) : (['keyword'] as ES_FIELD_TYPES[]),
+                esTypes: typeValue
+                  ? ([typeValue] as ES_FIELD_TYPES[])
+                  : (['keyword'] as ES_FIELD_TYPES[]),
               }}
               indexPattern={indexPattern}
               fieldFormatEditors={fieldFormatEditors}

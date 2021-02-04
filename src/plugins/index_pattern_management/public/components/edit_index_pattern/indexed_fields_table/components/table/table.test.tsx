@@ -23,6 +23,7 @@ const items: IndexedFieldItem[] = [
     searchable: true,
     info: [],
     type: 'name',
+    kbnType: 'string',
     excluded: false,
     format: '',
   },
@@ -30,6 +31,7 @@ const items: IndexedFieldItem[] = [
     name: 'timestamp',
     displayName: 'timestamp',
     type: 'date',
+    kbnType: 'date',
     info: [],
     excluded: false,
     format: 'YYYY-MM-DD',
@@ -37,7 +39,8 @@ const items: IndexedFieldItem[] = [
   {
     name: 'conflictingField',
     displayName: 'conflictingField',
-    type: 'conflict',
+    type: 'text, long',
+    kbnType: 'conflict',
     info: [],
     excluded: false,
     format: '',
@@ -94,7 +97,7 @@ describe('Table', () => {
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
-    const tableCell = shallow(component.prop('columns')[1].render('string'));
+    const tableCell = shallow(component.prop('columns')[1].render('string', {}));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -103,7 +106,9 @@ describe('Table', () => {
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
-    const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
+    const tableCell = shallow(
+      component.prop('columns')[1].render('conflict', { kbnType: 'conflict' })
+    );
     expect(tableCell).toMatchSnapshot();
   });
 

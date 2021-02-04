@@ -7,7 +7,15 @@
  */
 
 import { IndexPatternFieldEditorPlugin } from './plugin';
-export type Start = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['start']>>;
+
+export type Start = jest.Mocked<
+  Omit<ReturnType<IndexPatternFieldEditorPlugin['start']>, 'DeleteRuntimeFieldProvider'>
+> & {
+  DeleteRuntimeFieldProvider: ReturnType<
+    IndexPatternFieldEditorPlugin['start']
+  >['DeleteRuntimeFieldProvider'];
+};
+
 export type Setup = jest.Mocked<ReturnType<IndexPatternFieldEditorPlugin['setup']>>;
 
 const createSetupContract = (): Setup => {
@@ -28,6 +36,7 @@ const createStartContract = (): Start => {
     userPermissions: {
       editIndexPattern: jest.fn(),
     },
+    DeleteRuntimeFieldProvider: ({ children }) => children(jest.fn()) as JSX.Element,
   };
 };
 

@@ -61,6 +61,7 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             type: field.esTypes?.join(', ') || '',
+            kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,

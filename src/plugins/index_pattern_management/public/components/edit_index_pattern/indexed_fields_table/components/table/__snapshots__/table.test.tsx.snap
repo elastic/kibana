@@ -101,6 +101,7 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "",
         "info": Array [],
+        "kbnType": "string",
         "name": "Elastic",
         "searchable": true,
         "type": "name",
@@ -110,6 +111,7 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "YYYY-MM-DD",
         "info": Array [],
+        "kbnType": "date",
         "name": "timestamp",
         "type": "date",
       },
@@ -118,8 +120,9 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "",
         "info": Array [],
+        "kbnType": "conflict",
         "name": "conflictingField",
-        "type": "conflict",
+        "type": "text, long",
       },
     ]
   }
