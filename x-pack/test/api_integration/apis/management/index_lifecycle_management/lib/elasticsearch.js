@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getRandomString } from './random';
 
 /**
@@ -10,7 +12,10 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = (es) => {
+export const initElasticsearchHelpers = (getService) => {
+  const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   let indicesCreated = [];
   let templatesCreated = [];
   let composableTemplatesCreated = [];
@@ -24,13 +29,10 @@ export const initElasticsearchHelpers = (es) => {
     return es.indices.create({ index }).then(() => index);
   };
 
-  const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter((i) => i !== index);
-    return es.indices.delete({ index });
+  const deleteAllIndices = async () => {
+    await esDeleteAllIndices(indicesCreated);
+    indicesCreated = [];
   };
-
-  const deleteAllIndices = () =>
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
   // Data streams
   const createDataStream = (dataStream = getRandomString(), document) => {
@@ -102,7 +104,6 @@ export const initElasticsearchHelpers = (es) => {
     getIndex,
     createIndex,
     createDataStream,
-    deleteIndex,
     deleteAllIndices,
     deleteAllTemplates,
     getIndexTemplates,
