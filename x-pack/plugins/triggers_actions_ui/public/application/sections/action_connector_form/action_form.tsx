@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
@@ -318,6 +319,7 @@ export const ActionForm = ({
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
                 emptyActionsIds={emptyActionsIds}
+                connectors={connectors}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
                     (_item: AlertAction, i: number) => i !== index
@@ -339,6 +341,9 @@ export const ActionForm = ({
                       .filter((idx: number) => idx >= 0),
                   });
                   setAddModalVisibility(true);
+                }}
+                onSelectConnector={(connectorId: string) => {
+                  setActionIdByIndex(connectorId, index);
                 }}
               />
             );
