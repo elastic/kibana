@@ -52,7 +52,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
   });
 
   beforeEach(() => {
-    // Index mapping is forced to return true as being outdated so that we get the
+    // Index mapping outdated is forced to return true as being outdated so that we get the
     // need admin callouts being shown.
     cy.intercept('GET', '/api/detection_engine/index', {
       index_mapping_outdated: true,
