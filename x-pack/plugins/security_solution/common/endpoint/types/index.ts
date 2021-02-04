@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApplicationStart } from 'kibana/public';
@@ -430,13 +431,8 @@ export type HostInfo = Immutable<{
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
 
-export type HostMetadataDetails = Immutable<{
-  agent: {
-    id: string;
-  };
-  HostDetails: HostMetadata;
-}>;
-
+// HostMetadataDetails is now just HostMetadata
+// HostDetails is also just HostMetadata
 export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
