@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ThresholdVisualization } from './visualization';
-import { IndexThresholdAlertParams } from './types';
 import { DataPublicPluginStart } from 'src/plugins/data/public/types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
@@ -17,8 +16,6 @@ import { uiSettingsServiceMock } from 'src/core/public/mocks';
 import {
   builtInAggregationTypes,
   builtInComparators,
-  getTimeUnitLabel,
-  TIME_UNITS,
 } from '../../../../triggers_actions_ui/public';
 import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -54,22 +51,19 @@ describe('ThresholdVisualization', () => {
     });
   });
 
-  function getAlertParams(overrides = {}) {
-    return {
-      index: 'test-index',
-      aggType: 'count',
-      thresholdComparator: '>',
-      threshold: [0],
-      timeWindowSize: 15,
-      timeWindowUnit: 's',
-      ...overrides,
-    };
-  }
+  const alertParams = {
+    index: 'test-index',
+    aggType: 'count',
+    thresholdComparator: '>',
+    threshold: [0],
+    timeWindowSize: 15,
+    timeWindowUnit: 's',
+  };
 
-  async function setup(alertParams: IndexThresholdAlertParams) {
+  async function setup() {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={getAlertParams()}
+        alertParams={alertParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -91,7 +85,7 @@ describe('ThresholdVisualization', () => {
 
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={getAlertParams()}
+        alertParams={alertParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -120,7 +114,7 @@ describe('ThresholdVisualization', () => {
   test('renders loading message on initial load', async () => {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={getAlertParams()}
+        alertParams={alertParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
