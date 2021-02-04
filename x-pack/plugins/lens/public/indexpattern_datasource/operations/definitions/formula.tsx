@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { groupBy, isObject } from 'lodash';
@@ -194,7 +196,7 @@ export const formulaOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern, operationDefinitionMap) => {
     // Basic idea: if it has any math operation in it, probably it cannot be transferable
     const ast = parse(column.params.formula || '');
-    return !hasMathNode(ast, operationDefinitionMap);
+    return !hasMathNode(ast);
   },
 
   paramEditor: function ParamEditor({
@@ -323,7 +325,7 @@ function addASTValidation(
     }
 
     const errors: string[] = [];
-    const { namedArguments, variables, functions } = groupArgsByType(node.args);
+    const { namedArguments, functions } = groupArgsByType(node.args);
     const [firstArg] = node?.args || [];
 
     if (nodeOperation.input === 'field') {
@@ -472,6 +474,9 @@ function extractColumns(
 
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
+      if (!isMathNode(node)) {
+        throw Error('missing operation');
+      }
       // it's a regular math node
       const consumedArgs = node.args.map(parseNode).filter(Boolean) as Array<
         number | TinymathVariable
@@ -494,7 +499,7 @@ function extractColumns(
           throw Error('field as first argument not found');
         }
       } else {
-        if (node?.args[0]) {
+        if (firstArg) {
           throw Error('field as first argument not valid');
         }
       }
@@ -530,7 +535,7 @@ function extractColumns(
     }
 
     if (nodeOperation.input === 'fullReference') {
-      if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg, operations)) {
+      if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg)) {
         throw Error('first argument not valid for full reference');
       }
       const [referencedOp] = functions;
@@ -575,6 +580,12 @@ function extractColumns(
   }
   const root = parseNode(ast);
   const variables = findVariables(root);
+  const hasMissingVariables = variables.some(
+    (variable) => !indexPattern.getFieldByName(variable) || !layer.columns[variable]
+  );
+  if (hasMissingVariables) {
+    throw Error('missing variable');
+  }
   const mathColumn = mathOperation.buildColumn({
     layer,
     indexPattern,

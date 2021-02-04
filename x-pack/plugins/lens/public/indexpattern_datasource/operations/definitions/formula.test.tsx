@@ -1,16 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 // import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 // import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-// import { FormulaIndexPatternColumn } from './formula';
-import { formulaOperation, GenericOperationDefinition } from './index';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
+import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from './index';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
+
+jest.mock('../layer_helpers', () => {
+  return {
+    getColumnOrder: ({ columns }: { columns: Record<string, IndexPatternColumn> }) =>
+      Object.keys(columns),
+  };
+});
 
 // const defaultProps = {
 //   storage: {} as IStorageWrapper,
@@ -33,7 +41,7 @@ describe('formula', () => {
   beforeEach(() => {
     layer = {
       indexPatternId: '1',
-      columnOrder: ['col1', 'col2'],
+      columnOrder: ['col1'],
       columns: {
         col1: {
           label: 'Top value of category',
@@ -49,6 +57,134 @@ describe('formula', () => {
         },
       },
     };
+  });
+
+  describe('regenerateLayerFromAst()', () => {
+    let indexPattern: IndexPattern;
+    let operationDefinitionMap: Record<string, GenericOperationDefinition>;
+    let currentColumn: FormulaIndexPatternColumn;
+
+    function testIsBrokenFormula(formula: string) {
+      expect(
+        regenerateLayerFromAst(
+          formula,
+          layer,
+          'col1',
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula,
+              isFormulaBroken: true,
+            },
+          },
+        },
+      });
+    }
+
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+      operationDefinitionMap = {
+        avg: { input: 'field' } as GenericOperationDefinition,
+        count: { input: 'field' } as GenericOperationDefinition,
+        derivative: { input: 'fullReference' } as GenericOperationDefinition,
+        moving_average: {
+          input: 'fullReference',
+          operationParams: [{ name: 'window', type: 'number', required: true }],
+        } as GenericOperationDefinition,
+      };
+      currentColumn = {
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: { formula: '', isFormulaBroken: false },
+        references: [],
+      };
+    });
+
+    it('returns no change but error if the formula cannot be parsed', () => {
+      const formulas = [
+        '+',
+        'avg((',
+        'avg((bytes)',
+        'avg(bytes) +',
+        'avg(""',
+        'moving_average(avg(bytes), window=)',
+      ];
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula);
+      }
+    });
+
+    it('returns no change but error if field is used with no Lens wrapping operation', () => {
+      testIsBrokenFormula('bytes');
+    });
+
+    it('returns no change but error if at least one field in the formula is missing', () => {
+      const formulas = ['noField', 'avg(noField)', 'noField + 1', 'derivative(avg(noField))'];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula);
+      }
+    });
+
+    it('returns no change but error if at least one operation in the formula is missing', () => {
+      const formulas = [
+        'noFn()',
+        'noFn(bytes)',
+        'avg(bytes) + noFn()',
+        'derivative(noFn())',
+        'noFn() + noFnTwo()',
+        'noFn(noFnTwo())',
+      ];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula);
+      }
+    });
+
+    it('returns no change but error if one operation has the wrong first argument', () => {
+      const formulas = [
+        'avg(7)',
+        'avg()',
+        'avg(avg(bytes))',
+        'avg(1 + 2)',
+        'avg(bytes + 5)',
+        'avg(bytes + bytes)',
+        'derivative(7)',
+        'derivative(7 + 1)',
+        'derivative(bytes + 7)',
+        'derivative(bytes + bytes)',
+        'derivative(bytes + avg(bytes))',
+      ];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula);
+      }
+    });
+
+    it('returns no change by error if an argument is passed to count operation', () => {
+      const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula);
+      }
+    });
+
+    it('returns no change but error if a required parameter is not passed to the operation in formula', () => {
+      const formula = 'moving_average(avg(bytes))';
+      testIsBrokenFormula(formula);
+    });
   });
 
   describe('getErrorMessage', () => {
