@@ -40,14 +40,9 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const {
-    canAccessDashboards,
-    canCreateNewDashboards,
-    canEditDashboards,
-  } = capabilities.useService();
+  const { canAccessDashboards } = capabilities.useService();
 
-  const disableDashboardOptions =
-    !canAccessDashboards() || (!canCreateNewDashboards && !canEditDashboards);
+  const disableDashboardOptions = !canAccessDashboards();
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'

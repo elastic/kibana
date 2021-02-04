@@ -171,6 +171,7 @@ export class VisualizePlugin
           savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,

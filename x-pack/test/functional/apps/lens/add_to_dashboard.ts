@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('lens add-to-dashboards tests', () => {
     it('should allow new lens vizs be added to a new dashboard', async () => {
@@ -141,6 +143,109 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
+    });
+
+    describe('Capabilities', function capabilitiesTests() {
+      describe('dashboard no-access privileges', () => {
+        before(async () => {
+          await security.testUser.setRoles(['test_logstash_reader', 'global_visualize_all'], true);
+        });
+
+        after(async () => {
+          await security.testUser.restoreDefaults();
+        });
+
+        it('should not display dashboard flow prompt', async () => {
+          await PageObjects.common.navigateToApp('visualize');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.visualize.gotoLandingPage();
+
+          const hasPrompt = await testSubjects.exists('visualize-dashboard-flow-prompt');
+          expect(hasPrompt).to.eql(false);
+        });
+
+        it('should not display add-to-dashboard options', async () => {
+          await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.clickVisType('lens');
+          await PageObjects.lens.goToTimeRange();
+
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'avg',
+            field: 'bytes',
+          });
+
+          await PageObjects.lens.switchToVisualization('lnsMetric');
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.click('lnsApp_saveButton');
+
+          const hasOptions = await testSubjects.exists('add-to-dashboard-options');
+          expect(hasOptions).to.eql(false);
+        });
+      });
+
+      describe('dashboard read-only privileges', () => {
+        before(async () => {
+          await security.testUser.setRoles(
+            ['test_logstash_reader', 'global_visualize_all', 'global_dashboard_read'],
+            true
+          );
+        });
+
+        after(async () => {
+          await security.testUser.restoreDefaults();
+        });
+
+        it('should not display dashboard flow prompt', async () => {
+          await PageObjects.common.navigateToApp('visualize');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.visualize.gotoLandingPage();
+
+          const hasPrompt = await testSubjects.exists('visualize-dashboard-flow-prompt');
+          expect(hasPrompt).to.eql(false);
+        });
+
+        it('should only display "Existing" add-to-dashboard option', async () => {
+          await PageObjects.visualize.navigateToNewVisualization();
+          await PageObjects.visualize.clickVisType('lens');
+          await PageObjects.lens.goToTimeRange();
+
+          await PageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'avg',
+            field: 'bytes',
+          });
+
+          await PageObjects.lens.switchToVisualization('lnsMetric');
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.click('lnsApp_saveButton');
+
+          const hasOptions = await testSubjects.exists('add-to-dashboard-options');
+          expect(hasOptions).to.eql(true);
+
+          const hasCreateNewOption = await find.existsByCssSelector(
+            'input[id="new-dashboard-option"]'
+          );
+          const hasExistingOption = await find.existsByCssSelector(
+            'input[id="existing-dashboard-option"]'
+          );
+          const hasAddToLibraryOption = await find.existsByCssSelector(
+            'input[id="add-to-library-option"]'
+          );
+
+          expect(hasCreateNewOption).to.eql(false);
+          expect(hasExistingOption).to.eql(true);
+          expect(hasAddToLibraryOption).to.eql(true);
+        });
+      });
     });
   });
 }

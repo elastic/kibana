@@ -30,6 +30,7 @@ export const VisualizeListing = () => {
       application,
       chrome,
       dashboard,
+      dashboardCapabilities,
       history,
       savedVisualizations,
       toastNotifications,
@@ -148,6 +149,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <>
       <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
         defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{
@@ -172,11 +174,13 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
-        <div className="visListingCallout">
-          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-        </div>
-      )}
+      {dashboardCapabilities.show &&
+        dashboardCapabilities.createNew &&
+        dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+          <div className="visListingCallout">
+            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+          </div>
+        )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them

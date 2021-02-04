@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
+
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
