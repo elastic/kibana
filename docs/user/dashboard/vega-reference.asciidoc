@@ -251,12 +251,13 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       "longitude": -74,   // default 0
       "zoom": 7,          // default 2
 
-      // Use "mapStyle" to configure a base map layer for your vega map. 
-      // Can be set to one of the following:
-      // - set to false to disable base layer;
-      // - set "mapStyle" to any Elastic Maps Service (EMS) tile layer id. 
-      //   May either be: "road_map", "road_map_desaturated", "dark_map".  
+      // Defaults to 'true', disables the base map layer.
       "mapStyle": false,
+
+      // When 'mapStyle' is 'undefined' or 'true', sets the EMS-layer for the map.
+      // May either be: "road_map", "road_map_desaturated", "dark_map".
+      // If 'emsTileServiceId' is 'undefined', it falls back to the auto-switch-dark-light behavior.
+      "emsTileServiceId": "road_map",
 
       // default 0
       "minZoom": 5,
@@ -265,7 +266,7 @@ experimental[] To enable *Maps*, the graph must specify `type=map` in the host c
       // or 25 when base is disabled
       "maxZoom": 13,
 
-      // defaults to true, shows +/- buttons to zoom in/out
+      // Defaults to 'true', shows +/- buttons to zoom in/out
       "zoomControl": false,
 
       // Defaults to 'false', disables mouse wheel zoom. If set to

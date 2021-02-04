@@ -284,7 +284,27 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
+        zoomControl: true,
+        scrollWheelZoom: false,
+      },
+      0
+    )
+  );
+
+  test(
+    'emsTileServiceId',
+    check(
+      {
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
+      },
+      {
+        delayRepaint: true,
+        latitude: 0,
+        longitude: 0,
+        mapStyle: true,
+        emsTileServiceId: 'dark_map',
         zoomControl: true,
         scrollWheelZoom: false,
       },
@@ -299,7 +319,7 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],
@@ -308,7 +328,7 @@ describe('VegaParser._parseMapConfig', () => {
         delayRepaint: true,
         latitude: 0,
         longitude: 0,
-        mapStyle: 'default',
+        mapStyle: true,
         zoomControl: true,
         scrollWheelZoom: false,
         maxBounds: [1, 2, 3, 4],

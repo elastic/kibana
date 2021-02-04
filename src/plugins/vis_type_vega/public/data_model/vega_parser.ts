@@ -464,8 +464,11 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     validate(`minZoom`, true);
     validate(`maxZoom`, true);
 
-    // `false` is a valid value
-    res.mapStyle = this._config?.mapStyle === undefined ? `default` : this._config.mapStyle;
+    this._parseBool('mapStyle', res, true);
+
+    if (res.mapStyle) {
+      res.emsTileServiceId = this._config?.emsTileServiceId;
+    }
 
     this._parseBool('zoomControl', res, true);
     this._parseBool('scrollWheelZoom', res, false);

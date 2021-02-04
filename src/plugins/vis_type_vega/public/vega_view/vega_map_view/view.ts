@@ -57,9 +57,11 @@ export class VegaMapView extends VegaBaseView {
   private mapStyle = this.getMapStyle();
 
   private getMapStyle() {
-    const { mapStyle } = this._parser.mapConfig;
+    const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
 
-    return mapStyle === 'default' ? this.mapServiceSettings.defaultTmsLayer() : mapStyle;
+    if (mapStyle) {
+      return emsTileServiceId ?? this.mapServiceSettings.defaultTmsLayer();
+    }
   }
 
   private get shouldShowZoomControl() {
