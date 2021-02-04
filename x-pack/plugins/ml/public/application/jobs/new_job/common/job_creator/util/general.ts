@@ -236,11 +236,7 @@ function stashJobForCloning(
 ) {
   mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
   mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
-  if (jobCreator.createdBy === null) {
-    mlJobService.tempJobCloningObjects.createdBy = undefined;
-  } else {
-    mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy;
-  }
+  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy ?? undefined;
 
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
