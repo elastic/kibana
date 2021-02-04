@@ -242,11 +242,11 @@ warning is shown if any jobs are missing their saved objects.
 
 [float]
 [[index-data-visualizer-design]]
-=== Index data visualizer has new design
+=== Index Data Visualizer has new design
 
-The {ml} data visualizer provides a view into your indices to give a better 
+The {ml-cap} Data Visualizer provides a view into your indices to give a better 
 understanding of the fields in the data set prior to creating {anomaly-detect} 
-or {dfanalytics-jobs}. The data visualizer went through a major redesign and the 
+or {dfanalytics-jobs}. The Data Visualizer went through a major redesign and the 
 previous card based display is switched to a table. It has the benefit of a more 
 compact layout, a new document count chart, and expanded rows for viewing 
 details on individual fields.
