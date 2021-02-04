@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
@@ -12,31 +13,31 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { TableText } from '../';
 import { OnActionComplete } from './types';
 
-interface CancelButtonProps {
+interface DeleteButtonProps {
   id: string;
   name: string;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
 }
 
-const CancelConfirm = ({
-  onConfirmDismiss,
+const DeleteConfirm = ({
+  onConfirmCancel,
   ...props
-}: CancelButtonProps & { onConfirmDismiss: () => void }) => {
+}: DeleteButtonProps & { onConfirmCancel: () => void }) => {
   const { id, name, api, onActionComplete } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const title = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.title', {
-    defaultMessage: 'Cancel search session',
+    defaultMessage: 'Delete search session',
   });
-  const confirm = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.cancelButton', {
+  const confirm = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.deleteButton', {
+    defaultMessage: 'Delete',
+  });
+  const cancel = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.cancelButton', {
     defaultMessage: 'Cancel',
   });
-  const cancel = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.dontCancelButton', {
-    defaultMessage: 'Dismiss',
-  });
   const message = i18n.translate('xpack.data.mgmt.searchSessions.cancelModal.message', {
-    defaultMessage: `Canceling the search session \'{name}\' will expire any cached results, so that quick restore will no longer be available. You will still be able to re-run it, using the reload action.`,
+    defaultMessage: `Deleting the search session \'{name}\' deletes all cached results.`,
     values: {
       name,
     },
@@ -46,7 +47,7 @@ const CancelConfirm = ({
     <EuiOverlayMask>
       <EuiConfirmModal
         title={title}
-        onCancel={onConfirmDismiss}
+        onCancel={onConfirmCancel}
         onConfirm={async () => {
           setIsLoading(true);
           await api.sendCancel(id);
@@ -64,14 +65,14 @@ const CancelConfirm = ({
   );
 };
 
-export const CancelButton = (props: CancelButtonProps) => {
+export const DeleteButton = (props: DeleteButtonProps) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const onClick = () => {
     setShowConfirm(true);
   };
 
-  const onConfirmDismiss = () => {
+  const onConfirmCancel = () => {
     setShowConfirm(false);
   };
 
@@ -79,11 +80,11 @@ export const CancelButton = (props: CancelButtonProps) => {
     <>
       <TableText onClick={onClick}>
         <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.actionCancel"
-          defaultMessage="Cancel"
+          id="xpack.data.mgmt.searchSessions.actionDelete"
+          defaultMessage="Delete"
         />
       </TableText>
-      {showConfirm ? <CancelConfirm {...props} onConfirmDismiss={onConfirmDismiss} /> : null}
+      {showConfirm ? <DeleteConfirm {...props} onConfirmCancel={onConfirmCancel} /> : null}
     </>
   );
 };
