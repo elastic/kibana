@@ -5117,7 +5117,6 @@
     "xpack.apm.localFilters.titles.serviceName": "服务名称",
     "xpack.apm.localFilters.titles.serviceVersion": "服务版本",
     "xpack.apm.localFilters.titles.transactionResult": "事务结果",
-    "xpack.apm.localFilters.titles.transactionType": "事务类型",
     "xpack.apm.localFilters.titles.transactionUrl": "URL",
     "xpack.apm.localFiltersTitle": "筛选",
     "xpack.apm.metadataTable.section.agentLabel": "代理",
