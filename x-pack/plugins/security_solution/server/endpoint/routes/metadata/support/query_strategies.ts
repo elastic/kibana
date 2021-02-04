@@ -10,11 +10,7 @@ import {
   metadataCurrentIndexPattern,
   metadataIndexPattern,
 } from '../../../../../common/endpoint/constants';
-import {
-  HostMetadata,
-  HostMetadataDetails,
-  MetadataQueryStrategyVersions,
-} from '../../../../../common/endpoint/types';
+import { HostMetadata, MetadataQueryStrategyVersions } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult, MetadataQueryStrategy } from '../../../types';
 
 interface HitSource {
@@ -24,15 +20,6 @@ interface HitSource {
 export function metadataQueryStrategyV1(): MetadataQueryStrategy {
   return {
     index: metadataIndexPattern,
-    elasticAgentIdProperty: 'elastic.agent.id',
-    hostIdProperty: 'agent.id',
-    sortProperty: [
-      {
-        'event.created': {
-          order: 'desc',
-        },
-      },
-    ],
     extraBodyProperties: {
       collapse: {
         field: 'agent.id',
@@ -51,7 +38,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
       },
     },
     queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+      searchResponse: SearchResponse<HostMetadata>
     ): HostListQueryResult => {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
@@ -63,9 +50,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
       };
     },
-    queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostQueryResult => {
+    queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>): HostQueryResult => {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
         resultLength: response.hits.hits.length,
@@ -79,42 +64,46 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
 export function metadataQueryStrategyV2(): MetadataQueryStrategy {
   return {
     index: metadataCurrentIndexPattern,
-    elasticAgentIdProperty: 'HostDetails.elastic.agent.id',
-    hostIdProperty: 'HostDetails.agent.id',
-    sortProperty: [
-      {
-        'HostDetails.event.created': {
-          order: 'desc',
-        },
-      },
-    ],
     extraBodyProperties: {
       track_total_hits: true,
     },
     queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+      searchResponse: SearchResponse<HostMetadata | { HostDetails: HostMetadata }>
     ): HostListQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
+      const response = searchResponse as SearchResponse<
+        HostMetadata | { HostDetails: HostMetadata }
+      >;
+      const list =
+        response.hits.hits.length > 0
+          ? response.hits.hits.map((entry) => stripHostDetails(entry._source))
+          : [];
+
       return {
         resultLength:
           ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
-        resultList:
-          response.hits.hits.length > 0
-            ? response.hits.hits.map((entry) => entry._source.HostDetails)
-            : [],
+        resultList: list,
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
     queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+      searchResponse: SearchResponse<HostMetadata | { HostDetails: HostMetadata }>
     ): HostQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
+      const response = searchResponse as SearchResponse<
+        HostMetadata | { HostDetails: HostMetadata }
+      >;
       return {
         resultLength: response.hits.hits.length,
         result:
-          response.hits.hits.length > 0 ? response.hits.hits[0]._source.HostDetails : undefined,
+          response.hits.hits.length > 0
+            ? stripHostDetails(response.hits.hits[0]._source)
+            : undefined,
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
   };
+}
+
+// remove the top-level 'HostDetails' property if found, from previous schemas
+function stripHostDetails(host: HostMetadata | { HostDetails: HostMetadata }): HostMetadata {
+  return 'HostDetails' in host ? host.HostDetails : host;
 }

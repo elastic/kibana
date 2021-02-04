@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         retry.tryForTime(10000, async () => {
           testSubjects.existOrFail('dashboardLandingPage');
         });
+        await searchSessions.markTourDone();
       });
 
       after(async () => {
