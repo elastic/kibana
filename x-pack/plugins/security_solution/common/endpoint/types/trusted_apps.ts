@@ -41,6 +41,8 @@ export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
 
+export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
+
 export interface GetTrustedAppsSummaryResponse {
   total: number;
   windows: number;

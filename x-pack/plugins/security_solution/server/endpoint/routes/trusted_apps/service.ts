@@ -15,6 +15,7 @@ import {
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -79,6 +80,14 @@ export const createTrustedApp = async (
   );
 
   return { data: exceptionListItemToTrustedApp(createdTrustedAppExceptionItem) };
+};
+
+export const updateTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string,
+  newTrustedApp: PostTrustedAppCreateRequest
+): Promise<PutTrustedAppUpdateResponse> => {
+  //
 };
 
 export const getTrustedAppsSummary = async (
