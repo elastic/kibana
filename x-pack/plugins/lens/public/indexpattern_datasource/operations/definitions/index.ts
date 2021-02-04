@@ -35,8 +35,12 @@ import {
   MovingAverageIndexPatternColumn,
 } from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
-import { mathOperation, MathIndexPatternColumn } from './math';
-import { formulaOperation, FormulaIndexPatternColumn } from './formula';
+import {
+  mathOperation,
+  MathIndexPatternColumn,
+  formulaOperation,
+  FormulaIndexPatternColumn,
+} from './formula';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';

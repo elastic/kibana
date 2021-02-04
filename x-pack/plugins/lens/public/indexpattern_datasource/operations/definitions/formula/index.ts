@@ -6,3 +6,4 @@
  */
 
 export { formulaOperation, FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
+export { mathOperation, MathIndexPatternColumn } from './math';

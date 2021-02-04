@@ -7,9 +7,9 @@
 
 import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { isObject } from 'lodash';
-import { OperationDefinition, GenericOperationDefinition } from './index';
-import { ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPattern } from '../../types';
+import { OperationDefinition, GenericOperationDefinition } from '../index';
+import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPattern } from '../../../types';
 
 const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
 

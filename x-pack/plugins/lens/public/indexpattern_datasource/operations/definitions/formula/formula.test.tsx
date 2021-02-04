@@ -9,9 +9,9 @@
 // import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 // import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
-import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import { formulaOperation, FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
+import { GenericOperationDefinition, IndexPatternColumn } from '../index';
+import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 
 jest.mock('../../layer_helpers', () => {
   return {
@@ -33,6 +33,27 @@ jest.mock('../../layer_helpers', () => {
 //   } as IndexPattern,
 //   operationDefinitionMap: { avg: {} },
 // };
+
+const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
+  avg: ({
+    input: 'field',
+    buildColumn: ({ field }: { field: IndexPatternField }) => ({
+      label: 'avg',
+      dataType: 'number',
+      operationType: 'avg',
+      sourceField: field.name,
+      isBucketed: false,
+      scale: 'ratio',
+      timeScale: false,
+    }),
+  } as unknown) as GenericOperationDefinition,
+  count: { input: 'field' } as GenericOperationDefinition,
+  derivative: { input: 'fullReference' } as GenericOperationDefinition,
+  moving_average: {
+    input: 'fullReference',
+    operationParams: [{ name: 'window', type: 'number', required: true }],
+  } as GenericOperationDefinition,
+};
 
 describe('formula', () => {
   let layer: IndexPatternLayer;
@@ -61,7 +82,6 @@ describe('formula', () => {
 
   describe('regenerateLayerFromAst()', () => {
     let indexPattern: IndexPattern;
-    let operationDefinitionMap: Record<string, GenericOperationDefinition>;
     let currentColumn: FormulaIndexPatternColumn;
 
     function testIsBrokenFormula(formula: string) {
@@ -92,15 +112,6 @@ describe('formula', () => {
 
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
-      operationDefinitionMap = {
-        avg: { input: 'field' } as GenericOperationDefinition,
-        count: { input: 'field' } as GenericOperationDefinition,
-        derivative: { input: 'fullReference' } as GenericOperationDefinition,
-        moving_average: {
-          input: 'fullReference',
-          operationParams: [{ name: 'window', type: 'number', required: true }],
-        } as GenericOperationDefinition,
-      };
       currentColumn = {
         label: 'Formula',
         dataType: 'number',
@@ -110,6 +121,56 @@ describe('formula', () => {
         params: { formula: '', isFormulaBroken: false },
         references: [],
       };
+    });
+
+    it('should mutate the layer with new columns for valid formula expressions', () => {
+      expect(
+        regenerateLayerFromAst(
+          'avg(bytes)',
+          layer,
+          'col1',
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual({
+        ...layer,
+        columnOrder: ['col1X0', 'col1X1', 'col1'],
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...currentColumn,
+            references: ['col1X1'],
+            params: {
+              ...currentColumn.params,
+              formula: 'avg(bytes)',
+              isFormulaBroken: false,
+            },
+          },
+          col1X0: {
+            customLabel: true,
+            dataType: 'number',
+            isBucketed: false,
+            label: 'col1X0',
+            operationType: 'avg',
+            scale: 'ratio',
+            sourceField: 'bytes',
+            timeScale: false,
+          },
+          col1X1: {
+            customLabel: true,
+            dataType: 'number',
+            isBucketed: false,
+            label: 'col1X1',
+            operationType: 'math',
+            params: {
+              tinymathAst: 'col1X0',
+            },
+            references: ['col1X0'],
+            scale: 'ratio',
+          },
+        },
+      });
     });
 
     it('returns no change but error if the formula cannot be parsed', () => {
@@ -185,11 +246,15 @@ describe('formula', () => {
       const formula = 'moving_average(avg(bytes))';
       testIsBrokenFormula(formula);
     });
+
+    it('returns no change but error if a required parameter passed with the wrong type in formula', () => {
+      const formula = 'moving_average(avg(bytes), window="m")';
+      testIsBrokenFormula(formula);
+    });
   });
 
   describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
-    let operationDefinitionMap: Record<string, GenericOperationDefinition>;
 
     function getNewLayerWithFormula(formula: string, isBroken = true): IndexPatternLayer {
       return {
@@ -210,15 +275,6 @@ describe('formula', () => {
     }
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
-      operationDefinitionMap = {
-        avg: { input: 'field' } as GenericOperationDefinition,
-        count: { input: 'field' } as GenericOperationDefinition,
-        derivative: { input: 'fullReference' } as GenericOperationDefinition,
-        moving_average: {
-          input: 'fullReference',
-          operationParams: [{ name: 'window', type: 'number', required: true }],
-        } as GenericOperationDefinition,
-      };
     });
 
     it('returns undefined if count is passed without arguments', () => {
@@ -458,6 +514,19 @@ describe('formula', () => {
           operationDefinitionMap
         )
       ).toEqual(['The operation avg does not accept any parameter']);
+    });
+
+    it('returns an error if the parameter passed to an operation is of the wrong type', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('moving_average(avg(bytes), window="m")'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        'The parameters for the operation moving_average in the Formula are of the wrong type: window',
+      ]);
     });
   });
 });
