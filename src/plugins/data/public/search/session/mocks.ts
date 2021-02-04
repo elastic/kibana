@@ -17,6 +17,7 @@ export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
     create: jest.fn(),
     find: jest.fn(),
     update: jest.fn(),
+    extend: jest.fn(),
     delete: jest.fn(),
   };
 }

@@ -25,7 +25,7 @@ describe('datasource saga', () => {
           get: jest.fn(() =>
             Promise.resolve({
               title: 'test-pattern',
-              getNonScriptedFields: () => [{ name: 'field1', type: 'string' }],
+              getNonScriptedFields: () => [{ name: 'field1', type: 'string', isMapped: true }],
             } as IndexPattern)
           ),
         },

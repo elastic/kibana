@@ -40,6 +40,11 @@ export interface IKbnUrlStateStorage extends IStateStorage {
   change$: <State = unknown>(key: string) => Observable<State | null>;
 
   /**
+   * Cancels any pending url updates
+   */
+  cancel: () => void;
+
+  /**
    * Lower level wrapper around history library that handles batching multiple URL updates into one history change
    */
   kbnUrlControls: IKbnUrlControls;
@@ -108,6 +113,9 @@ export const createKbnUrlStateStorage = (
         }),
         share()
       ),
+    cancel() {
+      url.cancel();
+    },
     kbnUrlControls: url,
   };
 };

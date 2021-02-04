@@ -30,6 +30,7 @@ export interface DashboardSavedObject extends SavedObject {
   searchSource: ISearchSource;
   getQuery(): Query;
   getFilters(): Filter[];
+  getFullEditPath: (editMode?: boolean) => string;
 }
 
 // Used only by the savedDashboards service, usually no reason to change this
@@ -106,7 +107,7 @@ export function createSavedDashboardClass(
           refreshInterval: undefined,
         },
       });
-      this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(String(this.id))}`;
+      this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(this.id)}`;
     }
 
     getQuery() {
@@ -116,6 +117,10 @@ export function createSavedDashboardClass(
     getFilters() {
       return this.searchSource!.getOwnField('filter') || [];
     }
+
+    getFullEditPath = (editMode?: boolean) => {
+      return `/app/dashboards#${createDashboardEditUrl(this.id, editMode)}`;
+    };
   }
 
   // Unfortunately this throws a typescript error without the casting.  I think it's due to the

@@ -12,18 +12,35 @@ import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { appContextService } from '../../services';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
+function _joinFilters(filters: Array<string | undefined | KueryNode>) {
+  return filters
+    .filter((filter) => filter !== undefined)
+    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
+      | KueryNode
+      | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const kueryNode: KueryNode =
+        typeof kuery === 'string'
+          ? esKuery.fromKueryExpression(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery))
+          : kuery;
 
-    return `(${filter})`;
-  }, undefined);
+      if (!acc) {
+        return kueryNode;
+      }
+
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, kueryNode],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
 export async function listAgents(
@@ -46,19 +63,18 @@ export async function listAgents(
     showInactive = false,
     showUpgradeable,
   } = options;
-  const filters = [];
+  const filters: Array<string | KueryNode | undefined> = [];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-
   let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters),
+    filter: _joinFilters(filters) || '',
     sortField,
     sortOrder,
     page,
@@ -94,7 +110,7 @@ export async function listAllAgents(
   const filters = [];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {

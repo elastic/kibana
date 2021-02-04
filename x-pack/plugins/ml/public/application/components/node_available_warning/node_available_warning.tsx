@@ -41,7 +41,7 @@ export const NodeAvailableWarning: FC = () => {
             defaultMessage="You will not be able to create or run jobs."
           />
         </div>
-        {isCloud && id !== null && (
+        {isCloud() && id !== null && (
           <div>
             <FormattedMessage
               id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
