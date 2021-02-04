@@ -235,6 +235,7 @@ function stashCombinedJob(
 ) {
   mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
   mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
+  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy;
 
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;

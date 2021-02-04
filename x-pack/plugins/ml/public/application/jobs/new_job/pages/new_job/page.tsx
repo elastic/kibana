@@ -89,6 +89,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
     mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = null;
 
     if (
       mlJobService.tempJobCloningObjects.start !== undefined &&
