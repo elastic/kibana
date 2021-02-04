@@ -80,6 +80,7 @@ export function Discover({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  unmappedFieldsConfig,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
@@ -146,6 +147,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>

@@ -23,6 +23,7 @@ export interface SavedSearch {
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   lastSavedTitle?: string;
   copyOnSave?: boolean;
+  pre712?: boolean;
 }
 export interface SavedSearchLoader {
   get: (id: string) => Promise<SavedSearch>;

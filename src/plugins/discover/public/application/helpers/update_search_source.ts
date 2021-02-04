@@ -23,12 +23,14 @@ export function updateSearchSource(
     sort,
     columns,
     useNewFieldsApi,
+    showUnmappedFields,
   }: {
     indexPattern: IndexPattern;
     services: DiscoverServices;
     sort: SortOrder[];
     columns: string[];
     useNewFieldsApi: boolean;
+    showUnmappedFields?: boolean;
   }
 ) {
   const { uiSettings, data } = services;
@@ -46,7 +48,11 @@ export function updateSearchSource(
     .setField('filter', data.query.filterManager.getFilters());
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', ['*']);
+    const fields: Record<string, string> = { field: '*' };
+    if (showUnmappedFields) {
+      fields.include_unmapped = 'true';
+    }
+    searchSource.setField('fields', [fields]);
   } else {
     searchSource.removeField('fields');
     const fieldNames = indexPattern.fields.map((field) => field.name);
