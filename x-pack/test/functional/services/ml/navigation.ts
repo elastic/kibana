@@ -36,6 +36,11 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToAlertsAndAction() {
+      await PageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('alertsTab');
+    },
+
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
       await retry.tryForTime(10000, async () => {
         const allTabs = await testSubjects.findAll(`~${tabTypeSubject}`, 3);

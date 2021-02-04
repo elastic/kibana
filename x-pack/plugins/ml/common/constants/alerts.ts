@@ -11,7 +11,7 @@ import { MINIMUM_FULL_LICENSE } from '../license';
 import { PLUGIN_ID } from './app';
 
 export const ML_ALERT_TYPES = {
-  ANOMALY_DETECTION: 'xpack.ml.anomaly_threshold',
+  ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
 } as const;
 
 export type MlAlertType = typeof ML_ALERT_TYPES[keyof typeof ML_ALERT_TYPES];

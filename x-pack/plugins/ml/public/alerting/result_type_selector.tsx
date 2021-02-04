@@ -84,6 +84,9 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
                   },
                   isSelected: value === selectedResultType,
                 }}
+                data-test-subj={`mlAnomalyAlertResult_${value}${
+                  value === selectedResultType ? '_selected' : ''
+                }`}
               />
             </EuiFlexItem>
           );

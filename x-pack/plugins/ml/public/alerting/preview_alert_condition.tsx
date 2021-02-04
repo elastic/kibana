@@ -164,11 +164,16 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 setLookBehindInterval(e.target.value);
               }}
               isInvalid={isInvalid}
+              data-test-subj={'mlAnomalyAlertPreviewInterval'}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={testCondition} disabled={!isReady}>
+          <EuiButton
+            onClick={testCondition}
+            disabled={!isReady}
+            data-test-subj={'mlAnomalyAlertPreviewButton'}
+          >
             <FormattedMessage id="xpack.ml.previewAlert.testButtonLabel" defaultMessage="Test" />
           </EuiButton>
         </EuiFlexItem>
@@ -182,7 +187,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             title={
               <FormattedMessage
                 id="xpack.ml.previewAlert.previewMessage"
-                defaultMessage="There were {alertsCount} anomalies that satisfied the conditions of the alert in the last {interval}"
+                defaultMessage="There {alertsCount, plural, one {was} other {were}} {alertsCount, plural, one {# anomaly} other {# anomalies}} that satisfied the conditions of the alert in the last {interval}"
                 values={{
                   alertsCount: previewResponse.count,
                   interval: lookBehindInterval,
@@ -190,6 +195,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
               />
             }
             iconType="alert"
+            data-test-subj={'mlAnomalyAlertPreviewCallout'}
           >
             <ul>
               {sampleHits.map((v) => {

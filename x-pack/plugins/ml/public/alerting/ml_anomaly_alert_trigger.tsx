@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiForm } from '@elastic/eui';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -18,19 +18,26 @@ import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 
-interface Props {
+interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
-  setAlertParams: (key: string, value: any) => void;
+  setAlertParams: <T extends keyof MlAnomalyDetectionAlertParams>(
+    key: T,
+    value: MlAnomalyDetectionAlertParams[T]
+  ) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-const MlAnomalyAlertTrigger: FC<Props> = ({ alertParams, setAlertParams, setAlertProperty }) => {
+const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
+  alertParams,
+  setAlertParams,
+  setAlertProperty,
+}) => {
   const {
     services: { http },
   } = useMlKibana();
   const mlHttpService = useMemo(() => new HttpService(http), [http]);
-  const adJobsApiService = jobsApiProvider(mlHttpService);
-  const alertingApiService = alertingApiProvider(mlHttpService);
+  const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);
+  const alertingApiService = useMemo(() => alertingApiProvider(mlHttpService), [mlHttpService]);
 
   const onAlertParamChange = useCallback(
     <T extends keyof MlAnomalyDetectionAlertParams>(param: T) => (
@@ -54,7 +61,7 @@ const MlAnomalyAlertTrigger: FC<Props> = ({ alertParams, setAlertParams, setAler
   }, []);
 
   return (
-    <>
+    <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <JobSelectorControl
         jobSelection={alertParams.jobSelection}
         adJobsApiService={adJobsApiService}
@@ -72,7 +79,7 @@ const MlAnomalyAlertTrigger: FC<Props> = ({ alertParams, setAlertParams, setAler
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
 
       <EuiSpacer size="m" />
-    </>
+    </EuiForm>
   );
 };
 

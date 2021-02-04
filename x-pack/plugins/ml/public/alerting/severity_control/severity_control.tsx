@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { SEVERITY_OPTIONS } from '../../application/components/controls/select_severity/select_severity';
@@ -71,10 +72,13 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
           }}
           showLabels
           showValue
-          aria-label="An example of EuiRange with showValue prop"
+          aria-label={i18n.translate('xpack.ml.severitySelector.formControlLabel', {
+            defaultMessage: 'Select severity threshold',
+          })}
           showTicks
           ticks={toggleButtons}
           levels={levels}
+          data-test-subj={'mlAnomalyAlertScoreSelection'}
         />
       </>
     </EuiFormRow>

@@ -109,6 +109,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         options={options}
         onChange={onChange}
         fullWidth
+        data-test-subj={'mlAnomalyAlertJobSelection'}
       />
     </EuiFormRow>
   );
