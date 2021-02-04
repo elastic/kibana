@@ -1,0 +1,31 @@
+---
+id: kibDevDocsSavedObjectsIntro
+slug: /kibana-dev-docs/saved-objects-intro
+title: Saved objects
+summary: Saved objects are a key concept to understand when building a Kibana plugin.
+date: 2021-02-02
+tags: ['kibana','dev', 'contributor', 'api docs']
+---
+
+"Saved objects" are well defined, persisted entities, stored in the `.kibana` index. They are different
+from data stored in "data indices". Examples of saved objects are dashboards, lens, canvas workpads, index patterns,
+cases, ml jobs, maps, and more. Some saved object types are exposed to the user in the
+[Saved object management UI](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html), but not all.
+
+## Limitations
+
+
+
+It's very common for developers writing plugins to have saved object types they need to create.
+
+
+
+ persisted data in Kibana. There is data that an end user defines and
+manages, and there is data a developer defines and manages. Data that is defined by a 
+developer 
+
+"Saved objects" are objects stored in the `.kibana` index. 
+
+There are two kinds of data to understand when developing in Kibana. There is data that the end user
+defines and manages, and there is data a developer defines and manages. Data an end user defines is potentially
+vast. 
