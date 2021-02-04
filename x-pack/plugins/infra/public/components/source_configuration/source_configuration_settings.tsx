@@ -27,6 +27,7 @@ import { useSourceConfigurationFormState } from './source_configuration_form_sta
 import { SourceLoadingPage } from '../source_loading_page';
 import { Prompt } from '../../utils/navigation_warning_prompt';
 import { MLConfigurationPanel } from './ml_configuration_panel';
+import { useInfraMLCapabilitiesContext } from '../../containers/ml/infra_ml_capabilities';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -73,6 +74,8 @@ export const SourceConfigurationSettings = ({
     shouldAllowEdit,
     source,
   ]);
+
+  const { hasInfraMLCapabilites } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
@@ -125,14 +128,18 @@ export const SourceConfigurationSettings = ({
             />
           </EuiPanel>
           <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <MLConfigurationPanel
-              isLoading={isLoading}
-              readOnly={!isWriteable}
-              anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
-            />
-          </EuiPanel>
-          <EuiSpacer />
+          {hasInfraMLCapabilites && (
+            <>
+              <EuiPanel paddingSize="l">
+                <MLConfigurationPanel
+                  isLoading={isLoading}
+                  readOnly={!isWriteable}
+                  anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
+                />
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
           {errors.length > 0 ? (
             <>
               <EuiCallOut color="danger">
