@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import copy from 'cpy';
@@ -20,13 +20,14 @@ import {
 } from '../utils/package_json';
 import {
   buildProjectGraph,
+  getNonBazelProjectsOnly,
   getProjects,
   includeTransitiveProjects,
   topologicallyBatchProjects,
 } from '../utils/projects';
 import { Project } from '..';
 
-export async function buildProductionProjects({
+export async function buildNonBazelProductionProjects({
   kibanaRoot,
   buildRoot,
   onlyOSS,
@@ -35,12 +36,12 @@ export async function buildProductionProjects({
   buildRoot: string;
   onlyOSS?: boolean;
 }) {
-  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
+  const projects = await getNonBazelProjectsOnly(await getProductionProjects(kibanaRoot, onlyOSS));
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
   const projectNames = [...projects.values()].map((project) => project.name);
-  log.info(`Preparing production build for [${projectNames.join(', ')}]`);
+  log.info(`Preparing non Bazel production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {
@@ -58,7 +59,7 @@ export async function buildProductionProjects({
  * we only include Kibana's transitive _production_ dependencies. If onlyOSS
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
-async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
+export async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
   const projectsSubset = [projects.get('kibana')!];
@@ -93,7 +94,7 @@ async function deleteTarget(project: Project) {
   }
 }
 
-async function buildProject(project: Project) {
+export async function buildProject(project: Project) {
   if (project.hasScript('build')) {
     await project.runScript('build');
   }
