@@ -1,0 +1,1148 @@
+{
+  "properties": {
+    "timestamp": {
+      "type": "date"
+    },
+    "cluster_uuid": {
+      "type": "keyword"
+    },
+    "cluster_name": {
+      "type": "keyword"
+    },
+    "version": {
+      "type": "keyword"
+    },
+    "collection": {
+      "type": "keyword"
+    },
+    "collectionSource": {
+      "type": "keyword"
+    },
+    "stack_stats": {
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "data_stream": {
+                "properties": {
+                  "dataset": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "package": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "shipper": {
+                "type": "keyword"
+              },
+              "pattern_name": {
+                "type": "keyword"
+              },
+              "index_count": {
+                "type": "long"
+              },
+              "ecs_index_count": {
+                "type": "long"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "size_in_bytes": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "kibana": {
+          "timelion_sheet": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "visualization": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "search": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "index_pattern": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "dashboard": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "graph_workspace": {
+            "properties": {
+              "total": {
+                "type": "long"
+              }
+            }
+          },
+          "count": {
+            "type": "short"
+          },
+          "indices": {
+            "type": "short"
+          },
+          "os": {
+            "platforms": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "platform": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
+                }
+              }
+            },
+            "platformReleases": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "platformRelease": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
+                }
+              }
+            },
+            "distros": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "distro": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
+                }
+              }
+            },
+            "distroReleases": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "distroRelease": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
+                }
+              }
+            }
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "version": {
+                "type": "keyword"
+              },
+              "count": {
+                "type": "short"
+              }
+            }
+          },
+          "plugins": {}
+        }
+      }
+    },
+    "cluster_stats": {
+      "properties": {
+        "cluster_uuid": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "indices": {
+          "properties": {
+            "shards": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "primaries": {
+                  "type": "long"
+                },
+                "replication": {
+                  "type": "long"
+                },
+                "index": {
+                  "properties": {
+                    "shards": {
+                      "properties": {
+                        "min": {
+                          "type": "long"
+                        },
+                        "max": {
+                          "type": "long"
+                        },
+                        "avg": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "primaries": {
+                      "properties": {
+                        "min": {
+                          "type": "long"
+                        },
+                        "max": {
+                          "type": "long"
+                        },
+                        "avg": {
+                          "type": "float"
+                        }
+                      }
+                    },
+                    "replication": {
+                      "properties": {
+                        "min": {
+                          "type": "long"
+                        },
+                        "max": {
+                          "type": "long"
+                        },
+                        "avg": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "completion": {
+              "properties": {
+                "size_in_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "mappings": {
+              "properties": {
+                "field_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "index_count": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "query_cache": {
+              "properties": {
+                "miss_count": {
+                  "type": "long"
+                },
+                "memory_size_in_bytes": {
+                  "type": "long"
+                },
+                "cache_size": {
+                  "type": "long"
+                },
+                "total_count": {
+                  "type": "long"
+                },
+                "evictions": {
+                  "type": "long"
+                },
+                "hit_count": {
+                  "type": "long"
+                },
+                "cache_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "docs": {
+              "properties": {
+                "deleted": {
+                  "type": "long"
+                },
+                "count": {
+                  "type": "long"
+                }
+              }
+            },
+            "fielddata": {
+              "properties": {
+                "memory_size_in_bytes": {
+                  "type": "long"
+                },
+                "evictions": {
+                  "type": "long"
+                }
+              }
+            },
+            "count": {
+              "type": "long"
+            },
+            "store": {
+              "properties": {
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "reserved_in_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "analysis": {
+              "properties": {
+                "built_in_filters": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "tokenizer_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "built_in_tokenizers": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "analyzer_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "char_filter_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "filter_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "built_in_char_filters": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "built_in_analyzers": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "index_count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "segments": {
+              "properties": {
+                "version_map_memory_in_bytes": {
+                  "type": "long"
+                },
+                "norms_memory_in_bytes": {
+                  "type": "long"
+                },
+                "file_sizes": {
+                  "properties": {}
+                },
+                "max_unsafe_auto_id_timestamp": {
+                  "type": "long"
+                },
+                "count": {
+                  "type": "long"
+                },
+                "fixed_bit_set_memory_in_bytes": {
+                  "type": "long"
+                },
+                "term_vectors_memory_in_bytes": {
+                  "type": "long"
+                },
+                "points_memory_in_bytes": {
+                  "type": "long"
+                },
+                "index_writer_memory_in_bytes": {
+                  "type": "long"
+                },
+                "memory_in_bytes": {
+                  "type": "long"
+                },
+                "terms_memory_in_bytes": {
+                  "type": "long"
+                },
+                "doc_values_memory_in_bytes": {
+                  "type": "long"
+                },
+                "stored_fields_memory_in_bytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "nodes": {
+          "properties": {
+            "jvm": {
+              "properties": {
+                "max_uptime_in_millis": {
+                  "type": "long"
+                },
+                "mem": {
+                  "properties": {
+                    "heap_max_in_bytes": {
+                      "type": "long"
+                    },
+                    "heap_used_in_bytes": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "versions": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "vm_version": {
+                        "type": "keyword"
+                      },
+                      "using_bundled_jdk": {
+                        "type": "boolean"
+                      },
+                      "bundled_jdk": {
+                        "type": "boolean"
+                      },
+                      "count": {
+                        "type": "short"
+                      },
+                      "vm_vendor": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      },
+                      "vm_name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "threads": {
+                  "type": "long"
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "open_file_descriptors": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    },
+                    "max": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "cpu": {
+                  "properties": {
+                    "percent": {
+                      "type": "short"
+                    }
+                  }
+                }
+              }
+            },
+            "os": {
+              "properties": {
+                "available_processors": {
+                  "type": "short"
+                },
+                "pretty_names": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "names": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "mem": {
+                  "properties": {
+                    "used_in_bytes": {
+                      "type": "long"
+                    },
+                    "free_percent": {
+                      "type": "short"
+                    },
+                    "total_in_bytes": {
+                      "type": "long"
+                    },
+                    "free_in_bytes": {
+                      "type": "long"
+                    },
+                    "used_percent": {
+                      "type": "short"
+                    }
+                  }
+                },
+                "allocated_processors": {
+                  "type": "short"
+                }
+              }
+            },
+            "network_types": {
+              "properties": {
+                "http_types": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "short"
+                    }
+                  }
+                },
+                "transport_types": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "short"
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            },
+            "discovery_types": {
+              "properties": {
+                "single-node": {
+                  "type": "long"
+                },
+                "zen": {
+                  "type": "long"
+                }
+              }
+            },
+            "plugins": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "DYNAMIC_KEY": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      },
+                      "elasticsearch_version": {
+                        "type": "keyword"
+                      },
+                      "java_version": {
+                        "type": "keyword"
+                      },
+                      "description": {
+                        "type": "text"
+                      },
+                      "classname": {
+                        "type": "keyword"
+                      },
+                      "extended_plugins": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      },
+                      "has_native_controller": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "count": {
+              "properties": {
+                "total": {
+                  "type": "short"
+                },
+                "transform": {
+                  "type": "short"
+                },
+                "data": {
+                  "type": "short"
+                },
+                "remote_cluster_client": {
+                  "type": "short"
+                },
+                "voting_only": {
+                  "type": "short"
+                },
+                "data_only": {
+                  "type": "short"
+                },
+                "data_content": {
+                  "type": "short"
+                },
+                "data_hot": {
+                  "type": "short"
+                },
+                "data_warm": {
+                  "type": "short"
+                },
+                "data_cold": {
+                  "type": "short"
+                },
+                "coordinating_only": {
+                  "type": "short"
+                },
+                "master": {
+                  "type": "short"
+                },
+                "ingest": {
+                  "type": "short"
+                },
+                "ml": {
+                  "type": "short"
+                },
+                "DYNAMIC_KEY": {
+                  "type": "short"
+                }
+              }
+            },
+            "packaging_types": {
+              "type": "array",
+              "items": {
+                "flavor": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "count": {
+                  "type": "short"
+                }
+              }
+            },
+            "fs": {
+              "properties": {
+                "total_in_bytes": {
+                  "type": "long"
+                },
+                "free_in_bytes": {
+                  "type": "long"
+                },
+                "available_in_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "ingest": {
+              "properties": {
+                "number_of_pipelines": {
+                  "type": "long"
+                },
+                "procesor_stats": {
+                  "properties": {
+                    "pipeline": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "geoip": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "conditional": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "gsub": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "script": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "user_agent": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "DYNAMIC_KEY": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        },
+                        "current": {
+                          "type": "long"
+                        },
+                        "time_in_millis": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "usage": {
+              "nodes": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "timestamp": {
+                      "type": "long"
+                    },
+                    "since": {
+                      "type": "long"
+                    },
+                    "node_id": {
+                      "type": "keyword"
+                    },
+                    "aggregations": {
+                      "properties": {
+                        "date_histogram": {
+                          "properties": {
+                            "date": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "terms": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "scripted_metric": {
+                          "properties": {
+                            "other": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "sum": {
+                          "properties": {
+                            "numeric": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "filters": {
+                          "properties": {
+                            "other": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "nested": {
+                          "properties": {
+                            "other": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "cardinality": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "rest_actions": {
+                      "properties": {
+                        "ilm_get_action": {
+                          "type": "long"
+                        },
+                        "nodes_usage_action": {
+                          "type": "long"
+                        },
+                        "document_update_action": {
+                          "type": "long"
+                        },
+                        "cat_action": {
+                          "type": "long"
+                        },
+                        "get_index_template_action": {
+                          "type": "long"
+                        },
+                        "remote_cluster_info_action": {
+                          "type": "long"
+                        },
+                        "nodes_info_action": {
+                          "type": "long"
+                        },
+                        "get_mapping_action": {
+                          "type": "long"
+                        },
+                        "get_indices_action": {
+                          "type": "long"
+                        },
+                        "ml_get_jobs_action": {
+                          "type": "long"
+                        },
+                        "nodes_stats_action": {
+                          "type": "long"
+                        },
+                        "delete_index_action": {
+                          "type": "long"
+                        },
+                        "update_by_query_action": {
+                          "type": "long"
+                        },
+                        "monitoring_bulk": {
+                          "type": "long"
+                        },
+                        "xpack_info_action": {
+                          "type": "long"
+                        },
+                        "async_search_submit_action": {
+                          "type": "long"
+                        },
+                        "field_capabilities_action": {
+                          "type": "long"
+                        },
+                        "async_search_get_action": {
+                          "type": "long"
+                        },
+                        "document_get_action": {
+                          "type": "long"
+                        },
+                        "delete_by_query_action": {
+                          "type": "long"
+                        },
+                        "get_license": {
+                          "type": "long"
+                        },
+                        "document_delete_action": {
+                          "type": "long"
+                        },
+                        "count_action": {
+                          "type": "long"
+                        },
+                        "main_action": {
+                          "type": "long"
+                        },
+                        "cat_templates_action": {
+                          "type": "long"
+                        },
+                        "ilm_explain_action": {
+                          "type": "long"
+                        },
+                        "ml_get_job_stats_action": {
+                          "type": "long"
+                        },
+                        "cluster_get_settings_action": {
+                          "type": "long"
+                        },
+                        "put_mapping_action": {
+                          "type": "long"
+                        },
+                        "async_search_delete_action": {
+                          "type": "long"
+                        },
+                        "xpack_usage_action": {
+                          "type": "long"
+                        },
+                        "document_index_action": {
+                          "type": "long"
+                        },
+                        "cat_indices_action": {
+                          "type": "long"
+                        },
+                        "document_create_action_auto_id": {
+                          "type": "long"
+                        },
+                        "indices_stats_action": {
+                          "type": "long"
+                        },
+                        "document_create_action": {
+                          "type": "long"
+                        },
+                        "cluster_state_action": {
+                          "type": "long"
+                        },
+                        "cluster_stats_action": {
+                          "type": "long"
+                        },
+                        "put_index_template_action": {
+                          "type": "long"
+                        },
+                        "resolve_index_action": {
+                          "type": "long"
+                        },
+                        "ccr_follower_info": {
+                          "type": "long"
+                        },
+                        "search_action": {
+                          "type": "long"
+                        },
+                        "recovery_action": {
+                          "type": "long"
+                        },
+                        "get_aliases_action": {
+                          "type": "long"
+                        },
+                        "document_mget_action": {
+                          "type": "long"
+                        },
+                        "get_rollup_index_caps": {
+                          "type": "long"
+                        },
+                        "bulk_action": {
+                          "type": "long"
+                        },
+                        "search_scroll_action": {
+                          "type": "long"
+                        },
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

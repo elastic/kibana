@@ -1,0 +1,2162 @@
+{
+  "properties": {
+    "license": {
+      "properties": {
+        "uid": {
+          "type": "keyword"
+        },
+        "issue_date": {
+          "type": "date"
+        },
+        "issue_date_in_millis": {
+          "type": "long"
+        },
+        "start_date_in_millis": {
+          "type": "long"
+        },
+        "issued_to": {
+          "type": "keyword"
+        },
+        "issuer": {
+          "type": "keyword"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "max_nodes": {
+          "type": "long"
+        }
+      }
+    },
+    "stack_stats": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "flattened": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "field_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "watcher": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "count": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "active": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "execution": {
+                  "properties": {
+                    "actions": {
+                      "properties": {
+                        "_all": {
+                          "total": {
+                            "type": "long"
+                          },
+                          "total_time_in_ms": {
+                            "type": "long"
+                          }
+                        },
+                        "slack": {
+                          "total": {
+                            "type": "long"
+                          },
+                          "total_time_in_ms": {
+                            "type": "long"
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "total": {
+                            "type": "long"
+                          },
+                          "total_time_in_ms": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "watch": {
+                  "properties": {
+                    "input": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "chain": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "search": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "condition": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "compare": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "script": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "transform": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "script": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "action": {
+                      "properties": {
+                        "condition": {
+                          "properties": {
+                            "_all": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                },
+                                "active": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "script": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                },
+                                "active": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "DYNAMIC_KEY": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                },
+                                "active": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "_all": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "email": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "index": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "logging": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "slack": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "DYNAMIC_KEY": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "active": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "trigger": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "schedule": {
+                          "properties": {
+                            "_all": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                },
+                                "active": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "total": {
+                              "type": "long"
+                            },
+                            "active": {
+                              "type": "long"
+                            },
+                            "interval": {
+                              "properties": {
+                                "total": {
+                                  "type": "long"
+                                },
+                                "active": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "eql": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "features": {
+                  "properties": {
+                    "join": {
+                      "type": "long"
+                    },
+                    "joins": {
+                      "properties": {
+                        "join_queries_two": {
+                          "type": "long"
+                        },
+                        "join_queries_three": {
+                          "type": "long"
+                        },
+                        "join_queries_four": {
+                          "type": "long"
+                        },
+                        "join_queries_five_or_more": {
+                          "type": "long"
+                        },
+                        "join_until": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "event": {
+                      "type": "long"
+                    },
+                    "keys": {
+                      "properties": {
+                        "join_keys_one": {
+                          "type": "long"
+                        },
+                        "join_keys_two": {
+                          "type": "long"
+                        },
+                        "join_keys_three": {
+                          "type": "long"
+                        },
+                        "join_keys_four": {
+                          "type": "long"
+                        },
+                        "join_keys_five_or_more": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "sequence": {
+                      "type": "long"
+                    },
+                    "sequences": {
+                      "properties": {
+                        "sequence_queries_two": {
+                          "type": "long"
+                        },
+                        "sequence_queries_three": {
+                          "type": "long"
+                        },
+                        "sequence_queries_four": {
+                          "type": "long"
+                        },
+                        "sequence_queries_five_or_more": {
+                          "type": "long"
+                        },
+                        "sequence_maxspan": {
+                          "type": "long"
+                        },
+                        "sequence_until": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "pipes": {
+                      "properties": {
+                        "pipe_head": {
+                          "type": "long"
+                        },
+                        "pipe_tail": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "queries": {
+                  "properties": {
+                    "all": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "_all": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "frozen_indices": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "indices_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "ilm": {
+              "properties": {
+                "policy_count": {
+                  "type": "long"
+                },
+                "policy_stats": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "indices_managed": {
+                        "type": "long"
+                      },
+                      "phases": {
+                        "properties": {
+                          "hot": {
+                            "properties": {
+                              "min_age": {
+                                "type": "long"
+                              },
+                              "actions": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "warm": {
+                            "properties": {
+                              "min_age": {
+                                "type": "long"
+                              },
+                              "actions": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "cold": {
+                            "properties": {
+                              "min_age": {
+                                "type": "long"
+                              },
+                              "actions": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "delete": {
+                            "properties": {
+                              "min_age": {
+                                "type": "long"
+                              },
+                              "actions": {
+                                "type": "keyword"
+                              }
+                            }
+                          },
+                          "DYNAMIC_KEY": {
+                            "properties": {
+                              "min_age": {
+                                "type": "long"
+                              },
+                              "actions": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "monitoring": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "collection_enabled": {
+                  "type": "boolean"
+                },
+                "enabled_exporters": {
+                  "properties": {
+                    "local": {
+                      "type": "long"
+                    },
+                    "DYNAMIC_KEY": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "graph": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "data_tiers": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "data_hot": {
+                  "properties": {
+                    "primary_shard_size_median_bytes": {
+                      "type": "long"
+                    },
+                    "primary_shard_count": {
+                      "type": "long"
+                    },
+                    "doc_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_avg_bytes": {
+                      "type": "long"
+                    },
+                    "primary_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_shard_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_mad_bytes": {
+                      "type": "long"
+                    },
+                    "node_count": {
+                      "type": "long"
+                    },
+                    "index_count": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "data_warm": {
+                  "properties": {
+                    "primary_shard_size_median_bytes": {
+                      "type": "long"
+                    },
+                    "primary_shard_count": {
+                      "type": "long"
+                    },
+                    "doc_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_avg_bytes": {
+                      "type": "long"
+                    },
+                    "primary_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_shard_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_mad_bytes": {
+                      "type": "long"
+                    },
+                    "node_count": {
+                      "type": "long"
+                    },
+                    "index_count": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "data_cold": {
+                  "properties": {
+                    "primary_shard_size_median_bytes": {
+                      "type": "long"
+                    },
+                    "primary_shard_count": {
+                      "type": "long"
+                    },
+                    "doc_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_avg_bytes": {
+                      "type": "long"
+                    },
+                    "primary_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_shard_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_mad_bytes": {
+                      "type": "long"
+                    },
+                    "node_count": {
+                      "type": "long"
+                    },
+                    "index_count": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "data_content": {
+                  "properties": {
+                    "primary_shard_size_median_bytes": {
+                      "type": "long"
+                    },
+                    "primary_shard_count": {
+                      "type": "long"
+                    },
+                    "doc_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_avg_bytes": {
+                      "type": "long"
+                    },
+                    "primary_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_shard_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_mad_bytes": {
+                      "type": "long"
+                    },
+                    "node_count": {
+                      "type": "long"
+                    },
+                    "index_count": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "primary_shard_size_median_bytes": {
+                      "type": "long"
+                    },
+                    "primary_shard_count": {
+                      "type": "long"
+                    },
+                    "doc_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_avg_bytes": {
+                      "type": "long"
+                    },
+                    "primary_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_size_bytes": {
+                      "type": "long"
+                    },
+                    "total_shard_count": {
+                      "type": "long"
+                    },
+                    "primary_shard_size_mad_bytes": {
+                      "type": "long"
+                    },
+                    "node_count": {
+                      "type": "long"
+                    },
+                    "index_count": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "rollup": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "sql": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "features": {
+                  "properties": {
+                    "having": {
+                      "type": "long"
+                    },
+                    "subselect": {
+                      "type": "long"
+                    },
+                    "limit": {
+                      "type": "long"
+                    },
+                    "orderby": {
+                      "type": "long"
+                    },
+                    "where": {
+                      "type": "long"
+                    },
+                    "join": {
+                      "type": "long"
+                    },
+                    "groupby": {
+                      "type": "long"
+                    },
+                    "local": {
+                      "type": "long"
+                    },
+                    "command": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "queries": {
+                  "properties": {
+                    "rest": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "cli": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "canvas": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "obdc": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "jdbc": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "odbc32": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "odbc64": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "_all": {
+                      "properties": {
+                        "total": {
+                          "type": "long"
+                        },
+                        "paging": {
+                          "type": "long"
+                        },
+                        "failed": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "translate": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "analytics": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "stats": {
+                  "properties": {
+                    "rate_usage": {
+                      "type": "long"
+                    },
+                    "normalize_usage": {
+                      "type": "long"
+                    },
+                    "boxplot_usage": {
+                      "type": "long"
+                    },
+                    "top_metric_usage": {
+                      "type": "long"
+                    },
+                    "cumulative_cardinality_usage": {
+                      "type": "long"
+                    },
+                    "string_stats_usage": {
+                      "type": "long"
+                    },
+                    "moving_percentiles_usage": {
+                      "type": "long"
+                    },
+                    "t_test_usage": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "searchable_snapshots": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "indices_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "logstash": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "vectors": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "sparse_vector_fields_count": {
+                  "type": "long"
+                },
+                "dense_vector_fields_count": {
+                  "type": "long"
+                },
+                "dense_vector_dims_avg_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "transform": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "security": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "ssl": {
+                  "properties": {
+                    "http": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "transport": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ccr": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "auto_follow_patterns_count": {
+                  "type": "long"
+                },
+                "follower_indices_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "slm": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "enrich": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "voting_only": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "data_streams": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "data_streams": {
+                  "type": "long"
+                },
+                "indices_count": {
+                  "type": "long"
+                }
+              }
+            },
+            "spatial": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "ml": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "node_count": {
+                  "type": "long"
+                },
+                "datafeeds": {
+                  "properties": {
+                    "_all": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "started": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "stopped": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "data_frame_analytics_jobs": {
+                  "properties": {
+                    "_all": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "started": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "stopped": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "inference": {
+                  "properties": {
+                    "trained_models": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ingest_processors": {
+                      "properties": {
+                        "_all": {
+                          "properties": {
+                            "pipelines": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "time_ms": {
+                              "properties": {
+                                "min": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "num_docs_processed": {
+                              "properties": {
+                                "min": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "num_failures": {
+                              "properties": {
+                                "min": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "sum": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "jobs": {
+                  "properties": {
+                    "_all": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "closed": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "closing": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "failed": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "opened": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "opening": {
+                      "properties": {
+                        "count": {
+                          "type": "long"
+                        },
+                        "detectors": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "model_size": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "created_by": {
+                          "properties": {
+                            "single_metric_wizard": {
+                              "type": "long"
+                            },
+                            "categorization_wizard": {
+                              "type": "long"
+                            },
+                            "population_wizard": {
+                              "type": "long"
+                            },
+                            "multi_metric_wizard": {
+                              "type": "long"
+                            },
+                            "unknown": {
+                              "type": "long"
+                            },
+                            "DYNAMIC_KEY": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "forecasts": {
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "forecasted_jobs": {
+                              "type": "long"
+                            },
+                            "duration_ms": {
+                              "properties": {
+                                "avg": {
+                                  "type": "long"
+                                },
+                                "max": {
+                                  "type": "long"
+                                },
+                                "min": {
+                                  "type": "long"
+                                },
+                                "total": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "memory_bytes": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "processing_time_ms": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "records": {
+                          "properties": {
+                            "avg": {
+                              "type": "long"
+                            },
+                            "max": {
+                              "type": "long"
+                            },
+                            "min": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "status": {
+                          "properties": {
+                            "finished": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
