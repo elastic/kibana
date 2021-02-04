@@ -26,6 +26,7 @@ import {
 } from './get_transaction_group_stats';
 
 interface TopTransactionOptions {
+  environment?: string;
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;

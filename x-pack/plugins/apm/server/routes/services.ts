@@ -383,9 +383,9 @@ export const serviceDependenciesRoute = createRoute({
     }),
     query: t.intersection([
       t.type({
-        environment: t.string,
         numBuckets: toNumberRt,
       }),
+      environmentRt,
       rangeRt,
     ]),
   }),

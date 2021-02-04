@@ -37,6 +37,7 @@ export const transactionGroupsRoute = createRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -45,7 +46,7 @@ export const transactionGroupsRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const { environment, transactionType } = context.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
@@ -53,6 +54,7 @@ export const transactionGroupsRoute = createRoute({
 
     return getTransactionGroupList(
       {
+        environment,
         type: 'top_transactions',
         serviceName,
         transactionType,
@@ -251,6 +253,7 @@ export const transactionChartsDistributionRoute = createRoute({
         transactionId: t.string,
         traceId: t.string,
       }),
+      environmentRt,
       uiFiltersRt,
       rangeRt,
     ]),
@@ -260,6 +263,7 @@ export const transactionChartsDistributionRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
     const {
+      environment,
       transactionType,
       transactionName,
       transactionId = '',
@@ -271,6 +275,7 @@ export const transactionChartsDistributionRoute = createRoute({
     );
 
     return getTransactionDistribution({
+      environment,
       serviceName,
       transactionType,
       transactionName,

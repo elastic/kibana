@@ -12,14 +12,17 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
+import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
 export async function getErrorGroupSample({
+  environment,
   serviceName,
   groupId,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId: string;
   setup: Setup & SetupTimeRange;
@@ -38,6 +41,7 @@ export async function getErrorGroupSample({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],

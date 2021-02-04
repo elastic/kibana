@@ -25,6 +25,7 @@ export function useTransactionDistributionFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const {
+    environment,
     start,
     end,
     transactionType,
@@ -45,6 +46,7 @@ export function useTransactionDistributionFetcher() {
               serviceName,
             },
             query: {
+              environment,
               start,
               end,
               transactionType,
@@ -92,7 +94,15 @@ export function useTransactionDistributionFetcher() {
     },
     // the histogram should not be refetched if the transactionId or traceId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [serviceName, start, end, transactionType, transactionName, uiFilters]
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      transactionName,
+      uiFilters,
+    ]
   );
 
   return {

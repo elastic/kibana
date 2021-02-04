@@ -28,7 +28,7 @@ export const getMetrics = async ({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment: string;
+  environment?: string;
   numBuckets: number;
 }) => {
   const { start, end, apmEventClient } = setup;

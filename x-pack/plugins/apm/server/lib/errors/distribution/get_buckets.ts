@@ -12,14 +12,17 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeFilter } from '../../../../common/utils/range_filter';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
+  environment,
   serviceName,
   groupId,
   bucketSize,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
@@ -29,6 +32,7 @@ export async function getBuckets({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
+    ...getEnvironmentFilter(environment),
     ...esFilter,
   ];
 

@@ -32,7 +32,7 @@ export const getDestinationMap = async ({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment: string;
+  environment?: string;
 }) => {
   const { start, end, apmEventClient } = setup;
 

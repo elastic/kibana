@@ -138,6 +138,7 @@ export async function getServiceErrorGroups({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

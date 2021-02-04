@@ -50,7 +50,7 @@ export async function getServiceDependencies({
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  environment: string;
+  environment?: string;
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
   const { start, end } = setup;

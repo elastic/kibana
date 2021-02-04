@@ -15,14 +15,17 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getDistributionMax({
+  environment,
   serviceName,
   transactionName,
   transactionType,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -56,6 +59,7 @@ export async function getDistributionMax({
                 },
               },
             },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

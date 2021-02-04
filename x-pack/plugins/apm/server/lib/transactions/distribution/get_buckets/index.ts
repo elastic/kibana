@@ -22,6 +22,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../helpers/aggregated_transactions';
+import { getEnvironmentFilter } from '../../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 function getHistogramAggOptions({
@@ -45,6 +46,7 @@ function getHistogramAggOptions({
 }
 
 export async function getBuckets({
+  environment,
   serviceName,
   transactionName,
   transactionType,
@@ -55,6 +57,7 @@ export async function getBuckets({
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -72,6 +75,7 @@ export async function getBuckets({
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { term: { [TRANSACTION_NAME]: transactionName } },
     { range: rangeFilter(start, end) },
+    ...getEnvironmentFilter(environment),
     ...esFilter,
   ];
 

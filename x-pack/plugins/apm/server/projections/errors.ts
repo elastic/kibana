@@ -12,11 +12,14 @@ import {
 } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
+import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
 export function getErrorGroupsProjection({
+  environment,
   setup,
   serviceName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) {
@@ -32,6 +35,7 @@ export function getErrorGroupsProjection({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
         },

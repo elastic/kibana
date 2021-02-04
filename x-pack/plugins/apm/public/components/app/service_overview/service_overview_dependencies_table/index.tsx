@@ -182,7 +182,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           query: {
             start,
             end,
-            environment: environment || ENVIRONMENT_ALL.value,
+            environment,
             numBuckets: 20,
           },
         },
