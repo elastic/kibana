@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -20,13 +21,13 @@ import { Result } from '../result/result';
 
 export const Library: React.FC = () => {
   const props = {
+    isMetaEngine: false,
     result: {
       id: {
         raw: '1',
       },
       _meta: {
         id: '1',
-        scopedId: '1',
         score: 100,
         engine: 'my-engine',
       },
@@ -98,6 +99,7 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               result: {
                 id: props.result.id,
                 _meta: props.result._meta,
@@ -114,11 +116,11 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '1',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -133,12 +135,12 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               showScore: true,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '1',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -153,12 +155,13 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
+              isMetaEngine: true,
               showScore: true,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '2',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -173,6 +176,8 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
+              isMetaEngine: true,
               result: {
                 ...props.result,
                 'this-description-is-a-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-long-key': {
@@ -181,7 +186,6 @@ export const Library: React.FC = () => {
                 },
                 _meta: {
                   id: 'my-id-is-a-really-long-id-yes-it-is',
-                  scopedId: '2',
                   score: 100,
                   engine: 'my-engine-is-a-really-long-engin-name-yes-it-is',
                 },

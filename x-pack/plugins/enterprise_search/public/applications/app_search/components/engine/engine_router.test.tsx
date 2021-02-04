@@ -1,39 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/react_router_history.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
-jest.mock('../../../shared/flash_messages', () => ({
-  setQueuedErrorMessage: jest.fn(),
-}));
-import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
+import { AnalyticsRouter } from '../analytics';
+import { RelevanceTuning } from '../relevance_tuning';
 
-import { EngineRouter } from './';
+import { EngineRouter } from './engine_router';
 
 describe('EngineRouter', () => {
-  const values = { dataLoading: false, engineNotFound: false, myRole: {} };
+  const values = {
+    ...mockEngineValues,
+    dataLoading: false,
+    engineNotFound: false,
+    myRole: {},
+  };
   const actions = { setEngineName: jest.fn(), initializeEngine: jest.fn(), clearEngine: jest.fn() };
 
   beforeEach(() => {
     setMockValues(values);
     setMockActions(actions);
+    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-engine' });
   });
 
   describe('useEffect', () => {
     beforeEach(() => {
-      (useParams as jest.Mock).mockReturnValue({ engineName: 'some-engine' });
       shallow(<EngineRouter />);
     });
 
@@ -45,15 +49,15 @@ describe('EngineRouter', () => {
       expect(actions.initializeEngine).toHaveBeenCalled();
     });
 
-    it('clears engine on unmount', () => {
+    it('clears engine on unmount and on update', () => {
       unmountHandler();
       expect(actions.clearEngine).toHaveBeenCalled();
     });
   });
 
   it('redirects to engines list and flashes an error if the engine param was not found', () => {
-    (useParams as jest.Mock).mockReturnValue({ engineName: '404-engine' });
-    setMockValues({ ...values, engineNotFound: true });
+    const { setQueuedErrorMessage } = mockFlashMessageHelpers;
+    setMockValues({ ...values, engineNotFound: true, engineName: '404-engine' });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(Redirect).prop('to')).toEqual('/engines');
@@ -68,6 +72,16 @@ describe('EngineRouter', () => {
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
+  // This would happen if a user jumps around from one engine route to another. If the engine name
+  // on the path has changed, but we still have an engine stored in state, we do not want to load
+  // any route views as they would be rendering with the wrong data.
+  it('renders a loading component if the engine stored in state is stale', () => {
+    setMockValues({ ...values, engineName: 'some-engine' });
+    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-new-engine' });
+    const wrapper = shallow(<EngineRouter />);
+    expect(wrapper.find(Loading)).toHaveLength(1);
+  });
+
   it('renders a default engine overview', () => {
     const wrapper = shallow(<EngineRouter />);
 
@@ -76,9 +90,16 @@ describe('EngineRouter', () => {
   });
 
   it('renders an analytics view', () => {
-    setMockValues({ myRole: { canViewEngineAnalytics: true } });
+    setMockValues({ ...values, myRole: { canViewEngineAnalytics: true } });
     const wrapper = shallow(<EngineRouter />);
 
-    expect(wrapper.find('[data-test-subj="AnalyticsTODO"]')).toHaveLength(1);
+    expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
+  });
+
+  it('renders an relevance tuning view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(RelevanceTuning)).toHaveLength(1);
   });
 });

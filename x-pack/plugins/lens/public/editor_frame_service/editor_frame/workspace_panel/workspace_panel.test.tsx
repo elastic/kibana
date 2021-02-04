@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
-import { FramePublicAPI, TableSuggestion, Visualization } from '../../../types';
+import { FramePublicAPI, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -34,7 +35,7 @@ import {
   IFieldType,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { TriggerId, UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
@@ -48,12 +49,12 @@ describe('workspace_panel', () => {
   let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
   let uiActionsMock: jest.Mocked<UiActionsStart>;
   let dataMock: jest.Mocked<DataPublicPluginStart>;
-  let trigger: jest.Mocked<TriggerContract<TriggerId>>;
+  let trigger: jest.Mocked<TriggerContract>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
 
   beforeEach(() => {
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
+    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
     dataMock = dataPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
@@ -85,6 +86,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -108,6 +110,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -131,6 +134,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -168,6 +172,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -241,6 +246,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -284,6 +290,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -335,6 +342,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -415,6 +423,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
+          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -471,6 +480,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
+          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -528,6 +538,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -569,6 +580,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -612,6 +624,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -652,6 +665,7 @@ describe('workspace_panel', () => {
         ExpressionRenderer={expressionRendererMock}
         core={coreMock.createSetup()}
         plugins={{ uiActions: uiActionsMock, data: dataMock }}
+        getSuggestionForField={() => undefined}
       />
     );
 
@@ -690,6 +704,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
+          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -734,6 +749,7 @@ describe('workspace_panel', () => {
           ExpressionRenderer={expressionRendererMock}
           core={coreMock.createSetup()}
           plugins={{ uiActions: uiActionsMock, data: dataMock }}
+          getSuggestionForField={() => undefined}
         />
       );
     });
@@ -756,6 +772,7 @@ describe('workspace_panel', () => {
 
   describe('suggestions from dropping in workspace panel', () => {
     let mockDispatch: jest.Mock;
+    let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
     const draggedField = { id: 'field' };
@@ -763,11 +780,20 @@ describe('workspace_panel', () => {
     beforeEach(() => {
       frame = createMockFramePublicAPI();
       mockDispatch = jest.fn();
+      mockGetSuggestionForField = jest.fn();
     });
 
     function initComponent(draggingContext = draggedField) {
       instance = mount(
-        <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
+        <ChildDragDropProvider
+          dragging={draggingContext}
+          setDragging={() => {}}
+          setActiveDropTarget={() => {}}
+          activeDropTarget={undefined}
+          keyboardMode={false}
+          setKeyboardMode={() => {}}
+          setA11yMessage={() => {}}
+        >
           <WorkspacePanel
             activeDatasourceId={'mock'}
             datasourceStates={{
@@ -790,43 +816,23 @@ describe('workspace_panel', () => {
             ExpressionRenderer={expressionRendererMock}
             core={coreMock.createSetup()}
             plugins={{ uiActions: uiActionsMock, data: dataMock }}
+            getSuggestionForField={mockGetSuggestionForField}
           />
         </ChildDragDropProvider>
       );
     }
 
     it('should immediately transition if exactly one suggestion is returned', () => {
-      const expectedTable: TableSuggestion = {
-        isMultiRow: true,
-        layerId: '1',
-        columns: [],
-        changeType: 'unchanged',
-      };
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
-        {
-          state: {},
-          table: expectedTable,
-          keptLayerIds: [],
-        },
-      ]);
-      mockVisualization.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.5,
-          title: 'my title',
-          state: {},
-          previewIcon: 'empty',
-        },
-      ]);
+      mockGetSuggestionForField.mockReturnValue({
+        visualizationId: 'vis',
+        datasourceState: {},
+        datasourceId: 'mock',
+        visualizationState: {},
+      });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
+      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
 
-      expect(mockDatasource.getDatasourceSuggestionsForField).toHaveBeenCalledTimes(1);
-      expect(mockVisualization.getSuggestions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          table: expectedTable,
-        })
-      );
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
         newVisualizationId: 'vis',
@@ -837,80 +843,12 @@ describe('workspace_panel', () => {
     });
 
     it('should allow to drop if there are suggestions', () => {
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
-        {
-          state: {},
-          table: {
-            isMultiRow: true,
-            layerId: '1',
-            columns: [],
-            changeType: 'unchanged',
-          },
-          keptLayerIds: [],
-        },
-      ]);
-      mockVisualization.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.5,
-          title: 'my title',
-          state: {},
-          previewIcon: 'empty',
-        },
-      ]);
-      initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
-    });
-
-    it('should refuse to drop if there only suggestions from other visualizations if there are data tables', () => {
-      frame.datasourceLayers.a = mockDatasource.publicAPIMock;
-      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'a' }]);
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
-        {
-          state: {},
-          table: {
-            isMultiRow: true,
-            layerId: '1',
-            columns: [],
-            changeType: 'unchanged',
-          },
-          keptLayerIds: [],
-        },
-      ]);
-      mockVisualization2.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.5,
-          title: 'my title',
-          state: {},
-          previewIcon: 'empty',
-        },
-      ]);
-      initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
-    });
-
-    it('should allow to drop if there are suggestions from active visualization even if there are data tables', () => {
-      frame.datasourceLayers.a = mockDatasource.publicAPIMock;
-      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'a' }]);
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
-        {
-          state: {},
-          table: {
-            isMultiRow: true,
-            layerId: '1',
-            columns: [],
-            changeType: 'unchanged',
-          },
-          keptLayerIds: [],
-        },
-      ]);
-      mockVisualization.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.5,
-          title: 'my title',
-          state: {},
-          previewIcon: 'empty',
-        },
-      ]);
+      mockGetSuggestionForField.mockReturnValue({
+        visualizationId: 'vis',
+        datasourceState: {},
+        datasourceId: 'mock',
+        visualizationState: {},
+      });
       initComponent();
       expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
     });
@@ -918,62 +856,6 @@ describe('workspace_panel', () => {
     it('should refuse to drop if there are no suggestions', () => {
       initComponent();
       expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
-    });
-
-    it('should immediately transition to the first suggestion if there are multiple', () => {
-      mockDatasource.getDatasourceSuggestionsForField.mockReturnValueOnce([
-        {
-          state: {},
-          table: {
-            isMultiRow: true,
-            columns: [],
-            layerId: '1',
-            changeType: 'unchanged',
-          },
-          keptLayerIds: [],
-        },
-        {
-          state: {},
-          table: {
-            isMultiRow: true,
-            columns: [],
-            layerId: '1',
-            changeType: 'unchanged',
-          },
-          keptLayerIds: [],
-        },
-      ]);
-      mockVisualization.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.5,
-          title: 'second suggestion',
-          state: {},
-          previewIcon: 'empty',
-        },
-      ]);
-      mockVisualization.getSuggestions.mockReturnValueOnce([
-        {
-          score: 0.8,
-          title: 'first suggestion',
-          state: {
-            isFirst: true,
-          },
-          previewIcon: 'empty',
-        },
-      ]);
-
-      initComponent();
-      instance.find(DragDrop).prop('onDrop')!(draggedField);
-
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'SWITCH_VISUALIZATION',
-        newVisualizationId: 'vis',
-        initialState: {
-          isFirst: true,
-        },
-        datasourceState: {},
-        datasourceId: 'mock',
-      });
     });
   });
 });

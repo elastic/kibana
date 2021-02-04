@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
 import { curry } from 'lodash';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -24,7 +23,7 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getProxyAgent } from './lib/get_proxy_agent';
+import { getCustomAgents } from './lib/get_custom_agents';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -52,25 +51,26 @@ const ParamsSchema = schema.object({
 
 // action type definition
 
+export const ActionTypeId = '.slack';
 // customizing executor is only used for tests
 export function getActionType({
   logger,
   configurationUtilities,
-  executor = curry(slackExecutor)({ logger }),
+  executor = curry(slackExecutor)({ logger, configurationUtilities }),
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
   return {
-    id: '.slack',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
     validate: {
       secrets: schema.object(secretsSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       params: ParamsSchema,
     },
@@ -88,13 +88,13 @@ function renderParameterTemplates(
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
@@ -102,7 +102,7 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureHostnameAllowed(url.hostname);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
@@ -116,7 +116,10 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: SlackActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -126,19 +129,22 @@ async function slackExecutor(
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
   const { message } = params;
+  const proxySettings = configurationUtilities.getProxySettings();
 
-  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
-  if (execOptions.proxySettings) {
-    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
-    logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
+  const customAgents = getCustomAgents(configurationUtilities, logger);
+  const agent = webhookUrl.toLowerCase().startsWith('https')
+    ? customAgents.httpsAgent
+    : customAgents.httpAgent;
+
+  if (proxySettings) {
+    logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
   }
 
   try {
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
-      // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
-      agent: proxyAgent,
+      agent,
     });
     result = await webhook.send(message);
   } catch (err) {

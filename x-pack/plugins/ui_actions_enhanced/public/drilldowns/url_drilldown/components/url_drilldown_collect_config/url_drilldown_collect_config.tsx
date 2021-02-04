@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useRef, useState } from 'react';
 import {
-  EuiCheckbox,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -17,6 +17,11 @@ import {
   EuiText,
   EuiTextArea,
   EuiSelectableOption,
+  EuiSwitch,
+  EuiAccordion,
+  EuiSpacer,
+  EuiPanel,
+  EuiTextColor,
 } from '@elastic/eui';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
@@ -28,6 +33,9 @@ import {
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
   txtUrlTemplatePlaceholder,
+  txtUrlTemplateAdditionalOptions,
+  txtUrlTemplateEncodeUrl,
+  txtUrlTemplateEncodeDescription,
 } from './i18n';
 
 export interface UrlDrilldownCollectConfig {
@@ -110,15 +118,41 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
           inputRef={textAreaRef}
         />
       </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiCheckbox
-          id="openInNewTab"
-          name="openInNewTab"
-          label={txtUrlTemplateOpenInNewTab}
-          checked={config.openInNewTab}
-          onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-        />
-      </EuiFormRow>
+      <EuiSpacer size={'l'} />
+      <EuiAccordion
+        id="accordion_url_drilldown_additional_options"
+        buttonContent={txtUrlTemplateAdditionalOptions}
+        data-test-subj="urlDrilldownAdditionalOptions"
+      >
+        <EuiSpacer size={'s'} />
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
+          <EuiFormRow hasChildLabel={false}>
+            <EuiSwitch
+              id="openInNewTab"
+              name="openInNewTab"
+              label={txtUrlTemplateOpenInNewTab}
+              checked={config.openInNewTab}
+              onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
+              data-test-subj="urlDrilldownOpenInNewTab"
+            />
+          </EuiFormRow>
+          <EuiFormRow hasChildLabel={false} fullWidth>
+            <EuiSwitch
+              id="encodeUrl"
+              name="encodeUrl"
+              label={
+                <>
+                  {txtUrlTemplateEncodeUrl}
+                  <EuiSpacer size={'s'} />
+                  <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
+                </>
+              }
+              checked={config.encodeUrl ?? true}
+              onChange={() => onConfig({ ...config, encodeUrl: !(config.encodeUrl ?? true) })}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+      </EuiAccordion>
     </>
   );
 };

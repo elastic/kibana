@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, FC } from 'react';
@@ -22,8 +23,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-aggregation.html`;
+  const docsUrl = docLinks.links.ml.aggregations;
   return (
     <EuiDescribedFormGroup
       title={<h3>{title}</h3>}

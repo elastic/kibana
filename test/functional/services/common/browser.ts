@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { delay } from 'bluebird';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
@@ -299,21 +289,23 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           }
 
           const origin = document.querySelector(arguments[0]);
-          const target = document.querySelector(arguments[1]);
 
           const dragStartEvent = createEvent('dragstart');
           dispatchEvent(origin, dragStartEvent);
 
           setTimeout(() => {
             const dropEvent = createEvent('drop');
+            const target = document.querySelector(arguments[1]);
             dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
             const dragEndEvent = createEvent('dragend');
             dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
-          }, 50);
+          }, 100);
       `,
         from,
         to
       );
+      // wait for 150ms to make sure the script has run
+      await delay(150);
     }
 
     /**
@@ -467,6 +459,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         key,
         value
       );
+    }
+
+    /**
+     * Removes a value in local storage for the focused window/frame.
+     *
+     * @param {string} key
+     * @return {Promise<void>}
+     */
+    public async removeLocalStorageItem(key: string): Promise<void> {
+      await driver.executeScript('return window.localStorage.removeItem(arguments[0]);', key);
     }
 
     /**

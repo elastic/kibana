@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'src/core/server';
@@ -10,7 +11,7 @@ import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-export { invalidateAPIKey } from './security';
+export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
 
 export async function generateOutputApiKey(
@@ -24,7 +25,16 @@ export async function generateOutputApiKey(
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.ds-logs-*', '.ds-metrics-*', '.ds-traces-*'],
+          names: [
+            'logs-*',
+            'metrics-*',
+            'traces-*',
+            '.ds-logs-*',
+            '.ds-metrics-*',
+            '.ds-traces-*',
+            '.logs-endpoint.diagnostic.collection-*',
+            '.ds-.logs-endpoint.diagnostic.collection-*',
+          ],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],

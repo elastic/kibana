@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { MountPoint } from 'kibana/public';
+import type { DocLinksStart, MountPoint } from 'kibana/public';
 import {
   EuiCheckbox,
   EuiText,
@@ -16,7 +18,6 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { DocumentationLinksService } from '../documentation_links';
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',
@@ -24,12 +25,15 @@ export const insecureClusterAlertTitle = i18n.translate(
 );
 
 export const insecureClusterAlertText = (
-  getDocLinksService: () => DocumentationLinksService,
+  getDocLinks: () => DocLinksStart,
   onDismiss: (persist: boolean) => void
 ) =>
   ((e) => {
     const AlertText = () => {
       const [persist, setPersist] = useState(false);
+      const enableSecurityDocLink = `${
+        getDocLinks().links.security.elasticsearchEnableSecurity
+      }?blade=kibanasecuritymessage`;
 
       return (
         <I18nProvider>
@@ -56,7 +60,7 @@ export const insecureClusterAlertText = (
                   size="s"
                   color="primary"
                   fill
-                  href={getDocLinksService().getEnableSecurityDocUrl()}
+                  href={enableSecurityDocLink}
                   target="_blank"
                   data-test-subj="learnMoreButton"
                 >

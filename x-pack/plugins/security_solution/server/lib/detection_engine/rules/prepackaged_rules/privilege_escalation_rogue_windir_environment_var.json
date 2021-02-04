@@ -34,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1034",
-          "name": "Path Interception",
-          "reference": "https://attack.mitre.org/techniques/T1034/"
+          "id": "T1574",
+          "name": "Hijack Execution Flow",
+          "reference": "https://attack.mitre.org/techniques/T1574/",
+          "subtechnique": [
+            {
+              "id": "T1574.007",
+              "name": "Path Interception by PATH Environment Variable",
+              "reference": "https://attack.mitre.org/techniques/T1574/007/"
+            }
+          ]
         }
       ]
     }

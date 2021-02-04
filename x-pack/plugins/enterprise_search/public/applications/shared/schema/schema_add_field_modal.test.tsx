@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -41,10 +42,10 @@ describe('SchemaAddFieldModal', () => {
     expect(wrapper.find(EuiModal)).toHaveLength(1);
   });
 
-  // No matter what I try I can't get this to actually achieve coverage.
   it('sets loading state in useEffect', () => {
     setState(true);
-    const wrapper = mount(<SchemaAddFieldModal {...props} {...errors} />);
+    const wrapper = mount(<SchemaAddFieldModal {...props} />);
+    wrapper.setProps({ ...errors });
     const input = wrapper.find(EuiFieldText);
 
     expect(input.prop('isLoading')).toEqual(false);

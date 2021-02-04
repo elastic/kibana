@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -316,6 +317,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -352,6 +354,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       columnId: 'col2',
       filterOperations: (op: OperationMetadata) => op.isBucketed,
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -387,6 +390,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -438,6 +442,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -473,6 +478,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       columnId: 'col2',
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -538,6 +544,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       },
       droppedItem: dragging,
       state: testState,
+      groupId: '1',
     });
 
     expect(setState).toBeCalledTimes(1);
@@ -600,6 +607,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       droppedItem: dragging,
       state: testState,
       filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      groupId: 'a',
     };
 
     const stateWithColumnOrder = (columnOrder: string[]) => {

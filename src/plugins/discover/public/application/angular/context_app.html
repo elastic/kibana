@@ -1,15 +1,3 @@
-<kbn-top-nav
-  app-name="'context'"
-  show-search-bar="true"
-  show-filter-bar="true"
-  show-query-bar="false"
-  show-save-query="false"
-  show-date-picker="false"
-  index-patterns="[contextApp.indexPattern]"
-  use-default-behaviors="true"
->
-</kbn-top-nav>
-
 <!-- Context App Legacy -->
 <context-app-legacy
   filter="contextApp.actions.addFilter"
@@ -29,4 +17,6 @@
   successor-available="contextApp.state.rows.successors.length"
   successor-status="contextApp.state.loadingStatus.successors.status"
   on-change-successor-count="contextApp.actions.fetchGivenSuccessorRows"
+  use-new-fields-api="contextApp.state.useNewFieldsApi"
+  top-nav-menu="contextApp.topNavMenu"
 ></context-app-legacy>

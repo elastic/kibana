@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-interface GroupByEntry {
-  identifier: string;
-  label: string;
-  intervalLabel?: string;
-}
+import {
+  GroupByEntry,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
+} from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -31,8 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.api.cleanTransformIndices();
     });
 
-    const testDataList = [
+    const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
         source: 'ft_ecommerce',
         groupByEntries: [
@@ -138,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: [`Men's Accessories`],
           },
@@ -153,7 +156,15 @@ export default function ({ getService }: FtrProviderContext) {
           },
           histogramCharts: [
             { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: true,
+              id: 'currency',
+              legend: '1 category',
+              colorStats: [
+                { key: '#000000', value: 10 },
+                { key: '#54B399', value: 90 },
+              ],
+            },
             {
               chartAvailable: false,
               id: 'customer_birth_date',
@@ -161,15 +172,48 @@ export default function ({ getService }: FtrProviderContext) {
             },
             { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
             { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
-            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            {
+              chartAvailable: true,
+              id: 'customer_gender',
+              legend: '2 categories',
+              colorStats: [
+                { key: '#000000', value: 15 },
+                { key: '#54B399', value: 85 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'customer_id',
+              legend: 'top 20 of 46 categories',
+              colorStats: [
+                { key: '#54B399', value: 35 },
+                { key: '#000000', value: 60 },
+              ],
+            },
             { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
-            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+            {
+              chartAvailable: true,
+              id: 'customer_phone',
+              legend: '1 category',
+              colorStats: [
+                { key: '#000000', value: 10 },
+                { key: '#54B399', value: 90 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'day_of_week',
+              legend: '7 categories',
+              colorStats: [
+                { key: '#000000', value: 20 },
+                { key: '#54B399', value: 75 },
+              ],
+            },
           ],
         },
-      },
+      } as PivotTransformTestData,
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms group and percentiles agg',
         source: 'ft_ecommerce',
         groupByEntries: [
@@ -236,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: ['AE', 'CO', 'EG', 'FR', 'GB'],
           },
@@ -251,7 +295,55 @@ export default function ({ getService }: FtrProviderContext) {
           },
           histogramCharts: [],
         },
-      },
+      } as PivotTransformTestData,
+      {
+        type: 'latest',
+        suiteTitle: 'batch transform with the latest function',
+        source: 'ft_ecommerce',
+        uniqueKeys: [
+          {
+            identifier: 'geoip.country_iso_code',
+            label: 'geoip.country_iso_code',
+          },
+        ],
+        sortField: {
+          identifier: 'order_date',
+          label: 'order_date',
+        },
+        transformId: `ec_3_${Date.now()}`,
+
+        transformDescription:
+          'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          latestPreview: {
+            column: 0,
+            values: [],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          histogramCharts: [],
+          transformPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 22:16:19',
+              'July 12th 2019, 22:50:53',
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:15:22',
+              'July 12th 2019, 23:31:12',
+            ],
+          },
+        },
+      } as LatestTransformTestData,
     ];
 
     for (const testData of testDataList) {
@@ -277,8 +369,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('navigates through the wizard and sets all needed fields', async () => {
-          await transform.testExecution.logTestStep('displays the define pivot step');
+          await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
+
+          await transform.testExecution.logTestStep('has correct transform function selected');
+          await transform.wizard.assertSelectedTransformFunction('pivot');
 
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
@@ -289,8 +384,8 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.indexPreview.rows
           );
 
-          await transform.testExecution.logTestStep('displays an empty pivot preview');
-          await transform.wizard.assertPivotPreviewEmpty();
+          await transform.testExecution.logTestStep('displays an empty transform preview');
+          await transform.wizard.assertTransformPreviewEmpty();
 
           await transform.testExecution.logTestStep('displays the query input');
           await transform.wizard.assertQueryInputExists();
@@ -308,39 +403,59 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.histogramCharts
           );
 
-          await transform.testExecution.logTestStep('adds the group by entries');
-          for (const [index, entry] of testData.groupByEntries.entries()) {
-            await transform.wizard.assertGroupByInputExists();
-            await transform.wizard.assertGroupByInputValue([]);
-            await transform.wizard.addGroupByEntry(
-              index,
-              entry.identifier,
-              entry.label,
-              entry.intervalLabel
+          if (isPivotTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('adds the group by entries');
+            for (const [index, entry] of testData.groupByEntries.entries()) {
+              await transform.wizard.assertGroupByInputExists();
+              await transform.wizard.assertGroupByInputValue([]);
+              await transform.wizard.addGroupByEntry(
+                index,
+                entry.identifier,
+                entry.label,
+                entry.intervalLabel
+              );
+            }
+
+            await transform.testExecution.logTestStep('adds the aggregation entries');
+            await transform.wizard.addAggregationEntries(testData.aggregationEntries);
+
+            await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
+            await transform.wizard.assertAdvancedPivotEditorSwitchExists();
+            await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+
+            await transform.testExecution.logTestStep('displays the advanced configuration');
+            await transform.wizard.enableAdvancedPivotEditor();
+            await transform.wizard.assertAdvancedPivotEditorContent(
+              testData.expected.pivotAdvancedEditorValueArr
             );
           }
 
-          await transform.testExecution.logTestStep('adds the aggregation entries');
-          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
+          if (isLatestTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('sets latest transform method');
+            await transform.wizard.selectTransformFunction('latest');
+            await transform.testExecution.logTestStep('adds unique keys');
+            for (const { identifier, label } of testData.uniqueKeys) {
+              await transform.wizard.assertUniqueKeysInputExists();
+              await transform.wizard.assertUniqueKeysInputValue([]);
+              await transform.wizard.addUniqueKeyEntry(identifier, label);
+            }
+            await transform.testExecution.logTestStep('sets the sort field');
+            await transform.wizard.assertSortFieldInputExists();
+            await transform.wizard.assertSortFieldInputValue('');
+            await transform.wizard.setSortFieldValue(
+              testData.sortField.identifier,
+              testData.sortField.label
+            );
+          }
 
-          await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
-          await transform.wizard.assertAdvancedPivotEditorSwitchExists();
-          await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
-
-          await transform.testExecution.logTestStep('displays the advanced configuration');
-          await transform.wizard.enabledAdvancedPivotEditor();
-          await transform.wizard.assertAdvancedPivotEditorContent(
-            testData.expected.pivotAdvancedEditorValueArr
-          );
-
-          await transform.testExecution.logTestStep('loads the pivot preview');
+          await transform.testExecution.logTestStep('loads the transform preview');
           await transform.wizard.assertPivotPreviewLoaded();
 
-          await transform.testExecution.logTestStep('shows the pivot preview');
+          await transform.testExecution.logTestStep('shows the transform preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
 
           await transform.testExecution.logTestStep('loads the details step');

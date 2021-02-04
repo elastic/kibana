@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
@@ -132,7 +133,9 @@ export async function getWebCoreVitals({
 
   return {
     coreVitalPages: coreVitalPages?.doc_count ?? 0,
-    cls: cls?.values[pkey]?.toFixed(3) || null,
+    /* Because cls is required in the type UXMetrics, and defined as number | null,
+     * we need to default to null in the case where cls is undefined in order to satisfy the UXMetrics type */
+    cls: cls?.values[pkey] ?? null,
     fid: fid?.values[pkey],
     lcp: lcp?.values[pkey],
     tbt: tbt?.values[pkey] ?? 0,

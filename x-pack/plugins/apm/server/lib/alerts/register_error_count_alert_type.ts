@@ -1,16 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertingPlugin,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerts/server';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -41,7 +51,13 @@ export function registerErrorCountAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerts.registerType<
+    TypeOf<typeof paramsSchema>,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    ThresholdMetActionGroupId
+  >({
     id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,

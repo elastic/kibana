@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
+import { ActionGroupIdsOf } from '../../../../alerts/common';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
@@ -28,6 +30,7 @@ import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/g
 import { UMServerLibs, UptimeESClient } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
 const getMonIdByLoc = (monitorId: string, location: string) => {
   return monitorId + '-' + location;
@@ -178,8 +181,8 @@ const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
-  uptimeAlertWrapper({
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
+  uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.monitorStatus',
     name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
       defaultMessage: 'Uptime monitor status',

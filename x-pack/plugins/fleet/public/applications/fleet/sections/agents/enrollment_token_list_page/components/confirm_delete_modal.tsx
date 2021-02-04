@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -37,7 +38,7 @@ export const ConfirmEnrollmentTokenDelete = (props: Props) => {
         <EuiCallOut
           title={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.description', {
             defaultMessage:
-              'Are your sure you want to revoke {keyName}? Agents that use this token will no longer be able to access policies or send data. ',
+              'Are your sure you want to revoke {keyName}? New agents will no longer be able to be enrolled using this token.',
             values: {
               keyName: enrollmentKey.name,
             },

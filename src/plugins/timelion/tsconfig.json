@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../visualizations/tsconfig.json" },
+    { "path": "../navigation/tsconfig.json" },
+    { "path": "../vis_type_timelion/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../kibana_legacy/tsconfig.json" },
+  ]
+}

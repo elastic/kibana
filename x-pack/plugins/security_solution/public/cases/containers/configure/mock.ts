@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   ActionConnector,
+  ActionTypeConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
@@ -29,6 +31,7 @@ export const mappings: CaseConnectorMapping[] = [
     actionType: 'append',
   },
 ];
+
 export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
@@ -60,6 +63,49 @@ export const connectorsMock: ActionConnector[] = [
   },
 ];
 
+export const actionTypesMock: ActionTypeConnector[] = [
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.index',
+    name: 'Index',
+    minimumLicenseRequired: 'basic',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.resilient',
+    name: 'IBM Resilient',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+];
+
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -70,6 +116,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
+  error: null,
   mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
@@ -96,6 +143,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
+  error: null,
   mappings: [],
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },

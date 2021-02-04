@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,6 +16,7 @@ import { Connector } from './connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useGetIncidentTypes } from '../settings/resilient/use_get_incident_types';
 import { useGetSeverity } from '../settings/resilient/use_get_severity';
+import { schema, FormProps } from './schema';
 
 jest.mock('../../../common/lib/kibana', () => {
   return {
@@ -70,8 +72,12 @@ describe('Connector', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ connectorId: string; fields: Record<string, unknown> | null }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },
+      schema: {
+        connectorId: schema.connectorId,
+        fields: schema.fields,
+      },
     });
 
     globalForm = form;
@@ -96,7 +102,14 @@ describe('Connector', () => {
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="connector-settings"]`).exists()).toBeTruthy();
 
-    waitFor(() => {
+    await waitFor(() => {
+      expect(wrapper.find(`button[data-test-subj="dropdown-connectors"]`).first().text()).toBe(
+        'My Connector'
+      );
+    });
+
+    await waitFor(() => {
+      wrapper.update();
       expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
     });
   });

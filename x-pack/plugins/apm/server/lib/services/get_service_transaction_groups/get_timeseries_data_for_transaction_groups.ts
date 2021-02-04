@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -17,6 +18,7 @@ import {
 
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
+  getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
@@ -76,6 +78,9 @@ export async function getTimeseriesDataForTransactionGroups({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
             ...esFilter,
           ],
         },
@@ -87,11 +92,6 @@ export async function getTimeseriesDataForTransactionGroups({
             size,
           },
           aggs: {
-            transaction_types: {
-              terms: {
-                field: TRANSACTION_TYPE,
-              },
-            },
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
@@ -104,10 +104,8 @@ export async function getTimeseriesDataForTransactionGroups({
               },
               aggs: {
                 ...getLatencyAggregation(latencyAggregationType, field),
-                transaction_count: { value_count: { field } },
                 [EVENT_OUTCOME]: {
                   filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-                  aggs: { transaction_count: { value_count: { field } } },
                 },
               },
             },

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -42,6 +44,7 @@ describe('usePushToService', () => {
     isLoading: false,
     postPushToService,
   };
+
   const mockConnector = connectorsMock[0];
   const actionLicense = actionLicenses[0];
   const caseServices = {
@@ -53,6 +56,7 @@ describe('usePushToService', () => {
       hasDataToPush: true,
     },
   };
+
   const defaultArgs = {
     connector: {
       id: mockConnector.id,
@@ -67,6 +71,19 @@ describe('usePushToService', () => {
     updateCase,
     userCanCrud: true,
     isValidConnector: true,
+    alerts: {
+      'alert-id-1': {
+        _id: 'alert-id-1',
+        _index: 'alert-index-1',
+        '@timestamp': '2020-11-20T15:35:28.373Z',
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+          from: 'now-360s',
+          to: 'now',
+        },
+      },
+    },
   };
 
   beforeEach(() => {
@@ -98,6 +115,19 @@ describe('usePushToService', () => {
           type: ConnectorTypes.servicenow,
         },
         updateCase,
+        alerts: {
+          'alert-id-1': {
+            _id: 'alert-id-1',
+            _index: 'alert-index-1',
+            '@timestamp': '2020-11-20T15:35:28.373Z',
+            rule: {
+              id: 'rule-id-1',
+              name: 'Awesome rule',
+              from: 'now-360s',
+              to: 'now',
+            },
+          },
+        },
       });
       expect(result.current.pushCallouts).toBeNull();
     });

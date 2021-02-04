@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
@@ -23,6 +24,7 @@ import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
 import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -45,7 +47,11 @@ function Wrapper({ children }: { children?: ReactNode }) {
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper value={value}>
           <MockUrlParamsContextProvider
-            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+            params={{
+              rangeFrom: 'now-15m',
+              rangeTo: 'now',
+              latencyAggregationType: LatencyAggregationType.avg,
+            }}
           >
             {children}
           </MockUrlParamsContextProvider>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const mockTemplate = {
@@ -212,6 +213,6 @@ export const mockTimeline = {
   templateTimelineId: null,
   dateRange: { start: '2020-11-03T13:34:40.339Z', end: '2020-11-04T13:34:40.339Z' },
   savedQueryId: null,
-  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  sort: { columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' },
   status: 'draft',
 };

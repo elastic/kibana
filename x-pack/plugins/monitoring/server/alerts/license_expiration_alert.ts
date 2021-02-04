@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -17,11 +18,7 @@ import {
   LegacyAlert,
 } from '../../common/types/alerts';
 import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
-import {
-  ALERT_LICENSE_EXPIRATION,
-  FORMAT_DURATION_TEMPLATE_SHORT,
-  LEGACY_ALERT_DETAILS,
-} from '../../common/constants';
+import { ALERT_LICENSE_EXPIRATION, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerts/common';
@@ -113,12 +110,13 @@ export class LicenseExpirationAlert extends BaseAlert {
   ) {
     const legacyAlert = item.meta as LegacyAlert;
     const $expiry = moment(legacyAlert.metadata.time);
+    const $duration = moment.duration(+new Date() - $expiry.valueOf());
     if (alertState.ui.isFiring) {
       const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
         defaultMessage: 'Please update your license.',
       });
       const action = `[${actionText}](elasticsearch/nodes)`;
-      const expiredDate = $expiry.format(FORMAT_DURATION_TEMPLATE_SHORT).trim();
+      const expiredDate = $duration.humanize();
       instance.scheduleActions('default', {
         internalShortMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalShortMessage',

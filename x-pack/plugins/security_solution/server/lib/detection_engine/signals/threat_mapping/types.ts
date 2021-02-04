@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Duration } from 'moment';
@@ -20,7 +21,11 @@ import {
   ItemsPerSearch,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
-import { AlertServices } from '../../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -38,7 +43,7 @@ export interface CreateThreatSignalsOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -77,7 +82,7 @@ export interface CreateThreatSignalOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;

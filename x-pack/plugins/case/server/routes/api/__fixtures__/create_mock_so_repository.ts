@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -28,7 +29,7 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
   caseMappingsSavedObject?: any[];
-}) => {
+} = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
       return {
@@ -100,9 +101,12 @@ export const createMockSavedObjectsRepository = ({
       }
 
       if (
-        findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
-        caseConfigureSavedObject[0] &&
-        caseConfigureSavedObject[0].id === 'throw-error-find'
+        (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT &&
+          caseConfigureSavedObject[0] &&
+          caseConfigureSavedObject[0].id === 'throw-error-find') ||
+        (findArgs.type === CASE_SAVED_OBJECT &&
+          caseSavedObject[0] &&
+          caseSavedObject[0].id === 'throw-error-find')
       ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError('Error thrown for testing');
       }

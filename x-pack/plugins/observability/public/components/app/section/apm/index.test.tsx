@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render } from '../../../../utils/test_helper';
@@ -65,7 +67,7 @@ describe('APMSection', () => {
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
-    expect(getByText('Transactions per minute 312.00k')).toBeInTheDocument();
+    expect(getByText('Throughput 312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
   it('shows loading state', () => {
@@ -80,6 +82,6 @@ describe('APMSection', () => {
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('View in app')).toEqual([]);
     expect(queryAllByText('Services 11')).toEqual([]);
-    expect(queryAllByText('Transactions per minute 312.00k')).toEqual([]);
+    expect(queryAllByText('Throughput 312.00k tpm')).toEqual([]);
   });
 });

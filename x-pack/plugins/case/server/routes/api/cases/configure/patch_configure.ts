@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -33,6 +34,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
     },
     async (context, request, response) => {
       try {
+        let error = null;
         const client = context.core.savedObjects.client;
         const query = pipe(
           CasesConfigurePatchRt.decode(request.body),
@@ -68,12 +70,18 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           if (actionsClient == null) {
             throw Boom.notFound('Action client have not been found');
           }
-          mappings = await caseClient.getMappings({
-            actionsClient,
-            caseClient,
-            connectorId: connector.id,
-            connectorType: connector.type,
-          });
+          try {
+            mappings = await caseClient.getMappings({
+              actionsClient,
+              caseClient,
+              connectorId: connector.id,
+              connectorType: connector.type,
+            });
+          } catch (e) {
+            error = e.isBoom
+              ? e.output.payload.message
+              : `Error connecting to ${connector.name} instance`;
+          }
         }
         const patch = await caseConfigureService.patch({
           client,
@@ -96,6 +104,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
             ),
             mappings,
             version: patch.version ?? '',
+            error,
           }),
         });
       } catch (error) {

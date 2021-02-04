@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -25,7 +26,7 @@ export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUploadComponent = async () => {
-  return await pluginsStart.fileUpload.getFileUploadComponent();
+  return await pluginsStart.mapsFileUpload.getFileUploadComponent();
 };
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
@@ -49,6 +50,7 @@ export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
+export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

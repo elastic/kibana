@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
@@ -173,15 +174,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       return {
         ...groupAcc,
         [groupName]: {
-          fields: Object.entries(groupValue.fields ?? {}).reduce<Partial<BrowserField>>(
-            (fieldAcc, [fieldName, fieldValue]) => {
-              if (fieldValue.aggregatable === true) {
-                return { ...fieldAcc, [fieldName]: fieldValue };
-              }
-              return fieldAcc;
-            },
-            {}
-          ),
+          fields: Object.entries(groupValue.fields ?? {}).reduce<
+            Record<string, Partial<BrowserField>>
+          >((fieldAcc, [fieldName, fieldValue]) => {
+            if (fieldValue.aggregatable === true) {
+              fieldAcc[fieldName] = fieldValue;
+            }
+            return fieldAcc;
+          }, {}),
         } as Partial<BrowserField>,
       };
     },

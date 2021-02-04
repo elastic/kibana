@@ -1,24 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+
+interface VisualizeSaveModalArgs {
+  saveAsNew?: boolean;
+  redirectToOrigin?: boolean;
+  addToDashboard?: boolean;
+  dashboardId?: string;
+}
+
+type DashboardPickerOption =
+  | 'add-to-library-option'
+  | 'existing-dashboard-option'
+  | 'new-dashboard-option';
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -346,11 +347,27 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(
-      vizName: string,
-      { saveAsNew = false, redirectToOrigin = false } = {}
-    ) {
+    public async saveVisualization(vizName: string, saveModalArgs: VisualizeSaveModalArgs = {}) {
       await this.ensureSavePanelOpen();
+
+      await this.setSaveModalValues(vizName, saveModalArgs);
+      log.debug('Click Save Visualization button');
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // Confirm that the Visualization has actually been saved
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      const message = await common.closeToast();
+      await header.waitUntilLoadingHasFinished();
+      await common.waitForSaveModalToClose();
+
+      return message;
+    }
+
+    public async setSaveModalValues(
+      vizName: string,
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
+    ) {
       await testSubjects.setValue('savedObjectTitle', vizName);
 
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
@@ -366,24 +383,34 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         log.debug('redirect to origin checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
-      log.debug('Click Save Visualization button');
 
-      await testSubjects.click('confirmSaveSavedObjectButton');
+      const dashboardSelectorExists = await testSubjects.exists('add-to-dashboard-options');
+      if (dashboardSelectorExists) {
+        let option: DashboardPickerOption = 'add-to-library-option';
+        if (addToDashboard) {
+          option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+        }
+        log.debug('save modal dashboard selector, choosing option:', option);
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+        await label.click();
 
-      // Confirm that the Visualization has actually been saved
-      await testSubjects.existOrFail('saveVisualizationSuccess');
-      const message = await common.closeToast();
-      await header.waitUntilLoadingHasFinished();
-      await common.waitForSaveModalToClose();
-
-      return message;
+        if (dashboardId) {
+          // TODO - selecting an existing dashboard
+        }
+      }
     }
 
     public async saveVisualizationExpectSuccess(
       vizName: string,
-      { saveAsNew = false, redirectToOrigin = false } = {}
+      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: VisualizeSaveModalArgs = {}
     ) {
-      const saveMessage = await this.saveVisualization(vizName, { saveAsNew, redirectToOrigin });
+      const saveMessage = await this.saveVisualization(vizName, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+      });
       if (!saveMessage) {
         throw new Error(
           `Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`

@@ -1,11 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../../../../alerts/server';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertExecutorOptions,
+  ActionGroupIdsOf,
+} from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
@@ -21,7 +29,28 @@ import {
   thresholdActionVariableDescription,
 } from '../common/messages';
 
-export function registerMetricThresholdAlertType(libs: InfraBackendLibs): AlertType {
+export type MetricThresholdAlertType = AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+>;
+export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+>;
+
+export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),

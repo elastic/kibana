@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -14,13 +15,33 @@ import {
   createDatasetsFilters,
 } from './common';
 
+import { CategoriesSort } from '../../../../common/log_analysis';
+
+type CategoryAggregationOrder =
+  | 'filter_record>maximum_record_score'
+  | 'filter_model_plot>sum_actual';
+const getAggregationOrderForSortField = (
+  field: CategoriesSort['field']
+): CategoryAggregationOrder => {
+  switch (field) {
+    case 'maximumAnomalyScore':
+      return 'filter_record>maximum_record_score';
+      break;
+    case 'logEntryCount':
+      return 'filter_model_plot>sum_actual';
+      break;
+    default:
+      return 'filter_model_plot>sum_actual';
+  }
+};
+
 export const createTopLogEntryCategoriesQuery = (
   logEntryCategoriesJobId: string,
   startTime: number,
   endTime: number,
   size: number,
   datasets: string[],
-  sortDirection: 'asc' | 'desc' = 'desc'
+  sort: CategoriesSort
 ) => ({
   ...defaultRequestParameters,
   body: {
@@ -65,7 +86,7 @@ export const createTopLogEntryCategoriesQuery = (
           field: 'by_field_value',
           size,
           order: {
-            'filter_model_plot>sum_actual': sortDirection,
+            [getAggregationOrderForSortField(sort.field)]: sort.direction,
           },
         },
         aggs: {

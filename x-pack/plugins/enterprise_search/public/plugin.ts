@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   AppMountParameters,
+  CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
@@ -18,6 +20,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 import {
   APP_SEARCH_PLUGIN,
@@ -25,6 +28,8 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
@@ -41,6 +46,7 @@ interface PluginsSetup {
 export interface PluginsStart {
   cloud?: CloudSetup;
   licensing: LicensingPluginStart;
+  charts: ChartsPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -151,7 +157,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    // This must be called here in start() and not in `applications/index.tsx` to prevent loading
+    // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
+    docLinks.setDocLinks(core.docLinks);
+  }
 
   public stop() {}
 

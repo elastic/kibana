@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import ApolloClient from 'apollo-client';
@@ -27,6 +28,7 @@ import {
   TimelineId,
   TimelineStatus,
   TimelineType,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import {
@@ -42,11 +44,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import {
-  ColumnHeaderOptions,
-  TimelineModel,
-  TimelineTabs,
-} from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {

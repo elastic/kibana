@@ -12,6 +12,7 @@ import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import * as CSS from 'csstype';
+import { DetailedPeerCertificate } from 'tls';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { History } from 'history';
 import { Href } from 'history';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
+import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
@@ -32,30 +34,36 @@ import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { NotificationsStart as NotificationsStart_2 } from 'src/core/public';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { Optional } from '@kbn/utility-types';
+import { OverlayRef as OverlayRef_2 } from 'src/core/public';
 import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
+import { PeerCertificate } from 'tls';
 import { PluginInitializerContext } from 'src/core/public';
 import * as PropTypes from 'prop-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
-import { ShallowPromise } from '@kbn/utility-types';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { UnregisterCallback } from 'history';
+import { URL } from 'url';
 import { UserProvidedValues } from 'src/core/server/types';
 
 // Warning: (ae-missing-release-tag) "ACTION_ADD_PANEL" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -214,7 +222,7 @@ export const CONTEXT_MENU_TRIGGER = "CONTEXT_MENU_TRIGGER";
 // Warning: (ae-missing-release-tag) "contextMenuTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'>;
+export const contextMenuTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "defaultEmbeddableFactoryProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -297,10 +305,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     static runtimeId: number;
     // (undocumented)
     readonly runtimeId: number;
-    // Warning: (ae-forgotten-export) The symbol "TriggerContextMapping" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    supportedTriggers(): Array<keyof TriggerContextMapping>;
+    supportedTriggers(): string[];
     // (undocumented)
     abstract readonly type: string;
     // (undocumented)
@@ -410,6 +416,7 @@ export type EmbeddableInput = {
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
+    syncColors?: boolean;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -661,7 +668,7 @@ export interface IEmbeddable<I extends EmbeddableInput = EmbeddableInput, O exte
     reload(): void;
     render(domNode: HTMLElement | Element): void;
     readonly runtimeId?: number;
-    supportedTriggers(): Array<keyof TriggerContextMapping>;
+    supportedTriggers(): string[];
     readonly type: string;
     updateInput(changes: Partial<I>): void;
 }
@@ -716,7 +723,7 @@ export function openAddPanelFlyout(options: {
     overlays: OverlayStart_2;
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
-}): Promise<void>;
+}): OverlayRef_2;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -739,7 +746,7 @@ export const PANEL_NOTIFICATION_TRIGGER = "PANEL_NOTIFICATION_TRIGGER";
 // Warning: (ae-missing-release-tag) "panelBadgeTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'>;
+export const panelBadgeTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "PanelNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -753,7 +760,7 @@ export class PanelNotFoundError extends Error {
 // Warning: (ae-missing-release-tag) "panelNotificationTrigger" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'>;
+export const panelNotificationTrigger: Trigger;
 
 // Warning: (ae-missing-release-tag) "PanelState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -876,8 +883,8 @@ export const withEmbeddableSubscription: <I extends EmbeddableInput, O extends E
 
 // Warnings were encountered during analysis:
 //
-// src/plugins/embeddable/common/types.ts:42:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-// src/plugins/embeddable/public/lib/triggers/triggers.ts:46:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/common/types.ts:31:3 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+// src/plugins/embeddable/public/lib/triggers/triggers.ts:35:5 - (ae-forgotten-export) The symbol "Datatable" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

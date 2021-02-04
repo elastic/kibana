@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
@@ -16,22 +17,17 @@ import { fetchDetectionsUsage } from './index';
 
 describe('Detections Usage', () => {
   describe('fetchDetectionsUsage()', () => {
-    let callClusterMock: jest.Mocked<LegacyAPICaller>;
+    let esClientMock: jest.Mocked<ElasticsearchClient>;
     let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
     let mlMock: ReturnType<typeof mlServicesMock.create>;
 
     beforeEach(() => {
-      callClusterMock = elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser;
+      esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlMock = mlServicesMock.create();
     });
 
     it('returns zeroed counts if both calls are empty', async () => {
-      const result = await fetchDetectionsUsage(
-        '',
-        callClusterMock,
-        mlMock,
-        savedObjectsClientMock
-      );
+      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClientMock);
 
       expect(result).toEqual({
         detection_rules: {
@@ -58,13 +54,9 @@ describe('Detections Usage', () => {
     });
 
     it('tallies rules data given rules results', async () => {
-      (callClusterMock as jest.Mock).mockResolvedValue(getMockRulesResponse());
-      const result = await fetchDetectionsUsage(
-        '',
-        callClusterMock,
-        mlMock,
-        savedObjectsClientMock
-      );
+      (esClientMock.search as jest.Mock).mockResolvedValue({ body: getMockRulesResponse() });
+
+      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -92,12 +84,7 @@ describe('Detections Usage', () => {
         jobsSummary: mockJobSummary,
       });
 
-      const result = await fetchDetectionsUsage(
-        '',
-        callClusterMock,
-        mlMock,
-        savedObjectsClientMock
-      );
+      const result = await fetchDetectionsUsage('', esClientMock, mlMock, savedObjectsClientMock);
 
       expect(result).toEqual(
         expect.objectContaining({

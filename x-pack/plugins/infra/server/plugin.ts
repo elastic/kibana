@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Server } from '@hapi/hapi';
@@ -28,7 +29,7 @@ import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
-import { InfraRequestHandlerContext } from './types';
+import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 
 export const config = {
@@ -146,9 +147,9 @@ export class InfraServerPlugin {
     initInfraServer(this.libs);
     registerAlertTypes(plugins.alerts, this.libs);
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
-      (context, request): InfraRequestHandlerContext => {
+      (context, request) => {
         const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
           request,

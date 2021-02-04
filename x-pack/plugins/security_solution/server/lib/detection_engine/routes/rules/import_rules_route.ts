@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { chunk } from 'lodash/fp';
@@ -20,7 +21,7 @@ import {
   importRulesSchema as importRulesResponseSchema,
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -49,7 +50,11 @@ type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
+export const importRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType,
+  ml: SetupPlugins['ml']
+) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isEmpty } from 'lodash/fp';
@@ -12,7 +13,11 @@ import {
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
@@ -24,7 +29,7 @@ interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   id: string;
@@ -70,7 +75,7 @@ const getTransformedHits = (
     }
 
     const source = {
-      '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+      '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
       threshold_result: {
         count: totalResults,
         value: ruleId,
@@ -99,10 +104,10 @@ const getTransformedHits = (
         }
 
         const source = {
-          '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+          '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
           threshold_result: {
             count: docCount,
-            value: get(threshold.field, hit._source),
+            value: key,
           },
         };
 

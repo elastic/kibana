@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,6 +20,7 @@ import {
   PasteJsonText,
   UploadJsonFile,
 } from './creation_mode_components';
+import { Summary } from './creation_response_components';
 
 export const DocumentCreationFlyout: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
@@ -48,11 +50,7 @@ export const FlyoutContent: React.FC = () => {
         case 'file':
           return <UploadJsonFile />;
       }
-    case DocumentCreationStep.ShowError:
-      return <>DocumentCreationError</>;
-    case DocumentCreationStep.ShowErrorSummary:
-      return <>DocumentCreationSummary</>;
-    case DocumentCreationStep.ShowSuccessSummary:
-      return <>DocumentCreationSummary</>;
+    case DocumentCreationStep.ShowSummary:
+      return <Summary />;
   }
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
@@ -602,46 +603,27 @@ export const updateTimelineColumns = ({
   };
 };
 
-interface UpdateTimelineDescriptionParams {
-  id: string;
+interface UpdateTimelineTitleAndDescriptionParams {
   description: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineDescription = ({
-  id,
-  description,
-  timelineById,
-}: UpdateTimelineDescriptionParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      description: description.endsWith(' ') ? `${description.trim()} ` : description.trim(),
-    },
-  };
-};
-
-interface UpdateTimelineTitleParams {
   id: string;
   title: string;
   timelineById: TimelineById;
 }
 
-export const updateTimelineTitle = ({
+export const updateTimelineTitleAndDescription = ({
+  description,
   id,
   title,
   timelineById,
-}: UpdateTimelineTitleParams): TimelineById => {
+}: UpdateTimelineTitleAndDescriptionParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      title: title.endsWith(' ') ? `${title.trim()} ` : title.trim(),
+      description: description.trim(),
+      title: title.trim(),
     },
   };
 };

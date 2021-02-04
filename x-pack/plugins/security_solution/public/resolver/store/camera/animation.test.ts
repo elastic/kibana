@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createStore, Store, Reducer } from 'redux';
@@ -11,6 +12,7 @@ import * as selectors from './selectors';
 import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
 import { ResolverAction } from '../actions';
+import { panAnimationDuration } from './scaling_constants';
 
 type TestAction =
   | ResolverAction
@@ -59,7 +61,7 @@ describe('when the camera is created', () => {
   });
 
   describe('When attempting to pan to current position and scale', () => {
-    const duration = 1000;
+    const duration = panAnimationDuration;
     const startTime = 0;
     beforeEach(() => {
       const action: TestAction = {
@@ -101,7 +103,7 @@ describe('when the camera is created', () => {
   });
 
   describe('when animation begins', () => {
-    const duration = 1000;
+    const duration = panAnimationDuration;
     let targetTranslation: Vector2;
     const startTime = 0;
     beforeEach(() => {

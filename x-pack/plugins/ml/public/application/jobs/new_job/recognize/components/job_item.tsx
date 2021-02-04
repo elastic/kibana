@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, memo } from 'react';
@@ -21,6 +22,7 @@ import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 import { JobOverride } from '../../../../../../common/types/modules';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface JobItemProps {
   job: ModuleJobUI;
@@ -94,13 +96,13 @@ export const JobItem: FC<JobItemProps> = memo(
 
           {setupResult && setupResult.error && (
             <EuiText size="xs" color="danger">
-              {setupResult.error.msg}
+              {extractErrorMessage(setupResult.error)}
             </EuiText>
           )}
 
           {datafeedResult && datafeedResult.error && (
             <EuiText size="xs" color="danger">
-              {datafeedResult.error.msg}
+              {extractErrorMessage(datafeedResult.error)}
             </EuiText>
           )}
         </EuiFlexItem>

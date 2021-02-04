@@ -1,20 +1,7 @@
 [[development-unit-tests]]
 == Unit testing frameworks
 
-{kib} is migrating unit testing from `Mocha` to `Jest`. Legacy unit tests
-still exist in Mocha but all new unit tests should be written in Jest.
-
-[discrete]
-=== Mocha (legacy)
-
-Mocha tests are contained in `__tests__` directories.
-
-*Running Mocha Unit Tests*
-
-["source","shell"]
------------
-yarn test:mocha
------------
+{kib} is doing unit testing doing `Jest`.
 
 [discrete]
 == Jest
@@ -92,23 +79,10 @@ the `--debug-brk` flag. You’ll need to connect a remote debugger such
 as https://github.com/node-inspector/node-inspector[`node-inspector`]
 to proceed in this mode.
 
-[source,bash]
-----
-node scripts/mocha --debug <file>
-----
-
 [discrete]
 === Unit Testing Plugins
 
-This should work super if you’re using the
+Even when using 
 https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator[Kibana
-plugin generator]. If you’re not using the generator, well, you’re on
-your own. We suggest you look at how the generator works.
-
-To run the tests for just your particular plugin run the following
-command from your plugin:
-
-[source,bash]
-----
-yarn test:mocha
-----
+plugin generator] we do not enforce a way for unit testing your plugin. Please setup and you use 
+the tools of your choice. If the plugin will live inside the Kibana repo `Jest` must be used.

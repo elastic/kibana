@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { drag, drop } from '../common';
@@ -42,7 +43,7 @@ export const loadMoreEvents = () => {
 export const openEventsViewerFieldsBrowser = () => {
   cy.get(EVENTS_VIEWER_FIELDS_BUTTON).click({ force: true });
 
-  cy.get(SERVER_SIDE_EVENT_COUNT).invoke('text').should('not.equal', '0');
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { DocumentsLogic } from './documents_logic';
 
@@ -13,24 +14,7 @@ describe('DocumentsLogic', () => {
     isDocumentCreationOpen: false,
   };
 
-  const mount = (defaults?: object) => {
-    if (!defaults) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              documents_logic: {
-                ...defaults,
-              },
-            },
-          },
-        },
-      });
-    }
-    DocumentsLogic.mount();
-  };
+  const { mount } = new LogicMounter(DocumentsLogic);
 
   describe('actions', () => {
     describe('openDocumentCreation', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
 
-  describe('Screenshots', () => {
+  describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('reporting/ecommerce');
@@ -93,8 +94,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Preserve Layout', () => {
-      it('matches baseline report', async function () {
+    describe('PNG Layout', () => {
+      it('downloads a PNG file', async function () {
         const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
           const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
           await mkdirAsync(sessionDirectory, { recursive: true });
@@ -122,14 +123,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'dashboard_preserve_layout';
         const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentSimilar = await checkIfPngsMatch(
+        const percentDiff = await checkIfPngsMatch(
           sessionReportPath,
           getBaselineReportPath(reportFileName, 'png'),
           config.get('screenshots.directory'),
           log
         );
 
-        expect(percentSimilar).to.be.lessThan(0.1);
+        expect(percentDiff).to.be.lessThan(0.09);
+      });
+    });
+
+    describe('Preserve Layout', () => {
+      it('downloads a PDF file', async function () {
+        // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+        // function is taking about 15 seconds per comparison in jenkins.
+        this.timeout(300000);
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.clickGenerateReportButton();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const res = await PageObjects.reporting.getResponse(url);
+
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('application/pdf');
       });
     });
   });

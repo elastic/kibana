@@ -1,11 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
@@ -14,7 +24,7 @@ import {
   ThresholdExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 import { MetricExpression, AGGREGATION_TYPES } from '../types';
@@ -154,6 +164,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggType={aggType}
                   errors={errors}
                   onChangeSelectedAggField={updateMetric}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.ofExpression.helpTextDetail"
+                      defaultMessage="Can't find a metric? {documentationLink}."
+                      values={{
+                        documentationLink: (
+                          <EuiLink
+                            href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
+                            target="BLANK"
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.metrics.alertFlyout.ofExpression.popoverLinkLabel"
+                              defaultMessage="Learn how to add more data"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  }
+                  data-test-subj="ofExpression"
                 />
               </StyledExpression>
             )}

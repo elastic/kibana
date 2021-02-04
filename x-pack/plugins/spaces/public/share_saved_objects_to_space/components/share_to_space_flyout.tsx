@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import {
   EuiFlyout,
@@ -23,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
+import { GetSpaceResult } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { GetSpaceResult } from '../../../common/model/types';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions, SpaceTarget } from '../types';

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { LicenseExpirationAlert } from './license_expiration_alert';
 import { ALERT_LICENSE_EXPIRATION } from '../../common/constants';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
@@ -17,11 +19,13 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 jest.mock('moment', () => {
-  return function () {
+  const moment = function () {
     return {
       format: () => 'THE_DATE',
     };
   };
+  moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
+  return moment;
 });
 
 jest.mock('../static_globals', () => ({
@@ -170,11 +174,11 @@ describe('LicenseExpirationAlert', () => {
         action: '[Please update your license.](elasticsearch/nodes)',
         actionPlain: 'Please update your license.',
         internalFullMessage:
-          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. [Please update your license.](elasticsearch/nodes)',
+          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. [Please update your license.](elasticsearch/nodes)',
         internalShortMessage:
-          'License expiration alert is firing for testCluster. Your license expires in THE_DATE. Please update your license.',
+          'License expiration alert is firing for testCluster. Your license expires in HUMANIZED_DURATION. Please update your license.',
         clusterName,
-        expiredDate: 'THE_DATE',
+        expiredDate: 'HUMANIZED_DURATION',
         state: 'firing',
       });
     });

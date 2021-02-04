@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
-jest.mock('../../../shared/http', () => ({ HttpLogic: { values: { http: { get: jest.fn() } } } }));
-import { HttpLogic } from '../../../shared/http';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import { mockOverviewValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
+  const { mount } = new LogicMounter(OverviewLogic);
+  const { http } = mockHttpValues;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    OverviewLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {
@@ -65,7 +65,7 @@ describe('OverviewLogic', () => {
 
       await OverviewLogic.actions.initializeOverview();
 
-      expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(http.get).toHaveBeenCalledWith('/api/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -69,28 +70,30 @@ export default ({ getService }: FtrProviderContext) => {
     it('should list all jobs for user with access to all spaces', async () => {
       const body = await runRequest(200, USER.ML_VIEWER_ALL_SPACES);
 
-      expect(body).to.eql({
-        'anomaly-detector': {
-          [adJobIdSpace1]: [idSpace1],
-          [adJobIdSpace2]: [idSpace2],
-        },
-        'data-frame-analytics': {
-          [dfaJobIdSpace1]: [idSpace1],
-          [dfaJobIdSpace2]: [idSpace2],
-        },
+      expect(body).to.have.property('anomaly-detector');
+      expect(body['anomaly-detector']).to.eql({
+        [adJobIdSpace1]: [idSpace1],
+        [adJobIdSpace2]: [idSpace2],
+      });
+
+      expect(body).to.have.property('data-frame-analytics');
+      expect(body['data-frame-analytics']).to.eql({
+        [dfaJobIdSpace1]: [idSpace1],
+        [dfaJobIdSpace2]: [idSpace2],
       });
     });
 
     it('should only list jobs for the space the user has access to', async () => {
       const body = await runRequest(200, USER.ML_VIEWER_SPACE1);
 
-      expect(body).to.eql({
-        'anomaly-detector': {
-          [adJobIdSpace1]: [idSpace1],
-        },
-        'data-frame-analytics': {
-          [dfaJobIdSpace1]: [idSpace1],
-        },
+      expect(body).to.have.property('anomaly-detector');
+      expect(body['anomaly-detector']).to.eql({
+        [adJobIdSpace1]: [idSpace1],
+      });
+
+      expect(body).to.have.property('data-frame-analytics');
+      expect(body['data-frame-analytics']).to.eql({
+        [dfaJobIdSpace1]: [idSpace1],
       });
     });
   });

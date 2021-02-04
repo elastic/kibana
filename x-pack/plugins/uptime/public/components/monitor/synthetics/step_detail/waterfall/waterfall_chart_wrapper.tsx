@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -15,7 +16,7 @@ import {
   RenderItem,
 } from '../../waterfall';
 
-const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
+export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
@@ -43,15 +44,16 @@ const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   );
 };
 
-const renderLegendItem: RenderItem<LegendItem> = (item) => {
+export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
 };
 
 interface Props {
+  total: number;
   data: NetworkItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
+export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [networkData] = useState<NetworkItems>(data);
 
   const { series, domain } = useMemo(() => {
@@ -66,11 +68,13 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
 
   return (
     <WaterfallProvider
+      totalNetworkRequests={total}
+      fetchedNetworkRequests={networkData.length}
       data={series}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       renderTooltipItem={(tooltipProps) => {
-        return <EuiHealth color={String(tooltipProps.colour)}>{tooltipProps.value}</EuiHealth>;
+        return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }}
     >
       <WaterfallChart
@@ -81,6 +85,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        fullHeight={true}
       />
     </WaterfallProvider>
   );

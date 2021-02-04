@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -521,6 +522,21 @@ export default function ({ getService }: FtrProviderContext) {
 
         const task = await currentTask(originalTask.id);
         expect(task.attempts).to.eql(1);
+      });
+    });
+
+    it('should increment attempts when task fails on markAsRunning', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: { throwOnMarkAsRunning: true },
+      });
+
+      await delay(DEFAULT_POLL_INTERVAL * 3);
+
+      await retry.try(async () => {
+        const task = await currentTask(originalTask.id);
+        expect(task.attempts).to.eql(3);
+        expect(task.status).to.eql('failed');
       });
     });
 

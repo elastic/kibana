@@ -31,9 +31,16 @@
       },
       "technique": [
         {
-          "id": "T1103",
-          "name": "AppInit DLLs",
-          "reference": "https://attack.mitre.org/techniques/T1103/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.010",
+              "name": "AppInit DLLs",
+              "reference": "https://attack.mitre.org/techniques/T1546/010/"
+            }
+          ]
         }
       ]
     }

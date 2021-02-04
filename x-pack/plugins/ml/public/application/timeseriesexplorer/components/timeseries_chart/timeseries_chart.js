@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -689,7 +690,7 @@ class TimeseriesChartIntl extends Component {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization
-        yMax = yMax * (1 + (maxLevel + 1) / 5);
+        yMax += Math.abs(yMax - yMin) * ((maxLevel + 1) / 5);
       }
       this.focusYScale.domain([yMin, yMax]);
     } else {

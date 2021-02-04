@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,7 +15,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -33,7 +34,7 @@ import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -44,7 +45,7 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel, TimelineTabs } from '../../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { HideShowContainer } from '../styles';
@@ -173,9 +174,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlQueryExpression,
   ]);
 
-  const prevCombinedQueries = useRef<{
-    filterQuery: string;
-  } | null>(null);
   const combinedQueries = useMemo(
     () =>
       combineQueries({
@@ -211,17 +209,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
     return [...columnFields, ...requiredFieldsForActions];
   }, [columns]);
-  const prevTimelineQuerySortField = useRef<
-    Array<{
-      field: string;
-      direction: Direction;
-    }>
-  >([]);
+
   const timelineQuerySortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
         direction: sortDirection as Direction,
+        type: columnType,
       })),
     [sort]
   );
@@ -252,7 +246,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ timelineId });
+    onEventClosed({ tabType: TimelineTabs.query, timelineId });
 
     if (timelineId === TimelineId.active) {
       activeTimeline.toggleExpandedEvent({
@@ -265,17 +259,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
-
-  useEffect(() => {
-    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
-      prevCombinedQueries.current = combinedQueries;
-      handleOnEventClosed();
-    }
-    if (!deepEqual(prevTimelineQuerySortField.current, timelineQuerySortField)) {
-      prevTimelineQuerySortField.current = timelineQuerySortField;
-      handleOnEventClosed();
-    }
-  }, [combinedQueries, handleOnEventClosed, timelineQuerySortField]);
 
   return (
     <>
@@ -292,7 +275,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       <FullWidthFlexGroup>
         <ScrollableFlexItem grow={2}>
           <HideShowContainer $isVisible={!timelineFullScreen}>
-            <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+            <StyledEuiFlyoutHeader
+              data-test-subj={`${activeTab}-tab-flyout-header`}
+              hasBorder={false}
+            >
               <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
                 <DatePicker grow={1}>
                   <SuperDatePicker id="timeline" timelineId={timelineId} />
@@ -322,7 +308,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </HideShowContainer>
 
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
@@ -339,7 +328,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutBody>
 
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               {!isBlankTimeline && (
@@ -368,6 +357,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EventDetails
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                tabType={TimelineTabs.query}
                 timelineId={timelineId}
                 handleOnEventClosed={handleOnEventClosed}
               />
@@ -416,7 +406,7 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
-      expandedEvent,
+      expandedEvent: expandedEvent[TimelineTabs.query] ?? {},
       filters: timelineFilter,
       timelineId,
       isLive: input.policy.kind === 'interval',
@@ -425,7 +415,7 @@ const makeMapStateToProps = () => {
       kqlMode,
       kqlQueryExpression,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
-      showEventDetails: !!expandedEvent.eventId,
+      showEventDetails: !!expandedEvent[TimelineTabs.query]?.eventId,
       show,
       sort,
       start: input.timerange.from,

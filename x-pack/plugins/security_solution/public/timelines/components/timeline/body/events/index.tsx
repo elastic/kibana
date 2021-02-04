@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,8 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';

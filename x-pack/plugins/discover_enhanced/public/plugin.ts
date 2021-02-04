@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
@@ -15,24 +16,10 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../src/plugins/ki
 import {
   EmbeddableSetup,
   EmbeddableStart,
-  EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
-import {
-  ExploreDataContextMenuAction,
-  ExploreDataChartAction,
-  ACTION_EXPLORE_DATA,
-  ACTION_EXPLORE_DATA_CHART,
-  ExploreDataChartActionContext,
-} from './actions';
+import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
 import { Config } from '../common';
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPLORE_DATA]: EmbeddableContext;
-    [ACTION_EXPLORE_DATA_CHART]: ExploreDataChartActionContext;
-  }
-}
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;

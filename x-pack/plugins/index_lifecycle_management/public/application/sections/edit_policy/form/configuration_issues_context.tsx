@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -9,7 +10,7 @@ import React, { FunctionComponent, createContext, useContext } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 
-import { isUsingDefaultRolloverPath, useRolloverPath } from '../constants';
+import { isUsingDefaultRolloverPath, isUsingCustomRolloverPath } from '../constants';
 
 export interface ConfigurationIssues {
   /**
@@ -33,14 +34,20 @@ const pathToHotPhaseSearchableSnapshot =
 
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
-    watch: [pathToHotPhaseSearchableSnapshot, useRolloverPath, isUsingDefaultRolloverPath],
+    watch: [
+      pathToHotPhaseSearchableSnapshot,
+      isUsingCustomRolloverPath,
+      isUsingDefaultRolloverPath,
+    ],
   });
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
-  const rolloverSwitchEnabled = get(formData, useRolloverPath);
+  // Provide default value, as path may become undefined if removed from the DOM
+  const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath, true);
+
   return (
     <ConfigurationIssuesContext.Provider
       value={{
-        isUsingRollover: isUsingDefaultRollover === false ? rolloverSwitchEnabled : true,
+        isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
         isUsingSearchableSnapshotInHotPhase:
           get(formData, pathToHotPhaseSearchableSnapshot) != null,
       }}

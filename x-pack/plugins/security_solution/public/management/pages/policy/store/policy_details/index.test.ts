@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PolicyDetailsState } from '../../types';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { policyDetailsReducer, PolicyDetailsAction, policyDetailsMiddlewareFactory } from './index';
 import { policyConfig } from './selectors';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
   createSpyMiddleware,
@@ -54,7 +55,7 @@ describe('policy details: ', () => {
               },
             },
             policy: {
-              value: policyConfigFactory(),
+              value: policyFactory(),
             },
           },
         },
@@ -254,6 +255,7 @@ describe('policy details: ', () => {
         http.put.mock.calls.length - 1
       ] as unknown) as [string, HttpFetchOptions])[1];
 
+      // license is below platinum in this test, paid features are off
       expect(JSON.parse(lastPutCallPayload.body as string)).toEqual({
         name: '',
         description: '',
@@ -282,9 +284,14 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'off' },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                     },
@@ -296,9 +303,14 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'off' },
                     popup: {
                       malware: {
                         enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
+                        enabled: false,
                         message: '',
                       },
                     },

@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../../../../alerts/server';
+import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../../alerts/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
+  FIRED_ACTIONS_ID,
 } from './inventory_metric_threshold_executor';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
@@ -22,6 +25,7 @@ import {
   metricActionVariableDescription,
   thresholdActionVariableDescription,
 } from '../common/messages';
+import { RecoveredActionGroupId } from '../../../../../alerts/common';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -40,7 +44,21 @@ const condition = schema.object({
   ),
 });
 
-export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs): AlertType => ({
+export type InventoryMetricThresholdAllowedActionGroups = typeof FIRED_ACTIONS_ID;
+
+export const registerMetricInventoryThresholdAlertType = (
+  libs: InfraBackendLibs
+): AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  InventoryMetricThresholdAllowedActionGroups,
+  RecoveredActionGroupId
+> => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
     defaultMessage: 'Inventory',
@@ -59,7 +77,7 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
       { unknowns: 'allow' }
     ),
   },
-  defaultActionGroupId: FIRED_ACTIONS.id,
+  defaultActionGroupId: FIRED_ACTIONS_ID,
   actionGroups: [FIRED_ACTIONS],
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',

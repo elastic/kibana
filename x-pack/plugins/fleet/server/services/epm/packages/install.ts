@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import semverGt from 'semver/functions/gt';
@@ -379,6 +380,7 @@ export async function createInstallation(options: {
     {
       installed_kibana: [],
       installed_es: [],
+      package_assets: [],
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,

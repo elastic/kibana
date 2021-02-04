@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, ReactElement } from 'react';
@@ -25,7 +26,9 @@ export const HiddenText: React.FC<Props> = ({ text, children }) => {
     defaultMessage: 'Hidden text',
   });
   const hiddenText = isHidden ? (
-    <span aria-label={hiddenLabel}>{text.replace(/./g, '•')}</span>
+    <span aria-label={hiddenLabel}>
+      <span aria-hidden={true}>{text.replace(/./g, '•')}</span>
+    </span>
   ) : (
     text
   );

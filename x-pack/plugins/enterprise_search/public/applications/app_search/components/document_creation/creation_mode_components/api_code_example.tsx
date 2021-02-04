@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dedent from 'dedent';
@@ -23,6 +24,8 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
@@ -95,8 +98,14 @@ export const FlyoutBody: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiPanel hasShadow={false} paddingSize="s" className="eui-textBreakAll">
-        <EuiBadge color="primary">POST</EuiBadge>
-        <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">POST</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiCodeBlock language="bash" fontSize="m" isCopyable>
         {dedent(`

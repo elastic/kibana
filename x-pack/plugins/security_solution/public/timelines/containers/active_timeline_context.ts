@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TimelineExpandedEvent } from '../../../common/types/timeline';
+import { TimelineExpandedEventType } from '../../../common/types/timeline';
 import { TimelineEventsAllRequestOptions } from '../../../common/search_strategy/timeline';
 import { TimelineArgs } from '.';
 
@@ -21,7 +22,7 @@ import { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedEvent: TimelineExpandedEvent = {};
+  private _expandedEvent: TimelineExpandedEventType = {};
   private _pageName: string = '';
   private _request: TimelineEventsAllRequestOptions | null = null;
   private _response: TimelineArgs | null = null;
@@ -38,7 +39,7 @@ class ActiveTimelineEvents {
     return this._expandedEvent;
   }
 
-  toggleExpandedEvent(expandedEvent: TimelineExpandedEvent) {
+  toggleExpandedEvent(expandedEvent: TimelineExpandedEventType) {
     if (expandedEvent.eventId === this._expandedEvent.eventId) {
       this._expandedEvent = {};
     } else {
@@ -46,7 +47,7 @@ class ActiveTimelineEvents {
     }
   }
 
-  setExpandedEvent(expandedEvent: TimelineExpandedEvent) {
+  setExpandedEvent(expandedEvent: TimelineExpandedEventType) {
     this._expandedEvent = expandedEvent;
   }
 

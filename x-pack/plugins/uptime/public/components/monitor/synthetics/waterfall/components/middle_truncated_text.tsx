@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { FIXED_AXIS_HEIGHT } from './constants';
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -13,7 +16,7 @@ const OuterContainer = styled.div`
   position: relative;
 `;
 
-const InnerContainer = styled.div`
+const InnerContainer = styled.span`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -28,10 +31,12 @@ const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 const LastChunk = styled.span`
   flex-shrink: 0;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 export const getChunks = (text: string) => {
@@ -51,11 +56,18 @@ export const MiddleTruncatedText = ({ text }: { text: string }) => {
   }, [text]);
 
   return (
-    <OuterContainer>
-      <InnerContainer>
-        <FirstChunk>{chunks.first}</FirstChunk>
-        <LastChunk>{chunks.last}</LastChunk>
-      </InnerContainer>
-    </OuterContainer>
+    <>
+      <OuterContainer>
+        <EuiScreenReaderOnly>
+          <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
+        </EuiScreenReaderOnly>
+        <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+          <InnerContainer aria-hidden={true}>
+            <FirstChunk>{chunks.first}</FirstChunk>
+            <LastChunk>{chunks.last}</LastChunk>
+          </InnerContainer>
+        </EuiToolTip>
+      </OuterContainer>
+    </>
   );
 };

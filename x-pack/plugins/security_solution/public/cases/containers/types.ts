@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,6 +13,7 @@ import {
   CommentRequest,
   CaseStatuses,
   CaseAttributes,
+  CasePatchRequest,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -136,4 +138,19 @@ export interface DeleteCase {
 export interface FieldMappings {
   id: string;
   title?: string;
+}
+
+export type UpdateKey = keyof Pick<
+  CasePatchRequest,
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+>;
+
+export interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
+  updateCase?: (newCase: Case) => void;
+  caseData: Case;
+  onSuccess?: () => void;
+  onError?: () => void;
 }

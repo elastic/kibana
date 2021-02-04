@@ -35,6 +35,10 @@ discover-app {
   }
 }
 
+.dscPageContent {
+  border: $euiBorderThin;
+}
+
 .dscPageContent,
 .dscPageContent__inner {
   height: 100%;
@@ -46,6 +50,7 @@ discover-app {
 
 .dscResultCount {
   padding: $euiSizeS;
+  min-height: $euiSize * 3;
 
   @include euiBreakpoint('xs', 's') {
     .dscResultCount__toggle {
@@ -65,7 +70,7 @@ discover-app {
 
   // SASSTODO: the visualizing component should have an option or a modifier
   .series > rect {
-    fill-opacity: 0.5;
+    fill-opacity: .5;
     stroke-width: 1;
   }
 }
@@ -74,6 +79,13 @@ discover-app {
   display: flex;
   height: $euiSize * 12.5;
   padding: $euiSizeS;
+}
+
+// new slimmer layout for data grid
+.dscHistogramGrid {
+  display: flex;
+  height: $euiSize * 8;
+  padding: $euiSizeS $euiSizeS 0 $euiSizeS;
 }
 
 .dscTable {

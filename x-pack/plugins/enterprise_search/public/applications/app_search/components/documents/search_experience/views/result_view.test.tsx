@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,7 +23,6 @@ describe('ResultView', () => {
     },
     _meta: {
       id: '1',
-      scopedId: '1',
       score: 100,
       engine: 'my-engine',
     },
@@ -33,11 +33,14 @@ describe('ResultView', () => {
   };
 
   it('renders', () => {
-    const wrapper = shallow(<ResultView result={result} schemaForTypeHighlights={schema} />);
+    const wrapper = shallow(
+      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine={true} />
+    );
     expect(wrapper.find(Result).props()).toEqual({
       result,
       shouldLinkToDetailPage: true,
       schemaForTypeHighlights: schema,
+      isMetaEngine: true,
     });
   });
 });

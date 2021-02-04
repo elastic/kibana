@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
@@ -11,6 +12,7 @@ import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
@@ -77,7 +79,6 @@ export const updateAlertStatusAction = async ({
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-
     const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
@@ -115,6 +116,16 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 
   return { to, from };
 };
+
+const getFiltersFromRule = (filters: string[]): Filter[] =>
+  filters.reduce((acc, filterString) => {
+    try {
+      const objFilter: Filter = JSON.parse(filterString);
+      return [...acc, objFilter];
+    } catch (e) {
+      return acc;
+    }
+  }, [] as Filter[]);
 
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
@@ -262,22 +273,9 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
-        ],
+        description: `_id: ${ecsData._id}`,
+        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
+        dataProviders: [...getThresholdAggregationDataProvider(ecsData, nonEcsData)],
         id: TimelineId.active,
         indexNames: [],
         dateRange: {

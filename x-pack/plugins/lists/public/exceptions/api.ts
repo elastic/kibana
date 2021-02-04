@@ -1,8 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
+
+import { validateEither } from '../../common/shared_imports';
+import { toError, toPromise } from '../common/fp_utils';
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
@@ -17,22 +24,11 @@ import {
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   createEndpointListSchema,
-  createExceptionListItemSchema,
-  createExceptionListSchema,
-  deleteExceptionListItemSchema,
-  deleteExceptionListSchema,
   exceptionListItemSchema,
   exceptionListSchema,
-  findExceptionListItemSchema,
-  findExceptionListSchema,
   foundExceptionListItemSchema,
   foundExceptionListSchema,
-  readExceptionListItemSchema,
-  readExceptionListSchema,
-  updateExceptionListItemSchema,
-  updateExceptionListSchema,
 } from '../../common/schemas';
-import { validate } from '../../common/shared_imports';
 
 import {
   AddEndpointExceptionListProps,
@@ -41,6 +37,7 @@ import {
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
+  ExportExceptionListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -55,35 +52,38 @@ import {
  * @throws An error if response is not OK
  *
  */
-export const addExceptionList = async ({
+const addExceptionList = async ({
   http,
   list,
   signal,
-}: AddExceptionListProps): Promise<ExceptionListSchema> => {
-  const [validatedRequest, errorsRequest] = validate(list, createExceptionListSchema);
+}: AddExceptionListProps): Promise<ExceptionListSchema> =>
+  http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    body: JSON.stringify(list),
+    method: 'POST',
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
-        body: JSON.stringify(list),
-        method: 'POST',
-        signal,
-      });
+const addExceptionListWithValidation = async ({
+  http,
+  list,
+  signal,
+}: AddExceptionListProps): Promise<ExceptionListSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          addExceptionList({
+            http,
+            list,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(exceptionListSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { addExceptionListWithValidation as addExceptionList };
 
 /**
  * Add new ExceptionListItem
@@ -95,35 +95,38 @@ export const addExceptionList = async ({
  * @throws An error if response is not OK
  *
  */
-export const addExceptionListItem = async ({
+const addExceptionListItem = async ({
   http,
   listItem,
   signal,
-}: AddExceptionListItemProps): Promise<ExceptionListItemSchema> => {
-  const [validatedRequest, errorsRequest] = validate(listItem, createExceptionListItemSchema);
+}: AddExceptionListItemProps): Promise<ExceptionListItemSchema> =>
+  http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(listItem),
+    method: 'POST',
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-        body: JSON.stringify(listItem),
-        method: 'POST',
-        signal,
-      });
+const addExceptionListItemWithValidation = async ({
+  http,
+  listItem,
+  signal,
+}: AddExceptionListItemProps): Promise<ExceptionListItemSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          addExceptionListItem({
+            http,
+            listItem,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(exceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { addExceptionListItemWithValidation as addExceptionListItem };
 
 /**
  * Update existing ExceptionList
@@ -135,35 +138,38 @@ export const addExceptionListItem = async ({
  * @throws An error if response is not OK
  *
  */
-export const updateExceptionList = async ({
+const updateExceptionList = async ({
   http,
   list,
   signal,
-}: UpdateExceptionListProps): Promise<ExceptionListSchema> => {
-  const [validatedRequest, errorsRequest] = validate(list, updateExceptionListSchema);
+}: UpdateExceptionListProps): Promise<ExceptionListSchema> =>
+  http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    body: JSON.stringify(list),
+    method: 'PUT',
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
-        body: JSON.stringify(list),
-        method: 'PUT',
-        signal,
-      });
+const updateExceptionListWithValidation = async ({
+  http,
+  list,
+  signal,
+}: UpdateExceptionListProps): Promise<ExceptionListSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          updateExceptionList({
+            http,
+            list,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(exceptionListSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { updateExceptionListWithValidation as updateExceptionList };
 
 /**
  * Update existing ExceptionListItem
@@ -175,35 +181,38 @@ export const updateExceptionList = async ({
  * @throws An error if response is not OK
  *
  */
-export const updateExceptionListItem = async ({
+const updateExceptionListItem = async ({
   http,
   listItem,
   signal,
-}: UpdateExceptionListItemProps): Promise<ExceptionListItemSchema> => {
-  const [validatedRequest, errorsRequest] = validate(listItem, updateExceptionListItemSchema);
+}: UpdateExceptionListItemProps): Promise<ExceptionListItemSchema> =>
+  http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    body: JSON.stringify(listItem),
+    method: 'PUT',
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-        body: JSON.stringify(listItem),
-        method: 'PUT',
-        signal,
-      });
+const updateExceptionListItemWithValidation = async ({
+  http,
+  listItem,
+  signal,
+}: UpdateExceptionListItemProps): Promise<ExceptionListItemSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          updateExceptionListItem({
+            http,
+            listItem,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(exceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { updateExceptionListItemWithValidation as updateExceptionListItem };
 
 /**
  * Fetch all ExceptionLists (optionally by namespaceType)
@@ -216,7 +225,7 @@ export const updateExceptionListItem = async ({
  *
  * @throws An error if request params or response is not OK
  */
-export const fetchExceptionLists = async ({
+const fetchExceptionLists = async ({
   http,
   filters,
   namespaceTypes,
@@ -232,30 +241,38 @@ export const fetchExceptionLists = async ({
     sort_order: 'desc',
   };
 
-  const [validatedRequest, errorsRequest] = validate(query, findExceptionListSchema);
-
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
-        method: 'GET',
-        query,
-        signal,
-      });
-
-      const [validatedResponse, errorsResponse] = validate(response, foundExceptionListSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
+  return http.fetch<FoundExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
+    method: 'GET',
+    query,
+    signal,
+  });
 };
+
+const fetchExceptionListsWithValidation = async ({
+  filters,
+  http,
+  namespaceTypes,
+  pagination,
+  signal,
+}: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          fetchExceptionLists({
+            filters,
+            http,
+            namespaceTypes,
+            pagination,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(foundExceptionListSchema, response))),
+    flow(toPromise)
+  )();
+
+export { fetchExceptionListsWithValidation as fetchExceptionLists };
 
 /**
  * Fetch an ExceptionList by providing a ExceptionList ID
@@ -267,39 +284,41 @@ export const fetchExceptionLists = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListById = async ({
+const fetchExceptionListById = async ({
   http,
   id,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
-    readExceptionListSchema
-  );
+}: ApiCallByIdProps): Promise<ExceptionListSchema> =>
+  http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    method: 'GET',
+    query: { id, namespace_type: namespaceType },
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
-        method: 'GET',
-        query: { id, namespace_type: namespaceType },
-        signal,
-      });
+const fetchExceptionListByIdWithValidation = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          fetchExceptionListById({
+            http,
+            id,
+            namespaceType,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(exceptionListSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
 
 /**
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id
@@ -313,7 +332,7 @@ export const fetchExceptionListById = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListsItemsByListIds = async ({
+const fetchExceptionListsItemsByListIds = async ({
   http,
   listIds,
   namespaceTypes,
@@ -348,33 +367,41 @@ export const fetchExceptionListsItemsByListIds = async ({
     sort_order: 'desc',
     ...(filters.trim() !== '' ? { filter: filters } : {}),
   };
-  const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<FoundExceptionListItemSchema>(
-        `${EXCEPTION_LIST_ITEM_URL}/_find`,
-        {
-          method: 'GET',
-          query,
-          signal,
-        }
-      );
-
-      const [validatedResponse, errorsResponse] = validate(response, foundExceptionListItemSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
+  return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+    method: 'GET',
+    query,
+    signal,
+  });
 };
+
+const fetchExceptionListsItemsByListIdsWithValidation = async ({
+  filterOptions,
+  http,
+  listIds,
+  namespaceTypes,
+  pagination,
+  signal,
+}: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          fetchExceptionListsItemsByListIds({
+            filterOptions,
+            http,
+            listIds,
+            namespaceTypes,
+            pagination,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(foundExceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
+
+export { fetchExceptionListsItemsByListIdsWithValidation as fetchExceptionListsItemsByListIds };
 
 /**
  * Fetch an ExceptionListItem by providing a ExceptionListItem ID
@@ -386,38 +413,31 @@ export const fetchExceptionListsItemsByListIds = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListItemById = async ({
+const fetchExceptionListItemById = async ({
   http,
   id,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListItemSchema> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
-    readExceptionListItemSchema
-  );
+}: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
+  http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    method: 'GET',
+    query: { id, namespace_type: namespaceType },
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-        method: 'GET',
-        query: { id, namespace_type: namespaceType },
-        signal,
-      });
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
+const fetchExceptionListItemByIdWithValidation = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
+  flow(
+    () => tryCatch(() => fetchExceptionListItemById({ http, id, namespaceType, signal }), toError),
+    chain((response) => fromEither(validateEither(exceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
 
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { fetchExceptionListItemByIdWithValidation as fetchExceptionListItemById };
 
 /**
  * Delete an ExceptionList by providing a ExceptionList ID
@@ -429,39 +449,31 @@ export const fetchExceptionListItemById = async ({
  *
  * @throws An error if response is not OK
  */
-export const deleteExceptionListById = async ({
+const deleteExceptionListById = async ({
   http,
   id,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
-    deleteExceptionListSchema
-  );
+}: ApiCallByIdProps): Promise<ExceptionListSchema> =>
+  http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
+    method: 'DELETE',
+    query: { id, namespace_type: namespaceType },
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
-        method: 'DELETE',
-        query: { id, namespace_type: namespaceType },
-        signal,
-      });
+const deleteExceptionListByIdWithValidation = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListSchema> =>
+  flow(
+    () => tryCatch(() => deleteExceptionListById({ http, id, namespaceType, signal }), toError),
+    chain((response) => fromEither(validateEither(exceptionListSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { deleteExceptionListByIdWithValidation as deleteExceptionListById };
 
 /**
  * Delete an ExceptionListItem by providing a ExceptionListItem ID
@@ -473,39 +485,31 @@ export const deleteExceptionListById = async ({
  *
  * @throws An error if response is not OK
  */
-export const deleteExceptionListItemById = async ({
+const deleteExceptionListItemById = async ({
   http,
   id,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListItemSchema> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
-    deleteExceptionListItemSchema
-  );
+}: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
+  http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
+    method: 'DELETE',
+    query: { id, namespace_type: namespaceType },
+    signal,
+  });
 
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-        method: 'DELETE',
-        query: { id, namespace_type: namespaceType },
-        signal,
-      });
+const deleteExceptionListItemByIdWithValidation = async ({
+  http,
+  id,
+  namespaceType,
+  signal,
+}: ApiCallByIdProps): Promise<ExceptionListItemSchema> =>
+  flow(
+    () => tryCatch(() => deleteExceptionListItemById({ http, id, namespaceType, signal }), toError),
+    chain((response) => fromEither(validateEither(exceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
 
-      const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
-
-      if (errorsResponse != null || validatedResponse == null) {
-        return Promise.reject(errorsResponse);
-      } else {
-        return Promise.resolve(validatedResponse);
-      }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+export { deleteExceptionListItemByIdWithValidation as deleteExceptionListItemById };
 
 /**
  * Add new Endpoint ExceptionList
@@ -516,24 +520,47 @@ export const deleteExceptionListItemById = async ({
  * @throws An error if response is not OK
  *
  */
-export const addEndpointExceptionList = async ({
+const addEndpointExceptionList = async ({
   http,
   signal,
-}: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> => {
-  try {
-    const response = await http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
-      method: 'POST',
-      signal,
-    });
+}: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> =>
+  http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
+    method: 'POST',
+    signal,
+  });
 
-    const [validatedResponse, errorsResponse] = validate(response, createEndpointListSchema);
+const addEndpointExceptionListWithValidation = async ({
+  http,
+  signal,
+}: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> =>
+  flow(
+    () => tryCatch(() => addEndpointExceptionList({ http, signal }), toError),
+    chain((response) => fromEither(validateEither(createEndpointListSchema, response))),
+    flow(toPromise)
+  )();
 
-    if (errorsResponse != null || validatedResponse == null) {
-      return Promise.reject(errorsResponse);
-    } else {
-      return Promise.resolve(validatedResponse);
-    }
-  } catch (error) {
-    return Promise.reject(error);
-  }
-};
+export { addEndpointExceptionListWithValidation as addEndpointExceptionList };
+
+/**
+ * Fetch an ExceptionList by providing a ExceptionList ID
+ *
+ * @param http Kibana http service
+ * @param id ExceptionList ID (not list_id)
+ * @param listId ExceptionList LIST_ID (not id)
+ * @param namespaceType ExceptionList namespace_type
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const exportExceptionList = async ({
+  http,
+  id,
+  listId,
+  namespaceType,
+  signal,
+}: ExportExceptionListProps): Promise<Blob> =>
+  http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+    method: 'GET',
+    query: { id, list_id: listId, namespace_type: namespaceType },
+    signal,
+  });

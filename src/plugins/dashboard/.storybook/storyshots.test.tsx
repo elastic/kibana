@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fs from 'fs';
@@ -12,6 +13,7 @@ import 'moment-timezone';
 import ReactDOM from 'react-dom';
 
 import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-storyshots';
+// @ts-ignore
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
@@ -52,6 +54,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
   };
 });
 
+// @ts-ignore
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');

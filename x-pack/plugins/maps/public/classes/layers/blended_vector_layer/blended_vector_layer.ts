@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,7 @@ import {
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -61,6 +63,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     requestType: RENDER_AS.POINT,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
+  clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -311,14 +314,19 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        const abortController = new AbortController();
+        syncContext.registerCancelCallback(requestToken, () => abortController.abort());
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        const resp = await searchSource.fetch();
+        const resp = await searchSource.fetch({
+          abortSignal: abortController.signal,
+          sessionId: syncContext.dataFilters.searchSessionId,
+        });
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
         const countData = { isSyncClustered } as CountData;
         syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
-        if (!(error instanceof DataRequestAbortError)) {
+        if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);
         }
         return;

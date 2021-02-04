@@ -1,34 +1,120 @@
 # Chromium build
 
-We ship our own headless build of Chromium which is significantly smaller than the standard binaries shipped by Google. The scripts in this folder can be used to initialize the build environments and run the build on Mac, Windows, and Linux.
+We ship our own headless build of Chromium which is significantly smaller than
+the standard binaries shipped by Google. The scripts in this folder can be used
+to accept a commit hash from the Chromium repository, and initialize the build
+environments and run the build on Mac, Windows, and Linux.
 
-The official Chromium build process is poorly documented, and seems to have breaking changes fairly regularly. The build pre-requisites, and the build flags change over time, so it is likely that the scripts in this directory will be out of date by the time we have to do another Chromium build.
+## Before you begin
 
-This document is an attempt to note all of the gotchas we've come across while building, so that the next time we have to tinker here, we'll have a good starting point.
+If you wish to use a remote VM to build, you'll need access to our GCP account,
+which is where we have two machines provisioned for the Linux and Windows
+builds. Mac builds can be achieved locally, and are a great place to start to
+gain familiarity.
 
-# Before you begin
-You'll need access to our GCP account, which is where we have two machines provisioned for the Linux and Windows builds. Mac builds can be achieved locally, and are a great place to start to gain familiarity.
+**NOTE:** Linux builds should be done in Ubuntu on x86 architecture. ARM builds
+are created in x86. CentOS is not supported for building Chromium.
 
 1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
 2. Click the "Compute Engine" tab.
-3. Ensure that `chromium-build-linux` and `chromium-build-windows-12-beefy` are there.
-4. If #3 fails, you'll have to spin up new instances. Generally, these need `n1-standard-8` types or 8 vCPUs/30 GB memory.
-5. Ensure that there's enough room left on the disk. `ncdu` is a good linux util to verify what's claming space.
+3. Find `chromium-build-linux` or `chromium-build-windows-12-beefy` and start the instance.
+4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
+5. System dependencies:
+    - 8 CPU
+    - 30GB memory
+    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
+    - git
+    - python2 (`python` must link to `python2`)
+    - lsb_release
+    - tmux is recommended in case your ssh session is interrupted
+6. Copy the entire `build_chromium` directory into a GCP storage bucket, so you can copy the scripts into the instance and run them.
+
+## Build Script Usage
+
+```
+# Allow our scripts to use depot_tools commands
+export PATH=$HOME/chromium/depot_tools:$PATH
+
+# Create a dedicated working directory for this directory of Python scripts.
+mkdir ~/chromium && cd ~/chromium
+
+# Copy the scripts from the Kibana repo to use them conveniently in the working directory
+gsutil cp -r gs://my-bucket/build_chromium .
+
+# Install the OS packages, configure the environment, download the chromium source (25GB)
+python ./build_chromium/init.sh [arch_name]
+
+# Run the build script with the path to the chromium src directory, the git commit id
+python ./build_chromium/build.py <commit_id> x86
+
+# OR You can build for ARM
+python ./build_chromium/build.py <commit_id> arm64
+```
+
+**NOTE:** The `init.py` script updates git config to make it more possible for
+the Chromium repo to be cloned successfully. If checking out the Chromium fails
+with "early EOF" errors, the instance could be low on memory or disk space.
+
+## Getting the Commit ID
+The `build.py` script requires a commit ID of the Chromium repo. Getting `<commit_id>` can be tricky. The best technique seems to be:
+1. Create a temporary working directory and intialize yarn
+2. `yarn add puppeteer # install latest puppeter`
+3. Look through Puppeteer documentation and Changelogs to find information
+about where the "chromium revision" is located in the Puppeteer code. The code
+containing it might not be distributed in the node module.
+    - Example: https://github.com/puppeteer/puppeteer/blob/b549256/src/revisions.ts
+4. Use `https://crrev.com` and look up the revision and find the git commit info.
+    - Example: http://crrev.com/818858 leads to the git commit e62cb7e3fc7c40548cef66cdf19d270535d9350b
 
 ## Build args
 
-Chromium is built via a build tool called "ninja". The build can be configured by specifying build flags either in an "args.gn" file or via commandline args. We have an "args.gn" file per platform:
+A good how-to on building Chromium from source is
+[here](https://chromium.googlesource.com/chromium/src/+/master/docs/get_the_code.md).
 
-- mac: darwin/args.gn
-- linux 64bit: linux-x64/args.gn
+There are documents for each OS that will explain how to customize arguments
+for the build using the `gn` tool. Those instructions do not apply for the
+Kibana Chromium build. Our `build.py` script ensure the correct `args.gn`
+file gets used for build arguments.
+
+We have an `args.gn` file per platform:
+
+- mac: `darwin/args.gn`
+- linux 64bit: `linux-x64/args.gn`
+- windows: `windows/args.gn`
 - ARM 64bit: linux-aarch64/args.gn
-- windows: windows/args.gn
 
-The various build flags are not well documented. Some are documented [here](https://www.chromium.org/developers/gn-build-configuration). Some, such as `enable_basic_printing = false`, I only found by poking through 3rd party build scripts.
+To get a list of the build arguments that are enabled, install `depot_tools` and run
+`gn args out/headless --list`. It prints out all of the flags and their
+settings, including the defaults.
 
-As of this writing, there is an officially supported headless Chromium build args file for Linux: `build/args/headless.gn`. This does not work on Windows or Mac, so we have taken that as our starting point, and modified it until the Windows / Mac builds succeeded.
+The various build flags are not well documented. Some are documented
+[here](https://www.chromium.org/developers/gn-build-configuration). 
+
+As of this writing, there is an officially supported headless Chromium build
+args file for Linux: `build/args/headless.gn`. This does not work on Windows or
+Mac, so we have taken that as our starting point, and modified it until the
+Windows / Mac builds succeeded.
 
 **NOTE:** Please, make sure you consult @elastic/kibana-security before you change, remove or add any of the build flags.
+
+## Building locally
+
+You can skip the step of running `<os_name>/init.sh` for your OS if you already
+have your environment set up, and the chromium source cloned.
+
+To get the Chromium code, refer to the [documentation](https://chromium.googlesource.com/chromium/src/+/master/docs/get_the_code.md).
+Install `depot_tools` as suggested, since it comes with useful scripts. Use the
+`fetch` command to clone the chromium repository. To set up and run the build,
+use the Kibana `build.py` script (in this directory).
+
+It's recommended that you create a working directory for the chromium source
+code and all the build tools, and run the commands from there:
+```
+mkdir ~/chromium && cd ~/chromium
+cp -r ~/path/to/kibana/x-pack/build_chromium .
+python ./build_chromium/init.sh [arch_name]
+python ./build_chromium/build.py <commit_id>
+```
 
 ## VMs
 
@@ -44,8 +130,8 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 - Linux:
   - SSH in using [gcloud](https://cloud.google.com/sdk/)
-  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> gcloud
-  - Their in-browser UI is kinda sluggish, so use the commandline tool
+  - Get the ssh command in the [GCP console](https://console.cloud.google.com/) -> VM instances -> your-vm-name -> SSH -> "View gcloud command"
+  - Their in-browser UI is kinda sluggish, so use the commandline tool (Google Cloud SDK is required)
 
 - Windows:
   - Install Microsoft's Remote Desktop tools
@@ -57,7 +143,8 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 ## Initializing each VM / environment
 
-You only need to initialize each environment once. NOTE: on Mac OS you'll need to install XCode and accept the license agreement.
+In a VM, you'll want to use the init scripts to to initialize each environment.
+On Mac OS you'll need to install XCode and accept the license agreement.
 
 Create the build folder:
 
@@ -85,16 +172,6 @@ In windows, at least, you will need to do a number of extra steps:
 - Press enter in the terminal to continue running the init
 
 ## Building
-
-Find the sha of the Chromium commit you wish to build. Most likely, you want to build the Chromium revision that is tied to the version of puppeteer that we're using.
-
-Find the Chromium revision (run in kibana's working directory):
-
-- `cat node_modules/puppeteer-core/package.json | grep chromium_revision`
-- Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example, puppeteer@1.19.0 has rev (674921): https://crrev.com/674921)
-- Grab the SHA from there
-  - (For example, rev 674921 has sha 312d84c8ce62810976feda0d3457108a6dfff9e6)
 
 Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
 

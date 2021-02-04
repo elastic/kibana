@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
@@ -164,7 +165,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             data-test-subj={`edit${item.id}`}
             onClick={() => editItem(item, EditConectorTabs.Configuration)}
             key={item.id}
-            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true}
+            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
           >
             {value}
           </EuiLink>
@@ -207,7 +208,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               onDelete={() => setConnectorsToDelete([item.id])}
             />
             <RunOperation
-              canExecute={canExecute}
+              canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
               item={item}
               onRun={() => editItem(item, EditConectorTabs.Test)}
             />
@@ -226,7 +227,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       columns={actionsTableColumns}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',
@@ -234,7 +235,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       cellProps={(item: ActionConnectorTableItem) => ({
         'data-test-subj': 'cell',
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableCellDisabled'
             : '',
       })}

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
@@ -163,7 +165,6 @@ export async function getRegistryPackage(
   }
 
   const packageInfo = await getInfo(name, version);
-
   return { paths, packageInfo };
 }
 
@@ -209,7 +210,10 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = getPathParts(path.replace(/^\/package\//, ''));
-    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
+    if (
+      (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) ||
+      parts.service === 'elasticsearch'
+    ) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);
@@ -220,6 +224,6 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   return {
     kibana: assets.kibana,
-    // elasticsearch: assets.elasticsearch,
+    elasticsearch: assets.elasticsearch,
   };
 }

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 import {
-  criteriaRT,
-  TimeUnitRT,
+  countCriteriaRT,
+  timeUnitRT,
   timeSizeRT,
   groupByRT,
 } from '../../alerting/logs/log_threshold/types';
@@ -42,8 +43,8 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT = rt.intersection([
   rt.type({
-    criteria: criteriaRT,
-    timeUnit: TimeUnitRT,
+    criteria: countCriteriaRT,
+    timeUnit: timeUnitRT,
     timeSize: timeSizeRT,
   }),
   rt.partial({

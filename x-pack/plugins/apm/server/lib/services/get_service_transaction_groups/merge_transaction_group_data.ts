@@ -1,20 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
-
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getLatencyValue } from '../../helpers/latency_aggregation_type';
-
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
-
 import { TransactionGroupWithoutTimeseriesData } from './get_transaction_groups_for_page';
 
 export function mergeTransactionGroupData({
@@ -23,29 +18,19 @@ export function mergeTransactionGroupData({
   transactionGroups,
   timeseriesData,
   latencyAggregationType,
+  transactionType,
 }: {
   start: number;
   end: number;
   transactionGroups: TransactionGroupWithoutTimeseriesData[];
   timeseriesData: TransactionGroupTimeseriesData;
   latencyAggregationType: LatencyAggregationType;
+  transactionType: string;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   return transactionGroups.map((transactionGroup) => {
     const groupBucket = timeseriesData.find(
       ({ key }) => key === transactionGroup.name
     );
-
-    const transactionTypes =
-      groupBucket?.transaction_types.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [];
-
-    const transactionType =
-      transactionTypes.find(
-        (type) => type === TRANSACTION_PAGE_LOAD || type === TRANSACTION_REQUEST
-      ) ?? transactionTypes[0];
 
     const timeseriesBuckets = groupBucket?.timeseries.buckets ?? [];
 
@@ -67,18 +52,18 @@ export function mergeTransactionGroupData({
             ...acc.throughput,
             timeseries: acc.throughput.timeseries.concat({
               x: point.key,
-              y: point.transaction_count.value / deltaAsMinutes,
+              y: calculateThroughput({
+                start,
+                end,
+                value: point.doc_count,
+              }),
             }),
           },
           errorRate: {
             ...acc.errorRate,
             timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
-              y:
-                point.transaction_count.value > 0
-                  ? (point[EVENT_OUTCOME].transaction_count.value ?? 0) /
-                    point.transaction_count.value
-                  : null,
+              y: point[EVENT_OUTCOME].doc_count / point.doc_count,
             }),
           },
         };

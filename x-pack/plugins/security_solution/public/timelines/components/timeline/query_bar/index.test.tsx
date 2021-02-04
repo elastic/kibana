@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -23,6 +24,7 @@ import {
   getDataProviderFilter,
   TIMELINE_FILTER_DROP_AREA,
 } from './index';
+import { waitFor } from '@testing-library/dom';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -181,7 +183,7 @@ describe('Timeline QueryBar ', () => {
   });
 
   describe('#onSavedQuery', () => {
-    test('is only reference that changed when dataProviders props get updated', () => {
+    test('is only reference that changed when dataProviders props get updated', async () => {
       const Proxy = (props: QueryBarTimelineComponentProps) => (
         <TestProviders>
           <QueryBarTimeline {...props} />
@@ -213,13 +215,13 @@ describe('Timeline QueryBar ', () => {
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
       wrapper.setProps({ dataProviders: mockDataProviders.slice(1, 0) });
-      wrapper.update();
+      await waitFor(() => wrapper.update());
 
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
       expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
     });
 
-    test('is only reference that changed when savedQueryId props get updated', () => {
+    test('is only reference that changed when savedQueryId props get updated', async () => {
       const Proxy = (props: QueryBarTimelineComponentProps) => (
         <TestProviders>
           <QueryBarTimeline {...props} />
@@ -253,7 +255,7 @@ describe('Timeline QueryBar ', () => {
       wrapper.setProps({
         savedQueryId: 'new',
       });
-      wrapper.update();
+      await waitFor(() => wrapper.update());
 
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
       expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { first, map, distinctUntilChanged } from 'rxjs/operators';
 import {
@@ -18,6 +20,7 @@ import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
@@ -35,7 +38,9 @@ export type TaskManagerStartContract = Pick<
   TaskScheduling,
   'schedule' | 'runNow' | 'ensureScheduled'
 > &
-  Pick<TaskStore, 'fetch' | 'get' | 'remove'>;
+  Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
+    removeIfExists: TaskStore['remove'];
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
@@ -156,6 +161,7 @@ export class TaskManagerPlugin
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
+      removeIfExists: (id: string) => removeIfExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),

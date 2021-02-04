@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
+  EuiFlexGroup,
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -51,6 +41,7 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HeaderActionMenu } from './header_action_menu';
+import { HeaderExtension } from './header_extension';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -84,11 +75,13 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
+  breadcrumbsAppendExtension$,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -97,6 +90,10 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
+
+  const Breadcrumbs = (
+    <HeaderBreadcrumbs appTitle$={observables.appTitle$} breadcrumbs$={observables.breadcrumbs$} />
+  );
 
   return (
     <>
@@ -168,11 +165,23 @@ export function Header({
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
 
-            <HeaderBreadcrumbs
-              appTitle$={observables.appTitle$}
-              breadcrumbs$={observables.breadcrumbs$}
-              breadcrumbsAppendExtension$={observables.breadcrumbsAppendExtension$}
-            />
+            {!breadcrumbsAppendExtension ? (
+              Breadcrumbs
+            ) : (
+              <EuiFlexGroup
+                responsive={false}
+                wrap={false}
+                alignItems={'center'}
+                className={'header__breadcrumbsWithExtensionContainer'}
+                gutterSize={'none'}
+              >
+                {Breadcrumbs}
+                <HeaderExtension
+                  extension={breadcrumbsAppendExtension.content}
+                  containerClassName={'header__breadcrumbsAppendExtension'}
+                />
+              </EuiFlexGroup>
+            )}
 
             <HeaderBadge badge$={observables.badge$} />
 

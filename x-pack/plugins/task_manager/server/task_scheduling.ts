@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { filter } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -16,6 +18,8 @@ import {
   isTaskRunRequestEvent,
   RanTask,
   ErroredTask,
+  OkResultOf,
+  ErrResultOf,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import {
@@ -29,7 +33,6 @@ import {
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
-import { FillPoolResult } from './lib/fill_pool';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -125,19 +128,16 @@ export class TaskScheduling {
               return reject(await this.identifyTaskFailureReason(taskId, error));
             }, taskEvent.event);
           } else {
-            either<
-              RanTask | ConcreteTaskInstance | FillPoolResult,
-              Error | ErroredTask | Option<ConcreteTaskInstance>
-            >(
+            either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(
               taskEvent.event,
-              (taskInstance: RanTask | ConcreteTaskInstance | FillPoolResult) => {
+              (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
                 // resolve if the task has run sucessfully
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();
                   resolve({ id: (taskInstance as RanTask).task.id });
                 }
               },
-              async (errorResult: Error | ErroredTask | Option<ConcreteTaskInstance>) => {
+              async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
                 // reject if any error event takes place for the requested task
                 subscription.unsubscribe();
                 return reject(

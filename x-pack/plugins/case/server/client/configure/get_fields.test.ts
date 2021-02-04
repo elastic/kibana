@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConnectorTypes } from '../../../common/api';
@@ -22,7 +23,7 @@ describe('get_fields', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.getFields({
         actionsClient: actionsMock,
         connectorType: ConnectorTypes.jira,
@@ -43,7 +44,7 @@ describe('get_fields', () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseMappingsSavedObject: mockCaseMappings,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       await caseClient.client
         .getFields({
           actionsClient: { ...actionsMock, execute: jest.fn().mockReturnValue(actionsErrResponse) },

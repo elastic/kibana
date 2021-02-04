@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -12,7 +14,6 @@ import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
   PluginInitializerContext,
-  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
@@ -47,6 +48,7 @@ import {
   PluginsSetup,
   PluginsStart,
   LegacyRequest,
+  RequestHandlerContextMonitoringPlugin,
 } from './types';
 
 import { Globals } from './static_globals';
@@ -90,7 +92,7 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
     this.legacyShimDependencies = {
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
@@ -211,9 +213,11 @@ export class Plugin {
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
+        cluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -305,7 +309,7 @@ export class Plugin {
       route: (options: any) => {
         const method = options.method;
         const handler = async (
-          context: RequestHandlerContext,
+          context: RequestHandlerContextMonitoringPlugin,
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
@@ -335,6 +339,7 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {

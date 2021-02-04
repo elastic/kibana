@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash';
@@ -163,6 +164,7 @@ export function createSingleMetricViewerUrl(
     entities,
     globalState,
     functionDescription,
+    zoom,
   } = params;
 
   let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
@@ -191,6 +193,10 @@ export function createSingleMetricViewerUrl(
   }
   if (functionDescription !== undefined) {
     mlTimeSeriesExplorer.functionDescription = functionDescription;
+  }
+
+  if (zoom !== undefined) {
+    mlTimeSeriesExplorer.zoom = zoom;
   }
 
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;

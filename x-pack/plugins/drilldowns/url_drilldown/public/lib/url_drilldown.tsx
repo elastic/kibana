@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -56,14 +57,14 @@ export type UrlTrigger =
   | typeof ROW_CLICK_TRIGGER
   | typeof CONTEXT_MENU_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
+export interface ActionFactoryContext extends BaseActionFactoryContext {
   embeddable?: EmbeddableWithQueryInput;
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
 
-export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactoryContext> {
+export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
@@ -104,7 +105,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
 
   public readonly createConfig = () => ({
     url: { template: '' },
-    openInNewTab: false,
+    openInNewTab: true,
+    encodeUrl: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -133,7 +135,12 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private buildUrl(config: Config, context: ActionContext): string {
-    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    const doEncode = config.encodeUrl ?? true;
+    const url = urlDrilldownCompileUrl(
+      config.url.template,
+      this.getRuntimeVariables(context),
+      doEncode
+    );
     return url;
   }
 

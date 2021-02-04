@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea.mock';
-import { rerender } from '../../../__mocks__';
+import { setMockValues, rerender } from '../../../__mocks__';
+import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 
-import { EngineNav } from './';
+import { EngineNav } from './engine_nav';
 
 describe('EngineNav', () => {
-  const values = { myRole: {}, engineName: 'some-engine', dataLoading: false, engine: {} };
+  const values = { ...mockEngineValues, myRole: {}, dataLoading: false };
 
   beforeEach(() => {
     setMockValues(values);

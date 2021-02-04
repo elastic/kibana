@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, TimeRange, docValueFields } from '../utils/index';
+import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
 
 interface LifecycleParams {
   schema: ResolverSchema;
@@ -61,6 +63,13 @@ export class LifecycleQuery {
               },
             },
             {
+              bool: {
+                must_not: {
+                  term: { [this.schema.id]: '' },
+                },
+              },
+            },
+            {
               term: { 'event.category': 'process' },
             },
             {
@@ -79,12 +88,13 @@ export class LifecycleQuery {
    * @param nodes the unique IDs to search for in Elasticsearch
    */
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<FieldsObject[]> {
-    if (nodes.length <= 0) {
+    const validNodes = validIDs(nodes);
+    if (validNodes.length <= 0) {
       return [];
     }
 
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
-      body: this.query(nodes),
+      body: this.query(validNodes),
       index: this.indexPatterns,
     });
 

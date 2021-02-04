@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
@@ -50,18 +51,14 @@ const numClassesTypeMessage = (
   />
 );
 
-function getZeroClassesMessage(elasaticUrl: string, version: string) {
+function getZeroClassesMessage(elasticUrl: string) {
   return (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.zeroClassesMessage"
       defaultMessage="To evaluate the {wikiLink}, select all classes or a value greater than the total number of categories."
       values={{
         wikiLink: (
-          <EuiLink
-            href={`${elasaticUrl}guide/en/machine-learning/${version}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`}
-            target="_blank"
-            external
-          >
+          <EuiLink href={elasticUrl} target="_blank" external>
             {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
               defaultMessage: 'AUC ROC',
             })}
@@ -136,7 +133,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const classAucRocDocLink = docLinks.links.ml.classificationAucRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated, estimatedModelMemoryLimit } = state;
@@ -422,9 +419,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               helpText={getTopClassesHelpText(selectedNumTopClasses)}
               isInvalid={selectedNumTopClasses === 0 || selectedNumTopClassesIsInvalid}
               error={[
-                ...(selectedNumTopClasses === 0
-                  ? [getZeroClassesMessage(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION)]
-                  : []),
+                ...(selectedNumTopClasses === 0 ? [getZeroClassesMessage(classAucRocDocLink)] : []),
                 ...(selectedNumTopClassesIsInvalid ? [numClassesTypeMessage] : []),
               ]}
             >

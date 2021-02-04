@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
-import { BaseIndexPatternColumn } from './definitions/column_types';
+import type { TimeScaleUnit } from '../time_scale';
+import type { IndexPatternLayer } from '../types';
+import type { IndexPatternColumn } from './definitions';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
@@ -30,10 +32,13 @@ export function adjustTimeScaleLabelSuffix(
   return `${cleanedLabel} ${unitSuffixesLong[newTimeScale]}`;
 }
 
-export function adjustTimeScaleOnOtherColumnChange<T extends BaseIndexPatternColumn>(
-  column: T,
-  columns: Partial<Record<string, BaseIndexPatternColumn>>
-) {
+export function adjustTimeScaleOnOtherColumnChange<T extends IndexPatternColumn>(
+  layer: IndexPatternLayer,
+  thisColumnId: string,
+  changedColumnId: string
+): T {
+  const columns = layer.columns;
+  const column = columns[thisColumnId] as T;
   if (!column.timeScale) {
     return column;
   }

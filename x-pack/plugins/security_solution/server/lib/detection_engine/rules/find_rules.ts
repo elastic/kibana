@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FindResult } from '../../../../../alerts/server';
 import { SIGNALS_ID } from '../../../../common/constants';
+import { RuleTypeParams } from '../types';
 import { FindRuleOptions } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {
@@ -24,7 +26,7 @@ export const findRules = async ({
   filter,
   sortField,
   sortOrder,
-}: FindRuleOptions): Promise<FindResult> => {
+}: FindRuleOptions): Promise<FindResult<RuleTypeParams>> => {
   return alertsClient.find({
     options: {
       fields,

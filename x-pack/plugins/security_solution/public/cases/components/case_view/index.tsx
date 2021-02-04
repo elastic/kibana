@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -90,6 +91,8 @@ interface Signal {
   rule: {
     id: string;
     name: string;
+    to: string;
+    from: string;
   };
 }
 
@@ -97,6 +100,7 @@ interface SignalHit {
   _id: string;
   _index: string;
   _source: {
+    '@timestamp': string;
     signal: Signal;
   };
 }
@@ -104,6 +108,7 @@ interface SignalHit {
 export type Alert = {
   _id: string;
   _index: string;
+  '@timestamp': string;
 } & Signal;
 
 export const CaseComponent = React.memo<CaseProps>(
@@ -153,6 +158,7 @@ export const CaseComponent = React.memo<CaseProps>(
             [_id]: {
               _id,
               _index,
+              '@timestamp': _source['@timestamp'],
               ..._source.signal,
             },
           }),
@@ -175,7 +181,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'title',
                 updateValue: titleUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -189,7 +195,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'connector',
                 updateValue: connector,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -203,7 +209,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'description',
                 updateValue: descriptionUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -216,7 +222,7 @@ export const CaseComponent = React.memo<CaseProps>(
               updateKey: 'tags',
               updateValue: tagsUpdate,
               updateCase: handleUpdateNewCase,
-              version: caseData.version,
+              caseData,
               onSuccess,
               onError,
             });
@@ -229,7 +235,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'status',
                 updateValue: statusUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -243,7 +249,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'settings',
                 updateValue: settingsUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -290,7 +296,8 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
-      isValidConnector,
+      isValidConnector: isLoadingConnectors ? true : isValidConnector,
+      alerts,
     });
 
     const onSubmitConnector = useCallback(
@@ -423,7 +430,9 @@ export const CaseComponent = React.memo<CaseProps>(
             {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
-                {initLoadingData && <EuiLoadingContent lines={8} />}
+                {initLoadingData && (
+                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                )}
                 {!initLoadingData && (
                   <>
                     <UserActionTree

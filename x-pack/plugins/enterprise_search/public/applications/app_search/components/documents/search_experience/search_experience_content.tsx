@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,12 +15,12 @@ import { useValues } from 'kea';
 
 import { ResultView } from './views';
 import { Pagination } from './pagination';
-import { Props as ResultViewProps } from './views/result_view';
 import { useSearchContextState } from './hooks';
 import { DocumentCreationButton } from '../document_creation_button';
 import { AppLogic } from '../../../app_logic';
 import { EngineLogic } from '../../engine';
 import { DOCS_PREFIX } from '../../../routes';
+import { Result } from '../../result/types';
 
 export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
@@ -43,8 +44,14 @@ export const SearchExperienceContent: React.FC = () => {
         <EuiSpacer />
         <Results
           titleField="id"
-          resultView={(props: ResultViewProps) => {
-            return <ResultView {...props} schemaForTypeHighlights={engine.schema} />;
+          resultView={({ result }: { result: Result }) => {
+            return (
+              <ResultView
+                result={result}
+                schemaForTypeHighlights={engine.schema}
+                isMetaEngine={isMetaEngine}
+              />
+            );
           }}
         />
         <EuiSpacer />

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Alert, AlertType } from '../../types';
+import { Alert, AlertType, AlertUpdates } from '../../types';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
@@ -25,7 +26,7 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
-  health,
+  alertingFrameworkHealth,
   mapFiltersToKql,
 } from './alert_api';
 import uuid from 'uuid';
@@ -538,7 +539,7 @@ describe('deleteAlerts', () => {
 
 describe('createAlert', () => {
   test('should call create alert API', async () => {
-    const alertToCreate = {
+    const alertToCreate: AlertUpdates = {
       name: 'test',
       consumer: 'alerts',
       tags: ['foo'],
@@ -553,10 +554,13 @@ describe('createAlert', () => {
       notifyWhen: 'onActionGroupChange' as AlertNotifyWhenType,
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
-      apiKey: null,
       apiKeyOwner: null,
+      createdBy: null,
+      updatedBy: null,
+      muteAll: false,
+      mutedInstanceIds: [],
     };
-    const resolvedValue: Alert = {
+    const resolvedValue = {
       ...alertToCreate,
       id: '123',
       createdBy: null,
@@ -576,7 +580,7 @@ describe('createAlert', () => {
       Array [
         "/api/alerts/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"notifyWhen\\":\\"onActionGroupChange\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"notifyWhen\\":\\"onActionGroupChange\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKeyOwner\\":null,\\"createdBy\\":null,\\"updatedBy\\":null,\\"muteAll\\":false,\\"mutedInstanceIds\\":[]}",
         },
       ]
     `);
@@ -798,9 +802,9 @@ describe('unmuteAlerts', () => {
   });
 });
 
-describe('health', () => {
-  test('should call health API', async () => {
-    const result = await health({ http });
+describe('alertingFrameworkHealth', () => {
+  test('should call alertingFrameworkHealth API', async () => {
+    const result = await alertingFrameworkHealth({ http });
     expect(result).toEqual(undefined);
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [

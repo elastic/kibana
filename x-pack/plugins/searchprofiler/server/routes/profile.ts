@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../types';
 
@@ -28,10 +30,6 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       }
 
       const {
-        core: { elasticsearch },
-      } = ctx;
-
-      const {
         body: { query, index },
       } = request;
 
@@ -46,21 +44,25 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: JSON.stringify(parsed, null, 2),
       };
       try {
-        const resp = await elasticsearch.legacy.client.callAsCurrentUser('search', body);
+        const client = ctx.core.elasticsearch.client.asCurrentUser;
+        const resp = await client.search(body);
+
         return response.ok({
           body: {
             ok: true,
-            resp,
+            resp: resp.body,
           },
         });
       } catch (err) {
         log.error(err);
+        const { statusCode, body: errorBody } = err;
+
         return response.customError({
-          statusCode: err.status || 500,
-          body: err.body
+          statusCode: statusCode || 500,
+          body: errorBody
             ? {
-                message: err.message,
-                attributes: err.body,
+                message: errorBody.error?.reason,
+                attributes: errorBody,
               }
             : err,
         });

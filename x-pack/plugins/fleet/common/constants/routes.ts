@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 // Base API paths
 
 export const API_ROOT = `/api/fleet`;
@@ -29,6 +31,7 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+  STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
 };
 
 // Data stream API routes

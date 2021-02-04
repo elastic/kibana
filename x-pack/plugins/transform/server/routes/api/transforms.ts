@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import {
@@ -57,6 +59,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { isLatestTransform } from '../../../common/types/transform';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -531,9 +534,36 @@ const previewTransformHandler: RequestHandler<
   PostTransformsPreviewRequestSchema
 > = async (ctx, req, res) => {
   try {
+    const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      body: req.body,
+      body: reqBody,
     });
+    if (isLatestTransform(reqBody)) {
+      // for the latest transform mappings properties have to be retrieved from the source
+      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
+        index: reqBody.source.index,
+        fields: '*',
+        include_unmapped: false,
+      });
+
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+
+      const fields = Object.entries(
+        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+      ).reduce((acc, [fieldName, fieldCaps]) => {
+        const fieldDefinition = Object.values(fieldCaps)[0];
+        const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
+        const isKeywordDuplicate =
+          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
+        if (isMetaField || isKeywordDuplicate) {
+          return acc;
+        }
+        acc[fieldName] = { ...fieldDefinition };
+        return acc;
+      }, {} as Record<string, { type: string }>);
+
+      body.generated_dest_index.mappings.properties = fields;
+    }
     return res.ok({ body });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));

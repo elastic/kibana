@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
@@ -37,9 +38,9 @@ describe('deprecation logging API', () => {
 
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
     it('returns isEnabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.legacy.client
-        .callAsCurrentUser as jest.Mock).mockResolvedValue({
-        default: { logger: { deprecation: 'WARN' } },
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+        .getSettings as jest.Mock).mockResolvedValue({
+        body: { default: { logger: { deprecation: 'WARN' } } },
       });
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -51,8 +52,8 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.legacy.client
-        .callAsCurrentUser as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+        .getSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/deprecation_logging',
@@ -64,21 +65,21 @@ describe('deprecation logging API', () => {
 
   describe('PUT /api/upgrade_assistant/deprecation_logging', () => {
     it('returns isEnabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.legacy.client
-        .callAsCurrentUser as jest.Mock).mockResolvedValue({
-        default: { logger: { deprecation: 'ERROR' } },
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+        .putSettings as jest.Mock).mockResolvedValue({
+        body: { default: { logger: { deprecation: 'ERROR' } } },
       });
       const resp = await routeDependencies.router.getHandler({
-        method: 'get',
+        method: 'put',
         pathPattern: '/api/upgrade_assistant/deprecation_logging',
-      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+      })(routeHandlerContextMock, { body: { isEnabled: true } }, kibanaResponseFactory);
 
       expect(resp.payload).toEqual({ isEnabled: false });
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.legacy.client
-        .callAsCurrentUser as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
+        .putSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
       const resp = await routeDependencies.router.getHandler({
         method: 'put',
         pathPattern: '/api/upgrade_assistant/deprecation_logging',

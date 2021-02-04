@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { inflateSync } from 'zlib';
@@ -191,7 +192,7 @@ describe('manifest_manager', () => {
       expect(packagePolicyService.update.mock.calls.length).toEqual(2);
 
       expect(
-        packagePolicyService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+        packagePolicyService.update.mock.calls[0][3].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: '1.0.1',
         schema_version: 'v1',

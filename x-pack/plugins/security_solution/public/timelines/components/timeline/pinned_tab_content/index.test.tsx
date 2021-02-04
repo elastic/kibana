@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -15,7 +16,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -66,6 +67,7 @@ describe('PinnedTabContent', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -117,7 +119,9 @@ describe('PinnedTabContent', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
+      expect(
+        wrapper.find(`[data-test-subj="${TimelineTabs.pinned}-events-table"]`).exists()
+      ).toEqual(true);
     });
 
     it('it shows the timeline footer', () => {

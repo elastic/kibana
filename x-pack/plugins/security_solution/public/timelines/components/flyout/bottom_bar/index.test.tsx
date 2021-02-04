@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { TimelineTabs } from '../../../store/timeline/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { FlyoutBottomBar } from '.';
 
 describe('FlyoutBottomBar', () => {

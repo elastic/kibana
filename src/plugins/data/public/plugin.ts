@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
@@ -53,11 +42,6 @@ import {
   createFilterAction,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
-  ApplyGlobalFilterActionContext,
-  ACTION_SELECT_RANGE,
-  ACTION_VALUE_CLICK,
-  SelectRangeActionContext,
-  ValueClickActionContext,
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
@@ -66,19 +50,7 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { TriggerId } from '../../ui_actions/public';
-
-declare module '../../ui_actions/public' {
-  export interface TriggerContextMapping {
-    [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
-    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
-    [ACTION_VALUE_CLICK]: ValueClickActionContext;
-  }
-}
+import { NowProvider, NowProviderInternalContract } from './now_provider';
 
 export class DataPublicPlugin
   implements
@@ -94,6 +66,7 @@ export class DataPublicPlugin
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
+  private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -101,6 +74,7 @@ export class DataPublicPlugin
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
+    this.nowProvider = new NowProvider();
   }
 
   public setup(
@@ -113,9 +87,17 @@ export class DataPublicPlugin
 
     this.usageCollection = usageCollection;
 
+    const searchService = this.searchService.setup(core, {
+      bfetch,
+      usageCollection,
+      expressions,
+      nowProvider: this.nowProvider,
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      nowProvider: this.nowProvider,
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
@@ -125,24 +107,18 @@ export class DataPublicPlugin
     );
 
     uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER' as TriggerId,
+      'SELECT_RANGE_TRIGGER',
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER' as TriggerId,
+      'VALUE_CLICK_TRIGGER',
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
-
-    const searchService = this.searchService.setup(core, {
-      bfetch,
-      usageCollection,
-      expressions,
-    });
 
     inspector.registerView(
       getTableViewDescription(() => ({
@@ -213,6 +189,7 @@ export class DataPublicPlugin
       indexPatterns,
       query,
       search,
+      nowProvider: this.nowProvider,
     };
 
     const SearchBar = createSearchBar({

@@ -89,6 +89,20 @@ Object {
               "size": 5,
             },
           },
+          "impactedPages": Object {
+            "aggs": Object {
+              "pageCount": Object {
+                "cardinality": Object {
+                  "field": "transaction.id",
+                },
+              },
+            },
+            "filter": Object {
+              "term": Object {
+                "transaction.type": "page-load",
+              },
+            },
+          },
           "sample": Object {
             "top_hits": Object {
               "_source": Array [

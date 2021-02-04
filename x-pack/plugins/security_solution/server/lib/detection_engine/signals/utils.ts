@@ -1,16 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
+import { isEmpty, partition } from 'lodash';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  TimestampOverrideOrUndefined,
+  Privilege,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { AlertServices, parseDuration } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+  parseDuration,
+} from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
@@ -29,6 +41,7 @@ import { parseScheduleDates } from '../../../../common/detection_engine/parse_sc
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 import { ShardError } from '../../types';
+import { RuleStatusService } from './rule_status_service';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -51,6 +64,103 @@ export const shorthandMap = {
     asFn: (duration: moment.Duration) => duration.asHours(),
   },
 };
+
+export const hasReadIndexPrivileges = async (
+  privileges: Privilege,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage,
+  ruleStatusService: RuleStatusService
+): Promise<boolean> => {
+  const indexNames = Object.keys(privileges.index);
+  const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+    indexNames,
+    (indexName) => privileges.index[indexName].read
+  );
+
+  if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+    // some indices have read privileges others do not.
+    // set a partial failure status
+    const errorString = `Missing required read privileges on the following indices: ${JSON.stringify(
+      indexesWithNoReadPrivileges
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  } else if (
+    indexesWithReadPrivileges.length === 0 &&
+    indexesWithNoReadPrivileges.length === indexNames.length
+  ) {
+    // none of the indices had read privileges so set the status to failed
+    // since we can't search on any indices we do not have read privileges on
+    const errorString = `This rule may not have the required read privileges to the following indices: ${JSON.stringify(
+      indexesWithNoReadPrivileges
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  }
+  return false;
+};
+
+export const hasTimestampFields = async (
+  wroteStatus: boolean,
+  timestampField: string,
+  // any is derived from here
+  // node_modules/@elastic/elasticsearch/api/kibana.d.ts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
+  inputIndices: string[],
+  ruleStatusService: RuleStatusService,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+): Promise<boolean> => {
+  if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
+    const errorString = `The following index patterns did not match any indices: ${JSON.stringify(
+      inputIndices
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.error(errorString);
+    return true;
+  } else if (
+    !wroteStatus &&
+    (isEmpty(timestampFieldCapsResponse.body.fields) ||
+      timestampFieldCapsResponse.body.fields[timestampField] == null ||
+      timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null)
+  ) {
+    // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
+    // partial failure
+    const errorString = `The following indices are missing the ${
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(
+      isEmpty(timestampFieldCapsResponse.body.fields)
+        ? timestampFieldCapsResponse.body.indices
+        : timestampFieldCapsResponse.body.fields[timestampField].unmapped.indices
+    )}`;
+    logger.error(buildRuleMessage(errorString));
+    await ruleStatusService.partialFailure(errorString);
+    return true;
+  }
+  return wroteStatus;
+};
+
+export const checkPrivileges = async (
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  indices: string[]
+): Promise<Privilege> =>
+  services.callCluster('transport.request', {
+    path: '/_security/user/_has_privileges',
+    method: 'POST',
+    body: {
+      index: [
+        {
+          names: indices ?? [],
+          privileges: ['read'],
+        },
+      ],
+    },
+  });
 
 export const getGapMaxCatchupRatio = ({
   logger,
@@ -140,7 +250,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;
@@ -516,6 +626,7 @@ export const getSignalTimeTuples = ({
 export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
   return errors.map((error) => {
     const {
+      index,
       reason: {
         reason,
         type,
@@ -527,6 +638,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
     } = error;
 
     return [
+      ...(index != null ? [`index: "${index}"`] : []),
       ...(reason != null ? [`reason: "${reason}"`] : []),
       ...(type != null ? [`type: "${type}"`] : []),
       ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
@@ -582,7 +694,15 @@ export const createSearchAfterReturnTypeFromResponse = ({
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
-    success: searchResult._shards.failed === 0,
+    success:
+      searchResult._shards.failed === 0 ||
+      searchResult._shards.failures?.every((failure) => {
+        return (
+          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
+          failure.reason?.reason ===
+            `No mapping found for [${timestampOverride}] in order to sort on`
+        );
+      }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
   });
 };
@@ -612,6 +732,25 @@ export const createSearchAfterReturnType = ({
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
+  };
+};
+
+export const createSearchResultReturnType = (): SignalSearchResponse => {
+  return {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+      failures: [],
+    },
+    hits: {
+      total: 0,
+      max_score: 0,
+      hits: [],
+    },
   };
 };
 
@@ -651,6 +790,52 @@ export const mergeReturns = (
   });
 };
 
+export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
+  return searchResults.reduce((prev, next) => {
+    const {
+      took: existingTook,
+      timed_out: existingTimedOut,
+      // _scroll_id: existingScrollId,
+      _shards: existingShards,
+      // aggregations: existingAggregations,
+      hits: existingHits,
+    } = prev;
+
+    const {
+      took: newTook,
+      timed_out: newTimedOut,
+      _scroll_id: newScrollId,
+      _shards: newShards,
+      aggregations: newAggregations,
+      hits: newHits,
+    } = next;
+
+    return {
+      took: Math.max(newTook, existingTook),
+      timed_out: newTimedOut && existingTimedOut,
+      _scroll_id: newScrollId,
+      _shards: {
+        total: newShards.total + existingShards.total,
+        successful: newShards.successful + existingShards.successful,
+        failed: newShards.failed + existingShards.failed,
+        skipped: newShards.skipped + existingShards.skipped,
+        failures: [
+          ...(existingShards.failures != null ? existingShards.failures : []),
+          ...(newShards.failures != null ? newShards.failures : []),
+        ],
+      },
+      aggregations: newAggregations,
+      hits: {
+        total:
+          createTotalHitsFromSearchResult({ searchResult: prev }) +
+          createTotalHitsFromSearchResult({ searchResult: next }),
+        max_score: Math.max(newHits.max_score, existingHits.max_score),
+        hits: [...existingHits.hits, ...newHits.hits],
+      },
+    };
+  });
+};
+
 export const createTotalHitsFromSearchResult = ({
   searchResult,
 }: {
@@ -672,10 +857,9 @@ export const calculateThresholdSignalUuid = (
   // used to generate constant Threshold Signals ID when run with the same params
   const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
 
-  let baseString = `${ruleId}${startedAt}${thresholdField}`;
-  if (key != null) {
-    baseString = `${baseString}${key}`;
-  }
+  const startedAtString = startedAt.toISOString();
+  const keyString = key ?? '';
+  const baseString = `${ruleId}${startedAtString}${thresholdField}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
 };

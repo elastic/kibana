@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -58,7 +59,7 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
+  ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({

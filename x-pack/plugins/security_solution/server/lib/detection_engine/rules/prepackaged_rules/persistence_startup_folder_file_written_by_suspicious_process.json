@@ -31,9 +31,16 @@
       },
       "technique": [
         {
-          "id": "T1060",
-          "name": "Registry Run Keys / Startup Folder",
-          "reference": "https://attack.mitre.org/techniques/T1060/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
         }
       ]
     }

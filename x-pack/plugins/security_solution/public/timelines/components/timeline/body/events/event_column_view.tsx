@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -9,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
@@ -26,7 +27,7 @@ import { InvestigateInTimelineAction } from '../../../../../detections/component
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { inputsModel } from '../../../../../common/store';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { AddToCaseAction } from '../../../../../cases/components/timeline_actions/add_to_case_action';

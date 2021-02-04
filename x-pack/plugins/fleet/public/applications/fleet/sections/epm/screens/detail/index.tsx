@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState, useMemo, useCallback, ReactEventHandler } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -44,6 +46,7 @@ import './index.scss';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 import { PLUGIN_ID } from '../../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../../services/pkg_key_from_package_info';
+import { IntegrationAgentPolicyCount } from './integration_agent_policy_count';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -239,6 +242,18 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
+              ...(packageInstallStatus === 'installed'
+                ? [
+                    { isDivider: true },
+                    {
+                      label: i18n.translate('xpack.fleet.epm.usedByLabel', {
+                        defaultMessage: 'Agent Policies',
+                      }),
+                      'data-test-subj': 'agentPolicyCount',
+                      content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
+                    },
+                  ]
+                : []),
               { isDivider: true },
               {
                 content: (
@@ -264,7 +279,7 @@ export function Detail() {
                 ),
               },
             ].map((item, index) => (
-              <EuiFlexItem grow={false} key={index}>
+              <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
                   <Divider />
                 ) : item.label ? (
@@ -285,6 +300,7 @@ export function Detail() {
       handleAddIntegrationPolicyClick,
       hasWriteCapabilites,
       packageInfo,
+      packageInstallStatus,
       pkgkey,
       updateAvailable,
     ]

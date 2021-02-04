@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { PingTimestamp } from './columns/ping_timestamp';
 import { FailedStep } from './columns/failed_step';
 import { usePingsList } from './use_pings';
 import { PingListHeader } from './ping_list_header';
+import { clearPings } from '../../../state/actions';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -53,6 +55,12 @@ export const PingList = () => {
   const expandedIdsToRemove = JSON.stringify(
     Object.keys(expandedRows).filter((e) => !pings.some(({ docId }) => docId === e))
   );
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearPings());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     const parsed = JSON.parse(expandedIdsToRemove);
@@ -200,6 +208,15 @@ export const PingList = () => {
         itemId="docId"
         itemIdToExpandedRowMap={expandedRows}
         pagination={pagination}
+        noItemsMessage={
+          loading
+            ? i18n.translate('xpack.uptime.pingList.pingsLoadingMesssage', {
+                defaultMessage: 'Loading history...',
+              })
+            : i18n.translate('xpack.uptime.pingList.pingsUnavailableMessage', {
+                defaultMessage: 'No history found',
+              })
+        }
         onChange={(criteria: any) => {
           setPageSize(criteria.page!.size);
           setPageIndex(criteria.page!.index);

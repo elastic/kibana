@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Subscription } from 'rxjs';
 
 import {
+  ElasticsearchClient,
+  ElasticsearchServiceStart,
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
@@ -28,15 +31,18 @@ import { isAtLeast, LicenseService } from '../../../../common/license/license';
 export class PolicyWatcher {
   private logger: Logger;
   private soClient: SavedObjectsClientContract;
+  private esClient: ElasticsearchClient;
   private policyService: PackagePolicyServiceInterface;
   private subscription: Subscription | undefined;
   constructor(
     policyService: PackagePolicyServiceInterface,
     soStart: SavedObjectsServiceStart,
+    esStart: ElasticsearchServiceStart,
     logger: Logger
   ) {
     this.policyService = policyService;
     this.soClient = this.makeInternalSOClient(soStart);
+    this.esClient = esStart.client.asInternalUser;
     this.logger = logger;
   }
 
@@ -113,11 +119,16 @@ export class PolicyWatcher {
             license
           );
           try {
-            await this.policyService.update(this.soClient, policy.id, updatePolicy);
+            await this.policyService.update(this.soClient, this.esClient, policy.id, updatePolicy);
           } catch (e) {
             // try again for transient issues
             try {
-              await this.policyService.update(this.soClient, policy.id, updatePolicy);
+              await this.policyService.update(
+                this.soClient,
+                this.esClient,
+                policy.id,
+                updatePolicy
+              );
             } catch (ee) {
               this.logger.warn(
                 `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`

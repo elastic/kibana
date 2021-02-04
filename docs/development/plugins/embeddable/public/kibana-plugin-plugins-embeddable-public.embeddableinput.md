@@ -17,5 +17,6 @@ export declare type EmbeddableInput = {
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
+    syncColors?: boolean;
 };
 ```

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -236,13 +237,6 @@ export const OAUTH_SAVE_CONFIG_BUTTON = i18n.translate(
   }
 );
 
-export const OAUTH_REMOVE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.remove.button',
-  {
-    defaultMessage: 'Remove',
-  }
-);
-
 export const OAUTH_BACK_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.back.button',
   {
@@ -292,20 +286,6 @@ export const SAVE_CUSTOM_API_KEYS_BODY = i18n.translate(
   }
 );
 
-export const SAVE_CUSTOM_ACCESS_TOKEN_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.accessToken.label',
-  {
-    defaultMessage: 'Access Token',
-  }
-);
-
-export const SAVE_CUSTOM_API_KEY_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.apiKey.label',
-  {
-    defaultMessage: 'Key',
-  }
-);
-
 export const SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.visualWalkthrough.title',
   {
@@ -324,13 +304,6 @@ export const SAVE_CUSTOM_DOC_PERMISSIONS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.docPermissions.title',
   {
     defaultMessage: 'Set document-level permissions',
-  }
-);
-
-export const SAVE_CUSTOM_FEATURES_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.features.button',
-  {
-    defaultMessage: 'Learn about Platinum features',
   }
 );
 

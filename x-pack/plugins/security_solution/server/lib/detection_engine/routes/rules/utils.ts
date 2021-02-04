@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pickBy, countBy } from 'lodash/fp';
@@ -31,6 +32,7 @@ import {
   OutputError,
 } from '../utils';
 import { RuleActions } from '../../rule_actions/types';
+import { RuleTypeParams } from '../../types';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -172,7 +174,7 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 };
 
 export const transformFindAlerts = (
-  findResults: FindResult,
+  findResults: FindResult<RuleTypeParams>,
   ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): {
@@ -203,7 +205,7 @@ export const transformFindAlerts = (
 };
 
 export const transform = (
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> | null => {
@@ -220,7 +222,7 @@ export const transform = (
 
 export const transformOrBulkError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions: RuleActions,
   ruleStatus?: unknown
 ): Partial<RulesSchema> | BulkError => {
@@ -241,7 +243,7 @@ export const transformOrBulkError = (
 
 export const transformOrImportError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   existingImportSuccessError: ImportSuccessError
 ): ImportSuccessError => {
   if (isAlertType(alert)) {

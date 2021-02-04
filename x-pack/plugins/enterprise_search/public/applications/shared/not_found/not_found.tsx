@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,6 +24,7 @@ import {
 } from '../../../../common/constants';
 
 import { EuiButtonTo } from '../react_router_helpers';
+import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { SetAppSearchChrome, SetWorkplaceSearchChrome } from '../kibana_chrome';
 import { SendAppSearchTelemetry, SendWorkplaceSearchTelemetry } from '../telemetry';
 import { LicensingLogic } from '../licensing';
@@ -37,9 +39,11 @@ interface NotFoundProps {
     ID: string;
     SUPPORT_URL: string;
   };
+  // Optional breadcrumbs
+  breadcrumbs?: BreadcrumbTrail;
 }
 
-export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
+export const NotFound: React.FC<NotFoundProps> = ({ product = {}, breadcrumbs }) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : product.SUPPORT_URL;
 
@@ -64,7 +68,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
 
   return (
     <>
-      <SetPageChrome />
+      <SetPageChrome trail={breadcrumbs} />
       <SendTelemetry action="error" metric="not_found" />
 
       <EuiPageContent>

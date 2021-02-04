@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EditorFrameService } from './service';
@@ -57,6 +58,7 @@ describe('editor_frame service', () => {
             indexPatternId: '1',
             fieldName: 'test',
           },
+          searchSessionId: 'sessionId',
         });
         instance.unmount();
       })()
@@ -78,6 +80,7 @@ describe('editor_frame service', () => {
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
+      searchSessionId: 'sessionId',
     });
     instance.unmount();
 

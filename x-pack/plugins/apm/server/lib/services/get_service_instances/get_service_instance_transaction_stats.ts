@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -19,6 +20,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -30,18 +32,17 @@ export async function getServiceInstanceTransactionStats({
 }: ServiceInstanceParams) {
   const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString, bucketSize } = getBucketSize({
+    start,
+    end,
+    numBuckets,
+  });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
 
   const subAggs = {
-    count: {
-      value_count: {
-        field,
-      },
-    },
     avg_transaction_duration: {
       avg: {
         field,
@@ -51,13 +52,6 @@ export async function getServiceInstanceTransactionStats({
       filter: {
         term: {
           [EVENT_OUTCOME]: EventOutcome.failure,
-        },
-      },
-      aggs: {
-        count: {
-          value_count: {
-            field,
-          },
         },
       },
     },
@@ -112,11 +106,13 @@ export async function getServiceInstanceTransactionStats({
     },
   });
 
+  const bucketSizeInMinutes = bucketSize / 60;
+
   return (
     response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
       (serviceNodeBucket) => {
         const {
-          count,
+          doc_count: count,
           avg_transaction_duration: avgTransactionDuration,
           key,
           failures,
@@ -126,17 +122,17 @@ export async function getServiceInstanceTransactionStats({
         return {
           serviceNodeName: String(key),
           errorRate: {
-            value: failures.count.value / count.value,
+            value: failures.doc_count / count,
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.failures.count.value / dateBucket.count.value,
+              y: dateBucket.failures.doc_count / dateBucket.doc_count,
             })),
           },
           throughput: {
-            value: count.value,
+            value: calculateThroughput({ start, end, value: count }),
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.count.value,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
             })),
           },
           latency: {

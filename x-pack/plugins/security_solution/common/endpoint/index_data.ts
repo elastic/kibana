@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -30,7 +31,7 @@ import {
   PostAgentAcksResponse,
   PostAgentAcksRequest,
 } from '../../../fleet/common';
-import { factory as policyConfigFactory } from './models/policy_config';
+import { policyFactory as policyConfigFactory } from './models/policy_config';
 import { HostMetadata } from './types';
 import { KbnClientWithApiKeySupport } from '../../scripts/endpoint/kbn_client_with_api_key_support';
 
@@ -232,8 +233,8 @@ const createPolicy = async (
 ): Promise<CreatePackagePolicyResponse['item']> => {
   // Create Agent Policy first
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: `Policy for ${policyName}`,
-    description: '',
+    name: `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+    description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
   };
   let agentPolicy;
@@ -368,12 +369,7 @@ const fleetEnrollAgentForHost = async (
           },
         },
         host: {
-          architecture: 'x86_64',
-          hostname: endpointHost.host,
-          name: endpointHost.host,
-          id: '1c032ec0-3a94-4d54-9ad2-c5610c0eaba4',
-          ip: ['fe80::703b:b9e6:887d:7f5/64', '10.0.2.15/24', '::1/128', '127.0.0.1/8'],
-          mac: ['08:00:27:d8:c5:c0'],
+          ...endpointHost.host,
         },
         os: {
           family: 'windows',

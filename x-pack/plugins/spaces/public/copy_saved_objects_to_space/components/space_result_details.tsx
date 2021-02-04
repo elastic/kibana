@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './space_result_details.scss';
@@ -24,7 +25,7 @@ import { EuiSuperSelect } from '@elastic/eui';
 import moment from 'moment';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { ImportRetry } from '../types';
 

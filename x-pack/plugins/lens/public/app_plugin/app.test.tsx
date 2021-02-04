@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
-import { EditorFrameInstance } from '../types';
+import { EditorFrameInstance, EditorFrameProps } from '../types';
 import { Document } from '../persistence';
 import { DOC_TYPE } from '../../common';
 import { mount } from 'enzyme';
@@ -44,6 +45,8 @@ import {
 import { LensAttributeService } from '../lens_attribute_service';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { EmbeddableStateTransfer } from '../../../../../src/plugins/embeddable/public';
+import { NativeRenderer } from '../native_renderer';
+import moment from 'moment';
 
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
@@ -71,6 +74,16 @@ function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
     mount: jest.fn((el, props) => {}),
     unmount: jest.fn(() => {}),
+  };
+}
+
+function createMockSearchService() {
+  let sessionIdCounter = 1;
+  return {
+    session: {
+      start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
+      clear: jest.fn(),
+    },
   };
 }
 
@@ -118,16 +131,34 @@ function createMockQueryString() {
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
+  let timeFilter = { from: 'now-7d', to: 'now' };
+  let subscriber: () => void;
   return {
-    getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
-    setTime: jest.fn(),
+    getTime: jest.fn(() => timeFilter),
+    setTime: jest.fn((newTimeFilter) => {
+      timeFilter = newTimeFilter;
+      if (subscriber) {
+        subscriber();
+      }
+    }),
     getTimeUpdate$: () => ({
       subscribe: ({ next }: { next: () => void }) => {
+        subscriber = next;
         return unsubscribe;
       },
     }),
+    calculateBounds: jest.fn(() => ({
+      min: moment('2021-01-10T04:00:00.000Z'),
+      max: moment('2021-01-10T08:00:00.000Z'),
+    })),
+    getBounds: jest.fn(() => timeFilter),
     getRefreshInterval: () => {},
     getRefreshIntervalDefaults: () => {},
+    getAutoRefreshFetch$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        return next;
+      },
+    }),
   };
 }
 
@@ -209,6 +240,10 @@ describe('Lens App', () => {
             return new Promise((resolve) => resolve({ id }));
           }),
         },
+        search: createMockSearchService(),
+        nowProvider: {
+          get: jest.fn(),
+        },
       } as unknown) as DataPublicPluginStart,
       storage: {
         get: jest.fn(),
@@ -282,8 +317,8 @@ describe('Lens App', () => {
           />,
           Object {
             "dateRange": Object {
-              "fromDate": "now-7d",
-              "toDate": "now",
+              "fromDate": "2021-01-10T04:00:00.000Z",
+              "toDate": "2021-01-10T08:00:00.000Z",
             },
             "doc": undefined,
             "filters": Array [],
@@ -295,6 +330,7 @@ describe('Lens App', () => {
               "query": "",
             },
             "savedQuery": undefined,
+            "searchSessionId": "sessionId-1",
             "showNoDataPopover": [Function],
           },
         ],
@@ -325,7 +361,7 @@ describe('Lens App', () => {
     expect(frame.mount).toHaveBeenCalledWith(
       expect.any(Element),
       expect.objectContaining({
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
         query: { query: '', language: 'kuery' },
         filters: [pinnedFilter],
       })
@@ -983,7 +1019,7 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          dateRange: { fromDate: 'now-7d', toDate: 'now' },
+          dateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
           query: { query: '', language: 'kuery' },
         })
       );
@@ -1030,7 +1066,11 @@ describe('Lens App', () => {
     });
 
     it('updates the editor frame when the user changes query or time in the search bar', () => {
-      const { component, frame } = mountWith({});
+      const { component, frame, services } = mountWith({});
+      (services.data.query.timefilter.timefilter.calculateBounds as jest.Mock).mockReturnValue({
+        min: moment('2021-01-09T04:00:00.000Z'),
+        max: moment('2021-01-09T08:00:00.000Z'),
+      });
       act(() =>
         component.find(TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
@@ -1046,10 +1086,14 @@ describe('Lens App', () => {
         }),
         {}
       );
+      expect(services.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
+        from: 'now-14d',
+        to: 'now-7d',
+      });
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          dateRange: { fromDate: 'now-14d', toDate: 'now-7d' },
+          dateRange: { fromDate: '2021-01-09T04:00:00.000Z', toDate: '2021-01-09T08:00:00.000Z' },
           query: { query: 'new', language: 'lucene' },
         })
       );
@@ -1069,6 +1113,53 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           filters: [esFilters.buildExistsFilter(field, indexPattern)],
+        })
+      );
+    });
+
+    it('updates the searchSessionId when the user changes query or time in the search bar', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: '', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-1`,
+        })
+      );
+
+      // trigger again, this time changing just the query
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      act(() =>
+        services.data.query.filterManager.setFilters([
+          esFilters.buildExistsFilter(field, indexPattern),
+        ])
+      );
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-3`,
         })
       );
     });
@@ -1187,6 +1278,155 @@ describe('Lens App', () => {
         expect.any(Element),
         expect.objectContaining({
           filters: [pinned],
+        })
+      );
+    });
+  });
+
+  describe('search session id management', () => {
+    it('updates the searchSessionId when the query is updated', () => {
+      const { component, frame } = mountWith({});
+      act(() => {
+        component.find(TopNavMenu).prop('onSaved')!({
+          id: '1',
+          attributes: {
+            title: '',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      act(() => {
+        component.find(TopNavMenu).prop('onSavedQueryUpdated')!({
+          id: '2',
+          attributes: {
+            title: 'new title',
+            description: '',
+            query: { query: '', language: 'lucene' },
+          },
+        });
+      });
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    it('updates the searchSessionId when the active saved query is cleared', () => {
+      const { component, frame, services } = mountWith({});
+      act(() =>
+        component.find(TopNavMenu).prop('onQuerySubmit')!({
+          dateRange: { from: 'now-14d', to: 'now-7d' },
+          query: { query: 'new', language: 'lucene' },
+        })
+      );
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
+      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+      act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
+      component.update();
+      act(() => component.find(TopNavMenu).prop('onClearSavedQuery')!());
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    const mockUpdate = {
+      filterableIndexPatterns: [],
+      doc: {
+        title: '',
+        description: '',
+        visualizationType: '',
+        state: {
+          datasourceStates: {},
+          visualization: {},
+          filters: [],
+          query: { query: '', language: 'lucene' },
+        },
+        references: [],
+      },
+      isSaveable: true,
+      activeData: undefined,
+    };
+
+    it('does not update the searchSessionId when the state changes', () => {
+      const { component, frame } = mountWith({});
+      act(() => {
+        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
+          mockUpdate
+        );
+      });
+      component.update();
+      expect(frame.mount).not.toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    it('does update the searchSessionId when the state changes and too much time passed', () => {
+      const { component, frame, services } = mountWith({});
+
+      // time range is 100,000ms ago to 30,000ms ago (that's a lag of 30 percent)
+      (services.data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 30000));
+      (services.data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (services.data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 30000),
+      });
+
+      act(() => {
+        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
+          mockUpdate
+        );
+      });
+      component.update();
+      expect(frame.mount).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
+        })
+      );
+    });
+
+    it('does not update the searchSessionId when the state changes and too little time has passed', () => {
+      const { component, frame, services } = mountWith({});
+
+      // time range is 100,000ms ago to 300ms ago (that's a lag of .3 percent, not enough to trigger a session update)
+      (services.data.nowProvider.get as jest.Mock).mockReturnValue(new Date(Date.now() - 300));
+      (services.data.query.timefilter.timefilter.getTime as jest.Mock).mockReturnValue({
+        from: 'now-2m',
+        to: 'now',
+      });
+      (services.data.query.timefilter.timefilter.getBounds as jest.Mock).mockReturnValue({
+        min: moment(Date.now() - 100000),
+        max: moment(Date.now() - 300),
+      });
+
+      act(() => {
+        (component.find(NativeRenderer).prop('nativeProps') as EditorFrameProps).onChange(
+          mockUpdate
+        );
+      });
+      component.update();
+      expect(frame.mount).not.toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({
+          searchSessionId: `sessionId-2`,
         })
       );
     });

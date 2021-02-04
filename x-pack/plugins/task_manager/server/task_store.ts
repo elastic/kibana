@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -98,7 +99,11 @@ export interface FetchResult {
 }
 
 export interface ClaimOwnershipResult {
-  claimedTasks: number;
+  stats: {
+    tasksUpdated: number;
+    tasksConflicted: number;
+    tasksClaimed: number;
+  };
   docs: ConcreteTaskInstance[];
 }
 
@@ -214,16 +219,13 @@ export class TaskStore {
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
-    const numberOfTasksClaimed = await this.markAvailableTasksAsClaimed(
-      claimOwnershipUntil,
-      claimTasksByIdWithRawIds,
-      size
-    );
+    const {
+      updated: tasksUpdated,
+      version_conflicts: tasksConflicted,
+    } = await this.markAvailableTasksAsClaimed(claimOwnershipUntil, claimTasksByIdWithRawIds, size);
 
     const docs =
-      numberOfTasksClaimed > 0
-        ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size)
-        : [];
+      tasksUpdated > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
 
     const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
       claimTasksById.includes(doc.id)
@@ -250,7 +252,11 @@ export class TaskStore {
     ]);
 
     return {
-      claimedTasks: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      stats: {
+        tasksUpdated,
+        tasksConflicted,
+        tasksClaimed: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      },
       docs: docs.filter((doc) => doc.status === TaskStatus.Claiming),
     };
   };
@@ -259,7 +265,7 @@ export class TaskStore {
     claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
-  ): Promise<number> {
+  ): Promise<UpdateByQueryResult> {
     const registeredTaskTypes = this.definitions.getAllTypes();
     const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
       return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
@@ -282,7 +288,7 @@ export class TaskStore {
     }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const { updated } = await this.updateByQuery(
+    const result = await this.updateByQuery(
       asUpdateByQuery({
         query: matchesClauses(
           mustBeAllOf(
@@ -309,7 +315,7 @@ export class TaskStore {
     );
 
     if (apmTrans) apmTrans.end();
-    return updated;
+    return result;
   }
 
   /**
@@ -524,7 +530,7 @@ export class TaskStore {
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { max_docs }: UpdateByQueryOpts = {}
+    { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
@@ -543,10 +549,22 @@ export class TaskStore {
         },
       });
 
+      /**
+       * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
+       * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
+       * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
+       * many docs as we could have.
+       * This is still no more than an estimation, as there might have been less docuemnt to update that the
+       * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
+       * have for an unhealthy cluster distribution of Task Manager polling intervals
+       */
+      const conflictsCorrectedForContinuation =
+        max_docs && version_conflicts + updated > max_docs ? max_docs - updated : version_conflicts;
+
       return {
         total,
         updated,
-        version_conflicts,
+        version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {
       this.errors$.next(e);

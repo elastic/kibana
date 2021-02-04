@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniqBy } from 'lodash/fp';
@@ -17,6 +18,9 @@ import { MarkdownRenderer } from '../../../../common/components/markdown_editor'
 import { timelineActions } from '../../../store/timeline';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
+import { TimelineTabs } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { sourcererSelectors } from '../../../../common/store';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -34,18 +38,24 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const existingIndexNamesSelector = useMemo(
+    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    []
+  );
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+
   const handleClick = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
+        tabType: TimelineTabs.notes,
         timelineId,
         event: {
           eventId,
-          // we don't store yet info about event index name in note
-          indexName: '',
+          indexName: existingIndexNames.join(','),
         },
       })
     );
-  }, [dispatch, eventId, timelineId]);
+  }, [dispatch, eventId, existingIndexNames, timelineId]);
 
   return (
     <EuiButtonIcon
@@ -84,7 +94,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
           return {
             'data-test-subj': `note-preview-${note.savedObjectId}`,
             username: defaultToEmptyTag(note.updatedBy),
-            event: 'added a comment',
+            event: i18n.ADDED_A_NOTE,
             timestamp: note.updated ? (
               <FormattedRelative data-test-subj="updated" value={new Date(note.updated)} />
             ) : (
@@ -93,7 +103,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             children: (
               <div className={NOTE_CONTENT_CLASS_NAME} tabIndex={0}>
                 <EuiScreenReaderOnly data-test-subj="screenReaderOnlyUserAddedANote">
-                  <p>{i18n.USER_ADDED_A_NOTE(note.updatedBy ?? i18n.AN_UNKNOWN_USER)}</p>
+                  <p>{`${note.updatedBy ?? i18n.AN_UNKNOWN_USER} ${i18n.ADDED_A_NOTE}`}</p>
                 </EuiScreenReaderOnly>
                 <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
               </div>

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -44,11 +46,17 @@ describe('jira connector validation', () => {
     } as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        email: [],
-        apiToken: [],
-        projectKey: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          projectKey: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: [],
+          email: [],
+        },
       },
     });
   });
@@ -65,11 +73,17 @@ describe('jira connector validation', () => {
     } as unknown) as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        email: [],
-        apiToken: ['API token or password is required'],
-        projectKey: ['Project key is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          projectKey: ['Project key is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: ['API token or password is required'],
+          email: [],
+        },
       },
     });
   });
@@ -82,7 +96,7 @@ describe('jira action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { summary: [] },
+      errors: { 'subActionParams.incident.summary': [] },
     });
   });
 
@@ -93,7 +107,7 @@ describe('jira action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        summary: ['Summary is required.'],
+        'subActionParams.incident.summary': ['Summary is required.'],
       },
     });
   });

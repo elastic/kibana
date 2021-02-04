@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/server';
@@ -78,12 +79,12 @@ export const registerCollector: RegisterCollector = ({
       },
     },
     isReady: () => kibanaIndex.length > 0,
-    fetch: async ({ callCluster }: CollectorFetchContext): Promise<UsageData> => {
+    fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const [detections, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(
           kibanaIndex,
-          callCluster,
+          esClient,
           ml,
           (savedObjectsClient as unknown) as SavedObjectsClientContract
         ),

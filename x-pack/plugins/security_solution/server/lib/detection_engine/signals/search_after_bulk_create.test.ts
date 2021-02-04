@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -183,31 +184,6 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       })
-      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits())
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -250,8 +226,8 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(12);
-    expect(createdSignalsCount).toEqual(5);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(7);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -334,9 +310,9 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when all search results are in the allowlist and with sortId present', async () => {
     const searchListItems: SearchListItemArraySchema = [
-      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '3.3.3.3' },
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['3.3.3.3'] },
     ];
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     const sampleParams = sampleRuleAlertParams(30);
@@ -398,10 +374,10 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when all search results are in the allowlist and no sortId present', async () => {
     const searchListItems: SearchListItemArraySchema = [
-      { ...getSearchListItemResponseMock(), value: '1.1.1.1' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
-      { ...getSearchListItemResponseMock(), value: '2.2.2.2' },
+      { ...getSearchListItemResponseMock(), value: ['1.1.1.1'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
+      { ...getSearchListItemResponseMock(), value: ['2.2.2.2'] },
     ];
 
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
@@ -461,7 +437,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
-      'sortIds was empty on searchResult'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -542,7 +518,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
-      'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 

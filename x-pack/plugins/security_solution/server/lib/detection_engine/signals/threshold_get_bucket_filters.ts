@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash';
@@ -10,7 +11,11 @@ import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ThresholdQueryBucket } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -20,7 +25,7 @@ interface GetThresholdBucketFiltersParams {
   from: string;
   to: string;
   indexPattern: string[];
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   ruleId: string;
   bucketByField: string;

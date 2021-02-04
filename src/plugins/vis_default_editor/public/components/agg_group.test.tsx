@@ -1,40 +1,36 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
+import type { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
+import { ISchemas } from 'src/plugins/visualizations/public';
+import { createMockedVisEditorSchemas } from 'src/plugins/visualizations/public/mocks';
+
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { ISchemas, Schemas } from '../schemas';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { EditorVisState } from './sidebar/state/reducers';
 
-jest.mock('@elastic/eui', () => ({
-  EuiTitle: 'eui-title',
-  EuiDragDropContext: 'eui-drag-drop-context',
-  EuiDroppable: 'eui-droppable',
-  EuiDraggable: (props: any) => props.children({ dragHandleProps: {} }),
-  EuiSpacer: 'eui-spacer',
-  EuiPanel: 'eui-panel',
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    EuiTitle: 'eui-title',
+    EuiDragDropContext: 'eui-drag-drop-context',
+    EuiDroppable: 'eui-droppable',
+    EuiDraggable: (props: any) => props.children({ dragHandleProps: {} }),
+    EuiSpacer: 'eui-spacer',
+    EuiPanel: 'eui-panel',
+  };
+});
 
 jest.mock('./agg', () => ({
   DefaultEditorAgg: () => <div />,
@@ -56,7 +52,7 @@ describe('DefaultEditorAgg component', () => {
     setTouched = jest.fn();
     setValidity = jest.fn();
     reorderAggs = jest.fn();
-    schemas = new Schemas([
+    schemas = createMockedVisEditorSchemas([
       {
         name: 'metrics',
         group: 'metrics',

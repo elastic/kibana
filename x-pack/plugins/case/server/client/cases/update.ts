@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -110,7 +111,8 @@ export const update = ({
           };
         } else if (
           updateCaseAttributes.status &&
-          updateCaseAttributes.status === CaseStatuses.open
+          (updateCaseAttributes.status === CaseStatuses.open ||
+            updateCaseAttributes.status === CaseStatuses['in-progress'])
         ) {
           closedInfo = {
             closed_at: null,
@@ -182,11 +184,14 @@ export const update = ({
         // The filter guarantees that the comments will be of type alert
       })) as SavedObjectsFindResponse<{ alertId: string }>;
 
-      caseClient.updateAlertsStatus({
-        ids: caseComments.saved_objects.map(({ attributes: { alertId } }) => alertId),
-        // Either there is a status update or the syncAlerts got turned on.
-        status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
-      });
+      const commentIds = caseComments.saved_objects.map(({ attributes: { alertId } }) => alertId);
+      if (commentIds.length > 0) {
+        caseClient.updateAlertsStatus({
+          ids: commentIds,
+          // Either there is a status update or the syncAlerts got turned on.
+          status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
+        });
+      }
     }
 
     const returnUpdatedCase = myCases.saved_objects

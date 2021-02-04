@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './suggestion_panel.scss';
@@ -273,16 +274,18 @@ export function SuggestionPanel({
   const contextRef = useRef<ExecutionContextSearch>(context);
   contextRef.current = context;
 
+  const sessionIdRef = useRef<string>(frame.searchSessionId);
+  sessionIdRef.current = frame.searchSessionId;
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
-    const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent
         {...props}
         searchContext={contextRef.current}
-        reload$={autoRefreshFetch$}
+        searchSessionId={sessionIdRef.current}
       />
     );
-  }, [plugins.data.query.timefilter.timefilter, ExpressionRendererComponent]);
+  }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 

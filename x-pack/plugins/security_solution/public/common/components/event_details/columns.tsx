@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -50,6 +51,14 @@ const HoverActionsContainer = styled(EuiPanel)`
 `;
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
+
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+`;
+
+const FullWidthFlexItem = styled(EuiFlexItem)`
+  width: 100%;
+`;
 
 export const getColumns = ({
   browserFields,
@@ -159,10 +168,15 @@ export const getColumns = ({
     sortable: true,
     truncateText: false,
     render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
-      <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
+      <FullWidthFlexGroup
+        direction="column"
+        alignItems="flexStart"
+        component="span"
+        gutterSize="none"
+      >
         {values != null &&
           values.map((value, i) => (
-            <EuiFlexItem
+            <FullWidthFlexItem
               grow={false}
               component="span"
               key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
@@ -182,9 +196,9 @@ export const getColumns = ({
                   />
                 )}
               </div>
-            </EuiFlexItem>
+            </FullWidthFlexItem>
           ))}
-      </EuiFlexGroup>
+      </FullWidthFlexGroup>
     ),
   },
   {

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'>
+panelNotificationTrigger: Trigger
 ```

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -60,9 +61,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setPopover] = useState(false);
-  const [alertStatus, setAlertStatus] = useState<Status | undefined>(
-    (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
-  );
   const eventId = ecsRowData._id;
   const ruleId = useMemo(
     (): string | null =>
@@ -90,6 +88,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const { addWarning } = useAppToasts();
 
+  const alertStatus = useMemo(() => {
+    return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
+  }, [ecsRowData]);
+
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -98,7 +100,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -122,9 +124,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
       closeAddExceptionModal();
-      if (didCloseAlert) {
-        setAlertStatus('closed');
-      }
       if (timelineId !== TimelineId.active || didBulkCloseAlert) {
         refetch();
       }
@@ -154,7 +153,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         }
         displaySuccessToast(title, dispatchToaster);
       }
-      setAlertStatus(newStatus);
     },
     [dispatchToaster, addWarning]
   );
@@ -218,7 +216,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="open-alert-status"
       id={FILTER_OPEN}
       onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -251,7 +249,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="close-alert-status"
       id={FILTER_CLOSED}
       onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!hasIndexUpdateDelete && !hasIndexMaintenance}
     >
       <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -284,7 +282,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="in-progress-alert-status"
       id={FILTER_IN_PROGRESS}
       onClick={inProgressAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!canUserCRUD || !hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -359,10 +357,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         return [];
     }
   }, [
-    alertStatus,
     closeAlertActionComponent,
     inProgressAlertActionComponent,
     openAlertActionComponent,
+    alertStatus,
   ]);
 
   const items = useMemo(

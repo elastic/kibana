@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from 'lodash/fp';
@@ -17,7 +18,7 @@ import { isTab } from '../../../common/components/accessibility/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -68,7 +69,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
           id: timelineId,
           columns: defaultHeaders,
           indexNames: selectedPatterns,
-          expandedEvent: activeTimeline.getExpandedEvent(),
+          expandedEvent: {
+            [TimelineTabs.query]: activeTimeline.getExpandedEvent(),
+          },
           show: false,
         })
       );

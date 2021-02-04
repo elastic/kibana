@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
@@ -18,10 +19,13 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
-import { ADDED_TO_TIMELINE_MESSAGE } from '../../hooks/translations';
+import {
+  ADDED_TO_TIMELINE_MESSAGE,
+  ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
+} from '../../hooks/translations';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import {
   addFieldToTimelineColumns,
   addProviderToTimeline,
@@ -98,17 +102,27 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
 
-  const activeTimelineDataProviders = useDeepEqualSelector(
-    (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults)?.dataProviders
+  const {
+    dataProviders: activeTimelineDataProviders,
+    timelineType,
+  } = useDeepEqualSelector((state) =>
+    pick(
+      ['dataProviders', 'timelineType'],
+      getTimeline(state, TimelineId.active) ?? timelineDefaults
+    )
   );
   const dataProviders = useDeepEqualSelector(getDataProviders);
 
   const [, dispatchToaster] = useStateToaster();
   const onAddedToTimeline = useCallback(
     (fieldOrValue: string) => {
-      displaySuccessToast(ADDED_TO_TIMELINE_MESSAGE(fieldOrValue), dispatchToaster);
+      const message =
+        timelineType === TimelineType.template
+          ? ADDED_TO_TIMELINE_TEMPLATE_MESSAGE(fieldOrValue)
+          : ADDED_TO_TIMELINE_MESSAGE(fieldOrValue);
+      displaySuccessToast(message, dispatchToaster);
     },
-    [dispatchToaster]
+    [dispatchToaster, timelineType]
   );
 
   const onDragEnd = useCallback(

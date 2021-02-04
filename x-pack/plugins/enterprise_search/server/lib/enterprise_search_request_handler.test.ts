@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockConfig, mockLogger } from '../__mocks__';
@@ -116,15 +117,39 @@ describe('EnterpriseSearchRequestHandler', () => {
         );
       });
 
-      it('correctly encodes paths and query string parameters', async () => {
+      it('correctly encodes query string parameters', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
-          path: '/api/some example',
+          path: '/api/example',
         });
         await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
-          'http://localhost:3002/api/some%20example?page%5Bcurrent%5D=1'
+          'http://localhost:3002/api/example?page%5Bcurrent%5D=1'
         );
+      });
+
+      describe('encodePathParams', () => {
+        it('correctly replaces :pathVariables with request.params', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example/some/:id',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello', id: 'world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello/some/world'
+          );
+        });
+
+        it('correctly encodes path params as URI components', async () => {
+          const requestHandler = enterpriseSearchRequestHandler.createRequest({
+            path: '/api/examples/:example',
+          });
+          await makeAPICall(requestHandler, { params: { example: 'hello#@/$%^/&[]{}/";world' } });
+
+          EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+            'http://localhost:3002/api/examples/hello%23%40%2F%24%25%5E%2F%26%5B%5D%7B%7D%2F%22%3Bworld'
+          );
+        });
       });
     });
 

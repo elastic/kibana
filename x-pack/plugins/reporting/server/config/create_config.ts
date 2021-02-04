@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n/';
@@ -42,26 +43,12 @@ export function createConfig$(
       }
       const { kibanaServer: reportingServer } = config;
       const serverInfo = core.http.getServerInfo();
-      // kibanaServer.hostname, default to server.host, don't allow "0"
-      let kibanaServerHostname = reportingServer.hostname
+      // kibanaServer.hostname, default to server.host
+      const kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
         : serverInfo.hostname;
-      if (kibanaServerHostname === '0') {
-        logger.warn(
-          i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {
-            defaultMessage:
-              `Found 'server.host: "0"' in Kibana configuration. This is incompatible with Reporting. ` +
-              `To enable Reporting to work, '{configKey}: 0.0.0.0' is being automatically to the configuration. ` +
-              `You can change the setting to 'server.host: 0.0.0.0' or add '{configKey}: 0.0.0.0' in kibana.yml to prevent this message.`,
-            values: { configKey: 'xpack.reporting.kibanaServer.hostname' },
-          })
-        );
-        kibanaServerHostname = '0.0.0.0';
-      }
       // kibanaServer.port, default to server.port
-      const kibanaServerPort = reportingServer.port
-      ? reportingServer.port
-      : serverInfo.port; // prettier-ignore
+      const kibanaServerPort = reportingServer.port ? reportingServer.port : serverInfo.port;
       // kibanaServer.protocol, default to server.protocol
       const kibanaServerProtocol = reportingServer.protocol
         ? reportingServer.protocol

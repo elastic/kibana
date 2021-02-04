@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { map, last } from 'lodash';
@@ -23,14 +12,32 @@ import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
 // @ts-expect-error
-import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogStashFields from './fixtures/logstash_fields';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import { FieldFormat } from '../..';
+import { RuntimeField } from '../types';
 
 class MockFieldFormatter {}
+
+const runtimeFieldScript = {
+  type: 'keyword' as RuntimeField['type'],
+  script: {
+    source: "emit('hello world')",
+  },
+};
+
+const runtimeFieldMap = {
+  runtime_field: runtimeFieldScript,
+};
+
+const runtimeField = {
+  name: 'runtime_field',
+  runtimeField: runtimeFieldScript,
+  scripted: false,
+};
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
@@ -43,7 +50,15 @@ function create(id: string) {
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields: { ...fields, runtime_field: runtimeField },
+      title,
+      runtimeFieldMap,
+    },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -64,6 +79,10 @@ describe('IndexPattern', () => {
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
+      expect(indexPattern).toHaveProperty('addScriptedField');
+      expect(indexPattern).toHaveProperty('removeScriptedField');
+      expect(indexPattern).toHaveProperty('addRuntimeField');
+      expect(indexPattern).toHaveProperty('removeRuntimeField');
 
       // properties
       expect(indexPattern).toHaveProperty('fields');
@@ -76,6 +95,7 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields[0]).toHaveProperty('filterable');
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
+      expect(indexPattern.fields[0]).toHaveProperty('isMapped');
     });
   });
 
@@ -109,6 +129,12 @@ describe('IndexPattern', () => {
       expect(docValueFieldNames).toContain('utc_time');
     });
 
+    test('should return runtimeField', () => {
+      expect(indexPattern.getComputedFields().runtimeFields).toEqual({
+        runtime_field: runtimeFieldScript,
+      });
+    });
+
     test('should request date field doc values in date_time format', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
       const timestampField = docvalueFields.find((field) => field.field === '@timestamp');
@@ -128,6 +154,7 @@ describe('IndexPattern', () => {
       const notScriptedNames = mockLogStashFields()
         .filter((item: IndexPatternField) => item.scripted === false)
         .map((item: IndexPatternField) => item.name);
+      notScriptedNames.push('runtime_field');
       const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
       expect(respNames).toEqual(notScriptedNames);
@@ -193,6 +220,52 @@ describe('IndexPattern', () => {
 
       indexPattern.deleteFieldFormat('bytes');
       expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
+  describe('addRuntimeField and removeRuntimeField', () => {
+    const runtime = {
+      type: 'keyword' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world');",
+      },
+    };
+
+    beforeEach(() => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+    });
+
+    test('add and remove runtime field to existing field', () => {
+      indexPattern.addRuntimeField('@tags', runtime);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        '@tags': runtime,
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('@tags');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
+    });
+
+    test('add and remove runtime field as new field', () => {
+      indexPattern.addRuntimeField('new_field', runtime);
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+        new_field: runtime,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field.runtimeField).toEqual(runtime);
+
+      indexPattern.removeRuntimeField('new_field');
+      expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
+        runtime_field: runtimeField.runtimeField,
+      });
+      expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
   });
 

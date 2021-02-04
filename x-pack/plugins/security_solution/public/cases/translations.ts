@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -276,5 +277,16 @@ export const SYNC_ALERTS_HELP = i18n.translate(
   {
     defaultMessage:
       'Enabling this option will sync the status of alerts in this case with the case status.',
+  }
+);
+
+export const ALERT = i18n.translate('xpack.securitySolution.common.alertLabel', {
+  defaultMessage: 'Alert',
+});
+
+export const ALERT_ADDED_TO_CASE = i18n.translate(
+  'xpack.securitySolution.common.alertAddedToCase',
+  {
+    defaultMessage: 'added to case',
   }
 );

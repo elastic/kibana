@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IExternalUrl } from 'src/core/public';
@@ -441,5 +442,79 @@ describe('UrlDrilldown', () => {
         }
       });
     });
+  });
+});
+
+describe('encoding', () => {
+  const urlDrilldown = createDrilldown();
+  const context: ActionContext = {
+    data: {
+      data: mockDataPoints,
+    },
+    embeddable: mockEmbeddable,
+  };
+
+  test('encodes URL by default', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('encodes URL when encoding is enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: true,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('does not encode URL when encoding is not enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%26shoulders');
+  });
+
+  test('can encode URI component using "encodeURIComponent" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIComponent "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders%40gmail.com');
+  });
+
+  test('can encode URI component using "encodeURIQuery" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIQuery "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders@gmail.com');
   });
 });

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   Agent,
   AgentAction,
@@ -307,7 +308,11 @@ export async function getLatestConfigChangeAction(
 }
 
 export interface ActionsService {
-  getAgent: (soClient: SavedObjectsClientContract, agentId: string) => Promise<Agent>;
+  getAgent: (
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentId: string
+  ) => Promise<Agent>;
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -13,7 +14,13 @@ import { LicensingPluginStart } from '../../../licensing/server';
 import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
-import { AlertType } from '../types';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
 import { AlertTypeDisabledError } from './errors/alert_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
@@ -130,7 +137,23 @@ export class LicenseState {
     }
   }
 
-  public ensureLicenseForAlertType(alertType: AlertType) {
+  public ensureLicenseForAlertType<
+    Params extends AlertTypeParams,
+    State extends AlertTypeState,
+    InstanceState extends AlertInstanceState,
+    InstanceContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    alertType: AlertType<
+      Params,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >
+  ) {
     this.notifyUsage(alertType.name, alertType.minimumLicenseRequired);
 
     const check = this.getLicenseCheckForAlertType(

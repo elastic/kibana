@@ -1,28 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
-import {
+import type {
+  IRouter,
   IScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  RequestHandlerContext,
 } from 'src/core/server';
 import {
   ISearchOptions,
@@ -34,17 +25,18 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { ISessionService } from './session';
+import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
-  sessionService: ISessionService;
+  sessionService: ISearchSessionService;
 }
 
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   uiSettingsClient: IUiSettingsClient;
+  searchSessionsClient: IScopedSearchSessionsClient;
 }
 
 export interface ISearchSetup {
@@ -86,6 +78,22 @@ export interface ISearchStrategy<
     deps: SearchStrategyDependencies
   ) => Observable<SearchStrategyResponse>;
   cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
+  extend?: (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Promise<void>;
+}
+
+export interface IScopedSearchClient extends ISearchClient {
+  saveSession: IScopedSearchSessionsClient['save'];
+  getSession: IScopedSearchSessionsClient['get'];
+  findSessions: IScopedSearchSessionsClient['find'];
+  updateSession: IScopedSearchSessionsClient['update'];
+  cancelSession: IScopedSearchSessionsClient['cancel'];
+  deleteSession: IScopedSearchSessionsClient['delete'];
+  extendSession: IScopedSearchSessionsClient['extend'];
 }
 
 export interface ISearchStart<
@@ -101,8 +109,19 @@ export interface ISearchStart<
   getSearchStrategy: (
     name?: string // Name of the search strategy (defaults to the Elasticsearch strategy)
   ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  asScoped: (request: KibanaRequest) => ISearchClient;
+  asScoped: (request: KibanaRequest) => IScopedSearchClient;
   searchSource: {
     asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
   };
 }
+
+export type SearchRequestHandlerContext = IScopedSearchClient;
+
+/**
+ * @internal
+ */
+export interface DataRequestHandlerContext extends RequestHandlerContext {
+  search: SearchRequestHandlerContext;
+}
+
+export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

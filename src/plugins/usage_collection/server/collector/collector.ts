@@ -1,42 +1,51 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   Logger,
-  LegacyAPICaller,
   ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
 
-export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
+export type AllowedSchemaNumberTypes =
+  | 'long'
+  | 'integer'
+  | 'short'
+  | 'byte'
+  | 'double'
+  | 'float'
+  | 'date';
+export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
+export type AllowedSchemaBooleanTypes = 'boolean';
 
-export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
+export type AllowedSchemaTypes =
+  | AllowedSchemaNumberTypes
+  | AllowedSchemaStringTypes
+  | AllowedSchemaBooleanTypes;
 
 export interface SchemaField {
   type: string;
 }
 
+export type PossibleSchemaTypes<U> = U extends string
+  ? AllowedSchemaStringTypes
+  : U extends number
+  ? AllowedSchemaNumberTypes
+  : U extends boolean
+  ? AllowedSchemaBooleanTypes
+  : // allow any schema type from the union if typescript is unable to resolve the exact U type
+    AllowedSchemaTypes;
+
 export type RecursiveMakeSchemaFrom<U> = U extends object
   ? MakeSchemaFrom<U>
-  : { type: AllowedSchemaTypes };
+  : { type: PossibleSchemaTypes<U> };
 
 // Using Required to enforce all optional keys in the object
 export type MakeSchemaFrom<Base> = {
@@ -54,10 +63,6 @@ export type MakeSchemaFrom<Base> = {
  * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster.
  */
 export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined = false> = {
-  /**
-   * @deprecated Scoped Legacy Elasticsearch client: use esClient instead
-   */
-  callCluster: LegacyAPICaller;
   /**
    * Request-scoped Elasticsearch client
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -35,9 +36,7 @@ export const transactionGroupsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({
-        transactionType: t.string,
-      }),
+      t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -171,23 +170,28 @@ export const transactionLatencyChatsRoute = createRoute({
       transactionName,
       setup,
       searchAggregatedTransactions,
+      logger,
     };
 
-    const {
+    const [latencyData, anomalyTimeseries] = await Promise.all([
+      getLatencyTimeseries({
+        ...options,
+        latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      }),
+      getAnomalySeries(options).catch((error) => {
+        logger.warn(`Unable to retrieve anomalies for latency charts.`);
+        logger.error(error);
+        return undefined;
+      }),
+    ]);
+
+    const { latencyTimeseries, overallAvgDuration } = latencyData;
+
+    return {
       latencyTimeseries,
       overallAvgDuration,
-    } = await getLatencyTimeseries({
-      ...options,
-      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    });
-
-    const anomalyTimeseries = await getAnomalySeries({
-      ...options,
-      logger,
-      latencyTimeseries,
-    });
-
-    return { latencyTimeseries, overallAvgDuration, anomalyTimeseries };
+      anomalyTimeseries,
+    };
   },
 });
 
@@ -199,10 +203,8 @@ export const transactionThroughputChatsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -287,12 +289,8 @@ export const transactionChartsBreakdownRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({
-        transactionType: t.string,
-      }),
-      t.partial({
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -322,10 +320,8 @@ export const transactionChartsErrorRateRoute = createRoute({
     query: t.intersection([
       uiFiltersRt,
       rangeRt,
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },

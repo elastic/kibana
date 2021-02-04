@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { duration } from 'moment';
@@ -28,15 +17,8 @@ import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
-import { ByteSizeValue } from '@kbn/config-schema';
-
-const logger = loggingSystemMock.create();
-
-let coreId: symbol;
-let env: Env;
-let coreContext: CoreContext;
-let server: Server;
-let instanceInfo: InstanceInfo;
+import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ConfigService } from '@kbn/config';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -54,61 +36,112 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
 }
 
 describe('createPluginInitializerContext', () => {
+  let logger: ReturnType<typeof loggingSystemMock.create>;
+  let coreId: symbol;
+  let opaqueId: symbol;
+  let env: Env;
+  let coreContext: CoreContext;
+  let server: Server;
+  let instanceInfo: InstanceInfo;
+
   beforeEach(async () => {
+    logger = loggingSystemMock.create();
     coreId = Symbol('core');
+    opaqueId = Symbol();
     instanceInfo = {
       uuid: 'instance-uuid',
     };
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
-    await server.setupCoreConfig();
+    server.setupCoreConfig();
     coreContext = { coreId, env, logger, configService: server.configService };
   });
 
-  it('should return a globalConfig handler in the context', async () => {
-    const manifest = createPluginManifest();
-    const opaqueId = Symbol();
-    const pluginInitializerContext = createPluginInitializerContext(
-      coreContext,
-      opaqueId,
-      manifest,
-      instanceInfo
-    );
+  describe('context.config', () => {
+    it('config.get() should return the plugin config synchronously', async () => {
+      const config$ = rawConfigServiceMock.create({
+        rawConfig: {
+          plugin: {
+            foo: 'bar',
+            answer: 42,
+          },
+        },
+      });
 
-    expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
+      const configService = new ConfigService(config$, env, logger);
+      configService.setSchema(
+        'plugin',
+        schema.object({
+          foo: schema.string(),
+          answer: schema.number(),
+        })
+      );
+      await configService.validate();
 
-    const configObject = await pluginInitializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
-    expect(configObject).toStrictEqual({
-      kibana: {
-        index: '.kibana',
-        autocompleteTerminateAfter: duration(100000),
-        autocompleteTimeout: duration(1000),
-      },
-      elasticsearch: {
-        shardTimeout: duration(30, 's'),
-        requestTimeout: duration(30, 's'),
-        pingTimeout: duration(30, 's'),
-      },
-      path: { data: fromRoot('data') },
-      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+      coreContext = { coreId, env, logger, configService };
+
+      const manifest = createPluginManifest({
+        configPath: 'plugin',
+      });
+
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo
+      );
+
+      expect(pluginInitializerContext.config.get()).toEqual({
+        foo: 'bar',
+        answer: 42,
+      });
+    });
+
+    it('config.globalConfig$ should be an observable for the global config', async () => {
+      const manifest = createPluginManifest();
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo
+      );
+
+      expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
+
+      const configObject = await pluginInitializerContext.config.legacy.globalConfig$
+        .pipe(first())
+        .toPromise();
+      expect(configObject).toStrictEqual({
+        kibana: {
+          index: '.kibana',
+          autocompleteTerminateAfter: duration(100000),
+          autocompleteTimeout: duration(1000),
+        },
+        elasticsearch: {
+          shardTimeout: duration(30, 's'),
+          requestTimeout: duration(30, 's'),
+          pingTimeout: duration(30, 's'),
+        },
+        path: { data: fromRoot('data') },
+        savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+      });
     });
   });
 
-  it('allow to access the provided instance uuid', () => {
-    const manifest = createPluginManifest();
-    const opaqueId = Symbol();
-    instanceInfo = {
-      uuid: 'kibana-uuid',
-    };
-    const pluginInitializerContext = createPluginInitializerContext(
-      coreContext,
-      opaqueId,
-      manifest,
-      instanceInfo
-    );
-    expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
+  describe('context.env', () => {
+    it('should expose the correct instance uuid', () => {
+      const manifest = createPluginManifest();
+      instanceInfo = {
+        uuid: 'kibana-uuid',
+      };
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo
+      );
+      expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
+    });
   });
 });

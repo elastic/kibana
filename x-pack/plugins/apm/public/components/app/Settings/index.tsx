@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,9 +11,10 @@ import {
   EuiPageBody,
   EuiPageSideBar,
   EuiSideNav,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { ActionMenu } from '../../../application/action_menu';
@@ -30,6 +32,12 @@ export function Settings({ children, location }: SettingsProps) {
   const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = location;
 
+  const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
+
+  const toggleOpenOnMobile = () => {
+    setisSideNavOpenOnMobile((prevState) => !prevState);
+  };
+
   function getSettingsHref(path: string) {
     return getAPMHref({ basePath, path: `/settings${path}`, search });
   }
@@ -41,16 +49,24 @@ export function Settings({ children, location }: SettingsProps) {
       >
         <ActionMenu />
       </HeaderMenuPortal>
-      <HomeLink>
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.apm.settings.returnLinkLabel', {
-            defaultMessage: 'Return to inventory',
-          })}
-        </EuiButtonEmpty>
-      </HomeLink>
       <EuiPage>
         <EuiPageSideBar>
+          <HomeLink>
+            <EuiButtonEmpty
+              flush="left"
+              size="s"
+              color="primary"
+              iconType="arrowLeft"
+            >
+              {i18n.translate('xpack.apm.settings.returnLinkLabel', {
+                defaultMessage: 'Return to inventory',
+              })}
+            </EuiButtonEmpty>
+            <EuiSpacer size="s" />
+          </HomeLink>
           <EuiSideNav
+            toggleOpenOnMobile={() => toggleOpenOnMobile()}
+            isOpenOnMobile={isSideNavOpenOnMobile}
             items={[
               {
                 name: i18n.translate('xpack.apm.settings.pageTitle', {

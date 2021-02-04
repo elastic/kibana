@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -16,7 +17,13 @@ import template from './index.html';
 import { Legacy } from '../../../../legacy_shims';
 import { AdvancedIndex } from '../../../../components/elasticsearch/index/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
+import {
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_LARGE_SHARD_SIZE,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../../../../common/constants';
+import { SetupModeContext } from '../../../../components/setup_mode/setup_mode_context';
+import { SetupModeRenderer } from '../../../../components/renderers';
 
 function getPageData($injector) {
   const globalState = $injector.get('globalState');
@@ -70,6 +77,17 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
         reactNodeId: 'monitoringElasticsearchAdvancedIndexApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LARGE_SHARD_SIZE],
+            filters: [
+              {
+                shardIndex: $route.current.pathParams.index,
+              },
+            ],
+          },
+        },
       });
 
       this.indexName = indexName;
@@ -78,11 +96,25 @@ uiRoutes.when('/elasticsearch/indices/:index/advanced', {
         () => this.data,
         (data) => {
           this.renderReact(
-            <AdvancedIndex
-              indexSummary={data.indexSummary}
-              metrics={data.metrics}
-              onBrush={this.onBrush}
-              zoomInfo={this.zoomInfo}
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <AdvancedIndex
+                    scope={$scope}
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    indexSummary={data.indexSummary}
+                    metrics={data.metrics}
+                    onBrush={this.onBrush}
+                    zoomInfo={this.zoomInfo}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
           );
         }
