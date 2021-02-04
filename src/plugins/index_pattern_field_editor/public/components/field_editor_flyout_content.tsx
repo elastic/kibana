@@ -23,7 +23,7 @@ import {
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
 
-import { Field, InternalFieldType, PluginStart } from '../types';
+import { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
 import { getLinks } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
@@ -71,6 +71,8 @@ export interface Props {
   FieldEditor: React.ComponentType<FieldEditorProps> | null;
   /** The internal field type we are dealing with (concrete|runtime)*/
   fieldTypeToProcess: InternalFieldType;
+  /** Handler to validate the script  */
+  runtimeFieldValidator: (field: EsRuntimeField) => Promise<Record<string, any> | null>;
   /** Optional field to process */
   field?: Field;
 
@@ -91,6 +93,7 @@ const FieldEditorFlyoutContentComponent = ({
   fieldFormats,
   uiSettings,
   fieldTypeToProcess,
+  runtimeFieldValidator,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
@@ -107,9 +110,18 @@ const FieldEditorFlyoutContentComponent = ({
     const { isValid, data } = await submit();
 
     if (isValid) {
+      if (data.script) {
+        const syntaxError = await runtimeFieldValidator({
+          type: data.type,
+          script: data.script,
+        });
+
+        console.log('ERROR?', syntaxError); // eslint-disable-line
+      }
+
       onSave(data);
     }
-  }, [onSave, submit]);
+  }, [onSave, submit, runtimeFieldValidator]);
 
   const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
   const existingConcreteFields = indexPattern.fields.map((fld) => ({

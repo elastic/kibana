@@ -9,3 +9,5 @@
 export { deserializeField } from './serialization';
 
 export { getLinks } from './documentation';
+
+export { getRuntimeFieldValidator } from './runtime_field_validation';

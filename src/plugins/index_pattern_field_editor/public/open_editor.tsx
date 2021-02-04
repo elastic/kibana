@@ -16,6 +16,7 @@ import {
   IndexPatternField,
   DataPublicPluginStart,
   IndexPattern,
+  DataPublicPluginStart,
 } from './shared_imports';
 
 import { InternalFieldType } from './types';
@@ -33,13 +34,23 @@ export interface OpenFieldEditorOptions {
 
 type CloseEditor = () => void;
 
-export const getFieldEditorOpener = (
-  coreStart: CoreStart,
-  indexPatternService: DataPublicPluginStart['indexPatterns'],
-  fieldFormats: DataPublicPluginStart['fieldFormats'],
-  fieldFormatEditors: PluginStart['fieldFormatEditors']
-) => (options: OpenFieldEditorOptions): CloseEditor => {
-  const { uiSettings, overlays, docLinks, notifications } = coreStart;
+interface Dependencies {
+  core: CoreStart;
+  /** The search service from the data plugin */
+  search: DataPublicPluginStart['search'];
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+}
+
+export const getFieldEditorOpener = ({
+  core,
+  indexPatternService,
+  fieldFormats,
+  fieldFormatEditors,
+  search,
+}: Dependencies) => (options: OpenFieldEditorOptions): CloseEditor => {
+  const { uiSettings, overlays, docLinks, notifications } = core;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
 
   let overlayRef: OverlayRef | null = null;
@@ -83,7 +94,7 @@ export const getFieldEditorOpener = (
             onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
-            ctx={{ ...ctx, fieldTypeToProcess }}
+            ctx={{ ...ctx, fieldTypeToProcess, search }}
             indexPatternService={indexPatternService}
             notifications={notifications}
             fieldFormatEditors={fieldFormatEditors}
