@@ -43,9 +43,13 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
     public async getImageData(selector: string): Promise<number[]> {
       return await driver.executeScript(
         `
-        const el = document.querySelector('${selector}');
-        const ctx = el.getContext('2d');
-        return ctx.getImageData(0, 0, el.width, el.height).data;
+        try {
+          const el = document.querySelector('${selector}');
+          const ctx = el.getContext('2d');
+          return ctx.getImageData(0, 0, el.width, el.height).data;
+        } catch(e) {
+          return [];
+        }
         `
       );
     }

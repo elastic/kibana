@@ -149,6 +149,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'executionStatus'
   > & { actions: NormalizedAlertAction[] };
   options?: {
+    id?: string;
     migrationVersion?: Record<string, string>;
   };
 }
@@ -226,7 +227,7 @@ export class AlertsClient {
     data,
     options,
   }: CreateOptions<Params>): Promise<Alert<Params>> {
-    const id = SavedObjectsUtils.generateId();
+    const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized(
