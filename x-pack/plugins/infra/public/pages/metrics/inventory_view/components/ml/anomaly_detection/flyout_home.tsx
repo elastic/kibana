@@ -14,6 +14,8 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
+import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 import { SubscriptionSplashContent } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
@@ -24,14 +26,16 @@ import { useMetricHostsModuleContext } from '../../../../../../containers/ml/mod
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPage } from '../../../../../../components/loading_page';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
 }
 
+type Tab = 'jobs' | 'anomalies';
 export const FlyoutHome = (props: Props) => {
-  const [tab] = useState<'jobs' | 'anomalies'>('jobs');
+  const [tab, setTab] = useState<Tab>('jobs');
   const { goToSetup } = props;
   const {
     fetchJobStatus: fetchHostJobStatus,
@@ -97,38 +101,52 @@ export const FlyoutHome = (props: Props) => {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody>
-          <div>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
-                  id="xpack.infra.ml.anomalyFlyout.create.description"
-                />
-              </p>
-            </EuiText>
-          </div>
+        <EuiTabs>
+          <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
+            Jobs
+          </EuiTab>
+          <EuiTab isSelected={tab === 'anomalies'} onClick={() => setTab('anomalies')}>
+            Anomalies
+          </EuiTab>
+        </EuiTabs>
 
-          <EuiSpacer size="l" />
-          {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
+        <EuiFlyoutBody>
+          {tab === 'jobs' && (
             <>
-              <JobsEnabledCallout
+              <div>
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
+                      id="xpack.infra.ml.anomalyFlyout.create.description"
+                    />
+                  </p>
+                </EuiText>
+              </div>
+
+              <EuiSpacer size="l" />
+              {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
+                <>
+                  <JobsEnabledCallout
+                    hasHostJobs={hostJobSummaries.length > 0}
+                    hasK8sJobs={k8sJobSummaries.length > 0}
+                    jobIds={jobIds}
+                  />
+                  <EuiSpacer size="l" />
+                </>
+              )}
+
+              <CreateJobTab
                 hasHostJobs={hostJobSummaries.length > 0}
                 hasK8sJobs={k8sJobSummaries.length > 0}
-                jobIds={jobIds}
+                hasSetupCapabilities={props.hasSetupCapabilities}
+                createHosts={createHosts}
+                createK8s={createK8s}
               />
-              <EuiSpacer size="l" />
             </>
           )}
-          {tab === 'jobs' && (
-            <CreateJobTab
-              hasHostJobs={hostJobSummaries.length > 0}
-              hasK8sJobs={k8sJobSummaries.length > 0}
-              hasSetupCapabilities={props.hasSetupCapabilities}
-              createHosts={createHosts}
-              createK8s={createK8s}
-            />
-          )}
+
+          {tab === 'anomalies' && <AnomaliesTable />}
         </EuiFlyoutBody>
       </>
     );

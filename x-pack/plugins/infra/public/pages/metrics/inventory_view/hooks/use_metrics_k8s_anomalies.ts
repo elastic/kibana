@@ -174,7 +174,7 @@ export const useMetricsK8sAnomaliesResults = ({
   const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async (metric: Metric) => {
+      createPromise: async (metric?: Metric) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -305,7 +305,7 @@ interface RequestArgs {
   anomalyThreshold: number;
   startTime: number;
   endTime: number;
-  metric: Metric;
+  metric?: Metric;
   sort: Sort;
   pagination: Pagination;
   datasets?: string[];
