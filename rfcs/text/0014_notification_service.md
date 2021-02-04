@@ -2,6 +2,32 @@
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
+---
+- [Summary](#summary)
+- [Motivation](#motivation)
+- [Detailed design](#detailed-design)
+    - [Unified Notification Service](#unified-notification-service)
+    - [Kibana Notification Service](#kibana-notification-service)
+        - [Kibana Notification Service key elements](#kibana-notification-service-key-elements)
+        - [Notification event](#notification-event)
+        - [Sourcing](#sourcing)
+        - [Notification System](#notification-system)
+            - [LocalRepository](#localrepository)
+                - [Notification model](#notification-model)
+                - [Notification storage](#notification-storage)
+            - [RemoteRepository](#remoterepository)
+        - [Delivery](#delivery)
+            - [List of notifications](#list-of-notifications)
+            - [Filtering](#filtering)
+            - [Notification Status](#notification-status)
+        - [Settings](#settings)
+- [Drawbacks](#drawbacks)
+- [Alternatives](#alternatives)
+- [Adoption strategy](#adoption-strategy)
+- [How we teach this](#how-we-teach-this)
+- [Unresolved questions](#unresolved-questions)
+---
+
 # Summary
 
 The notification service improves UX by providing a way of drawing the user's attention to an event that occurred in Kibana or another Elastic product.
