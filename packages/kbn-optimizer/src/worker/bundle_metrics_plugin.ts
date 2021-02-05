@@ -96,7 +96,7 @@ export class BundleMetricsPlugin {
       const metricsSource = new RawSource(JSON.stringify(bundleMetrics, null, 2));
 
       // see https://github.com/jantimon/html-webpack-plugin/blob/33d69f49e6e9787796402715d1b9cd59f80b628f/index.js#L266
-      // @ts-expect-error undocumented but very important compilation method used to add assets to the output
+      // @ts-expect-error undocumented, used to add assets to the output
       compilation.emitAsset('metrics.json', metricsSource);
     });
   }
