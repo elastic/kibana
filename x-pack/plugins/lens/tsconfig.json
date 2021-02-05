@@ -1,0 +1,40 @@
+
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+      "composite": true,
+      "outDir": "./target/types",
+      "emitDeclarationOnly": true,
+      "declaration": true,
+      "declarationMap": true
+    },
+    "include": [
+      "*.ts",
+      "common/**/*",
+      "public/**/*",
+      "server/**/*",
+      "../../typings/**/*"
+    ],
+    "references": [
+      { "path": "../../../src/core/tsconfig.json" },
+      { "path": "../task_manager/tsconfig.json" },
+      { "path": "../global_search/tsconfig.json"},
+      { "path": "../saved_objects_tagging/tsconfig.json"},
+      { "path": "../../../src/plugins/data/tsconfig.json"},
+      { "path": "../../../src/plugins/charts/tsconfig.json"},
+      { "path": "../../../src/plugins/expressions/tsconfig.json"},
+      { "path": "../../../src/plugins/navigation/tsconfig.json" },
+      { "path": "../../../src/plugins/url_forwarding/tsconfig.json" },
+      { "path": "../../../src/plugins/visualizations/tsconfig.json" },
+      { "path": "../../../src/plugins/dashboard/tsconfig.json" },
+      { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
+      { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+      { "path": "../../../src/plugins/share/tsconfig.json" },
+      { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+      { "path": "../../../src/plugins/saved_objects/tsconfig.json"},
+      { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+      { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+      { "path": "../../../src/plugins/embeddable/tsconfig.json"},
+      { "path": "../../../src/plugins/presentation_util/tsconfig.json"},
+    ]
+  }

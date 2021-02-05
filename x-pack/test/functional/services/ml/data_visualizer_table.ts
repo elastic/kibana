@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -288,6 +290,16 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.ensureDetailsClosed(fieldName);
     }
 
+    public async assertExamplesList(fieldName: string, expectedExamplesCount: number) {
+      const examplesList = await testSubjects.find(
+        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
+      );
+      const examplesListItems = await examplesList.findAllByTagName('li');
+      expect(examplesListItems).to.have.length(
+        expectedExamplesCount,
+        `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
+      );
+    }
     public async assertTextFieldContents(
       fieldName: string,
       docCountFormatted: string,
@@ -297,14 +309,33 @@ export function MachineLearningDataVisualizerTableProvider(
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
 
-      const examplesList = await testSubjects.find(
-        this.detailsSelector(fieldName, 'mlFieldDataExamplesList')
-      );
-      const examplesListItems = await examplesList.findAllByTagName('li');
-      expect(examplesListItems).to.have.length(
-        expectedExamplesCount,
-        `Expected example list item count for field '${fieldName}' to be '${expectedExamplesCount}' (got '${examplesListItems.length}')`
-      );
+      await this.assertExamplesList(fieldName, expectedExamplesCount);
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertGeoPointFieldContents(
+      fieldName: string,
+      docCountFormatted: string,
+      expectedExamplesCount: number
+    ) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await this.assertExamplesList(fieldName, expectedExamplesCount);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlEmbeddedMapContent'));
+
+      await this.ensureDetailsClosed(fieldName);
+    }
+
+    public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
+      await this.assertRowExists(fieldName);
+      await this.assertFieldDocCount(fieldName, docCountFormatted);
+      await this.ensureDetailsOpen(fieldName);
+
+      await testSubjects.existOrFail(this.detailsSelector(fieldName, 'mlDVDocumentStatsContent'));
+
       await this.ensureDetailsClosed(fieldName);
     }
 
@@ -321,10 +352,14 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {
+        await this.assertGeoPointFieldContents(fieldName, docCountFormatted, exampleCount);
+      } else if (fieldType === ML_JOB_FIELD_TYPES.UNKNOWN) {
+        await this.assertUnknownFieldContents(fieldName, docCountFormatted);
       }
     }
 
-    public async ensureNumRowsPerPage(n: 10 | 25 | 100) {
+    public async ensureNumRowsPerPage(n: 10 | 25 | 50) {
       const paginationButton = 'mlDataVisualizerTable > tablePaginationPopoverButton';
       await retry.tryForTime(10000, async () => {
         await testSubjects.existOrFail(paginationButton);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
@@ -9,7 +10,7 @@
 import { Logger, KibanaRequest } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow, pipe } from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/lib/function';
 
 import { toError, toPromise } from '../../../../common/fp_utils';
 
@@ -186,49 +187,45 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-        const [privileges, timestampFieldCaps] = await Promise.all([
-          pipe(
-            { services, version, index },
-            ({ services: svc, version: ver, index: idx }) =>
-              pipe(
-                tryCatch(() => getInputIndex(svc, ver, idx), toError),
-                chain((indices) => tryCatch(() => checkPrivileges(svc, indices), toError))
-              ),
-            toPromise
-          ),
-          services.scopedClusterClient.fieldCaps({
-            index,
-            fields: hasTimestampOverride
-              ? ['@timestamp', timestampOverride as string]
-              : ['@timestamp'],
-            allow_no_indices: false,
-            include_unmapped: true,
-          }),
-        ]);
+        if (!isEmpty(index)) {
+          const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
+          const inputIndices = await getInputIndex(services, version, index);
+          const [privileges, timestampFieldCaps] = await Promise.all([
+            checkPrivileges(services, inputIndices),
+            services.scopedClusterClient.fieldCaps({
+              index,
+              fields: hasTimestampOverride
+                ? ['@timestamp', timestampOverride as string]
+                : ['@timestamp'],
+              include_unmapped: true,
+            }),
+          ]);
 
-        wrotePartialFailureStatus = await flow(
-          () =>
-            tryCatch(
-              () => hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
-              toError
+          wrotePartialFailureStatus = await flow(
+            () =>
+              tryCatch(
+                () =>
+                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                toError
+              ),
+            chain((wroteStatus) =>
+              tryCatch(
+                () =>
+                  hasTimestampFields(
+                    wroteStatus,
+                    hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
+                    timestampFieldCaps,
+                    inputIndices,
+                    ruleStatusService,
+                    logger,
+                    buildRuleMessage
+                  ),
+                toError
+              )
             ),
-          chain((wroteStatus) =>
-            tryCatch(
-              () =>
-                hasTimestampFields(
-                  wroteStatus,
-                  hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
-                  timestampFieldCaps,
-                  ruleStatusService,
-                  logger,
-                  buildRuleMessage
-                ),
-              toError
-            )
-          ),
-          toPromise
-        )();
+            toPromise
+          )();
+        }
       } catch (exc) {
         logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
       }
@@ -667,6 +664,21 @@ export const signalRulesAlertType = ({
               lastLookBackDate: result.lastLookBackDate?.toISOString(),
             });
           }
+
+          // adding this log line so we can get some information from cloud
+          logger.info(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount}  ${
+                !isEmpty(result.totalToFromTuples)
+                  ? `signals searched between date ranges ${JSON.stringify(
+                      result.totalToFromTuples,
+                      null,
+                      2
+                    )}`
+                  : ''
+              }`
+            )
+          );
         } else {
           const errorMessage = buildRuleMessage(
             'Bulk Indexing of signals failed:',

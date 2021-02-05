@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { NonEmptyString } from './detection_engine/schemas/types/non_empty_string';
@@ -16,4 +17,5 @@ export { exactCheck } from './exact_check';
 export { getPaths, foldLeftRight, removeExternalLinkText } from './test_utils';
 export { validate, validateEither } from './validate';
 export { formatErrors } from './format_errors';
-export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11.0';
+export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11_0';
+export { migratePackagePolicyToV7120 } from './endpoint/policy/migrations/to_v7_12_0';

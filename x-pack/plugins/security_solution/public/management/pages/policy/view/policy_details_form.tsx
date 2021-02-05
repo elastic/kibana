@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
@@ -11,12 +12,15 @@ import { MalwareProtections } from './policy_forms/protections/malware';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
+import { Ransomware } from './policy_forms/protections/ransomware';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const handleAdvancedPolicyClick = useCallback(() => {
     setShowAdvancedPolicy(!showAdvancedPolicy);
   }, [showAdvancedPolicy]);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
 
   return (
     <>
@@ -31,6 +35,8 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="xs" />
       <MalwareProtections />
+      <EuiSpacer size="m" />
+      {isPlatinumPlus && <Ransomware />}
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">
@@ -44,14 +50,14 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="xs" />
       <WindowsEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <MacEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <LinuxEvents />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <AntivirusRegistrationForm />
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.advanced.show"

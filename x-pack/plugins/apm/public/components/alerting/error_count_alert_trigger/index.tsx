@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,7 +14,6 @@ import { asInteger } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { getAbsoluteTimeRange } from '../helper';
@@ -46,20 +46,23 @@ export function ErrorCountAlertTrigger(props: Props) {
 
   const { threshold, windowSize, windowUnit, environment } = alertParams;
 
-  const { data } = useFetcher(() => {
-    if (windowSize && windowUnit) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
-        params: {
-          query: {
-            ...getAbsoluteTimeRange(windowSize, windowUnit),
-            environment,
-            serviceName,
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (windowSize && windowUnit) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+          params: {
+            query: {
+              ...getAbsoluteTimeRange(windowSize, windowUnit),
+              environment,
+              serviceName,
+            },
           },
-        },
-      });
-    }
-  }, [windowSize, windowUnit, environment, serviceName]);
+        });
+      }
+    },
+    [windowSize, windowUnit, environment, serviceName]
+  );
 
   const defaults = {
     threshold: 25,

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
@@ -17,7 +19,7 @@ import {
   PolicyData,
   SafeEndpointEvent,
 } from './types';
-import { factory as policyFactory } from './models/policy_config';
+import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
   entityIDSafeVersion,
@@ -1275,6 +1277,7 @@ export class EndpointDocGenerator {
       status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
