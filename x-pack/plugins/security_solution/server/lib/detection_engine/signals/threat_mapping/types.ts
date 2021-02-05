@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { Duration } from 'moment';
+
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -178,13 +180,15 @@ export interface GetSortWithTieBreakerOptions {
   listItemIndex: string;
 }
 
+export interface ThreatListDoc {
+  [key: string]: unknown;
+}
+
 /**
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export interface ThreatListItem {
-  [key: string]: unknown;
-}
+export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
 
 export interface ThreatIndicator {
   [key: string]: unknown;

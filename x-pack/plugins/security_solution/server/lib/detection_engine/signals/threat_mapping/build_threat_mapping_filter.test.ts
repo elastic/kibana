@@ -132,13 +132,15 @@ describe('build_threat_mapping_filter', () => {
             ],
           },
         ],
-        threatListItem: {
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: {
-            name: 'host-1',
-            // since ip is missing this entire AND clause should be dropped
+        threatListItem: getThreatListItemMock({
+          _source: {
+            '@timestamp': '2020-09-09T21:59:13Z',
+            host: {
+              name: 'host-1',
+              // since ip is missing this entire AND clause should be dropped
+            },
           },
-        },
+        }),
       });
       expect(item).toEqual([]);
     });
@@ -170,14 +172,14 @@ describe('build_threat_mapping_filter', () => {
             ],
           },
         ],
-        threatListItem: {
+        threatListItem: getThreatListItemMock({
           _source: {
             '@timestamp': '2020-09-09T21:59:13Z',
             host: {
               name: 'host-1',
             },
           },
-        },
+        }),
       });
       expect(item).toEqual([
         {
@@ -315,7 +317,10 @@ describe('build_threat_mapping_filter', () => {
 
     test('it should return an empty boolean clause given an empty object for a threat list item', () => {
       const threatMapping = getThreatMappingMock();
-      const innerClause = createAndOrClauses({ threatMapping, threatListItem: { _source: {} } });
+      const innerClause = createAndOrClauses({
+        threatMapping,
+        threatListItem: getThreatListItemMock({ _source: {} }),
+      });
       expect(innerClause).toEqual({ bool: { minimum_should_match: 1, should: [] } });
     });
   });
