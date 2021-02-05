@@ -21,10 +21,9 @@ TOP="$(curl -L http://snapshots.elastic.co/latest/master.json)"
 MB_BUILD=$(echo $TOP | sed 's/.*"version" : "\(.*\)", "build_id.*/\1/')
 echo $MB_BUILD
 MB_BUILD_ID=$(echo $TOP | sed 's/.*"build_id" : "\(.*\)", "manifest_url.*/\1/')
-echo $MB_BUILD_ID
 
 URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
-
+echo $URL
 # Downloading the Metricbeat package
 while [ 1 ]; do
     wget -q --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 0 --continue --no-check-certificate --tries=3 $URL
@@ -34,11 +33,13 @@ while [ 1 ]; do
 
 
 # Install Metricbeat
+echo "untar metricbeat and config"
 tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz --directory "$KIBANA_DIR"
 ls -l
 mv "$KIBANA_DIR"/metricbeat-${MB_BUILD}-linux-x86_64 "$KIBANA_DIR"/metricbeat-install
 
 # Configure Metricbeat
+echo "Changing metricbeat config"
 pushd ../kibana-load-testing
 cp cfg/metricbeat/elasticsearch-xpack.yml "$KIBANA_DIR"/metricbeat-install/modules.d/elasticsearch-xpack.yml
 cp cfg/metricbeat/kibana-xpack.yml "$KIBANA_DIR"/metricbeat-install/modules.d/elasticsearch-xpack.yml
@@ -65,7 +66,8 @@ echo " -> test setup"
 source test/scripts/jenkins_test_setup_xpack.sh
 
 # Start Metricbeat
-nohup home/metricbeat/metricbeat > home/metricbeat/logs/metricbeat.log 2>&1 &
+echo "Starting metricbeat"
+nohup "$KIBANA_DIR"/metricbeat-install/metricbeat > "$KIBANA_DIR"/metricbeat-install/logs/metricbeat.log 2>&1 &
 
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
