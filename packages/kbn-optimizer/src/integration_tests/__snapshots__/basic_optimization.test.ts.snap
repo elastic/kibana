@@ -13,6 +13,7 @@ OptimizerConfig {
       "id": "bar",
       "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/target/public,
+      "pageLoadAssetSizeLimit": undefined,
       "publicDirNames": Array [
         "public",
       ],
@@ -29,6 +30,7 @@ OptimizerConfig {
       "id": "foo",
       "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/target/public,
+      "pageLoadAssetSizeLimit": undefined,
       "publicDirNames": Array [
         "public",
       ],
@@ -47,6 +49,7 @@ OptimizerConfig {
       "id": "baz",
       "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       "outputDir": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/target/public,
+      "pageLoadAssetSizeLimit": undefined,
       "publicDirNames": Array [
         "public",
       ],
@@ -57,7 +60,6 @@ OptimizerConfig {
   "cache": true,
   "dist": false,
   "inspectWorkers": false,
-  "limits": "<Limits>",
   "maxWorkerCount": 1,
   "plugins": Array [
     Object {
