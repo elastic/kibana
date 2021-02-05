@@ -8,26 +8,25 @@
 
 import { IndexPatternsFetcher } from '.';
 import { ElasticsearchClient } from 'kibana/server';
+import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
 
 describe('Index Pattern Fetcher - server', () => {
   let indexPatterns: IndexPatternsFetcher;
   let esClient: ElasticsearchClient;
   const emptyResponse = {
     body: {
-      indices: [],
+      count: 0,
     },
   };
   const response = {
     body: {
-      indices: ['hello', 'world'],
+      count: 1115,
     },
   };
   const patternList = ['a', 'b', 'c'];
   beforeEach(() => {
     esClient = ({
-      transport: {
-        request: jest.fn().mockReturnValueOnce(emptyResponse).mockReturnValue(response),
-      },
+      count: jest.fn().mockResolvedValueOnce(emptyResponse).mockResolvedValue(response),
     } as unknown) as ElasticsearchClient;
     indexPatterns = new IndexPatternsFetcher(esClient);
   });
@@ -39,12 +38,35 @@ describe('Index Pattern Fetcher - server', () => {
 
   it('Returns all patterns when all match indices', async () => {
     esClient = ({
-      transport: {
-        request: jest.fn().mockReturnValue(response),
-      },
+      count: jest.fn().mockResolvedValue(response),
     } as unknown) as ElasticsearchClient;
     indexPatterns = new IndexPatternsFetcher(esClient);
     const result = await indexPatterns.validatePatternListActive(patternList);
     expect(result).toEqual(patternList);
+  });
+  it('Removes pattern when "index_not_found_exception" error is thrown', async () => {
+    class ServerError extends Error {
+      public body?: Record<string, any>;
+      constructor(
+        message: string,
+        public readonly statusCode: number,
+        errBody?: Record<string, any>
+      ) {
+        super(message);
+        this.body = errBody;
+      }
+    }
+
+    esClient = ({
+      count: jest
+        .fn()
+        .mockResolvedValueOnce(response)
+        .mockRejectedValue(
+          new ServerError('index_not_found_exception', 404, indexNotFoundException)
+        ),
+    } as unknown) as ElasticsearchClient;
+    indexPatterns = new IndexPatternsFetcher(esClient);
+    const result = await indexPatterns.validatePatternListActive(patternList);
+    expect(result).toEqual([patternList[0]]);
   });
 });
