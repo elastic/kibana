@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -44,6 +45,7 @@ interface OfExpressionProps {
     | 'rightUp'
     | 'rightDown';
   display?: 'fullWidth' | 'inline';
+  helpText?: string | JSX.Element;
 }
 
 export const OfExpression = ({
@@ -55,6 +57,7 @@ export const OfExpression = ({
   display = 'inline',
   customAggTypesOptions,
   popupPosition,
+  helpText,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -119,6 +122,8 @@ export const OfExpression = ({
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
+              data-test-subj="availablefieldsOptionsFormRow"
+              helpText={helpText}
             >
               <EuiComboBox
                 fullWidth
