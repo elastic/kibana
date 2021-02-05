@@ -351,10 +351,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return an auto histogram for precalculated histograms', async () => {
         const { body } = await supertest
-          .post('/api/lens/index_stats/test-histogram/field')
+          .post('/api/lens/index_stats/histogram-test/field')
           .set(COMMON_HEADERS)
           .send({
             dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
             field: {
               name: 'histogram-content',
               type: 'histogram',
@@ -363,17 +365,57 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.eql({
-          totalDocuments: 4634,
-          sampledDocuments: 4634,
-          sampledValues: 4634,
           histogram: {
             buckets: [
               {
-                count: 100,
+                count: 237,
                 key: 0,
+              },
+              {
+                count: 323,
+                key: 0.47000000000000003,
+              },
+              {
+                count: 556,
+                key: 0.9400000000000001,
+              },
+              {
+                count: 166,
+                key: 1.4100000000000001,
+              },
+              {
+                count: 168,
+                key: 1.8800000000000001,
+              },
+              {
+                count: 425,
+                key: 2.35,
+              },
+              {
+                count: 311,
+                key: 2.8200000000000003,
+              },
+              {
+                count: 596,
+                key: 3.29,
+              },
+              {
+                count: 406,
+                key: 3.7600000000000002,
+              },
+              {
+                count: 324,
+                key: 4.23,
+              },
+              {
+                count: 639,
+                key: 4.7,
               },
             ],
           },
+          sampledDocuments: 7,
+          sampledValues: 4151,
+          totalDocuments: 7,
         });
       });
 

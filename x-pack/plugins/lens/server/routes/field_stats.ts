@@ -124,8 +124,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: IFieldType,
-  includeTopValues = true
+  field: IFieldType
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
@@ -140,11 +139,9 @@ export async function getNumberHistogram(
           max: { field: field.name },
         },
         sample_count: { value_count: { ...fieldRef } },
-        top_values: includeTopValues
-          ? {
-              terms: { ...fieldRef, size: 10 },
-            }
-          : {},
+        top_values: {
+          terms: { ...fieldRef, size: 10 },
+        },
       },
     },
   };
