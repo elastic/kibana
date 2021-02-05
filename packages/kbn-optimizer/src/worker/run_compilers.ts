@@ -36,6 +36,7 @@ import {
   isConcatenatedModule,
   getModulePath,
 } from './webpack_helpers';
+import { writeBundleMetrics } from './write_bundle_metrics';
 
 const PLUGIN_NAME = '@kbn/optimizer';
 
@@ -178,6 +179,8 @@ const observeCompiler = (
         workUnits,
         files,
       });
+
+      writeBundleMetrics(bundle);
 
       return compilerMsgs.compilerSuccess({
         moduleCount,

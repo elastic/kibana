@@ -33,7 +33,7 @@ export function readLimits(): Limits {
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
-  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize || {});
+  const limitBundleIds = Object.keys(readLimits().pageLoadAssetSize || {});
   const configBundleIds = config.bundles.map((b) => b.id);
 
   const missingBundleIds = diff(configBundleIds, limitBundleIds);
@@ -75,15 +75,16 @@ interface UpdateBundleLimitsOptions {
 }
 
 export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLimitsOptions) {
-  const metrics = getMetrics(log, config);
+  const limits = readLimits();
+  const metrics = getMetrics(config);
 
   const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
     ? {}
-    : config.limits.pageLoadAssetSize ?? {};
+    : limits.pageLoadAssetSize ?? {};
 
   for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
     if (metric.group === 'page load bundle size') {
-      const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
+      const existingLimit = limits.pageLoadAssetSize?.[metric.id];
       pageLoadAssetSize[metric.id] =
         existingLimit != null && existingLimit >= metric.value
           ? existingLimit

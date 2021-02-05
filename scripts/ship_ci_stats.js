@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { OptimizerConfig, getMetrics } from './optimizer';
-export * from './run_optimizer';
-export * from './log_optimizer_state';
-export * from './node';
-export * from './limits';
+require('../src/setup_node_env/no_transpilation');
+require('@kbn/dev-utils').shipCiStatsCli();

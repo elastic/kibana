@@ -7,19 +7,14 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { CiStatsReporter } from '@kbn/dev-utils';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  logOptimizerState,
-  reportOptimizerStats,
-} from '@kbn/optimizer';
+import { lastValueFrom } from '@kbn/std';
+import { runOptimizer, OptimizerConfig, logOptimizerState, getMetrics } from '@kbn/optimizer';
 
-import { Task } from '../lib';
+import { Task, write } from '../lib';
 
 export const BuildKibanaPlatformPlugins: Task = {
   description: 'Building distributable versions of Kibana platform plugins',
-  async run(_, log, build) {
+  async run(buildConfig, log, build) {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
@@ -31,11 +26,11 @@ export const BuildKibanaPlatformPlugins: Task = {
       includeCoreBundle: true,
     });
 
-    const reporter = CiStatsReporter.fromEnv(log);
-
-    await runOptimizer(config)
-      .pipe(reportOptimizerStats(reporter, config, log), logOptimizerState(log, config))
-      .toPromise();
+    await lastValueFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+    await write(
+      buildConfig.resolveFromTarget('optimizer_bundle_metrics.json'),
+      JSON.stringify(getMetrics(config), null, 2)
+    );
 
     await Promise.all(config.bundles.map((b) => b.cache.clear()));
   },
