@@ -25,7 +25,8 @@ import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
-import { useDefaultFieldNames } from './useDefaultFieldNames';
+import { useFieldNames } from './useFieldNames';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/slow_transactions'>
@@ -44,9 +45,15 @@ export function LatencyCorrelations({ onClose }: Props) {
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
-  const defaultFieldNames = useDefaultFieldNames();
-  const [fieldNames, setFieldNames] = useState(defaultFieldNames);
-  const [durationPercentile, setDurationPercentile] = useState(50);
+  const { defaultFieldNames } = useFieldNames();
+  const [fieldNames, setFieldNames] = useLocalStorage(
+    'apm.correlations.latency.fields',
+    defaultFieldNames
+  );
+  const [durationPercentile, setDurationPercentile] = useLocalStorage(
+    'apm.correlations.latency.threshold',
+    50
+  );
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
@@ -90,9 +97,9 @@ export function LatencyCorrelations({ onClose }: Props) {
           <EuiText size="s">
             <p>
               Orbiting this at a distance of roughly ninety-two million miles is
-              an utterly insignificant little blue green planet whose ape-
-              descended life forms are so amazingly primitive that they still
-              think digital watches are a pretty neat idea.
+              an utterly insignificant little blue green planet whose
+              ape-descended life forms are so amazingly primitive that they
+              still think digital watches are a pretty neat idea.
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -129,7 +136,6 @@ export function LatencyCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <CustomFields
-            defaultFieldNames={defaultFieldNames}
             fieldNames={fieldNames}
             setFieldNames={setFieldNames}
             showThreshold
@@ -220,7 +226,13 @@ function LatencyDistributionChart({
           <BarSeries
             id={i18n.translate(
               'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
-              { defaultMessage: 'Latency distribution for selected term' }
+              {
+                defaultMessage: '{fieldName}:{fieldValue}',
+                values: {
+                  fieldName: selectedSignificantTerm.fieldName,
+                  fieldValue: selectedSignificantTerm.fieldValue,
+                },
+              }
             )}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}

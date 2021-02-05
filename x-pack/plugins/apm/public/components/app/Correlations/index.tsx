@@ -23,15 +23,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { enableCorrelations } from '../../../../common/ui_settings_keys';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { LatencyCorrelations } from './latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
-// import { ThroughputCorrelations } from './throughput_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
-import { useLicenseContext } from '../../../context/license/use_license_context';
 
 const latencyTab = {
   key: 'latency',
@@ -40,13 +35,6 @@ const latencyTab = {
   }),
   component: LatencyCorrelations,
 };
-// const throughputTab = {
-//   key: 'throughput',
-//   label: i18n.translate('xpack.apm.correlations.tabs.throughputLabel', {
-//     defaultMessage: 'Throughput',
-//   }),
-//   component: ThroughputCorrelations,
-// };
 const errorRateTab = {
   key: 'errorRate',
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
@@ -54,25 +42,15 @@ const errorRateTab = {
   }),
   component: ErrorCorrelations,
 };
-// const tabs = [latencyTab, throughputTab, errorRateTab];
 const tabs = [latencyTab, errorRateTab];
 
 export function Correlations() {
-  const { uiSettings } = useApmPluginContext().core;
   const { urlParams } = useUrlParams();
-  const license = useLicenseContext();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [currentTab, setCurrentTab] = useState(latencyTab.key);
   const { component: TabContent } =
     tabs.find((tab) => tab.key === currentTab) ?? latencyTab;
-
-  if (
-    !uiSettings.get(enableCorrelations) ||
-    !isActivePlatinumLicense(license)
-  ) {
-    return null;
-  }
 
   return (
     <>

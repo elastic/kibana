@@ -13,13 +13,16 @@ import {
   EuiFormRow,
   EuiLink,
   EuiFieldNumber,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
+import { useFieldNames } from './useFieldNames';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 interface Props {
   fieldNames: string[];
-  defaultFieldNames: string[];
   setFieldNames: (fieldNames: string[]) => void;
   setDurationPercentile?: (value: number) => void;
   showThreshold?: boolean;
@@ -29,11 +32,22 @@ interface Props {
 export function CustomFields({
   fieldNames,
   setFieldNames,
-  defaultFieldNames,
   setDurationPercentile = () => {},
   showThreshold = false,
   durationPercentile = 50,
 }: Props) {
+  const { defaultFieldNames, getSuggestions } = useFieldNames();
+  const [suggestedFieldNames, setSuggestedFieldNames] = useState(
+    getSuggestions('')
+  );
+
+  useEffect(() => {
+    if (suggestedFieldNames.length) {
+      return;
+    }
+    setSuggestedFieldNames(getSuggestions(''));
+  }, [getSuggestions, suggestedFieldNames]);
+
   return (
     <EuiAccordion
       id="accordion"
@@ -42,15 +56,16 @@ export function CustomFields({
         { defaultMessage: 'Customize fields' }
       )}
     >
-      <EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
         {showThreshold && (
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={false}>
             <EuiFormRow
               label={i18n.translate(
                 'xpack.apm.correlations.customize.thresholdLabel',
                 { defaultMessage: 'Threshold' }
               )}
-              helpText="Target percentile"
+              helpText="Default threshold is 50th percentile."
             >
               <EuiFieldNumber
                 value={durationPercentile.toString(10)}
@@ -60,41 +75,52 @@ export function CustomFields({
                     setDurationPercentile(value);
                   }
                 }}
-                prepend="%"
+                prepend="Percentile"
               />
             </EuiFormRow>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={4}>
+        <EuiFlexItem grow={false}>
           <EuiFormRow
             fullWidth={true}
             label={i18n.translate(
               'xpack.apm.correlations.customize.fieldLabel',
-              {
-                defaultMessage: 'Field',
-              }
+              { defaultMessage: 'Field' }
             )}
             helpText={
-              <>
-                {i18n.translate(
-                  'xpack.apm.correlations.customize.fieldHelpText',
-                  {
-                    defaultMessage: 'Fields to analyse for correlations.',
-                  }
-                )}
-                &nbsp;
-                <EuiLink
-                  type="reset"
-                  onClick={() => {
-                    setFieldNames(defaultFieldNames);
-                  }}
-                >
-                  {i18n.translate(
-                    'xpack.apm.correlations.customize.fieldResetDefault',
-                    { defaultMessage: 'Reset to default' }
-                  )}
-                </EuiLink>
-              </>
+              <FormattedMessage
+                id="xpack.apm.correlations.customize.fieldHelpText"
+                defaultMessage="Customize or {reset} fields to analyze for correlations. {docsLink}"
+                values={{
+                  reset: (
+                    <EuiLink
+                      type="reset"
+                      onClick={() => {
+                        setFieldNames(defaultFieldNames);
+                      }}
+                    >
+                      {i18n.translate(
+                        'xpack.apm.correlations.customize.fieldHelpTextReset',
+                        { defaultMessage: 'reset' }
+                      )}
+                    </EuiLink>
+                  ),
+                  docsLink: (
+                    <ElasticDocsLink
+                      section="/kibana"
+                      path="/advanced-queries.html"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.correlations.customize.fieldHelpTextDocsLink',
+                        {
+                          defaultMessage:
+                            'Learn more about the default fields.',
+                        }
+                      )}
+                    </ElasticDocsLink>
+                  ),
+                }}
+              />
             }
           >
             <EuiComboBox
@@ -112,6 +138,10 @@ export function CustomFields({
                 const nextFieldNames = [...fieldNames, term];
                 setFieldNames(nextFieldNames);
               }}
+              onSearchChange={(searchValue) => {
+                setSuggestedFieldNames(getSuggestions(searchValue));
+              }}
+              options={suggestedFieldNames.map((label) => ({ label }))}
             />
           </EuiFormRow>
         </EuiFlexItem>

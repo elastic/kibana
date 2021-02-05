@@ -27,7 +27,8 @@ import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
-import { useDefaultFieldNames } from './useDefaultFieldNames';
+import { useFieldNames } from './useFieldNames';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -36,19 +37,6 @@ type CorrelationsApiResponse = NonNullable<
 type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
-
-// const initialFieldNames = [
-//   'transaction.name',
-//   'user.username',
-//   'user.id',
-//   'host.ip',
-//   'user_agent.name',
-//   'kubernetes.pod.uuid',
-//   'kubernetes.pod.name',
-//   'url.domain',
-//   'container.id',
-//   'service.node.name',
-// ].map((label) => ({ label }));
 
 interface Props {
   onClose: () => void;
@@ -60,8 +48,11 @@ export function ErrorCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
-  const defaultFieldNames = useDefaultFieldNames();
-  const [fieldNames, setFieldNames] = useState(defaultFieldNames);
+  const { defaultFieldNames } = useFieldNames();
+  const [fieldNames, setFieldNames] = useLocalStorage(
+    'apm.correlations.errors.fields',
+    defaultFieldNames
+  );
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
@@ -103,9 +94,9 @@ export function ErrorCorrelations({ onClose }: Props) {
           <EuiText size="s">
             <p>
               Orbiting this at a distance of roughly ninety-two million miles is
-              an utterly insignificant little blue green planet whose ape-
-              descended life forms are so amazingly primitive that they still
-              think digital watches are a pretty neat idea.
+              an utterly insignificant little blue green planet whose
+              ape-descended life forms are so amazingly primitive that they
+              still think digital watches are a pretty neat idea.
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -138,11 +129,7 @@ export function ErrorCorrelations({ onClose }: Props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CustomFields
-            defaultFieldNames={defaultFieldNames}
-            fieldNames={fieldNames}
-            setFieldNames={setFieldNames}
-          />
+          <CustomFields fieldNames={fieldNames} setFieldNames={setFieldNames} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -196,7 +183,13 @@ function ErrorTimeseriesChart({
           <LineSeries
             id={i18n.translate(
               'xpack.apm.correlations.error.chart.selectedTermErrorRateLabel',
-              { defaultMessage: 'Error rate for selected term' }
+              {
+                defaultMessage: '{fieldName}:{fieldValue}',
+                values: {
+                  fieldName: selectedSignificantTerm.fieldName,
+                  fieldValue: selectedSignificantTerm.fieldValue,
+                },
+              }
             )}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}

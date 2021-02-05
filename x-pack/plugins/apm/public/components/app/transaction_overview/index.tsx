@@ -30,7 +30,6 @@ import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { SearchBar } from '../../shared/search_bar';
 import { TransactionTypeSelect } from '../../shared/transaction_type_select';
-import { Correlations } from '../correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
@@ -85,7 +84,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
 
   return (
     <>
-      <SearchBar showTimeComparison />
+      <SearchBar showTimeComparison showCorrelations />
 
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -111,9 +110,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
 
