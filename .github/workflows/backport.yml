@@ -2,19 +2,25 @@ on:
   pull_request_target:
     branches:
       - backport-testing
-    # types: [closed]
+    types:
+      - labeled
+      - closed
 
 jobs:
   backport:
     name: Backport
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'wip-auto-backport')
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          ref: 'master'
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
+      #   with:
+      #     ref: 'master'
+
+      - name: 'Get backport config'
+        run: |
+          curl 'https://raw.githubusercontent.com/elastic/kibana/master/.backportrc.json' > .backportrc.json
 
       - name: Use Node.js 14.x
         uses: actions/setup-node@v1
@@ -23,16 +29,23 @@ jobs:
 
       - run: npm install -g backport
 
-      - name: Labels
-        run: |
-          echo "$PR_LABELS"
-        env:
-          PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
+      # - name: Labels
+      #   run: |
+      #     echo "$PR_LABELS"
+      #   env:
+      #     PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
 
-      - name: backport
+      - name: Backport PR
         run: |
           git config --global user.name "kibanamachine"
           git config --global user.email "42973632+kibanamachine@users.noreply.github.com"
-          backport --fork true --username kibanamachine --accessToken "${{ secrets.KIBANAMACHINE_TOKEN }}" --ci --pr "90337" --labels backport --verbose
+          backport --fork true --username kibanamachine --accessToken "${{ secrets.KIBANAMACHINE_TOKEN }}" --ci --pr "$PR_NUMBER" --labels backport --assignee "$PR_OWNER" | tee 'output.log'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_OWNER: ${{ github.event.pull_request.user.login }}
+
+      - name: Report backport status
+        run: |
+          GITHUB_TOKEN="${{ secrets.KIBANAMACHINE_TOKEN }}" gh --repo elastic/kibana pr comment "$PR_NUMBER" --body "Backport result\n\n```\n$(cat output.log)\n```"
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
