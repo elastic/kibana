@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializer } from 'src/core/server';
-import { BannersPlugin, BannersPluginStartDeps } from './plugin';
+import { BannersPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}, {}, BannersPluginStartDeps> = () =>
-  new BannersPlugin();
+export const plugin: PluginInitializer<{}, {}, {}, {}> = () => new BannersPlugin();

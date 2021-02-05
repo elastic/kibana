@@ -28,4 +28,5 @@ export {
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeBadge,
+  ChromeUserBanner,
 } from './types';

@@ -23,7 +23,7 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => 
   }
 
   return (
-    <div className="header__topBanner" data-test-subj="footerGlobalNav">
+    <div className="header__topBanner" data-test-subj="headerTopBanner">
       <HeaderExtension
         containerClassName="header__topBannerContainer"
         display="block"

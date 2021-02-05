@@ -6,14 +6,9 @@
  */
 
 import { CoreSetup, Plugin } from 'src/core/server';
-import { LicensingPluginStart } from '../../licensing/server';
 import { registerSettings } from './ui_settings';
 
-export interface BannersPluginStartDeps {
-  licensing: LicensingPluginStart;
-}
-
-export class BannersPlugin implements Plugin<{}, {}, {}, BannersPluginStartDeps> {
+export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
   setup({ uiSettings }: CoreSetup<{}, {}>) {
     registerSettings(uiSettings);
     return {};

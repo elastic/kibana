@@ -218,15 +218,11 @@ export interface ChromeStart {
   getIsNavDrawerLocked$(): Observable<boolean>;
 
   /**
-   * TODO: doc
-   * @param headerBanner
+   * Set the banner that will appear on top of the chrome header.
+   *
+   * @remarks Using `undefined` when invoking this API will remove the banner.
    */
   setHeaderBanner(headerBanner?: ChromeUserBanner): void;
-
-  /**
-   * Get the current set of classNames that will be set on the body element.
-   */
-  getBodyClasses$(): Observable<string[]>;
 }
 
 /** @internal */
@@ -236,4 +232,10 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+  /**
+   * Used only by the rendering service to retrieve the set of classNames
+   * that will be set on the body element.
+   * @internal
+   */
+  getBodyClasses$(): Observable<string[]>;
 }

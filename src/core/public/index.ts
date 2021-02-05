@@ -46,6 +46,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
@@ -293,6 +294,7 @@ export {
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   ChromeStart,
   DocLinksStart,
   FatalErrorInfo,

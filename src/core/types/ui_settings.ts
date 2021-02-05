@@ -70,7 +70,7 @@ export interface UiSettingsParams<T = unknown> {
    * index of the settings within its category (ascending order, smallest will be displayed first).
    * Used for ordering in the UI.
    *
-   * @remark settings without their order defined will be displayed last.
+   * @remark settings without order defined will be displayed last and ordered by name
    */
   order?: number;
   /*
