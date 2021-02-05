@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -30,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         retry.tryForTime(10000, async () => {
           testSubjects.existOrFail('dashboardLandingPage');
         });
+        await searchSessions.markTourDone();
       });
 
       after(async () => {
@@ -86,15 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectState('completed');
       });
 
-      it('Cancels a session from management', async () => {
+      it('Deletes a session from management', async () => {
         await PageObjects.searchSessionsManagement.goTo();
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
 
         expect(searchSessionList.length).to.be(1);
-        await searchSessionList[0].cancel();
+        await searchSessionList[0].delete();
 
-        // TODO: update this once canceling doesn't delete the object!
         await retry.waitFor(`wait for list to be empty`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
 
