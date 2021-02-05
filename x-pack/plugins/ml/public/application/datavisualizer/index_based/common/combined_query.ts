@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
-export type { CombinedQuery } from './combined_query';
+export interface CombinedQuery {
+  searchString: string | { [key: string]: any };
+  searchQueryLanguage: string;
+}
