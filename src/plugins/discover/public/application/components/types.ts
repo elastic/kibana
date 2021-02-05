@@ -21,8 +21,8 @@ import {
   TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
-import { TopNavMenuData } from '../../../../navigation/public';
+import { AppState, GetStateReturn } from '../angular/discover_state';
+import { RequestAdapter } from '../../../../inspector/common';
 
 export interface DiscoverProps {
   /**
@@ -101,6 +101,22 @@ export interface DiscoverProps {
      */
     config: IUiSettingsClient;
     /**
+     * returns field statistics based on the loaded data sample
+     */
+    getFieldCounts: () => Promise<Record<string, number>>;
+    /**
+     * Use angular router for navigation
+     */
+    navigateTo: () => void;
+    /**
+     * Functions to get/mutate state
+     */
+    stateContainer: GetStateReturn;
+    /**
+     * Inspect, for analyzing requests and responses
+     */
+    inspectorAdapters: { requests: RequestAdapter };
+    /**
      * Data plugin
      */
     data: DataPublicPluginStart;
@@ -165,10 +181,6 @@ export interface DiscoverProps {
    * Currently selected time range
    */
   timeRange?: { from: string; to: string };
-  /**
-   * Menu data of top navigation (New, save ...)
-   */
-  topNavMenu: TopNavMenuData[];
   /**
    * Function to update the actual query
    */
