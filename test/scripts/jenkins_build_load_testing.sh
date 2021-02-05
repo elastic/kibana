@@ -34,15 +34,15 @@ while [ 1 ]; do
 
 
 # Install Metricbeat
-tar -xf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz --directory /home
+tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz --directory "$KIBANA_DIR"
 
 # Configure Metricbeat
 pushd ../kibana-load-testing
-cp cfg/metricbeat/elasticsearch-xpack.yml /home/metricbeat/modules.d/elasticsearch-xpack.yml
-cp cfg/metricbeat/kibana-xpack.yml /home/metricbeat/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/elasticsearch-xpack.yml "$KIBANA_DIR"/metricbeat/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/kibana-xpack.yml "$KIBANA_DIR"/metricbeat/modules.d/elasticsearch-xpack.yml
 echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
-cp cfg/metricbeat/metricbeat.yml /home/metricbeat/metricbeat.yml
-mv /etc/metricbeat/modules.d/system.yml /home/metricbeat/modules.d/system.yml.disabled
+cp cfg/metricbeat/metricbeat.yml "$KIBANA_DIR"/metricbeat/metricbeat.yml
+mv /etc/metricbeat/modules.d/system.yml "$KIBANA_DIR"/metricbeat/modules.d/system.yml.disabled
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy
