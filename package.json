@@ -121,6 +121,7 @@
     "@kbn/ace": "link:packages/kbn-ace",
     "@kbn/analytics": "link:packages/kbn-analytics",
     "@kbn/apm-config-loader": "link:packages/kbn-apm-config-loader",
+    "@kbn/apm-utils": "link:packages/kbn-apm-utils",
     "@kbn/config": "link:packages/kbn-config",
     "@kbn/config-schema": "link:packages/kbn-config-schema",
     "@kbn/i18n": "link:packages/kbn-i18n",
