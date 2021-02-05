@@ -154,7 +154,10 @@ export interface ElasticsearchLegacySource {
   cluster_state?: {
     status?: string;
     nodes?: {
-      [nodeUuid: string]: {};
+      [nodeUuid: string]: {
+        ephemeral_id?: string;
+        name?: string;
+      };
     };
     master_node?: boolean;
   };

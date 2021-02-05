@@ -262,8 +262,8 @@ export interface AlertClusterStatsNodes {
 
 export interface AlertClusterStatsNode {
   nodeUuid: string;
-  nodeEphemeralId: string;
-  nodeName: string;
+  nodeEphemeralId?: string;
+  nodeName?: string;
 }
 
 export interface AlertClusterHealth {

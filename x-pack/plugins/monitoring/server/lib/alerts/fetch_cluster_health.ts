@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
@@ -9,8 +10,7 @@ import { ElasticsearchSource } from '../../../common/types/es';
 export async function fetchClusterHealth(
   callCluster: any,
   clusters: AlertCluster[],
-  index: string,
-  size: number
+  index: string
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
@@ -20,8 +20,15 @@ export async function fetchClusterHealth(
       'hits.hits._index',
     ],
     body: {
-      size,
-      sort: [{ timestamp: { order: 'desc' } }],
+      size: clusters.length,
+      sort: [
+        {
+          timestamp: {
+            order: 'desc',
+            unmapped_type: 'long',
+          },
+        },
+      ],
       query: {
         bool: {
           filter: [

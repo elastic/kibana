@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { get } from 'lodash';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
 
 export async function fetchLicenses(
@@ -21,7 +21,14 @@ export async function fetchLicenses(
     ],
     body: {
       size,
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [
+        {
+          timestamp: {
+            order: 'desc',
+            unmapped_type: 'long',
+          },
+        },
+      ],
       query: {
         bool: {
           filter: [
@@ -52,14 +59,14 @@ export async function fetchLicenses(
   };
 
   const response = await callCluster('search', params);
-  return get<any>(response, 'hits.hits', []).map((hit: any) => {
-    const rawLicense: any = get(hit, '_source.license', {});
+  return response.hits.hits.map((hit: any) => {
+    const rawLicense: any = hit._source.license;
     const license: AlertLicense = {
       status: rawLicense.status,
       type: rawLicense.type,
       expiryDateMS: rawLicense.expiry_date_in_millis,
-      clusterUuid: get(hit, '_source.cluster_uuid'),
-      ccs: get(hit, '_index'),
+      clusterUuid: hit._source.cluster_uuid,
+      ccs: hit._index,
     };
     return license;
   });

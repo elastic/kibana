@@ -70,14 +70,14 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
+    let kibanaIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
     if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
+      kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
     }
     const kibanaVersions = await fetchKibanaVersions(
       callCluster,
       clusters,
-      esIndexPattern,
+      kibanaIndexPattern,
       Globals.app.config.ui.max_bucket_size
     );
 
@@ -112,11 +112,12 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    // This alert does not feature grouping
-    if (alertStates.length !== 1) {
+    if (alertStates.length === 0) {
       return;
     }
 
+    // Logic in the base alert assumes that all alerts will operate against multiple nodes/instances (such as a CPU alert against ES nodes)
+    // However, some alerts operate on the state of the cluster itself and are only concerned with a single state
     const state = alertStates[0];
     const { versions } = state.meta as AlertVersions;
     const shortActionText = i18n.translate(

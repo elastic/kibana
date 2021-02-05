@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { get } from 'lodash';
 import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
+import { ElasticsearchSource } from '../../../common/types/es';
 
-interface ClusterStateNodesESResponse {
-  [nodeUuid: string]: {
-    name: string;
-    ephemeral_id: string;
-  };
-}
-
-function formatNode(nodes: ClusterStateNodesESResponse) {
+function formatNode(
+  nodes: NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']> | undefined
+) {
+  if (!nodes) {
+    return [];
+  }
   return Object.keys(nodes).map((nodeUuid) => {
     return {
       nodeUuid,
@@ -28,60 +27,79 @@ export async function fetchNodesFromClusterStats(
   clusters: AlertCluster[],
   index: string
 ): Promise<AlertClusterStatsNodes[]> {
-  return await Promise.all(
-    clusters.map(async (cluster) => {
-      const params = {
-        index,
-        filterPath: [
-          'hits.hits._source.cluster_state.nodes_hash',
-          'hits.hits._source.cluster_state.nodes',
-          'hits.hits._source.cluster_uuid',
-          'hits.hits._index',
-        ],
-        body: {
-          size: 2,
-          sort: [
+  const params = {
+    index,
+    filterPath: ['aggregations.clusters.buckets'],
+    body: {
+      size: 0,
+      sort: [
+        {
+          timestamp: {
+            order: 'desc',
+            unmapped_type: 'long',
+          },
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
             {
-              timestamp: {
-                order: 'desc',
+              term: {
+                type: 'cluster_stats',
+              },
+            },
+            {
+              range: {
+                timestamp: {
+                  gte: 'now-2m',
+                },
               },
             },
           ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    cluster_uuid: cluster.clusterUuid,
-                  },
-                },
-                {
-                  term: {
-                    type: 'cluster_stats',
-                  },
-                },
-                {
-                  range: {
+        },
+      },
+      aggs: {
+        clusters: {
+          terms: {
+            include: clusters.map((cluster) => cluster.clusterUuid),
+            field: 'cluster_uuid',
+          },
+          aggs: {
+            top: {
+              top_hits: {
+                sort: [
+                  {
                     timestamp: {
-                      gte: 'now-2d',
+                      order: 'desc',
+                      unmapped_type: 'long',
                     },
                   },
+                ],
+                _source: {
+                  includes: ['cluster_state.nodes_hash', 'cluster_state.nodes'],
                 },
-              ],
+                size: 2,
+              },
             },
           },
         },
-      };
+      },
+    },
+  };
 
-      const response = await callCluster('search', params);
-      const hits = get(response, 'hits.hits', []);
-      const indexName = get(hits[0], '_index', '');
-      return {
-        clusterUuid: get(hits[0], '_source.cluster_uuid', ''),
-        recentNodes: formatNode(get(hits[0], '_source.cluster_state.nodes')),
-        priorNodes: formatNode(get(hits[1], '_source.cluster_state.nodes')),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
-      };
-    })
-  );
+  const response = await callCluster('search', params);
+  const nodes = [];
+  const clusterBuckets = response.aggregations.clusters.buckets;
+  for (const clusterBucket of clusterBuckets) {
+    const clusterUuid = clusterBucket.key;
+    const hits = clusterBucket.top.hits.hits;
+    const indexName = hits[0]._index;
+    nodes.push({
+      clusterUuid,
+      recentNodes: formatNode(hits[0]._source.cluster_state?.nodes),
+      priorNodes: formatNode(hits[1]._source.cluster_state?.nodes),
+      ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
+    });
+  }
+  return nodes;
 }
