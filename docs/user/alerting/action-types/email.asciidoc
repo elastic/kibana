@@ -14,7 +14,7 @@ Name::      The name of the connector. The name is used to identify a  connector
 Sender::    The from address for all emails sent with this connector, specified in `user@host-name` format.
 Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this hostname is added to the allowed hosts.
 Port::      The port to connect to on the service provider.
-Secure::    If true the connection will use TLS when connecting to the service provider. See https://nodemailer.com/smtp/#tls-options[nodemailer TLS documentation] for more information.  If not true, the connection will initially connect over TCP, then attempt to switch to TLS via the SMTP STARTTLS command.
+Secure::    If true the connection will use TLS when connecting to the service provider. Refer to the https://nodemailer.com/smtp/#tls-options[Nodemailer TLS documentation] for more information.  If not true, the connection will initially connect over TCP, then attempt to switch to TLS via the SMTP STARTTLS command.
 Username::  username for 'login' type authentication.
 Password::  password for 'login' type authentication.
 
@@ -92,7 +92,7 @@ systems, refer to:
 * <<exchange>>
 * <<amazon-ses>>
 
-For other email servers, you can check the list of well-known services that Nodemailer supports in the JSON file https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json].  The properties of the objects in those files - `host`, `port`, and `secure` - correspond to the same email action configuration properties.  A missing `secure` property in the "well-known/services.json" file is considered `false`.  Generally, `port: 465` uses `secure: true`, and `port: 25` and `port: 587` use `secure: false`.
+For other email servers, you can check the list of well-known services that Nodemailer supports in the JSON file https://github.com/nodemailer/nodemailer/blob/master/lib/well-known/services.json[well-known/services.json].  The properties of the objects in those files &mdash; `host`, `port`, and `secure` &mdash; correspond to the same email action configuration properties.  A missing `secure` property in the "well-known/services.json" file is considered `false`.  Typically, `port: 465` uses `secure: true`, and `port: 25` and `port: 587` use `secure: false`.
 
 [float]
 [[gmail]]
