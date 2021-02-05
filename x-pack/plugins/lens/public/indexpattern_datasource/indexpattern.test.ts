@@ -14,11 +14,8 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import {
-  operationDefinitionMap,
-  getErrorMessages,
-  createMockedReferenceOperation,
-} from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
+import { createMockedReferenceOperation } from './operations/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
