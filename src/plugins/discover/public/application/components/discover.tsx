@@ -43,7 +43,6 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { getTopNavLinks } from './top_nav/get_top_nav_links';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -82,23 +81,6 @@ export function Discover({
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
   const { trackUiMetric, capabilities, indexPatterns } = services;
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        getFieldCounts: opts.getFieldCounts,
-        indexPattern,
-        inspectorAdapters: opts.inspectorAdapters,
-        navigateTo: opts.navigateTo,
-        savedSearch: opts.savedSearch,
-        services,
-        state: opts.stateContainer,
-        onOpenInspector: () => {
-          // prevent overlapping
-          setExpandedDoc(undefined);
-        },
-      }),
-    [indexPattern, opts, services]
-  );
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -120,6 +102,11 @@ export function Discover({
       }),
     [capabilities, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
   );
+
+  const onOpenInspector = useCallback(() => {
+    // prevent overlapping
+    setExpandedDoc(undefined);
+  }, [setExpandedDoc]);
 
   const onSort = useCallback(
     (sort: string[][]) => {
@@ -204,8 +191,8 @@ export function Discover({
         <TopNavMemoized
           indexPattern={indexPattern}
           opts={opts}
+          onOpenInspector={onOpenInspector}
           state={state}
-          topNavMenu={topNavMenu}
           updateQuery={updateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">

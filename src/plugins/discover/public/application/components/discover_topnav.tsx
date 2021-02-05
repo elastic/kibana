@@ -7,16 +7,36 @@
  */
 import React, { useMemo } from 'react';
 import { DiscoverProps } from './types';
+import { getTopNavLinks } from './top_nav/get_top_nav_links';
+
+export type DiscoverTopNavProps = Pick<
+  DiscoverProps,
+  'indexPattern' | 'updateQuery' | 'state' | 'opts'
+> & { onOpenInspector: () => void };
 
 export const DiscoverTopNav = ({
-  topNavMenu,
   indexPattern,
-  updateQuery,
-  state,
   opts,
-}: Pick<DiscoverProps, 'topNavMenu' | 'indexPattern' | 'updateQuery' | 'state' | 'opts'>) => {
+  onOpenInspector,
+  state,
+  updateQuery,
+}: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = opts.services.navigation.ui;
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        getFieldCounts: opts.getFieldCounts,
+        indexPattern,
+        inspectorAdapters: opts.inspectorAdapters,
+        navigateTo: opts.navigateTo,
+        savedSearch: opts.savedSearch,
+        services: opts.services,
+        state: opts.stateContainer,
+        onOpenInspector,
+      }),
+    [indexPattern, opts, onOpenInspector]
+  );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appStateContainer, setAppState } = opts.stateContainer;
