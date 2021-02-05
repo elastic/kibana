@@ -6,10 +6,12 @@
  */
 
 export type BoostType = 'value' | 'functional' | 'proximity';
+export type BoostFunction = 'gaussian' | 'exponential' | 'linear';
+export type BoostOperation = 'add' | 'multiply';
 
 export interface BaseBoost {
-  operation?: string;
-  function?: string;
+  operation?: BoostOperation;
+  function?: BoostFunction;
 }
 
 // A boost that comes from the server, before we normalize it has a much looser schema

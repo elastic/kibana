@@ -1,11 +1,26 @@
-.relevanceTuningForm {
-  .boostSelect {
+.boosts {
+  .boosts__header.euiPageContentHeader {
+    margin-bottom: 0;
+  }
+
+  .boosts__select {
     min-width: $euiSizeXXL * 4;
+  }
+
+  .boosts__itemContent {
+    width: 100%;
+  }
+
+  .boosts__item {
+    margin-top: $euiSize;
+  }
+
+  .boosts__item + .boosts__item {
+    margin-top: $euiSizeS;
   }
 }
 
 .boostSelectOption {
-
   .euiContextMenuItem__text {
     display: flex;
     align-items: center;

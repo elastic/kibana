@@ -21,7 +21,14 @@ import {
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
 } from './constants';
-import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
+import {
+  BaseBoost,
+  Boost,
+  BoostFunction,
+  BoostOperation,
+  BoostType,
+  SearchSettings,
+} from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
@@ -82,7 +89,7 @@ interface RelevanceTuningActions {
     name: string,
     boostIndex: number,
     optionType: keyof BaseBoost,
-    value: string
+    value: BoostOperation | BoostFunction
   ): {
     name: string;
     boostIndex: number;
@@ -497,7 +504,11 @@ export const RelevanceTuningLogic = kea<
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
-      updatedBoosts[boostIndex][optionType] = value;
+      if (optionType === 'operation') {
+        updatedBoosts[boostIndex][optionType] = value as BoostOperation;
+      } else {
+        updatedBoosts[boostIndex][optionType] = value as BoostFunction;
+      }
 
       actions.setSearchSettings({
         ...searchSettings,

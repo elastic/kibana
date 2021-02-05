@@ -94,6 +94,7 @@ export const RelevanceTuningForm: React.FC = () => {
               <RelevanceTuningItemContent
                 name={fieldName}
                 type={schema[fieldName]}
+                boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
                 field={searchSettings.search_fields[fieldName]}
               />
             </EuiAccordion>

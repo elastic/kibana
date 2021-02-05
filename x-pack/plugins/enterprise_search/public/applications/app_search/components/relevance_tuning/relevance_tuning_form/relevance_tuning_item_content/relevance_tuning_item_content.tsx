@@ -10,7 +10,7 @@ import { EuiPageContent, EuiPageContentBody } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../../shared/types';
 
-import { SearchField } from '../../types';
+import { Boost, SearchField } from '../../types';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
 import { Boosts } from './boosts';
@@ -19,10 +19,11 @@ import './relevance_tuning_item_content.scss';
 interface Props {
   name: string;
   type: SchemaTypes;
+  boosts?: Boost[];
   field?: SearchField;
 }
 
-export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, field }) => {
+export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, boosts, field }) => {
   return (
     <>
       <EuiPageContent hasShadow={false} className="relevanceTuningForm__itemContent">
@@ -31,7 +32,7 @@ export const RelevanceTuningItemContent: React.FC<Props> = ({ name, type, field 
           {field && <WeightSlider name={name} field={field} />}
         </EuiPageContentBody>
       </EuiPageContent>
-      <Boosts name={name} type={type} />
+      <Boosts name={name} type={type} boosts={boosts} />
     </>
   );
 };

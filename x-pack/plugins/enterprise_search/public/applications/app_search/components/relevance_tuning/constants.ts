@@ -60,6 +60,18 @@ export const VALUE_DISPLAY = i18n.translate(
     defaultMessage: 'Value',
   }
 );
+export const BOOST_TYPE_TO_DISPLAY_MAP = {
+  [PROXIMITY]: PROXIMITY_DISPLAY,
+  [FUNCTIONAL]: FUNCTIONAL_DISPLAY,
+  [VALUE]: VALUE_DISPLAY,
+};
+
+export const EXPONENTIAL = 'exponential';
+export const GAUSSIAN = 'gaussian';
+export const LINEAR = 'linear';
+
+export const ADD = 'add';
+export const MULTIPLY = 'multiply';
 
 export const BOOST_TYPE_TO_ICON_MAP = {
   [VALUE]: 'tokenNumber',

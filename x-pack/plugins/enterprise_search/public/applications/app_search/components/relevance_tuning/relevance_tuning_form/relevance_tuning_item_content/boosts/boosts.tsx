@@ -11,6 +11,7 @@ import {
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPageContentBody,
   EuiTitle,
   EuiSuperSelect,
 } from '@elastic/eui';
@@ -30,7 +31,8 @@ import {
 } from '../../../constants';
 import { BoostIcon } from '../../../boost_icon';
 import { RelevanceTuningLogic } from '../../../relevance_tuning_logic';
-import { BoostType } from '../../../types';
+import { Boost, BoostType } from '../../../types';
+import { BoostItem } from './boost_item';
 
 import './boosts.scss';
 
@@ -83,9 +85,10 @@ const filterInvalidOptions = (value: BoostType, type: SchemaTypes) => {
 interface Props {
   name: string;
   type: SchemaTypes;
+  boosts?: Boost[];
 }
 
-export const Boosts: React.FC<Props> = ({ name, type }) => {
+export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
   const { addBoost } = useActions(RelevanceTuningLogic);
 
   const addBoostClick = (value: BoostType) => {
@@ -98,8 +101,8 @@ export const Boosts: React.FC<Props> = ({ name, type }) => {
   );
 
   return (
-    <EuiPageContent>
-      <EuiPageContentHeader responsive={false}>
+    <EuiPageContent className="boosts">
+      <EuiPageContentHeader className="boosts__header" responsive={false}>
         <EuiPageContentHeaderSection>
           <EuiTitle size="xxs">
             <h4>
@@ -114,7 +117,7 @@ export const Boosts: React.FC<Props> = ({ name, type }) => {
         </EuiPageContentHeaderSection>
         <EuiPageContentHeaderSection>
           <EuiSuperSelect
-            className="boostSelect"
+            className="boosts__select"
             itemClassName="boostSelectOption"
             valueOfSelected={'add-boost'}
             options={selectOptions}
@@ -122,6 +125,11 @@ export const Boosts: React.FC<Props> = ({ name, type }) => {
           />
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
+      <EuiPageContentBody>
+        {boosts.map((boost, index) => (
+          <BoostItem key={index} id={`boost-${index}`} boost={boost} />
+        ))}
+      </EuiPageContentBody>
     </EuiPageContent>
   );
 };
