@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { OptimizerConfig, getMetrics } from './optimizer';
+export { OptimizerConfig } from './optimizer';
 export * from './run_optimizer';
 export * from './log_optimizer_state';
 export * from './node';

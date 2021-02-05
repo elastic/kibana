@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
+
 import { REPO_ROOT } from '@kbn/utils';
 import { lastValueFrom } from '@kbn/std';
-import { runOptimizer, OptimizerConfig, logOptimizerState, getMetrics } from '@kbn/optimizer';
+import { CiStatsMetrics } from '@kbn/dev-utils';
+import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 
-import { Task, write } from '../lib';
+import { Task, deleteAll, write, read } from '../lib';
 
 export const BuildKibanaPlatformPlugins: Task = {
   description: 'Building distributable versions of Kibana platform plugins',
@@ -27,11 +30,26 @@ export const BuildKibanaPlatformPlugins: Task = {
     });
 
     await lastValueFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+
+    const combinedMetrics: CiStatsMetrics = [];
+    const metricFilePaths: string[] = [];
+    for (const bundle of config.bundles) {
+      const path = Path.resolve(bundle.outputDir, 'metrics.json');
+      const metrics: CiStatsMetrics = JSON.parse(await read(path));
+      combinedMetrics.push(...metrics);
+      metricFilePaths.push(path);
+    }
+
+    // write combined metrics to target
     await write(
       buildConfig.resolveFromTarget('optimizer_bundle_metrics.json'),
-      JSON.stringify(getMetrics(config), null, 2)
+      JSON.stringify(combinedMetrics, null, 2)
     );
 
+    // delete all metric files
+    await deleteAll(metricFilePaths, log);
+
+    // delete all bundle cache files
     await Promise.all(config.bundles.map((b) => b.cache.clear()));
   },
 };
