@@ -8,7 +8,7 @@
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -25,7 +25,6 @@ import {
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getLatencyAggregation } from '../../helpers/latency_aggregation_type';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export type TransactionGroupTimeseriesData = PromiseReturnType<
   typeof getTimeseriesDataForTransactionGroups
@@ -83,8 +82,8 @@ export async function getTimeseriesDataForTransactionGroups({
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
         },

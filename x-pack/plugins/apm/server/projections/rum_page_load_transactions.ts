@@ -28,7 +28,7 @@ export function getRumPageLoadTransactionsProjection({
 
   const bool = {
     filter: [
-      rangeQuery(start, end),
+      ...rangeQuery(start, end),
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       ...(checkFetchStartFieldExists
         ? [
@@ -79,7 +79,7 @@ export function getRumErrorsProjection({
 
   const bool = {
     filter: [
-      rangeQuery(start, end),
+      ...rangeQuery(start, end),
       { term: { [AGENT_NAME]: 'rum-js' } },
       {
         term: {

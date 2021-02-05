@@ -7,7 +7,7 @@
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -19,7 +19,6 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import { processSignificantTermAggs } from '../process_significant_term_aggs';
 import { getLatencyDistribution } from './get_latency_distribution';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getCorrelationsForSlowTransactions({
   environment,
@@ -41,8 +40,8 @@ export async function getCorrelationsForSlowTransactions({
   const { start, end, esFilter, apmEventClient } = setup;
 
   const backgroundFilters: ESFilter[] = [
-    rangeQuery(start, end),
-    ...getEnvironmentFilter(environment),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
     ...esFilter,
   ];
 

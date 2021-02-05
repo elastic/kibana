@@ -10,10 +10,9 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
-import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
 function getServiceNodeNameFilters(serviceNodeName?: string) {
   if (!serviceNodeName) {
@@ -43,8 +42,8 @@ export function getMetricsProjection({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getServiceNodeNameFilters(serviceNodeName),
-    rangeQuery(start, end),
-    ...getEnvironmentFilter(environment),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
     ...esFilter,
   ];
 

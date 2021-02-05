@@ -19,13 +19,12 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getEnvironmentFilter } from '../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
@@ -59,8 +58,8 @@ export async function getServiceMapServiceNodeInfo({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    rangeQuery(start, end),
-    ...getEnvironmentFilter(environment),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));

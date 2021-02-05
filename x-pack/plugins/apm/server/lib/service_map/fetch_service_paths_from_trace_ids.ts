@@ -40,7 +40,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
-            rangeQuery(start, end),
+            ...rangeQuery(start, end),
           ],
         },
       },

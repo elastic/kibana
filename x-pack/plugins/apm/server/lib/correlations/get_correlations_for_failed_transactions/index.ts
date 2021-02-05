@@ -13,7 +13,7 @@ import {
 } from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -27,7 +27,6 @@ import {
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getCorrelationsForFailedTransactions({
   environment,
@@ -47,8 +46,8 @@ export async function getCorrelationsForFailedTransactions({
   const { start, end, esFilter, apmEventClient } = setup;
 
   const backgroundFilters: ESFilter[] = [
-    rangeQuery(start, end),
-    ...getEnvironmentFilter(environment),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
     ...esFilter,
   ];
 

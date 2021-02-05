@@ -22,7 +22,7 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { getEnvironmentFilter } from '../helpers/get_environment_filter';
+import { environmentQuery } from '../../../common/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
@@ -103,7 +103,7 @@ export function registerTransactionErrorRateAlertType({
                       },
                     ]
                   : []),
-                ...getEnvironmentFilter(alertParams.environment),
+                ...environmentQuery(alertParams.environment),
               ],
             },
           },

@@ -6,7 +6,7 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -21,7 +21,6 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getServiceInstanceTransactionStats({
   environment,
@@ -74,8 +73,8 @@ export async function getServiceInstanceTransactionStats({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
         },

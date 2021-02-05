@@ -11,12 +11,11 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../common/utils/queries';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
 } from '../lib/helpers/aggregated_transactions';
-import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
 export function getTransactionsProjection({
   environment,
@@ -53,8 +52,8 @@ export function getTransactionsProjection({
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-      rangeQuery(start, end),
-      ...getEnvironmentFilter(environment),
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
       ...esFilter,
     ],
   };

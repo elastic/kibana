@@ -13,9 +13,8 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -45,8 +44,8 @@ export const getMetrics = async ({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { exists: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT } },
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
           ],
         },
       },

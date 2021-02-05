@@ -15,7 +15,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -29,7 +29,6 @@ import {
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 interface AggregationParams {
   environment?: string;
@@ -75,8 +74,8 @@ export async function getServiceTransactionStats({
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
         },

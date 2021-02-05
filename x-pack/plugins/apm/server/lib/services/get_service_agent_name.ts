@@ -42,7 +42,7 @@ export async function getServiceAgentName({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            rangeQuery(start, end),
+            ...rangeQuery(start, end),
           ],
         },
       },

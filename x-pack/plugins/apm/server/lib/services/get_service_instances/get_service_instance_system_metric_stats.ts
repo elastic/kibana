@@ -6,7 +6,7 @@
  */
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
@@ -23,7 +23,6 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getServiceInstanceSystemMetricStats({
   environment,
@@ -96,8 +95,8 @@ export async function getServiceInstanceSystemMetricStats({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
           should: [cgroupMemoryFilter, systemMemoryFilter, cpuUsageFilter],

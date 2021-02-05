@@ -35,7 +35,7 @@ export async function getTransaction({
           filter: [
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
-            rangeQuery(start, end),
+            ...rangeQuery(start, end),
           ],
         },
       },

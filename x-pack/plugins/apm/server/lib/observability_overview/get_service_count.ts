@@ -34,7 +34,7 @@ export async function getServiceCount({
       size: 0,
       query: {
         bool: {
-          filter: [rangeQuery(start, end)],
+          filter: [...rangeQuery(start, end)],
         },
       },
       aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },

@@ -11,7 +11,7 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -28,7 +28,6 @@ import {
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -89,8 +88,8 @@ export async function getTransactionGroupsForPage({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            rangeQuery(start, end),
-            ...getEnvironmentFilter(environment),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
             ...esFilter,
           ],
         },

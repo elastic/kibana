@@ -27,7 +27,7 @@ export async function getEnvironments({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const filter: ESFilter[] = [rangeQuery(start, end)];
+  const filter: ESFilter[] = [...rangeQuery(start, end)];
 
   if (serviceName) {
     filter.push({

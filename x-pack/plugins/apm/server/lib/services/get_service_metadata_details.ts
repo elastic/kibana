@@ -72,7 +72,7 @@ export async function getServiceMetadataDetails({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    rangeQuery(start, end),
+    ...rangeQuery(start, end),
   ];
 
   const params = {

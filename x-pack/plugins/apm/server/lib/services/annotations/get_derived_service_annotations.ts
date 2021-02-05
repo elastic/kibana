@@ -12,12 +12,11 @@ import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDerivedServiceAnnotations({
@@ -38,7 +37,7 @@ export async function getDerivedServiceAnnotations({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...getEnvironmentFilter(environment),
+    ...environmentQuery(environment),
   ];
 
   const versions =
@@ -55,7 +54,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: [...filter, rangeQuery(start, end)],
+              filter: [...filter, ...rangeQuery(start, end)],
             },
           },
           aggs: {

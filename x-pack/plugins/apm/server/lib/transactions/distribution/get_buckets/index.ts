@@ -16,13 +16,15 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { rangeQuery } from '../../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+} from '../../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../helpers/aggregated_transactions';
-import { getEnvironmentFilter } from '../../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 function getHistogramAggOptions({
@@ -74,8 +76,8 @@ export async function getBuckets({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { term: { [TRANSACTION_NAME]: transactionName } },
-    rangeQuery(start, end),
-    ...getEnvironmentFilter(environment),
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
     ...esFilter,
   ];
 

@@ -15,7 +15,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../projections/services';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { getEnvironmentFilter } from '../helpers/get_environment_filter';
+import { environmentQuery } from '../../../common/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
@@ -98,7 +98,7 @@ async function getServicesData(options: IEnvOptions) {
   }
 
   if (options.environment) {
-    filter = filter.concat(getEnvironmentFilter(environment));
+    filter = filter.concat(...environmentQuery(environment));
   }
 
   const params = mergeProjection(projection, {

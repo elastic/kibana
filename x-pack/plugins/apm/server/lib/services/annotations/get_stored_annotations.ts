@@ -7,13 +7,12 @@
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { unwrapEsResponse } from '../../../../../observability/server';
-import { rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getStoredAnnotations({
@@ -37,11 +36,11 @@ export async function getStoredAnnotations({
     query: {
       bool: {
         filter: [
-          rangeQuery(start, end),
+          ...rangeQuery(start, end),
           { term: { 'annotation.type': 'deployment' } },
           { term: { tags: 'apm' } },
           { term: { [SERVICE_NAME]: serviceName } },
-          ...getEnvironmentFilter(environment),
+          ...environmentQuery(environment),
         ],
       },
     },

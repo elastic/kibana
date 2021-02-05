@@ -39,7 +39,10 @@ export async function getTraceItems(
       size: maxTraceItems,
       query: {
         bool: {
-          filter: [{ term: { [TRACE_ID]: traceId } }, rangeQuery(start, end)],
+          filter: [
+            { term: { [TRACE_ID]: traceId } },
+            ...rangeQuery(start, end),
+          ],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
@@ -64,7 +67,10 @@ export async function getTraceItems(
       size: maxTraceItems,
       query: {
         bool: {
-          filter: [{ term: { [TRACE_ID]: traceId } }, rangeQuery(start, end)],
+          filter: [
+            { term: { [TRACE_ID]: traceId } },
+            ...rangeQuery(start, end),
+          ],
           should: {
             exists: { field: PARENT_ID },
           },

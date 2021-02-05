@@ -44,7 +44,7 @@ export async function getServiceTransactionTypes({
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
-            rangeQuery(start, end),
+            ...rangeQuery(start, end),
           ],
         },
       },

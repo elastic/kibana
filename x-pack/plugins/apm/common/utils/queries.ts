@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL,
-} from '../../../common/environment_filter_values';
-import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
+} from '../environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
 
-export function getEnvironmentFilter(environment?: string): ESFilter[] {
+type QueryContainer = ESFilter;
+
+export function environmentQuery(environment?: string): QueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
+
   if (environment === ENVIRONMENT_NOT_DEFINED.value) {
     return [{ bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } }];
   }
+
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
+}
+
+export function rangeQuery(start: number, end: number): QueryContainer[] {
+  return [
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
 }
