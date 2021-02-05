@@ -16,22 +16,36 @@ import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { appContextService } from '../../services';
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
+function _joinFilters(filters: Array<string | undefined | KueryNode>): KueryNode | undefined {
+  return filters
+    .filter((filter) => filter !== undefined)
+    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
+      | KueryNode
+      | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const kueryNode: KueryNode =
+        typeof kuery === 'string' ? esKuery.fromKueryExpression(removeSOAttributes(kuery)) : kuery;
 
-    return `(${filter})`;
-  }, undefined);
+      if (!acc) {
+        return kueryNode;
+      }
+
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, kueryNode],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
-function removeSOAttributes(kuery: string) {
+export function removeSOAttributes(kuery: string) {
   return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
 }
 
@@ -58,12 +72,15 @@ export async function listAgents(
   const filters = [];
 
   if (kuery && kuery !== '') {
-    filters.push(removeSOAttributes(kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
 
   const res = await esClient.search({
     index: AGENTS_INDEX,
@@ -71,9 +88,7 @@ export async function listAgents(
     size: perPage,
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
-    body: {
-      query: esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(_joinFilters(filters))),
-    },
+    body,
   });
 
   let agentResults: Agent[] = res.body.hits.hits.map(searchHitToAgent);
@@ -124,13 +139,15 @@ export async function countInactiveAgents(
     filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
+  const kueryNode = _joinFilters(filters);
+  const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
+
   const res = await esClient.search({
     index: AGENTS_INDEX,
     size: 0,
     track_total_hits: true,
-    q: _joinFilters(filters),
+    body,
   });
-
   return res.body.hits.total.value;
 }
 
