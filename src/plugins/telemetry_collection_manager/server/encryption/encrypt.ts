@@ -10,7 +10,7 @@ import { createRequestEncryptor } from '@elastic/request-crypto';
 import { telemetryJWKS } from './telemetry_jwks';
 
 export function getKID(useProdKey = false): string {
-  return useProdKey ? 'kibana' : 'kibana_dev';
+  return useProdKey ? 'kibana_1' : 'kibana_dev_1';
 }
 
 export async function encryptTelemetry(
