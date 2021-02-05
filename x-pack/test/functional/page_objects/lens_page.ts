@@ -546,7 +546,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'asc' | 'desc') {
+    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
       await el.click();
       let buttonEl;

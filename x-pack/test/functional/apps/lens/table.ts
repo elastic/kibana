@@ -21,15 +21,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       // Sort by number
-      await PageObjects.lens.changeTableSortingBy(2, 'asc');
+      await PageObjects.lens.changeTableSortingBy(2, 'ascending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
       // Now sort by IP
-      await PageObjects.lens.changeTableSortingBy(0, 'asc');
+      await PageObjects.lens.changeTableSortingBy(0, 'ascending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('78.83.247.30');
       // Change the sorting
-      await PageObjects.lens.changeTableSortingBy(0, 'desc');
+      await PageObjects.lens.changeTableSortingBy(0, 'descending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
       // Remove the sorting
