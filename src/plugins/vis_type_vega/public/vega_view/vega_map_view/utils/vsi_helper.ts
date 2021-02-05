@@ -7,7 +7,6 @@
  */
 
 // @ts-expect-error
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Vsi from 'vega-spec-injector';
 
 import { Spec } from 'vega';
