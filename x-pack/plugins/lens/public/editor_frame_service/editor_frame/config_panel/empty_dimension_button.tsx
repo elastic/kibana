@@ -68,7 +68,7 @@ export function EmptyDimensionButton({
             columnId: value.columnId,
             filterOperations: group.filterOperations,
             groupId: group.groupId,
-            visualizationGroupConfig: groups,
+            dimensionGroups: groups,
           })
         }
       >

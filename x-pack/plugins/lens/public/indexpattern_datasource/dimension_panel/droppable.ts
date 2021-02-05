@@ -12,7 +12,7 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, reorderByGroups } from '../operations';
+import { getColumnOrder, insertOrReplaceColumn, reorderByGroups } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -21,13 +21,7 @@ import { getOperationSupportMatrix, OperationSupportMatrix } from './operation_s
 
 type DropHandlerProps<T = DraggedOperation> = Pick<
   DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>,
-  | 'columnId'
-  | 'setState'
-  | 'state'
-  | 'layerId'
-  | 'droppedItem'
-  | 'visualizationGroupConfig'
-  | 'groupId'
+  'columnId' | 'setState' | 'state' | 'layerId' | 'droppedItem' | 'dimensionGroups' | 'groupId'
 > & {
   droppedItem: T;
   operationSupportMatrix: OperationSupportMatrix;
@@ -99,7 +93,7 @@ const onMoveDropToCompatibleGroup = ({
   state,
   layerId,
   droppedItem,
-  visualizationGroupConfig,
+  dimensionGroups,
   groupId,
 }: DropHandlerProps) => {
   const layer = state.layers[layerId];
@@ -120,8 +114,15 @@ const onMoveDropToCompatibleGroup = ({
     // for drop to replace, reuse the same index
     newColumnOrder[oldIndex] = columnId;
   }
+  const newLayer = {
+    ...layer,
+    columnOrder: newColumnOrder,
+    columns: newColumns,
+  };
 
-  reorderByGroups(visualizationGroupConfig, groupId, newColumnOrder, columnId);
+  const updatedColumnOrder = getColumnOrder(newLayer);
+
+  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
   // Time to replace
   setState(
@@ -129,7 +130,7 @@ const onMoveDropToCompatibleGroup = ({
       state,
       layerId,
       newLayer: {
-        columnOrder: newColumnOrder,
+        columnOrder: updatedColumnOrder,
         columns: newColumns,
       },
     })
@@ -144,7 +145,7 @@ const onFieldDrop = ({
   layerId,
   droppedItem,
   operationSupportMatrix,
-  visualizationGroupConfig,
+  dimensionGroups: visualizationGroupConfig,
   groupId,
 }: DropHandlerProps<unknown>) => {
   function hasOperationForField(field: IndexPatternField) {
@@ -205,7 +206,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     layerId,
     groupId,
     isNew,
-    visualizationGroupConfig,
+    dimensionGroups,
   } = props;
 
   if (!isDraggedOperation(droppedItem)) {
@@ -217,7 +218,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       droppedItem,
       operationSupportMatrix,
       groupId,
-      visualizationGroupConfig,
+      dimensionGroups,
     });
   }
   const isExistingFromSameGroup =
@@ -233,7 +234,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       droppedItem,
       operationSupportMatrix,
       groupId,
-      visualizationGroupConfig,
+      dimensionGroups,
     });
   }
 
@@ -253,7 +254,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
         droppedItem,
         operationSupportMatrix,
         groupId,
-        visualizationGroupConfig,
+        dimensionGroups,
       });
     }
   }

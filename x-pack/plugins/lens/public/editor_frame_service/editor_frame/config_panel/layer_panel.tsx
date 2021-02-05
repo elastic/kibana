@@ -135,7 +135,7 @@ export function LayerPanel(
         layerId: targetLayerId,
         isNew,
         filterOperations,
-        visualizationGroupConfig: groups,
+        dimensionGroups: groups,
       });
       if (dropResult) {
         const newVisState = setDimension({

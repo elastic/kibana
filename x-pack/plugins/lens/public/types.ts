@@ -302,7 +302,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
   isReorder?: boolean;
-  visualizationGroupConfig: VisualizationDimensionGroupConfig[];
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {

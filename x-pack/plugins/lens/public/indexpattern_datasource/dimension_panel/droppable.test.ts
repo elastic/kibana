@@ -8,7 +8,7 @@
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { onDrop, canHandleDrop } from './droppable';
-import { DragContextState } from '../../drag_drop';
+import { DragContextState, DragDropIdentifier } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -46,6 +46,22 @@ const fields = [
   {
     name: 'source',
     displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'src',
+    displayName: 'src',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
     type: 'string',
     aggregatable: true,
     searchable: true,
@@ -133,6 +149,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       columnId: 'col1',
       layerId: 'first',
       uniqueLabel: 'stuff',
+      groupId: 'group1',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
       uiSettings: {} as IUiSettingsClient,
@@ -560,6 +577,268 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
+    });
+  });
+
+  describe('dimension group aware ordering', () => {
+    let dragging: DragDropIdentifier;
+    let testState: IndexPatternPrivateState;
+    beforeEach(() => {
+      dragging = {
+        columnId: 'col2',
+        groupId: 'b',
+        layerId: 'first',
+        id: 'col2',
+      };
+      testState = { ...state };
+      testState.layers.first = {
+        indexPatternId: 'foo',
+        columnOrder: ['col1', 'col2', 'col3', 'col4'],
+        columns: {
+          col1: testState.layers.first.columns.col1,
+          col2: {
+            label: 'Top values of src',
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'column', columnId: 'col4' },
+              orderDirection: 'desc',
+              size: 10,
+            },
+            sourceField: 'src',
+          },
+          col3: {
+            label: 'Top values of dest',
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'column', columnId: 'col4' },
+              orderDirection: 'desc',
+              size: 10,
+            },
+            sourceField: 'dest',
+          },
+          col4: {
+            label: 'Count of records',
+            dataType: 'number',
+            isBucketed: false,
+
+            // Private
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        },
+      };
+    });
+    const dimensionGroups = [
+      {
+        accessors: [],
+        groupId: 'a',
+        supportsMoreColumns: true,
+        hideGrouping: true,
+        groupLabel: '',
+        filterOperations: () => false,
+      },
+      {
+        accessors: [{ columnId: 'col1' }, { columnId: 'col2' }, { columnId: 'col3' }],
+        groupId: 'b',
+        supportsMoreColumns: true,
+        hideGrouping: true,
+        groupLabel: '',
+        filterOperations: () => false,
+      },
+      {
+        accessors: [{ columnId: 'col4' }],
+        groupId: 'c',
+        supportsMoreColumns: true,
+        hideGrouping: true,
+        groupLabel: '',
+        filterOperations: () => false,
+      },
+    ];
+
+    it('respects groups on moving operations from one group to another', () => {
+      // config:
+      // a:
+      // b: col1, col2, col3
+      // c: col4
+      // dragging col2 into newCol in group a
+      onDrop({
+        ...defaultProps,
+        columnId: 'newCol',
+        dragDropContext: {
+          ...dragDropContext,
+          dragging,
+        },
+        droppedItem: dragging,
+        state: testState,
+        groupId: 'a',
+        dimensionGroups,
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          first: {
+            ...testState.layers.first,
+            columnOrder: ['newCol', 'col1', 'col3', 'col4'],
+            columns: {
+              newCol: testState.layers.first.columns.col2,
+              col1: testState.layers.first.columns.col1,
+              col3: testState.layers.first.columns.col3,
+              col4: testState.layers.first.columns.col4,
+            },
+          },
+        },
+      });
+    });
+
+    it('respects groups on moving operations from one group to another with overwrite', () => {
+      // config:
+      // a: col1,
+      // b: col2, col3
+      // c: col4
+      // dragging col3 onto col1 in group a
+      const draggingCol3 = {
+        columnId: 'col3',
+        groupId: 'b',
+        layerId: 'first',
+        id: 'col3',
+      };
+      onDrop({
+        ...defaultProps,
+        columnId: 'col1',
+        dragDropContext: {
+          ...dragDropContext,
+          dragging: draggingCol3,
+        },
+        droppedItem: draggingCol3,
+        state: testState,
+        groupId: 'a',
+        dimensionGroups: [
+          { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+          { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+          { ...dimensionGroups[2] },
+        ],
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          first: {
+            ...testState.layers.first,
+            columnOrder: ['col1', 'col2', 'col4'],
+            columns: {
+              col1: testState.layers.first.columns.col3,
+              col2: testState.layers.first.columns.col2,
+              col4: testState.layers.first.columns.col4,
+            },
+          },
+        },
+      });
+    });
+
+    it('moves newly created dimension to the bottom of the current group', () => {
+      // config:
+      // a: col1
+      // b: col2, col3
+      // c: col4
+      // dragging col1 into newCol in group b
+      const draggingCol1 = {
+        columnId: 'col1',
+        groupId: 'a',
+        layerId: 'first',
+        id: 'col1',
+      };
+      onDrop({
+        ...defaultProps,
+        columnId: 'newCol',
+        dragDropContext: {
+          ...dragDropContext,
+          dragging: draggingCol1,
+        },
+        droppedItem: draggingCol1,
+        state: testState,
+        groupId: 'b',
+        dimensionGroups: [
+          { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
+          { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
+          { ...dimensionGroups[2] },
+        ],
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...testState,
+        layers: {
+          first: {
+            ...testState.layers.first,
+            columnOrder: ['col2', 'col3', 'newCol', 'col4'],
+            columns: {
+              newCol: testState.layers.first.columns.col1,
+              col2: testState.layers.first.columns.col2,
+              col3: testState.layers.first.columns.col3,
+              col4: testState.layers.first.columns.col4,
+            },
+          },
+        },
+      });
+    });
+
+    it('appends the dropped column in the right place when a field is dropped', () => {
+      // config:
+      // a:
+      // b: col1, col2, col3
+      // c: col4
+      // dragging field into newCol in group a
+      const draggingField = {
+        field: { type: 'number', name: 'bytes', aggregatable: true },
+        indexPatternId: 'foo',
+        id: 'bar',
+      };
+
+      onDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging: draggingField,
+        },
+        droppedItem: draggingField,
+        columnId: 'newCol',
+        filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+        groupId: 'a',
+        dimensionGroups,
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...testState.layers.first,
+            columnOrder: ['newCol', 'col1', 'col2', 'col3', 'col4'],
+            columns: {
+              newCol: expect.objectContaining({
+                dataType: 'number',
+                sourceField: 'bytes',
+              }),
+              col1: testState.layers.first.columns.col1,
+              col2: testState.layers.first.columns.col2,
+              col3: testState.layers.first.columns.col3,
+              col4: testState.layers.first.columns.col4,
+            },
+            incompleteColumns: {},
+          },
+        },
+      });
     });
   });
 

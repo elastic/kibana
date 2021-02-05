@@ -65,7 +65,7 @@ export function DraggableDimensionButton({
       columnId,
       filterOperations: group.filterOperations,
       groupId: group.groupId,
-      visualizationGroupConfig: groups,
+      dimensionGroups: groups,
     });
 
   const dragType = isSelf(value, dragging)
