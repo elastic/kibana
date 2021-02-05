@@ -614,6 +614,7 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        const formatterIndex = keyBy(filteredDocvalueFields, 'format');
         body.fields = body.fields.map((fld: SearchFieldValue) => {
           const fieldName = getFieldName(fld);
           if (Object.keys(docvaluesIndex).includes(fieldName)) {
@@ -625,6 +626,10 @@ export class SearchSource {
                   ...docvaluesIndex[fieldName],
                   ...fld,
                 };
+          }
+          if (Object.keys(formatterIndex).includes('strict_date_optional_time_nanos')) {
+            // @ts-ignore
+            fld.format = 'strict_date_optional_time_nanos';
           }
           return fld;
         });

@@ -179,7 +179,7 @@ export class IndexPattern implements IIndexPattern {
           field: dateField.name,
           format:
             dateField.esTypes && dateField.esTypes.indexOf('date_nanos') !== -1
-              ? 'strict_date_time'
+              ? 'strict_date_optional_time_nanos'
               : 'date_time',
         };
       }
