@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { px, unit, units } from '../../../../../style/variables';
-import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
 

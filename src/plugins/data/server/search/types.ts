@@ -92,6 +92,7 @@ export interface IScopedSearchClient extends ISearchClient {
   findSessions: IScopedSearchSessionsClient['find'];
   updateSession: IScopedSearchSessionsClient['update'];
   cancelSession: IScopedSearchSessionsClient['cancel'];
+  deleteSession: IScopedSearchSessionsClient['delete'];
   extendSession: IScopedSearchSessionsClient['extend'];
 }
 

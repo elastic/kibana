@@ -17,6 +17,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
+  is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
@@ -24,6 +25,7 @@ export interface AgentPolicy extends NewAgentPolicy {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
   package_policies: string[] | PackagePolicy[];
+  is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
   revision: number;

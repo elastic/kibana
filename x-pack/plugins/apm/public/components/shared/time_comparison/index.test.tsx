@@ -17,6 +17,7 @@ import {
 } from '../../../utils/testHelpers';
 import { TimeComparison } from './';
 import * as urlHelpers from '../../shared/Links/url_helpers';
+import moment from 'moment';
 
 function getWrapper(params?: IUrlParams) {
   return ({ children }: { children?: ReactNode }) => {
@@ -31,6 +32,10 @@ function getWrapper(params?: IUrlParams) {
 }
 
 describe('TimeComparison', () => {
+  beforeAll(() => {
+    moment.tz.setDefault('Europe/Amsterdam');
+  });
+  afterAll(() => moment.tz.setDefault(''));
   const spy = jest.spyOn(urlHelpers, 'replace');
   beforeEach(() => {
     jest.resetAllMocks();
@@ -40,6 +45,7 @@ describe('TimeComparison', () => {
       const Wrapper = getWrapper({
         start: '2021-01-28T14:45:00.000Z',
         end: '2021-01-28T15:00:00.000Z',
+        rangeTo: 'now',
       });
       render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -57,6 +63,7 @@ describe('TimeComparison', () => {
         end: '2021-01-28T15:00:00.000Z',
         comparisonEnabled: true,
         comparisonType: 'yesterday',
+        rangeTo: 'now',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -67,13 +74,64 @@ describe('TimeComparison', () => {
           .selectedIndex
       ).toEqual(0);
     });
+
+    it('enables yesterday option when date difference is equal to 24 hours', () => {
+      const Wrapper = getWrapper({
+        start: '2021-01-28T10:00:00.000Z',
+        end: '2021-01-29T10:00:00.000Z',
+        comparisonEnabled: true,
+        comparisonType: 'yesterday',
+        rangeTo: 'now',
+      });
+      const component = render(<TimeComparison />, {
+        wrapper: Wrapper,
+      });
+      expectTextsInDocument(component, ['Yesterday', 'A week ago']);
+      expect(
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+          .selectedIndex
+      ).toEqual(0);
+    });
+
+    it('selects previous period when rangeTo is different than now', () => {
+      const Wrapper = getWrapper({
+        start: '2021-01-28T10:00:00.000Z',
+        end: '2021-01-29T10:00:00.000Z',
+        comparisonEnabled: true,
+        comparisonType: 'previousPeriod',
+        rangeTo: 'now-15m',
+      });
+      const component = render(<TimeComparison />, {
+        wrapper: Wrapper,
+      });
+      expectTextsInDocument(component, ['28/01 11:00 - 29/01 11:00']);
+      expect(
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+          .selectedIndex
+      ).toEqual(0);
+    });
   });
 
   describe('Time range is between 24 hours - 1 week', () => {
+    it("doesn't show yesterday option when date difference is greater than 24 hours", () => {
+      const Wrapper = getWrapper({
+        start: '2021-01-28T10:00:00.000Z',
+        end: '2021-01-29T11:00:00.000Z',
+        comparisonEnabled: true,
+        comparisonType: 'week',
+        rangeTo: 'now',
+      });
+      const component = render(<TimeComparison />, {
+        wrapper: Wrapper,
+      });
+      expectTextsNotInDocument(component, ['Yesterday']);
+      expectTextsInDocument(component, ['A week ago']);
+    });
     it('sets default values', () => {
       const Wrapper = getWrapper({
         start: '2021-01-26T15:00:00.000Z',
         end: '2021-01-28T15:00:00.000Z',
+        rangeTo: 'now',
       });
       render(<TimeComparison />, {
         wrapper: Wrapper,
@@ -91,12 +149,31 @@ describe('TimeComparison', () => {
         end: '2021-01-28T15:00:00.000Z',
         comparisonEnabled: true,
         comparisonType: 'week',
+        rangeTo: 'now',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
       expectTextsNotInDocument(component, ['Yesterday']);
       expectTextsInDocument(component, ['A week ago']);
+      expect(
+        (component.getByTestId('comparisonSelect') as HTMLSelectElement)
+          .selectedIndex
+      ).toEqual(0);
+    });
+
+    it('selects previous period when rangeTo is different than now', () => {
+      const Wrapper = getWrapper({
+        start: '2021-01-26T15:00:00.000Z',
+        end: '2021-01-28T15:00:00.000Z',
+        comparisonEnabled: true,
+        comparisonType: 'previousPeriod',
+        rangeTo: '2021-01-28T15:00:00.000Z',
+      });
+      const component = render(<TimeComparison />, {
+        wrapper: Wrapper,
+      });
+      expectTextsInDocument(component, ['26/01 16:00 - 28/01 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
@@ -111,12 +188,13 @@ describe('TimeComparison', () => {
         end: '2021-01-28T15:00:00.000Z',
         comparisonEnabled: true,
         comparisonType: 'previousPeriod',
+        rangeTo: 'now',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['20/01 - 28/01']);
+      expectTextsInDocument(component, ['20/01 16:00 - 28/01 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
@@ -129,12 +207,13 @@ describe('TimeComparison', () => {
         end: '2021-01-28T15:00:00.000Z',
         comparisonEnabled: true,
         comparisonType: 'previousPeriod',
+        rangeTo: 'now',
       });
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['20/12/20 - 28/01/21']);
+      expectTextsInDocument(component, ['20/12/20 16:00 - 28/01/21 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
