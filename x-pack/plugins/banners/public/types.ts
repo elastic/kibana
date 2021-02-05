@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/server';
-import { BannersPlugin, BannersPluginStartDeps } from './plugin';
+export type BannerPlacement = 'disabled' | 'header';
 
-export const plugin: PluginInitializer<{}, {}, {}, BannersPluginStartDeps> = () =>
-  new BannersPlugin();
+export interface BannerConfiguration {
+  placement: BannerPlacement;
+  text: string;
+  textColor: string;
+  backgroundColor: string;
+}

@@ -6,19 +6,26 @@
  */
 
 import React, { FC } from 'react';
+import { BannerConfiguration } from '../types';
 
-export const Banner: FC<{}> = ({}) => {
+interface BannerProps {
+  bannerConfig: BannerConfiguration;
+}
+
+export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
+  const { text, textColor, backgroundColor } = bannerConfig;
   return (
     <div
       style={{
         height: '100%',
-        backgroundColor: 'red',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor,
+        color: textColor,
       }}
     >
-      <div>Banner from the plugin!</div>
+      <div>{text}</div>
     </div>
   );
 };

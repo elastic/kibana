@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/server';
-import { BannersPlugin, BannersPluginStartDeps } from './plugin';
+const hexColorRegexp = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i;
 
-export const plugin: PluginInitializer<{}, {}, {}, BannersPluginStartDeps> = () =>
-  new BannersPlugin();
+export const isHexColor = (color: string) => {
+  return hexColorRegexp.test(color);
+};
