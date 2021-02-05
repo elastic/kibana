@@ -28,7 +28,7 @@ const getFiles = (dir: string, parent?: string) =>
       const stats = Fs.statSync(absPath);
 
       if (stats.isDirectory()) {
-        return getFiles(absPath, relPath);
+        return getFiles(absPath, relPath).flat();
       }
 
       return {
