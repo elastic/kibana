@@ -20,14 +20,25 @@ const needAdminForUpdateRulesMessage: CallOutMessage = {
 
 /**
  * Callout component that lets the user know that an administrator is needed for performing
- * and auto-update of signals or not.
+ * and auto-update of signals or not. For this component to render the user must:
+ * - Have the permissions to be able to read "signalIndexMappingOutdated" and that condition is "true"
+ * - Have the permissions to be able to read "hasIndexManage" and that condition is "false"
+ *
+ * If the user has the permissions to see that signalIndexMappingOutdated is true and that
+ * hasIndexManage is also true, then the user should be performing the update on the page which is
+ * why we do not show it for that condition.
  */
 const NeedAdminForUpdateCallOutComponent = (): JSX.Element => {
-  const [{ signalIndexMappingOutdated }] = useUserData();
+  const [{ signalIndexMappingOutdated, hasIndexManage }] = useUserData();
+
+  const signalIndexMappingIsOutdated =
+    signalIndexMappingOutdated != null && signalIndexMappingOutdated;
+
+  const userHasIndexManage = hasIndexManage != null && hasIndexManage;
 
   return (
     <CallOutPersistentSwitcher
-      condition={signalIndexMappingOutdated != null && signalIndexMappingOutdated}
+      condition={signalIndexMappingIsOutdated && !userHasIndexManage}
       message={needAdminForUpdateRulesMessage}
     />
   );

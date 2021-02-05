@@ -17,11 +17,11 @@ import {
 import { waitForAlertsIndexToBeCreated } from '../../tasks/alerts';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
-import { getCallOut } from '../../tasks/common/callouts';
+import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
 import { cleanKibana } from '../../tasks/common';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
-  waitForPageWithoutDateRange(url, ROLES.platform_engineer);
+  waitForPageWithoutDateRange(url, ROLES.soc_manager);
   waitForPageTitleToBeShown();
 };
 
@@ -36,7 +36,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.platform_engineer);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.soc_manager);
     waitForAlertsIndexToBeCreated();
   });
 
@@ -55,9 +55,9 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     });
 
     it('We show the need admin primary callout', () => {
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       getCallOut(ALERTS_CALLOUT).should('not.exist');
       getCallOut(RULES_CALLOUT).should('not.exist');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
     });
   });
 
@@ -67,9 +67,9 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     });
 
     it('We show 1 primary callout of need admin', () => {
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       getCallOut(ALERTS_CALLOUT).should('not.exist');
       getCallOut(RULES_CALLOUT).should('not.exist');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
     });
   });
 
@@ -86,9 +86,9 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
     });
 
     it('We show 1 primary callout', () => {
+      waitForCallOutToBeShown(NEED_ADMIN_FOR_UPDATE_CALLOUT, 'primary');
       getCallOut(ALERTS_CALLOUT).should('not.exist');
       getCallOut(RULES_CALLOUT).should('not.exist');
-      getCallOut(NEED_ADMIN_FOR_UPDATE_CALLOUT).should('not.exist');
     });
   });
 });
