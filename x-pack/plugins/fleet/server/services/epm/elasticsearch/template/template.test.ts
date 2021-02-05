@@ -584,7 +584,7 @@ test('tests priority and index pattern for data stream with dataset_is_prefix se
     dataset_is_prefix: true,
   } as RegistryDataStream;
   const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
-  const templatePriorityDatasetIsPrefixTrue = 200;
+  const templatePriorityDatasetIsPrefixTrue = 150;
   const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
   const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
 
