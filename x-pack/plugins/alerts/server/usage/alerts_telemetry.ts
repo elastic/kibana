@@ -7,6 +7,7 @@
 
 import { LegacyAPICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
+import { AlertsUsage } from './types';
 
 const alertTypeMetric = {
   scripted_metric: {
@@ -34,14 +35,22 @@ const alertTypeMetric = {
   },
 };
 
-export async function getTotalCountAggregations(callCluster: LegacyAPICaller, kibanaInex: string) {
+export async function getTotalCountAggregations(
+  callCluster: LegacyAPICaller,
+  kibanaInex: string
+): Promise<
+  Pick<
+    AlertsUsage,
+    'count_total' | 'count_by_type' | 'throttle_time' | 'schedule_time' | 'connectors_per_alert'
+  >
+> {
   const throttleTimeMetric = {
     scripted_metric: {
       init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
       map_script: `
         if (doc['alert.throttle'].size() > 0) {
           def throttle = doc['alert.throttle'].value;
-          
+
           if (throttle.length() > 1) {
               // get last char
               String timeChar = throttle.substring(throttle.length() - 1);
@@ -51,7 +60,7 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
               if (throttle.chars().allMatch(Character::isDigit)) {
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(throttle);
-                
+
                 if (timeChar.equals("s")) {
                   parsed = parsed;
                 } else if (timeChar.equals("m")) {
@@ -107,7 +116,7 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
       map_script: `
         if (doc['alert.schedule.interval'].size() > 0) {
           def interval = doc['alert.schedule.interval'].value;
-          
+
           if (interval.length() > 1) {
               // get last char
               String timeChar = interval.substring(interval.length() - 1);
@@ -117,7 +126,7 @@ export async function getTotalCountAggregations(callCluster: LegacyAPICaller, ki
               if (interval.chars().allMatch(Character::isDigit)) {
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(interval);
-                
+
                 if (timeChar.equals("s")) {
                   parsed = parsed;
                 } else if (timeChar.equals("m")) {

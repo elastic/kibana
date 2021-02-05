@@ -126,6 +126,11 @@ export interface UsageData extends UsageStats {
   count?: number;
   usesFeatureControls?: boolean;
   disabledFeatures: {
+    stackAlerts?: number;
+    actions?: number;
+    enterpriseSearch?: number;
+    fleet?: number;
+    savedObjectsTagging?: number;
     indexPatterns?: number;
     discover?: number;
     canvas?: number;
@@ -168,6 +173,11 @@ export function getSpacesUsageCollector(
     schema: {
       usesFeatureControls: { type: 'boolean' },
       disabledFeatures: {
+        stackAlerts: { type: 'long' },
+        actions: { type: 'long' },
+        enterpriseSearch: { type: 'long' },
+        fleet: { type: 'long' },
+        savedObjectsTagging: { type: 'long' },
         indexPatterns: { type: 'long' },
         discover: { type: 'long' },
         canvas: { type: 'long' },

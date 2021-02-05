@@ -92,26 +92,26 @@
         "throttle_time": {
           "properties": {
             "min": {
-              "type": "long"
+              "type": "keyword"
             },
             "avg": {
-              "type": "float"
+              "type": "keyword"
             },
             "max": {
-              "type": "long"
+              "type": "keyword"
             }
           }
         },
         "schedule_time": {
           "properties": {
             "min": {
-              "type": "long"
+              "type": "keyword"
             },
             "avg": {
-              "type": "float"
+              "type": "keyword"
             },
             "max": {
-              "type": "long"
+              "type": "keyword"
             }
           }
         },
@@ -1031,7 +1031,7 @@
         },
         "environments": {
           "properties": {
-            "services_without_environments": {
+            "services_without_environment": {
               "type": "long"
             },
             "services_with_multiple_environments": {
@@ -1512,6 +1512,17 @@
               }
             },
             "cardinality": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "environments": {
               "properties": {
                 "took": {
                   "properties": {
@@ -3448,6 +3459,21 @@
         },
         "disabledFeatures": {
           "properties": {
+            "stackAlerts": {
+              "type": "long"
+            },
+            "actions": {
+              "type": "long"
+            },
+            "enterpriseSearch": {
+              "type": "long"
+            },
+            "fleet": {
+              "type": "long"
+            },
+            "savedObjectsTagging": {
+              "type": "long"
+            },
             "indexPatterns": {
               "type": "long"
             },
