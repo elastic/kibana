@@ -195,7 +195,7 @@ Any installations using `.deb` or `.rpm` packages using SysV will need to migrat
 === TLS v1.0 and v1.1 are disabled by default
 
 *Details:*
-Support can be re-enabled by setting the environment variable `NODE_OPTIONS=--tls-min-1.0`.
+Support can be re-enabled by setting `--tls-min-1.0` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in Debian based system would be `/etc/kibana`).
 
 *Impact:*
 Browser and proxy clients communicating over TLS v1.0 and v1.1.
