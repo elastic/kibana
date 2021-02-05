@@ -88,9 +88,6 @@ export const previewMetricThresholdAlert: (
       getIntervalInSeconds(alertThrottle),
       alertIntervalInSeconds
     );
-    const executionsPerThrottle = Math.floor(
-      (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
-    );
 
     const previewResults = await Promise.all(
       groups.map(async (group) => {
@@ -114,7 +111,7 @@ export const previewMetricThresholdAlert: (
             previousActionGroup = actionGroup;
           } else if (alertNotifyWhen === 'onThrottleInterval') {
             if (throttleTracker === 0) numberOfNotifications++;
-            throttleTracker++;
+            throttleTracker += alertIntervalInSeconds;
           } else {
             numberOfNotifications++;
           }
@@ -147,10 +144,10 @@ export const previewMetricThresholdAlert: (
           } else {
             previousActionGroup = 'recovered';
             if (throttleTracker > 0) {
-              throttleTracker++;
+              throttleTracker += alertIntervalInSeconds;
             }
           }
-          if (throttleTracker >= executionsPerThrottle) {
+          if (throttleTracker >= throttleIntervalInSeconds) {
             throttleTracker = 0;
           }
         }

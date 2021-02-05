@@ -41,7 +41,7 @@ import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface Props {
-  expression: Required<MetricExpression>;
+  expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
   filterQuery?: string;
@@ -296,7 +296,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
               defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize * 20 }}
+              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
             />
           </EuiText>
         ) : (
@@ -304,7 +304,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
               defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize * 20 }}
+              values={{ timeLabel, lookback: timeSize! * 20 }}
             />
           </EuiText>
         )}

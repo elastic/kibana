@@ -61,9 +61,7 @@ export const previewInventoryMetricThresholdAlert = async ({
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
   const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
-  const executionsPerThrottle = Math.floor(
-    (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
-  );
+
   try {
     const results = await Promise.all(
       criteria.map((c) =>
@@ -86,7 +84,7 @@ export const previewInventoryMetricThresholdAlert = async ({
           if (previousActionGroup !== actionGroup) numberOfNotifications++;
         } else if (alertNotifyWhen === 'onThrottleInterval') {
           if (throttleTracker === 0) numberOfNotifications++;
-          throttleTracker++;
+          throttleTracker += alertIntervalInSeconds;
         } else {
           numberOfNotifications++;
         }
@@ -121,10 +119,10 @@ export const previewInventoryMetricThresholdAlert = async ({
         } else {
           previousActionGroup = 'recovered';
           if (throttleTracker > 0) {
-            throttleTracker++;
+            throttleTracker += alertIntervalInSeconds;
           }
         }
-        if (throttleTracker === executionsPerThrottle) {
+        if (throttleTracker >= throttleIntervalInSeconds) {
           throttleTracker = 0;
         }
       }
