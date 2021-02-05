@@ -29,7 +29,7 @@ expect.addSnapshotSerializer({
 });
 
 test('get template', () => {
-  const templateIndexPattern = 'logs-nginx-access-abcd-*';
+  const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
   const template = getTemplate({
     type: 'logs',
@@ -71,7 +71,7 @@ test('adds empty composed_of correctly', () => {
 });
 
 test('adds hidden field correctly', () => {
-  const templateIndexPattern = 'logs-nginx-access-abcd-*';
+  const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
   const templateWithHidden = getTemplate({
     type: 'logs',
