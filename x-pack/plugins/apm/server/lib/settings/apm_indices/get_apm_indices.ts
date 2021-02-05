@@ -14,6 +14,7 @@ import {
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
+import { withApmSpan } from '../../../utils/with_span';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
@@ -35,9 +36,11 @@ export type ApmIndicesName = keyof ApmIndicesConfig;
 async function getApmIndicesSavedObject(
   savedObjectsClient: ISavedObjectsClient
 ) {
-  const apmIndices = await savedObjectsClient.get<Partial<ApmIndicesConfig>>(
-    APM_INDICES_SAVED_OBJECT_TYPE,
-    APM_INDICES_SAVED_OBJECT_ID
+  const apmIndices = await withApmSpan('get_apm_indices_saved_object', () =>
+    savedObjectsClient.get<Partial<ApmIndicesConfig>>(
+      APM_INDICES_SAVED_OBJECT_TYPE,
+      APM_INDICES_SAVED_OBJECT_ID
+    )
   );
   return apmIndices.attributes;
 }

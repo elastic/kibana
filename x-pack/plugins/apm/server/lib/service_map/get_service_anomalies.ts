@@ -15,6 +15,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
+import { withApmSpan } from '../../utils/with_span';
 import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -34,115 +35,119 @@ export async function getServiceAnomalies({
   setup: Setup & SetupTimeRange;
   environment?: string;
 }) {
-  const { ml, start, end } = setup;
+  return withApmSpan('get_service_anomalies', async () => {
+    const { ml, start, end } = setup;
 
-  if (!ml) {
-    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
-  }
+    if (!ml) {
+      throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
 
-  const params = {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { result_type: ['model_plot', 'record'] } },
-            {
-              range: {
-                timestamp: {
-                  // fetch data for at least 30 minutes
-                  gte: Math.min(end - 30 * 60 * 1000, start),
-                  lte: end,
-                  format: 'epoch_millis',
+    const params = {
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { result_type: ['model_plot', 'record'] } },
+              {
+                range: {
+                  timestamp: {
+                    // fetch data for at least 30 minutes
+                    gte: Math.min(end - 30 * 60 * 1000, start),
+                    lte: end,
+                    format: 'epoch_millis',
+                  },
                 },
               },
-            },
-            {
-              terms: {
-                // Only retrieving anomalies for transaction types "request" and "page-load"
-                by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+              {
+                terms: {
+                  // Only retrieving anomalies for transaction types "request" and "page-load"
+                  by_field_value: [TRANSACTION_REQUEST, TRANSACTION_PAGE_LOAD],
+                },
               },
-            },
-          ],
-        },
-      },
-      aggs: {
-        services: {
-          composite: {
-            size: 5000,
-            sources: [
-              { serviceName: { terms: { field: 'partition_field_value' } } },
-              { jobId: { terms: { field: 'job_id' } } },
             ],
           },
-          aggs: {
-            metrics: {
-              top_metrics: {
-                metrics: [
-                  { field: 'actual' },
-                  { field: 'by_field_value' },
-                  { field: 'result_type' },
-                  { field: 'record_score' },
-                ] as const,
-                sort: {
-                  record_score: 'desc' as const,
+        },
+        aggs: {
+          services: {
+            composite: {
+              size: 5000,
+              sources: [
+                { serviceName: { terms: { field: 'partition_field_value' } } },
+                { jobId: { terms: { field: 'job_id' } } },
+              ],
+            },
+            aggs: {
+              metrics: {
+                top_metrics: {
+                  metrics: [
+                    { field: 'actual' },
+                    { field: 'by_field_value' },
+                    { field: 'result_type' },
+                    { field: 'record_score' },
+                  ] as const,
+                  sort: {
+                    record_score: 'desc' as const,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  };
+    };
 
-  const [anomalyResponse, jobIds] = await Promise.all([
-    // pass an empty array of job ids to anomaly search
-    // so any validation is skipped
-    ml.mlSystem.mlAnomalySearch(params, []),
-    getMLJobIds(ml.anomalyDetectors, environment),
-  ]);
+    const [anomalyResponse, jobIds] = await Promise.all([
+      // pass an empty array of job ids to anomaly search
+      // so any validation is skipped
+      withApmSpan('ml_anomaly_search', () =>
+        ml.mlSystem.mlAnomalySearch(params, [])
+      ),
+      getMLJobIds(ml.anomalyDetectors, environment),
+    ]);
 
-  const typedAnomalyResponse: ESSearchResponse<
-    unknown,
-    typeof params
-  > = anomalyResponse as any;
-  const relevantBuckets = uniqBy(
-    sortBy(
-      // make sure we only return data for jobs that are available in this space
-      typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
-        jobIds.includes(bucket.key.jobId as string)
-      ) ?? [],
-      // sort by job ID in case there are multiple jobs for one service to
-      // ensure consistent results
-      (bucket) => bucket.key.jobId
-    ),
-    // return one bucket per service
-    (bucket) => bucket.key.serviceName
-  );
+    const typedAnomalyResponse: ESSearchResponse<
+      unknown,
+      typeof params
+    > = anomalyResponse as any;
+    const relevantBuckets = uniqBy(
+      sortBy(
+        // make sure we only return data for jobs that are available in this space
+        typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
+          jobIds.includes(bucket.key.jobId as string)
+        ) ?? [],
+        // sort by job ID in case there are multiple jobs for one service to
+        // ensure consistent results
+        (bucket) => bucket.key.jobId
+      ),
+      // return one bucket per service
+      (bucket) => bucket.key.serviceName
+    );
 
-  return {
-    mlJobIds: jobIds,
-    serviceAnomalies: relevantBuckets.map((bucket) => {
-      const metrics = bucket.metrics.top[0].metrics;
+    return {
+      mlJobIds: jobIds,
+      serviceAnomalies: relevantBuckets.map((bucket) => {
+        const metrics = bucket.metrics.top[0].metrics;
 
-      const anomalyScore =
-        metrics.result_type === 'record' && metrics.record_score
-          ? (metrics.record_score as number)
-          : 0;
+        const anomalyScore =
+          metrics.result_type === 'record' && metrics.record_score
+            ? (metrics.record_score as number)
+            : 0;
 
-      const severity = getSeverity(anomalyScore);
-      const healthStatus = getServiceHealthStatus({ severity });
+        const severity = getSeverity(anomalyScore);
+        const healthStatus = getServiceHealthStatus({ severity });
 
-      return {
-        serviceName: bucket.key.serviceName as string,
-        jobId: bucket.key.jobId as string,
-        transactionType: metrics.by_field_value as string,
-        actualValue: metrics.actual as number | null,
-        anomalyScore,
-        healthStatus,
-      };
-    }),
-  };
+        return {
+          serviceName: bucket.key.serviceName as string,
+          jobId: bucket.key.jobId as string,
+          transactionType: metrics.by_field_value as string,
+          actualValue: metrics.actual as number | null,
+          anomalyScore,
+          healthStatus,
+        };
+      }),
+    };
+  });
 }
 
 export async function getMLJobs(

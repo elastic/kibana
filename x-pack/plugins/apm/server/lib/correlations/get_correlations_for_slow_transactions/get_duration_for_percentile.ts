@@ -7,6 +7,7 @@
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { withApmSpan } from '../../../utils/with_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDurationForPercentile({
@@ -18,26 +19,28 @@ export async function getDurationForPercentile({
   backgroundFilters: ESFilter[];
   setup: Setup & SetupTimeRange;
 }) {
-  const { apmEventClient } = setup;
-  const res = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: { filter: backgroundFilters },
+  return withApmSpan('get_duration_for_percentiles', async () => {
+    const { apmEventClient } = setup;
+    const res = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.transaction],
       },
-      aggs: {
-        percentile: {
-          percentiles: {
-            field: TRANSACTION_DURATION,
-            percents: [durationPercentile],
+      body: {
+        size: 0,
+        query: {
+          bool: { filter: backgroundFilters },
+        },
+        aggs: {
+          percentile: {
+            percentiles: {
+              field: TRANSACTION_DURATION,
+              percents: [durationPercentile],
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  return Object.values(res.aggregations?.percentile.values || {})[0];
+    return Object.values(res.aggregations?.percentile.values || {})[0];
+  });
 }

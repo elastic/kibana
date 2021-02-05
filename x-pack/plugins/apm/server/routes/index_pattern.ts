@@ -12,13 +12,16 @@ import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_patt
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
 import { getApmIndices } from '../lib/settings/apm_indices/get_apm_indices';
 import { UIProcessorEvent } from '../../common/processor_event';
+import { withApmSpan } from '../utils/with_span';
 
 export const staticIndexPatternRoute = createRoute((core) => ({
   endpoint: 'POST /api/apm/index_pattern/static',
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const savedObjectsClient = await getInternalSavedObjectsClient(core);
+    const [setup, savedObjectsClient] = await Promise.all([
+      setupRequest(context, request),
+      getInternalSavedObjectsClient(core),
+    ]);
 
     await createStaticIndexPattern(setup, context, savedObjectsClient);
 
@@ -40,10 +43,12 @@ export const dynamicIndexPatternRoute = createRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
-    const indices = await getApmIndices({
-      config: context.config,
-      savedObjectsClient: context.core.savedObjects.client,
-    });
+    const indices = await withApmSpan('get_apm_indices', () =>
+      getApmIndices({
+        config: context.config,
+        savedObjectsClient: context.core.savedObjects.client,
+      })
+    );
 
     const processorEvent = context.params.query.processorEvent as
       | UIProcessorEvent

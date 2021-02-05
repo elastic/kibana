@@ -5,20 +5,23 @@
  */
 
 import { MlPluginSetup } from '../../../../ml/server';
+import { withApmSpan } from '../../utils/with_span';
 import { APM_ML_JOB_GROUP } from './constants';
 
 // returns ml jobs containing "apm" group
 // workaround: the ML api returns 404 when no jobs are found. This is handled so instead of throwing an empty response is returned
-export async function getMlJobsWithAPMGroup(
+export function getMlJobsWithAPMGroup(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>
 ) {
-  try {
-    return await anomalyDetectors.jobs(APM_ML_JOB_GROUP);
-  } catch (e) {
-    if (e.statusCode === 404) {
-      return { count: 0, jobs: [] };
-    }
+  return withApmSpan('get_ml_jobs_with_apm_group', async () => {
+    try {
+      return await anomalyDetectors.jobs(APM_ML_JOB_GROUP);
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return { count: 0, jobs: [] };
+      }
 
-    throw e;
-  }
+      throw e;
+    }
+  });
 }
