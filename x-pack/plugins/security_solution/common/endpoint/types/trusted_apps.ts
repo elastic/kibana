@@ -106,6 +106,7 @@ export type UpdateTrustedApp = NewTrustedApp & {
 
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {
+  version: string;
   id: string;
   created_at: string;
   created_by: string;

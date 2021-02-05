@@ -19,8 +19,8 @@ import {
   deleteTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
-  TrustedAppNotFoundError,
 } from './service';
+import { TrustedAppNotFoundError } from './errors';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -50,6 +50,7 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
 
 const TRUSTED_APP: TrustedApp = {
   id: '123',
+  version: 'abc123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
   name: 'linux trusted app 1',

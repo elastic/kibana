@@ -61,7 +61,7 @@ import {
   editingTrustedApp,
   getListItems,
 } from './selectors';
-import { toNewTrustedApp } from '../service/to_new_trusted_app';
+import { toUpdateTrustedApp } from '../service/to_new_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -371,7 +371,7 @@ const fetchEditTrustedAppIfNeeded = async (
       dispatch({
         type: 'trustedAppCreationDialogFormStateUpdated',
         payload: {
-          entry: toNewTrustedApp(trustedAppForEdit),
+          entry: toUpdateTrustedApp(trustedAppForEdit),
           isValid: true,
         },
       });

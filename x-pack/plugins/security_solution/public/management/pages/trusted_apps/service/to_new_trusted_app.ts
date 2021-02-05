@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import { MaybeImmutable, NewTrustedApp } from '../../../../../common/endpoint/types';
+import {
+  MaybeImmutable,
+  NewTrustedApp,
+  UpdateTrustedApp,
+} from '../../../../../common/endpoint/types';
 import { defaultNewTrustedApp } from '../store/builders';
 
-const NEW_TRUSTED_APP_KEYS: Array<keyof NewTrustedApp> = [
+const NEW_TRUSTED_APP_KEYS: Array<keyof UpdateTrustedApp> = [
   'name',
   'effectScope',
   'entries',
   'description',
   'os',
+  'version',
 ];
 
-export const toNewTrustedApp = <T extends NewTrustedApp>(
+export const toUpdateTrustedApp = <T extends NewTrustedApp>(
   trustedApp: MaybeImmutable<T>
-): NewTrustedApp => {
-  const newTrustedApp = defaultNewTrustedApp();
+): UpdateTrustedApp => {
+  const newTrustedApp: UpdateTrustedApp = defaultNewTrustedApp();
   for (const key of NEW_TRUSTED_APP_KEYS) {
     // This should be safe. Its needed due to the inter-dependency on property values (`os` <=> `entries`)
     // @ts-expect-error

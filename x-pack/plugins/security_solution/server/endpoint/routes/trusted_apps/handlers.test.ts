@@ -93,6 +93,7 @@ const NEW_TRUSTED_APP: NewTrustedApp = {
 
 const TRUSTED_APP: TrustedApp = {
   id: '123',
+  version: 'abc123',
   created_at: '11/11/2011T11:11:11.111',
   created_by: 'admin',
   name: 'linux trusted app 1',

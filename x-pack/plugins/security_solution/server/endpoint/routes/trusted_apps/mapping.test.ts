@@ -259,6 +259,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'linux trusted app',
           description: 'Linux Trusted App',
           effectScope: { type: 'global' },
@@ -283,6 +284,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
           effectScope: { type: 'global' },
@@ -307,6 +309,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'windows trusted app',
           description: 'Windows Trusted App',
           effectScope: { type: 'global' },
@@ -336,6 +339,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'signed trusted app',
           description: 'Signed trusted app',
           effectScope: { type: 'global' },
@@ -360,6 +364,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
           effectScope: { type: 'global' },
@@ -388,6 +393,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
           effectScope: { type: 'global' },
@@ -422,6 +428,7 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
           effectScope: { type: 'global' },

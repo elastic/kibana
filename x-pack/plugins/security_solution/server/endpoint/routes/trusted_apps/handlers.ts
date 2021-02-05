@@ -24,9 +24,9 @@ import {
   deleteTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
-  TrustedAppNotFoundError,
   updateTrustedApp,
 } from './service';
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
 const exceptionListClientFromContext = (
   context: SecuritySolutionRequestHandlerContext
@@ -49,6 +49,10 @@ const errorHandler = <E extends Error>(
 
   if (error instanceof TrustedAppNotFoundError) {
     return res.notFound({ body: error });
+  }
+
+  if (error instanceof TrustedAppVersionConflictError) {
+    return res.conflict({ body: error });
   }
 
   return res.internalError({ body: error });

@@ -25,12 +25,8 @@ import {
   osFromExceptionItem,
   updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
-
-export class TrustedAppNotFoundError extends Error {
-  constructor(id: string) {
-    super(`Trusted Application (${id}) not found`);
-  }
-}
+import { ExceptionListItemSchema } from '../../../../../lists/common';
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -107,9 +103,19 @@ export const updateTrustedApp = async (
   // Validate update TA entry - error if not valid
   // TODO: implement validations
 
-  const updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
-    updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
-  );
+  let updatedTrustedAppExceptionItem: ExceptionListItemSchema | null;
+
+  try {
+    updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
+      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+    );
+  } catch (e) {
+    if (e?.output.statusCode === 409) {
+      throw new TrustedAppVersionConflictError(id, e);
+    }
+
+    throw e;
+  }
 
   // If `null` is returned, then that means the TA does not exist (could happen in race conditions)
   if (!updatedTrustedAppExceptionItem) {

@@ -49,6 +49,7 @@ describe('When on the Trusted Apps Page', () => {
 
   const getFakeTrustedApp = (): TrustedApp => ({
     id: '1111-2222-3333-4444',
+    version: 'abc123',
     name: 'one app',
     os: OperatingSystem.WINDOWS,
     created_at: '2021-01-04T13:55:00.561Z',
@@ -378,6 +379,7 @@ describe('When on the Trusted Apps Page', () => {
               data: {
                 ...(JSON.parse(httpPostBody) as NewTrustedApp),
                 id: '1',
+                version: 'abc123',
                 created_at: '2020-09-16T14:09:45.484Z',
                 created_by: 'kibana',
               },

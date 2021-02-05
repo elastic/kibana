@@ -44,7 +44,7 @@ export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',

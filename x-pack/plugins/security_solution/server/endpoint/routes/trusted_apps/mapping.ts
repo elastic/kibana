@@ -118,6 +118,7 @@ export const exceptionListItemToTrustedApp = (
 
     return {
       id: exceptionListItem.id,
+      version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,
       effectScope: tagsToEffectScope(exceptionListItem.tags),
