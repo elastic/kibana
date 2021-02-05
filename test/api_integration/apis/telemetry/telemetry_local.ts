@@ -7,32 +7,12 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
 import { basicUiCounters } from './__fixtures__/ui_counters';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
-import { convertSchemaToConfigSchema } from './schema_to_config_schema';
-
-/*
- * Create a single-level array with strings for all the paths to values in the
- * source object, up to 3 deep. Going deeper than 3 causes a bit too much churn
- * in the tests.
- */
-function flatKeys(source: Record<string, unknown>) {
-  const recursivelyFlatKeys = (obj: unknown, path: string[] = [], depth = 0): string[] => {
-    return depth < 3 && _.isObject(obj)
-      ? Object.entries(obj).reduce(
-          (acc, [k, v]) => [...acc, ...recursivelyFlatKeys(v, [...path, k], depth + 1)],
-          [] as string[]
-        )
-      : [path.join('.')];
-  };
-
-  return _.uniq(_.flattenDeep(recursivelyFlatKeys(source))).sort((a, b) => a.localeCompare(b));
-}
+import { assertTelemetryPayload, flatKeys } from './utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -66,30 +46,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should pass the schema validation', () => {
-        const ossTelemetrySchema = ossRootTelemetrySchema;
-        set(
-          ossTelemetrySchema,
-          'properties.stack_stats.properties.kibana.properties.plugins',
-          ossPluginsTelemetrySchema
-        );
         try {
-          const ossTelemetryValidationSchema = convertSchemaToConfigSchema(ossTelemetrySchema);
-
-          // Run @kbn/config-schema validation to the entire payload
-          try {
-            ossTelemetryValidationSchema.validate(stats);
-          } catch (err) {
-            // "[path.to.key]: definition for this key is missing "
-            err.message += ` in document\n${JSON.stringify(stats, null, 2)}`;
-            throw err;
-          }
+          assertTelemetryPayload(
+            { root: ossRootTelemetrySchema, plugins: ossPluginsTelemetrySchema },
+            stats
+          );
         } catch (err) {
           err.message = `The telemetry schemas in 'src/plugins/telemetry/schema/' are out-of-date, please update it as required: ${err.message}`;
           throw err;
         }
       });
 
-      it('should pass ad-hoc enforced validations', async () => {
+      it('should pass ad-hoc enforced validations', () => {
         expect(stats.collection).to.be('local');
         expect(stats.collectionSource).to.be('local');
         expect(stats.license).to.be(undefined); // OSS cannot get the license
@@ -123,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
       });
 
-      it('should validate mandatory fields exist', async () => {
+      it('should validate mandatory fields exist', () => {
         const actual = flatKeys(stats);
         expect(actual).to.be.an('array');
         const expected = [
