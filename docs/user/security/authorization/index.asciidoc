@@ -17,14 +17,14 @@ To create a role that grants {kib} privileges, open the menu, then click *Stack 
 [float]
 ==== Required permissions
 
-The `manage_security` {ref}/security-privileges.htmlprivileges-list-cluster[cluster privilege] is required to access role management.
+The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[cluster privilege] is required to access role management.
 
 [[adding_cluster_privileges]]
 ==== Adding cluster privileges
 
 Cluster privileges grant access to monitoring and management features within {es}. They also enable certain <<management, Stack Management>> capabilities within {kib}.
 
-Refer to {ref}/security-privileges.htmlprivileges-list-cluster[cluster privileges] for a complete description of available options.
+Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
 
 [[adding_index_privileges]]
 ==== Adding index privileges
@@ -32,7 +32,7 @@ Refer to {ref}/security-privileges.htmlprivileges-list-cluster[cluster privilege
 Each role can grant access to multiple data indices, and each index can have a different set of privileges.
 We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with inside of {kib}.
 
-Refer to {ref}/security-privileges.htmlprivileges-list-indices[index privileges] for a complete description of available options.
+Refer to {ref}/security-privileges.html#privileges-list-indices[index privileges] for a complete description of available options.
 
 Document-level and field-level security affords you even more granularity when it comes to granting access to your data.
 With document-level security ("DLS"), you can write an {es} query to describe which documents this role should grant access to.
