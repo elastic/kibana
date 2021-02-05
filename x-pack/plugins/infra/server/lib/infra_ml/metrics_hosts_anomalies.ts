@@ -181,14 +181,14 @@ async function fetchMetricsHostsAnomalies(
 
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery(
+      createMetricsHostsAnomaliesQuery({
         jobIds,
         anomalyThreshold,
         startTime,
         endTime,
         sort,
-        expandedPagination
-      ),
+        pagination: expandedPagination,
+      }),
       jobIds
     )
   );
