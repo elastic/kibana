@@ -19,6 +19,7 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
 export interface ErrorMessage {
   query: string;
@@ -51,7 +52,7 @@ export interface StepDefineExposedState {
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
-  runtimeMappings?: { [key: string]: RuntimeMapping };
+  runtimeMappings?: { [key: string]: RuntimeField };
 }
 
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {

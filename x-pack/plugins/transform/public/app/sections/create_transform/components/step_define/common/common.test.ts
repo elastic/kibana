@@ -8,6 +8,7 @@
 import { getPivotDropdownOptions } from '../common';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { FilterAggForm } from './filter_agg/components';
+import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
@@ -116,7 +117,7 @@ describe('Transform: Define Pivot Common', () => {
         script: {
           source: "emit(doc['bytes'].value * 2.0)",
         },
-      },
+      } as RuntimeField,
     };
     const optionsWithRuntimeFields = getPivotDropdownOptions(indexPattern, runtimeMappings);
     expect(optionsWithRuntimeFields).toMatchObject({
