@@ -48,23 +48,23 @@ import { ViewContentHeader } from '../../../components/shared/view_content_heade
 
 import { SourceDataItem } from '../../../types';
 import { AppLogic } from '../../../app_logic';
+import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import { staticSourceData } from '../source_data';
 
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const {
-    updateContentSource,
-    removeContentSource,
-    resetSourceState,
-    getSourceConfigData,
-  } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType },
     buttonLoading,
-    sourceConfigData: { configuredFields },
   } = useValues(SourceLogic);
+
+  const {
+    sourceConfigData: { configuredFields },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -72,6 +72,7 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
     return resetSourceState;
   }, []);
+
   const {
     configuration: { isPublicKey },
     editPath,
