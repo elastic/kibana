@@ -148,7 +148,7 @@ async function main() {
       kibana: {
         alias: 'k',
         describe: 'kibana url',
-        default: 'http://elastic:changeme@localhost:5601',
+        default: 'http://XavierM:Ry4t9RHeCXEwPzj@localhost:5601',
         type: 'string',
       },
     })
@@ -178,7 +178,8 @@ async function main() {
           .demandOption(['ids']);
       },
       handler: async (args) => {
-        return handleGenGroupAlerts(args);
+        await handleGenGroupAlerts(args);
+        return true;
       },
     })
     .command({
@@ -211,6 +212,4 @@ async function main() {
     })
     .demandCommand()
     .parse();
-
-  console.log('completed');
 }
