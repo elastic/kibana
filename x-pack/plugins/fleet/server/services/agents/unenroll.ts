@@ -4,16 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentSOAttributes } from '../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { AgentSOAttributes } from '../../types';
+import { AgentUnenrollmentError } from '../../errors';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { getAgent } from './crud';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
-import { getAgents, listAllAgents } from './crud';
+import { getAgent, getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 
-export async function unenrollAgent(soClient: SavedObjectsClientContract, agentId: string) {
+async function unenrollAgentIsAllowed(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  if (agentPolicy?.is_managed) {
+    throw new AgentUnenrollmentError(
+      `Cannot unenroll ${agentId} from a managed agent policy ${agentPolicy.id}`
+    );
+  }
+
+  return true;
+}
+
+export async function unenrollAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  await unenrollAgentIsAllowed(soClient, esClient, agentId);
+
   const now = new Date().toISOString();
   await createAgentAction(soClient, {
     agent_id: agentId,
@@ -36,7 +56,6 @@ export async function unenrollAgents(
         kuery: string;
       }
 ) {
-  // Filter to agents that do not already unenrolled, or unenrolling
   const agents =
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
@@ -46,9 +65,19 @@ export async function unenrollAgents(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter(
+
+  // Filter to agents that are not already unenrolled, or unenrolling
+  const agentsEnrolled = agents.filter(
     (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
   );
+  // And which are allowed to unenroll
+  const settled = await Promise.allSettled(
+    agentsEnrolled.map((agent) =>
+      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
+    )
+  );
+  const agentsToUpdate = agentsEnrolled.filter((_, index) => settled[index].status === 'fulfilled');
+
   const now = new Date().toISOString();
 
   // Create unenroll action for each agent
