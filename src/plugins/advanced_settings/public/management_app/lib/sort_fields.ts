@@ -11,17 +11,21 @@ import { FieldSetting } from '../types';
 
 const cmp = Comparators.default('asc');
 
-// TODO: test
 export const fieldSorter = (a: FieldSetting, b: FieldSetting): number => {
   const aOrder = a.order !== undefined;
   const bOrder = b.order !== undefined;
+
   if (aOrder && bOrder) {
+    if (a.order === b.order) {
+      return cmp(a.name, b.name);
+    }
     return cmp(a.order, b.order);
-  } else if (aOrder) {
-    return -1;
-  } else if (bOrder) {
-    return 1;
-  } else {
-    return cmp(a.name, b.name);
   }
+  if (aOrder) {
+    return -1;
+  }
+  if (bOrder) {
+    return 1;
+  }
+  return cmp(a.name, b.name);
 };
