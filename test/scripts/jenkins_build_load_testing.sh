@@ -9,11 +9,11 @@ done
 echo "Simulation classes: $simulations";
 
 cd "$KIBANA_DIR"
-#source src/dev/ci_setup/setup_env.sh
+source src/dev/ci_setup/setup_env.sh
 
-#if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
-#  ./test/scripts/jenkins_xpack_build_plugins.sh
-#fi
+if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
+  ./test/scripts/jenkins_xpack_build_plugins.sh
+fi
 
 # Configuring Metricbeat monitoring for the load testing
 # Getting the URL
@@ -49,39 +49,39 @@ popd
 
 echo "Changing metricbeat config"
 pushd ../kibana-load-testing
-cp cfg/metricbeat/elasticsearch-xpack.yml "$KIBANA_DIR"/metricbeat-install/modules.d/elasticsearch-xpack.yml
-cp cfg/metricbeat/kibana-xpack.yml "$KIBANA_DIR"/metricbeat-install/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/elasticsearch-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/kibana-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
 echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
-cp cfg/metricbeat/metricbeat.yml "$KIBANA_DIR"/metricbeat-install/metricbeat.yml
-mv "$KIBANA_DIR"/metricbeat-install/modules.d/system.yml "$KIBANA_DIR"/metricbeat-install/modules.d/system.yml.disabled
+cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
+mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy
 export KBN_NP_PLUGINS_BUILT=true
 
-#echo " -> building and extracting default Kibana distributable for use in functional tests"
-#cd "$KIBANA_DIR"
-#node scripts/build --debug --no-oss
-#linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
-#installDir="$KIBANA_DIR/install/kibana"
-#mkdir -p "$installDir"
-#tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+echo " -> building and extracting default Kibana distributable for use in functional tests"
+cd "$KIBANA_DIR"
+node scripts/build --debug --no-oss
+linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+installDir="$KIBANA_DIR/install/kibana"
+mkdir -p "$installDir"
+tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-#mkdir -p "$WORKSPACE/kibana-build-xpack"
-#cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
+mkdir -p "$WORKSPACE/kibana-build-xpack"
+cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
 
-#echo " -> test setup"
-#source test/scripts/jenkins_test_setup_xpack.sh
+echo " -> test setup"
+source test/scripts/jenkins_test_setup_xpack.sh
 
 # Start Metricbeat
 echo "Starting metricbeat"
-nohup "$KIBANA_DIR"/metricbeat-install/metricbeat > "$KIBANA_DIR"/metricbeat-install/logs/metricbeat.log 2>&1 &
+nohup $KIBANA_DIR/metricbeat-install/metricbeat > $KIBANA_DIR/metricbeat-install/logs/metricbeat.log 2>&1 &
 
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
-#node scripts/functional_tests \
-#  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-#  --config test/load/config.ts
+node scripts/functional_tests \
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+  --config test/load/config.ts
   
 echo "output of metricbeat.log" 
-cat "$KIBANA_DIR"/metricbeat-install/logs/metricbeat.log
+cat $KIBANA_DIR/metricbeat-install/logs/metricbeat.log
