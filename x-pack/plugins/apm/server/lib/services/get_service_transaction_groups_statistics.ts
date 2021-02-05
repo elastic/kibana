@@ -56,8 +56,6 @@ export async function getServiceTransactionGroupsStatistics({
   >
 > {
   const { apmEventClient, start, end, esFilter } = setup;
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
