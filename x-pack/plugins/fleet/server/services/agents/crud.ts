@@ -12,7 +12,7 @@ import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
-import { appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import * as crudServiceSO from './crud_so';
 import * as crudServiceFleetServer from './crud_fleet_server';
 
@@ -84,6 +84,22 @@ export async function getAgents(soClient: SavedObjectsClientContract, agentIds: 
   );
   const agents = agentSOs.saved_objects.map(savedObjectToAgent);
   return agents;
+}
+
+export async function getAgentPolicyForAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agent = await getAgent(soClient, esClient, agentId);
+  if (!agent.policy_id) {
+    return;
+  }
+
+  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+  if (agentPolicy) {
+    return agentPolicy;
+  }
 }
 
 export async function getAgentByAccessAPIKeyId(

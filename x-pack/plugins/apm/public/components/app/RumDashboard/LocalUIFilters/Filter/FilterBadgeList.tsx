@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { unit, px, truncate } from '../../../../style/variables';
+import { unit, px, truncate } from '../../../../../style/variables';
 
 const BadgeText = styled.div`
   display: inline-block;

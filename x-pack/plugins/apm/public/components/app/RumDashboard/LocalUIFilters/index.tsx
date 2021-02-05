@@ -15,12 +15,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { Filter } from './Filter';
-import { useLocalUIFilters } from '../../../hooks/useLocalUIFilters';
-import { Projection } from '../../../../common/projections';
-import { LocalUIFilterName } from '../../../../common/ui_filter';
+import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
+import { LocalUIFilterName } from '../../../../../common/ui_filter';
 
 interface Props {
-  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   showCount?: boolean;
@@ -33,7 +31,6 @@ const ButtonWrapper = styled.div`
 `;
 
 function LocalUIFilters({
-  projection,
   params,
   filterNames,
   children,
@@ -42,7 +39,6 @@ function LocalUIFilters({
 }: Props) {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
-    projection,
     params,
     shouldFetch,
   });
