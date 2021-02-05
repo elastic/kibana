@@ -11,10 +11,10 @@ import { telemetryJWKS } from './telemetry_jwks';
 import { encryptTelemetry, getKID } from './encrypt';
 
 describe('getKID', () => {
-  it(`returns 'kibana_dev_1' kid for development`, async () => {
+  it(`returns 'kibana_dev' kid for development`, async () => {
     const useProdKey = false;
     const kid = getKID(useProdKey);
-    expect(kid).toBe('kibana_dev_1');
+    expect(kid).toBe('kibana_dev');
   });
 
   it(`returns 'kibana_1' kid for production`, async () => {
@@ -41,9 +41,9 @@ describe('encryptTelemetry', () => {
     expect(mockEncrypt).toBeCalledWith('kibana_1', payload);
   });
 
-  it('uses kibana_dev_1 kid on { useProdKey: false }', async () => {
+  it('uses kibana_dev kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: false });
-    expect(mockEncrypt).toBeCalledWith('kibana_dev_1', payload);
+    expect(mockEncrypt).toBeCalledWith('kibana_dev', payload);
   });
 });
