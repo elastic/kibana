@@ -8,6 +8,7 @@
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -19,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -314,6 +316,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const unsupportedRuntimeFields = useMemo(
+    () =>
+      currentIndexPattern.fields
+        .getAll()
+        .filter((f) => true)
+        .map((f) => `'${f.displayName}'`),
+    [currentIndexPattern.fields]
+  );
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
@@ -445,6 +456,26 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
+      {unsupportedRuntimeFields && unsupportedRuntimeFields.length > 0 && (
+        <>
+          <EuiCallOut size={'s'} color={'warning'}>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFields"
+              defaultMessage="The runtime fields {unsupportedRuntimeFields} are not supported for analysis."
+              values={{
+                unsupportedRuntimeFields:
+                  unsupportedRuntimeFields.length > 5
+                    ? `${unsupportedRuntimeFields.slice(0, 5).join(', ')} ... (and ${
+                        unsupportedRuntimeFields.length
+                      } more)`
+                    : unsupportedRuntimeFields.join(', '),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
