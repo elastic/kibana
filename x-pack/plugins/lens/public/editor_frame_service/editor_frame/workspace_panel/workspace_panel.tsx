@@ -10,16 +10,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
