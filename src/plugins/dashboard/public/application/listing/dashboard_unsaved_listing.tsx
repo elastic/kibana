@@ -148,25 +148,38 @@ export const DashboardUnsavedListing = ({ redirectTo }: { redirectTo: DashboardR
     let canceled = false;
     const dashPromises = dashboardIds
       .filter((id) => id !== DASHBOARD_PANELS_UNSAVED_ID)
-      .map((dashboardId) => savedDashboards.get(dashboardId));
-    Promise.all(dashPromises).then((dashboards: DashboardSavedObject[]) => {
+      .map((dashboardId) => {
+        return (savedDashboards.get(dashboardId) as Promise<DashboardSavedObject>).catch(
+          () => dashboardId
+        );
+      });
+    Promise.all(dashPromises).then((dashboards: Array<string | DashboardSavedObject>) => {
       const dashboardMap = {};
       if (canceled) {
         return;
       }
-      setItems(
-        dashboards.reduce((map, dashboard) => {
-          return {
-            ...map,
-            [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
-          };
-        }, dashboardMap)
-      );
+      let hasError = false;
+      const newItems = dashboards.reduce((map, dashboard) => {
+        if (typeof dashboard === 'string') {
+          hasError = true;
+          dashboardPanelStorage.clearPanels(dashboard);
+          return map;
+        }
+        return {
+          ...map,
+          [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
+        };
+      }, dashboardMap);
+      if (hasError) {
+        setDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+        return;
+      }
+      setItems(newItems);
     });
     return () => {
       canceled = true;
     };
-  }, [dashboardIds, savedDashboards]);
+  }, [dashboardIds, savedDashboards, dashboardPanelStorage]);
 
   return dashboardIds.length === 0 ? null : (
     <>

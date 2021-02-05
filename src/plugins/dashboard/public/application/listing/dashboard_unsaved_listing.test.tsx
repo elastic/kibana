@@ -39,7 +39,9 @@ function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
   core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
   const savedDashboards = {} as SavedObjectLoader;
-  savedDashboards.get = jest.fn().mockImplementation((id: string) => mockedDashboards[id]);
+  savedDashboards.get = jest
+    .fn()
+    .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
   const dashboardPanelStorage = {} as DashboardPanelStorage;
   dashboardPanelStorage.clearPanels = jest.fn();
   dashboardPanelStorage.getDashboardIdsWithUnsavedChanges = jest
@@ -148,6 +150,37 @@ describe('Unsaved listing', () => {
       expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
+    });
+  });
+
+  it('removes unsaved changes from any dashboard which errors on fetch', async () => {
+    const services = makeDefaultServices();
+    services.savedDashboards.get = jest.fn().mockImplementation((id: string) => {
+      if (id === 'failCase1' || id === 'failCase2') {
+        return Promise.reject(new Error());
+      }
+      return Promise.resolve(mockedDashboards[id]);
+    });
+
+    services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges = jest
+      .fn()
+      .mockImplementation(() => [
+        'dashboardUnsavedOne',
+        'dashboardUnsavedTwo',
+        'dashboardUnsavedThree',
+        'failCase1',
+        'failCase2',
+      ]);
+    const { component } = mountWith({ services });
+    waitFor(() => {
+      component.update();
+      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase1');
+      expect(services.dashboardPanelStorage.clearPanels).toHaveBeenCalledWith('failCase2');
+
+      // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
+      expect(
+        services.dashboardPanelStorage.getDashboardIdsWithUnsavedChanges
+      ).toHaveBeenCalledTimes(2);
     });
   });
 });
