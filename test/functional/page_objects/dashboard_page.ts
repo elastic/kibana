@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -111,6 +111,33 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return id;
     }
 
+    public async expectUnsavedChangesListingExists(title: string) {
+      log.debug(`Expect Unsaved Changes Listing Exists for `, title);
+      await testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async expectUnsavedChangesDoesNotExist(title: string) {
+      log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
+      await testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async clickUnsavedChangesContinueEditing(title: string) {
+      log.debug(`Click Unsaved Changes Continue Editing `, title);
+      await testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+      await testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
+      log.debug(`Click Unsaved Changes Discard for `, title);
+      await testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
+      await testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+      if (confirmDiscard) {
+        await PageObjects.common.clickConfirmOnModal();
+      } else {
+        await PageObjects.common.clickCancelOnModal();
+      }
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
@@ -216,8 +243,32 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardViewOnlyMode');
     }
 
-    public async clickNewDashboard() {
+    public async clickDiscardChanges() {
+      log.debug('clickDiscardChanges');
+      await testSubjects.click('dashboardDiscardChanges');
+    }
+
+    public async clickNewDashboard(continueEditing = false) {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      if (await testSubjects.exists('dashboardCreateConfirm')) {
+        if (continueEditing) {
+          await testSubjects.click('dashboardCreateConfirmContinue');
+        } else {
+          await testSubjects.click('dashboardCreateConfirmStartOver');
+        }
+      }
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
+    }
+
+    public async clickNewDashboardExpectWarning(continueEditing = false) {
+      await listingTable.clickNewButton('createDashboardPromptButton');
+      await testSubjects.existOrFail('dashboardCreateConfirm');
+      if (continueEditing) {
+        await testSubjects.click('dashboardCreateConfirmContinue');
+      } else {
+        await testSubjects.click('dashboardCreateConfirmStartOver');
+      }
       // make sure the dashboard page is shown
       await this.waitForRenderComplete();
     }

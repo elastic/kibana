@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -39,30 +39,45 @@ describe('KbnLoggerJsonFormat', () => {
       expect(message).toBe('undefined');
     });
 
-    it('response', async () => {
-      const event = {
-        ...makeEvent('response'),
-        statusCode: 200,
-        contentLength: 800,
-        responseTime: 12000,
-        method: 'GET',
-        path: '/path/to/resource',
-        responsePayload: '1234567879890',
-        source: {
-          remoteAddress: '127.0.0.1',
-          userAgent: 'Test Thing',
-          referer: 'elastic.co',
-        },
-      };
-      const result = await createPromiseFromStreams<string>([createListStream([event]), format]);
-      const { type, method, statusCode, message, req } = JSON.parse(result);
+    describe('response', () => {
+      it('handles a response object', async () => {
+        const event = {
+          ...makeEvent('response'),
+          statusCode: 200,
+          contentLength: 800,
+          responseTime: 12000,
+          method: 'GET',
+          path: '/path/to/resource',
+          responsePayload: '1234567879890',
+          source: {
+            remoteAddress: '127.0.0.1',
+            userAgent: 'Test Thing',
+            referer: 'elastic.co',
+          },
+        };
+        const result = await createPromiseFromStreams<string>([createListStream([event]), format]);
+        const { type, method, statusCode, message, req } = JSON.parse(result);
 
-      expect(type).toBe('response');
-      expect(method).toBe('GET');
-      expect(statusCode).toBe(200);
-      expect(message).toBe('GET /path/to/resource 200 12000ms - 13.0B');
-      expect(req.remoteAddress).toBe('127.0.0.1');
-      expect(req.userAgent).toBe('Test Thing');
+        expect(type).toBe('response');
+        expect(method).toBe('GET');
+        expect(statusCode).toBe(200);
+        expect(message).toBe('GET /path/to/resource 200 12000ms - 13.0B');
+        expect(req.remoteAddress).toBe('127.0.0.1');
+        expect(req.userAgent).toBe('Test Thing');
+      });
+
+      it('leaves payload size empty if not available', async () => {
+        const event = {
+          ...makeEvent('response'),
+          statusCode: 200,
+          responseTime: 12000,
+          method: 'GET',
+          path: '/path/to/resource',
+          responsePayload: null,
+        };
+        const result = await createPromiseFromStreams<string>([createListStream([event]), format]);
+        expect(JSON.parse(result).message).toBe('GET /path/to/resource 200 12000ms');
+      });
     });
 
     it('ops', async () => {
