@@ -245,6 +245,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   timeScalingMode?: TimeScalingMode;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
+  /*
+   * Operations can be used as middleware for other operations, hence not shown in the panel UI
+   */
+  hidden?: boolean;
 }
 
 interface BaseBuildColumnArgs {

@@ -6,8 +6,8 @@
  */
 
 import { groupBy, isObject } from 'lodash';
-import type { TinymathAST, TinymathNamedArgument } from 'packages/kbn-tinymath';
-import type { OperationDefinition, IndexPatternColumn } from '../index';
+import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from 'packages/kbn-tinymath';
+import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
 export function groupArgsByType(args: TinymathAST[]) {
@@ -63,4 +63,65 @@ export function getOperationParams(
     }
     return args;
   }, {});
+}
+export const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
+
+export function isMathNode(node: TinymathAST) {
+  return isObject(node) && node.type === 'function' && tinymathValidOperators.has(node.name);
+}
+
+export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
+  function flattenMathNodes(node: TinymathAST | string): TinymathFunction[] {
+    if (!isObject(node) || node.type !== 'function' || !isMathNode(node)) {
+      return [];
+    }
+    return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
+  }
+  return flattenMathNodes(root);
+}
+
+export function hasMathNode(root: TinymathAST): boolean {
+  return Boolean(findMathNodes(root).length);
+}
+
+function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
+  function flattenFunctionNodes(node: TinymathAST | string): TinymathFunction[] {
+    if (!isObject(node) || node.type !== 'function') {
+      return [];
+    }
+    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
+  }
+  return flattenFunctionNodes(root);
+}
+
+export function hasInvalidOperations(
+  node: TinymathAST | string,
+  operations: Record<string, GenericOperationDefinition>
+) {
+  // avoid duplicates
+  return Array.from(
+    new Set(
+      findFunctionNodes(node)
+        .filter((v) => !isMathNode(v) && !operations[v.name])
+        .map(({ name }) => name)
+    )
+  );
+}
+
+// traverse a tree and find all string leaves
+export function findVariables(node: TinymathAST | string | undefined): string[] {
+  if (node == null) {
+    return [];
+  }
+  if (typeof node === 'string') {
+    return [node];
+  }
+  if (typeof node === 'number' || node.type === 'namedArgument') {
+    return [];
+  }
+  if (node.type === 'variable') {
+    // leaf node
+    return [node.value];
+  }
+  return node.args.flatMap(findVariables);
 }

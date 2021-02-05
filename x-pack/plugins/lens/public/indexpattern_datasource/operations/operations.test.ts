@@ -304,6 +304,14 @@ describe('getOperationTypesForField', () => {
                 "operationType": "last_value",
                 "type": "field",
               },
+              Object {
+                "operationType": "math",
+                "type": "managedReference",
+              },
+              Object {
+                "operationType": "formula",
+                "type": "managedReference",
+              },
             ],
           },
           Object {

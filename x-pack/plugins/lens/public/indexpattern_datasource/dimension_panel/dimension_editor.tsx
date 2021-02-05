@@ -144,6 +144,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
