@@ -33,7 +33,7 @@ export const needAdminForUpdateCallOutBody = (): JSX.Element => (
         <p>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.needAdminForUpdateCallOutBody.messageBody.essenceDescription"
-            defaultMessage="You are currently missing the required permissions to auto-migrate your alert data. Please have your administrator visit this page one time to auto migrate your alert data."
+            defaultMessage="You are currently missing the required permissions to auto migrate your alert data. Please have your administrator visit this page one time to auto migrate your alert data."
           />
         </p>
       ),
