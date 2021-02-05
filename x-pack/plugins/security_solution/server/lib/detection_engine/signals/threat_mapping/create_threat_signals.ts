@@ -92,7 +92,6 @@ export const createThreatSignals = async ({
   });
 
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
-    // TODO should _id be a configurable field?
     const matchedThreatsFilter = {
       query: {
         bool: {
