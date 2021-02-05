@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { UiSettingsServiceSetup } from 'src/core/server';
 import { isHexColor } from './utils';
 
+// Note: unused for now, will be used for v2 (see https://github.com/elastic/kibana/issues/17298)
+
 export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
   uiSettings.register({
     'banner:placement': {
@@ -20,7 +22,7 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
       order: 1,
       type: 'select',
       value: 'disabled',
-      options: ['disabled', 'header', 'footer', 'both'],
+      options: ['disabled', 'header'],
       optionLabels: {},
       requiresPageReload: true,
       schema: schema.oneOf([schema.literal('disabled'), schema.literal('header')]),

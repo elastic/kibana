@@ -6,14 +6,14 @@
  */
 
 import React, { FC } from 'react';
-import { BannerConfiguration } from '../types';
+import { BannerConfiguration } from '../../common';
 
 interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
 
 export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
-  const { text, textColor, backgroundColor } = bannerConfig;
+  const { textContent, textColor, backgroundColor } = bannerConfig;
   return (
     <div
       style={{
@@ -25,7 +25,7 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
         color: textColor,
       }}
     >
-      <div>{text}</div>
+      <div>{textContent}</div>
     </div>
   );
 };

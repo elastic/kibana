@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from 'src/core/server';
-import { registerSettings } from './ui_settings';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { BannerConfiguration } from '../common';
+import { BannersConfigType } from './config';
 import { BannersRequestHandlerContext } from './types';
 import { registerRoutes } from './routes';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
-  setup({ uiSettings, getStartServices, http }: CoreSetup<{}, {}>) {
-    registerSettings(uiSettings);
+  private readonly config: BannerConfiguration;
 
+  constructor(context: PluginInitializerContext) {
+    this.config = convertConfig(context.config.get<BannersConfigType>());
+  }
+
+  setup({ uiSettings, getStartServices, http }: CoreSetup<{}, {}>) {
     const router = http.createRouter<BannersRequestHandlerContext>();
-    registerRoutes(router);
+    registerRoutes(router, this.config);
 
     return {};
   }
@@ -24,3 +29,5 @@ export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
     return {};
   }
 }
+
+const convertConfig = (raw: BannersConfigType): BannerConfiguration => raw;

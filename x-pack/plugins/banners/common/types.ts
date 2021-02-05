@@ -7,4 +7,14 @@
 
 export interface BannerInfoResponse {
   allowed: boolean;
+  banner: BannerConfiguration;
+}
+
+export type BannerPlacement = 'disabled' | 'header';
+
+export interface BannerConfiguration {
+  placement: BannerPlacement;
+  textContent: string;
+  textColor: string;
+  backgroundColor: string;
 }

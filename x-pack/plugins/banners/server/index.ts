@@ -8,4 +8,5 @@
 import { PluginInitializer } from 'src/core/server';
 import { BannersPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}, {}, {}> = () => new BannersPlugin();
+export { config } from './config';
+export const plugin: PluginInitializer<{}, {}, {}, {}> = (context) => new BannersPlugin(context);

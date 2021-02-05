@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export type BannerPlacement = 'disabled' | 'header';
+import { BannerPlacement } from '../common';
 
-export interface BannerConfiguration {
+export interface BannerClientConfig {
   placement: BannerPlacement;
-  text: string;
-  textColor: string;
-  backgroundColor: string;
 }

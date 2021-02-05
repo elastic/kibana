@@ -8,37 +8,63 @@
 import { getBannerInfoMock } from './plugin.test.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { BannersPlugin } from './plugin';
+import { BannerClientConfig } from './types';
+
+const nextTick = async () => await new Promise<void>((resolve) => resolve());
 
 describe('BannersPlugin', () => {
   let plugin: BannersPlugin;
+  let pluginInitContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
+    pluginInitContext = coreMock.createPluginInitializerContext();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
 
     getBannerInfoMock.mockResolvedValue({
       allowed: false,
     });
-
-    plugin = new BannersPlugin();
-    plugin.setup(coreSetup);
   });
+
+  const startPlugin = async (config: BannerClientConfig) => {
+    pluginInitContext = coreMock.createPluginInitializerContext(config);
+    plugin = new BannersPlugin(pluginInitContext);
+    plugin.setup(coreSetup);
+    plugin.start(coreStart);
+    // await for the `getBannerInfo` promise to resolve
+    await nextTick();
+  };
 
   afterEach(() => {
     getBannerInfoMock.mockReset();
   });
 
-  it('registers the header banner when `banner:placement` is `header`', () => {
-    coreStart.uiSettings.get.mockImplementation((key, defaultValue) => {
-      if (key === 'banner:placement') {
-        return 'header';
-      }
-      return defaultValue;
+  it('calls `getBannerInfo` if `config.placement !== disabled`', async () => {
+    await startPlugin({
+      placement: 'header',
     });
 
-    plugin.start(coreStart);
+    expect(getBannerInfoMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call `getBannerInfo` if `config.placement === disabled`', async () => {
+    await startPlugin({
+      placement: 'disabled',
+    });
+
+    expect(getBannerInfoMock).not.toHaveBeenCalled();
+  });
+
+  it('registers the header banner if `getBannerInfo` return `allowed=true`', async () => {
+    getBannerInfoMock.mockResolvedValue({
+      allowed: true,
+    });
+
+    await startPlugin({
+      placement: 'header',
+    });
 
     expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
     expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
@@ -46,48 +72,15 @@ describe('BannersPlugin', () => {
     });
   });
 
-  it('does not register the header banner when `banner:placement` is `disabled`', () => {
-    coreStart.uiSettings.get.mockImplementation((key, defaultValue) => {
-      if (key === 'banner:placement') {
-        return 'disabled';
-      }
-      return defaultValue;
-    });
-
-    plugin.start(coreStart);
-
-    expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
-  });
-
-  it('disable the banner if `getBannerInfo` returns `allowed: false`', async () => {
-    coreStart.uiSettings.get.mockImplementation((key, defaultValue) => {
-      if (key === 'banner:placement') {
-        return 'header';
-      }
-      return defaultValue;
-    });
-
-    let resolveInfo: Function;
-    const resolveBannerPromise = new Promise((resolve) => {
-      resolveInfo = resolve;
-    });
-
-    getBannerInfoMock.mockReturnValue(resolveBannerPromise);
-
-    plugin.start(coreStart);
-
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
-      content: expect.any(Function),
-    });
-
-    resolveInfo!({
+  it('does not register the header banner if `getBannerInfo` return `allowed=false`', async () => {
+    getBannerInfoMock.mockResolvedValue({
       allowed: false,
     });
 
-    await new Promise<void>((resolve) => resolve());
+    await startPlugin({
+      placement: 'header',
+    });
 
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(2);
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith(undefined);
+    expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
   });
 });

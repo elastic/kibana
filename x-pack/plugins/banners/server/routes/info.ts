@@ -6,10 +6,10 @@
  */
 
 import { ILicense } from '../../../licensing/server';
-import { BannerInfoResponse } from '../../common';
+import { BannerInfoResponse, BannerConfiguration } from '../../common';
 import { BannersRouter } from '../types';
 
-export const registerInfoRoute = (router: BannersRouter) => {
+export const registerInfoRoute = (router: BannersRouter, config: BannerConfiguration) => {
   router.get(
     {
       path: '/api/banners/info',
@@ -24,6 +24,7 @@ export const registerInfoRoute = (router: BannersRouter) => {
       return res.ok({
         body: {
           allowed,
+          banner: config,
         } as BannerInfoResponse,
       });
     }
