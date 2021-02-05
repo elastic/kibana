@@ -11,7 +11,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
-  describe('maps loaded from sample data', () => {
+  describe.only('maps loaded from sample data', () => {
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
     // Setting the time range to a window larger than the sample data set
@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'ecommerce_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.03);
+        expect(percentDifference).to.be.lessThan(0.02);
       });
     });
 
@@ -86,11 +86,10 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'flights_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.06);
+        expect(percentDifference).to.be.lessThan(0.02);
       });
     });
 
-    // Skipped because EMS vectors are not accessible in CI
     describe('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -119,7 +118,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'web_logs_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.06);
+        expect(percentDifference).to.be.lessThan(0.02);
       });
     });
   });
