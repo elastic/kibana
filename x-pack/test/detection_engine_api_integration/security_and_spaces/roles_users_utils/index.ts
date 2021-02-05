@@ -64,6 +64,20 @@ export const createUserAndRole = async (
   }
 };
 
+/**
+ * Given a roleName and security service this will delete the roleName
+ * and user
+ * @param roleName The user and role to delete with the same name
+ * @param securityService The security service
+ */
+export const deleteUserAndRole = async (
+  securityService: ReturnType<FtrProviderContext['getService']>,
+  roleName: ROLES
+) => {
+  await securityService.role.delete(roleName);
+  await securityService.user.delete(roleName);
+};
+
 interface UserInterface {
   password: string;
   roles: string[];

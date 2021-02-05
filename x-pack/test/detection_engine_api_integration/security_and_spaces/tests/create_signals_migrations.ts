@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 
 interface CreateResponse {
   index: string;
@@ -181,6 +181,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .send({ index: [legacySignalsIndexName] })
         .expect(400);
+
+      await deleteUserAndRole(security, ROLES.t1_analyst);
     });
   });
 };
