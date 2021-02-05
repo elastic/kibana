@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -95,10 +96,24 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
+        // this is the number of renderings of the histogram needed when new data is fetched
+        // this needs to be improved
+        const renderingCountInc = 3;
+        const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await retry.waitFor('chart rendering complete', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings before brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + renderingCountInc;
+        });
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-
+        await retry.waitFor('chart rendering complete after being brushed', async () => {
+          const actualRenderingCount = await elasticChart.getVisualizationRenderingCount();
+          log.debug(`Number of renderings after brushing: ${actualRenderingCount}`);
+          return actualRenderingCount === prevRenderingCount + 6;
+        });
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(26);
 
@@ -106,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
           const rowData = await PageObjects.discover.getDocTableField(1);
           log.debug(`The first timestamp value in doc table: ${rowData}`);
           const dateParsed = Date.parse(rowData);
-          //compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
+          // compare against the parsed date of Sep 20, 2015 @ 17:30:00.000 and Sep 20, 2015 @ 23:30:00.000
           return dateParsed >= 1442770200000 && dateParsed <= 1442791800000;
         });
       });
