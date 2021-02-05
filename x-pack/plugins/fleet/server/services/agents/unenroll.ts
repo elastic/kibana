@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentUnenrollmentError } from '../../errors';
+
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import * as APIKeyService from '../api_keys';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 import {
   getAgent,
+  updateAgent,
   getAgentPolicyForAgent,
   getAgents,
   listAllAgents,
   bulkUpdateAgents,
-  updateAgent,
 } from './crud';
+import { AgentUnenrollmentError } from '../../errors';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,

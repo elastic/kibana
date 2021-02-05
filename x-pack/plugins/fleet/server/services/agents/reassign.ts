@@ -7,11 +7,16 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import type { AgentSOAttributes } from '../../types';
-import { AgentReassignmentError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
-import { getAgentPolicyForAgent, getAgents, listAllAgents, bulkUpdateAgents } from './crud';
+import {
+  getAgents,
+  getAgentPolicyForAgent,
+  listAllAgents,
+  updateAgent,
+  bulkUpdateAgents,
+} from './crud';
+import { AgentReassignmentError } from '../../errors';
+
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -27,7 +32,7 @@ export async function reassignAgent(
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+  await updateAgent(soClient, esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
