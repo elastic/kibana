@@ -29,7 +29,7 @@ declare interface JobService {
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: Job): Promise<any>;
-  cloneDatafeed(Datafeed: Datafeed | undefined): Datafeed;
+  cloneDatafeed(Datafeed: Datafeed): Datafeed;
   openJob(jobId: string): Promise<any>;
   saveNewDatafeed(datafeedConfig: any, jobId: string): Promise<any>;
   startDatafeed(
