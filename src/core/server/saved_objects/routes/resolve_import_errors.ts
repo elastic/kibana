@@ -9,6 +9,7 @@
 import { extname } from 'path';
 import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
+import { chain } from 'lodash';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
@@ -94,13 +95,13 @@ export const registerResolveImportErrorsRoute = (
 
       const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
 
-      const includedHiddenTypes = req.body.retries
-        .map((retry) => retry.type)
+      const includedHiddenTypes = chain(req.body.retries)
+        .map('type')
+        .uniq()
         .filter(
-          (supportedType) =>
-            typeRegistry.isHidden(supportedType) &&
-            typeRegistry.isImportableAndExportable(supportedType)
-        );
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
 
       const client = getClient({ includedHiddenTypes });
       const importer = getImporter(client);

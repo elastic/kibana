@@ -59,8 +59,6 @@ class CoreSavedObjectsRouteHandlerContext {
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
-  #exporter?: ISavedObjectsExporter;
-  #importer?: ISavedObjectsImporter;
 
   public get client() {
     if (this.#scopedSavedObjectsClient == null) {
@@ -81,17 +79,11 @@ class CoreSavedObjectsRouteHandlerContext {
   };
 
   public getExporter = (client: SavedObjectsClientContract) => {
-    if (this.#exporter == null) {
-      this.#exporter = this.savedObjectsStart.createExporter(client);
-    }
-    return this.#exporter;
+    return this.savedObjectsStart.createExporter(client);
   };
 
   public getImporter = (client: SavedObjectsClientContract) => {
-    if (this.#importer == null) {
-      this.#importer = this.savedObjectsStart.createImporter(client);
-    }
-    return this.#importer;
+    return this.savedObjectsStart.createImporter(client);
   };
 }
 
