@@ -7,14 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormSchema, fieldValidators } from '../../shared_imports';
+import { fieldValidators } from '../../shared_imports';
 
-import type { FieldFormInternal } from './field_editor';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
-export const schema: FormSchema<FieldFormInternal> = {
+export const schema = {
   name: {
     label: i18n.translate('indexPatternFieldEditor.editor.form.nameLabel', {
       defaultMessage: 'Name',
