@@ -40,8 +40,8 @@ export function shipCiStatsCli() {
       flags: {
         string: ['metrics'],
         help: `
-        --metrics [path]        A path to a JSON file that includes metrics which should be sent. Multiple instances supported
-      `,
+          --metrics [path]   A path to a JSON file that includes metrics which should be sent. Multiple instances supported
+        `,
       },
     }
   );
