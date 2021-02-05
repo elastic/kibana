@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sampleDocWithSortId } from '../__mocks__/es_results';
@@ -39,7 +40,7 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -55,7 +56,7 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'excluded',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -71,7 +72,7 @@ describe('filterEvents', () => {
       {
         field: 'madeup.nonexistent', // field does not exist
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
     const field = filterEvents({
@@ -87,12 +88,12 @@ describe('filterEvents', () => {
       {
         field: 'source.ip',
         operator: 'included',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
       {
         field: 'source.ip',
         operator: 'excluded',
-        matchedSet: new Set([JSON.stringify('1.1.1.1')]),
+        matchedSet: new Set([JSON.stringify(['1.1.1.1'])]),
       },
     ];
 

@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getServices, chance } from './lib';
 
-export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => () => {
+export function docMissingAndIndexReadOnlySuite() {
   // ensure the kibana index has no documents
   beforeEach(async () => {
     const { kbnServer, callCluster } = getServices();
@@ -22,7 +22,7 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
-      index: savedObjectsIndex,
+      index: kbnServer.config.get('kibana.index'),
       body: {
         query: { match_all: {} },
       },
@@ -30,7 +30,7 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
     // set the index to read only
     await callCluster('indices.putSettings', {
-      index: savedObjectsIndex,
+      index: kbnServer.config.get('kibana.index'),
       body: {
         index: {
           blocks: {
@@ -42,11 +42,11 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
   });
 
   afterEach(async () => {
-    const { callCluster } = getServices();
+    const { kbnServer, callCluster } = getServices();
 
     // disable the read only block
     await callCluster('indices.putSettings', {
-      index: savedObjectsIndex,
+      index: kbnServer.config.get('kibana.index'),
       body: {
         index: {
           blocks: {
@@ -142,4 +142,4 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
       });
     });
   });
-};
+}
