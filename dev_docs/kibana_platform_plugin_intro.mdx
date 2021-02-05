@@ -11,45 +11,35 @@ From an end user perspective, Kibana is a tool for interacting with Elasticsearc
 to visualize and analyze data.
 
 From a developer perspective, Kibana is a platform that provides a set of tools to build not only the UI you see in Kibana today, but
-a wide variety of applications that can be used to explore, visualize, and act upon data in Elasticsearch. The platform provides developers the ability to build applications, or inject extra functionality into 
+a wide variety of applications that can be used to explore, visualize, and act upon data in Elasticsearch. The platform provides developers the ability 
+to build applications, or inject extra functionality into 
 already existing applications. Did you know that almost everything you see in the
 Kibana UI is built inside a plugin? If you removed all plugins from Kibana, you'd be left with an empty navigation menu, and a set of
 developer tools. The Kibana platform is a blank canvas, just waiting for a developer to come along and create something!
 
 ![Kibana personas](assets/kibana_platform_plugin_end_user.png)
+ 
+## Platform services
 
-## Plugins vs The Platform
+Plugins have access to three kinds of public services:
 
-The core platform provides the most basic and fundamental tools neccessary for building a plugin, like creating saved objects,
-routing, application registration, and notifications. The Core platform is not a plugin itself, although
-there are some plugins that provide platform functionality. For example, the 
-<DocLink id="kibDataPlugin" text="data plugin"/> provides basic utilities to search, query, and filter data in Elasticsearch. 
-This code is not part of Core, but is still fundamental for building a plugin,
- and we strongly encourage using this service over querying Elasticsearch directly. 
+ - Platform services provided by `core` (<DocLink id="kibPlatformIntro" section="core-services" text="Core services"/>)
+ - Platform services provided by plugins (<DocLink id="kibPlatformIntro" section="platform-plugins" text="Platform plugins"/>)
+ - Shared services provided by plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils"). 
 
-<DocCallOut title="Three kinds of public services">
-We currently have three kinds of public services:
+ The first two items are what make up "Platform services".
 
- - platform services provided by `core`
- - platform services provided by plugins, that can, and should, be used by every plugin (e.g. <DocLink id="kibDataPlugin" text="data"/>) .
- - shared services provided by plugins, that are only relevant for only a few, specific plugins (e.g. "presentation utils"). 
+<DocCallOut title="What is the difference between services provided by platform plugins, and those by core?">
 
-Two common questions we encounter are:
+We try to put only the most stable and fundamental code into `Core`, while more application focused functionality goes in a plugin, but the heuristic isn't
+clear, and we haven't done a great job of sticking to it. For example, notifications and toasts are core services, but data and search are plugin services.
 
-1. Which services are platform services? 
-2. What is the difference between platform code supplied by core, and platform code supplied by plugins?
+Today it looks like the left, where we should probably be closer to the diagram on the right. Core should be an implementation detail of the platform, and plugins 
+shouldn't need to understand the difference.
 
-We don't have great answers to those questions today. Currently, the best answers we have are:
-
-1. Platform plugins are _usually_ plugins that are managed by the Platform Group, but we are starting to see some exceptions.
-2. `core` code contains the most fundamental and stable services needed for plugin development. Everything else goes in a plugin.
-
-We will continue to focus on adding clarity around these types of services and what developers can expect from each.
-
-</DocCallOut>
-
+![Core vs platform plugins](assets/platform_core.png)
+ 
 <DocAccordion buttonContent="A bit of history">
-<DocCallOut title="A bit of history">
 When the Kibana platform and plugin infrastructure was built, we thought of two types of code: core services, and other plugin services. We planned to keep the most stable and fundamental 
 code needed to build plugins inside core.
 
@@ -70,125 +60,62 @@ Another side effect of having many small plugins is that common code often ends 
 
 We recognize the need to better clarify the relationship between core functionality, platform-like plugin functionality, and functionality exposed by other plugins.
  It's something we will be working on!
-</DocCallOut>
 </DocAccordion>
 
-The main difference between core functionality and functionality supplied by plugins, is in how it is accessed. Core is
-passed to plugins as the first parameter to their `start` and `setup` lifecycle functions, while plugin supplied functionality is passed as the
-second parameter.  Plugin dependencies must be declared explicitly inside the `kibana.json` file. Core functionality is always provided. Read the 
-section on <DocLink id="kibPlatformIntro" section="how-plugins-interact-with-each-other-and-core" text="how plugins interact with eachother and core"/> for more information.
-
-## The anatomy of a plugin
-
-Plugins are defined as classes and present themselves to Kibana through a simple wrapper function. A plugin can have browser-side code, server-side code,
-or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly, 
-and you interact with Core and other plugins in the same way.
-
-The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
-
-```
-plugins/
-  demo
-    kibana.json [1]
-    public
-      index.ts  [2]
-      plugin.ts [3]
-    server
-      index.ts  [4]
-      plugin.ts [5]
-```
-
-### [1] kibana.json 
-
-`kibana.json` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
-
-```
-{
-  "id": "demo",
-  "version": "kibana",
-  "server": true,
-  "ui": true
-}
-```
-
-### [2] public/index.ts
-
-`public/index.ts` is the entry point into the client-side code of this plugin. It must export a function named plugin, which will receive a standard set of
- core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
-
-```
-import type { PluginInitializerContext } from 'kibana/server';
-import { DemoPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DemoPlugin(initializerContext);
-}
-```
-
-### [3] public/plugin.ts
-
-`public/plugin.ts` is the client-side plugin definition itself. Technically speaking, it does not need to be a class or even a separate file from the entry
- point, but all plugins at Elastic should be consistent in this way.
+We will continue to focus on adding clarity around these types of services and what developers can expect from each.
 
 
- ```ts
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+</DocCallOut>
 
-export class DemoPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+### Core services
 
-  public setup(core: CoreSetup) {
-    // called when plugin is setting up during Kibana's startup sequence
-  }
+Sometimes referred to just as Core, Core services provide the most basic and fundamental tools neccessary for building a plugin, like creating saved objects,
+routing, application registration, and notifications. The Core platform is not a plugin itself, although
+there are some plugins that provide platform functionality. We call these <DocLink id="kibPlatformIntro" section="platform-plugins" text="Platform plugins"/>.
 
-  public start(core: CoreStart) {
-    // called after all plugins are set up
-  }
+### Platform plugins
 
-  public stop() {
-    // called when plugin is torn down during Kibana's shutdown sequence
-  }
-}
- ```
+Plugins that provide fundamental services and functionality to extend and customize Kibana, for example, the 
+<DocLink id="kibDataPlugin" text="data"/> plugin. There is no official way to tell if a plugin is a platform plugin or not.
+Platform plugins are _usually_ plugins that are managed by the Platform Group, but we are starting to see some exceptions.
 
+## Plugins
 
-### [4] server/index.ts 
+Plugins are code that is written to extend and customize Kibana. Plugin's don't have to be part of the Kibana repo, though the Kibana 
+repo does contain many plugins! Plugins add customizations by 
+using <DocLink id="kibPlatformIntro" section="extension-points" text="extension points"/> provided by <DocLink id="kibPlatformIntro" section="platform-services" text="platform services"/>.
+Sometimes people confuse the term "plugin" and "application". While often there is a 1:1 relationship between a plugin and an application, it is not always the case.
+A plugin may register many applications, or none.
 
-`server/index.ts` is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
+### Applications
 
-### [5] server/plugin.ts
+Applications are top level pages in the Kibana UI. Dashboard, Canvas, Maps, App Search, etc, are all examples of applications:
 
-`server/plugin.ts` is the server-side plugin definition. The shape of this plugin is the same as it’s client-side counter-part:
+![applications in kibana](./assets/applications.png)
 
-```ts
-import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+A plugin can register an application by
+adding it to core's application <DocLink id="kibPlatformIntro" section="registry" text="registry"/>.
 
-export class DemoPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+### Public plugin API
 
-  public setup(core: CoreSetup) {
-    // called when plugin is setting up during Kibana's startup sequence
-  }
+A plugin's public API consists of everything exported from a plugin's <DocLink id="kibPlatformIntro" section="plugin-lifecycle" text="start or setup lifecycle methods"/>, 
+as well as from the top level `index.ts` files that exist in the three "scope" folders:
 
-  public start(core: CoreStart) {
-    // called after all plugins are set up
-  }
+- common/index.ts
+- public/index.ts
+- server/index.ts
 
-  public stop() {
-    // called when plugin is torn down during Kibana's shutdown sequence
-  }
-}
-```
+Any plugin that exports something from those files, or from the lifecycle methods, is exposing a public service. We sometimes call these things "plugin services" or
+"shared services".
 
-Kibana does not impose any technical restrictions on how the the internals of a plugin are architected, though there are certain 
-considerations related to how plugins integrate with core APIs and APIs exposed by other plugins that may greatly impact how they are built.
+## Lifecycle methods
 
-## Plugin lifecycles & Core services
+Core, and plugins, expose different features at different parts of their lifecycle. We describe the lifecycle of core services and plugins with
+ specifically-named functions on the service definition.
 
-The various independent domains that make up core are represented by a series of services. Those services expose public interfaces that are provided to all plugins. 
-Services expose different features at different parts of their lifecycle. We describe the lifecycle of core services and plugins with specifically-named functions on the service definition.
-
-Kibana has three lifecycles: setup, start, and stop. Each plugin’s setup function is called sequentially while Kibana is setting up on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins. The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
+Kibana has three lifecycles: setup, start, and stop. Each plugin’s setup function is called sequentially while Kibana is setting up
+ on the server or when it is being loaded in the browser. The start functions are called sequentially after setup has been completed for all plugins. 
+ The stop functions are called sequentially while Kibana is gracefully shutting down the server or when the browser tab or window is being closed.
 
 The table below explains how each lifecycle relates to the state of Kibana.
 
@@ -201,105 +128,45 @@ The table below explains how each lifecycle relates to the state of Kibana.
 Different service interfaces can and will be passed to setup, start, and stop because certain functionality makes sense in the context of a running plugin while other types 
 of functionality may have restrictions or may only make sense in the context of a plugin that is stopping.
 
-## How plugin's interact with each other, and Core
+## Extension points
 
-The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin. 
-For example, the core http service exposes a function createRouter to all plugin setup functions. To use this function to register an HTTP route handler, 
-a plugin just accesses it off of the first argument:
+An extension point is a function provided by core, or a plugin's plugin API, that can be used by other
+plugins to customize the Kibana experience. Examples of extension points are:
 
-```ts
-import type { CoreSetup } from 'kibana/server';
+- core.application.register (The extension point talked about above)
+- core.notifications.toasts.addSuccess
+- core.overlays.showModal
+- embeddables.registerEmbeddableFactory
+- uiActions.registerAction
+- core.saedObjects.registerType
 
-export class DemoPlugin {
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-    // handler is called when '/path' resource is requested with `GET` method
-    router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
-  }
-}
-```
+## Registries
 
-Unlike core, capabilities exposed by plugins are not automatically injected into all plugins.
-Instead, if a plugin wishes to use the public interface provided by another plugin, it must first declare that plugin as a
- dependency in it’s kibana.json manifest file.
+Registries are a term you'll hear quite frequently when developing in Kibana.
+A registry is a collection of common things that can be manipulated via extension points.
 
-** foobar plugin.ts: **
+Examples of extension points that modify registries are:
 
-```
-import type { Plugin } from 'kibana/server';
-export interface FoobarPluginSetup { [1]
-  getFoo(): string;
-}
+- core.application.register
+- embeddables.registerEmbeddableFactory
+- uiActions.registerAction
+- alerting.registerType
 
-export interface FoobarPluginStart { [1]
-  getBar(): string;
-}
+Extension points that don't affect registries:
 
-export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
-  public setup(): FoobarPluginSetup {
-    return {
-      getFoo() {
-        return 'foo';
-      },
-    };
-  }
+- core.notifications.toasts.addSuccess
+- core.overlays.showModal
 
-  public start(): FoobarPluginStart {
-    return {
-      getBar() {
-        return 'bar';
-      },
-    };
-  }
-}
-```
-[1]  We highly encourage plugin authors to explicitly declare public interfaces for their plugins.
+Developers add specific implementations to registries. For example, the `LensEmbeddable` is
+a specific implementation of the generic `Embeddable` that the Lens plugin adds to the embeddable
+registry using `embeddables.registerEmbeddableFactory` extension point.
 
+<DocCallOut title="Common pitfall" color="warning">
+In most situations, extension points that affect registries should only be exposed from a plugins setup 
+<DocLink id="kibPlatformIntro" section="plugin-lifecycle" text="lifecycle"/>.
+Then you are garaunteed by the time your start method runs, the list won't change.
+</DocCallOut>
 
-** demo kibana.json**
+## Follow up material
 
-```
-{
-  "id": "demo",
-  "requiredPlugins": ["foobar"],
-  "server": true,
-  "ui": true
-}
-```
-
-With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup and/or start:
-
-```ts
-import type { CoreSetup, CoreStart } from 'kibana/server';
-import type { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
-
-interface DemoSetupPlugins {  [1]
-  foobar: FoobarPluginSetup;
-}
-
-interface DemoStartPlugins {
-  foobar: FoobarPluginStart;
-}
-
-export class DemoPlugin {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins) { [2]
-    const { foobar } = plugins;
-    foobar.getFoo(); // 'foo'
-    foobar.getBar(); // throws because getBar does not exist
-  }
-
-  public start(core: CoreStart, plugins: DemoStartPlugins) { [3]
-    const { foobar } = plugins;
-    foobar.getFoo(); // throws because getFoo does not exist
-    foobar.getBar(); // 'bar'
-  }
-
-  public stop() {}
-}
-```
-	
-[1] The interface for plugin’s dependencies must be manually composed. You can do this by importing the appropriate type from the plugin and constructing an interface where the property name is the plugin’s ID.
-
-[2] These manually constructed types should then be used to specify the type of the second argument to the plugin.
-
-[3] Notice that the type for the setup and start lifecycles are different. Plugin lifecycle functions can only access the APIs that are exposed during that lifecycle.
+Learn how to build your own plugin by following <DocLink id="kibDevTutorialBuildAPlugin" />
