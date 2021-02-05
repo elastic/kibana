@@ -15,7 +15,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@ela
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
-import { getSeverity } from '../../../../common/util/anomaly_utils';
+import { getSeverity, getFormattedSeverityScore } from '../../../../common/util/anomaly_utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 
 interface InfluencerValueData {
@@ -64,10 +64,10 @@ function getTooltipContent(maxScoreLabel: string, totalScoreLabel: string) {
 
 const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter, valueData }) => {
   const maxScore = Math.floor(valueData.maxAnomalyScore);
-  const maxScoreLabel = maxScore !== 0 ? `${maxScore}` : '< 1';
+  const maxScoreLabel = getFormattedSeverityScore(valueData.maxAnomalyScore);
   const severity = getSeverity(maxScore);
   const totalScore = Math.floor(valueData.sumAnomalyScore);
-  const totalScoreLabel = totalScore !== 0 ? `${totalScore}` : '< 1';
+  const totalScoreLabel = getFormattedSeverityScore(valueData.sumAnomalyScore);
 
   // Ensure the bar has some width for 0 scores.
   const barScore = maxScore !== 0 ? maxScore : 1;
