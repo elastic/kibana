@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { History } from 'history';
 
 import { useKibana } from '../../services/kibana_react';
@@ -72,9 +71,9 @@ export const useDashboardContainer = (
     const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
 
     let canceled = false;
-    let container: DashboardContainer | ErrorEmbeddable | null | undefined;
+    let newContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
-      const newContainer = await dashboardFactory.create(
+      newContainer = await dashboardFactory.create(
         getDashboardContainerInput({
           dashboardCapabilities,
           dashboardStateManager,
@@ -85,12 +84,19 @@ export const useDashboardContainer = (
         })
       );
 
+      // already new container is being created
+      // no longer interested in current one
       if (canceled) {
-        newContainer?.destroy();
+        try {
+          newContainer?.destroy();
+        } catch (e) {
+          // destroy could throw if something has already destroyed the container
+          // eslint-disable-next-line no-console
+          console.warn(e);
+        }
+
         return;
       }
-
-      container = newContainer;
 
       if (!newContainer || isErrorEmbeddable(newContainer)) {
         return;
@@ -118,7 +124,14 @@ export const useDashboardContainer = (
     })();
     return () => {
       canceled = true;
-      container?.destroy();
+      try {
+        newContainer?.destroy();
+      } catch (e) {
+        // destroy could throw if something has already destroyed the container
+        // eslint-disable-next-line no-console
+        console.warn(e);
+      }
+
       setDashboardContainer(null);
     };
   }, [
