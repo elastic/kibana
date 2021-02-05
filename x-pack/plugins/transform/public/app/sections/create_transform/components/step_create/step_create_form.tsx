@@ -189,12 +189,14 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
             title: indexPatternName,
             timeFieldName,
+            ...(runtimeMappings ? { runtimeFieldMap: runtimeMappings } : {}),
           },
           false,
           true
