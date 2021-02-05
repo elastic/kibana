@@ -113,9 +113,8 @@ export const useExceptionListItems = ({
               signal: abortCtrl.signal,
             });
 
-            // This data transform is UI specific and useful for UI concerns
-            // to compensate for the differences and preferences of how ReactJS might prefer
-            // data vs. how we want to model data. View `transformInput` for more details
+            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+            // for context around the temporary `id`
             const transformedData = data.map((item) => transformInput(item));
 
             if (isSubscribed) {

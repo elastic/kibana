@@ -58,6 +58,7 @@ export interface ExceptionsPagination {
 }
 
 export interface FormattedBuilderEntry {
+  id: string;
   field: IFieldType | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;

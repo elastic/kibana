@@ -37,6 +37,7 @@ import {
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
 import exceptionableFields from '../exceptionable_fields.json';
+import { addIdToItem } from '../../../../../common';
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -160,6 +161,7 @@ export const getFormattedBuilderEntry = (
           ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
           : foundField,
       correspondingKeywordField,
+      id: item.id,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -169,6 +171,7 @@ export const getFormattedBuilderEntry = (
   } else {
     return {
       field: foundField,
+      id: item.id,
       correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
@@ -215,6 +218,7 @@ export const getFormattedBuilderEntries = (
     } else {
       const parentEntry: FormattedBuilderEntry = {
         operator: isOperator,
+        id: item.id,
         nested: 'parent',
         field: isNewNestedEntry
           ? undefined
@@ -603,18 +607,20 @@ export const getEntryOnListChange = (
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry => ({
-  field: '',
-  type: OperatorTypeEnum.MATCH,
-  operator: OperatorEnum.INCLUDED,
-  value: '',
-});
+export const getDefaultEmptyEntry = (): EmptyEntry =>
+  addIdToItem({
+    field: '',
+    type: OperatorTypeEnum.MATCH,
+    operator: OperatorEnum.INCLUDED,
+    value: '',
+  });
 
-export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
-  field: '',
-  type: OperatorTypeEnum.NESTED,
-  entries: [],
-});
+export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry =>
+  addIdToItem({
+    field: '',
+    type: OperatorTypeEnum.NESTED,
+    entries: [],
+  });
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some((entry) => entry.type === OperatorTypeEnum.LIST));

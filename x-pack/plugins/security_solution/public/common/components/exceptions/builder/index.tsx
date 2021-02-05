@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { addIdToItem } from '../../../../../common';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
@@ -240,8 +241,6 @@ export const ExceptionBuilderComponent = ({
         entries: [...entries, isNested ? getDefaultNestedEmptyEntry() : getDefaultEmptyEntry()],
       };
 
-      // setAndLogicIncluded(updatedException.entries.length > 1);
-
       setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
     },
     [setUpdateExceptions, exceptions]
@@ -287,12 +286,12 @@ export const ExceptionBuilderComponent = ({
             ...lastEntry,
             entries: [
               ...lastEntry.entries,
-              {
+              addIdToItem({
                 field: '',
                 type: OperatorTypeEnum.MATCH,
                 operator: OperatorEnum.INCLUDED,
                 value: '',
-              },
+              }),
             ],
           },
         ],

@@ -51,12 +51,16 @@ export const usePersistExceptionItem = ({
           if (isUpdateExceptionItem(exceptionListItem)) {
             await updateExceptionListItem({
               http,
+              // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+              // for context around the temporary `id`
               listItem: transformOutput(exceptionListItem),
               signal: abortCtrl.signal,
             });
           } else {
             await addExceptionListItem({
               http,
+              // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+              // for context around the temporary `id`
               listItem: transformOutput(exceptionListItem),
               signal: abortCtrl.signal,
             });

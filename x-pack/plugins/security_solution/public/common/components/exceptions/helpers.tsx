@@ -36,12 +36,16 @@ import {
   UpdateExceptionListItemSchema,
   EntryNested,
   OsTypeArray,
+  EntryExists,
+  EntryMatch,
+  EntryMatchAny,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
 import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { addIdToItem, removeIdFromItem } from '../../../../common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -148,12 +152,12 @@ export const getNewExceptionItem = ({
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
-      {
+      addIdToItem({
         field: '',
         operator: 'included',
         type: 'match',
         value: '',
-      },
+      }),
     ],
     item_id: undefined,
     list_id: listId,
@@ -172,15 +176,32 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => {
-        const [validatedEntry] = validate(t, entry);
-        const [validatedNestedEntry] = validate(t, entriesNested);
+      // NOTE: The temporary ids that are attached to the exception item entries for the
+      // benefit of React keys functionality do not get stripped here. Chose to leave the
+      // adding and stripping of the temporary ids to the api boundaries, the exception being
+      // in the builder where an id is added to the exception item during creation
+      const entries = exception.entries.filter((singleEntry) => {
+        if (singleEntry.type === 'nested') {
+          const strippedSingleEntry = removeIdFromItem({
+            ...singleEntry,
+            entries: singleEntry.entries.map((nestedEntry) => removeIdFromItem(nestedEntry)),
+          });
+          const [validatedNestedEntry] = validate(strippedSingleEntry, entriesNested);
 
-        if (validatedEntry != null || validatedNestedEntry != null) {
-          return true;
+          if (validatedNestedEntry != null) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          const [validatedEntry] = validate(removeIdFromItem(singleEntry), entry);
+
+          if (validatedEntry != null) {
+            return true;
+          } else {
+            return false;
+          }
         }
-
-        return false;
       });
 
       const item = { ...exception, entries };
