@@ -38,11 +38,11 @@ tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
 #--directory "$KIBANA_DIR"
 ls -l
 echo "rename"
-mv "$KIBANA_DIR"/metricbeat-${MB_BUILD}-linux-x86_64 "$KIBANA_DIR"/metricbeat-install
+mv metricbeat-${MB_BUILD}-linux-x86_64 metricbeat-install
 ls -l
 # Configure Metricbeat
 
-pushd "$KIBANA_DIR"/metricbeat-install
+pushd metricbeat-install
 echo "check inside folder"
 ls -l
 popd
