@@ -48106,23 +48106,34 @@ async function isBazelBinAvailable() {
   }
 }
 
+async function isBazeliskInstalled(bazeliskVersion) {
+  try {
+    const {
+      stdout: bazeliskPkgInstallStdout
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['ls', '--global', '--parseable', '--long', `@bazel/bazelisk@${bazeliskVersion}`], {
+      stdio: 'pipe'
+    });
+    return bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`);
+  } catch {
+    return false;
+  }
+}
+
 async function installBazelTools(repoRootPath) {
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
   const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion'); // Check what globals are installed
 
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`);
-  const {
-    stdout: bazeliskPkgInstallStdout
-  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'list'], {
-    stdio: 'pipe'
-  });
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Test if bazelisk is already installed in the correct version
+
+  const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion); // Test if bazel bin is available
+
   const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
 
-  if (!bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`) || !isBazelBinAlreadyAvailable) {
+  if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
+    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
       env: {
         USE_BAZEL_VERSION: bazelVersion
       },
@@ -48132,7 +48143,7 @@ async function installBazelTools(repoRootPath) {
 
     if (!isBazelBinAvailableAfterInstall) {
       throw new Error(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure 'yarn global bin' is on your $PATH, otherwise just add it there
+        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH
       `);
     }
   }
