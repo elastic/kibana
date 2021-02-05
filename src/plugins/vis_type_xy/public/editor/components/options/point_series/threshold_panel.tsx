@@ -19,12 +19,14 @@ import {
 } from '../../../../../../vis_default_editor/public';
 import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
+import { getThresholdLineStyles } from '../../../collections';
+
+const thresholdLineStyles = getThresholdLineStyles();
 
 function ThresholdPanel({
   stateParams,
   setValue,
   setMultipleValidity,
-  vis,
 }: ValidationVisOptionsProps<VisParams>) {
   const setThresholdLine = useCallback(
     <T extends keyof VisParams['thresholdLine']>(
@@ -95,7 +97,7 @@ function ThresholdPanel({
             label={i18n.translate('visTypeXy.editors.pointSeries.thresholdLine.styleLabel', {
               defaultMessage: 'Line style',
             })}
-            options={vis.type.editorConfig.collections.thresholdLineStyles}
+            options={thresholdLineStyles}
             paramName="style"
             value={stateParams.thresholdLine.style}
             setValue={setThresholdLine}

@@ -29,7 +29,6 @@ describe('Enterprise Search Telemetry API', () => {
     mockRouter = new MockRouter({
       method: 'put',
       path: '/api/enterprise_search/stats',
-      payload: 'body',
     });
 
     registerTelemetryRoute({
