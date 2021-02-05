@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const { body: singleAlert }: { body: CollectionWithSubCaseResponse } = await supertest
         .post(getCaseCommentsUrl(caseInfo.id))
-        .query({ sub_case_id: caseInfo.subCase!.id })
+        .query({ subCaseID: caseInfo.subCase!.id })
         .set('kbn-xsrf', 'true')
         .send(postCommentAlertReq)
         .expect(200);

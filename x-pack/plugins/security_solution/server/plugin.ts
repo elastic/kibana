@@ -77,6 +77,13 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../case/server';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -115,6 +122,14 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
+];
+
+const caseSavedObjects = [
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -216,14 +231,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: [
-              'alert',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
-              ...savedObjectTypes,
-            ],
+            all: ['alert', ...caseSavedObjects, ...savedObjectTypes],
             read: ['config'],
           },
           alerting: {
@@ -240,14 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: [
-              'config',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
-              ...savedObjectTypes,
-            ],
+            read: ['config', ...caseSavedObjects, ...savedObjectTypes],
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],

@@ -20,7 +20,7 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
       validate: {
         params: schema.object({
           case_id: schema.string(),
-          sub_case_id: schema.string(),
+          subCaseID: schema.string(),
         }),
         query: schema.object({
           includeComments: schema.boolean({ defaultValue: true }),
@@ -34,7 +34,7 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
 
         const subCase = await caseService.getSubCase({
           client,
-          id: request.params.sub_case_id,
+          id: request.params.subCaseID,
         });
 
         if (!includeComments) {
@@ -49,7 +49,7 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
 
         const theComments = await caseService.getAllSubCaseComments({
           client,
-          id: request.params.sub_case_id,
+          id: request.params.subCaseID,
           options: {
             sortField: 'created_at',
             sortOrder: 'asc',
@@ -64,7 +64,7 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
               totalComment: theComments.total,
               totalAlerts: countAlertsForID({
                 comments: theComments,
-                id: request.params.sub_case_id,
+                id: request.params.subCaseID,
               }),
             })
           ),

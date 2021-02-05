@@ -21,9 +21,35 @@ import {
   SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
+  CasesResponse,
 } from '../../../../plugins/case/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
+
+interface SetStatusCasesParams {
+  id: string;
+  version: string;
+  status: CaseStatuses;
+}
+
+export const setStatus = async ({
+  supertest,
+  cases,
+  type,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  cases: SetStatusCasesParams[];
+  type: 'case' | 'sub_case';
+}): Promise<CasesResponse | SubCasesResponse> => {
+  const url = type === 'case' ? CASES_URL : SUB_CASES_PATCH_DEL_URL;
+  const patchFields = type === 'case' ? { cases } : { subCases: cases };
+  const { body }: { body: CasesResponse | SubCasesResponse } = await supertest
+    .patch(url)
+    .set('kbn-xsrf', 'true')
+    .send(patchFields)
+    .expect(200);
+  return body;
+};
 
 /**
  * Variable to easily access the default comment for the createSubCase function.
@@ -35,7 +61,10 @@ export const defaultCreateSubComment = postCommentGenAlertReq;
  */
 export const defaultCreateSubPost = postCollectionReq;
 
-interface CreateSubCaseResp {
+/**
+ * Response structure for the createSubCase and createSubCaseComment functions.
+ */
+export interface CreateSubCaseResp {
   newSubCaseInfo: CollectionWithSubCaseResponse;
   modifiedSubCases?: SubCasesResponse;
 }
@@ -94,14 +123,17 @@ export const createSubCaseComment = async ({
       .get(`${getSubCasesUrl(collectionID)}/_find`)
       .expect(200);
 
-    if (subCasesResp.subCases.length > 0) {
+    const nonClosed = subCasesResp.subCases.filter(
+      (subCase) => subCase.status !== CaseStatuses.closed
+    );
+    if (nonClosed.length > 0) {
       // mark the sub case as closed so a new sub case will be created on the next comment
       closedSubCases = (
         await supertest
           .patch(SUB_CASES_PATCH_DEL_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            subCases: subCasesResp.subCases.map((subCase) => ({
+            subCases: nonClosed.map((subCase) => ({
               id: subCase.id,
               version: subCase.version,
               status: CaseStatuses.closed,

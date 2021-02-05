@@ -15,9 +15,10 @@ import {
   defaultUser,
   postCaseReq,
   postCaseResp,
+  postCollectionReq,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../common/lib/mock';
-import { deleteCases, deleteCasesUserActions } from '../../../common/lib/utils';
+import { deleteAllCaseItems } from '../../../common/lib/utils';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -38,8 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('patch_cases', () => {
     afterEach(async () => {
-      await deleteCases(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should patch a case', async () => {
@@ -125,6 +125,28 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         })
         .expect(404);
+    });
+
+    it("should 400 when attempting to update a collection case's status", async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCollectionReq)
+        .expect(200);
+
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: 'closed',
+            },
+          ],
+        })
+        .expect(400);
     });
 
     it('unhappy path - 406s when excess data sent', async () => {

@@ -24,7 +24,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         }),
         query: schema.maybe(
           schema.object({
-            sub_case_id: schema.maybe(schema.string()),
+            subCaseID: schema.maybe(schema.string()),
           })
         ),
       },
@@ -36,12 +36,12 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 
-        const id = request.query?.sub_case_id ?? request.params.case_id;
+        const id = request.query?.subCaseID ?? request.params.case_id;
         const comments = await getComments({
           client,
           caseService,
           id,
-          associationType: request.query?.sub_case_id
+          associationType: request.query?.subCaseID
             ? AssociationType.subCase
             : AssociationType.case,
         });

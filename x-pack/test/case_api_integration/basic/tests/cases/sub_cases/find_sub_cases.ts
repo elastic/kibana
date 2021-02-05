@@ -98,5 +98,9 @@ export default ({ getService }: FtrProviderContext): void => {
         count_closed_cases: 1,
       });
     });
+
+    // TODO:
+    // tests for sorting on status, sort order, sort field
+    // tests for in-progress stats
   });
 };

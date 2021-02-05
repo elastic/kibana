@@ -150,7 +150,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              fields: ['comment', 'description', 'status', 'tags', 'title'],
+              fields: ['comment', 'description', 'status', 'tags', 'title', 'sub_case'],
             })
           ),
         });

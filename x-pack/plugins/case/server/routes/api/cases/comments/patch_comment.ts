@@ -66,7 +66,7 @@ export function initPatchCommentApi({
         }),
         query: schema.maybe(
           schema.object({
-            sub_case_id: schema.maybe(schema.string()),
+            subCaseID: schema.maybe(schema.string()),
           })
         ),
         body: escapeHatch,
@@ -87,7 +87,7 @@ export function initPatchCommentApi({
           service: caseService,
           client,
           caseID: request.params.case_id,
-          subCaseID: request.query?.sub_case_id,
+          subCaseID: request.query?.subCaseID,
         });
 
         const myComment = await caseService.getComment({
@@ -103,7 +103,7 @@ export function initPatchCommentApi({
           throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        const saveObjType = request.query?.sub_case_id ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const saveObjType = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
 
         const caseRef = myComment.references.find((c) => c.type === saveObjType);
         if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
@@ -147,7 +147,7 @@ export function initPatchCommentApi({
               actionAt: updatedDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.sub_case_id,
+              subCaseId: request.query?.subCaseID,
               commentId: updatedComment.id,
               fields: ['comment'],
               newValue: JSON.stringify(queryRestAttributes),

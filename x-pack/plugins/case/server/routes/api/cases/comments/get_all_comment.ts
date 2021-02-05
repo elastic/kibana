@@ -23,8 +23,8 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         }),
         query: schema.maybe(
           schema.object({
-            include_sub_case_comments: schema.maybe(schema.boolean()),
-            sub_case_id: schema.maybe(schema.string()),
+            includeSubCaseComments: schema.maybe(schema.boolean()),
+            subCaseID: schema.maybe(schema.string()),
           })
         ),
       },
@@ -34,16 +34,16 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
         const client = context.core.savedObjects.client;
         let comments: SavedObjectsFindResponse<CommentAttributes>;
 
-        if (request.query?.sub_case_id) {
+        if (request.query?.subCaseID) {
           comments = await caseService.getAllSubCaseComments({
             client,
-            id: request.query.sub_case_id,
+            id: request.query.subCaseID,
           });
         } else {
           comments = await caseService.getAllCaseComments({
             client,
             id: request.params.case_id,
-            includeSubCaseComments: request.query?.include_sub_case_comments,
+            includeSubCaseComments: request.query?.includeSubCaseComments,
           });
         }
 

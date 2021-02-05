@@ -6,10 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-// TODO: fix this
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { legacyClientMock } from 'src/core/server/elasticsearch/legacy/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {
   AlertServiceContract,
@@ -48,7 +45,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     alertsService: jest.Mocked<AlertServiceContract>;
   };
 }> => {
-  const esLegacyCluster = legacyClientMock.createScopedClusterClient();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
@@ -77,7 +74,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     connectorMappingsService,
     userActionService,
     alertsService,
-    callCluster: esLegacyCluster.callAsCurrentUser,
+    scopedClusterClient: esClient,
   });
   return {
     client: caseClient,

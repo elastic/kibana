@@ -47,6 +47,7 @@ async function getSubCase({
     return mostRecentSubCase;
   }
 
+  // TODO: add action for sub_case creation
   // else need to create a new sub case
   return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
 }

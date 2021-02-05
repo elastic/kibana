@@ -15,6 +15,8 @@ import {
   UserActionField,
   ESCaseAttributes,
   User,
+  UserActionFieldType,
+  SubCaseAttributes,
 } from '../../../common/api';
 import {
   isTwoArraysDifference,
@@ -159,16 +161,23 @@ const userActionFieldsAllowed: UserActionField = [
   'sub_case',
 ];
 
-export const buildCaseUserActions = ({
+const buildGenericCaseUserActions = <T>({
   actionDate,
   actionBy,
   originalCases,
   updatedCases,
+  allowedFields,
+  getField,
 }: {
   actionDate: string;
   actionBy: User;
-  originalCases: Array<SavedObject<ESCaseAttributes>>;
-  updatedCases: Array<SavedObjectsUpdateResponse<ESCaseAttributes>>;
+  originalCases: Array<SavedObject<T>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<T>>;
+  allowedFields: UserActionField;
+  getField: (
+    attributes: Pick<SavedObjectsUpdateResponse<T>, 'attributes'>,
+    field: UserActionFieldType
+  ) => unknown;
 }): UserActionItem[] =>
   updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
     const originalItem = originalCases.find((oItem) => oItem.id === updatedItem.id);
@@ -176,16 +185,9 @@ export const buildCaseUserActions = ({
       let userActions: UserActionItem[] = [];
       const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
       updatedFields.forEach((field) => {
-        if (userActionFieldsAllowed.includes(field)) {
-          const origValue =
-            field === 'connector' && originalItem.attributes.connector
-              ? transformESConnectorToCaseConnector(originalItem.attributes.connector)
-              : get(originalItem, ['attributes', field]);
-
-          const updatedValue =
-            field === 'connector' && updatedItem.attributes.connector
-              ? transformESConnectorToCaseConnector(updatedItem.attributes.connector)
-              : get(updatedItem, ['attributes', field]);
+        if (allowedFields.includes(field)) {
+          const origValue = getField(originalItem, field);
+          const updatedValue = getField(updatedItem, field);
 
           if (isString(origValue) && isString(updatedValue) && origValue !== updatedValue) {
             userActions = [
@@ -253,3 +255,48 @@ export const buildCaseUserActions = ({
     }
     return acc;
   }, []);
+
+/**
+ * Create a user action for an updated sub case.
+ */
+export const buildSubCaseUserActions = (args: {
+  actionDate: string;
+  actionBy: User;
+  originalSubCases: Array<SavedObject<SubCaseAttributes>>;
+  updatedSubCases: Array<SavedObjectsUpdateResponse<SubCaseAttributes>>;
+}): UserActionItem[] => {
+  const getField = (
+    so: Pick<SavedObjectsUpdateResponse<SubCaseAttributes>, 'attributes'>,
+    field: UserActionFieldType
+  ) => get(so, ['attributes', field]);
+
+  return buildGenericCaseUserActions({
+    actionDate: args.actionDate,
+    actionBy: args.actionBy,
+    originalCases: args.originalSubCases,
+    updatedCases: args.updatedSubCases,
+    allowedFields: ['status'],
+    getField,
+  });
+};
+
+/**
+ * Create a user action for an updated case.
+ */
+export const buildCaseUserActions = (args: {
+  actionDate: string;
+  actionBy: User;
+  originalCases: Array<SavedObject<ESCaseAttributes>>;
+  updatedCases: Array<SavedObjectsUpdateResponse<ESCaseAttributes>>;
+}): UserActionItem[] => {
+  const getField = (
+    so: Pick<SavedObjectsUpdateResponse<ESCaseAttributes>, 'attributes'>,
+    field: UserActionFieldType
+  ) => {
+    return field === 'connector' && so.attributes.connector
+      ? transformESConnectorToCaseConnector(so.attributes.connector)
+      : get(so, ['attributes', field]);
+  };
+
+  return buildGenericCaseUserActions({ ...args, allowedFields: userActionFieldsAllowed, getField });
+};

@@ -68,12 +68,12 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient, callCluster } = services;
+  const { savedObjectsClient, scopedClusterClient } = services;
   // TODO: ??? calling a constructor in a curry generates this error, TypeError: _client.CaseClientImpl is not a constructor
   // const caseClient = new CaseClientImpl({
   const caseClient = createExternalCaseClient({
     savedObjectsClient,
-    callCluster,
+    scopedClusterClient,
     // TODO: refactor this
     request: {} as KibanaRequest,
     caseService,

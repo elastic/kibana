@@ -32,6 +32,11 @@ import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
+import { UserInfo } from '../../../../common';
+import {
+  buildCaseUserActions,
+  buildSubCaseUserActions,
+} from '../../../../services/user_actions/helpers';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -145,6 +150,25 @@ async function getParentCases({
   }, new Map<string, SavedObject<ESCaseAttributes>>());
 }
 
+function getValidUpdateRequests(
+  toUpdate: SubCasePatchRequest[],
+  subCasesMap: Map<string, SavedObject<SubCaseAttributes>>
+): SubCasePatchRequest[] {
+  const validatedSubCaseAttributes: SubCasePatchRequest[] = toUpdate.map((updateCase) => {
+    const currentCase = subCasesMap.get(updateCase.id);
+    return currentCase != null
+      ? getCaseToUpdate(currentCase.attributes, {
+          ...updateCase,
+        })
+      : { id: updateCase.id, version: updateCase.version };
+  });
+
+  return validatedSubCaseAttributes.filter((updateCase: SubCasePatchRequest) => {
+    const { id, version, ...updateCaseAttributes } = updateCase;
+    return Object.keys(updateCaseAttributes).length > 0;
+  });
+}
+
 async function update({
   client,
   caseService,
@@ -170,22 +194,7 @@ async function update({
 
   checkNonExistingOrConflict(query.subCases, subCasesMap);
 
-  // TODO: extract to new function
-  const validatedSubCaseAttributes: SubCasePatchRequest[] = query.subCases.map((updateCase) => {
-    const currentCase = subCasesMap.get(updateCase.id);
-    return currentCase != null
-      ? getCaseToUpdate(currentCase.attributes, {
-          ...updateCase,
-        })
-      : { id: updateCase.id, version: updateCase.version };
-  });
-
-  const nonEmptySubCaseRequests = validatedSubCaseAttributes.filter(
-    (updateCase: SubCasePatchRequest) => {
-      const { id, version, ...updateCaseAttributes } = updateCase;
-      return Object.keys(updateCaseAttributes).length > 0;
-    }
-  );
+  const nonEmptySubCaseRequests = getValidUpdateRequests(query.subCases, subCasesMap);
 
   if (nonEmptySubCaseRequests.length <= 0) {
     throw Boom.notAcceptable('All update fields are identical to current version.');
@@ -206,8 +215,11 @@ async function update({
     client,
     subCases: nonEmptySubCaseRequests.map((thisCase) => {
       const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
-      // TODO: type this
-      let closedInfo = {};
+      let closedInfo: { closed_at: string | null; closed_by: UserInfo | null } = {
+        closed_at: null,
+        closed_by: null,
+      };
+
       if (
         updateSubCaseAttributes.status &&
         updateSubCaseAttributes.status === CaseStatuses.closed
@@ -307,16 +319,16 @@ async function update({
     []
   );
 
-  // TODO: need to implement one for sub case
-  /* await userActionService.postUserActions({
+  // TODO: figure out what we need to save
+  await userActionService.postUserActions({
     client,
-    actions: buildCaseUserActions({
-      originalCases: bulkSubCases.saved_objects,
-      updatedCases: updatedCases.saved_objects,
-      actionDate: updatedDt,
+    actions: buildSubCaseUserActions({
+      originalSubCases: bulkSubCases.saved_objects,
+      updatedSubCases: updatedCases.saved_objects,
+      actionDate: updatedAt,
       actionBy: { email, full_name, username },
     }),
-  });*/
+  });
 
   return SubCasesResponseRt.encode(returnUpdatedSubCases);
 }

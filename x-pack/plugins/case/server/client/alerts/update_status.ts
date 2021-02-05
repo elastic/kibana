@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILegacyScopedClusterClient } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { CaseStatuses } from '../../../common/api';
 import { AlertServiceContract } from '../../services';
 
@@ -14,8 +14,7 @@ interface UpdateAlertsStatusArgs {
   ids: string[];
   status: CaseStatuses;
   indices: Set<string>;
-  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  scopedClusterClient: ElasticsearchClient;
 }
 
 // TODO: remove this file
@@ -24,7 +23,7 @@ export const updateAlertsStatus = async ({
   ids,
   status,
   indices,
-  callCluster,
+  scopedClusterClient,
 }: UpdateAlertsStatusArgs): Promise<void> => {
-  await alertsService.updateAlertsStatus({ ids, status, indices, callCluster });
+  await alertsService.updateAlertsStatus({ ids, status, indices, scopedClusterClient });
 };

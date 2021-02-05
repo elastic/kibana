@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 
 export type AlertServiceContract = PublicMethodsOf<AlertService>;
@@ -16,14 +16,18 @@ interface UpdateAlertsStatusArgs {
   ids: string[];
   status: CaseStatuses;
   indices: Set<string>;
-  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  scopedClusterClient: ElasticsearchClient;
 }
 
 export class AlertService {
   constructor() {}
 
-  public async updateAlertsStatus({ ids, status, indices, callCluster }: UpdateAlertsStatusArgs) {
+  public async updateAlertsStatus({
+    ids,
+    status,
+    indices,
+    scopedClusterClient,
+  }: UpdateAlertsStatusArgs) {
     /**
      * remove empty strings from the indices, I'm not sure how likely this is but in the case that
      * the document doesn't have _index set the security_solution code sets the value to an empty string
@@ -35,7 +39,7 @@ export class AlertService {
     }
 
     // The above check makes sure that esClient is defined.
-    const result = await callCluster('updateByQuery', {
+    const result = await scopedClusterClient.updateByQuery({
       index: sanitizedIndices,
       conflicts: 'abort',
       body: {

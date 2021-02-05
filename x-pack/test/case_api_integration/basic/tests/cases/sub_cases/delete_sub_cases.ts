@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       }: { body: CollectionWithSubCaseResponse } = await supertest
         .post(`${CASES_URL}/${caseInfo.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .query({ sub_case_id: caseInfo.subCase!.id })
+        .query({ subCaseID: caseInfo.subCase!.id })
         .send(postCommentUserReq)
         .expect(200);
 

@@ -25,7 +25,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
         }),
         query: schema.maybe(
           schema.object({
-            sub_case_id: schema.maybe(schema.string()),
+            subCaseID: schema.maybe(schema.string()),
           })
         ),
       },
@@ -46,8 +46,8 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
           throw Boom.notFound(`This comment ${request.params.comment_id} does not exist anymore.`);
         }
 
-        const type = request.query?.sub_case_id ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-        const id = request.query?.sub_case_id ?? request.params.case_id;
+        const type = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
+        const id = request.query?.subCaseID ?? request.params.case_id;
 
         const caseRef = myComment.references.find((c) => c.type === type);
         if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
