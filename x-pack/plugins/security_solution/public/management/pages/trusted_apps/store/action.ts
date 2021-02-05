@@ -52,6 +52,10 @@ export type TrustedAppCreationDialogFormStateUpdated = Action<'trustedAppCreatio
   };
 };
 
+export type TrustedAppCreationEditItemStateChanged = Action<'trustedAppCreationEditItemStateChanged'> & {
+  payload: AsyncResourceState<TrustedApp>;
+};
+
 export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialogConfirmed'>;
 
 export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
@@ -72,6 +76,7 @@ export type TrustedAppsPageAction =
   | TrustedAppDeletionDialogConfirmed
   | TrustedAppDeletionDialogClosed
   | TrustedAppCreationSubmissionResourceStateChanged
+  | TrustedAppCreationEditItemStateChanged
   | TrustedAppCreationDialogStarted
   | TrustedAppCreationDialogFormStateUpdated
   | TrustedAppCreationDialogConfirmed

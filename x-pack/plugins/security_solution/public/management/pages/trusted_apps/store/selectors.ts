@@ -131,7 +131,7 @@ export const getDeletionDialogEntry = (
 };
 
 export const isCreationDialogLocation = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return state.location.show === 'create';
+  return !!state.location.show;
 };
 
 export const getCreationSubmissionResourceState = (
@@ -199,4 +199,37 @@ export const listOfPolicies: (
   state: Immutable<TrustedAppsListPageState>
 ) => Immutable<GetPolicyListResponse['items']> = createSelector(policiesState, (policies) => {
   return isLoadedResourceState(policies) ? policies.data.items : [];
+});
+
+export const isEdit: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
+  getCurrentLocation,
+  ({ show }) => {
+    return show === 'edit';
+  }
+);
+
+export const editItemId: (
+  state: Immutable<TrustedAppsListPageState>
+) => string | undefined = createSelector(getCurrentLocation, ({ id }) => {
+  return id;
+});
+
+export const editItemState: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<TrustedAppsListPageState>['creationDialog']['editItem'] = (state) => {
+  return state.creationDialog.editItem;
+};
+
+export const isFetchingEditTrustedAppItem: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(editItemState, (editTrustedAppState) => {
+  return editTrustedAppState ? isLoadingResourceState(editTrustedAppState) : false;
+});
+
+export const editingTrustedApp: (
+  state: Immutable<TrustedAppsListPageState>
+) => undefined | Immutable<TrustedApp> = createSelector(editItemState, (editTrustedAppState) => {
+  if (editTrustedAppState && isLoadedResourceState(editTrustedAppState)) {
+    return editTrustedAppState.data;
+  }
 });
