@@ -156,6 +156,29 @@ export default function ({ getService }: FtrProviderContext) {
           expect(eventsUntil.length).to.be(expectedEvents.length + 1);
           assertEventsFromApiMatchCreatedEvents(eventsUntil, [firstEvent, ...expectedEvents]);
         });
+
+        it('should aggregate events summary by Saved Object ids', async () => {
+          const id1 = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+          const expectedEvents1 = [fakeEvent(namespace, id1), fakeEvent(namespace, id1)];
+
+          const id2 = `421f2511-5cd1-44fd-95df-e0df83e354d1`;
+          const expectedEvents2 = [fakeEvent(namespace, id2), fakeEvent(namespace, id2)];
+
+          await logTestEvent(namespace, id1, expectedEvents1[0]);
+          await logTestEvent(namespace, id1, expectedEvents1[1]);
+          await logTestEvent(namespace, id2, expectedEvents2[0]);
+          await logTestEvent(namespace, id2, expectedEvents2[1]);
+
+          await retry.try(async () => {
+            const result = await aggregateEventsSummaryBySavedObjectIds(namespace, [id1, id2], {});
+
+            expect(result.body.length).to.be(2);
+            expect(result.body).to.eql([
+              { savedObjectId: '421f2511-5cd1-44fd-95df-e0df83e354d1', summary: { doc_count: 2 } },
+              { savedObjectId: '421f2511-5cd1-44fd-95df-e0df83e354d5', summary: { doc_count: 2 } },
+            ]);
+          });
+        });
       });
     }
 
@@ -201,6 +224,24 @@ export default function ({ getService }: FtrProviderContext) {
     }`;
     log.debug(`Finding Events for Saved Object with ${url}`);
     return await supertest.get(url).set('kbn-xsrf', 'foo').expect(200);
+  }
+
+  async function aggregateEventsSummaryBySavedObjectIds(
+    namespace: string | undefined,
+    ids: string[],
+    aggs: Record<string, any> = {}
+  ) {
+    const urlPrefix = urlPrefixFromNamespace(namespace);
+    const url = `${urlPrefix}/api/event_log/event_log_test/saved_object_summary`;
+    log.debug(`Finding Events for Saved Object with ${url}`);
+    return await supertest
+      .post(url)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        ids,
+        aggs,
+      })
+      .expect(200);
   }
 
   function assertEventsFromApiMatchCreatedEvents(

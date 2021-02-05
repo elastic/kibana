@@ -871,6 +871,15 @@ describe('queryEventsSummaryBySavedObjectIds', () => {
                             'kibana.saved_objects.id': ['saved-object-id'],
                           },
                         },
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'kibana.saved_objects.namespace',
+                              },
+                            },
+                          },
+                        },
                       ],
                     },
                   },
@@ -887,15 +896,6 @@ describe('queryEventsSummaryBySavedObjectIds', () => {
                 range: {
                   '@timestamp': {
                     lte: '2020-07-08T00:00:00.000Z',
-                  },
-                },
-              },
-              {
-                bool: {
-                  must_not: {
-                    exists: {
-                      field: 'kibana.saved_objects.namespace',
-                    },
                   },
                 },
               },
