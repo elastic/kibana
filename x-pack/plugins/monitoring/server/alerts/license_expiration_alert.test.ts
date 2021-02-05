@@ -7,6 +7,7 @@
 
 import { LicenseExpirationAlert } from './license_expiration_alert';
 import { ALERT_LICENSE_EXPIRATION } from '../../common/constants';
+import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
@@ -19,17 +20,8 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
 }));
 jest.mock('moment', () => {
-  const moment = function () {
-    return {
-      format: () => 'THE_DATE',
-    };
-  };
+  const moment = function () {};
   moment.duration = () => ({ humanize: () => 'HUMANIZED_DURATION' });
-  moment.utc = () => ({
-    add: () => ({
-      isAfter: () => false,
-    }),
-  });
   return moment;
 });
 
@@ -84,7 +76,7 @@ describe('LicenseExpirationAlert', () => {
     const license = {
       status: 'expired',
       type: 'gold',
-      expiryDateMS: 1,
+      expiryDateMS: 1000 * 60 * 60 * 24 * 59,
       clusterUuid,
     };
 
@@ -138,7 +130,7 @@ describe('LicenseExpirationAlert', () => {
             itemLabel: undefined,
             meta: {
               clusterUuid: 'abc123',
-              expiryDateMS: 1,
+              expiryDateMS: 5097600000,
               status: 'expired',
               type: 'gold',
             },
@@ -155,14 +147,14 @@ describe('LicenseExpirationAlert', () => {
                     type: 'time',
                     isRelative: true,
                     isAbsolute: false,
-                    timestamp: 1,
+                    timestamp: 5097600000,
                   },
                   {
                     startToken: '#absolute',
                     type: 'time',
                     isAbsolute: true,
                     isRelative: false,
-                    timestamp: 1,
+                    timestamp: 5097600000,
                   },
                   {
                     startToken: '#start_link',
@@ -198,7 +190,7 @@ describe('LicenseExpirationAlert', () => {
           {
             status: 'active',
             type: 'gold',
-            expiryDateMS: 1,
+            expiryDateMS: 1000 * 60 * 60 * 24 * 61,
             clusterUuid,
           },
         ];
@@ -212,6 +204,48 @@ describe('LicenseExpirationAlert', () => {
       } as any);
       expect(replaceState).not.toHaveBeenCalledWith({});
       expect(scheduleActions).not.toHaveBeenCalled();
+    });
+
+    it('should use danger severity for a license expiring soon', async () => {
+      (fetchLicenses as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            status: 'active',
+            type: 'gold',
+            expiryDateMS: 1000 * 60 * 60 * 24 * 2,
+            clusterUuid,
+          },
+        ];
+      });
+      const alert = new LicenseExpirationAlert();
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.alertOptions.defaultParams,
+      } as any);
+      expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Danger);
+    });
+
+    it('should use warning severity for a license expiring in a bit', async () => {
+      (fetchLicenses as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            status: 'active',
+            type: 'gold',
+            expiryDateMS: 1000 * 60 * 60 * 24 * 31,
+            clusterUuid,
+          },
+        ];
+      });
+      const alert = new LicenseExpirationAlert();
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.alertOptions.defaultParams,
+      } as any);
+      expect(replaceState.mock.calls[0][0].alertStates[0].ui.severity).toBe(AlertSeverity.Warning);
     });
   });
 });

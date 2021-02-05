@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
@@ -91,7 +90,6 @@ export class LicenseExpirationAlert extends BaseAlert {
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;
-      const $expiry = moment.utc(expiryDateMS);
       let isExpired = false;
       let severity = AlertSeverity.Success;
 
@@ -104,10 +102,10 @@ export class LicenseExpirationAlert extends BaseAlert {
             break;
           }
 
-          const $fromNow = moment.utc().add(EXPIRES_DAYS[i], 'days');
-          if ($fromNow.isAfter($expiry)) {
+          const fromNow = +new Date() + EXPIRES_DAYS[i] * 1000 * 60 * 60 * 24;
+          if (fromNow >= expiryDateMS) {
             isExpired = true;
-            severity = i > 1 ? AlertSeverity.Warning : AlertSeverity.Danger;
+            severity = i < 1 ? AlertSeverity.Warning : AlertSeverity.Danger;
             break;
           }
         }
@@ -167,8 +165,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     // Logic in the base alert assumes that all alerts will operate against multiple nodes/instances (such as a CPU alert against ES nodes)
     // However, some alerts operate on the state of the cluster itself and are only concerned with a single state
     const state: AlertLicenseState = alertStates[0] as AlertLicenseState;
-    const $expiry = moment.utc(state.expiryDateMS);
-    const $duration = moment.duration(+new Date() - $expiry.valueOf());
+    const $duration = moment.duration(+new Date() - state.expiryDateMS);
     const actionText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
       defaultMessage: 'Please update your license.',
     });
