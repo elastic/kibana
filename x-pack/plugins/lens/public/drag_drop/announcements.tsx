@@ -25,7 +25,7 @@ const selectedTargetReplace = (
   { label: dropLabel, groupLabel, position }: HumanData
 ) =>
   i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
-    defaultMessage: `You have selected {dropLabel} in {groupLabel} group in position {position}. Press space or enter to replace {dropLabel} with {label}.`,
+    defaultMessage: `Selected {dropLabel} in {groupLabel} group at position {position}. Press space or enter to replace {dropLabel} with {label}.`,
     values: {
       label,
       dropLabel,
@@ -66,7 +66,7 @@ export const announcements: CustomAnnouncementsType = {
           }),
     duplicate_in_group: ({ label }, { label: dropLabel, groupLabel, position }) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicated', {
-        defaultMessage: `You have selected {dropLabel} in {groupLabel} group in position {position}. Press space or enter to duplicate {label}.`,
+        defaultMessage: `Selected {dropLabel} in {groupLabel} group at position {position}. Press space or enter to duplicate {label}.`,
         values: {
           label,
           dropLabel,
@@ -92,7 +92,7 @@ export const announcements: CustomAnnouncementsType = {
     duplicate_in_group: ({ label }, { groupLabel, position }) =>
       i18n.translate('xpack.lens.dragDrop.announce.dropped.duplicated', {
         defaultMessage:
-          'You have dropped the item. You have duplicated {label} in {groupLabel} group in position {position}',
+          'You have dropped the item. You have duplicated {label} in {groupLabel} group at position {position}',
         values: {
           label,
           groupLabel,
@@ -108,7 +108,7 @@ export const announcements: CustomAnnouncementsType = {
 const defaultAnnouncements = {
   lifted: ({ label }: HumanData) =>
     i18n.translate('xpack.lens.dragDrop.announce.lifted', {
-      defaultMessage: `You have lifted an item {label}`,
+      defaultMessage: `Lifted {label}`,
       values: {
         label,
       },
@@ -119,7 +119,7 @@ const defaultAnnouncements = {
     }),
   noTarget: () => {
     return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.noSelected', {
-      defaultMessage: `You have no target selected. Use arrow keys to select a target.`,
+      defaultMessage: `No target selected. Use arrow keys to select a target.`,
     });
   },
 
@@ -130,7 +130,7 @@ const defaultAnnouncements = {
     dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.droppedDefault', {
           defaultMessage:
-            'You have dropped {label} to {dropLabel} in {dropGroupLabel} group in position {position}',
+            'You have dropped {label} to {dropLabel} in {dropGroupLabel} group at position {position}',
           values: {
             label,
             dropGroupLabel,
@@ -151,7 +151,7 @@ const defaultAnnouncements = {
   ) => {
     return dropGroupLabel && position
       ? i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.default', {
-          defaultMessage: `You have selected {dropLabel} in {dropGroupLabel} group in position {position}. Press space or enter to drop {label}`,
+          defaultMessage: `Selected {dropLabel} in {dropGroupLabel} group at position {position}. Press space or enter to drop {label}`,
           values: {
             dropLabel,
             label,
@@ -160,7 +160,7 @@ const defaultAnnouncements = {
           },
         })
       : i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.defaultNoPosition', {
-          defaultMessage: `You have selected {dropLabel}. Press space or enter to drop {label}`,
+          defaultMessage: `Selected {dropLabel}. Press space or enter to drop {label}`,
           values: {
             dropLabel,
             label,

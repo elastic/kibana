@@ -22,7 +22,9 @@ exports[`DragDrop items that has dropType=undefined get special styling when ano
 `;
 
 exports[`DragDrop renders if nothing is being dragged 1`] = `
-<div>
+<div
+  data-test-subj="lnsDragDrop_draggable-hello"
+>
   <button
     aria-describedby="lnsDragDrop-keyboardInstructions"
     aria-label="hello"
