@@ -27,7 +27,7 @@ export function TraceOverview() {
   const { environment, start, end } = urlParams;
   const { status, data = DEFAULT_RESPONSE } = useFetcher(
     (callApmApi) => {
-      if (environment && start && end) {
+      if (start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/traces',
           params: {
