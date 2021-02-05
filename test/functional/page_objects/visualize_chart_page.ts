@@ -418,7 +418,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     public async filterOnTableCell(columnIndex: number, rowIndex: number) {
       await retry.try(async () => {
         const cell = await dataGrid.getCellElement(rowIndex, columnIndex);
-        await cell.moveMouseTo();
+        await cell.focus();
         const filterBtn = await testSubjects.findDescendant(
           'tbvChartCell__filterForCellValue',
           cell
