@@ -21,12 +21,12 @@ export const telemetryJWKS: PublicJWKS = {
     },
     {
       kty: 'RSA',
-      kid: 'kibana_dev_1',
+      kid: 'kibana_dev',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
       n:
-        'jTbnpqb3vZheLoedLvTJI8Ci7RT-bTkxpmp_ni0PN_b1lv_9c9crbzbIqkE7EiFrqEsFD1xFHOqrFgYdrQmoE3TmDx6hRLGhhKeBWg89opbutb8ET3YSA97Io4uAHk02mo447NWXg7I1HiQau6TkdZNXrol4mjzkiRtUQGDUmhK428sxH3yVZB69WfJijEwtYI81Ms7FynPPAymPzGo_He3-sV0JG5U2OCy8RTohB9Agjq708F8SrVhJ6whX32gQ537DeYOzGUpFXfoIS3HE__OLYeyLj6OoKnyTLl6FF9iMVY8xfAPbFY5eJuMqCzACTsndRuDlYfOsbYFueUQogw',
+        'juVHivsYFznjrDC449oL3xKVTvux_7dEgBGOgJdfzA2R2GspEAOzupT-VkBnqrJnRP_lznM8bQIvvst1f_DNQ1me_Lr9u9cwL5Vq6SWlmw_u9ur_-ewkShU4tBoJDArksOS-ciTaUJoMaxanb7jWexp0pCDlrLrQyAOCnKQL701mD1gdT4rIw7F-jkb5fLUNUVzOGaGyVy6DHAHZx7Tnyw8rswhyRVvuS73imbRp9XcdOFhBDOeSbrSuZGqrVCjoIlWw-UsiW2ueRd8brBoOIHSmTOMIrIMjpPmzMFRKyCvvhnbjrw8j3fQtFII8urhXCVAw8aIHZhiBc5t9ZuwbJw',
     },
   ],
 };
