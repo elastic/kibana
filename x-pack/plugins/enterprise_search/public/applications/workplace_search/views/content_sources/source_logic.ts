@@ -27,7 +27,6 @@ import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } f
 export interface SourceActions {
   onInitializeSource(contentSource: ContentSourceFullData): ContentSourceFullData;
   onUpdateSourceName(name: string): string;
-  setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSearchResults(searchResultsResponse: SearchResultsResponse): SearchResultsResponse;
   initializeFederatedSummary(sourceId: string): { sourceId: string };
   onUpdateSummary(summary: DocumentSummaryItem[]): DocumentSummaryItem[];
@@ -41,26 +40,7 @@ export interface SourceActions {
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
-  getSourceConfigData(serviceType: string): { serviceType: string };
   setButtonNotLoading(): void;
-}
-
-interface SourceConfigData {
-  serviceType: string;
-  name: string;
-  configured: boolean;
-  categories: string[];
-  needsPermissions?: boolean;
-  privateSourcesEnabled: boolean;
-  configuredFields: {
-    publicKey: string;
-    privateKey: string;
-    consumerKey: string;
-    baseUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-  };
-  accountContextOnly?: boolean;
 }
 
 interface SourceValues {
@@ -71,7 +51,6 @@ interface SourceValues {
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
-  sourceConfigData: SourceConfigData;
 }
 
 interface SearchResultsResponse {
@@ -84,7 +63,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
-    setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     onUpdateSummary: (summary: object[]) => summary,
     setSearchResults: (searchResultsResponse: SearchResultsResponse) => searchResultsResponse,
     setContentFilterValue: (contentFilterValue: string) => contentFilterValue,
@@ -96,7 +74,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
-    getSourceConfigData: (serviceType: string) => ({ serviceType }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
   },
@@ -115,17 +92,10 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }),
       },
     ],
-    sourceConfigData: [
-      {} as SourceConfigData,
-      {
-        setSourceConfigData: (_, sourceConfigData) => sourceConfigData,
-      },
-    ],
     dataLoading: [
       true,
       {
         onInitializeSource: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
       },
     ],
@@ -133,7 +103,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       false,
       {
         setButtonNotLoading: () => false,
-        setSourceConfigData: () => false,
         resetSourceState: () => false,
         removeContentSource: () => true,
       },
@@ -181,7 +150,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           actions.initializeFederatedSummary(sourceId);
         }
       } catch (e) {
-        // TODO: Verify this works once components are there. Not sure if the catch gives a status code.
         if (e.response.status === 404) {
           KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
         } else {
@@ -258,16 +226,6 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         flashAPIErrors(e);
       } finally {
         actions.setButtonNotLoading();
-      }
-    },
-    getSourceConfigData: async ({ serviceType }) => {
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
-
-      try {
-        const response = await HttpLogic.values.http.get(route);
-        actions.setSourceConfigData(response);
-      } catch (e) {
-        flashAPIErrors(e);
       }
     },
     onUpdateSourceName: (name: string) => {
