@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -64,7 +65,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
-import { AppRequestContext } from './types';
+import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
@@ -168,10 +169,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
 
-    const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(
+    const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
-      (context, request, response): AppRequestContext => ({
+      (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
       })
     );
@@ -355,6 +356,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.policyWatcher = new PolicyWatcher(
         plugins.fleet!.packagePolicyService,
         core.savedObjects,
+        core.elasticsearch,
         this.logger
       );
       this.policyWatcher.start(licenseService);
@@ -374,6 +376,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
       licenseService,
+      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
     this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);

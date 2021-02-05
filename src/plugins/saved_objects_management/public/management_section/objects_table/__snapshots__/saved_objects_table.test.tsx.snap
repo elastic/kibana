@@ -108,7 +108,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
         "navigateToUrl": [MockFunction],
-        "registerMountContext": [MockFunction],
       }
     }
   >

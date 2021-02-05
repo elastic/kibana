@@ -1,25 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
+import { SavedObjectsExportTransform } from './export';
+import { SavedObjectsImportHook } from './import/types';
 
 export {
   SavedObjectsImportResponse,
@@ -31,6 +22,9 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportWarning,
 } from './import/types';
 
 import { SavedObject } from '../../types';
@@ -245,9 +239,44 @@ export interface SavedObjectsType {
    */
   mappings: SavedObjectsTypeMappingDefinition;
   /**
-   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
-  migrations?: SavedObjectMigrationMap;
+  migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
+  /**
+   * If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.
+   *
+   * Requirements:
+   *
+   *  1. This string value must be a valid semver version
+   *  2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}
+   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`}
+   *
+   * Example of a single-namespace type in 7.10:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'single',
+   *   mappings: {...}
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace type in 7.11:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '7.11.0'
+   * }
+   * ```
+   *
+   * Note: a migration function can be optionally specified for the same version.
+   */
+  convertToMultiNamespaceTypeVersion?: string;
   /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
@@ -292,4 +321,58 @@ export interface SavedObjectsTypeManagementDefinition {
    *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+  /**
+   * An optional export transform function that can be used transform the objects of the registered type during
+   * the export process.
+   *
+   * It can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.
+   *
+   * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  onExport?: SavedObjectsExportTransform;
+  /**
+   * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
+   *
+   * Import hooks are executed during the savedObjects import process and allow to interact
+   * with the imported objects. See the {@link SavedObjectsImportHook | hook documentation}
+   * for more info.
+   *
+   * @example
+   * Registering a hook displaying a warning about a specific type of object
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          onImport: (objects) => {
+   *            if(someActionIsNeeded(objects)) {
+   *              return {
+   *                 warnings: [
+   *                   {
+   *                     type: 'action_required',
+   *                     message: 'Objects need to be manually enabled after import',
+   *                     actionPath: '/app/my-app/require-activation',
+   *                   },
+   *                 ]
+   *              }
+   *            }
+   *            return {};
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remarks messages returned in the warnings are user facing and must be translated.
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  onImport?: SavedObjectsImportHook;
 }

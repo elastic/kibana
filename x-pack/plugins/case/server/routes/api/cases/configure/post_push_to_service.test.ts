@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler, RequestHandlerContext } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
 import {
@@ -17,6 +18,7 @@ import {
 import { initPostPushToService } from './post_push_to_service';
 import { executePushResponse, newPostPushRequest } from '../../__mocks__/request_responses';
 import { CASE_CONFIGURE_PUSH_URL } from '../../../../../common/constants';
+import type { CasesRequestHandlerContext } from '../../../../types';
 
 describe('Post push to service', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -28,7 +30,7 @@ describe('Post push to service', () => {
     },
     body: newPostPushRequest,
   });
-  let context: RequestHandlerContext;
+  let context: CasesRequestHandlerContext;
   beforeAll(async () => {
     routeHandler = await createRoute(initPostPushToService, 'post');
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
@@ -67,7 +69,7 @@ describe('Post push to service', () => {
           };
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as CasesRequestHandlerContext;
 
     const res = await routeHandler(betterContext, req, kibanaResponseFactory);
 
@@ -81,7 +83,7 @@ describe('Post push to service', () => {
     const betterContext = ({
       ...context,
       case: null,
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as CasesRequestHandlerContext;
 
     const res = await routeHandler(betterContext, req, kibanaResponseFactory);
     expect(res.status).toEqual(400);
@@ -94,7 +96,7 @@ describe('Post push to service', () => {
     const betterContext = ({
       ...context,
       actions: null,
-    } as unknown) as RequestHandlerContext;
+    } as unknown) as CasesRequestHandlerContext;
 
     const res = await routeHandler(betterContext, req, kibanaResponseFactory);
     expect(res.status).toEqual(404);

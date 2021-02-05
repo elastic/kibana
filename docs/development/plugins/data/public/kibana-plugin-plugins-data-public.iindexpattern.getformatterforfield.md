@@ -4,6 +4,8 @@
 
 ## IIndexPattern.getFormatterForField property
 
+Look up a formatter for a given field
+
 <b>Signature:</b>
 
 ```typescript

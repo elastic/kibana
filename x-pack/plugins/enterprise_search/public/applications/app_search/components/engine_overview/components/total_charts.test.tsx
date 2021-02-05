@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues } from '../../../../__mocks__/kea.mock';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -20,7 +22,6 @@ describe('TotalCharts', () => {
   beforeAll(() => {
     jest.clearAllMocks();
     setMockValues({
-      engineName: 'some-engine',
       startDate: '1970-01-01',
       queriesPerDay: [0, 1, 2, 3, 5, 10, 50],
       operationsPerDay: [0, 0, 0, 0, 0, 0, 0],

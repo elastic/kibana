@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // handlers that handle agent actions request
@@ -23,8 +24,9 @@ export const postNewAgentActionHandlerBuilder = function (
   return async (context, request, response) => {
     try {
       const soClient = context.core.savedObjects.client;
+      const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const agent = await actionsService.getAgent(soClient, request.params.agentId);
+      const agent = await actionsService.getAgent(soClient, esClient, request.params.agentId);
 
       const newAgentAction = request.body.action;
 

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
@@ -37,15 +40,26 @@ export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'param
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    alerting?: {
-      getAlertsClient: () => AlertsClient;
-      listTypes: AlertTypeRegistry['list'];
-      getFrameworkHealth: () => Promise<AlertsHealth>;
-    };
-  }
+/**
+ * @public
+ */
+export interface AlertingApiRequestHandlerContext {
+  getAlertsClient: () => AlertsClient;
+  listTypes: AlertTypeRegistry['list'];
+  getFrameworkHealth: () => Promise<AlertsHealth>;
 }
+
+/**
+ * @internal
+ */
+export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+  alerting: AlertingApiRequestHandlerContext;
+}
+
+/**
+ * @internal
+ */
+export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
   /**

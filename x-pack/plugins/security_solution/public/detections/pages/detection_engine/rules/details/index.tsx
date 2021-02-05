@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
@@ -22,6 +23,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import {
   useDeepEqualSelector,
@@ -101,6 +103,15 @@ import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
+
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -460,7 +471,7 @@ const RuleDetailsPageComponent = () => {
       <ReadOnlyAlertsCallOut />
       <ReadOnlyRulesCallOut />
       {indicesExist ? (
-        <div onKeyDown={onKeyDown} ref={containerElement}>
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -618,7 +629,7 @@ const RuleDetailsPageComponent = () => {
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </div>
+        </StyledFullHeightContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

@@ -28,5 +28,6 @@ export declare class SavedObjectsRepository
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.get.md) |  | Gets a single object |
 |  [incrementCounter(type, id, counterFields, options)](./kibana-plugin-core-server.savedobjectsrepository.incrementcounter.md) |  | Increments all the specified counter fields (by one by default). Creates the document if one doesn't exist for the given id. |
 |  [removeReferencesTo(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.removereferencesto.md) |  | Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference. |
+|  [resolve(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.resolve.md) |  | Resolves a single object, using any legacy URL alias if it exists |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsrepository.update.md) |  | Updates an object |
 

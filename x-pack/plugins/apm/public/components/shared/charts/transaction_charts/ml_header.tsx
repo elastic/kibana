@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
@@ -62,7 +63,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
         'xpack.apm.metrics.transactionChart.machineLearningTooltip',
         {
           defaultMessage:
-            'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
+            'The stream displays the expected bounds of the average latency. A red vertical annotation indicates anomalies with an anomaly score of 75 or above.',
         }
       )}
     />

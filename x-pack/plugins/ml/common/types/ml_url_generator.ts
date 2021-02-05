@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type {
@@ -42,11 +43,7 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   [key: string]: any;
 }
 
-export interface DataVisualizerIndexBasedAppState {
-  pageIndex: number;
-  pageSize: number;
-  sortField: string;
-  sortDirection: string;
+export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];
   searchQueryLanguage?: SearchQueryLanguage;
@@ -57,6 +54,13 @@ export interface DataVisualizerIndexBasedAppState {
   showAllFields?: boolean;
   showEmptyFields?: boolean;
 }
+
+export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
+  visibleFieldTypes?: string[];
+  visibleFieldNames?: string[];
+  showDistributions?: boolean;
+}
+
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
@@ -90,7 +94,18 @@ export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: [number, number];
+    /**
+     * @deprecated legacy query param variable, use `selectedLanes`
+     */
+    selectedLane?: string[] | string;
+    /**
+     * It's possible to have only "from" time boundaries, e.g. in the Watcher URL
+     */
+    selectedTimes?: [number, number] | number;
+    /**
+     * @deprecated legacy query param variable, use `selectedTimes`
+     */
+    selectedTime?: [number, number] | number;
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;

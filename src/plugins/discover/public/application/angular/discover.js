@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -29,12 +18,12 @@ import {
   connectToQueryState,
   esFilters,
   indexPatterns as indexPatternsUtils,
+  noSearchSessionStorageCapabilityMessage,
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
-import indexTemplateGrid from './discover_datagrid.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -58,25 +47,25 @@ import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
-import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { getDefaultSort } from './doc_table/lib/get_default_sort';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 
 const services = getServices();
 
 const {
   core,
+  capabilities,
   chrome,
   data,
   history: getHistory,
@@ -95,9 +84,6 @@ const fetchStatuses = {
   ERROR: 'error',
 };
 
-const getSearchSessionIdFromURL = (history) =>
-  getQueryParams(history.location)[SEARCH_SESSION_ID_QUERY_PARAM];
-
 const app = getAngularModule();
 
 app.config(($routeProvider) => {
@@ -106,8 +92,8 @@ app.config(($routeProvider) => {
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
-    badge: (uiCapabilities) => {
-      if (uiCapabilities.discover.save) {
+    badge: () => {
+      if (capabilities.discover.save) {
         return undefined;
       }
 
@@ -124,9 +110,7 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: getServices().uiSettings.get('doc_table:legacy', true)
-      ? indexTemplateLegacy
-      : indexTemplateGrid,
+    template: indexTemplateLegacy,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -184,11 +168,13 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
+function discoverController($route, $scope, Promise) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
+
   let inspectorRequest;
+  let isChangingIndexPattern = false;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPattern(
@@ -196,6 +182,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $scope.searchSource,
     toastNotifications
   );
+  $scope.useNewFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
+
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -204,17 +192,12 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   const history = getHistory();
-  // used for restoring a search session
-  let isInitialSearch = true;
+  const searchSessionManager = new DiscoverSearchSessionManager({
+    history,
+    session: data.search.session,
+  });
 
-  // search session requested a data refresh
-  subscriptions.add(
-    data.search.session.onRefresh$.subscribe(() => {
-      refetch$.next();
-    })
-  );
-
-  const state = getState({
+  const stateContainer = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
@@ -229,7 +212,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     replaceUrlAppState,
     kbnUrlStateStorage,
     getPreviousAppState,
-  } = state;
+  } = stateContainer;
 
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -264,6 +247,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
       $scope.$evalAsync(async () => {
         if (oldStatePartial.index !== newStatePartial.index) {
           //in case of index pattern switch the route has currently to be reloaded, legacy
+          isChangingIndexPattern = true;
           $route.reload();
           return;
         }
@@ -291,12 +275,21 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     }
   });
 
-  data.search.session.setSearchSessionInfoProvider(
+  data.search.session.enableStorage(
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
       getSavedSearch: () => savedSearch,
-    })
+    }),
+    {
+      isDisabled: () =>
+        capabilities.discover.storeSearchSession
+          ? { disabled: false }
+          : {
+              disabled: true,
+              reasonText: noSearchSessionStorageCapabilityMessage,
+            },
+    }
   );
 
   $scope.setIndexPattern = async (id) => {
@@ -307,7 +300,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
         nextIndexPattern,
         $scope.state.columns,
         $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH)
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        $scope.useNewFieldsApi
       );
       await setAppState(nextAppState);
     }
@@ -328,9 +322,23 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     )
   );
 
-  const inspectorAdapters = {
-    requests: new RequestAdapter(),
+  $scope.opts = {
+    // number of records to fetch, then paginate through
+    sampleSize: config.get(SAMPLE_SIZE_SETTING),
+    timefield: getTimeField(),
+    savedSearch: savedSearch,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
+    filterManager,
+    setAppState,
+    data,
+    stateContainer,
   };
+
+  const inspectorAdapters = ($scope.opts.inspectorAdapters = {
+    requests: new RequestAdapter(),
+  });
 
   $scope.timefilterUpdateHandler = (ranges) => {
     timefilter.setTime({
@@ -341,7 +349,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.showSaveQuery = capabilities.discover.saveQuery;
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
@@ -350,7 +358,12 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
-    data.search.session.clear();
+    if (!isChangingIndexPattern) {
+      // HACK:
+      // do not clear session when changing index pattern due to how state management around it is setup
+      // it will be cleared by searchSessionManager on controller reload instead
+      data.search.session.clear();
+    }
     appStateUnsubscribe();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
@@ -358,7 +371,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     unlistenHistoryBasePath();
   });
 
-  const getFieldCounts = async () => {
+  $scope.opts.getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
@@ -374,20 +387,11 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
       });
     });
   };
-
-  $scope.topNavMenu = getTopNavLinks({
-    getFieldCounts,
-    indexPattern: $scope.indexPattern,
-    inspectorAdapters,
-    navigateTo: (path) => {
-      $scope.$evalAsync(() => {
-        history.push(path);
-      });
-    },
-    savedSearch,
-    services,
-    state,
-  });
+  $scope.opts.navigateTo = (path) => {
+    $scope.$evalAsync(() => {
+      history.push(path);
+    });
+  };
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)
@@ -414,19 +418,24 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   setBreadcrumbsTitle(savedSearch, chrome);
 
+  function getDefaultColumns() {
+    if (savedSearch.columns.length > 0) {
+      return [...savedSearch.columns];
+    }
+    return [...config.get(DEFAULT_COLUMNS_SETTING)];
+  }
+
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+    const columns = getDefaultColumns();
 
     const defaultState = {
       query,
       sort: !sort.length
         ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
         : sort,
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -441,26 +450,14 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.opts = {
-    // number of records to fetch, then paginate through
-    sampleSize: config.get(SAMPLE_SIZE_SETTING),
-    timefield: getTimeField(),
-    savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.savedObjects.ip.list,
-    config: config,
-    setHeaderActionMenu: getHeaderActionMenuMounter(),
-    filterManager,
-    setAppState,
-    data,
-  };
-
   const shouldSearchOnPageLoad = () => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
       config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false
+      timefilter.getRefreshInterval().pause === false ||
+      searchSessionManager.hasSearchSessionIdInURL()
     );
   };
 
@@ -471,7 +468,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
         filterManager.getFetches$(),
         timefilter.getFetch$(),
         timefilter.getAutoRefreshFetch$(),
-        data.query.queryString.getUpdates$()
+        data.query.queryString.getUpdates$(),
+        searchSessionManager.newSearchSessionIdFromURL$
       ).pipe(debounceTime(100));
 
       subscriptions.add(
@@ -576,20 +574,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
-    const searchSessionId = (() => {
-      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-      if (searchSessionIdFromURL) {
-        if (isInitialSearch) {
-          data.search.session.restore(searchSessionIdFromURL);
-          isInitialSearch = false;
-          return searchSessionIdFromURL;
-        } else {
-          // navigating away from background search
-          removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
-        }
-      }
-      return data.search.session.start();
-    })();
+    const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
     $scope
       .updateDataSource()
@@ -616,6 +601,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
 
   $scope.handleRefresh = function (_payload, isUpdate) {
     if (isUpdate === false) {
+      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       refetch$.next();
     }
   };
@@ -717,31 +703,51 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $route.reload();
   };
 
-  $scope.onSkipBottomButtonClick = function () {
+  $scope.onSkipBottomButtonClick = async () => {
     // show all the Rows
     $scope.minimumVisibleRows = $scope.hits;
 
     // delay scrolling to after the rows have been rendered
-    const bottomMarker = $element.find('#discoverBottomMarker');
-    $timeout(() => {
-      bottomMarker.focus();
-      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
-      // so the browser will show a highlight: remove the focus once scrolled
-      $timeout(() => {
-        bottomMarker.blur();
-      }, 0);
-    }, 0);
+    const bottomMarker = document.getElementById('discoverBottomMarker');
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker.focus();
+    await wait(50);
+    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
     history.push('/');
   };
 
+  const showUnmappedFieldsDefaultValue = $scope.useNewFieldsApi && !!$scope.opts.savedSearch.pre712;
+  let showUnmappedFields = showUnmappedFieldsDefaultValue;
+
+  const onChangeUnmappedFields = (value) => {
+    showUnmappedFields = value;
+    $scope.unmappedFieldsConfig.showUnmappedFields = value;
+    $scope.fetch();
+  };
+
+  $scope.unmappedFieldsConfig = {
+    showUnmappedFieldsDefaultValue,
+    showUnmappedFields,
+    onChangeUnmappedFields,
+  };
+
   $scope.updateDataSource = () => {
-    updateSearchSource($scope.searchSource, {
-      indexPattern: $scope.indexPattern,
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
+    const { columns, sort } = $scope.state;
+    updateSearchSource(searchSource, {
+      indexPattern,
       services,
-      sort: $scope.state.sort,
+      sort,
+      columns,
+      useNewFieldsApi,
+      showUnmappedFields,
     });
     return Promise.resolve();
   };
@@ -769,20 +775,20 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.addColumn($scope.state.columns, columnName);
+    const columns = columnActions.addColumn($scope.state.columns, columnName, useNewFieldsApi);
     setAppState({ columns });
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
+    const { indexPattern, useNewFieldsApi } = $scope;
+    if (capabilities.discover.save) {
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName);
+    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort = $scope.state.sort.length
       ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)

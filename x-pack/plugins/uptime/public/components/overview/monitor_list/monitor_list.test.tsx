@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -19,7 +20,7 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
-import { EuiThemeProvider } from '../../../../../observability/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {

@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ApolloClient } from 'apollo-client';
 import { History } from 'history';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
@@ -18,7 +18,6 @@ import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { MetricDetail } from '../pages/metrics/metric_detail';
 import { InfraClientStartDeps } from '../types';
-import { createApolloClient } from '../utils/apollo_client';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
@@ -28,14 +27,12 @@ export const renderApp = (
   plugins: InfraClientStartDeps,
   { element, history, setHeaderActionMenu }: AppMountParameters
 ) => {
-  const apolloClient = createApolloClient(core.http.fetch);
   const storage = new Storage(window.localStorage);
 
   prepareMountElement(element);
 
   ReactDOM.render(
     <MetricsApp
-      apolloClient={apolloClient}
       core={core}
       history={history}
       plugins={plugins}
@@ -51,19 +48,17 @@ export const renderApp = (
 };
 
 const MetricsApp: React.FC<{
-  apolloClient: ApolloClient<{}>;
   core: CoreStart;
   history: History<unknown>;
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
-}> = ({ apolloClient, core, history, plugins, setHeaderActionMenu, storage }) => {
+}> = ({ core, history, plugins, setHeaderActionMenu, storage }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
     <CoreProviders core={core} plugins={plugins}>
       <CommonInfraProviders
-        apolloClient={apolloClient}
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}

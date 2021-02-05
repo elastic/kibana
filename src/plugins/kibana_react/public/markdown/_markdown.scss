@@ -18,7 +18,6 @@ $kbnDefaultFontSize: 14px;
 }
 
 .kbnMarkdown__body {
-
   // Font size variables
   $kbnMarkdownFontSizeS: canvasToEm(12px);
   $kbnMarkdownFontSize: canvasToEm(14px);
@@ -34,14 +33,14 @@ $kbnDefaultFontSize: 14px;
   $kbnMarkdownSizeXXS: canvasToEm(4px);
 
   // Grayscale variables
-  $kbnMarkdownAlphaLightestShade: rgba($euiColorFullShade,.05);
-  $kbnMarkdownAlphaLightShade: rgba($euiColorFullShade,.15);
-  $kbnMarkdownAlphaDarkShade: rgba($euiColorFullShade,.65);
+  $kbnMarkdownAlphaLightestShade: rgba($euiColorFullShade, .05);
+  $kbnMarkdownAlphaLightShade: rgba($euiColorFullShade, .15);
+  $kbnMarkdownAlphaDarkShade: rgba($euiColorFullShade, .65);
 
   // Reverse grayscale for opposite of theme
-  $kbnMarkdownAlphaLightestShadeReversed: rgba($euiColorEmptyShade,.05);
-  $kbnMarkdownAlphaLightShadeReversed: rgba($euiColorEmptyShade,.15);
-  $kbnMarkdownAlphaDarkShadeReversed: rgba($euiColorEmptyShade,.65);
+  $kbnMarkdownAlphaLightestShadeReversed: rgba($euiColorEmptyShade, .05);
+  $kbnMarkdownAlphaLightShadeReversed: rgba($euiColorEmptyShade, .15);
+  $kbnMarkdownAlphaDarkShadeReversed: rgba($euiColorEmptyShade, .65);
 
   &--reversed {
     color: $euiColorLightestShade;
@@ -171,19 +170,19 @@ $kbnDefaultFontSize: 14px;
 
   hr::before {
     display: table;
-    content: "";
+    content: '';
   }
 
   hr::after {
     display: table;
     clear: both;
-    content: "";
+    content: '';
   }
 
   // 6. Lists
   ul,
   ol {
-    padding-left: 0;
+    padding-left: $kbnMarkdownSizeL;
     margin-top: 0;
     margin-bottom: $kbnMarkdownSize;
   }
@@ -213,11 +212,6 @@ $kbnDefaultFontSize: 14px;
 
   dd {
     margin-left: 0;
-  }
-
-  ul,
-  ol {
-    padding-left: $kbnMarkdownSizeL;
   }
 
   ul ul,
@@ -297,8 +291,8 @@ $kbnDefaultFontSize: 14px;
 
   code::before,
   code::after {
-    letter-spacing: -0.2em;
-    content: "\00a0";
+    letter-spacing: -.2em;
+    content: '\00a0';
   }
 
   pre {

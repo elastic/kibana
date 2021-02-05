@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -14,15 +15,9 @@ import { registerRoutes } from './routes';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
-  RouteHandlerGlobalSearchContext,
+  GlobalSearchRequestHandlerContext,
 } from './types';
 import { GlobalSearchConfigType } from './config';
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    globalSearch?: RouteHandlerGlobalSearchContext;
-  }
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}
@@ -56,12 +51,15 @@ export class GlobalSearchPlugin
 
     registerRoutes(core.http.createRouter());
 
-    core.http.registerRouteHandlerContext('globalSearch', (_, req) => {
-      return {
-        find: (term, options) => this.searchServiceStart!.find(term, options, req),
-        getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),
-      };
-    });
+    core.http.registerRouteHandlerContext<GlobalSearchRequestHandlerContext, 'globalSearch'>(
+      'globalSearch',
+      (_, req) => {
+        return {
+          find: (term, options) => this.searchServiceStart!.find(term, options, req),
+          getSearchableTypes: () => this.searchServiceStart!.getSearchableTypes(req),
+        };
+      }
+    );
 
     return {
       registerResultProvider,

@@ -37,6 +37,9 @@ Object {
         "percentageMode": Array [
           true,
         ],
+        "showLabels": Array [
+          false,
+        ],
       },
       "function": "metricVis",
       "type": "function",
@@ -79,7 +82,11 @@ Object {
       "type": "function",
     },
     Object {
-      "arguments": Object {},
+      "arguments": Object {
+        "showLabels": Array [
+          false,
+        ],
+      },
       "function": "metricVis",
       "type": "function",
     },

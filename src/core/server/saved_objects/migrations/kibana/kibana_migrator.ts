@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -23,6 +12,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import Semver from 'semver';
 import { KibanaConfigType } from '../../../kibana_config';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Logger } from '../../../logging';
@@ -106,9 +96,9 @@ export class KibanaMigrator {
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
     this.documentMigrator = new DocumentMigrator({
-      kibanaVersion,
+      kibanaVersion: this.kibanaVersion,
       typeRegistry,
       log: this.log,
     });
@@ -158,6 +148,10 @@ export class KibanaMigrator {
     return this.migrationResult;
   }
 
+  public prepareMigrations() {
+    this.documentMigrator.prepareMigrations();
+  }
+
   public getStatus$() {
     return this.status$.asObservable();
   }
@@ -169,6 +163,15 @@ export class KibanaMigrator {
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
+
+    this.log.debug('Applying registered migrations for the following saved object types:');
+    Object.entries(this.documentMigrator.migrationVersion)
+      .sort(([t1, v1], [t2, v2]) => {
+        return Semver.compare(v1, v2);
+      })
+      .forEach(([type, migrationVersion]) => {
+        this.log.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
+      });
 
     const migrators = Object.keys(indexMap).map((index) => {
       // TODO migrationsV2: remove old migrations algorithm
@@ -184,7 +187,7 @@ export class KibanaMigrator {
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
                 migrateRawDocs(
                   this.serializer,
-                  this.documentMigrator.migrate,
+                  this.documentMigrator.migrateAndConvert,
                   rawDocs,
                   new MigrationLogger(this.log)
                 ),
@@ -199,6 +202,7 @@ export class KibanaMigrator {
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
+          kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
           pollInterval: this.savedObjectsConfig.pollInterval,

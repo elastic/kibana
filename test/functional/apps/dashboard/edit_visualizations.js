@@ -1,27 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'visEditor']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -35,10 +26,14 @@ export default function ({ getService, getPageObjects }) {
     await PageObjects.visualize.clickMarkdownWidget();
     await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
     await PageObjects.visEditor.clickGo();
-    await PageObjects.visualize.saveVisualizationExpectSuccess(title, {
-      saveAsNew: true,
-      redirectToOrigin: true,
-    });
+    if (title) {
+      await PageObjects.visualize.saveVisualizationExpectSuccess(title, {
+        saveAsNew: true,
+        redirectToOrigin: true,
+      });
+    } else {
+      await PageObjects.visualize.saveVisualizationAndReturn();
+    }
   };
 
   const editMarkdownVis = async () => {
@@ -95,6 +90,23 @@ export default function ({ getService, getPageObjects }) {
 
       const markdownText = await testSubjects.find('markdownBody');
       expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+    });
+
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was by value', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      // Create markdown by value.
+      await createMarkdownVis();
+
+      // Edit then save and return
+      await editMarkdownVis();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appsMenu.clickLink('Visualize');
+      await PageObjects.common.clickConfirmOnModal();
+      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
   });
 }

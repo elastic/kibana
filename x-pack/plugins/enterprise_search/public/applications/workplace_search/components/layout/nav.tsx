@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -24,9 +26,14 @@ import {
 interface Props {
   sourcesSubNav?: React.ReactNode;
   groupsSubNav?: React.ReactNode;
+  settingsSubNav?: React.ReactNode;
 }
 
-export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNav }) => (
+export const WorkplaceSearchNav: React.FC<Props> = ({
+  sourcesSubNav,
+  groupsSubNav,
+  settingsSubNav,
+}) => (
   <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
     <SideNavLink to="/" isRoot>
       {NAV.OVERVIEW}
@@ -40,10 +47,8 @@ export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNa
     <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
       {NAV.ROLE_MAPPINGS}
     </SideNavLink>
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
-      {NAV.SECURITY}
-    </SideNavLink>
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(ORG_SETTINGS_PATH)}>
+    <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
+    <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
       {NAV.SETTINGS}
     </SideNavLink>
     <EuiSpacer />

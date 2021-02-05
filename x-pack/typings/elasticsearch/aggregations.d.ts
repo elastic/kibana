@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Unionize, UnionToIntersection } from 'utility-types';
 import { ESSearchHit, MaybeReadonlyArray, ESSourceOptions, ESHitsOf } from '.';
 
-type SortOrder = 'asc' | 'desc';
+export type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
 export type SortOptions = SortOrder | SortInstruction | SortInstruction[];
 
@@ -387,22 +388,24 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
   };
   bucket_sort: undefined;
   bucket_selector: undefined;
-  top_metrics: [
-    {
-      sort: [string | number];
-      metrics: UnionToIntersection<
-        TAggregationOptionsMap extends {
-          top_metrics: { metrics: { field: infer TFieldName } };
-        }
-          ? TopMetricsMap<TFieldName>
-          : TAggregationOptionsMap extends {
-              top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
-            }
-          ? TopMetricsMap<TFieldName>
-          : TopMetricsMap<string>
-      >;
-    }
-  ];
+  top_metrics: {
+    top: [
+      {
+        sort: [string | number];
+        metrics: UnionToIntersection<
+          TAggregationOptionsMap extends {
+            top_metrics: { metrics: { field: infer TFieldName } };
+          }
+            ? TopMetricsMap<TFieldName>
+            : TAggregationOptionsMap extends {
+                top_metrics: { metrics: MaybeReadonlyArray<{ field: infer TFieldName }> };
+              }
+            ? TopMetricsMap<TFieldName>
+            : TopMetricsMap<string>
+        >;
+      }
+    ];
+  };
   avg_bucket: {
     value: number | null;
   };

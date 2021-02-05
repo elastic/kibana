@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { OperationMetadata } from '../../types';
@@ -2147,14 +2148,17 @@ describe('state_helpers', () => {
     it('should collect errors from metric-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.avg.getErrorMessage = mock;
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          // @ts-expect-error invalid column
-          col1: { operationType: 'avg' },
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            // @ts-expect-error invalid column
+            col1: { operationType: 'avg' },
+          },
         },
-      });
+        indexPattern
+      );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
     });
@@ -2162,17 +2166,80 @@ describe('state_helpers', () => {
     it('should collect errors from reference-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
       operationDefinitionMap.testReference.getErrorMessage = mock;
-      const errors = getErrorMessages({
-        indexPatternId: '1',
-        columnOrder: [],
-        columns: {
-          col1:
-            // @ts-expect-error not statically analyzed
-            { operationType: 'testReference', references: [] },
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
         },
-      });
+        indexPattern
+      );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
+    });
+
+    it('should ignore incompleteColumns when checking for errors', () => {
+      const savedRef = jest.fn().mockReturnValue(['error 1']);
+      const incompleteRef = jest.fn();
+      operationDefinitionMap.testReference.getErrorMessage = savedRef;
+      // @ts-expect-error invalid type, just need a single function on it
+      operationDefinitionMap.testIncompleteReference = {
+        getErrorMessage: incompleteRef,
+      };
+
+      const errors = getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
+          incompleteColumns: {
+            // @ts-expect-error not statically analyzed
+            col1: { operationType: 'testIncompleteReference' },
+          },
+        },
+        indexPattern
+      );
+      expect(savedRef).toHaveBeenCalled();
+      expect(incompleteRef).not.toHaveBeenCalled();
+      expect(errors).toHaveLength(1);
+
+      delete operationDefinitionMap.testIncompleteReference;
+    });
+
+    it('should forward the indexpattern when available', () => {
+      const mock = jest.fn();
+      operationDefinitionMap.testReference.getErrorMessage = mock;
+      getErrorMessages(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1:
+              // @ts-expect-error not statically analyzed
+              { operationType: 'testReference', references: [] },
+          },
+        },
+        indexPattern
+      );
+      expect(mock).toHaveBeenCalledWith(
+        {
+          indexPatternId: '1',
+          columnOrder: [],
+          columns: {
+            col1: { operationType: 'testReference', references: [] },
+          },
+        },
+        'col1',
+        indexPattern
+      );
     });
   });
 });

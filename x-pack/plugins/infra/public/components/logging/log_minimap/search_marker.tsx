@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import { euiStyled, keyframes } from '../../../../../observability/public';
+import { euiStyled, keyframes } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
 import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';

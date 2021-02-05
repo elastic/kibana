@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TimeRange, RefreshInterval, Filter } from 'src/plugins/data/public';
 import { syncQueryStateWithUrl } from '../../../../../../../src/plugins/data/public';
 import { getData } from '../../../kibana_services';
@@ -30,6 +32,6 @@ export function updateGlobalState(newState: MapsGlobalState, flushUrlState = fal
     ...newState,
   });
   if (flushUrlState) {
-    kbnUrlStateStorage.flush({ replace: true });
+    kbnUrlStateStorage.kbnUrlControls.flush(true);
   }
 }

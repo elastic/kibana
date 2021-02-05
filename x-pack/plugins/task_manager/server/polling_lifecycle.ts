@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Subject, Observable, Subscription } from 'rxjs';
 
 import { performance } from 'perf_hooks';
@@ -129,10 +131,7 @@ export class TaskPollingLifecycle {
       this.events$,
       config.version_conflict_threshold,
       config.monitored_stats_running_average_window
-    );
-    pollIntervalDelay$.subscribe((delay) => {
-      emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)));
-    });
+    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
 
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<

@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL } from '../../../../../common/constants';
 import { getSignalsMigrationStatusSchema } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -17,7 +18,7 @@ import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse, transformError } from '../utils';
 
-export const getSignalsMigrationStatusRoute = (router: IRouter) => {
+export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,

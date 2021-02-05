@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { agentPolicyStatuses } from '../../constants';
 import { DataType, ValueOf } from '../../types';
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
@@ -15,6 +17,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
+  is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
@@ -22,6 +25,7 @@ export interface AgentPolicy extends NewAgentPolicy {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
   package_policies: string[] | PackagePolicy[];
+  is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
   revision: number;
@@ -79,4 +83,38 @@ export interface FullAgentPolicyKibanaConfig {
   hosts: string[];
   protocol: string;
   path?: string;
+}
+
+// Generated from Fleet Server schema.json
+
+/**
+ * A policy that an Elastic Agent is attached to
+ */
+export interface FleetServerPolicy {
+  /**
+   * Date/time the policy revision was created
+   */
+  '@timestamp'?: string;
+  /**
+   * The ID of the policy
+   */
+  policy_id: string;
+  /**
+   * The revision index of the policy
+   */
+  revision_idx: number;
+  /**
+   * The coordinator index of the policy
+   */
+  coordinator_idx: number;
+  /**
+   * The opaque payload.
+   */
+  data: {
+    [k: string]: unknown;
+  };
+  /**
+   * True when this policy is the default policy to start Fleet Server
+   */
+  default_fleet_server: boolean;
 }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Logger } from 'kibana/server';
 import { chunk } from 'lodash';
 import { PromiseReturnType } from '../../../../observability/typings/common';
@@ -18,7 +20,6 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
-  ServiceAnomaliesResponse,
 } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
@@ -149,7 +150,7 @@ export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
   const { logger } = options;
-  const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
+  const anomaliesPromise = getServiceAnomalies(
     options
 
     // always catch error to avoid breaking service maps if there is a problem with ML

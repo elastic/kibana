@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
@@ -155,7 +156,15 @@ export default function ({ getService }: FtrProviderContext) {
           },
           histogramCharts: [
             { chartAvailable: false, id: 'category', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'currency', legend: '1 category' },
+            {
+              chartAvailable: true,
+              id: 'currency',
+              legend: '1 category',
+              colorStats: [
+                { key: '#000000', value: 10 },
+                { key: '#54B399', value: 90 },
+              ],
+            },
             {
               chartAvailable: false,
               id: 'customer_birth_date',
@@ -163,11 +172,43 @@ export default function ({ getService }: FtrProviderContext) {
             },
             { chartAvailable: false, id: 'customer_first_name', legend: 'Chart not supported.' },
             { chartAvailable: false, id: 'customer_full_name', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'customer_gender', legend: '2 categories' },
-            { chartAvailable: true, id: 'customer_id', legend: 'top 20 of 46 categories' },
+            {
+              chartAvailable: true,
+              id: 'customer_gender',
+              legend: '2 categories',
+              colorStats: [
+                { key: '#000000', value: 15 },
+                { key: '#54B399', value: 85 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'customer_id',
+              legend: 'top 20 of 46 categories',
+              colorStats: [
+                { key: '#54B399', value: 35 },
+                { key: '#000000', value: 60 },
+              ],
+            },
             { chartAvailable: false, id: 'customer_last_name', legend: 'Chart not supported.' },
-            { chartAvailable: true, id: 'customer_phone', legend: '1 category' },
-            { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
+            {
+              chartAvailable: true,
+              id: 'customer_phone',
+              legend: '1 category',
+              colorStats: [
+                { key: '#000000', value: 10 },
+                { key: '#54B399', value: 90 },
+              ],
+            },
+            {
+              chartAvailable: true,
+              id: 'day_of_week',
+              legend: '7 categories',
+              colorStats: [
+                { key: '#000000', value: 20 },
+                { key: '#54B399', value: 75 },
+              ],
+            },
           ],
         },
       } as PivotTransformTestData,
@@ -412,10 +453,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('shows the transform preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
-          await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.transformPreview.column,
-            testData.expected.transformPreview.values
-          );
+          // cell virtualization means the last column is cutoff in the functional tests
+          // https://github.com/elastic/eui/issues/4470
+          // await transform.wizard.assertPivotPreviewColumnValues(
+          //   testData.expected.transformPreview.column,
+          //   testData.expected.transformPreview.values
+          // );
 
           await transform.testExecution.logTestStep('loads the details step');
           await transform.wizard.advanceToDetailsStep();

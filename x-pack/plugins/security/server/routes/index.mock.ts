@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
@@ -32,7 +33,7 @@ export const routeDefinitionParamsMock = {
       httpResources: httpResourcesMock.createRegistrar(),
       getFeatures: jest.fn(),
       getFeatureUsageService: jest.fn(),
-      session: sessionMock.create(),
+      getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
     } as unknown) as DeeplyMockedKeys<RouteDefinitionParams>),
 };

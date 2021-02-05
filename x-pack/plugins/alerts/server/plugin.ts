@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -28,13 +30,13 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   IContextProvider,
-  RequestHandler,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
+import type { AlertingRequestHandlerContext } from './types';
 
 import {
   aggregateAlertRoute,
@@ -255,10 +257,13 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
+    core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
+      'alerting',
+      this.createRouteHandlerContext(core)
+    );
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
     aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
@@ -392,7 +397,7 @@ export class AlertingPlugin {
 
   private createRouteHandlerContext = (
     core: CoreSetup
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
+  ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();

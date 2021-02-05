@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -20,9 +21,9 @@ describe('delayOnClaimConflicts', () => {
 
   test(
     'initializes with a delay of 0',
-    fakeSchedulers(async (advance) => {
+    fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 100;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
       const delays = delayOnClaimConflicts(
         of(maxWorkers),
@@ -40,9 +41,9 @@ describe('delayOnClaimConflicts', () => {
 
   test(
     'emits a random delay whenever p50 of claim clashes exceed 80% of available max_workers',
-    fakeSchedulers(async (advance) => {
+    fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 100;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const delays$ = delayOnClaimConflicts(
@@ -61,7 +62,7 @@ describe('delayOnClaimConflicts', () => {
             result: FillPoolResult.PoolFilled,
             stats: {
               tasksUpdated: 0,
-              tasksConflicted: 80,
+              tasksConflicted: 8,
               tasksClaimed: 0,
             },
             docs: [],
@@ -80,9 +81,9 @@ describe('delayOnClaimConflicts', () => {
 
   test(
     'doesnt emit a new delay when conflicts have reduced',
-    fakeSchedulers(async (advance) => {
+    fakeSchedulers(async () => {
       const pollInterval = 100;
-      const maxWorkers = 100;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const handler = jest.fn();
@@ -104,7 +105,7 @@ describe('delayOnClaimConflicts', () => {
             result: FillPoolResult.PoolFilled,
             stats: {
               tasksUpdated: 0,
-              tasksConflicted: 80,
+              tasksConflicted: 8,
               tasksClaimed: 0,
             },
             docs: [],
@@ -124,7 +125,7 @@ describe('delayOnClaimConflicts', () => {
             result: FillPoolResult.PoolFilled,
             stats: {
               tasksUpdated: 0,
-              tasksConflicted: 70,
+              tasksConflicted: 7,
               tasksClaimed: 0,
             },
             docs: [],
@@ -135,14 +136,14 @@ describe('delayOnClaimConflicts', () => {
       await sleep(0);
       expect(handler.mock.calls.length).toEqual(2);
 
-      // shift average back up to threshold (70 + 90) / 2 = 80
+      // shift average back up to threshold (7 + 9) / 2 = 80% of maxWorkers
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
           asOk({
             result: FillPoolResult.PoolFilled,
             stats: {
               tasksUpdated: 0,
-              tasksConflicted: 90,
+              tasksConflicted: 9,
               tasksClaimed: 0,
             },
             docs: [],

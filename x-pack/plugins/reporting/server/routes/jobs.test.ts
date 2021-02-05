@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
@@ -12,7 +13,7 @@ import { ReportingCore } from '..';
 import { ReportingInternalSetup } from '../core';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
-import { ExportTypeDefinition } from '../types';
+import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../types';
 import { registerJobInfoRoutes } from './jobs';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -35,7 +36,11 @@ describe('GET /api/reporting/jobs/download', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
     core = await createMockReportingCore(config, ({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },

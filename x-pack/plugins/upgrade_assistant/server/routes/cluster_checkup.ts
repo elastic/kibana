@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
@@ -23,9 +24,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: {
-              legacy: { client },
-            },
+            elasticsearch: { client },
           },
         },
         request,
@@ -34,10 +33,10 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
         try {
           const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
 
-          const callAsCurrentUser = client.callAsCurrentUser.bind(client);
-          const reindexActions = reindexActionsFactory(savedObjectsClient, callAsCurrentUser);
+          const asCurrentUser = client.asCurrentUser;
+          const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
           const reindexService = reindexServiceFactory(
-            callAsCurrentUser,
+            asCurrentUser,
             reindexActions,
             log,
             licensing
@@ -52,7 +51,7 @@ export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: 
             body: status,
           });
         } catch (e) {
-          if (e.status === 403) {
+          if (e.statusCode === 403) {
             return response.forbidden(e.message);
           }
 

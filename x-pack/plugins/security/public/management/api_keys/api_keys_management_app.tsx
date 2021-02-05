@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,8 +10,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginStartDependencies } from '../../plugin';
-import { DocumentationLinksService } from './documentation_links';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -35,25 +36,21 @@ export const apiKeysManagementApp = Object.freeze({
           },
         ]);
 
-        const [
-          [{ docLinks, http, notifications, i18n: i18nStart, application }],
-          { APIKeysGridPage },
-          { APIKeysAPIClient },
-        ] = await Promise.all([
+        const [[core], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid'),
           import('./api_keys_api_client'),
         ]);
 
         render(
-          <i18nStart.Context>
-            <APIKeysGridPage
-              navigateToApp={application.navigateToApp}
-              notifications={notifications}
-              docLinks={new DocumentationLinksService(docLinks)}
-              apiKeysAPIClient={new APIKeysAPIClient(http)}
-            />
-          </i18nStart.Context>,
+          <KibanaContextProvider services={core}>
+            <core.i18n.Context>
+              <APIKeysGridPage
+                notifications={core.notifications}
+                apiKeysAPIClient={new APIKeysAPIClient(core.http)}
+              />
+            </core.i18n.Context>
+          </KibanaContextProvider>,
           element
         );
 

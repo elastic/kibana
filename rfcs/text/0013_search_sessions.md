@@ -285,7 +285,6 @@ interface ISessionService {
     * @param url TODO: is the URL provided here? How?
     * @returns The stored `SearchSessionAttributes` object
     * @throws Throws an error in OSS.
-    * @internal (Consumers should use searchInterceptor.sendToBackground())
     */
   store: (
     request: KibanaRequest,

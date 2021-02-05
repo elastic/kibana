@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandler } from 'src/core/server';
@@ -83,6 +84,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
@@ -98,14 +100,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 
   try {
     if (Array.isArray(agents)) {
-      await AgentService.sendUpgradeAgentsActions(soClient, {
+      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
         agentIds: agents,
         sourceUri,
         version,
         force,
       });
     } else {
-      await AgentService.sendUpgradeAgentsActions(soClient, {
+      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
         kuery: agents,
         sourceUri,
         version,

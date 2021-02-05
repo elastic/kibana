@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Location } from 'history';
@@ -49,6 +50,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm,
     percentile,
     latencyAggregationType = LatencyAggregationType.avg,
+    comparisonEnabled,
+    comparisonType,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -78,6 +81,10 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
     latencyAggregationType,
+    comparisonEnabled: comparisonEnabled
+      ? toBoolean(comparisonEnabled)
+      : undefined,
+    comparisonType,
 
     // ui filters
     environment,

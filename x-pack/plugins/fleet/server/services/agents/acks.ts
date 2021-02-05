@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
+  ElasticsearchClient,
   KibanaRequest,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
@@ -40,6 +42,7 @@ const actionCache = new LRU<string, AgentAction>({
 
 export async function acknowledgeAgentActions(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
@@ -79,7 +82,7 @@ export async function acknowledgeAgentActions(
 
   const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
   if (isAgentUnenrolled) {
-    await forceUnenrollAgent(soClient, agent.id);
+    await forceUnenrollAgent(soClient, esClient, agent.id);
   }
 
   const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
@@ -196,6 +199,7 @@ export async function saveAgentEvents(
 export interface AcksService {
   acknowledgeAgentActions: (
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agent: Agent,
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
@@ -206,6 +210,8 @@ export interface AcksService {
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
+
+  getElasticsearchClientContract: () => ElasticsearchClient;
 
   saveAgentEvents: (
     soClient: SavedObjectsClientContract,

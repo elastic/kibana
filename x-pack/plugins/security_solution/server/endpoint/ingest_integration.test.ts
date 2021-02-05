@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 import { createNewPackagePolicyMock } from '../../../fleet/common/mocks';
-import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidFeatures,
+} from '../../common/endpoint/models/policy_config';
 import {
   getManifestManagerMock,
   ManifestManagerMockType,
@@ -15,7 +19,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './ingest_integration';
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from './mocks';
@@ -25,11 +29,15 @@ import { Subject } from 'rxjs';
 import { ILicense } from '../../../licensing/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../types';
+import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { ExceptionListClient } from '../../../lists/server';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
-  let ctx: RequestHandlerContext;
+  let ctx: SecuritySolutionRequestHandlerContext;
+  const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
@@ -51,6 +59,9 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('ingest_integration sanity checks', () => {
+    beforeEach(() => {
+      licenseEmitter.next(Platinum); // set license level to platinum
+    });
     test('policy is updated with initial manifest', async () => {
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const manifestManager = getManifestManagerMock({
@@ -63,13 +74,15 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock(); // policy config without manifest
       const newPolicyConfig = await callback(policyConfig, ctx, req); // policy config WITH manifest
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual({
         artifacts: {
           'endpoint-exceptionlist-macos-v1': {
@@ -140,13 +153,15 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
         lastComputed!.toEndpointFormat()
       );
@@ -167,13 +182,15 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
     });
 
     test('subsequent policy creations succeed', async () => {
@@ -188,13 +205,42 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.appClientFactory,
         maxTimelineImportExportSize,
         endpointAppContextMock.security,
-        endpointAppContextMock.alerts
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
       );
       const policyConfig = createNewPackagePolicyMock();
       const newPolicyConfig = await callback(policyConfig, ctx, req);
 
       expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
-      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyConfigFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
+      expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
+        lastComputed!.toEndpointFormat()
+      );
+    });
+
+    test('policy creation succeeds even if endpoint exception list creation fails', async () => {
+      const mockError = new Error('error creating endpoint list');
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+      const manifestManager = getManifestManagerMock();
+      const lastComputed = await manifestManager.getLastComputedManifest();
+      exceptionListClient.createEndpointList = jest.fn().mockRejectedValue(mockError);
+      const callback = getPackagePolicyCreateCallback(
+        logger,
+        manifestManager,
+        endpointAppContextMock.appClientFactory,
+        maxTimelineImportExportSize,
+        endpointAppContextMock.security,
+        endpointAppContextMock.alerts,
+        licenseService,
+        exceptionListClient
+      );
+      const policyConfig = createNewPackagePolicyMock();
+      const newPolicyConfig = await callback(policyConfig, ctx, req);
+
+      expect(exceptionListClient.createEndpointList).toHaveBeenCalled();
+      expect(newPolicyConfig.inputs[0]!.type).toEqual('endpoint');
+      expect(newPolicyConfig.inputs[0]!.config!.policy.value).toEqual(policyFactory());
       expect(newPolicyConfig.inputs[0]!.config!.artifact_manifest.value).toEqual(
         lastComputed!.toEndpointFormat()
       );
@@ -205,8 +251,7 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Gold); // set license level to gold
     });
     it('returns an error if paid features are turned on in the policy', async () => {
-      const mockPolicy = policyConfigFactory();
-      mockPolicy.windows.popup.malware.message = 'paid feature';
+      const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
       const policyConfig = generator.generatePolicyPackagePolicy();
@@ -216,7 +261,7 @@ describe('ingest_integration tests ', () => {
       );
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
-      const mockPolicy = policyConfigFactory();
+      const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);
@@ -231,7 +276,7 @@ describe('ingest_integration tests ', () => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
     it('updates successfully when paid features are turned on', async () => {
-      const mockPolicy = policyConfigFactory();
+      const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
       const callback = getPackagePolicyUpdateCallback(logger, licenseService);

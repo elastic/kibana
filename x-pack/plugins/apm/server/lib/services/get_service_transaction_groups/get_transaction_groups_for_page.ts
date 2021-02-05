@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { orderBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -25,6 +27,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -97,10 +100,8 @@ export async function getTransactionGroupsForPage({
           },
           aggs: {
             ...getLatencyAggregation(latencyAggregationType, field),
-            transaction_count: { value_count: { field } },
             [EVENT_OUTCOME]: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-              aggs: { transaction_count: { value_count: { field } } },
             },
           },
         },
@@ -111,9 +112,8 @@ export async function getTransactionGroupsForPage({
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
       const errorRate =
-        bucket.transaction_count.value > 0
-          ? (bucket[EVENT_OUTCOME].transaction_count.value ?? 0) /
-            bucket.transaction_count.value
+        bucket.doc_count > 0
+          ? bucket[EVENT_OUTCOME].doc_count / bucket.doc_count
           : null;
 
       return {
@@ -122,7 +122,11 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.transaction_count.value,
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
         errorRate,
       };
     }) ?? [];

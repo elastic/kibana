@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { colourPalette, getSeriesAndDomain } from './data_formatting';
-import { NetworkItems } from './types';
+import { NetworkItems, MimeType } from './types';
+import { WaterfallDataEntry } from '../../waterfall/types';
 
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
     expect(colourPalette).toEqual({
-      blocked: '#b9a888',
+      blocked: '#dcd4c4',
       connect: '#da8b45',
       dns: '#54b399',
       font: '#aa6556',
@@ -136,6 +138,31 @@ describe('getSeriesAndDomain', () => {
     },
   ];
 
+  const networkItemsWithUncommonMimeType: NetworkItems = [
+    {
+      timestamp: '2021-01-05T19:22:28.928Z',
+      method: 'GET',
+      url: 'https://unpkg.com/director@1.2.8/build/director.js',
+      status: 200,
+      mimeType: 'application/x-javascript',
+      requestSentTime: 18098833.537,
+      requestStartTime: 18098837.233999997,
+      loadEndTime: 18098977.648000002,
+      timings: {
+        blocked: 84.54599999822676,
+        receive: 3.068000001803739,
+        queueing: 3.69700000010198,
+        proxy: -1,
+        total: 144.1110000014305,
+        wait: 52.56100000042352,
+        connect: -1,
+        send: 0.2390000008745119,
+        ssl: -1,
+        dns: -1,
+      },
+    },
+  ];
+
   it('formats timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual).toMatchInlineSnapshot(`
@@ -147,10 +174,10 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 0.854ms",
               },
             },
@@ -238,10 +265,10 @@ describe('getSeriesAndDomain', () => {
           },
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 84.546ms",
               },
             },
@@ -304,10 +331,10 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
-              "colour": "#b9a888",
+              "colour": "#dcd4c4",
               "showTooltip": true,
               "tooltipProps": Object {
-                "colour": "#b9a888",
+                "colour": "#dcd4c4",
                 "value": "Queued / Blocked: 0.854ms",
               },
             },
@@ -455,5 +482,23 @@ describe('getSeriesAndDomain', () => {
         ],
       }
     `);
+  });
+
+  it('handles formatting when mime type is not mapped to a specific mime type bucket', () => {
+    const actual = getSeriesAndDomain(networkItemsWithUncommonMimeType);
+    const { series } = actual;
+    /* verify that raw mime type appears in the tooltip config and that
+     * the colour is mapped to mime type other */
+    const contentDownloadedingConfigItem = series.find((item: WaterfallDataEntry) => {
+      const { tooltipProps } = item.config;
+      if (tooltipProps && typeof tooltipProps.value === 'string') {
+        return (
+          tooltipProps.value.includes('application/x-javascript') &&
+          tooltipProps.colour === colourPalette[MimeType.Other]
+        );
+      }
+      return false;
+    });
+    expect(contentDownloadedingConfigItem).toBeDefined();
   });
 });
