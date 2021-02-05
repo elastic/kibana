@@ -15,6 +15,7 @@ Having trouble? Here are solutions to common problems you might encounter while 
 * <<reporting-troubleshooting-error-messages>>
 * <<reporting-troubleshooting-puppeteer-debug-logs>>
 * <<reporting-troubleshooting-system-requirements>>
+* <<reporting-troubleshooting-arm-systems>>
 
 [float]
 [[reporting-diagnostics]]
@@ -55,10 +56,9 @@ if it encounters errors, logs them in the Console. Unfortunately, the error mess
 information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
 that {kib} could not connect to the Chromium process.
 
-Chromium is not compatible with ARM RHEL/CentOS.
-
 To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
 <<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
+
 
 [float]
 [[reporting-troubleshooting-text-incorrect]]
@@ -158,3 +158,9 @@ requests to render.
 
 If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
 In this case, try increasing the memory for the {kib} instance to 2GB.
+
+[float]
+[[reporting-troubleshooting-arm-systems]]
+=== ARM systems
+
+Chromium is not compatible with ARM RHEL/CentOS.
