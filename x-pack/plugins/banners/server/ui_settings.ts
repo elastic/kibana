@@ -16,9 +16,6 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
       name: i18n.translate('xpack.banners.settings.placement.title', {
         defaultMessage: 'Banner placement',
       }),
-      description: i18n.translate('xpack.banners.settings.placement.desc', {
-        defaultMessage: 'TODO',
-      }),
       category: ['banner'],
       order: 1,
       type: 'select',
@@ -33,9 +30,6 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
         defaultMessage: 'Banner text',
       }),
       sensitive: true,
-      description: i18n.translate('xpack.banners.settings.textContent.desc', {
-        defaultMessage: 'TODO',
-      }),
       category: ['banner'],
       order: 2,
       type: 'markdown',
@@ -46,9 +40,6 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
     'banner:textColor': {
       name: i18n.translate('xpack.banners.settings.textColor.title', {
         defaultMessage: 'Banner text color',
-      }),
-      description: i18n.translate('xpack.banners.settings.textColor.desc', {
-        defaultMessage: 'TODO',
       }),
       category: ['banner'],
       order: 3,
@@ -66,9 +57,6 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup) => {
     'banner:backgroundColor': {
       name: i18n.translate('xpack.banners.settings.backgroundColor.title', {
         defaultMessage: 'Banner background color',
-      }),
-      description: i18n.translate('xpack.banners.settings.backgroundColor.desc', {
-        defaultMessage: 'TODO',
       }),
       category: ['banner'],
       order: 4,
