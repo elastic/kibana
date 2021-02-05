@@ -50,7 +50,11 @@ export function useTimeRangeComparison({
   const daysToSubtractPerType: Record<string, number> = {
     yesterday: 1,
     week: 7,
-    previousPeriod: getDateDifference(startDate, endDate, 'days'),
+    previousPeriod: getDateDifference({
+      start: startDate,
+      end: endDate,
+      unitOfTime: 'days',
+    }),
   };
 
   const daysToSubtract = daysToSubtractPerType[comparisonType];
