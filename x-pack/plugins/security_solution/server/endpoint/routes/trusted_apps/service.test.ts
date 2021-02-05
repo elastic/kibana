@@ -19,7 +19,7 @@ import {
   deleteTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
-  MissingTrustedAppException,
+  TrustedAppNotFoundError,
 } from './service';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
@@ -86,7 +86,7 @@ describe('service', () => {
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
 
       await expect(deleteTrustedApp(exceptionsListClient, { id: '123' })).rejects.toBeInstanceOf(
-        MissingTrustedAppException
+        TrustedAppNotFoundError
       );
     });
   });

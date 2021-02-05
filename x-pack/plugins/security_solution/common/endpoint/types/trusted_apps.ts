@@ -99,6 +99,11 @@ export type NewTrustedApp = {
   effectScope: EffectScope;
 } & (MacosLinuxConditionEntries | WindowsConditionEntries);
 
+/** An Update to a Trusted App Entry */
+export type UpdateTrustedApp = NewTrustedApp & {
+  version?: string;
+};
+
 /** A trusted app entry */
 export type TrustedApp = NewTrustedApp & {
   id: string;

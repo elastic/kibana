@@ -7,16 +7,19 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas/common';
+import { OsType } from '../../../../../lists/common/schemas';
 import {
   EntriesArray,
   EntryMatch,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common/shared_exports';
+} from '../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
+import {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '../../../../../lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,
@@ -24,6 +27,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
@@ -208,6 +212,32 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     entries: conditionEntriesToEntries(entries),
     itemId: uuid.v4(),
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    meta: undefined,
+    name,
+    namespaceType: 'agnostic',
+    osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
+    tags: effectScopeToTags(effectScope),
+    type: 'simple',
+  };
+};
+
+/**
+ * Map NewTrustedApp to CreateExceptionListItemOptions.
+ */
+export const updatedTrustedAppToUpdateExceptionListItemOptions = ({
+  os,
+  entries,
+  name,
+  description = '',
+  effectScope,
+}: UpdateTrustedApp): UpdateExceptionListItemOptions => {
+  return {
+    id: '', // FIXME: need value
+    _version: '', // FIXME: need value
+    comments: [],
+    description,
+    entries: conditionEntriesToEntries(entries),
+    itemId: '', // FIXME: need value
     meta: undefined,
     name,
     namespaceType: 'agnostic',

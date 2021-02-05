@@ -53,7 +53,8 @@ const SignerConditionEntrySchema = schema.object({
 
 const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends ConditionEntry>(
   osSchema: Type<O>,
-  entriesSchema: Type<E>
+  entriesSchema: Type<E>,
+  forUpdateFlow: boolean = false
 ) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
@@ -78,6 +79,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
         );
       },
     }),
+    ...(forUpdateFlow ? { version: schema.maybe(schema.boolean()) } : {}),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
@@ -97,6 +99,20 @@ export const PutTrustedAppUpdateRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
-  // body is the same as Create
-  body: PostTrustedAppCreateRequestSchema.body,
+  body: schema.oneOf([
+    createNewTrustedAppForOsScheme(
+      schema.oneOf([schema.literal(OperatingSystem.LINUX), schema.literal(OperatingSystem.MAC)]),
+      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema]),
+      true
+    ),
+    createNewTrustedAppForOsScheme(
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.oneOf([
+        HashConditionEntrySchema,
+        PathConditionEntrySchema,
+        SignerConditionEntrySchema,
+      ]),
+      true
+    ),
+  ]),
 };

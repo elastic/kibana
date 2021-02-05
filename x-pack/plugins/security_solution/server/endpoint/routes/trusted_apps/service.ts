@@ -15,6 +15,7 @@ import {
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateRequest,
   PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 
@@ -24,8 +25,10 @@ import {
   osFromExceptionItem,
 } from './mapping';
 
-export class MissingTrustedAppException {
-  constructor(public id: string) {}
+export class TrustedAppNotFoundError extends Error {
+  constructor(id: string) {
+    super(`Trusted Application (${id}) not found`);
+  }
 }
 
 export const deleteTrustedApp = async (
@@ -39,7 +42,7 @@ export const deleteTrustedApp = async (
   });
 
   if (!exceptionListItem) {
-    throw new MissingTrustedAppException(id);
+    throw new TrustedAppNotFoundError(id);
   }
 };
 
@@ -85,9 +88,23 @@ export const createTrustedApp = async (
 export const updateTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   id: string,
-  newTrustedApp: PostTrustedAppCreateRequest
+  updatedTrustedApp: PutTrustedAppUpdateRequest
 ): Promise<PutTrustedAppUpdateResponse> => {
-  //
+  // retrieve existing TA entry - error if it does not exist
+  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!currentTrustedApp) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  // Validate update TA entry - error if not valid
+  // Update the TA entry - Error if it fails
+
+  throw new Error('not implemented');
 };
 
 export const getTrustedAppsSummary = async (

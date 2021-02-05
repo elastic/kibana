@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'kibana/server';
+import type { KibanaResponseFactory, RequestHandler, IKibanaResponse, Logger } from 'kibana/server';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -24,7 +24,8 @@ import {
   deleteTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
-  MissingTrustedAppException,
+  TrustedAppNotFoundError,
+  updateTrustedApp,
 } from './service';
 
 const exceptionListClientFromContext = (
@@ -37,6 +38,20 @@ const exceptionListClientFromContext = (
   }
 
   return exceptionLists;
+};
+
+const errorHandler = <E extends Error>(
+  logger: Logger,
+  res: KibanaResponseFactory,
+  error: E
+): IKibanaResponse => {
+  logger.error(error);
+
+  if (error instanceof TrustedAppNotFoundError) {
+    return res.notFound({ body: error });
+  }
+
+  return res.internalError({ body: error });
 };
 
 export const getTrustedAppsDeleteRouteHandler = (
@@ -55,12 +70,7 @@ export const getTrustedAppsDeleteRouteHandler = (
 
       return res.ok();
     } catch (error) {
-      if (error instanceof MissingTrustedAppException) {
-        return res.notFound({ body: `trusted app id [${req.params.id}] not found` });
-      } else {
-        logger.error(error);
-        return res.internalError({ body: error });
-      }
+      return errorHandler(logger, res, error);
     }
   };
 };
@@ -81,8 +91,7 @@ export const getTrustedAppsListRouteHandler = (
         body: await getTrustedAppsList(exceptionListClientFromContext(context), req.query),
       });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };
@@ -103,8 +112,7 @@ export const getTrustedAppsCreateRouteHandler = (
         body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
       });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };
@@ -121,13 +129,15 @@ export const getTrustedAppsUpdateRouteHandler = (
 
   return async (context, req, res) => {
     try {
-      throw new Error('not implemented');
-      // return res.ok({
-      //   body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
-      // });
+      return res.ok({
+        body: await updateTrustedApp(
+          exceptionListClientFromContext(context),
+          req.params.id,
+          req.body
+        ),
+      });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };
@@ -143,8 +153,7 @@ export const getTrustedAppsSummaryRouteHandler = (
         body: await getTrustedAppsSummary(exceptionListClientFromContext(context)),
       });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };
