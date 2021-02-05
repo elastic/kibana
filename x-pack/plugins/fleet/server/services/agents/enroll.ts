@@ -10,11 +10,13 @@ import semverParse from 'semver/functions/parse';
 import semverDiff from 'semver/functions/diff';
 import semverLte from 'semver/functions/lte';
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentType, Agent, AgentSOAttributes } from '../../types';
+import type { SavedObjectsClientContract } from 'src/core/server';
+import type { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { IngestManagerError } from '../../errors';
 import * as APIKeyService from '../api_keys';
+import { agentPolicyService } from '../../services';
 import { appContextService } from '../app_context';
 
 export async function enroll(
@@ -25,6 +27,11 @@ export async function enroll(
 ): Promise<Agent> {
   const agentVersion = metadata?.local?.elastic?.agent?.version;
   validateAgentVersion(agentVersion);
+
+  const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, false);
+  if (agentPolicy?.is_managed) {
+    throw new IngestManagerError(`Cannot enroll in managed policy ${agentPolicyId}`);
+  }
 
   const agentData: AgentSOAttributes = {
     active: true,
