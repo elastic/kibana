@@ -187,16 +187,11 @@ describe('getAlertInstanceSummary()', () => {
       {
         savedObjectId: 'ca200500-66b2-11eb-aa35-e3f876ca1006',
         summary: {
-          doc_count: 79,
           instances: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [
               {
                 key: '*',
-                doc_count: 39,
                 instance_created: {
-                  doc_count: 0,
                   max_timestamp: {
                     value_as_string: instanceCreatedDate,
                   },

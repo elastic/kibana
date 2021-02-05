@@ -52,50 +52,41 @@ export function alertInstanceSummaryFromEventLog(
     for (const instance of instancesLatestStateSummary.instances.buckets) {
       const instanceId = instance.key;
       const status = getAlertInstanceStatus(instances, instanceId);
-      if (instancesCreatedSummary.instances) {
-        const instanceCreated = instancesCreatedSummary.instances.buckets.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (newInstance: any) => newInstance.key === instanceId
-        );
-        status.activeStartDate = instanceCreated
-          ? instanceCreated.instance_created.max_timestamp.value_as_string
-          : undefined;
-      }
+      const instanceCreated = instancesCreatedSummary.instances?.buckets?.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (newInstance: any) => newInstance.key === instanceId
+      );
+      status.activeStartDate = instanceCreated?.instance_created?.max_timestamp?.value_as_string;
 
-      const actionActivityResult = instance.last_state.action.hits.hits;
-      if (actionActivityResult.length > 0) {
+      const actionActivityResult = instance.last_state?.action?.hits?.hits;
+      if (actionActivityResult && actionActivityResult.length > 0) {
         const actionData = actionActivityResult[0]._source;
         if (
           actionData.event.action === EVENT_LOG_ACTIONS.activeInstance ||
           actionData.event.action === EVENT_LOG_ACTIONS.newInstance
         ) {
           status.status = 'Active';
-          status.actionGroupId = actionData.kibana.alerting.action_group_id;
-          status.actionSubgroup = actionData.kibana.alerting.action_subgroup;
+          status.actionGroupId = actionData.kibana?.alerting?.action_group_id;
+          status.actionSubgroup = actionData.kibana?.alerting?.action_subgroup;
         }
       }
     }
   }
 
-  if (instancesLatestStateSummary.last_execution_state) {
-    alertInstanceSummary.lastRun =
-      instancesLatestStateSummary.last_execution_state.max_timestamp?.value_as_string;
-  }
+  alertInstanceSummary.lastRun =
+    instancesLatestStateSummary.last_execution_state?.max_timestamp?.value_as_string;
 
-  if (
-    instancesLatestStateSummary.errors_state &&
-    instancesLatestStateSummary.errors_state.action &&
-    instancesLatestStateSummary.errors_state.action.hits.hits.length > 0
-  ) {
-    const executionSummary = instancesLatestStateSummary.errors_state.action.hits.hits[0]._source;
+  const executionErrors = instancesLatestStateSummary.errors_state?.action?.hits?.hits;
 
-    if (executionSummary.error !== undefined) {
-      alertInstanceSummary.status = 'Error';
-      alertInstanceSummary.errorMessages.push({
-        date: executionSummary['@timestamp'],
-        message: executionSummary.error.message,
-      });
-    }
+  if (executionErrors && executionErrors.length > 0) {
+    alertInstanceSummary.status = 'Error';
+    alertInstanceSummary.errorMessages.push(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...executionErrors.map((executionError: any) => ({
+        date: executionError._source['@timestamp'],
+        message: executionError._source.error.message,
+      }))
+    );
   }
   // set the muted status of instances
   for (const instanceId of alert.mutedInstanceIds) {

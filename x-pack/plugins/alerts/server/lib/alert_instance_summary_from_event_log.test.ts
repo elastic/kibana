@@ -156,7 +156,9 @@ describe('alertInstanceSummaryFromEventLog', () => {
       instances: {},
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
     const instancesCreatedSummary = {
@@ -185,14 +187,23 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
       instances: {},
       errors_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        doc_count: 2,
         action: {
           hits: {
             hits: [
               {
                 _source: {
+                  '@timestamp': '2020-06-18T00:00:00.000Z',
                   error: {
                     message: 'oof!',
+                  },
+                },
+              },
+              {
+                _source: {
+                  '@timestamp': '2020-06-18T00:00:10.000Z',
+                  error: {
+                    message: 'rut roh!',
                   },
                 },
               },
@@ -240,15 +251,52 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('alert with currently inactive instance', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            last_state: {
+              action: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2021-02-04T23:20:20.343Z',
+                        event: {
+                          action: 'recovered-instance',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
 
+    const instanceCreatedDate = '2021-02-03T23:09:14.169Z';
+
     const instancesCreatedSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            instance_created: {
+              max_timestamp: {
+                value_as_string: instanceCreatedDate,
+              },
+            },
+          },
+        ],
+      },
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
@@ -265,7 +313,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
           "instance-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
-            "activeStartDate": undefined,
+            "activeStartDate": "${instanceCreatedDate}",
             "muted": false,
             "status": "OK",
           },
@@ -279,15 +327,51 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('legacy alert with currently inactive instance', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            last_state: {
+              action: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2021-02-04T23:20:20.343Z',
+                        event: {
+                          action: 'resolved-instance',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
+    const instanceCreatedDate = '2021-02-03T23:09:14.169Z';
 
     const instancesCreatedSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            instance_created: {
+              max_timestamp: {
+                value_as_string: instanceCreatedDate,
+              },
+            },
+          },
+        ],
+      },
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
@@ -304,7 +388,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
           "instance-1": Object {
             "actionGroupId": undefined,
             "actionSubgroup": undefined,
-            "activeStartDate": undefined,
+            "activeStartDate": "${instanceCreatedDate}",
             "muted": false,
             "status": "OK",
           },
@@ -318,10 +402,34 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('alert with currently inactive instance, no new-instance', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            last_state: {
+              action: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2021-02-04T23:20:20.343Z',
+                        event: {
+                          action: 'recovered-instance',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
 
@@ -357,15 +465,57 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('alert with currently active instance', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            last_state: {
+              action: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2021-02-04T23:20:20.343Z',
+                        event: {
+                          action: 'active-instance',
+                        },
+                        kibana: {
+                          alerting: {
+                            action_group_id: 'action group A',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
 
+    const instanceCreatedDate = '2020-06-18T00:00:00.000Z';
+
     const instancesCreatedSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            instance_created: {
+              max_timestamp: {
+                value_as_string: instanceCreatedDate,
+              },
+            },
+          },
+        ],
+      },
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
@@ -396,15 +546,52 @@ describe('alertInstanceSummaryFromEventLog', () => {
   test('alert with currently active instance with no action group in event log', async () => {
     const alert = createAlert({});
     const instancesLatestStateSummary: RawEventLogAlertsSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            last_state: {
+              action: {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        '@timestamp': '2021-02-04T23:20:20.343Z',
+                        event: {
+                          action: 'active-instance',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       errors_state: {},
       last_execution_state: {
-        '@timestamp': '2020-06-18T00:00:10.000Z',
+        max_timestamp: {
+          value_as_string: '2020-06-18T00:00:10.000Z',
+        },
       },
     };
 
+    const instanceCreatedDate = '2020-06-18T00:00:00.000Z';
+
     const instancesCreatedSummary = {
-      instances: {},
+      instances: {
+        buckets: [
+          {
+            key: 'instance-1',
+            instance_created: {
+              max_timestamp: {
+                value_as_string: instanceCreatedDate,
+              },
+            },
+          },
+        ],
+      },
     };
     const alertInstanceSummary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
       alert,
