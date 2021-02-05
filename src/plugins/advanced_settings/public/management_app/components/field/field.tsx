@@ -399,6 +399,7 @@ export class Field extends PureComponent<FieldProps> {
             {...a11yProps}
             color={currentValue}
             onChange={this.onFieldChange}
+            disabled={loading || isOverridden || !enableSaving}
             format="hex"
             data-test-subj={`advancedSetting-editField-${name}`}
           />
