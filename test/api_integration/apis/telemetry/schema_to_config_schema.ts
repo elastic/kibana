@@ -38,7 +38,7 @@ function isOneOfCandidate(
 function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   if ('properties' in value) {
     const { DYNAMIC_KEY, ...properties } = value.properties;
-    const schemas: Array<Type<unknown>> = [convertSchemaToConfigSchema({ properties })];
+    const schemas: Array<Type<unknown>> = [objectSchemaToConfigSchema({ properties })];
     if (DYNAMIC_KEY) {
       schemas.push(schema.recordOf(schema.string(), valueSchemaToConfigSchema(DYNAMIC_KEY)));
     }
@@ -65,9 +65,26 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
           return schema.arrayOf(valueSchemaToConfigSchema(value.items));
         }
       default:
-        throw new Error(`Unsupported schema type ${valueType}`);
+        throw new Error(
+          `Unsupported schema type ${valueType}. Did you forget to wrap your object definition in a nested 'properties' field?`
+        );
     }
   }
+}
+
+function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): ObjectType {
+  return schema.object(
+    Object.fromEntries(
+      Object.entries(objectSchema.properties).map(([key, value]) => {
+        try {
+          return [key, schema.maybe(valueSchemaToConfigSchema(value))];
+        } catch (err) {
+          err.failedKey = [key, ...(err.failedKey || [])];
+          throw err;
+        }
+      })
+    )
+  );
 }
 
 /**
@@ -79,21 +96,10 @@ export function convertSchemaToConfigSchema(telemetrySchema: {
   properties: Record<string, TelemetrySchemaValue>;
 }): ObjectType {
   try {
-    return schema.object(
-      Object.fromEntries(
-        Object.entries(telemetrySchema.properties).map(([key, value]) => {
-          try {
-            return [key, schema.maybe(valueSchemaToConfigSchema(value))];
-          } catch (err) {
-            err.failedKey = [key, ...(err.failedKey || [])];
-            throw err;
-          }
-        })
-      )
-    );
+    return objectSchemaToConfigSchema(telemetrySchema);
   } catch (err) {
     if (err.failedKey) {
-      err.message = `Error in key ${err.failedKey.join('.')}: ${err.message}`;
+      err.message = `Malformed schema for key [${err.failedKey.join('.')}]: ${err.message}`;
     }
     throw err;
   }
