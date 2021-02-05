@@ -31,8 +31,8 @@ jobs:
 
       - name: backport
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          backport --fork false --username "${{ github.actor }}" --accessToken "${{ secrets.GITHUB_TOKEN }}" --ci --pr "90337" --labels backport --verbose
+          git config --global user.name "kibanamachine"
+          git config --global user.email "42973632+kibanamachine@users.noreply.github.com"
+          backport --fork true --username kibanamachine --accessToken "${{ secrets.KIBANAMACHINE_TOKEN }}" --ci --pr "90337" --labels backport --verbose
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
