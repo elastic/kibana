@@ -10,13 +10,14 @@ import { compile } from 'vega-lite/build-es5/vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
+import { LEGEND_TYPES } from '../vega_chart';
+
 import {
   getColorSpec,
   getScatterplotMatrixVegaLiteSpec,
   COLOR_OUTLIER,
   COLOR_RANGE_NOMINAL,
   DEFAULT_COLOR,
-  LEGEND_TYPES,
 } from './scatterplot_matrix_vega_lite_spec';
 
 describe('getColorSpec()', () => {
