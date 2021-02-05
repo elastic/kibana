@@ -36,7 +36,7 @@ async function isBazelBinAvailable() {
   }
 }
 
-async function isBazeliskInstalled(bazeliskVersion) {
+async function isBazeliskInstalled(bazeliskVersion: string) {
   try {
     const { stdout: bazeliskPkgInstallStdout } = await spawn(
       'npm',
