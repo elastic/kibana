@@ -162,8 +162,6 @@ function FormulaEditor({
   operationDefinitionMap,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
-  const functionList = useRef([]);
-  const kibana = useKibana();
   const argValueSuggestions = useMemo(() => [], []);
 
   const provideCompletionItems = useCallback(
@@ -200,7 +198,8 @@ function FormulaEditor({
             innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
             innerText.length - lengthAfterPosition,
             context,
-            undefined
+            undefined,
+            indexPattern
           );
         }
       } else {
@@ -215,7 +214,8 @@ function FormulaEditor({
           innerText,
           innerText.length - lengthAfterPosition,
           context,
-          wordUntil
+          wordUntil,
+          indexPattern
         );
       }
 

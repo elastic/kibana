@@ -10,6 +10,7 @@ import { monaco } from '@kbn/monaco';
 
 import { Parser } from 'pegjs';
 import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
+import { IndexPattern } from '../../../types';
 import type { GenericOperationDefinition } from '..';
 import { operationDefinitionMap } from '..';
 
@@ -153,7 +154,8 @@ export async function suggest(
   expression: string,
   position: number,
   context: monaco.languages.CompletionContext,
-  word: monaco.editor.IWordAtPosition
+  word: monaco.editor.IWordAtPosition,
+  indexPattern: IndexPattern
 ): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
@@ -169,7 +171,11 @@ export async function suggest(
         tokenInfo.parent.args[tokenInfo.parent.args.length - 1]
       );
     } else if (tokenInfo?.parent) {
-      return getArgumentSuggestions(tokenInfo.parent.name, tokenInfo.parent.args.length);
+      return getArgumentSuggestions(
+        tokenInfo.parent.name,
+        tokenInfo.parent.args.length,
+        indexPattern
+      );
     }
     if (tokenInfo) {
       return getFunctionSuggestions(word);
@@ -187,43 +193,31 @@ function getFunctionSuggestions(word: monaco.editor.IWordAtPosition) {
   return { list, type: SUGGESTION_TYPE.FUNCTIONS };
 }
 
-function getArgumentSuggestions(name: string, position: number) {
+function getArgumentSuggestions(name: string, position: number, indexPattern: IndexPattern) {
   const operation = operationDefinitionMap[name];
   if (!operation) {
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 
+  const fields = indexPattern.fields
+    .filter((field) => field.type === 'number')
+    .map((field) => field.name);
+
   if (operation.input === 'field') {
-    return { list: ['bytes', 'memory'], type: SUGGESTION_TYPE.FIELD };
+    return { list: fields, type: SUGGESTION_TYPE.FIELD };
   }
 
   if (operation.input === 'fullReference') {
     if (operation.selectionStyle === 'field') {
-      return { list: ['bytes', 'memory'], type: SUGGESTION_TYPE.FIELD };
+      return { list: fields, type: SUGGESTION_TYPE.FIELD };
     }
-    return { list: ['count', 'avg'], type: SUGGESTION_TYPE.FUNCTIONS };
+    return { list: Object.keys(operationDefinitionMap), type: SUGGESTION_TYPE.FUNCTIONS };
   }
 
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
 function getArgValueSuggestions(name: string, position: number) {
-  const operation = operationDefinitionMap[name];
-  if (!operation) {
-    return { list: [], type: SUGGESTION_TYPE.FIELD };
-  }
-
-  if (operation.input === 'field') {
-    return { list: ['bytes', 'memory'], type: SUGGESTION_TYPE.FIELD };
-  }
-
-  if (operation.input === 'fullReference') {
-    if (operation.selectionStyle === 'field') {
-      return { list: ['bytes', 'memory'], type: SUGGESTION_TYPE.FIELD };
-    }
-    return { list: ['count', 'avg'], type: SUGGESTION_TYPE.FUNCTIONS };
-  }
-
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
