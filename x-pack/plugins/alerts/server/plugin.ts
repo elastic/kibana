@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
@@ -35,6 +35,7 @@ import {
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
+  ServiceStatusLevels,
 } from '../../../../src/core/server';
 import type { AlertingRequestHandlerContext } from './types';
 
@@ -238,12 +239,14 @@ export class AlertingPlugin {
       this.config
     );
 
+    const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
+      level: ServiceStatusLevels.unavailable,
+      summary: 'Alerts are initializing',
+    });
+    core.status.set(serviceStatus$);
     core.getStartServices().then(async ([, startPlugins]) => {
-      core.status.set(
-        combineLatest([
-          core.status.derivedStatus$,
-          getHealthStatusStream(startPlugins.taskManager),
-        ]).pipe(
+      combineLatest([core.status.derivedStatus$, getHealthStatusStream(startPlugins.taskManager)])
+        .pipe(
           map(([derivedStatus, healthStatus]) => {
             if (healthStatus.level > derivedStatus.level) {
               return healthStatus as ServiceStatus;
@@ -252,7 +255,7 @@ export class AlertingPlugin {
             }
           })
         )
-      );
+        .subscribe(serviceStatus$);
     });
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());

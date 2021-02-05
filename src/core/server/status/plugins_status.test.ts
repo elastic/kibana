@@ -34,6 +34,26 @@ describe('PluginStatusService', () => {
     ['c', ['a', 'b']],
   ]);
 
+  describe('set', () => {
+    it('throws an exception if called after registrations are blocked', () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+
+      service.blockNewRegistrations();
+      expect(() => {
+        service.set(
+          'a',
+          of({
+            level: ServiceStatusLevels.available,
+            summary: 'fail!',
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(`"Custom statuses cannot be registered after setup"`);
+    });
+  });
+
   describe('getDerivedStatus$', () => {
     it(`defaults to core's most severe status`, async () => {
       const serviceAvailable = new PluginsStatusService({

@@ -109,7 +109,9 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     };
   }
 
-  public start() {}
+  public start() {
+    this.pluginsStatus!.blockNewRegistrations();
+  }
 
   public stop() {
     if (this.overallSubscription) {
