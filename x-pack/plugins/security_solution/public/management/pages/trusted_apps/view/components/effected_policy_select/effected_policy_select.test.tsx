@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
@@ -11,7 +12,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import React from 'react';
-import { forceHTMLElementOffsetWith } from './test_utils';
+import { forceHTMLElementOffsetWidth } from './test_utils';
 import { fireEvent, act } from '@testing-library/react';
 
 describe('when using EffectedPolicySelect component', () => {
@@ -33,7 +34,7 @@ describe('when using EffectedPolicySelect component', () => {
   let resetHTMLElementOffsetWidth: () => void;
 
   beforeAll(() => {
-    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWith();
+    resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
   });
 
   afterAll(() => resetHTMLElementOffsetWidth());

@@ -63,6 +63,11 @@ type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 /**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
+
+/**
  * Stats for related events for a particular node in a resolver graph.
  */
 export interface EventStats {
