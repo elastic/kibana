@@ -30,7 +30,6 @@ export const VisualizeListing = () => {
       application,
       chrome,
       dashboard,
-      dashboardCapabilities,
       history,
       savedVisualizations,
       toastNotifications,
