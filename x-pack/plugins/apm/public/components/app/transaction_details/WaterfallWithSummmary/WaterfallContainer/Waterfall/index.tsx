@@ -21,6 +21,7 @@ import { WaterfallFlyout } from './WaterfallFlyout';
 import {
   IWaterfall,
   IWaterfallItem,
+  IWaterfallSpanItem,
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = styled.div`
@@ -76,13 +77,13 @@ export function Waterfall({
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
-  const { serviceColors, duration } = waterfall;
+  const { duration } = waterfall;
 
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
-  const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
+  const errorMarks = getErrorMarks(waterfall.errorItems);
 
   function renderItems(
-    childrenByParentId: Record<string | number, IWaterfallItem[]>
+    childrenByParentId: Record<string | number, IWaterfallSpanItem[]>
   ) {
     const { entryWaterfallTransaction } = waterfall;
     if (!entryWaterfallTransaction) {
@@ -95,7 +96,6 @@ export function Waterfall({
         isOpen={isAccordionOpen}
         item={entryWaterfallTransaction}
         level={0}
-        serviceColors={serviceColors}
         waterfallItemId={waterfallItemId}
         location={location}
         errorsPerTransaction={waterfall.errorsPerTransaction}

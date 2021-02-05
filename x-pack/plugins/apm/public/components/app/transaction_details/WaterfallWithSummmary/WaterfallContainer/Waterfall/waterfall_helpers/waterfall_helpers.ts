@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  first,
-  flatten,
-  groupBy,
-  isEmpty,
-  sortBy,
-  sum,
-  uniq,
-  zipObject,
-} from 'lodash';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { first, flatten, groupBy, isEmpty, sortBy, sum, uniq } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
@@ -23,10 +14,15 @@ import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 
 interface IWaterfallGroup {
-  [key: string]: IWaterfallItem[];
+  [key: string]: IWaterfallSpanItem[];
 }
 
 const ROOT_ID = 'root';
+
+export enum WaterfallLegendType {
+  ServiceName = 'serviceName',
+  SpanType = 'spanType',
+}
 
 export interface IWaterfall {
   entryWaterfallTransaction?: IWaterfallTransaction;
@@ -37,46 +33,67 @@ export interface IWaterfall {
    */
   duration: number;
   items: IWaterfallItem[];
-  childrenByParentId: Record<string | number, IWaterfallItem[]>;
+  childrenByParentId: Record<string | number, IWaterfallSpanItem[]>;
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   errorsCount: number;
-  serviceColors: IServiceColors;
+  legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
 }
 
-interface IWaterfallItemBase<T, U> {
-  docType: U;
-  doc: T;
-
-  id: string;
-
-  parent?: IWaterfallItem;
-  parentId?: string;
-
+interface IWaterfallSpanItemBase<TDocument, TDoctype>
+  extends IWaterfallItemBase<TDocument, TDoctype> {
   /**
    * Latency in us
    */
   duration: number;
+  legendValues: Record<WaterfallLegendType, string>;
+}
 
+interface IWaterfallItemBase<TDocument, TDoctype> {
+  doc: TDocument;
+  docType: TDoctype;
+  id: string;
+  parent?: IWaterfallSpanItem;
+  parentId?: string;
+  color: string;
   /**
    * offset from first item in us
    */
   offset: number;
-
   /**
    * skew from timestamp in us
    */
   skew: number;
 }
 
-export type IWaterfallTransaction = IWaterfallItemBase<
+export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
+
+export type IWaterfallTransaction = IWaterfallSpanItemBase<
   Transaction,
   'transaction'
 >;
-export type IWaterfallSpan = IWaterfallItemBase<Span, 'span'>;
-export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
 
-export type IWaterfallItem = IWaterfallTransaction | IWaterfallSpan;
+export type IWaterfallSpan = IWaterfallSpanItemBase<Span, 'span'>;
+
+export type IWaterfallSpanItem = IWaterfallTransaction | IWaterfallSpan;
+
+export type IWaterfallItem = IWaterfallSpanItem | IWaterfallError;
+
+export interface IWaterfallLegend {
+  type: WaterfallLegendType;
+  value: string | undefined;
+  color: string;
+}
+
+function getLegendValues(transactionOrSpan: Transaction | Span) {
+  return {
+    [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
+    [WaterfallLegendType.SpanType]:
+      'span' in transactionOrSpan
+        ? transactionOrSpan.span.subtype || transactionOrSpan.span.type
+        : '',
+  };
+}
 
 function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
   return {
@@ -87,6 +104,8 @@ function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
     duration: transaction.transaction.duration.us,
     offset: 0,
     skew: 0,
+    legendValues: getLegendValues(transaction),
+    color: '',
   };
 }
 
@@ -99,6 +118,8 @@ function getSpanItem(span: Span): IWaterfallSpan {
     duration: span.span.duration.us,
     offset: 0,
     skew: 0,
+    legendValues: getLegendValues(span),
+    color: '',
   };
 }
 
@@ -110,7 +131,8 @@ function getErrorItem(
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
   const parent = items.find(
     (waterfallItem) => waterfallItem.id === error.parent?.id
-  );
+  ) as IWaterfallSpanItem | undefined;
+
   const errorItem: IWaterfallError = {
     docType: 'error',
     doc: error,
@@ -119,7 +141,7 @@ function getErrorItem(
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
     skew: 0,
-    duration: 0,
+    color: '',
   };
 
   return {
@@ -130,7 +152,7 @@ function getErrorItem(
 
 export function getClockSkew(
   item: IWaterfallItem | IWaterfallError,
-  parentItem?: IWaterfallItem
+  parentItem?: IWaterfallSpanItem
 ) {
   if (!parentItem) {
     return 0;
@@ -168,9 +190,9 @@ export function getOrderedWaterfallItems(
   const visitedWaterfallItemSet = new Set();
 
   function getSortedChildren(
-    item: IWaterfallItem,
-    parentItem?: IWaterfallItem
-  ): IWaterfallItem[] {
+    item: IWaterfallSpanItem,
+    parentItem?: IWaterfallSpanItem
+  ): IWaterfallSpanItem[] {
     if (visitedWaterfallItemSet.has(item)) {
       return [];
     }
@@ -203,27 +225,39 @@ function getRootTransaction(childrenByParentId: IWaterfallGroup) {
   }
 }
 
-export type IServiceColors = Record<string, string>;
+function getLegends(waterfallItems: IWaterfallItem[]) {
+  const onlySpanItems = waterfallItems.filter(
+    (item) => 'legendValues' in item
+  ) as IWaterfallSpanItem[];
 
-function getServiceColors(waterfallItems: IWaterfallItem[]) {
-  const services = uniq(waterfallItems.map((item) => item.doc.service.name));
+  const legends = [
+    WaterfallLegendType.ServiceName,
+    WaterfallLegendType.SpanType,
+  ].flatMap((legendType) => {
+    const values = uniq(
+      onlySpanItems.map((item) => item.legendValues[legendType])
+    );
 
-  const assignedColors = [
-    theme.euiColorVis1,
-    theme.euiColorVis0,
-    theme.euiColorVis3,
-    theme.euiColorVis2,
-    theme.euiColorVis6,
-    theme.euiColorVis7,
-    theme.euiColorVis5,
-  ];
+    const palette = euiPaletteColorBlind({
+      rotations: Math.ceil(values.length / 10),
+    });
 
-  return zipObject(services, assignedColors) as IServiceColors;
+    return values.map((value, index) => ({
+      type: legendType,
+      value,
+      color: palette[index],
+    }));
+  });
+
+  return legends;
 }
 
 const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
   Math.max(
-    ...waterfallItems.map((item) => item.offset + item.skew + item.duration),
+    ...waterfallItems.map(
+      (item) =>
+        item.offset + item.skew + ('duration' in item ? item.duration : 0)
+    ),
     0
   );
 
@@ -238,7 +272,7 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
     }
   });
 
-function reparentSpans(waterfallItems: IWaterfallItem[]) {
+function reparentSpans(waterfallItems: IWaterfallSpanItem[]) {
   // find children that needs to be re-parented and map them to their correct parent id
   const childIdToParentIdMapping = Object.fromEntries(
     flatten(
@@ -266,7 +300,7 @@ function reparentSpans(waterfallItems: IWaterfallItem[]) {
   });
 }
 
-const getChildrenGroupedByParentId = (waterfallItems: IWaterfallItem[]) =>
+const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanItem[]) =>
   groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
 
 const getEntryWaterfallTransaction = (
@@ -329,13 +363,13 @@ export function getWaterfall(
       items: [],
       errorsPerTransaction,
       errorsCount: sum(Object.values(errorsPerTransaction)),
-      serviceColors: {},
+      legends: [],
       errorItems: [],
       childrenByParentId: {},
     };
   }
 
-  const waterfallItems: IWaterfallItem[] = getWaterfallItems(trace.items);
+  const waterfallItems: IWaterfallSpanItem[] = getWaterfallItems(trace.items);
 
   const childrenByParentId = getChildrenGroupedByParentId(
     reparentSpans(waterfallItems)
@@ -358,7 +392,7 @@ export function getWaterfall(
 
   const rootTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);
-  const serviceColors = getServiceColors(items);
+  const legends = getLegends(items);
 
   return {
     entryWaterfallTransaction,
@@ -367,7 +401,7 @@ export function getWaterfall(
     items,
     errorsPerTransaction,
     errorsCount: errorItems.length,
-    serviceColors,
+    legends,
     errorItems,
     childrenByParentId: getChildrenGroupedByParentId(items),
   };

@@ -15,6 +15,7 @@ import {
   IWaterfallItem,
   IWaterfallTransaction,
   IWaterfallError,
+  IWaterfallSpanItem,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 
@@ -377,7 +378,12 @@ describe('waterfall_helpers', () => {
 
   describe('getWaterfallItems', () => {
     it('should order items correctly', () => {
-      const items: IWaterfallItem[] = [
+      const legendValues = {
+        serviceName: 'opbeans-java',
+        spanType: '',
+      };
+
+      const items: IWaterfallSpanItem[] = [
         {
           docType: 'span',
           doc: {
@@ -397,6 +403,8 @@ describe('waterfall_helpers', () => {
           duration: 210,
           offset: 0,
           skew: 0,
+          legendValues,
+          color: '',
         },
         {
           docType: 'span',
@@ -417,6 +425,8 @@ describe('waterfall_helpers', () => {
           duration: 4694,
           offset: 0,
           skew: 0,
+          legendValues,
+          color: '',
         },
         {
           docType: 'span',
@@ -437,6 +447,8 @@ describe('waterfall_helpers', () => {
           duration: 4694,
           offset: 0,
           skew: 0,
+          legendValues,
+          color: '',
         },
         {
           docType: 'transaction',
@@ -451,6 +463,8 @@ describe('waterfall_helpers', () => {
           duration: 3581,
           offset: 0,
           skew: 0,
+          legendValues,
+          color: '',
         },
         {
           docType: 'transaction',
@@ -466,6 +480,8 @@ describe('waterfall_helpers', () => {
           duration: 9480,
           offset: 0,
           skew: 0,
+          legendValues,
+          color: '',
         },
       ];
 
@@ -489,7 +505,7 @@ describe('waterfall_helpers', () => {
             transaction: { id: 'a' },
             timestamp: { us: 10 },
           } as unknown) as Transaction,
-        } as IWaterfallItem,
+        } as IWaterfallSpanItem,
         {
           docType: 'span',
           id: 'b',
@@ -501,7 +517,7 @@ describe('waterfall_helpers', () => {
             parent: { id: 'a' },
             timestamp: { us: 20 },
           } as unknown) as Span,
-        } as IWaterfallItem,
+        } as IWaterfallSpanItem,
       ];
       const childrenByParentId = groupBy(items, (hit) =>
         hit.parentId ? hit.parentId : 'root'
@@ -522,7 +538,7 @@ describe('waterfall_helpers', () => {
           timestamp: { us: 0 },
         },
         duration: 50,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       const parent = {
         docType: 'transaction',
@@ -531,7 +547,7 @@ describe('waterfall_helpers', () => {
         },
         duration: 100,
         skew: 5,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       expect(getClockSkew(child, parent)).toBe(130);
     });
@@ -543,7 +559,7 @@ describe('waterfall_helpers', () => {
           timestamp: { us: 250 },
         },
         duration: 50,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       const parent = {
         docType: 'transaction',
@@ -552,7 +568,7 @@ describe('waterfall_helpers', () => {
         },
         duration: 100,
         skew: 5,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       expect(getClockSkew(child, parent)).toBe(0);
     });
@@ -564,7 +580,7 @@ describe('waterfall_helpers', () => {
           timestamp: { us: 150 },
         },
         duration: 50,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       const parent = {
         docType: 'transaction',
@@ -573,7 +589,7 @@ describe('waterfall_helpers', () => {
         },
         duration: 100,
         skew: 5,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       expect(getClockSkew(child, parent)).toBe(0);
     });
@@ -590,7 +606,7 @@ describe('waterfall_helpers', () => {
         },
         duration: 100,
         skew: 5,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       expect(getClockSkew(child, parent)).toBe(5);
     });
@@ -607,7 +623,7 @@ describe('waterfall_helpers', () => {
         },
         duration: 100,
         skew: 5,
-      } as IWaterfallItem;
+      } as IWaterfallSpanItem;
 
       expect(getClockSkew(child, parent)).toBe(5);
     });
