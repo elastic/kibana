@@ -36,6 +36,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
   SavedObjectsUpdateOptions,
@@ -1830,7 +1831,10 @@ export class SavedObjectsRepository {
       ...(preference ? { preference } : {}),
     };
 
-    const { body, statusCode } = await this.client.openPointInTime<{ id: string }>(esOptions, {
+    const {
+      body,
+      statusCode,
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(esOptions, {
       ignore: [404],
     });
     if (statusCode === 404) {
@@ -1840,6 +1844,50 @@ export class SavedObjectsRepository {
     return {
       id: body.id,
     };
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @remarks
+   * While the `keepAlive` that is provided will cause a PIT to automatically close,
+   * it is highly recommended to explicitly close a PIT when you are done with it
+   * in order to avoid consuming unneeded resources in Elasticsearch.
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * const { id } = await repository.openPointInTimeForType(
+   *   type: 'index-pattern',
+   *   { keepAlive: '1m' },
+   * );
+   *
+   * const response = await repository.find({
+   *   type: 'index-pattern',
+   *   search: 'foo*',
+   *   sortField: 'name',
+   *   sortOrder: 'desc',
+   *   pit: {
+   *     id: 'abc123',
+   *     keepAlive: '1m',
+   *   },
+   *   searchAfter: [1234, 'abcd'],
+   * });
+   *
+   * await repository.closePointInTime(response.pit_id);
+   * ```
+   *
+   * @param {string} id
+   * @returns {promise} - { id: string }
+   */
+  async closePointInTime(id: string): Promise<SavedObjectsClosePointInTimeResponse> {
+    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+      body: { id },
+    });
+    return body;
   }
 
   /**

@@ -341,6 +341,21 @@ export interface SavedObjectsOpenPointInTimeResponse {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsClosePointInTimeResponse {
+  /**
+   * If true, all search contexts associated with the PIT id are
+   * successfully closed.
+   */
+  succeeded: boolean;
+  /**
+   * The number of search contexts that have been successfully closed.
+   */
+  num_freed: number;
+}
+
+/**
  *
  * @public
  */
@@ -543,5 +558,14 @@ export class SavedObjectsClient {
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
     return await this._repository.openPointInTimeForType(type, options);
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   */
+  async closePointInTime(id: string) {
+    return await this._repository.closePointInTime(id);
   }
 }

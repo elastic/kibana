@@ -4434,7 +4434,7 @@ describe('SavedObjectsRepository', () => {
     };
 
     describe('client calls', () => {
-      it(`should use the ES search action`, async () => {
+      it(`should use the ES PIT API`, async () => {
         await successResponse(type);
         expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       });
@@ -4506,6 +4506,48 @@ describe('SavedObjectsRepository', () => {
         );
         const response = await savedObjectsRepository.openPointInTimeForType(type);
         expect(response).toEqual({ id });
+      });
+    });
+  });
+
+  describe('#closePointInTime', () => {
+    const generateResults = () => ({ succeeded: true, num_freed: 3 });
+    const successResponse = async (id) => {
+      client.closePointInTime.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
+      );
+      const result = await savedObjectsRepository.closePointInTime(id);
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the ES PIT API`, async () => {
+        await successResponse('abc123');
+        expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`accepts id`, async () => {
+        await successResponse('abc123');
+        expect(client.closePointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              id: 'abc123',
+            }),
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns response body from ES`, async () => {
+        const results = generateResults('abc123');
+        client.closePointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(results)
+        );
+        const response = await savedObjectsRepository.closePointInTime('abc123');
+        expect(response).toEqual(results);
       });
     });
   });

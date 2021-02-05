@@ -229,16 +229,19 @@ export class SavedObjectsExporter {
     };
     const finder = this.findWithPointInTime(options);
 
+    let lastPit: string | undefined;
     let hits: SavedObjectsFindResult[] = [];
     for await (const result of finder) {
+      lastPit = result.pit_id;
       hits = hits.concat(result.saved_objects);
       if (hits.length > this.#exportSizeLimit) {
         throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
       }
     }
 
-    // TODO: Need to close our PIT after we have collected all hits
-    // await this.#savedObjectsClient.closePointInTime(id);
+    if (lastPit) {
+      await this.#savedObjectsClient.closePointInTime(lastPit);
+    }
 
     // sorts server-side by _id, since it's only available in fielddata
     return (

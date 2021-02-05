@@ -20,6 +20,7 @@ const create = () =>
     bulkGet: jest.fn(),
     find: jest.fn(),
     get: jest.fn(),
+    closePointInTime: jest.fn(),
     openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
     resolve: jest.fn(),
     update: jest.fn(),

@@ -130,6 +130,20 @@ test(`#openPointInTimeForType`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#closePointInTime`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    closePointInTime: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const id = Symbol();
+  const result = await client.closePointInTime(id);
+
+  expect(mockRepository.closePointInTime).toHaveBeenCalledWith(id);
+  expect(result).toBe(returnValue);
+});
+
 test(`#resolve`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
