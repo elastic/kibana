@@ -67,7 +67,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
         <EuiButtonTo
           fill
           to={product.URL}
-          shouldNotCreateHref={true}
+          shouldNotCreateHref
           onClick={() =>
             sendEnterpriseSearchTelemetry({
               action: 'clicked',
