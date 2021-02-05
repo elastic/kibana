@@ -25,6 +25,7 @@
     "test/**/*",
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/ftr_e2e/**/*",
+    "plugins/apm/scripts/**/*",
     "plugins/security_solution/cypress/**/*"
   ],
   "compilerOptions": {
