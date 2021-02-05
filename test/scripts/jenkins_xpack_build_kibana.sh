@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cd "$KIBANA_DIR"
-source src/dev/ci_setup/setup_env.sh
+source src/dev/ci_setup/setup.sh
 
 if [[ ! "$TASK_QUEUE_PROCESS_ID" ]]; then
   ./test/scripts/jenkins_xpack_build_plugins.sh
