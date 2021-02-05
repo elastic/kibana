@@ -14,8 +14,9 @@ import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_ses
 import {
   ISessionService,
   SearchSessionState,
+  SearchUsageCollector,
   TimefilterContract,
-} from '../../../../../../../src/plugins/data/public/';
+} from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -26,6 +27,7 @@ export interface SearchSessionIndicatorDeps {
   timeFilter: TimefilterContract;
   application: ApplicationStart;
   storage: IStorageWrapper;
+  usageCollector?: SearchUsageCollector;
 }
 
 export const createConnectedSearchSessionIndicator = ({
@@ -33,6 +35,7 @@ export const createConnectedSearchSessionIndicator = ({
   application,
   timeFilter,
   storage,
+  usageCollector,
 }: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
@@ -81,12 +84,16 @@ export const createConnectedSearchSessionIndicator = ({
           ref={ref}
           state={state}
           onContinueInBackground={() => {
+            usageCollector?.trackSessionSentToBackground();
             sessionService.save();
           }}
           onSaveResults={() => {
+            usageCollector?.trackSessionSavedResults();
             sessionService.save();
           }}
           onCancel={() => {
+            // Should this be a separate action than the "cancel" action from the management UI?
+            usageCollector?.trackSessionCancelled();
             sessionService.cancel();
           }}
           disabled={disabled}

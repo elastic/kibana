@@ -16,15 +16,19 @@ import {
   ISessionService,
   RefreshInterval,
   SearchSessionState,
+  SearchUsageCollector,
   TimefilterContract,
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
+import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins/data/public/search/collectors/mocks';
 
 const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
+let usageCollector: SearchUsageCollector;
+
 const refreshInterval$ = new BehaviorSubject<RefreshInterval>({ value: 0, pause: true });
 const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<TimefilterContract>;
 timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$);
@@ -32,6 +36,7 @@ timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue
 
 beforeEach(() => {
   storage = new Storage(new StubBrowserStorage());
+  usageCollector = createSearchUsageCollectorMock();
   refreshInterval$.next({ value: 0, pause: true });
   sessionService.isSessionStorageReady.mockImplementation(() => true);
   sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
@@ -47,6 +52,7 @@ test("shouldn't show indicator in case no active search session", async () => {
     application: coreStart.application,
     timeFilter,
     storage,
+    usageCollector,
   });
   const { getByTestId, container } = render(<SearchSessionIndicator />);
 
@@ -69,6 +75,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     application: coreStart.application,
     timeFilter,
     storage,
+    usageCollector,
   });
   const { getByTestId, container } = render(<SearchSessionIndicator />);
   sessionService.isSessionStorageReady.mockImplementation(() => false);
@@ -93,6 +100,7 @@ test('should show indicator in case there is an active search session', async ()
     application: coreStart.application,
     timeFilter,
     storage,
+    usageCollector,
   });
   const { getByTestId } = render(<SearchSessionIndicator />);
 
@@ -118,6 +126,7 @@ test('should be disabled in case uiConfig says so ', async () => {
     application: coreStart.application,
     timeFilter,
     storage,
+    usageCollector,
   });
 
   render(<SearchSessionIndicator />);
@@ -135,6 +144,7 @@ test('should be disabled during auto-refresh', async () => {
     application: coreStart.application,
     timeFilter,
     storage,
+    usageCollector,
   });
 
   render(<SearchSessionIndicator />);
@@ -167,6 +177,7 @@ describe('tour steps', () => {
         application: coreStart.application,
         timeFilter,
         storage,
+        usageCollector,
       });
       const rendered = render(<SearchSessionIndicator />);
 
@@ -199,6 +210,7 @@ describe('tour steps', () => {
         application: coreStart.application,
         timeFilter,
         storage,
+        usageCollector,
       });
       const rendered = render(<SearchSessionIndicator />);
 
@@ -225,6 +237,7 @@ describe('tour steps', () => {
       application: coreStart.application,
       timeFilter,
       storage,
+      usageCollector,
     });
     const rendered = render(<SearchSessionIndicator />);
 
@@ -242,6 +255,7 @@ describe('tour steps', () => {
       application: coreStart.application,
       timeFilter,
       storage,
+      usageCollector,
     });
     const rendered = render(<SearchSessionIndicator />);
 
