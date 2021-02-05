@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProvidedType } from 'packages/kbn-test/types/ftr';
 import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
 import {
   t1AnalystUser,
@@ -26,10 +27,10 @@ import {
 } from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users';
 
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { services } from '../../common/services';
 
 export const createUserAndRole = async (
-  securityService: ReturnType<FtrProviderContext['getService']>,
+  securityService: ProvidedType<typeof services['security']>,
   role: ROLES
 ): Promise<void> => {
   switch (role) {
@@ -71,7 +72,7 @@ export const createUserAndRole = async (
  * @param securityService The security service
  */
 export const deleteUserAndRole = async (
-  securityService: ReturnType<FtrProviderContext['getService']>,
+  securityService: ProvidedType<typeof services['security']>,
   roleName: ROLES
 ) => {
   await securityService.role.delete(roleName);
@@ -109,7 +110,7 @@ export const postRoleAndUser = async (
   roleName: string,
   role: RoleInterface,
   user: UserInterface,
-  securityService: ReturnType<FtrProviderContext['getService']>
+  securityService: ProvidedType<typeof services['security']>
 ) => {
   await securityService.role.create(roleName, {
     kibana: role.kibana,
