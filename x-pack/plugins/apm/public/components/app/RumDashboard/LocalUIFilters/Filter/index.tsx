@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FilterBadgeList } from './FilterBadgeList';
-import { unit, px } from '../../../../style/variables';
+import { unit, px } from '../../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
 const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
