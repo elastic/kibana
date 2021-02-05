@@ -8,8 +8,14 @@
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import path from 'path';
+import { RegistryDataStream } from '../../../../types';
 import { Field, processFields } from '../../fields/field';
-import { generateMappings, getTemplate } from './template';
+import {
+  generateMappings,
+  getTemplate,
+  getTemplatePriority,
+  generateTemplateIndexPattern,
+} from './template';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -525,4 +531,63 @@ test('tests constant_keyword field type handling', () => {
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+});
+
+test('tests priority and index pattern for data stream without dataset_is_prefix', () => {
+  const dataStreamDatasetIsPrefixUnset = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixUnset = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
+});
+
+test('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
+  const dataStreamDatasetIsPrefixFalse = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: false,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixFalse = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
+});
+
+test('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
+  const dataStreamDatasetIsPrefixTrue = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: true,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
+  const templatePriorityDatasetIsPrefixTrue = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
 });
