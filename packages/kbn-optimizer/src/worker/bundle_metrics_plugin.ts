@@ -63,11 +63,16 @@ export class BundleMetricsPlugin {
 
       const sumSize = (files: Asset[]) => files.reduce((acc: number, a) => acc + a.size, 0);
 
+      const moduleCount = bundle.cache.getModuleCount();
+      if (moduleCount === undefined) {
+        throw new Error(`moduleCount wasn't populated by PopulateBundleCachePlugin`);
+      }
+
       const bundleMetrics: CiStatsMetrics = [
         {
           group: `@kbn/optimizer bundle module count`,
           id: bundle.id,
-          value: bundle.cache.getModuleCount() || 0,
+          value: moduleCount,
         },
         {
           group: `page load bundle size`,
