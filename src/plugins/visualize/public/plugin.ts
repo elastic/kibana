@@ -95,7 +95,7 @@ export class VisualizePlugin
       setActiveUrl,
       restorePreviousUrl,
     } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/visualize'),
+      baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
@@ -120,7 +120,7 @@ export class VisualizePlugin
           !urlToSave.includes(`${VisualizeConstants.EDIT_PATH}/`) &&
           this.isLinkedToOriginatingApp?.()
         ) {
-          return core.http.basePath.prepend('/app/visualize');
+          return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
         }
         return urlToSave;
       },
