@@ -93,7 +93,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '<rootDir>/node_modules/(?!(monaco-editor|react-monaco-editor)/)',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 
