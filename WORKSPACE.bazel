@@ -10,15 +10,20 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
     name = "build_bazel_rules_nodejs",
-    sha256 = "dd4dc46066e2ce034cba0c81aa3e862b27e8e8d95871f567359f7a534cccb666",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.1.0/rules_nodejs-3.1.0.tar.gz"],
+    sha256 = "6142e9586162b179fdd570a55e50d1332e7d9c030efd853453438d607569721d",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.0.0/rules_nodejs-3.0.0.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
 load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "node_repositories", "yarn_install")
 
 # Assure we have at least a given rules_nodejs version
-check_rules_nodejs_version(minimum_version_string = "3.1.0")
+#
+# NOTE: In a normal situation that would be 3.1.0 but the rules for nodejs
+# were released with the wrong version logic set in place
+# https://github.com/bazelbuild/rules_nodejs/blob/835a5198e3651bb4454ab65bb6e5e16705dfadce/version.bzl#L22
+# We can change that line after it gets fixed
+check_rules_nodejs_version(minimum_version_string = "3.0.0")
 
 # Setup the Node.js toolchain for the architectures we want to support
 #
@@ -28,8 +33,9 @@ check_rules_nodejs_version(minimum_version_string = "3.1.0")
 node_repositories(
     node_repositories = {
         "14.15.4-darwin_amd64": ("node-v14.15.4-darwin-x64.tar.gz", "node-v14.15.4-darwin-x64", "6b0e19e5c2601ef97510f7eb4f52cc8ee261ba14cb05f31eb1a41a5043b0304e"),
+        "14.15.4-linux_arm64": ("node-v14.15.4-linux-arm64.tar.xz", "node-v14.15.4-linux-arm64", "b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"),
+        "14.15.4-linux_s390x": ("node-v14.15.4-linux-s390x.tar.xz", "node-v14.15.4-linux-s390x", "29f794d492eccaf0b08e6492f91162447ad95cfefc213fc580a72e29e11501a9"),
         "14.15.4-linux_amd64": ("node-v14.15.4-linux-x64.tar.xz", "node-v14.15.4-linux-x64", "ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"),
-        "14.15.4-linux_arm64": ("node-v14.15.4-linux-arm64.tar.gz", "node-v14.15.4-linux-arm64", "b681bda8eaa1ed2ac85e0ed2c2041a0408963c2198a24da183dc3ab60d93d975"),
         "14.15.4-windows_amd64": ("node-v14.15.4-win-x64.zip", "node-v14.15.4-win-x64", "b2a0765240f8fbd3ba90a050b8c87069d81db36c9f3745aff7516e833e4d2ed6"),
     },
     node_version = "14.15.4",

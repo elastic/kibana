@@ -2,5 +2,7 @@
 # targets so we can build them all at once
 filegroup(
   name = "build",
-  srcs = [],
+  srcs = [
+      "//packages/elastic-datemath"
+  ],
 )

@@ -1,0 +1,26 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
+load("@build_bazel_rules_nodejs//internal/js_library:js_library.bzl", "js_library")
+
+SRCS = [
+    "index.d.ts",
+    "index.js",
+    "package.json",
+    "tsconfig.json",
+]
+
+filegroup(
+    name = "src",
+    srcs = glob(SRCS),
+)
+
+js_library(
+    name = "elastic-datemath",
+    srcs = [
+        ":src",
+    ],
+    deps = [
+        "@npm//moment",
+    ],
+    package_name = "@elastic/datemath",
+    visibility = ["//visibility:public"],
+)
