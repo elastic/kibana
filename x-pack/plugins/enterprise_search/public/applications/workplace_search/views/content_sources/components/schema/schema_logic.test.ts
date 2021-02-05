@@ -14,7 +14,6 @@ jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
@@ -23,15 +22,16 @@ const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
 
 import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
+
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
+import { AppLogic } from '../../../../app_logic';
 
 import {
   SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
   SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_UPDATED_MESSAGE,
 } from './constants';
-
 import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {

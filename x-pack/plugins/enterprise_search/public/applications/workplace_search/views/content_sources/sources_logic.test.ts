@@ -13,6 +13,7 @@ import {
 } from '../../../__mocks__';
 
 import { AppLogic } from '../../app_logic';
+
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));

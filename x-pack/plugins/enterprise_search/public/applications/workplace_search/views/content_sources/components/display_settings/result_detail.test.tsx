@@ -8,6 +8,7 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
+
 import { shallow, mount } from 'enzyme';
 
 /**
@@ -45,7 +46,6 @@ import { EuiTextColor } from '@elastic/eui';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
-
 import { ResultDetail } from './result_detail';
 
 describe('ResultDetail', () => {

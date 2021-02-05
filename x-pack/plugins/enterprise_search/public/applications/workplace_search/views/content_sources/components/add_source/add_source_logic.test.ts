@@ -13,16 +13,16 @@ import {
 } from '../../../../../__mocks__';
 
 import { AppLogic } from '../../../../app_logic';
+
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
+import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import { CustomSource } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
 import { nextTick } from '@kbn/test/jest';
-
-import { CustomSource } from '../../../../types';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
