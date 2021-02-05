@@ -358,7 +358,6 @@ describe('enrichSignalThreatMatches', () => {
     ]);
   });
 
-  // TODO note in PR
   it('provides only match data if the matched threat cannot be found', async () => {
     getMatchedThreats = async () => [];
     const signalHit = getSignalHitMock({

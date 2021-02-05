@@ -455,9 +455,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const { hits } = signalsOpen.hits;
           const threats = hits.map((hit) => hit._source.threat);
-          // TODO how should a signal be enriched if a single indicator matches
-          // on multiple fields? As evidenced below, we currently duplicate the
-          // indicator with a different matched object.
+
           expect(threats).to.eql([
             {
               indicator: [
