@@ -87,7 +87,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
     } else if (
       recordEntry.type &&
       recordEntry.type === 'text' &&
-      recordEntry.value.length &&
+      recordEntry.value?.length &&
       !isNaN(+recordEntry.value)
     ) {
       varPart[lastKeyPart] = `"${recordEntry.value}"`;

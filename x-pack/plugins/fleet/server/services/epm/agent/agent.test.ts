@@ -22,12 +22,16 @@ password: {{password}}
 {{#if password}}
 hidden_password: {{password}}
 {{/if}}
+{{#if optional_field}}
+optional_field: {{optional_field}}
+{{/if}}
 foo: {{bar}}
 some_text_field: {{should_be_text}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
       password: { type: 'password', value: '' },
+      optional_field: { type: 'text', value: undefined },
       bar: { type: 'text', value: 'bar' },
       should_be_text: { type: 'text', value: '1234' },
     };
