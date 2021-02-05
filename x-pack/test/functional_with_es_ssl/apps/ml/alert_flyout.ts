@@ -57,7 +57,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     indices: ['ft_ecommerce'],
   };
 
-  describe('anomaly detection alert', () => {
+  describe('anomaly detection alert', function () {
+    this.tags('ciGroup13');
+
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');

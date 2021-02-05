@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const ml = getService('ml');
+  const esArchiver = getService('esArchiver');
 
   describe('ML app', function () {
     this.tags(['mlqa', 'skipFirefox']);
@@ -19,6 +20,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await esArchiver.unload('ml/ecommerce');
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
       await ml.testResources.resetKibanaTimeZone();
