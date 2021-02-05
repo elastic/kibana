@@ -83,8 +83,8 @@ export interface VisualizeServices extends CoreStart {
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   share?: SharePluginStart;
-  visualizeCapabilities: any;
-  dashboardCapabilities: any;
+  visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
+  dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
   savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];

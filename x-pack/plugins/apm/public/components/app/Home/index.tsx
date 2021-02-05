@@ -16,7 +16,7 @@ import { useTraceOverviewHref } from '../../shared/Links/apm/TraceOverviewLink';
 import { MainTabs } from '../../shared/main_tabs';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceInventory } from '../service_inventory';
-import { TraceOverview } from '../TraceOverview';
+import { TraceOverview } from '../trace_overview';
 
 interface Tab {
   key: string;

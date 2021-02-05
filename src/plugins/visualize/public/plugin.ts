@@ -173,6 +173,7 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),

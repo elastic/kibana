@@ -41,6 +41,7 @@ export const VisualizeListing = () => {
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      dashboardCapabilities,
       kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
@@ -174,9 +175,8 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboardCapabilities.show &&
-        dashboardCapabilities.createNew &&
-        dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+        dashboardCapabilities.createNew && (
           <div className="visListingCallout">
             <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
           </div>
