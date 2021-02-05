@@ -75,6 +75,13 @@ export const dashboardFeatureCatalog = {
 /*
   Actions
 */
+export const dashboardCopyToDashboardAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+};
+
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
