@@ -116,6 +116,10 @@ describe('Datatable Visualization', () => {
             { columnId: 'col1', width: 123 },
             { columnId: 'col2', hidden: true },
           ],
+          sorting: {
+            columnId: 'col1',
+            direction: 'asc',
+          },
         },
         table: {
           isMultiRow: true,
@@ -132,6 +136,10 @@ describe('Datatable Visualization', () => {
         { columnId: 'col2', hidden: true },
         { columnId: 'col3' },
       ]);
+      expect(suggestions[0].state.sorting).toEqual({
+        columnId: 'col1',
+        direction: 'asc',
+      });
     });
 
     it('should not make suggestions when the table is unchanged', () => {
