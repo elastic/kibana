@@ -369,16 +369,14 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     >
       <p>
         {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
-          defaultMessage: 'The auto date histogram splits a date field into buckets by interval.',
+          defaultMessage: 'The auto date histogram splits a data field into buckets by interval.',
         })}
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-          defaultMessage="Lens automatically chooses an interval for you by dividing the specified time range by the 
-                  {targetBarSetting} advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
-                  number of bars is set by the {maxBarSetting} value."
+          defaultMessage="Lens automatically chooses an interval by dividing the specified time range by the {targetBarSetting} setting. Lens tries to present “nice” time intervals. The maximum number of bars is set by the {maxBarSetting} value."
           values={{
             maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
             targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,

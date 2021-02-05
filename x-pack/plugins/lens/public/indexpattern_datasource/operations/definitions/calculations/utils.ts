@@ -36,7 +36,7 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
   return [
     i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
       defaultMessage:
-        '{name} requires a date histogram to work. Choose a different function or add a date histogram.',
+        '{name} requires a date histogram to work. Add a date histogram or select a different function.',
       values: {
         name,
       },
