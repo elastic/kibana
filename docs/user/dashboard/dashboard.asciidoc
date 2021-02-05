@@ -133,8 +133,7 @@ image::dashboard/images/dashboard-filters.png[Labeled interface with semi-struct
 Semi-structured search::
   Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
   Type a search term to match across all fields, or begin typing a field name to
-  get prompted with field names and operators you can use to build a structured query.
-  +
+  get prompted with field names and operators you can use to build a structured query. 
   For example, in the sample web logs data, this query displays data only for the US:
 
   . Enter `g`, and then select *geo.source*.
@@ -152,21 +151,19 @@ Time filter::
   . Open the panel menu, then select *More > Customize time range*.
 
   . On the *Customize panel time range* window, specify the new time range, then click *Add to panel*.
-
+  
 [role="screenshot"]
 image:images/time_range_per_panel.gif[Time range per dashboard panel]
 
 Additional filters with AND::
-  You can add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL].
-  
+  Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
   When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
-  
   To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
-
+  
   . Click *Add filter*.
   . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
   . *Save* the filter.
-  . To remove the filter, click *x* next to the filter.
+  . To remove the filter, click *x*.
 
 [float]
 [[clone-panels]]
